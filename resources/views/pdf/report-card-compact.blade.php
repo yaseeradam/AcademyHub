@@ -94,6 +94,20 @@
             $logoPath = $logo ? public_path('uploads/'.str_replace('\\', '/', $logo)) : null;
             $termLabel = 'Term '.$term;
         @endphp
+        @php
+    $opts = $rcOptions ?? [];
+    $showPosition = $opts['show_position'] ?? true;
+    $showAttendance = $opts['show_attendance'] ?? true;
+    $showGradingKey = $opts['show_grading_key'] ?? true;
+    $showClassAverage = $opts['show_class_average'] ?? true;
+    $showWatermark = $opts['show_watermark'] ?? true;
+    $showNextTermDate = $opts['show_next_term_date'] ?? true;
+    $showTeacherRemarks = $opts['show_teacher_remarks'] ?? true;
+    $showPrincipalRemarks = $opts['show_principal_remarks'] ?? true;
+    $showPsychomotor = $opts['show_psychomotor'] ?? false;
+    $showSchoolFees = $opts['show_school_fees'] ?? false;
+    $showSignatures = $opts['show_signatures'] ?? false;
+@endphp
         <div class="page">
             <div class="header">
                 <div class="header-table">
@@ -117,20 +131,14 @@
                 </div>
             </div>
 
-            <div class="grid">
-                <div class="row">
-                    <div class="cell label">Student</div>
-                    <div class="cell value">{{ $student->full_name ?? ($student->first_name.' '.$student->last_name) }}</div>
-                    <div class="cell label">Admission No</div>
-                    <div class="cell value">{{ $student->admission_number }}</div>
-                </div>
-                <div class="row">
-                    <div class="cell label">Class</div>
-                    <div class="cell value">{{ $student->schoolClass?->name ?? '-' }}</div>
-                    <div class="cell label">Section</div>
-                    <div class="cell value">{{ $student->section?->name ?? '-' }}</div>
-                </div>
-            </div>
+            
+                @php($siBorderColor = '#0ea5e9')
+                @php($siBgColor = '#f0f9ff')
+                @php($siLabelColor = '#0c4a6e')
+                @php($siValueColor = '#0f172a')
+                @php($siDotColor = '#bae6fd')
+                @include('pdf.partials.rc-student-info')
+
 
             <table class="scores" width="100%" cellspacing="0" cellpadding="0">
                 <thead>
@@ -160,12 +168,42 @@
             <div class="summary">
                 <div class="summary-line">Grand Total: <span class="muted">{{ $grandTotal }}</span></div>
                 <div class="summary-line">Average: <span class="muted">{{ $average }}</span></div>
+                @if($showPosition)
                 <div class="summary-line">Position: <span class="muted">{{ $position }}</span></div>
+                @endif
+                @if($showClassAverage)
                 <div class="summary-line">Class Average: <span class="muted">{{ $classAverage }}</span></div>
+                @endif
+                @if($showAttendance)
                 <div class="summary-line">Days Opened: <span class="muted">{{ $timesOpened ?? '—' }}</span></div>
                 <div class="summary-line">Days Present: <span class="muted">{{ $timesPresent ?? '—' }}</span></div>
                 <div class="summary-line">Days Absent: <span class="muted">{{ $timesAbsent ?? '—' }}</span></div>
+                @endif
             </div>
+
+            @php($rcBorderColor = '#0ea5e9')
+            @php($rcBgLight = '#f0f9ff')
+            @php($rcTitleColor = '#0c4a6e')
+            @php($rcLabelColor = '#334155')
+            @include('pdf.partials.rc-psychomotor')
+            @include('pdf.partials.rc-school-fees')
+
+            @if($showTeacherRemarks)
+            <div class="summary" style="margin-top: 8px;">
+                <div class="summary-line">Teacher's Remarks: <span class="muted">{{ $teacherRemarks ?? '—' }}</span></div>
+            </div>
+            @endif
+            @if($showPrincipalRemarks)
+            <div class="summary" style="margin-top: 8px;">
+                <div class="summary-line">Principal's Remarks: <span class="muted">{{ $principalRemarks ?? '—' }}</span></div>
+            </div>
+            @endif
+            @if($showNextTermDate)
+            <div class="summary" style="margin-top: 8px; text-align: center;">
+                <div class="summary-line">Next Term Begins: <span class="muted">{{ $nextTermDate ?? 'To be announced' }}</span></div>
+            </div>
+            @endif
         </div>
     </body>
 </html>
+

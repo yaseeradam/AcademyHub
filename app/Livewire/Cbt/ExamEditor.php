@@ -35,7 +35,7 @@ class ExamEditor extends Component
     public ?int $classId = null;
     public ?int $subjectId = null;
     public int $durationMinutes = 30;
-    public int $term = 1;
+    public ?int $term = null;
     public string $session = '';
 
     public ?int $editingQuestionId = null;

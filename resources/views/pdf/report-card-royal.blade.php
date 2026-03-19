@@ -62,6 +62,20 @@
 </head>
 <body>
     @php $schoolName = config('myacademy.school_name', 'MyAcademy'); @endphp
+        @php
+    $opts = $rcOptions ?? [];
+    $showPosition = $opts['show_position'] ?? true;
+    $showAttendance = $opts['show_attendance'] ?? true;
+    $showGradingKey = $opts['show_grading_key'] ?? true;
+    $showClassAverage = $opts['show_class_average'] ?? true;
+    $showWatermark = $opts['show_watermark'] ?? true;
+    $showNextTermDate = $opts['show_next_term_date'] ?? true;
+    $showTeacherRemarks = $opts['show_teacher_remarks'] ?? true;
+    $showPrincipalRemarks = $opts['show_principal_remarks'] ?? true;
+    $showPsychomotor = $opts['show_psychomotor'] ?? false;
+    $showSchoolFees = $opts['show_school_fees'] ?? false;
+    $showSignatures = $opts['show_signatures'] ?? false;
+@endphp
     
     <div class="page">
         <div class="ornament-top">❖ ❖ ❖</div>
@@ -77,36 +91,14 @@
         </div>
         
         <div class="student-frame">
-            <div class="student-grid">
-                <div class="student-col">
-                    <div class="student-item">
-                        <div class="student-label">Student Name</div>
-                        <div class="student-value">{{ $student->full_name }}</div>
-                    </div>
-                    <div class="student-item">
-                        <div class="student-label">Admission Number</div>
-                        <div class="student-value">{{ $student->admission_number }}</div>
-                    </div>
-                    <div class="student-item">
-                        <div class="student-label">Class & Section</div>
-                        <div class="student-value">{{ $student->schoolClass?->name }} - {{ $student->section?->name ?? 'N/A' }}</div>
-                    </div>
-                </div>
-                <div class="student-col">
-                    <div class="student-item">
-                        <div class="student-label">Gender</div>
-                        <div class="student-value">{{ $student->gender ?? 'N/A' }}</div>
-                    </div>
-                    <div class="student-item">
-                        <div class="student-label">Age</div>
-                        <div class="student-value">{{ $student->dob ? \Carbon\Carbon::parse($student->dob)->age . ' years' : 'N/A' }}</div>
-                    </div>
-                    <div class="student-item">
-                        <div class="student-label">Class Size</div>
-                        <div class="student-value">{{ $totalStudents ?? 'N/A' }} Students</div>
-                    </div>
-                </div>
-            </div>
+            
+                @php($siBorderColor = '#7c3aed')
+                @php($siBgColor = '#f5f3ff')
+                @php($siLabelColor = '#5b21b6')
+                @php($siValueColor = '#1f2937')
+                @php($siDotColor = '#c4b5fd')
+                @include('pdf.partials.rc-student-info')
+
         </div>
         
         <div class="stats-royal">
@@ -188,10 +180,16 @@
         
         <div class="sigs">
             <div class="sig">
-                <div class="sig-line">Class Teacher</div>
+                @if($showSignatures && ($signatureImages['teacher'] ?? null) && file_exists($signatureImages['teacher']))
+                            <img src="{{ $signatureImages['teacher'] }}" alt="Teacher Signature" style="max-height: 40px; max-width: 100px; object-fit: contain; margin-bottom: 4px;" />
+                        @endif
+                        <div class="sig-line">Class Teacher</div>
             </div>
             <div class="sig">
-                <div class="sig-line">Principal</div>
+                @if($showSignatures && ($signatureImages['principal'] ?? null) && file_exists($signatureImages['principal']))
+                            <img src="{{ $signatureImages['principal'] }}" alt="Principal Signature" style="max-height: 40px; max-width: 100px; object-fit: contain; margin-bottom: 4px;" />
+                        @endif
+                        <div class="sig-line">Principal</div>
             </div>
             <div class="sig">
                 <div class="sig-line">Parent/Guardian</div>

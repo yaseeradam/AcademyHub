@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Users;
 
+use App\Models\CustomField;
 use App\Support\Audit;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
@@ -28,12 +29,20 @@ class Index extends Component
     public string $role = 'teacher';
     public string $isActive = '1';
     public string $password = '';
+    public array $customFieldValues = [];
 
     public ?int $editingUserId = null;
     public string $editRole = 'teacher';
     public string $editIsActive = '1';
     public string $newPassword = '';
     public array $editPermissions = [];
+    public array $editCustomFieldValues = [];
+
+    #[Computed]
+    public function teacherCustomFields()
+    {
+        return CustomField::active()->ordered()->where('form_type', 'teacher')->get();
+    }
 
     public function updatedSearch(): void
     {
@@ -84,13 +93,27 @@ class Index extends Component
         $authUser = auth()->user();
         abort_unless($authUser && $authUser->hasPermission('users.manage'), 403);
 
-        $data = $this->validate([
+        $rules = [
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users', 'email')],
             'role' => ['required', Rule::in(['admin', 'bursar', 'teacher'])],
             'isActive' => ['required', 'in:0,1'],
             'password' => ['nullable', 'string', 'min:8'],
-        ], [
+        ];
+
+        // Add teacher custom field validation
+        foreach ($this->teacherCustomFields as $field) {
+            $fieldRules = $field->required ? ['required'] : ['nullable'];
+            match ($field->type) {
+                'number' => $fieldRules[] = 'numeric',
+                'date' => $fieldRules[] = 'date',
+                'checkbox' => $fieldRules[] = 'boolean',
+                default => array_push($fieldRules, 'string', 'max:255'),
+            };
+            $rules["customFieldValues.{$field->name}"] = $fieldRules;
+        }
+
+        $data = $this->validate($rules, [
             'isActive.in' => 'Invalid active status.',
         ]);
 
@@ -102,6 +125,7 @@ class Index extends Component
             'role' => $data['role'],
             'is_active' => (bool) $data['isActive'],
             'password' => $password,
+            'custom_fields' => $this->customFieldValues ?: null,
         ]);
 
         Audit::log('user.created', $created, [
@@ -109,7 +133,7 @@ class Index extends Component
             'is_active' => $created->is_active,
         ]);
 
-        $this->reset(['name', 'email', 'role', 'isActive', 'password']);
+        $this->reset(['name', 'email', 'role', 'isActive', 'password', 'customFieldValues']);
         $this->role = 'teacher';
         $this->isActive = '1';
 
@@ -128,6 +152,7 @@ class Index extends Component
         $this->editRole = (string) $user->role;
         $this->editIsActive = $user->is_active ? '1' : '0';
         $this->newPassword = '';
+        $this->editCustomFieldValues = $user->custom_fields ?? [];
 
         $definitions = (array) config('permissions.definitions', []);
         $overrides = $user->permissions;
@@ -166,6 +191,7 @@ class Index extends Component
         $this->editingUserId = null;
         $this->newPassword = '';
         $this->editPermissions = [];
+        $this->editCustomFieldValues = [];
     }
 
     public function saveEdit(): void
@@ -179,11 +205,25 @@ class Index extends Component
 
         $user = User::query()->findOrFail($this->editingUserId);
 
-        $data = $this->validate([
+        $rules = [
             'editRole' => ['required', Rule::in(['admin', 'bursar', 'teacher'])],
             'editIsActive' => ['required', 'in:0,1'],
             'newPassword' => ['nullable', 'string', 'min:8'],
-        ]);
+        ];
+
+        // Add teacher custom field validation for edit
+        foreach ($this->teacherCustomFields as $field) {
+            $fieldRules = $field->required ? ['required'] : ['nullable'];
+            match ($field->type) {
+                'number' => $fieldRules[] = 'numeric',
+                'date' => $fieldRules[] = 'date',
+                'checkbox' => $fieldRules[] = 'boolean',
+                default => array_push($fieldRules, 'string', 'max:255'),
+            };
+            $rules["editCustomFieldValues.{$field->name}"] = $fieldRules;
+        }
+
+        $data = $this->validate($rules);
 
         $isSelf = Auth::id() && (int) Auth::id() === (int) $user->id;
         if ($isSelf && $data['editIsActive'] === '0') {
@@ -215,6 +255,7 @@ class Index extends Component
             ? ['grant' => $grant, 'revoke' => $revoke]
             : null;
 
+        $user->custom_fields = $this->editCustomFieldValues ?: null;
         $user->save();
 
         Audit::log('user.updated', $user, [
@@ -227,6 +268,7 @@ class Index extends Component
         $this->editingUserId = null;
         $this->newPassword = '';
         $this->editPermissions = [];
+        $this->editCustomFieldValues = [];
 
         unset($this->users);
 

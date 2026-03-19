@@ -20,7 +20,7 @@ class Weekly extends Component
 {
     public ?int $classId = null;
     public ?int $sectionId = null;
-    public int $term = 1;
+    public ?int $term = null;
     public string $session = '';
     public string $weekStart = '';
 

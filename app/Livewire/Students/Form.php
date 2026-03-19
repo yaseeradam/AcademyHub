@@ -5,6 +5,7 @@ namespace App\Livewire\Students;
 use App\Models\SchoolClass;
 use App\Models\Section;
 use App\Models\Student;
+use App\Models\CustomField;
 use App\Traits\DispatchesModals;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
@@ -36,6 +37,7 @@ class Form extends Component
     public ?string $guardian_phone = null;
     public ?string $guardian_address = null;
     public string $status = 'Active';
+    public array $customFieldValues = [];
 
     public $passport = null;
 
@@ -59,9 +61,16 @@ class Form extends Component
             $this->guardian_phone = $student->guardian_phone;
             $this->guardian_address = $student->guardian_address;
             $this->status = $student->status;
+            $this->customFieldValues = $student->custom_fields ?? [];
         } else {
             $this->admission_number = $this->generateAdmissionNumber();
         }
+    }
+
+    #[Computed]
+    public function customFields()
+    {
+        return CustomField::active()->ordered()->where('form_type', 'student')->get();
     }
 
     #[Computed]
@@ -126,6 +135,33 @@ class Form extends Component
             $rules['passport'] = ['image', 'max:2048'];
         }
 
+        // Add custom field validation
+        foreach ($this->customFields as $field) {
+            $fieldRules = [];
+            if ($field->required) {
+                $fieldRules[] = 'required';
+            } else {
+                $fieldRules[] = 'nullable';
+            }
+            
+            switch ($field->type) {
+                case 'number':
+                    $fieldRules[] = 'numeric';
+                    break;
+                case 'date':
+                    $fieldRules[] = 'date';
+                    break;
+                case 'checkbox':
+                    $fieldRules[] = 'boolean';
+                    break;
+                default:
+                    $fieldRules[] = 'string';
+                    $fieldRules[] = 'max:255';
+            }
+            
+            $rules["customFieldValues.{$field->name}"] = $fieldRules;
+        }
+
         if (!$this->auto_admission || $id) {
             $rules['admission_number'] = [
                 'required',
@@ -146,6 +182,7 @@ class Form extends Component
 
         unset($data['passport']);
         $data['admission_number'] = $this->admission_number;
+        $data['custom_fields'] = $this->customFieldValues;
 
         $student = $this->student ?? new Student();
         $student->fill($data);

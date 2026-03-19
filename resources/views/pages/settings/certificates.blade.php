@@ -2,8 +2,7 @@
 
 @section('content')
 @php
-    $licenseManager = app(\App\Support\LicenseManager::class);
-    $hasPremium = $licenseManager->can('cbt');
+    $hasPremium = true;
 
     $certificateTemplate = old('certificate_template', config('myacademy.certificate_template', 'modern'));
 @endphp

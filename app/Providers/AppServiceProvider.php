@@ -8,7 +8,6 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\ServiceProvider;
-use App\Support\LicenseManager;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -17,7 +16,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        $this->app->singleton(LicenseManager::class, fn() => new LicenseManager());
+        //
     }
 
     /**
@@ -28,11 +27,7 @@ class AppServiceProvider extends ServiceProvider
         Student::observe(StudentObserver::class);
 
         Blade::if('premium', function (string $feature) {
-            try {
-                return app(LicenseManager::class)->can($feature);
-            } catch (\Throwable) {
-                return false;
-            }
+            return true;
         });
 
         $settings = \Illuminate\Support\Facades\Cache::rememberForever('myacademy_settings_cache', function () {
@@ -76,6 +71,23 @@ class AppServiceProvider extends ServiceProvider
                 'certificate_default_body',
                 'certificate_template',
                 'report_card_template',
+                'rc_show_position',
+                'rc_show_attendance',
+                'rc_show_grading_key',
+                'rc_show_class_average',
+                'rc_show_watermark',
+                'rc_show_next_term_date',
+                'rc_show_teacher_remarks',
+                'rc_show_principal_remarks',
+                'rc_show_psychomotor',
+                'rc_show_school_fees',
+                'rc_school_fees_account_number',
+                'rc_school_fees_bank_name',
+                'rc_school_fees_account_name',
+                'rc_school_fees_by_class',
+                'rc_show_signatures',
+                'rc_principal_signature_image',
+                'rc_teacher_signature_image',
             ];
 
             return Arr::only($data, $allowed);

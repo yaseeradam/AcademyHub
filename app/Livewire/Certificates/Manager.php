@@ -27,7 +27,7 @@ class Manager extends Component
     public string $title = '';
     public string $description = '';
     public string $session = '';
-    public int $term = 1;
+    public ?int $term = null;
     public string $issueDate = '';
     public string $template = 'modern';
     public bool $showModal = false;
@@ -57,6 +57,7 @@ class Manager extends Component
 
     public function mount(): void
     {
+        $this->term = $this->term ?: \App\Models\AcademicTerm::activeTermNumber();
         $this->session = now()->format('Y') . '/' . (now()->format('Y') + 1);
         $this->issueDate = now()->format('Y-m-d');
 

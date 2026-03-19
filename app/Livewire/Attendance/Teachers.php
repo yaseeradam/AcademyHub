@@ -19,7 +19,7 @@ use Livewire\Component;
 class Teachers extends Component
 {
     public string $date = '';
-    public int $term = 1;
+    public ?int $term = null;
     public string $session = '';
 
     public ?int $sheetId = null;

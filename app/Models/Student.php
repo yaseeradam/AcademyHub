@@ -26,12 +26,14 @@ class Student extends Model
         'guardian_address',
         'passport_photo',
         'status',
+        'custom_fields',
     ];
 
     protected $casts = [
         'class_id' => 'integer',
         'section_id' => 'integer',
         'dob' => 'date',
+        'custom_fields' => 'array',
     ];
 
     public function schoolClass(): BelongsTo

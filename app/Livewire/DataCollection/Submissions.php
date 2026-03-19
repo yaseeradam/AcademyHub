@@ -16,7 +16,7 @@ use Livewire\Component;
 class Submissions extends Component
 {
     public ?int $classId = null;
-    public int $term = 1;
+    public ?int $term = null;
     public string $session = '';
     public string $status = 'submitted'; // submitted|approved|rejected|all
 

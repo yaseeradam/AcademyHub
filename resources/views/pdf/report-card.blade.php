@@ -143,59 +143,57 @@
             font-size: 11px;
         }
 
-        /* ─── Student Info ─── */
+        /* ─── Student Info (compact inline) ─── */
         .student-section {
             border: 3px solid #d97706;
             border-radius: 10px;
-            padding: 14px;
+            padding: 10px 12px;
             margin-bottom: 14px;
             background: linear-gradient(135deg, #fffbeb, #fef3c7);
             box-shadow: 0 3px 10px rgba(217, 119, 6, 0.15);
         }
 
-        .student-grid {
+        .student-row-inline {
             display: table;
             width: 100%;
-        }
-
-        .student-col {
-            display: table-cell;
-            width: 42%;
-            padding: 3px 5px;
-            vertical-align: top;
-        }
-
-        .student-row {
-            margin-bottom: 5px;
             border-bottom: 1px dotted #fbbf24;
-            padding-bottom: 4px;
+        }
+
+        .student-row-inline:last-child {
+            border-bottom: none;
+        }
+
+        .student-cell {
+            display: table-cell;
+            padding: 4px 6px;
+            vertical-align: middle;
         }
 
         .student-label {
             color: #92400e;
             font-weight: 700;
-            font-size: 8px;
+            font-size: 7px;
             text-transform: uppercase;
-            display: inline-block;
-            width: 45%;
+            white-space: nowrap;
         }
 
         .student-value {
             font-weight: 700;
             color: #1f2937;
-            font-size: 10px;
+            font-size: 9px;
         }
 
-        .passport-box {
+        .passport-cell {
             display: table-cell;
-            width: 100px;
+            width: 70px;
             text-align: center;
-            vertical-align: top;
+            vertical-align: middle;
+            padding-left: 8px;
         }
 
         .passport {
-            width: 85px;
-            height: 100px;
+            width: 60px;
+            height: 72px;
             border: 2px solid #d97706;
             border-radius: 6px;
             object-fit: cover;
@@ -210,7 +208,6 @@
 
         .summary-card {
             display: table-cell;
-            width: 16.66%;
             padding: 4px;
         }
 
@@ -416,6 +413,145 @@
             color: #1f2937;
         }
 
+        /* ─── Psychomotor Domain ─── */
+        .psychomotor-box {
+            border: 2px solid #fbbf24;
+            border-radius: 8px;
+            padding: 10px;
+            margin-bottom: 14px;
+            background: linear-gradient(135deg, #fef3c7, #fde68a);
+            box-shadow: 0 2px 6px rgba(251, 191, 36, 0.2);
+        }
+
+        .psychomotor-title {
+            font-size: 9px;
+            font-weight: 800;
+            color: #92400e;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+            text-align: center;
+        }
+
+        .psychomotor-grid {
+            display: table;
+            width: 100%;
+        }
+
+        .psychomotor-row {
+            display: table-row;
+        }
+
+        .psychomotor-cell {
+            display: table-cell;
+            width: 50%;
+            padding: 3px 6px;
+        }
+
+        .psychomotor-item {
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+            padding: 6px 10px;
+            margin-bottom: 4px;
+        }
+
+        .psychomotor-label {
+            font-size: 8px;
+            color: #78350f;
+            font-weight: 700;
+            display: inline-block;
+            width: 60%;
+        }
+
+        .psychomotor-rating {
+            font-size: 8px;
+            font-weight: 600;
+            color: #6b7280;
+            display: inline-block;
+            width: 35%;
+            text-align: right;
+        }
+
+        .rating-bar {
+            display: inline-block;
+            width: 40px;
+            height: 6px;
+            background: #e5e7eb;
+            border-radius: 3px;
+            overflow: hidden;
+            vertical-align: middle;
+            margin-left: 4px;
+        }
+
+        .rating-fill {
+            height: 100%;
+            border-radius: 3px;
+        }
+
+        .rating-fill.excellent { background: #059669; width: 100%; }
+        .rating-fill.good { background: #2563eb; width: 75%; }
+        .rating-fill.average { background: #d97706; width: 50%; }
+        .rating-fill.fair { background: #ea580c; width: 25%; }
+
+        /* ─── School Fees ─── */
+        .school-fees-box {
+            border: 3px solid #d97706;
+            border-radius: 10px;
+            padding: 12px;
+            margin-bottom: 14px;
+            background: linear-gradient(135deg, #fff7ed, #ffedd5);
+            box-shadow: 0 3px 10px rgba(217, 119, 6, 0.15);
+        }
+
+        .school-fees-title {
+            font-size: 10px;
+            font-weight: 900;
+            color: #92400e;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 8px;
+            text-align: center;
+        }
+
+        .school-fees-grid {
+            display: table;
+            width: 100%;
+        }
+
+        .school-fees-item {
+            display: table-cell;
+            padding: 4px 8px;
+            vertical-align: top;
+        }
+
+        .school-fees-label {
+            font-size: 7px;
+            color: #92400e;
+            font-weight: 700;
+            text-transform: uppercase;
+            display: block;
+            margin-bottom: 2px;
+        }
+
+        .school-fees-value {
+            font-size: 10px;
+            font-weight: 800;
+            color: #78350f;
+        }
+
+        .school-fees-amount {
+            font-size: 16px;
+            font-weight: 900;
+            color: #92400e;
+            text-align: center;
+            padding: 8px;
+            background: white;
+            border: 2px solid #d97706;
+            border-radius: 8px;
+            margin-bottom: 8px;
+        }
+
         /* ─── Remarks ─── */
         .remarks-section {
             border: 2px solid #fbbf24;
@@ -473,6 +609,13 @@
             padding: 8px;
         }
 
+        .signature-image {
+            max-height: 40px;
+            max-width: 100px;
+            object-fit: contain;
+            margin-bottom: 4px;
+        }
+
         .signature-line {
             border-top: 3px double #78350f;
             margin-top: 40px;
@@ -480,6 +623,10 @@
             font-size: 10px;
             font-weight: 900;
             color: #78350f;
+        }
+
+        .signature-line.has-image {
+            margin-top: 6px;
         }
 
         .signature-label {
@@ -520,9 +667,23 @@
         $logo = config('myacademy.school_logo');
         $logoPath = $logo ? public_path('uploads/' . str_replace('\\', '/', $logo)) : null;
         $logoExists = $logoPath && file_exists($logoPath);
+
+        // Report card options (with safe defaults)
+        $opts = $rcOptions ?? [];
+        $showPosition = $opts['show_position'] ?? true;
+        $showAttendance = $opts['show_attendance'] ?? true;
+        $showGradingKey = $opts['show_grading_key'] ?? true;
+        $showClassAverage = $opts['show_class_average'] ?? true;
+        $showWatermark = $opts['show_watermark'] ?? true;
+        $showNextTermDate = $opts['show_next_term_date'] ?? true;
+        $showTeacherRemarks = $opts['show_teacher_remarks'] ?? true;
+        $showPrincipalRemarks = $opts['show_principal_remarks'] ?? true;
+        $showPsychomotor = $opts['show_psychomotor'] ?? false;
+        $showSchoolFees = $opts['show_school_fees'] ?? false;
+        $showSignatures = $opts['show_signatures'] ?? false;
     @endphp
 
-    @if($logoExists)
+    @if($logoExists && $showWatermark)
         <div class="watermark">
             <img src="{{ $logoPath }}" alt="" style="width: 100%; height: 100%; object-fit: contain;" />
         </div>
@@ -577,47 +738,39 @@
         </div>
 
         <div class="student-section">
-            <div class="student-grid">
-                <div class="student-col">
-                    <div class="student-row">
-                        <span class="student-label">Student Name</span>
-                        <span class="student-value">{{ $student->full_name }}</span>
+            <div style="display: table; width: 100%;">
+                <div style="display: table-cell; vertical-align: middle;">
+                    <div class="student-row-inline">
+                        <div class="student-cell">
+                            <span class="student-label">Student Name:</span>
+                            <span class="student-value"> {{ $student->full_name }}</span>
+                        </div>
+                        <div class="student-cell">
+                            <span class="student-label">Admission No:</span>
+                            <span class="student-value"> {{ $student->admission_number }}</span>
+                        </div>
+                        <div class="student-cell">
+                            <span class="student-label">Class / Section:</span>
+                            <span class="student-value"> {{ $student->schoolClass?->name }} {{ $student->section?->name ? '— ' . $student->section->name : '' }}</span>
+                        </div>
                     </div>
-                    <div class="student-row">
-                        <span class="student-label">Admission No</span>
-                        <span class="student-value">{{ $student->admission_number }}</span>
-                    </div>
-                    <div class="student-row">
-                        <span class="student-label">Class</span>
-                        <span class="student-value">{{ $student->schoolClass?->name }}</span>
-                    </div>
-                    <div class="student-row">
-                        <span class="student-label">Section</span>
-                        <span class="student-value">{{ $student->section?->name ?? 'N/A' }}</span>
-                    </div>
-                </div>
-                <div class="student-col">
-                    <div class="student-row">
-                        <span class="student-label">Gender</span>
-                        <span class="student-value">{{ $student->gender ?? 'N/A' }}</span>
-                    </div>
-                    <div class="student-row">
-                        <span class="student-label">Date of Birth</span>
-                        <span
-                            class="student-value">{{ $student->dob ? \Carbon\Carbon::parse($student->dob)->format('d M, Y') : 'N/A' }}</span>
-                    </div>
-                    <div class="student-row">
-                        <span class="student-label">Age</span>
-                        <span
-                            class="student-value">{{ $student->dob ? \Carbon\Carbon::parse($student->dob)->age . ' years' : 'N/A' }}</span>
-                    </div>
-                    <div class="student-row">
-                        <span class="student-label">No. in Class</span>
-                        <span class="student-value">{{ $totalStudents ?? 'N/A' }}</span>
+                    <div class="student-row-inline">
+                        <div class="student-cell">
+                            <span class="student-label">Gender:</span>
+                            <span class="student-value"> {{ $student->gender ?? 'N/A' }}</span>
+                        </div>
+                        <div class="student-cell">
+                            <span class="student-label">Date of Birth:</span>
+                            <span class="student-value"> {{ $student->dob ? \Carbon\Carbon::parse($student->dob)->format('d M, Y') : 'N/A' }}</span>
+                        </div>
+                        <div class="student-cell">
+                            <span class="student-label">No. in Class:</span>
+                            <span class="student-value"> {{ $totalStudents ?? 'N/A' }}</span>
+                        </div>
                     </div>
                 </div>
                 @if($student->passport_photo)
-                    <div class="passport-box">
+                    <div class="passport-cell">
                         <img src="{{ public_path('uploads/' . str_replace('\\', '/', $student->passport_photo)) }}"
                             alt="Photo" class="passport" />
                     </div>
@@ -638,12 +791,15 @@
                     <div class="summary-value">{{ number_format($average, 1) }}%</div>
                 </div>
             </div>
+            @if($showPosition)
             <div class="summary-card">
                 <div class="summary-inner blue">
                     <div class="summary-label">Position</div>
                     <div class="summary-value">{{ $position }}</div>
                 </div>
             </div>
+            @endif
+            @if($showClassAverage)
             <div class="summary-card">
                 <div class="summary-inner purple">
                     <div class="summary-label">Class Avg</div>
@@ -662,6 +818,7 @@
                     <div class="summary-value">{{ number_format($lowestAverage ?? 0, 1) }}%</div>
                 </div>
             </div>
+            @endif
         </div>
 
         <table>
@@ -702,6 +859,7 @@
             </tbody>
         </table>
 
+        @if($showGradingKey)
         <div class="grading-key">
             <div class="grading-title">Grading System</div>
             <div class="grading-grid">
@@ -712,7 +870,9 @@
                 <div class="grading-item"><span class="grade-letter grade-f">F:</span> 0-39 (Fail)</div>
             </div>
         </div>
+        @endif
 
+        @if($showAttendance)
         <div class="attendance-box">
             <div class="attendance-title">Attendance Record</div>
             <div class="attendance-grid">
@@ -736,23 +896,116 @@
                 </div>
             </div>
         </div>
+        @endif
 
+        @if($showPsychomotor)
+        <div class="psychomotor-box">
+            <div class="psychomotor-title">Psychomotor Domain / Affective Skills</div>
+            <div class="psychomotor-grid">
+                @php
+                    $psychomotorTraits = [
+                        ['name' => 'Handwriting', 'rating' => 'Good'],
+                        ['name' => 'Verbal Fluency', 'rating' => 'Good'],
+                        ['name' => 'Games / Sports', 'rating' => 'Average'],
+                        ['name' => 'Craft / Drawing', 'rating' => 'Good'],
+                        ['name' => 'Musical Skills', 'rating' => 'Average'],
+                        ['name' => 'Punctuality', 'rating' => 'Excellent'],
+                        ['name' => 'Neatness', 'rating' => 'Good'],
+                        ['name' => 'Politeness / Courtesy', 'rating' => 'Excellent'],
+                        ['name' => 'Honesty', 'rating' => 'Excellent'],
+                        ['name' => 'Self-Control', 'rating' => 'Good'],
+                        ['name' => 'Attentiveness', 'rating' => 'Good'],
+                        ['name' => 'Relationship with Others', 'rating' => 'Excellent'],
+                    ];
+                    $chunked = array_chunk($psychomotorTraits, 2);
+                @endphp
+                @foreach($chunked as $pair)
+                <div class="psychomotor-row">
+                    @foreach($pair as $trait)
+                    <div class="psychomotor-cell">
+                        <div class="psychomotor-item">
+                            <span class="psychomotor-label">{{ $trait['name'] }}</span>
+                            <span class="psychomotor-rating">
+                                {{ $trait['rating'] }}
+                                <span class="rating-bar">
+                                    <span class="rating-fill {{ strtolower($trait['rating']) }}"></span>
+                                </span>
+                            </span>
+                        </div>
+                    </div>
+                    @endforeach
+                </div>
+                @endforeach
+            </div>
+        </div>
+        @endif
+
+        @if($showTeacherRemarks)
+        <div class="remarks-section">
+            <div class="remarks-title">Class Teacher's Remarks</div>
+            <div class="remarks-content">{{ $teacherRemarks ?? 'No remarks provided.' }}</div>
+        </div>
+        @endif
+
+        @if($showPrincipalRemarks)
         <div class="remarks-section">
             <div class="remarks-title">Principal's Remarks</div>
             <div class="remarks-content">{{ $principalRemarks ?? 'No remarks provided.' }}</div>
         </div>
+        @endif
 
+        @if($showSchoolFees && !empty($schoolFees))
+        <div class="school-fees-box">
+            <div class="school-fees-title">School Fees for Next Term</div>
+            <div class="school-fees-amount">
+                {{ $schoolFees['currency'] ?? '₦' }}{{ number_format($schoolFees['amount'], 2) }}
+            </div>
+            <div class="school-fees-grid">
+                @if($schoolFees['bank_name'] ?? null)
+                <div class="school-fees-item">
+                    <span class="school-fees-label">Bank Name</span>
+                    <span class="school-fees-value">{{ $schoolFees['bank_name'] }}</span>
+                </div>
+                @endif
+                @if($schoolFees['account_number'] ?? null)
+                <div class="school-fees-item">
+                    <span class="school-fees-label">Account Number</span>
+                    <span class="school-fees-value">{{ $schoolFees['account_number'] }}</span>
+                </div>
+                @endif
+                @if($schoolFees['account_name'] ?? null)
+                <div class="school-fees-item">
+                    <span class="school-fees-label">Account Name</span>
+                    <span class="school-fees-value">{{ $schoolFees['account_name'] }}</span>
+                </div>
+                @endif
+            </div>
+        </div>
+        @endif
+
+        @if($showNextTermDate)
         <div class="next-term">
             Next Term Begins: {{ $nextTermDate ?? 'To be announced' }}
         </div>
+        @endif
 
         <div class="signature-section">
             <div class="signature">
-                <div class="signature-line">Class Teacher</div>
+                @if($showSignatures && ($signatureImages['teacher'] ?? null) && file_exists($signatureImages['teacher']))
+                    <img src="{{ $signatureImages['teacher'] }}" alt="Teacher Signature" class="signature-image" />
+                    <div class="signature-line has-image">Class Teacher</div>
+                @else
+                    <div class="signature-line">Class Teacher</div>
+                @endif
                 <div class="signature-label">Signature & Date</div>
             </div>
             <div class="signature">
-                <div class="signature-line">Principal</div>
+                @if($showSignatures && ($signatureImages['principal'] ?? null) && file_exists($signatureImages['principal']))
+                    <img src="{{ $signatureImages['principal'] }}" alt="Principal Signature" class="signature-image" />
+                    <div class="signature-line has-image">Principal</div>
+                @else
+                    <div class="signature-line">Principal</div>
+                @endif
                 <div class="signature-label">Signature & Stamp</div>
             </div>
             <div class="signature">

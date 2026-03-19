@@ -385,6 +385,20 @@
         $logoPath = $logo ? public_path('uploads/' . str_replace('\\', '/', $logo)) : null;
         $logoExists = $logoPath && file_exists($logoPath);
     @endphp
+        @php
+    $opts = $rcOptions ?? [];
+    $showPosition = $opts['show_position'] ?? true;
+    $showAttendance = $opts['show_attendance'] ?? true;
+    $showGradingKey = $opts['show_grading_key'] ?? true;
+    $showClassAverage = $opts['show_class_average'] ?? true;
+    $showWatermark = $opts['show_watermark'] ?? true;
+    $showNextTermDate = $opts['show_next_term_date'] ?? true;
+    $showTeacherRemarks = $opts['show_teacher_remarks'] ?? true;
+    $showPrincipalRemarks = $opts['show_principal_remarks'] ?? true;
+    $showPsychomotor = $opts['show_psychomotor'] ?? false;
+    $showSchoolFees = $opts['show_school_fees'] ?? false;
+    $showSignatures = $opts['show_signatures'] ?? false;
+@endphp
 
     @if($logoExists)
         <div class="watermark">
@@ -436,34 +450,14 @@
                         class="meta-value">{{ now()->format('d/m/Y') }}</span></div>
             </div>
 
-            <table class="info-table">
-                <tr>
-                    <td class="info-label">Student Name</td>
-                    <td class="info-value">{{ $student->full_name }}</td>
-                    <td class="info-label">Adm. No</td>
-                    <td class="info-value">{{ $student->admission_number }}</td>
-                    @if($student->passport_photo)
-                        <td class="photo-td" rowspan="3">
-                            <img src="{{ public_path('uploads/' . str_replace('\\', '/', $student->passport_photo)) }}"
-                                alt="Photo" class="photo" />
-                        </td>
-                    @endif
-                </tr>
-                <tr>
-                    <td class="info-label">Class</td>
-                    <td class="info-value">{{ $student->schoolClass?->name }}</td>
-                    <td class="info-label">Section</td>
-                    <td class="info-value">{{ $student->section?->name ?? 'N/A' }}</td>
-                </tr>
-                <tr>
-                    <td class="info-label">Gender</td>
-                    <td class="info-value">{{ $student->gender ?? 'N/A' }}</td>
-                    <td class="info-label">D.O.B</td>
-                    <td class="info-value">
-                        {{ $student->date_of_birth ? \Carbon\Carbon::parse($student->date_of_birth)->format('d/m/Y') : 'N/A' }}
-                    </td>
-                </tr>
-            </table>
+            
+                @php($siBorderColor = '#374151')
+                @php($siBgColor = '#f9fafb')
+                @php($siLabelColor = '#374151')
+                @php($siValueColor = '#1f2937')
+                @php($siDotColor = '#d1d5db')
+                @include('pdf.partials.rc-student-info')
+
 
             <div class="summary-row">
                 <div class="summary-cell">
@@ -550,13 +544,27 @@
                 Next Term Begins: {{ $nextTermDate ?? 'To be announced' }}
             </div>
 
-            <div class="signatures">
+            
+                @php($rcBorderColor = '#374151')
+                @php($rcBgLight = '#f9fafb')
+                @php($rcTitleColor = '#374151')
+                @php($rcLabelColor = '#374151')
+                @include('pdf.partials.rc-psychomotor')
+                @include('pdf.partials.rc-school-fees')
+
+<div class="signatures">
                 <div class="sig">
-                    <div class="sig-line">Class Teacher</div>
+                    @if($showSignatures && ($signatureImages['teacher'] ?? null) && file_exists($signatureImages['teacher']))
+                            <img src="{{ $signatureImages['teacher'] }}" alt="Teacher Signature" style="max-height: 40px; max-width: 100px; object-fit: contain; margin-bottom: 4px;" />
+                        @endif
+                        <div class="sig-line">Class Teacher</div>
                     <div class="sig-sub">Signature & Date</div>
                 </div>
                 <div class="sig">
-                    <div class="sig-line">Principal</div>
+                    @if($showSignatures && ($signatureImages['principal'] ?? null) && file_exists($signatureImages['principal']))
+                            <img src="{{ $signatureImages['principal'] }}" alt="Principal Signature" style="max-height: 40px; max-width: 100px; object-fit: contain; margin-bottom: 4px;" />
+                        @endif
+                        <div class="sig-line">Principal</div>
                     <div class="sig-sub">Signature & Stamp</div>
                 </div>
                 <div class="sig">

@@ -43,7 +43,6 @@ use App\Livewire\Messages\Index as MessagesIndex;
 use App\Livewire\Marketplace\Index as MarketplaceIndex;
 use App\Livewire\Notifications\Index as NotificationsIndex;
 use App\Livewire\Promotions\Index as PromotionsIndex;
-use App\Livewire\Premium\Devices as PremiumDevices;
 use App\Livewire\SavingsLoan\Index as SavingsLoanIndex;
 use App\Livewire\Students\Form as StudentsForm;
 use App\Livewire\Students\Index as StudentsIndex;
@@ -53,6 +52,7 @@ use App\Livewire\Imports\Index as ImportsIndex;
 use App\Livewire\Imports\Students as ImportsStudents;
 use App\Livewire\Imports\Subjects as ImportsSubjects;
 use App\Livewire\Imports\Teachers as ImportsTeachers;
+use App\Livewire\Settings\CustomFields;
 
 /*
 |--------------------------------------------------------------------------
@@ -85,13 +85,12 @@ Route::get('/home', function () {
         : redirect()->route('login');
 });
 
-Route::middleware(config('myacademy.premium_enforce', true) ? ['premium_public:cbt'] : [])->group(function () {
-    Route::get('/cbt/portal', CbtPortalStart::class)->name('cbt.portal');
-    Route::get('/cbt/portal/{attempt}', CbtPortalTake::class)->name('cbt.portal.take');
+// CBT Portal Routes (No restrictions)
+Route::get('/cbt/portal', CbtPortalStart::class)->name('cbt.portal');
+Route::get('/cbt/portal/{attempt}', CbtPortalTake::class)->name('cbt.portal.take');
 
-    Route::get('/cbt/student', CbtPortalStart::class)->name('cbt.student');
-    Route::get('/cbt/student/{attempt}', CbtPortalTake::class)->name('cbt.student.take');
-});
+Route::get('/cbt/student', CbtPortalStart::class)->name('cbt.student');
+Route::get('/cbt/student/{attempt}', CbtPortalTake::class)->name('cbt.student.take');
 
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthenticatedSessionController::class, 'create'])->name('login');
@@ -166,7 +165,6 @@ Route::middleware(['auth', 'active'])->group(function () {
         Route::post('/settings/school', [SettingsController::class, 'updateSchool'])->name('settings.update-school');
         Route::post('/settings/results', [SettingsController::class, 'updateResults'])->name('settings.update-results');
         Route::post('/settings/certificates', [SettingsController::class, 'updateCertificates'])->name('settings.update-certificates');
-        Route::post('/settings/license', [SettingsController::class, 'updateLicense'])->name('settings.update-license');
     });
 
     Route::get('/students', StudentsIndex::class)->name('students.index');
@@ -184,7 +182,6 @@ Route::middleware(['auth', 'active'])->group(function () {
             ->name('billing.export.transactions');
 
         Route::get('/savings-loan', SavingsLoanIndex::class)
-            ->middleware('premium:savings_loan')
             ->name('savings-loan.index');
     });
 
@@ -200,16 +197,17 @@ Route::middleware(['auth', 'active'])->group(function () {
         Route::get('/data-collection', DataCollectionWeekly::class)->middleware('permission:data_collection.submit')->name('data-collection');
         Route::view('/examination', 'pages.examination.index')->name('examination');
         Route::get('/cbt', CbtIndex::class)
-            ->middleware(config('myacademy.premium_enforce', true) ? ['premium:cbt'] : [])
             ->name('cbt.index');
         Route::get('/cbt/exams/{exam}', CbtExamEditor::class)
-            ->middleware(config('myacademy.premium_enforce', true) ? ['premium:cbt'] : [])
             ->name('cbt.exams.edit');
         Route::get('/cbt/exams/{exam}/pdf', [CbtExportController::class, 'examPdf'])
-            ->middleware(config('myacademy.premium_enforce', true) ? ['premium:cbt'] : [])
             ->name('cbt.exams.pdf');
 
         Route::get('/results/entry', ResultsEntry::class)->middleware('permission:results.entry,results.review')->name('results.entry');
+        Route::get('/results/scoresheet/download', [\App\Http\Controllers\ScoresheetController::class, 'download'])->middleware('permission:results.entry,results.review')->name('results.scoresheet.download');
+        Route::get('/results/scoresheet/test', function() {
+            return response()->json(['message' => 'Scoresheet route is working', 'timestamp' => now()]);
+        })->name('results.scoresheet.test');
         Route::get('/results/broadsheet', ResultsBroadsheet::class)->middleware('permission:results.broadsheet')->name('results.broadsheet');
         Route::get('/results/submissions', ResultsSubmissions::class)->middleware('role:admin')->name('results.submissions');
         Route::get('/results/report-card/{student}', [ReportCardController::class, 'download'])->name('results.report-card');
@@ -236,14 +234,14 @@ Route::middleware(['auth', 'active'])->group(function () {
         Route::view('/settings', 'pages.settings.index')->name('settings.index');
         Route::view('/settings/results', 'pages.settings.results')->name('settings.results');
         Route::view('/settings/certificates', 'pages.settings.certificates')->name('settings.certificates');
-        Route::view('/settings/templates', 'pages.settings.templates')->name('settings.templates');
+        Route::get('/settings/templates', [SettingsController::class, 'showTemplates'])->name('settings.templates');
         Route::post('/settings/templates', [SettingsController::class, 'updateTemplates'])->name('settings.update-templates');
         Route::get('/settings/templates/preview/{type}/{template}', [SettingsController::class, 'previewTemplate'])->name('settings.templates.preview');
-        Route::get('/settings/devices', PremiumDevices::class)->name('settings.devices');
         Route::get('/settings/backup', [BackupController::class, 'index'])->middleware('permission:backup.manage')->name('settings.backup');
         Route::post('/settings/backup', [BackupController::class, 'create'])->middleware('permission:backup.manage')->name('settings.backup.create');
         Route::post('/settings/restore', [BackupController::class, 'restore'])->middleware('permission:backup.manage')->name('settings.restore');
         Route::get('/settings/audit-logs', AuditLogsIndex::class)->middleware('permission:audit.view')->name('settings.audit-logs');
+        Route::get('/settings/custom-fields', CustomFields::class)->name('settings.custom-fields');
 
         Route::get('/promotions', PromotionsIndex::class)->name('promotions');
         Route::get('/academic-sessions', AcademicSessions::class)->name('academic-sessions');
@@ -253,7 +251,6 @@ Route::middleware(['auth', 'active'])->group(function () {
             ->name('data-collection.submissions');
 
         Route::get('/cbt/exams/{exam}/export', [CbtExportController::class, 'examResults'])
-            ->middleware(config('myacademy.premium_enforce', true) ? ['premium:cbt'] : [])
             ->name('cbt.exams.export');
     });
 });

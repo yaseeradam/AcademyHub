@@ -80,6 +80,54 @@ class ReportCardService
 
         $principalRemarks = $this->generatePrincipalRemarks($average, $position, $totalStudents);
 
+        // Report card display options from settings
+        $rcOptions = [
+            'show_position' => (bool) config('myacademy.rc_show_position', true),
+            'show_attendance' => (bool) config('myacademy.rc_show_attendance', true),
+            'show_grading_key' => (bool) config('myacademy.rc_show_grading_key', true),
+            'show_class_average' => (bool) config('myacademy.rc_show_class_average', true),
+            'show_watermark' => (bool) config('myacademy.rc_show_watermark', true),
+            'show_next_term_date' => (bool) config('myacademy.rc_show_next_term_date', true),
+            'show_teacher_remarks' => (bool) config('myacademy.rc_show_teacher_remarks', true),
+            'show_principal_remarks' => (bool) config('myacademy.rc_show_principal_remarks', true),
+            'show_psychomotor' => (bool) config('myacademy.rc_show_psychomotor', false),
+            'show_school_fees' => (bool) config('myacademy.rc_show_school_fees', false),
+            'show_signatures' => (bool) config('myacademy.rc_show_signatures', false),
+        ];
+
+        // School fees data
+        $schoolFees = null;
+        if ($rcOptions['show_school_fees']) {
+            $feesByClass = config('myacademy.rc_school_fees_by_class');
+            if (is_string($feesByClass)) {
+                $feesByClass = json_decode($feesByClass, true) ?? [];
+            }
+            $feesByClass = is_array($feesByClass) ? $feesByClass : [];
+            $classId = $student->class_id;
+            $feeAmount = $feesByClass[(string) $classId] ?? null;
+
+            if ($feeAmount !== null) {
+                $schoolFees = [
+                    'amount' => (float) $feeAmount,
+                    'account_number' => config('myacademy.rc_school_fees_account_number'),
+                    'bank_name' => config('myacademy.rc_school_fees_bank_name'),
+                    'account_name' => config('myacademy.rc_school_fees_account_name'),
+                    'currency' => config('myacademy.currency_symbol', '₦'),
+                ];
+            }
+        }
+
+        // Signature images
+        $signatureImages = null;
+        if ($rcOptions['show_signatures']) {
+            $principalSig = config('myacademy.rc_principal_signature_image');
+            $teacherSig = config('myacademy.rc_teacher_signature_image');
+            $signatureImages = [
+                'principal' => $principalSig ? public_path('uploads/' . str_replace('\\', '/', $principalSig)) : null,
+                'teacher' => $teacherSig ? public_path('uploads/' . str_replace('\\', '/', $teacherSig)) : null,
+            ];
+        }
+
         return [
             'student' => $student,
             'term' => $term,
@@ -98,6 +146,9 @@ class ReportCardService
             'principalRemarks' => $principalRemarks,
             'teacherRemarks' => null,
             'nextTermDate' => null,
+            'rcOptions' => $rcOptions,
+            'schoolFees' => $schoolFees,
+            'signatureImages' => $signatureImages,
         ];
     }
 

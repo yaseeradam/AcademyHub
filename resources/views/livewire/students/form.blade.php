@@ -133,6 +133,74 @@
                             <div class="mt-2 text-sm text-orange-700">{{ $message }}</div>
                         @enderror
                     </div>
+
+                    <!-- Custom Fields -->
+                    @foreach($this->customFields as $field)
+                        <div class="{{ $field->type === 'textarea' ? 'sm:col-span-2' : '' }}">
+                            <label class="text-sm font-semibold text-gray-700">
+                                {{ $field->label }}
+                                @if($field->required)
+                                    <span class="text-red-500">*</span>
+                                @endif
+                            </label>
+                            
+                            @if($field->type === 'text')
+                                <input
+                                    wire:model.live="customFieldValues.{{ $field->name }}"
+                                    type="text"
+                                    placeholder="{{ $field->placeholder }}"
+                                    class="mt-2 w-full rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-700 shadow-sm focus:border-brand-500 focus:ring-brand-500"
+                                />
+                            @elseif($field->type === 'number')
+                                <input
+                                    wire:model.live="customFieldValues.{{ $field->name }}"
+                                    type="number"
+                                    placeholder="{{ $field->placeholder }}"
+                                    class="mt-2 w-full rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-700 shadow-sm focus:border-brand-500 focus:ring-brand-500"
+                                />
+                            @elseif($field->type === 'date')
+                                <input
+                                    wire:model.live="customFieldValues.{{ $field->name }}"
+                                    type="date"
+                                    class="mt-2 w-full rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-700 shadow-sm focus:border-brand-500 focus:ring-brand-500"
+                                />
+                            @elseif($field->type === 'select')
+                                <select
+                                    wire:model.live="customFieldValues.{{ $field->name }}"
+                                    class="mt-2 w-full rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-700 shadow-sm focus:border-brand-500 focus:ring-brand-500"
+                                >
+                                    <option value="">{{ $field->placeholder ?: 'Select option' }}</option>
+                                    @if($field->options)
+                                        @foreach($field->options as $option)
+                                            <option value="{{ $option }}">{{ $option }}</option>
+                                        @endforeach
+                                    @endif
+                                </select>
+                            @elseif($field->type === 'textarea')
+                                <textarea
+                                    wire:model.live="customFieldValues.{{ $field->name }}"
+                                    rows="3"
+                                    placeholder="{{ $field->placeholder }}"
+                                    class="mt-2 w-full rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-700 shadow-sm focus:border-brand-500 focus:ring-brand-500"
+                                ></textarea>
+                            @elseif($field->type === 'checkbox')
+                                <div class="mt-2">
+                                    <label class="flex items-center">
+                                        <input
+                                            wire:model.live="customFieldValues.{{ $field->name }}"
+                                            type="checkbox"
+                                            class="rounded border-gray-300 text-brand-600 focus:ring-brand-500"
+                                        />
+                                        <span class="ml-2 text-sm text-gray-600">{{ $field->placeholder ?: 'Yes' }}</span>
+                                    </label>
+                                </div>
+                            @endif
+                            
+                            @error("customFieldValues.{$field->name}")
+                                <div class="mt-2 text-sm text-orange-700">{{ $message }}</div>
+                            @enderror
+                        </div>
+                    @endforeach
                 </div>
             </div>
 

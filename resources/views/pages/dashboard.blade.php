@@ -135,16 +135,14 @@
         return $data;
     });
 
-    // Exam performance data
-    $examStats = \Illuminate\Support\Facades\Cache::remember('dashboard_exam_stats', \DateInterval::createFromDateString('15 minutes'), function () {
-        $totalScores = \App\Models\Score::query()->count();
-        $passScores = \App\Models\Score::query()->where('total', '>=', 50)->count();
-        return [
-            'totalScores' => $totalScores,
-            'passScores' => $passScores,
-            'failScores' => $totalScores - $passScores,
-        ];
-    });
+    // Exam performance data (caching removed)
+    $totalScores = \App\Models\Score::query()->count();
+    $passScores = \App\Models\Score::query()->where('total', '>=', 50)->count();
+    $examStats = [
+        'totalScores' => $totalScores,
+        'passScores' => $passScores,
+        'failScores' => $totalScores - $passScores,
+    ];
 
     $totalScores = $examStats['totalScores'];
     $passScores = $examStats['passScores'];

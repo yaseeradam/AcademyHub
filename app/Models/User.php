@@ -25,6 +25,7 @@ class User extends Authenticatable
         'is_active',
         'profile_photo',
         'permissions',
+        'custom_fields',
     ];
 
     /**
@@ -47,6 +48,7 @@ class User extends Authenticatable
         'password' => 'hashed',
         'is_active' => 'boolean',
         'permissions' => 'array',
+        'custom_fields' => 'array',
     ];
 
     public function hasPermission(string $permission): bool

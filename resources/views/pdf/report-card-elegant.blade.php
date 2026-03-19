@@ -346,8 +346,22 @@
             $logoPath   = $logo ? public_path('uploads/' . str_replace('\\', '/', $logo)) : null;
             $logoExists = $logoPath && file_exists($logoPath);
         @endphp
+        @php
+    $opts = $rcOptions ?? [];
+    $showPosition = $opts['show_position'] ?? true;
+    $showAttendance = $opts['show_attendance'] ?? true;
+    $showGradingKey = $opts['show_grading_key'] ?? true;
+    $showClassAverage = $opts['show_class_average'] ?? true;
+    $showWatermark = $opts['show_watermark'] ?? true;
+    $showNextTermDate = $opts['show_next_term_date'] ?? true;
+    $showTeacherRemarks = $opts['show_teacher_remarks'] ?? true;
+    $showPrincipalRemarks = $opts['show_principal_remarks'] ?? true;
+    $showPsychomotor = $opts['show_psychomotor'] ?? false;
+    $showSchoolFees = $opts['show_school_fees'] ?? false;
+    $showSignatures = $opts['show_signatures'] ?? false;
+@endphp
 
-        @if($logoExists)
+        @if($logoExists && $showWatermark)
             <div class="watermark">
                 <img src="{{ $logoPath }}" alt="" style="width: 100%; height: 100%; object-fit: contain;" />
             </div>
@@ -402,35 +416,14 @@
                     </div>
                 </div>
 
-                <div class="info-section">
-                    <div class="info-left">
-                        <div class="info-row">
-                            <div class="info-label">Student Name</div>
-                            <div class="info-value">{{ $student->full_name }}</div>
-                        </div>
-                        <div class="info-row">
-                            <div class="info-label">Admission No</div>
-                            <div class="info-value">{{ $student->admission_number }}</div>
-                        </div>
-                        <div class="info-row">
-                            <div class="info-label">Class / Section</div>
-                            <div class="info-value">{{ $student->schoolClass?->name }} {{ $student->section?->name ? '— ' . $student->section->name : '' }}</div>
-                        </div>
-                        <div class="info-row">
-                            <div class="info-label">Gender</div>
-                            <div class="info-value">{{ $student->gender ?? 'N/A' }}</div>
-                        </div>
-                        <div class="info-row">
-                            <div class="info-label">Date of Birth</div>
-                            <div class="info-value">{{ $student->date_of_birth ? \Carbon\Carbon::parse($student->date_of_birth)->format('d M, Y') : 'N/A' }}</div>
-                        </div>
-                    </div>
-                    @if($student->passport_photo)
-                        <div class="photo-cell">
-                            <img src="{{ public_path('uploads/' . str_replace('\\', '/', $student->passport_photo)) }}" alt="Photo" class="photo" />
-                        </div>
-                    @endif
-                </div>
+                
+                @php($siBorderColor = '#1e3a5f')
+                @php($siBgColor = '#f8fafc')
+                @php($siLabelColor = '#1e3a5f')
+                @php($siValueColor = '#1e293b')
+                @php($siDotColor = '#c4975a')
+                @include('pdf.partials.rc-student-info')
+
 
                 <div class="stats-bar">
                     <div class="stat">
@@ -525,12 +518,26 @@
                     Next Term Begins: {{ $nextTermDate ?? 'To be announced' }}
                 </div>
 
-                <div class="signatures">
+                
+                @php($rcBorderColor = '#1e3a5f')
+                @php($rcBgLight = '#f8fafc')
+                @php($rcTitleColor = '#1e3a5f')
+                @php($rcLabelColor = '#1e3a5f')
+                @include('pdf.partials.rc-psychomotor')
+                @include('pdf.partials.rc-school-fees')
+
+<div class="signatures">
                     <div class="sig">
+                        @if($showSignatures && ($signatureImages['teacher'] ?? null) && file_exists($signatureImages['teacher']))
+                            <img src="{{ $signatureImages['teacher'] }}" alt="Teacher Signature" style="max-height: 40px; max-width: 100px; object-fit: contain; margin-bottom: 4px;" />
+                        @endif
                         <div class="sig-line">Class Teacher</div>
                         <div class="sig-sub">Signature & Date</div>
                     </div>
                     <div class="sig">
+                        @if($showSignatures && ($signatureImages['principal'] ?? null) && file_exists($signatureImages['principal']))
+                            <img src="{{ $signatureImages['principal'] }}" alt="Principal Signature" style="max-height: 40px; max-width: 100px; object-fit: contain; margin-bottom: 4px;" />
+                        @endif
                         <div class="sig-line">Principal</div>
                         <div class="sig-sub">Signature & Stamp</div>
                     </div>

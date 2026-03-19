@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\SchoolClass;
 use App\Support\LicenseManager;
 use App\Support\CertificatePdf;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -144,17 +145,7 @@ class SettingsController extends Controller
         $settings['certificate_show_logo'] = (bool) $data['certificate_show_logo'];
         $settings['certificate_show_watermark'] = (bool) $data['certificate_show_watermark'];
 
-        $hasPremium = $request->user()?->licenseManager()?->can('cbt') ?? app(LicenseManager::class)->can('cbt');
-        $freeCert = ['modern', 'classic', 'elegant'];
-
-        if (!$hasPremium) {
-            if (!in_array($data['certificate_template'], $freeCert)) {
-                throw ValidationException::withMessages([
-                    'certificate_template' => 'This template requires a premium license. Upload a license key to unlock.',
-                ]);
-            }
-        }
-
+        // All templates are now free
         $settings['certificate_template'] = (string) $data['certificate_template'];
 
         if ($request->boolean('certificate_watermark_remove')) {
@@ -242,22 +233,38 @@ class SettingsController extends Controller
         return back()->with('status', 'Certificate settings saved.');
     }
 
+    public function showTemplates()
+    {
+        $classes = SchoolClass::query()->orderBy('level')->orderBy('name')->get();
+        return view('pages.settings.templates', compact('classes'));
+    }
+
     public function updateTemplates(Request $request, LicenseManager $license)
     {
         $data = $request->validate([
             'report_card_template' => ['required', 'string', 'in:' . implode(',', self::REPORT_CARD_TEMPLATES)],
+            // Toggle options
+            'rc_show_position' => ['nullable', 'boolean'],
+            'rc_show_attendance' => ['nullable', 'boolean'],
+            'rc_show_grading_key' => ['nullable', 'boolean'],
+            'rc_show_class_average' => ['nullable', 'boolean'],
+            'rc_show_watermark' => ['nullable', 'boolean'],
+            'rc_show_next_term_date' => ['nullable', 'boolean'],
+            'rc_show_teacher_remarks' => ['nullable', 'boolean'],
+            'rc_show_principal_remarks' => ['nullable', 'boolean'],
+            'rc_show_psychomotor' => ['nullable', 'boolean'],
+            'rc_show_school_fees' => ['nullable', 'boolean'],
+            'rc_school_fees_account_number' => ['nullable', 'string', 'max:50'],
+            'rc_school_fees_bank_name' => ['nullable', 'string', 'max:100'],
+            'rc_school_fees_account_name' => ['nullable', 'string', 'max:150'],
+            'rc_school_fees_by_class' => ['nullable', 'array'],
+            'rc_school_fees_by_class.*' => ['nullable', 'numeric', 'min:0'],
+            'rc_show_signatures' => ['nullable', 'boolean'],
+            'rc_principal_signature_image' => ['nullable', 'image', 'max:2048'],
+            'rc_teacher_signature_image' => ['nullable', 'image', 'max:2048'],
+            'rc_principal_signature_remove' => ['nullable', 'boolean'],
+            'rc_teacher_signature_remove' => ['nullable', 'boolean'],
         ]);
-
-        $hasPremium = $license->can('cbt');
-        $freeReport = ['standard'];
-
-        if (!$hasPremium) {
-            if (!in_array($data['report_card_template'], $freeReport)) {
-                throw ValidationException::withMessages([
-                    'report_card_template' => 'This template requires a premium license. Upload a license key to unlock.',
-                ]);
-            }
-        }
 
         $settingsPath = storage_path('app/myacademy/settings.json');
         File::ensureDirectoryExists(dirname($settingsPath));
@@ -270,12 +277,82 @@ class SettingsController extends Controller
             }
         }
 
+        // All templates are now free
         $settings['report_card_template'] = (string) $data['report_card_template'];
+
+        // Boolean toggles
+        $boolKeys = [
+            'rc_show_position', 'rc_show_attendance', 'rc_show_grading_key',
+            'rc_show_class_average', 'rc_show_watermark', 'rc_show_next_term_date',
+            'rc_show_teacher_remarks', 'rc_show_principal_remarks',
+            'rc_show_psychomotor', 'rc_show_school_fees', 'rc_show_signatures',
+        ];
+        foreach ($boolKeys as $key) {
+            $settings[$key] = $request->boolean($key);
+        }
+
+        // School fees details
+        $settings['rc_school_fees_account_number'] = $data['rc_school_fees_account_number'] ?? null;
+        $settings['rc_school_fees_bank_name'] = $data['rc_school_fees_bank_name'] ?? null;
+        $settings['rc_school_fees_account_name'] = $data['rc_school_fees_account_name'] ?? null;
+
+        // School fees per class (stored as JSON object)
+        if (isset($data['rc_school_fees_by_class']) && is_array($data['rc_school_fees_by_class'])) {
+            $fees = [];
+            foreach ($data['rc_school_fees_by_class'] as $classId => $amount) {
+                if ($amount !== null && $amount !== '') {
+                    $fees[(string) $classId] = (float) $amount;
+                }
+            }
+            $settings['rc_school_fees_by_class'] = !empty($fees) ? $fees : null;
+        }
+
+        // Principal signature image
+        if ($request->boolean('rc_principal_signature_remove')) {
+            $old = $settings['rc_principal_signature_image'] ?? null;
+            if ($old) {
+                Storage::disk('uploads')->delete((string) $old);
+            }
+            $settings['rc_principal_signature_image'] = null;
+        }
+        if ($request->hasFile('rc_principal_signature_image')) {
+            $file = $request->file('rc_principal_signature_image');
+            $ext = $file->getClientOriginalExtension() ?: 'png';
+            $filename = 'rc-principal-signature-' . now()->format('YmdHis') . '.' . $ext;
+            $path = $file->storeAs('school-assets', $filename, 'uploads');
+            $path = str_replace('\\', '/', (string) $path);
+            $old = $settings['rc_principal_signature_image'] ?? null;
+            if ($old && $old !== $path) {
+                Storage::disk('uploads')->delete((string) $old);
+            }
+            $settings['rc_principal_signature_image'] = $path;
+        }
+
+        // Teacher signature image
+        if ($request->boolean('rc_teacher_signature_remove')) {
+            $old = $settings['rc_teacher_signature_image'] ?? null;
+            if ($old) {
+                Storage::disk('uploads')->delete((string) $old);
+            }
+            $settings['rc_teacher_signature_image'] = null;
+        }
+        if ($request->hasFile('rc_teacher_signature_image')) {
+            $file = $request->file('rc_teacher_signature_image');
+            $ext = $file->getClientOriginalExtension() ?: 'png';
+            $filename = 'rc-teacher-signature-' . now()->format('YmdHis') . '.' . $ext;
+            $path = $file->storeAs('school-assets', $filename, 'uploads');
+            $path = str_replace('\\', '/', (string) $path);
+            $old = $settings['rc_teacher_signature_image'] ?? null;
+            if ($old && $old !== $path) {
+                Storage::disk('uploads')->delete((string) $old);
+            }
+            $settings['rc_teacher_signature_image'] = $path;
+        }
 
         File::put($settingsPath, json_encode($settings, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
         \Illuminate\Support\Facades\Cache::forget('myacademy_settings_cache');
 
-        return back()->with('status', 'Template selection saved.');
+        return back()->with('status', 'Report card settings saved.');
     }
 
     public function previewTemplate(string $type, string $template): \Illuminate\Http\Response
@@ -390,6 +467,21 @@ class SettingsController extends Controller
                 'teacherRemarks' => 'An excellent student with outstanding academic performance. Keep it up!',
                 'principalRemarks' => 'A commendable result. Continue to strive for excellence.',
                 'nextTermDate' => 'September 8, 2025',
+                'rcOptions' => [
+                    'show_position' => (bool) config('myacademy.rc_show_position', true),
+                    'show_attendance' => (bool) config('myacademy.rc_show_attendance', true),
+                    'show_grading_key' => (bool) config('myacademy.rc_show_grading_key', true),
+                    'show_class_average' => (bool) config('myacademy.rc_show_class_average', true),
+                    'show_watermark' => (bool) config('myacademy.rc_show_watermark', true),
+                    'show_next_term_date' => (bool) config('myacademy.rc_show_next_term_date', true),
+                    'show_teacher_remarks' => (bool) config('myacademy.rc_show_teacher_remarks', true),
+                    'show_principal_remarks' => (bool) config('myacademy.rc_show_principal_remarks', true),
+                    'show_psychomotor' => (bool) config('myacademy.rc_show_psychomotor', false),
+                    'show_school_fees' => (bool) config('myacademy.rc_show_school_fees', false),
+                    'show_signatures' => (bool) config('myacademy.rc_show_signatures', false),
+                ],
+                'schoolFees' => null,
+                'signatureImages' => null,
             ];
 
             if (request()->boolean('html')) {
@@ -407,21 +499,5 @@ class SettingsController extends Controller
         abort(404);
     }
 
-    public function updateLicense(Request $request, LicenseManager $licenses)
-    {
-        $request->validate([
-            'license' => ['required', 'file', 'max:64'],
-        ]);
-
-        $realPath = $request->file('license')->getRealPath();
-        $raw = $realPath ? (string) File::get($realPath) : '';
-
-        $state = $licenses->installRaw($raw);
-
-        if (!($state['ok'] ?? false)) {
-            return back()->withErrors(['license' => (string) ($state['reason'] ?? 'Invalid license.')]);
-        }
-
-        return back()->with('status', 'License installed. Premium features updated.');
-    }
+    // License functionality removed - all features are free
 }

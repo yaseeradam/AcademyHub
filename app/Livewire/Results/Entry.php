@@ -26,7 +26,7 @@ class Entry extends Component
 {
     public ?int $classId = null;
     public ?int $subjectId = null;
-    public int $term = 1;
+    public ?int $term = null;
     public string $session = '';
     public ?int $rejectingId = null;
     public string $rejectNote = '';
@@ -92,6 +92,8 @@ class Entry extends Component
 
         if ($defaultTerm >= 1 && $defaultTerm <= 3) {
             $this->term = $defaultTerm;
+        } else {
+            $this->term = $this->term ?: \App\Models\AcademicTerm::activeTermNumber();
         }
 
         if ($defaultSession !== '') {
@@ -235,16 +237,19 @@ class Entry extends Component
     public function updatedSubjectId(): void
     {
         $this->loadExistingScores();
+        unset($this->submission);
     }
 
     public function updatedTerm(): void
     {
         $this->loadExistingScores();
+        unset($this->submission, $this->isPublished);
     }
 
     public function updatedSession(): void
     {
         $this->loadExistingScores();
+        unset($this->submission, $this->isPublished);
     }
 
     public function updatedScores(mixed $value, ?string $name = null): void
@@ -601,6 +606,33 @@ class Entry extends Component
         $next = $year + 1;
 
         return "{$year}/{$next}";
+    }
+
+    public function downloadPrintableScoresheet()
+    {
+        if (!$this->classId || !$this->subjectId) {
+            $this->dispatch('alert', message: 'Please select both class and subject before printing.', type: 'warning');
+            return;
+        }
+
+        // Log for debugging
+        \Log::info('Scoresheet download requested', [
+            'class_id' => $this->classId,
+            'subject_id' => $this->subjectId,
+            'term' => $this->term,
+            'session' => $this->session,
+            'user' => auth()->user()?->name
+        ]);
+
+        $url = route('results.scoresheet.download', [
+            'class_id' => $this->classId,
+            'subject_id' => $this->subjectId,
+            'term' => $this->term,
+            'session' => $this->session,
+        ]);
+
+        // For debugging, let's dispatch a JavaScript redirect
+        $this->dispatch('redirect-to-url', url: $url);
     }
 
     public function render()

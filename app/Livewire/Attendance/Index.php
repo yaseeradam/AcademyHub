@@ -24,7 +24,7 @@ class Index extends Component
     public ?int $classId = null;
     public ?int $sectionId = null;
     public string $date = '';
-    public int $term = 1;
+    public ?int $term = null;
     public string $session = '';
 
     public ?int $sheetId = null;

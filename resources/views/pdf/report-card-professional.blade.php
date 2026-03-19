@@ -58,6 +58,20 @@
 </head>
 <body>
     @php $schoolName = config('myacademy.school_name', 'MyAcademy'); @endphp
+        @php
+    $opts = $rcOptions ?? [];
+    $showPosition = $opts['show_position'] ?? true;
+    $showAttendance = $opts['show_attendance'] ?? true;
+    $showGradingKey = $opts['show_grading_key'] ?? true;
+    $showClassAverage = $opts['show_class_average'] ?? true;
+    $showWatermark = $opts['show_watermark'] ?? true;
+    $showNextTermDate = $opts['show_next_term_date'] ?? true;
+    $showTeacherRemarks = $opts['show_teacher_remarks'] ?? true;
+    $showPrincipalRemarks = $opts['show_principal_remarks'] ?? true;
+    $showPsychomotor = $opts['show_psychomotor'] ?? false;
+    $showSchoolFees = $opts['show_school_fees'] ?? false;
+    $showSignatures = $opts['show_signatures'] ?? false;
+@endphp
     
     <div class="page">
         <div class="sidebar">
@@ -130,25 +144,19 @@
                     <div class="info-cell">{{ $student->gender ?? 'N/A' }}</div>
                     <div class="info-cell">Date of Birth</div>
                     <div class="info-cell">{{ $student->dob ? \Carbon\Carbon::parse($student->dob)->format('M d, Y') : 'N/A' }}</div>
-                </div>
-                <div class="info-row">
-                    <div class="info-cell">Age</div>
-                    <div class="info-cell">{{ $student->dob ? \Carbon\Carbon::parse($student->dob)->age . ' years' : 'N/A' }}</div>
                     <div class="info-cell">Students in Class</div>
                     <div class="info-cell">{{ $totalStudents ?? 'N/A' }}</div>
                 </div>
+                @if($showAttendance)
                 <div class="info-row">
                     <div class="info-cell">Times Opened</div>
                     <div class="info-cell">{{ $timesOpened ?? '—' }}</div>
                     <div class="info-cell">Times Present</div>
                     <div class="info-cell">{{ $timesPresent ?? '—' }}</div>
-                </div>
-                <div class="info-row">
                     <div class="info-cell">Times Absent</div>
                     <div class="info-cell">{{ $timesAbsent ?? '—' }}</div>
-                    <div class="info-cell"></div>
-                    <div class="info-cell"></div>
                 </div>
+                @endif
             </div>
             
             <table>
@@ -198,10 +206,16 @@
             
             <div class="sigs">
                 <div class="sig">
-                    <div class="sig-line">Class Teacher</div>
+                    @if($showSignatures && ($signatureImages['teacher'] ?? null) && file_exists($signatureImages['teacher']))
+                            <img src="{{ $signatureImages['teacher'] }}" alt="Teacher Signature" style="max-height: 40px; max-width: 100px; object-fit: contain; margin-bottom: 4px;" />
+                        @endif
+                        <div class="sig-line">Class Teacher</div>
                 </div>
                 <div class="sig">
-                    <div class="sig-line">Principal</div>
+                    @if($showSignatures && ($signatureImages['principal'] ?? null) && file_exists($signatureImages['principal']))
+                            <img src="{{ $signatureImages['principal'] }}" alt="Principal Signature" style="max-height: 40px; max-width: 100px; object-fit: contain; margin-bottom: 4px;" />
+                        @endif
+                        <div class="sig-line">Principal</div>
                 </div>
                 <div class="sig">
                     <div class="sig-line">Parent/Guardian</div>

@@ -26,11 +26,12 @@ use ZipArchive;
 class Broadsheet extends Component
 {
     public ?int $classId = null;
-    public int $term = 1;
+    public ?int $term = null;
     public string $session = '';
 
     public function mount(): void
     {
+        $this->term = $this->term ?: \App\Models\AcademicTerm::activeTermNumber();
         $this->session = $this->session ?: $this->defaultSession();
     }
 

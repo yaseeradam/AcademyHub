@@ -63,6 +63,20 @@
 </head>
 <body>
     @php $schoolName = config('myacademy.school_name', 'MyAcademy'); @endphp
+        @php
+    $opts = $rcOptions ?? [];
+    $showPosition = $opts['show_position'] ?? true;
+    $showAttendance = $opts['show_attendance'] ?? true;
+    $showGradingKey = $opts['show_grading_key'] ?? true;
+    $showClassAverage = $opts['show_class_average'] ?? true;
+    $showWatermark = $opts['show_watermark'] ?? true;
+    $showNextTermDate = $opts['show_next_term_date'] ?? true;
+    $showTeacherRemarks = $opts['show_teacher_remarks'] ?? true;
+    $showPrincipalRemarks = $opts['show_principal_remarks'] ?? true;
+    $showPsychomotor = $opts['show_psychomotor'] ?? false;
+    $showSchoolFees = $opts['show_school_fees'] ?? false;
+    $showSignatures = $opts['show_signatures'] ?? false;
+@endphp
     
     <div class="page" style="position: relative;">
         <div class="leaf-corner leaf-tl">🌿</div>
@@ -81,22 +95,14 @@
         </div>
         
         <div class="info-cards">
-            <div class="info-card">
-                <div class="info-inner">
-                    <div class="info-item">
-                        <div class="info-label">Student Name</div>
-                        <div class="info-value">{{ $student->full_name }}</div>
-                    </div>
-                    <div class="info-item">
-                        <div class="info-label">Admission Number</div>
-                        <div class="info-value">{{ $student->admission_number }}</div>
-                    </div>
-                    <div class="info-item">
-                        <div class="info-label">Class & Section</div>
-                        <div class="info-value">{{ $student->schoolClass?->name }} - {{ $student->section?->name ?? 'N/A' }}</div>
-                    </div>
-                </div>
-            </div>
+            
+                @php($siBorderColor = '#10b981')
+                @php($siBgColor = '#ecfdf5')
+                @php($siLabelColor = '#065f46')
+                @php($siValueColor = '#1f2937')
+                @php($siDotColor = '#6ee7b7')
+                @include('pdf.partials.rc-student-info')
+
             <div class="info-card">
                 <div class="info-inner">
                     <div class="info-item">
@@ -194,10 +200,16 @@
         
         <div class="sigs">
             <div class="sig">
-                <div class="sig-line">Class Teacher</div>
+                @if($showSignatures && ($signatureImages['teacher'] ?? null) && file_exists($signatureImages['teacher']))
+                            <img src="{{ $signatureImages['teacher'] }}" alt="Teacher Signature" style="max-height: 40px; max-width: 100px; object-fit: contain; margin-bottom: 4px;" />
+                        @endif
+                        <div class="sig-line">Class Teacher</div>
             </div>
             <div class="sig">
-                <div class="sig-line">Principal</div>
+                @if($showSignatures && ($signatureImages['principal'] ?? null) && file_exists($signatureImages['principal']))
+                            <img src="{{ $signatureImages['principal'] }}" alt="Principal Signature" style="max-height: 40px; max-width: 100px; object-fit: contain; margin-bottom: 4px;" />
+                        @endif
+                        <div class="sig-line">Principal</div>
             </div>
             <div class="sig">
                 <div class="sig-line">Parent/Guardian</div>

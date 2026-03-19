@@ -2,16 +2,44 @@
 
 @section('content')
     @php
-        $licenseManager = app(\App\Support\LicenseManager::class);
-        $hasPremium = $licenseManager->can('cbt');
+        $hasPremium = true;
 
         $certificateTemplate = old('certificate_template', config('myacademy.certificate_template', 'modern'));
         $reportCardTemplate = old('report_card_template', config('myacademy.report_card_template', 'standard'));
+
+        // Report card options
+        $rcShowPosition = old('rc_show_position', config('myacademy.rc_show_position', true));
+        $rcShowAttendance = old('rc_show_attendance', config('myacademy.rc_show_attendance', true));
+        $rcShowGradingKey = old('rc_show_grading_key', config('myacademy.rc_show_grading_key', true));
+        $rcShowClassAverage = old('rc_show_class_average', config('myacademy.rc_show_class_average', true));
+        $rcShowWatermark = old('rc_show_watermark', config('myacademy.rc_show_watermark', true));
+        $rcShowNextTermDate = old('rc_show_next_term_date', config('myacademy.rc_show_next_term_date', true));
+        $rcShowTeacherRemarks = old('rc_show_teacher_remarks', config('myacademy.rc_show_teacher_remarks', true));
+        $rcShowPrincipalRemarks = old('rc_show_principal_remarks', config('myacademy.rc_show_principal_remarks', true));
+        $rcShowPsychomotor = old('rc_show_psychomotor', config('myacademy.rc_show_psychomotor', false));
+        $rcShowSchoolFees = old('rc_show_school_fees', config('myacademy.rc_show_school_fees', false));
+        $rcSchoolFeesAccountNumber = old('rc_school_fees_account_number', config('myacademy.rc_school_fees_account_number'));
+        $rcSchoolFeesBankName = old('rc_school_fees_bank_name', config('myacademy.rc_school_fees_bank_name'));
+        $rcSchoolFeesAccountName = old('rc_school_fees_account_name', config('myacademy.rc_school_fees_account_name'));
+        $rcSchoolFeesByClass = config('myacademy.rc_school_fees_by_class', []);
+        if (is_string($rcSchoolFeesByClass)) {
+            $rcSchoolFeesByClass = json_decode($rcSchoolFeesByClass, true) ?? [];
+        }
+        $rcShowSignatures = old('rc_show_signatures', config('myacademy.rc_show_signatures', false));
+        $rcPrincipalSignatureImage = config('myacademy.rc_principal_signature_image');
+        $rcTeacherSignatureImage = config('myacademy.rc_teacher_signature_image');
     @endphp
 
     <div class="space-y-6"
-        x-data="{ open: false, src: null, title: '', selectedReportTemplate: '{{ $reportCardTemplate }}' }">
-        <x-page-header title="Templates" subtitle="Choose which Report Card template to use."
+        x-data="{
+            open: false,
+            src: null,
+            title: '',
+            selectedReportTemplate: '{{ $reportCardTemplate }}',
+            showSchoolFees: {{ $rcShowSchoolFees ? 'true' : 'false' }},
+            showSignatures: {{ $rcShowSignatures ? 'true' : 'false' }},
+        }">
+        <x-page-header title="Report Card Settings" subtitle="Choose template and customize what appears on the report card."
             accent="settings" />
 
         <div class="flex gap-2">
@@ -35,11 +63,10 @@
             </div>
         @endif
 
-        <form method="POST" action="{{ route('settings.update-templates') }}" class="space-y-6">
+        <form method="POST" action="{{ route('settings.update-templates') }}" enctype="multipart/form-data" class="space-y-6">
             @csrf
 
-
-
+            {{-- ═══════════════ TEMPLATE SELECTION ═══════════════ --}}
             <div class="rounded-3xl border border-gray-100 bg-gradient-to-br from-emerald-50 to-sky-50/60 p-6 shadow-lg">
                 <div class="mb-5 flex items-center gap-3">
                     <div
@@ -188,9 +215,265 @@
                 </div>
             </div>
 
+            {{-- ═══════════════ REPORT CARD OPTIONS ═══════════════ --}}
+            <div class="rounded-3xl border border-gray-100 bg-gradient-to-br from-violet-50 to-indigo-50/60 p-6 shadow-lg">
+                <div class="mb-5 flex items-center gap-3">
+                    <div
+                        class="icon-3d grid h-12 w-12 place-items-center rounded-xl bg-gradient-to-br from-violet-500 to-indigo-600 text-white shadow-lg shadow-violet-500/30">
+                        <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                            <path d="M9 11l3 3L22 4" />
+                            <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
+                        </svg>
+                    </div>
+                    <div>
+                        <div class="text-lg font-black text-gray-900">Report Card Display Options</div>
+                        <div class="text-sm font-semibold text-gray-600">Toggle which sections appear on the report card</div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                    {{-- Position --}}
+                    <label class="flex items-center gap-3 rounded-2xl border border-gray-200 bg-white/80 p-4 shadow-sm cursor-pointer hover:border-violet-300 transition">
+                        <input type="hidden" name="rc_show_position" value="0" />
+                        <input type="checkbox" name="rc_show_position" value="1" class="h-5 w-5 rounded-lg border-gray-300 text-violet-600 focus:ring-violet-500" @checked($rcShowPosition) />
+                        <div>
+                            <div class="text-sm font-bold text-gray-900">Student Position</div>
+                            <div class="text-xs text-gray-500">Show class position/ranking</div>
+                        </div>
+                    </label>
+
+                    {{-- Attendance --}}
+                    <label class="flex items-center gap-3 rounded-2xl border border-gray-200 bg-white/80 p-4 shadow-sm cursor-pointer hover:border-violet-300 transition">
+                        <input type="hidden" name="rc_show_attendance" value="0" />
+                        <input type="checkbox" name="rc_show_attendance" value="1" class="h-5 w-5 rounded-lg border-gray-300 text-violet-600 focus:ring-violet-500" @checked($rcShowAttendance) />
+                        <div>
+                            <div class="text-sm font-bold text-gray-900">Attendance Record</div>
+                            <div class="text-xs text-gray-500">Show times opened/present/absent</div>
+                        </div>
+                    </label>
+
+                    {{-- Grading Key --}}
+                    <label class="flex items-center gap-3 rounded-2xl border border-gray-200 bg-white/80 p-4 shadow-sm cursor-pointer hover:border-violet-300 transition">
+                        <input type="hidden" name="rc_show_grading_key" value="0" />
+                        <input type="checkbox" name="rc_show_grading_key" value="1" class="h-5 w-5 rounded-lg border-gray-300 text-violet-600 focus:ring-violet-500" @checked($rcShowGradingKey) />
+                        <div>
+                            <div class="text-sm font-bold text-gray-900">Grading Key</div>
+                            <div class="text-xs text-gray-500">Show A-F grading legend</div>
+                        </div>
+                    </label>
+
+                    {{-- Class Average --}}
+                    <label class="flex items-center gap-3 rounded-2xl border border-gray-200 bg-white/80 p-4 shadow-sm cursor-pointer hover:border-violet-300 transition">
+                        <input type="hidden" name="rc_show_class_average" value="0" />
+                        <input type="checkbox" name="rc_show_class_average" value="1" class="h-5 w-5 rounded-lg border-gray-300 text-violet-600 focus:ring-violet-500" @checked($rcShowClassAverage) />
+                        <div>
+                            <div class="text-sm font-bold text-gray-900">Class Average / Highest / Lowest</div>
+                            <div class="text-xs text-gray-500">Show class average, highest, and lowest scores</div>
+                        </div>
+                    </label>
+
+                    {{-- Watermark --}}
+                    <label class="flex items-center gap-3 rounded-2xl border border-gray-200 bg-white/80 p-4 shadow-sm cursor-pointer hover:border-violet-300 transition">
+                        <input type="hidden" name="rc_show_watermark" value="0" />
+                        <input type="checkbox" name="rc_show_watermark" value="1" class="h-5 w-5 rounded-lg border-gray-300 text-violet-600 focus:ring-violet-500" @checked($rcShowWatermark) />
+                        <div>
+                            <div class="text-sm font-bold text-gray-900">School Logo Watermark</div>
+                            <div class="text-xs text-gray-500">Faint logo watermark in background</div>
+                        </div>
+                    </label>
+
+                    {{-- Next Term Date --}}
+                    <label class="flex items-center gap-3 rounded-2xl border border-gray-200 bg-white/80 p-4 shadow-sm cursor-pointer hover:border-violet-300 transition">
+                        <input type="hidden" name="rc_show_next_term_date" value="0" />
+                        <input type="checkbox" name="rc_show_next_term_date" value="1" class="h-5 w-5 rounded-lg border-gray-300 text-violet-600 focus:ring-violet-500" @checked($rcShowNextTermDate) />
+                        <div>
+                            <div class="text-sm font-bold text-gray-900">Next Term Resumption Date</div>
+                            <div class="text-xs text-gray-500">Show when next term begins</div>
+                        </div>
+                    </label>
+
+                    {{-- Teacher Remarks --}}
+                    <label class="flex items-center gap-3 rounded-2xl border border-gray-200 bg-white/80 p-4 shadow-sm cursor-pointer hover:border-violet-300 transition">
+                        <input type="hidden" name="rc_show_teacher_remarks" value="0" />
+                        <input type="checkbox" name="rc_show_teacher_remarks" value="1" class="h-5 w-5 rounded-lg border-gray-300 text-violet-600 focus:ring-violet-500" @checked($rcShowTeacherRemarks) />
+                        <div>
+                            <div class="text-sm font-bold text-gray-900">Teacher's Remarks</div>
+                            <div class="text-xs text-gray-500">Show class teacher comment</div>
+                        </div>
+                    </label>
+
+                    {{-- Principal Remarks --}}
+                    <label class="flex items-center gap-3 rounded-2xl border border-gray-200 bg-white/80 p-4 shadow-sm cursor-pointer hover:border-violet-300 transition">
+                        <input type="hidden" name="rc_show_principal_remarks" value="0" />
+                        <input type="checkbox" name="rc_show_principal_remarks" value="1" class="h-5 w-5 rounded-lg border-gray-300 text-violet-600 focus:ring-violet-500" @checked($rcShowPrincipalRemarks) />
+                        <div>
+                            <div class="text-sm font-bold text-gray-900">Principal's Remarks</div>
+                            <div class="text-xs text-gray-500">Show principal/head teacher comment</div>
+                        </div>
+                    </label>
+
+                    {{-- Psychomotor Domain --}}
+                    <label class="flex items-center gap-3 rounded-2xl border border-gray-200 bg-white/80 p-4 shadow-sm cursor-pointer hover:border-violet-300 transition">
+                        <input type="hidden" name="rc_show_psychomotor" value="0" />
+                        <input type="checkbox" name="rc_show_psychomotor" value="1" class="h-5 w-5 rounded-lg border-gray-300 text-violet-600 focus:ring-violet-500" @checked($rcShowPsychomotor) />
+                        <div>
+                            <div class="text-sm font-bold text-gray-900">Psychomotor Domain</div>
+                            <div class="text-xs text-gray-500">Handwriting, sports, punctuality, neatness, etc.</div>
+                        </div>
+                    </label>
+                </div>
+            </div>
+
+            {{-- ═══════════════ SCHOOL FEES SECTION ═══════════════ --}}
+            <div class="rounded-3xl border border-gray-100 bg-gradient-to-br from-amber-50 to-orange-50/60 p-6 shadow-lg">
+                <div class="mb-5 flex items-center gap-3">
+                    <div
+                        class="icon-3d grid h-12 w-12 place-items-center rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 text-white shadow-lg shadow-amber-500/30">
+                        <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                            <line x1="12" y1="1" x2="12" y2="23" />
+                            <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+                        </svg>
+                    </div>
+                    <div>
+                        <div class="text-lg font-black text-gray-900">School Fees for Next Term</div>
+                        <div class="text-sm font-semibold text-gray-600">Show tuition fees and bank details on the report card</div>
+                    </div>
+                </div>
+
+                <label class="flex items-center gap-3 rounded-2xl border border-gray-200 bg-white/80 p-4 shadow-sm cursor-pointer hover:border-amber-300 transition mb-4">
+                    <input type="hidden" name="rc_show_school_fees" value="0" />
+                    <input type="checkbox" name="rc_show_school_fees" value="1"
+                        class="h-5 w-5 rounded-lg border-gray-300 text-amber-600 focus:ring-amber-500"
+                        x-model="showSchoolFees"
+                        @checked($rcShowSchoolFees) />
+                    <div>
+                        <div class="text-sm font-bold text-gray-900">Enable School Fees on Report Card</div>
+                        <div class="text-xs text-gray-500">When enabled, each class's tuition and account details will be printed</div>
+                    </div>
+                </label>
+
+                <div x-show="showSchoolFees" x-transition class="space-y-4">
+                    {{-- Bank Details --}}
+                    <div class="rounded-2xl border border-amber-200 bg-white/90 p-5 shadow-sm">
+                        <div class="text-sm font-bold text-gray-900 mb-3">Bank Account Details</div>
+                        <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                            <div>
+                                <label class="text-xs font-bold uppercase tracking-wider text-gray-600">Bank Name</label>
+                                <input name="rc_school_fees_bank_name"
+                                    class="mt-1 w-full rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-semibold text-gray-900 shadow-sm focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+                                    value="{{ $rcSchoolFeesBankName }}" placeholder="e.g. First Bank" />
+                            </div>
+                            <div>
+                                <label class="text-xs font-bold uppercase tracking-wider text-gray-600">Account Number</label>
+                                <input name="rc_school_fees_account_number"
+                                    class="mt-1 w-full rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-semibold text-gray-900 shadow-sm focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+                                    value="{{ $rcSchoolFeesAccountNumber }}" placeholder="e.g. 0123456789" />
+                            </div>
+                            <div>
+                                <label class="text-xs font-bold uppercase tracking-wider text-gray-600">Account Name</label>
+                                <input name="rc_school_fees_account_name"
+                                    class="mt-1 w-full rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-semibold text-gray-900 shadow-sm focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+                                    value="{{ $rcSchoolFeesAccountName }}" placeholder="e.g. School Name Ltd" />
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- Per-Class Fees --}}
+                    <div class="rounded-2xl border border-amber-200 bg-white/90 p-5 shadow-sm">
+                        <div class="text-sm font-bold text-gray-900 mb-1">Fees Per Class</div>
+                        <div class="text-xs text-gray-500 mb-4">Set the tuition amount for each class (leave empty to skip that class)</div>
+                        <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                            @foreach ($classes as $class)
+                                <div class="flex items-center gap-3 rounded-xl border border-gray-100 bg-gray-50/50 p-3">
+                                    <div class="min-w-0 flex-1">
+                                        <div class="text-xs font-bold text-gray-800">{{ $class->name }}</div>
+                                    </div>
+                                    <div class="flex items-center gap-1">
+                                        <span class="text-sm font-bold text-gray-500">{{ config('myacademy.currency_symbol', '₦') }}</span>
+                                        <input name="rc_school_fees_by_class[{{ $class->id }}]"
+                                            type="number" step="0.01" min="0"
+                                            class="w-28 rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+                                            value="{{ $rcSchoolFeesByClass[$class->id] ?? '' }}"
+                                            placeholder="0.00" />
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {{-- ═══════════════ SIGNATURES SECTION ═══════════════ --}}
+            <div class="rounded-3xl border border-gray-100 bg-gradient-to-br from-rose-50 to-pink-50/60 p-6 shadow-lg">
+                <div class="mb-5 flex items-center gap-3">
+                    <div
+                        class="icon-3d grid h-12 w-12 place-items-center rounded-xl bg-gradient-to-br from-rose-500 to-pink-600 text-white shadow-lg shadow-rose-500/30">
+                        <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                            <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z" />
+                        </svg>
+                    </div>
+                    <div>
+                        <div class="text-lg font-black text-gray-900">Signatures on Report Card</div>
+                        <div class="text-sm font-semibold text-gray-600">Upload actual signature images to print on report cards</div>
+                    </div>
+                </div>
+
+                <label class="flex items-center gap-3 rounded-2xl border border-gray-200 bg-white/80 p-4 shadow-sm cursor-pointer hover:border-rose-300 transition mb-4">
+                    <input type="hidden" name="rc_show_signatures" value="0" />
+                    <input type="checkbox" name="rc_show_signatures" value="1"
+                        class="h-5 w-5 rounded-lg border-gray-300 text-rose-600 focus:ring-rose-500"
+                        x-model="showSignatures"
+                        @checked($rcShowSignatures) />
+                    <div>
+                        <div class="text-sm font-bold text-gray-900">Enable Signature Images</div>
+                        <div class="text-xs text-gray-500">When enabled, uploaded signatures will appear above the signature lines</div>
+                    </div>
+                </label>
+
+                <div x-show="showSignatures" x-transition class="space-y-4">
+                    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                        {{-- Principal Signature --}}
+                        <div class="rounded-2xl border border-rose-200 bg-white/90 p-5 shadow-sm">
+                            <div class="text-sm font-bold text-gray-900 mb-3">Principal / Head Teacher Signature</div>
+                            @if($rcPrincipalSignatureImage)
+                                <div class="mb-3 flex items-center gap-3 rounded-xl border border-gray-200 bg-gray-50 p-3">
+                                    <img src="{{ asset('uploads/' . str_replace('\\', '/', $rcPrincipalSignatureImage)) }}"
+                                        alt="Principal Signature" class="h-12 object-contain" />
+                                    <label class="flex items-center gap-2 text-xs text-gray-600 cursor-pointer">
+                                        <input type="checkbox" name="rc_principal_signature_remove" value="1" class="rounded border-gray-300 text-red-500" />
+                                        Remove
+                                    </label>
+                                </div>
+                            @endif
+                            <input name="rc_principal_signature_image" type="file" accept="image/*"
+                                class="w-full rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-900 shadow-sm focus:ring-2 focus:ring-rose-500" />
+                            <div class="mt-1 text-xs text-gray-500">Upload a transparent PNG for best results (max 2MB)</div>
+                        </div>
+
+                        {{-- Teacher Signature --}}
+                        <div class="rounded-2xl border border-rose-200 bg-white/90 p-5 shadow-sm">
+                            <div class="text-sm font-bold text-gray-900 mb-3">Class Teacher Signature</div>
+                            @if($rcTeacherSignatureImage)
+                                <div class="mb-3 flex items-center gap-3 rounded-xl border border-gray-200 bg-gray-50 p-3">
+                                    <img src="{{ asset('uploads/' . str_replace('\\', '/', $rcTeacherSignatureImage)) }}"
+                                        alt="Teacher Signature" class="h-12 object-contain" />
+                                    <label class="flex items-center gap-2 text-xs text-gray-600 cursor-pointer">
+                                        <input type="checkbox" name="rc_teacher_signature_remove" value="1" class="rounded border-gray-300 text-red-500" />
+                                        Remove
+                                    </label>
+                                </div>
+                            @endif
+                            <input name="rc_teacher_signature_image" type="file" accept="image/*"
+                                class="w-full rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-900 shadow-sm focus:ring-2 focus:ring-rose-500" />
+                            <div class="mt-1 text-xs text-gray-500">Upload a transparent PNG for best results (max 2MB)</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <button type="submit"
                 class="w-full rounded-xl bg-slate-900 px-5 py-3 text-sm font-bold text-white shadow-lg hover:bg-slate-800 transition-all">
-                Save Template Selection
+                Save Report Card Settings
             </button>
         </form>
 

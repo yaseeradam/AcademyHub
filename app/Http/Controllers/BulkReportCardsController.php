@@ -91,6 +91,11 @@ class BulkReportCardsController extends Controller
                     'elegant' => 'pdf.report-card-elegant',
                     'modern' => 'pdf.report-card-modern',
                     'classic' => 'pdf.report-card-classic',
+                    'vibrant' => 'pdf.report-card-vibrant',
+                    'professional' => 'pdf.report-card-professional',
+                    'royal' => 'pdf.report-card-royal',
+                    'fresh' => 'pdf.report-card-fresh',
+                    'sunset' => 'pdf.report-card-sunset',
                     default => 'pdf.report-card',
                 };
 

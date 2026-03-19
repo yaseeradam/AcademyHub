@@ -221,6 +221,7 @@ class Index extends Component
         $this->assertConversationAccess($id, $user);
 
         $this->conversationId = $id;
+        unset($this->chatMessages);
         $this->markConversationRead($id);
     }
 
@@ -255,6 +256,7 @@ class Index extends Component
             $this->conversationId = (int) $existing;
             $this->markConversationRead($this->conversationId);
             $this->recipientId = null;
+            unset($this->chatMessages);
             return;
         }
 
@@ -267,6 +269,7 @@ class Index extends Component
         $this->conversationId = $conversation->id;
         $this->recipientId = null;
         $this->body = '';
+        unset($this->conversations, $this->chatMessages);
         $this->dispatch('alert', message: 'Conversation started.', type: 'success');
     }
 
@@ -353,6 +356,7 @@ class Index extends Component
 
         $this->body = '';
         $this->attachment = null;
+        unset($this->chatMessages, $this->conversations);
         $this->markConversationRead($this->conversationId);
     }
 

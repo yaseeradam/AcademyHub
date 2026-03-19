@@ -30,22 +30,13 @@
 <body
     class="h-full bg-gradient-to-br from-amber-50 via-white to-orange-50 text-slate-900 transition-colors duration-300">
     @php
-        /** @var \App\Support\LicenseManager $licenses */
-        $licenses = app(\App\Support\LicenseManager::class);
-        $licenseState = $licenses->load();
-        $licenseOk = (bool) ($licenseState['ok'] ?? false);
-        $licenseFeatures = $licenseOk ? ($licenseState['data']['features'] ?? []) : [];
-        if (!is_array($licenseFeatures)) {
-            $licenseFeatures = [];
-        }
-
-        $hasCbt = $licenseOk && in_array('cbt', $licenseFeatures, true);
-        $hasSavingsLoan = $licenseOk && in_array('savings_loan', $licenseFeatures, true);
+        $hasCbt = true;
+        $hasSavingsLoan = true;
 
         $appMode = (string) config('myacademy.mode', 'full');
-        $premiumEnforce = (bool) config('myacademy.premium_enforce', true);
-        $cbtLocked = $premiumEnforce && !$hasCbt;
-        $showSavingsLoan = $premiumEnforce ? $hasSavingsLoan : true;
+        $premiumEnforce = false;
+        $cbtLocked = false;
+        $showSavingsLoan = true;
     @endphp
 
     <div id="app" class="min-h-screen">

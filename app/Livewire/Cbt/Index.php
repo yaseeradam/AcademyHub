@@ -26,7 +26,7 @@ class Index extends Component
     public ?int $classId = null;
     public ?int $subjectId = null;
     public int $durationMinutes = 30;
-    public int $term = 1;
+    public ?int $term = null;
     public string $session = '';
 
     public ?int $teacherId = null;
@@ -36,6 +36,7 @@ class Index extends Component
 
     public function mount(): void
     {
+        $this->term = $this->term ?: \App\Models\AcademicTerm::activeTermNumber();
         $user = auth()->user();
         abort_unless($user && in_array($user->role, ['admin', 'teacher'], true), 403);
 
@@ -89,7 +90,7 @@ class Index extends Component
         $this->classId = null;
         $this->subjectId = null;
         $this->durationMinutes = 30;
-        $this->term = 1;
+        $this->term = \App\Models\AcademicTerm::activeTermNumber();
         $this->session = AcademicSession::activeName() ?: $this->defaultSession();
         $this->teacherId = null;
         $this->requestNote = '';
