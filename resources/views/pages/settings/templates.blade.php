@@ -18,6 +18,15 @@
         $rcShowPrincipalRemarks = old('rc_show_principal_remarks', config('myacademy.rc_show_principal_remarks', true));
         $rcShowPsychomotor = old('rc_show_psychomotor', config('myacademy.rc_show_psychomotor', false));
         $rcShowSchoolFees = old('rc_show_school_fees', config('myacademy.rc_show_school_fees', false));
+        
+        // Debug: Log current config values
+        \Log::info('Template view config values:', [
+            'rc_show_position' => config('myacademy.rc_show_position'),
+            'rc_show_attendance' => config('myacademy.rc_show_attendance'),
+            'rc_show_next_term_date' => config('myacademy.rc_show_next_term_date'),
+            'rc_show_teacher_remarks' => config('myacademy.rc_show_teacher_remarks'),
+            'rc_show_principal_remarks' => config('myacademy.rc_show_principal_remarks'),
+        ]);
         $rcSchoolFeesAccountNumber = old('rc_school_fees_account_number', config('myacademy.rc_school_fees_account_number'));
         $rcSchoolFeesBankName = old('rc_school_fees_bank_name', config('myacademy.rc_school_fees_bank_name'));
         $rcSchoolFeesAccountName = old('rc_school_fees_account_name', config('myacademy.rc_school_fees_account_name'));

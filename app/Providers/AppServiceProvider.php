@@ -98,6 +98,17 @@ class AppServiceProvider extends ServiceProvider
                 continue;
             }
 
+            // Handle boolean values explicitly
+            if (in_array($key, [
+                'certificate_show_logo', 'certificate_show_watermark',
+                'rc_show_position', 'rc_show_attendance', 'rc_show_grading_key',
+                'rc_show_class_average', 'rc_show_watermark', 'rc_show_next_term_date',
+                'rc_show_teacher_remarks', 'rc_show_principal_remarks',
+                'rc_show_psychomotor', 'rc_show_school_fees', 'rc_show_signatures'
+            ])) {
+                $value = (bool) $value;
+            }
+
             config(["myacademy.{$key}" => $value]);
         }
     }

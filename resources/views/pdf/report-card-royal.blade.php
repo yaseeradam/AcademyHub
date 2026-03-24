@@ -114,18 +114,22 @@
                     <div class="stat-value">{{ number_format($average, 1) }}%</div>
                 </div>
             </div>
+            @if($showPosition)
             <div class="stat-royal">
                 <div class="stat-box">
                     <div class="stat-label">Position</div>
                     <div class="stat-value">{{ $position }}</div>
                 </div>
             </div>
+            @endif
+            @if($showClassAverage)
             <div class="stat-royal">
                 <div class="stat-box">
                     <div class="stat-label">Class Avg</div>
                     <div class="stat-value">{{ number_format($classAverage, 1) }}%</div>
                 </div>
             </div>
+            @endif
             <div class="stat-royal">
                 <div class="stat-box">
                     <div class="stat-label">Highest</div>
@@ -167,26 +171,33 @@
             </tbody>
         </table>
         
+        @if($showGradingKey)
         <div class="grade-royal">
             <strong>A:</strong> 70-100 | <strong>B:</strong> 60-69 | <strong>C:</strong> 50-59 | <strong>D:</strong> 40-49 | <strong>F:</strong> 0-39
         </div>
+        @endif
         
+        @if($showPrincipalRemarks)
         <div class="remarks-royal">
             <div class="remarks-title">Principal's Remarks</div>
             <div class="remarks-text">{{ $principalRemarks ?? 'No remarks provided.' }}</div>
         </div>
+        @endif
         
+        @if($showNextTermDate)
         <div class="next-royal">♔ Next Term Begins: {{ $nextTermDate ?? 'To be announced' }} ♔</div>
+        @endif
         
+        @if($showSignatures)
         <div class="sigs">
             <div class="sig">
-                @if($showSignatures && ($signatureImages['teacher'] ?? null) && file_exists($signatureImages['teacher']))
+                @if(($signatureImages['teacher'] ?? null) && file_exists($signatureImages['teacher']))
                             <img src="{{ $signatureImages['teacher'] }}" alt="Teacher Signature" style="max-height: 40px; max-width: 100px; object-fit: contain; margin-bottom: 4px;" />
                         @endif
                         <div class="sig-line">Class Teacher</div>
             </div>
             <div class="sig">
-                @if($showSignatures && ($signatureImages['principal'] ?? null) && file_exists($signatureImages['principal']))
+                @if(($signatureImages['principal'] ?? null) && file_exists($signatureImages['principal']))
                             <img src="{{ $signatureImages['principal'] }}" alt="Principal Signature" style="max-height: 40px; max-width: 100px; object-fit: contain; margin-bottom: 4px;" />
                         @endif
                         <div class="sig-line">Principal</div>
@@ -195,6 +206,7 @@
                 <div class="sig-line">Parent/Guardian</div>
             </div>
         </div>
+        @endif
         
         <div class="ornament-bottom">❖ ❖ ❖</div>
         

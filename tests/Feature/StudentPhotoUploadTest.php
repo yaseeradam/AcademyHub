@@ -32,7 +32,7 @@ class StudentPhotoUploadTest extends TestCase
             ->test(StudentsForm::class, ['student' => $student])
             ->set('passport', UploadedFile::fake()->createWithContent('passport.png', $png))
             ->call('save')
-            ->assertRedirect();
+            ->assertDispatched('student-saved');
 
         $student->refresh();
         $this->assertNotEmpty($student->passport_photo);

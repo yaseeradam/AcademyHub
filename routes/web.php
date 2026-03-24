@@ -203,11 +203,45 @@ Route::middleware(['auth', 'active'])->group(function () {
         Route::get('/cbt/exams/{exam}/pdf', [CbtExportController::class, 'examPdf'])
             ->name('cbt.exams.pdf');
 
+        Route::get('/analytics', \App\Livewire\Analytics\Dashboard::class)
+            ->middleware('permission:analytics.view')
+            ->name('analytics.dashboard');
+        
+        Route::get('/analytics/export/performance', [\App\Http\Controllers\AnalyticsExportController::class, 'exportPerformanceData'])
+            ->middleware('permission:analytics.view')
+            ->name('analytics.export.performance');
+        
+        Route::get('/analytics/export/attendance', [\App\Http\Controllers\AnalyticsExportController::class, 'exportAttendanceData'])
+            ->middleware('permission:analytics.view')
+            ->name('analytics.export.attendance');
+        
+        Route::get('/analytics/export/financial', [\App\Http\Controllers\AnalyticsExportController::class, 'exportFinancialData'])
+            ->middleware('role:admin,bursar')
+            ->name('analytics.export.financial');
+        
+        Route::get('/analytics/export/cbt', [\App\Http\Controllers\AnalyticsExportController::class, 'exportCbtData'])
+            ->middleware('permission:analytics.view')
+            ->name('analytics.export.cbt');
+
         Route::get('/results/entry', ResultsEntry::class)->middleware('permission:results.entry,results.review')->name('results.entry');
-        Route::get('/results/scoresheet/download', [\App\Http\Controllers\ScoresheetController::class, 'download'])->middleware('permission:results.entry,results.review')->name('results.scoresheet.download');
-        Route::get('/results/scoresheet/test', function() {
-            return response()->json(['message' => 'Scoresheet route is working', 'timestamp' => now()]);
-        })->name('results.scoresheet.test');
+
+        
+        Route::get('/settings/debug', function() {
+            return response()->json([
+                'config_values' => [
+                    'rc_show_position' => config('myacademy.rc_show_position'),
+                    'rc_show_attendance' => config('myacademy.rc_show_attendance'),
+                    'rc_show_next_term_date' => config('myacademy.rc_show_next_term_date'),
+                    'rc_show_teacher_remarks' => config('myacademy.rc_show_teacher_remarks'),
+                    'rc_show_principal_remarks' => config('myacademy.rc_show_principal_remarks'),
+                ],
+                'cache_key_exists' => \Illuminate\Support\Facades\Cache::has('myacademy_settings_cache'),
+                'settings_file_exists' => file_exists(storage_path('app/myacademy/settings.json')),
+                'settings_file_content' => file_exists(storage_path('app/myacademy/settings.json')) 
+                    ? json_decode(file_get_contents(storage_path('app/myacademy/settings.json')), true) 
+                    : null,
+            ]);
+        })->name('settings.debug');
         Route::get('/results/broadsheet', ResultsBroadsheet::class)->middleware('permission:results.broadsheet')->name('results.broadsheet');
         Route::get('/results/submissions', ResultsSubmissions::class)->middleware('role:admin')->name('results.submissions');
         Route::get('/results/report-card/{student}', [ReportCardController::class, 'download'])->name('results.report-card');

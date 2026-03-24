@@ -434,6 +434,16 @@
                     <span class="sidebar-text">Attendance</span>
                 </a>
 
+                <a href="{{ route('analytics.dashboard') }}" wire:navigate
+                    class="{{ request()->routeIs('analytics.*') ? 'bg-amber-500 text-white shadow-md' : 'text-slate-700 hover:bg-amber-50' }} mb-0.5 group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-bold transition-all">
+                    <svg class="h-5 w-5 flex-shrink-0 {{ request()->routeIs('analytics.*') ? 'text-white' : 'text-indigo-600' }}"
+                        viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <path d="M3 3v18h18" />
+                        <path d="M18.7 8l-5.1 5.2-2.8-2.7L7 14.3" />
+                    </svg>
+                    <span class="sidebar-text">Analytics</span>
+                </a>
+
                 <a href="{{ route('messages') }}" wire:navigate
                     class="{{ request()->routeIs('messages') ? 'bg-amber-500 text-white shadow-md' : 'text-slate-700 hover:bg-amber-50' }} mb-0.5 group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-bold transition-all">
                     <svg class="h-5 w-5 flex-shrink-0 {{ request()->routeIs('messages') ? 'text-white' : 'text-purple-600' }}"

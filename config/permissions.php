@@ -62,5 +62,9 @@ return [
             'label' => 'Review data collection submissions',
             'roles' => ['admin'],
         ],
+        'analytics.view' => [
+            'label' => 'View Analytics Dashboard',
+            'roles' => ['admin', 'teacher'],
+        ],
     ],
 ];

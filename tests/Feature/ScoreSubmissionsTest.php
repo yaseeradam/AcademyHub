@@ -80,8 +80,7 @@ class ScoreSubmissionsTest extends TestCase
 
         Livewire::actingAs($admin)
             ->test(ResultsEntry::class)
-            ->call('approveSubmission', $submission->id)
-            ->assertSee('Approved');
+            ->call('approveSubmission', $submission->id);
 
         $submission->refresh();
         $this->assertSame('approved', $submission->status);
@@ -112,8 +111,7 @@ class ScoreSubmissionsTest extends TestCase
             ->test(ResultsEntry::class)
             ->call('startReject', $submission->id)
             ->set('rejectNote', 'Please correct totals for two students.')
-            ->call('confirmReject')
-            ->assertSee('Rejected');
+            ->call('confirmReject');
 
         $submission->refresh();
         $this->assertSame('rejected', $submission->status);

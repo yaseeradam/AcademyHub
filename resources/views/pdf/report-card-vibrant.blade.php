@@ -112,18 +112,22 @@
                     <div class="circle-value">{{ number_format($average, 1) }}%</div>
                 </div>
             </div>
+            @if($showPosition)
             <div class="circle-wrap">
                 <div class="circle blue">
                     <div class="circle-label">Position</div>
                     <div class="circle-value">{{ $position }}</div>
                 </div>
             </div>
+            @endif
+            @if($showClassAverage)
             <div class="circle-wrap">
                 <div class="circle green">
                     <div class="circle-label">Class Avg</div>
                     <div class="circle-value">{{ number_format($classAverage, 1) }}%</div>
                 </div>
             </div>
+            @endif
             <div class="circle-wrap">
                 <div class="circle orange">
                     <div class="circle-label">Highest</div>
@@ -165,31 +169,40 @@
             </tbody>
         </table>
         
+        @if($showGradingKey)
         <div class="grade-strip">
             <strong>A:</strong> 70-100 | <strong>B:</strong> 60-69 | <strong>C:</strong> 50-59 | <strong>D:</strong> 40-49 | <strong>F:</strong> 0-39
         </div>
+        @endif
         
+        @if($showTeacherRemarks)
         <div class="remarks-box">
             <div class="remarks-title">👨‍🏫 Class Teacher's Remarks</div>
             <div class="remarks-text">{{ $teacherRemarks ?? 'No remarks provided.' }}</div>
         </div>
+        @endif
         
+        @if($showPrincipalRemarks)
         <div class="remarks-box">
             <div class="remarks-title">👔 Principal's Remarks</div>
             <div class="remarks-text">{{ $principalRemarks ?? 'No remarks provided.' }}</div>
         </div>
+        @endif
         
+        @if($showNextTermDate)
         <div class="next-term">🗓️ Next Term Begins: {{ $nextTermDate ?? 'To be announced' }}</div>
+        @endif
         
+        @if($showSignatures)
         <div class="sigs">
             <div class="sig">
-                @if($showSignatures && ($signatureImages['teacher'] ?? null) && file_exists($signatureImages['teacher']))
+                @if(($signatureImages['teacher'] ?? null) && file_exists($signatureImages['teacher']))
                             <img src="{{ $signatureImages['teacher'] }}" alt="Teacher Signature" style="max-height: 40px; max-width: 100px; object-fit: contain; margin-bottom: 4px;" />
                         @endif
                         <div class="sig-line">Class Teacher</div>
             </div>
             <div class="sig">
-                @if($showSignatures && ($signatureImages['principal'] ?? null) && file_exists($signatureImages['principal']))
+                @if(($signatureImages['principal'] ?? null) && file_exists($signatureImages['principal']))
                             <img src="{{ $signatureImages['principal'] }}" alt="Principal Signature" style="max-height: 40px; max-width: 100px; object-fit: contain; margin-bottom: 4px;" />
                         @endif
                         <div class="sig-line">Principal</div>
@@ -198,6 +211,7 @@
                 <div class="sig-line">Parent/Guardian</div>
             </div>
         </div>
+        @endif
         
         <div class="footer">Generated {{ now()->format('M d, Y') }} • {{ $schoolName }} • MyAcademy SMS</div>
     </div>

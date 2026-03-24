@@ -123,6 +123,9 @@ class CbtExportController extends Controller
         $pdf = Pdf::loadView('pdf.cbt-exam', ['exam' => $exam]);
         $filename = 'exam-'.str_replace(' ', '-', strtolower($exam->title)).'.pdf';
 
-        return $pdf->download($filename);
+        return $pdf->download($filename)
+            ->header('Cache-Control', 'no-cache, no-store, must-revalidate')
+            ->header('Pragma', 'no-cache')
+            ->header('Expires', '0');
     }
 }

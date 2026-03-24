@@ -128,7 +128,7 @@
                         </td>
                         <td class="px-5 py-4 text-right">
                             <a
-                                href="{{ route('results.report-card', ['student' => $row['student'], 'term' => $term, 'session' => $session]) }}"
+                                href="{{ route('results.report-card', ['student' => $row['student'], 'term' => $term, 'session' => $session, '_t' => time()]) }}"
                                 class="text-sm font-semibold text-brand-600 hover:text-brand-700"
                             >
                                 Report Card

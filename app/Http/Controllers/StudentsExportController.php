@@ -96,7 +96,10 @@ class StudentsExportController extends Controller
                 'students' => $students,
                 'generatedAt' => now()->format('Y-m-d H:i:s'),
                 'showHeaders' => $includeHeaders,
-            ])->download($filename);
+            ])->download($filename)
+                ->header('Cache-Control', 'no-cache, no-store, must-revalidate')
+                ->header('Pragma', 'no-cache')
+                ->header('Expires', '0');
         }
 
         if ($format === 'excel') {

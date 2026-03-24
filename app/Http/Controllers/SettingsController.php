@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\SchoolClass;
-use App\Support\LicenseManager;
 use App\Support\CertificatePdf;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Carbon;
@@ -60,7 +59,15 @@ class SettingsController extends Controller
         }
 
         File::put($settingsPath, json_encode($settings, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+        
+        // Clear cache and force reload
         \Illuminate\Support\Facades\Cache::forget('myacademy_settings_cache');
+        \Illuminate\Support\Facades\Cache::flush(); // Clear all cache to be safe
+        
+        // Force config reload by clearing config cache
+        if (function_exists('opcache_reset')) {
+            opcache_reset();
+        }
 
         return back()->with('status', 'School settings saved.');
     }
@@ -96,7 +103,15 @@ class SettingsController extends Controller
         $settings['results_exam_max'] = (int) $data['results_exam_max'];
 
         File::put($settingsPath, json_encode($settings, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+        
+        // Clear cache and force reload
         \Illuminate\Support\Facades\Cache::forget('myacademy_settings_cache');
+        \Illuminate\Support\Facades\Cache::flush(); // Clear all cache to be safe
+        
+        // Force config reload by clearing config cache
+        if (function_exists('opcache_reset')) {
+            opcache_reset();
+        }
 
         return back()->with('status', 'Result scoring marks saved.');
     }
@@ -142,8 +157,8 @@ class SettingsController extends Controller
         $settings['certificate_orientation'] = $data['certificate_orientation'];
         $settings['certificate_border_color'] = $data['certificate_border_color'];
         $settings['certificate_accent_color'] = $data['certificate_accent_color'];
-        $settings['certificate_show_logo'] = (bool) $data['certificate_show_logo'];
-        $settings['certificate_show_watermark'] = (bool) $data['certificate_show_watermark'];
+        $settings['certificate_show_logo'] = $request->has('certificate_show_logo') && $request->input('certificate_show_logo') == '1';
+        $settings['certificate_show_watermark'] = $request->has('certificate_show_watermark') && $request->input('certificate_show_watermark') == '1';
 
         // All templates are now free
         $settings['certificate_template'] = (string) $data['certificate_template'];
@@ -228,7 +243,15 @@ class SettingsController extends Controller
         $settings['certificate_default_body'] = $data['certificate_default_body'] ?: null;
 
         File::put($settingsPath, json_encode($settings, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+        
+        // Clear cache and force reload
         \Illuminate\Support\Facades\Cache::forget('myacademy_settings_cache');
+        \Illuminate\Support\Facades\Cache::flush(); // Clear all cache to be safe
+        
+        // Force config reload by clearing config cache
+        if (function_exists('opcache_reset')) {
+            opcache_reset();
+        }
 
         return back()->with('status', 'Certificate settings saved.');
     }
@@ -239,120 +262,146 @@ class SettingsController extends Controller
         return view('pages.settings.templates', compact('classes'));
     }
 
-    public function updateTemplates(Request $request, LicenseManager $license)
+    public function updateTemplates(Request $request)
     {
-        $data = $request->validate([
-            'report_card_template' => ['required', 'string', 'in:' . implode(',', self::REPORT_CARD_TEMPLATES)],
-            // Toggle options
-            'rc_show_position' => ['nullable', 'boolean'],
-            'rc_show_attendance' => ['nullable', 'boolean'],
-            'rc_show_grading_key' => ['nullable', 'boolean'],
-            'rc_show_class_average' => ['nullable', 'boolean'],
-            'rc_show_watermark' => ['nullable', 'boolean'],
-            'rc_show_next_term_date' => ['nullable', 'boolean'],
-            'rc_show_teacher_remarks' => ['nullable', 'boolean'],
-            'rc_show_principal_remarks' => ['nullable', 'boolean'],
-            'rc_show_psychomotor' => ['nullable', 'boolean'],
-            'rc_show_school_fees' => ['nullable', 'boolean'],
-            'rc_school_fees_account_number' => ['nullable', 'string', 'max:50'],
-            'rc_school_fees_bank_name' => ['nullable', 'string', 'max:100'],
-            'rc_school_fees_account_name' => ['nullable', 'string', 'max:150'],
-            'rc_school_fees_by_class' => ['nullable', 'array'],
-            'rc_school_fees_by_class.*' => ['nullable', 'numeric', 'min:0'],
-            'rc_show_signatures' => ['nullable', 'boolean'],
-            'rc_principal_signature_image' => ['nullable', 'image', 'max:2048'],
-            'rc_teacher_signature_image' => ['nullable', 'image', 'max:2048'],
-            'rc_principal_signature_remove' => ['nullable', 'boolean'],
-            'rc_teacher_signature_remove' => ['nullable', 'boolean'],
-        ]);
+        try {
+            $data = $request->validate([
+                'report_card_template' => ['required', 'string', 'in:' . implode(',', self::REPORT_CARD_TEMPLATES)],
+                // Toggle options
+                'rc_show_position' => ['nullable', 'boolean'],
+                'rc_show_attendance' => ['nullable', 'boolean'],
+                'rc_show_grading_key' => ['nullable', 'boolean'],
+                'rc_show_class_average' => ['nullable', 'boolean'],
+                'rc_show_watermark' => ['nullable', 'boolean'],
+                'rc_show_next_term_date' => ['nullable', 'boolean'],
+                'rc_show_teacher_remarks' => ['nullable', 'boolean'],
+                'rc_show_principal_remarks' => ['nullable', 'boolean'],
+                'rc_show_psychomotor' => ['nullable', 'boolean'],
+                'rc_show_school_fees' => ['nullable', 'boolean'],
+                'rc_school_fees_account_number' => ['nullable', 'string', 'max:50'],
+                'rc_school_fees_bank_name' => ['nullable', 'string', 'max:100'],
+                'rc_school_fees_account_name' => ['nullable', 'string', 'max:150'],
+                'rc_school_fees_by_class' => ['nullable', 'array'],
+                'rc_school_fees_by_class.*' => ['nullable', 'numeric', 'min:0'],
+                'rc_show_signatures' => ['nullable', 'boolean'],
+                'rc_principal_signature_image' => ['nullable', 'image', 'max:2048'],
+                'rc_teacher_signature_image' => ['nullable', 'image', 'max:2048'],
+                'rc_principal_signature_remove' => ['nullable', 'boolean'],
+                'rc_teacher_signature_remove' => ['nullable', 'boolean'],
+            ]);
 
-        $settingsPath = storage_path('app/myacademy/settings.json');
-        File::ensureDirectoryExists(dirname($settingsPath));
+            $settingsPath = storage_path('app/myacademy/settings.json');
+            File::ensureDirectoryExists(dirname($settingsPath));
 
-        $settings = [];
-        if (File::exists($settingsPath)) {
-            $existing = json_decode(File::get($settingsPath), true);
-            if (is_array($existing)) {
-                $settings = $existing;
-            }
-        }
-
-        // All templates are now free
-        $settings['report_card_template'] = (string) $data['report_card_template'];
-
-        // Boolean toggles
-        $boolKeys = [
-            'rc_show_position', 'rc_show_attendance', 'rc_show_grading_key',
-            'rc_show_class_average', 'rc_show_watermark', 'rc_show_next_term_date',
-            'rc_show_teacher_remarks', 'rc_show_principal_remarks',
-            'rc_show_psychomotor', 'rc_show_school_fees', 'rc_show_signatures',
-        ];
-        foreach ($boolKeys as $key) {
-            $settings[$key] = $request->boolean($key);
-        }
-
-        // School fees details
-        $settings['rc_school_fees_account_number'] = $data['rc_school_fees_account_number'] ?? null;
-        $settings['rc_school_fees_bank_name'] = $data['rc_school_fees_bank_name'] ?? null;
-        $settings['rc_school_fees_account_name'] = $data['rc_school_fees_account_name'] ?? null;
-
-        // School fees per class (stored as JSON object)
-        if (isset($data['rc_school_fees_by_class']) && is_array($data['rc_school_fees_by_class'])) {
-            $fees = [];
-            foreach ($data['rc_school_fees_by_class'] as $classId => $amount) {
-                if ($amount !== null && $amount !== '') {
-                    $fees[(string) $classId] = (float) $amount;
+            $settings = [];
+            if (File::exists($settingsPath)) {
+                $existing = json_decode(File::get($settingsPath), true);
+                if (is_array($existing)) {
+                    $settings = $existing;
                 }
             }
-            $settings['rc_school_fees_by_class'] = !empty($fees) ? $fees : null;
-        }
 
-        // Principal signature image
-        if ($request->boolean('rc_principal_signature_remove')) {
-            $old = $settings['rc_principal_signature_image'] ?? null;
-            if ($old) {
-                Storage::disk('uploads')->delete((string) $old);
-            }
-            $settings['rc_principal_signature_image'] = null;
-        }
-        if ($request->hasFile('rc_principal_signature_image')) {
-            $file = $request->file('rc_principal_signature_image');
-            $ext = $file->getClientOriginalExtension() ?: 'png';
-            $filename = 'rc-principal-signature-' . now()->format('YmdHis') . '.' . $ext;
-            $path = $file->storeAs('school-assets', $filename, 'uploads');
-            $path = str_replace('\\', '/', (string) $path);
-            $old = $settings['rc_principal_signature_image'] ?? null;
-            if ($old && $old !== $path) {
-                Storage::disk('uploads')->delete((string) $old);
-            }
-            $settings['rc_principal_signature_image'] = $path;
-        }
+            // All templates are now free
+            $settings['report_card_template'] = (string) $data['report_card_template'];
 
-        // Teacher signature image
-        if ($request->boolean('rc_teacher_signature_remove')) {
-            $old = $settings['rc_teacher_signature_image'] ?? null;
-            if ($old) {
-                Storage::disk('uploads')->delete((string) $old);
+            // Boolean toggles - explicitly handle unchecked state
+            $boolKeys = [
+                'rc_show_position', 'rc_show_attendance', 'rc_show_grading_key',
+                'rc_show_class_average', 'rc_show_watermark', 'rc_show_next_term_date',
+                'rc_show_teacher_remarks', 'rc_show_principal_remarks',
+                'rc_show_psychomotor', 'rc_show_school_fees', 'rc_show_signatures',
+            ];
+            foreach ($boolKeys as $key) {
+                // Use has() to check if checkbox was submitted, then get the value
+                $settings[$key] = $request->has($key) && $request->input($key) == '1';
+                \Log::info("Setting {$key} to: " . ($settings[$key] ? 'true' : 'false') . " (has: " . ($request->has($key) ? 'yes' : 'no') . ", value: " . $request->input($key, 'null') . ")");
             }
-            $settings['rc_teacher_signature_image'] = null;
-        }
-        if ($request->hasFile('rc_teacher_signature_image')) {
-            $file = $request->file('rc_teacher_signature_image');
-            $ext = $file->getClientOriginalExtension() ?: 'png';
-            $filename = 'rc-teacher-signature-' . now()->format('YmdHis') . '.' . $ext;
-            $path = $file->storeAs('school-assets', $filename, 'uploads');
-            $path = str_replace('\\', '/', (string) $path);
-            $old = $settings['rc_teacher_signature_image'] ?? null;
-            if ($old && $old !== $path) {
-                Storage::disk('uploads')->delete((string) $old);
+
+            // School fees details
+            $settings['rc_school_fees_account_number'] = $data['rc_school_fees_account_number'] ?? null;
+            $settings['rc_school_fees_bank_name'] = $data['rc_school_fees_bank_name'] ?? null;
+            $settings['rc_school_fees_account_name'] = $data['rc_school_fees_account_name'] ?? null;
+
+            // School fees per class (stored as JSON object)
+            if (isset($data['rc_school_fees_by_class']) && is_array($data['rc_school_fees_by_class'])) {
+                $fees = [];
+                foreach ($data['rc_school_fees_by_class'] as $classId => $amount) {
+                    if ($amount !== null && $amount !== '') {
+                        $fees[(string) $classId] = (float) $amount;
+                    }
+                }
+                $settings['rc_school_fees_by_class'] = !empty($fees) ? $fees : null;
             }
-            $settings['rc_teacher_signature_image'] = $path;
+
+            // Principal signature image
+            if ($request->boolean('rc_principal_signature_remove')) {
+                $old = $settings['rc_principal_signature_image'] ?? null;
+                if ($old) {
+                    Storage::disk('uploads')->delete((string) $old);
+                }
+                $settings['rc_principal_signature_image'] = null;
+            }
+            if ($request->hasFile('rc_principal_signature_image')) {
+                $file = $request->file('rc_principal_signature_image');
+                $ext = $file->getClientOriginalExtension() ?: 'png';
+                $filename = 'rc-principal-signature-' . now()->format('YmdHis') . '.' . $ext;
+                $path = $file->storeAs('school-assets', $filename, 'uploads');
+                $path = str_replace('\\', '/', (string) $path);
+                $old = $settings['rc_principal_signature_image'] ?? null;
+                if ($old && $old !== $path) {
+                    Storage::disk('uploads')->delete((string) $old);
+                }
+                $settings['rc_principal_signature_image'] = $path;
+            }
+
+            // Teacher signature image
+            if ($request->boolean('rc_teacher_signature_remove')) {
+                $old = $settings['rc_teacher_signature_image'] ?? null;
+                if ($old) {
+                    Storage::disk('uploads')->delete((string) $old);
+                }
+                $settings['rc_teacher_signature_image'] = null;
+            }
+            if ($request->hasFile('rc_teacher_signature_image')) {
+                $file = $request->file('rc_teacher_signature_image');
+                $ext = $file->getClientOriginalExtension() ?: 'png';
+                $filename = 'rc-teacher-signature-' . now()->format('YmdHis') . '.' . $ext;
+                $path = $file->storeAs('school-assets', $filename, 'uploads');
+                $path = str_replace('\\', '/', (string) $path);
+                $old = $settings['rc_teacher_signature_image'] ?? null;
+                if ($old && $old !== $path) {
+                    Storage::disk('uploads')->delete((string) $old);
+                }
+                $settings['rc_teacher_signature_image'] = $path;
+            }
+
+            File::put($settingsPath, json_encode($settings, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+            
+            // Clear cache aggressively
+            \Illuminate\Support\Facades\Cache::forget('myacademy_settings_cache');
+            \Illuminate\Support\Facades\Cache::flush();
+            
+            // Clear config cache
+            \Illuminate\Support\Facades\Artisan::call('config:clear');
+            \Illuminate\Support\Facades\Artisan::call('cache:clear');
+            
+            // Force opcache reset
+            if (function_exists('opcache_reset')) {
+                opcache_reset();
+            }
+            
+            \Log::info('Settings saved and cache cleared', $settings);
+
+            return back()->with('status', 'Report card settings saved.');
+            
+        } catch (\Exception $e) {
+            \Log::error('Template settings update error: ' . $e->getMessage(), [
+                'request_data' => $request->all(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            
+            return back()->withErrors(['error' => 'Failed to save settings: ' . $e->getMessage()]);
         }
-
-        File::put($settingsPath, json_encode($settings, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
-        \Illuminate\Support\Facades\Cache::forget('myacademy_settings_cache');
-
-        return back()->with('status', 'Report card settings saved.');
     }
 
     public function previewTemplate(string $type, string $template): \Illuminate\Http\Response

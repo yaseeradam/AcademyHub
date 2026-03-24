@@ -608,32 +608,7 @@ class Entry extends Component
         return "{$year}/{$next}";
     }
 
-    public function downloadPrintableScoresheet()
-    {
-        if (!$this->classId || !$this->subjectId) {
-            $this->dispatch('alert', message: 'Please select both class and subject before printing.', type: 'warning');
-            return;
-        }
 
-        // Log for debugging
-        \Log::info('Scoresheet download requested', [
-            'class_id' => $this->classId,
-            'subject_id' => $this->subjectId,
-            'term' => $this->term,
-            'session' => $this->session,
-            'user' => auth()->user()?->name
-        ]);
-
-        $url = route('results.scoresheet.download', [
-            'class_id' => $this->classId,
-            'subject_id' => $this->subjectId,
-            'term' => $this->term,
-            'session' => $this->session,
-        ]);
-
-        // For debugging, let's dispatch a JavaScript redirect
-        $this->dispatch('redirect-to-url', url: $url);
-    }
 
     public function render()
     {

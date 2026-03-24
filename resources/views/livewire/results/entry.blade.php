@@ -11,9 +11,6 @@
                 <a href="{{ route('results.submissions') }}" class="btn-primary">Score Submissions</a>
             @endif
             <a href="{{ route('results.broadsheet') }}" class="btn-outline">Broadsheet</a>
-            @if($classId && $subjectId)
-                <button type="button" wire:click="downloadPrintableScoresheet" class="btn-outline">🖨️ Print Scoresheet</button>
-            @endif
         </x-slot:actions>
     </x-page-header>
 
@@ -270,13 +267,6 @@
                 });
             </script>
 
-            <script>
-                document.addEventListener('livewire:init', () => {
-                    Livewire.on('redirect-to-url', (event) => {
-                        console.log('Redirecting to:', event.url);
-                        window.open(event.url, '_blank');
-                    });
-                });
-            </script>
+
     @endif
 </div>

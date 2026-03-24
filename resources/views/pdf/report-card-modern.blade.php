@@ -431,7 +431,7 @@
     $showSignatures = $opts['show_signatures'] ?? false;
 @endphp
 
-    @if($logoExists)
+    @if($logoExists && $showWatermark)
         <div class="watermark">
             <img src="{{ $logoPath }}" alt="" style="width: 100%; height: 100%; object-fit: contain;" />
         </div>
@@ -499,18 +499,22 @@
                         <div class="stat-value">{{ number_format($average, 1) }}%</div>
                     </div>
                 </div>
+                @if($showPosition)
                 <div class="stat-card">
                     <div class="stat-inner">
                         <div class="stat-label">Position</div>
                         <div class="stat-value">{{ $position }}</div>
                     </div>
                 </div>
+                @endif
+                @if($showClassAverage)
                 <div class="stat-card">
                     <div class="stat-inner purple">
                         <div class="stat-label">Class Avg</div>
                         <div class="stat-value">{{ number_format($classAverage, 1) }}%</div>
                     </div>
                 </div>
+                @endif
             </div>
 
             <table>
@@ -542,6 +546,7 @@
                 </tbody>
             </table>
 
+            @if($showGradingKey)
             <div class="grading-bar">
                 <div class="gr-cell"><strong>A:</strong> 70-100</div>
                 <div class="gr-cell"><strong>B:</strong> 60-69</div>
@@ -549,7 +554,9 @@
                 <div class="gr-cell"><strong>D:</strong> 40-49</div>
                 <div class="gr-cell"><strong>F:</strong> 0-39</div>
             </div>
+            @endif
 
+            @if($showAttendance)
             <div class="att-bar">
                 <div class="att-cell">
                     <div class="att-inner">
@@ -570,20 +577,27 @@
                     </div>
                 </div>
             </div>
+            @endif
 
+            @if($showTeacherRemarks)
             <div class="remarks-card">
                 <div class="remarks-label">Class Teacher's Remarks</div>
                 <div class="remarks-text">{{ $teacherRemarks ?? 'No remarks provided.' }}</div>
             </div>
+            @endif
 
+            @if($showPrincipalRemarks)
             <div class="remarks-card">
                 <div class="remarks-label">Principal's Remarks</div>
                 <div class="remarks-text">{{ $principalRemarks ?? 'No remarks provided.' }}</div>
             </div>
+            @endif
 
+            @if($showNextTermDate)
             <div class="next-term-bar">
                 Next Term Begins: {{ $nextTermDate ?? 'To be announced' }}
             </div>
+            @endif
 
             
                 @php($rcBorderColor = '#06b6d4')
@@ -593,16 +607,17 @@
                 @include('pdf.partials.rc-psychomotor')
                 @include('pdf.partials.rc-school-fees')
 
+@if($showSignatures)
 <div class="signatures">
                 <div class="sig">
-                    @if($showSignatures && ($signatureImages['teacher'] ?? null) && file_exists($signatureImages['teacher']))
+                    @if(($signatureImages['teacher'] ?? null) && file_exists($signatureImages['teacher']))
                             <img src="{{ $signatureImages['teacher'] }}" alt="Teacher Signature" style="max-height: 40px; max-width: 100px; object-fit: contain; margin-bottom: 4px;" />
                         @endif
                         <div class="sig-line">Class Teacher</div>
                     <div class="sig-sub">Signature & Date</div>
                 </div>
                 <div class="sig">
-                    @if($showSignatures && ($signatureImages['principal'] ?? null) && file_exists($signatureImages['principal']))
+                    @if(($signatureImages['principal'] ?? null) && file_exists($signatureImages['principal']))
                             <img src="{{ $signatureImages['principal'] }}" alt="Principal Signature" style="max-height: 40px; max-width: 100px; object-fit: contain; margin-bottom: 4px;" />
                         @endif
                         <div class="sig-line">Principal</div>
@@ -613,6 +628,7 @@
                     <div class="sig-sub">Signature & Date</div>
                 </div>
             </div>
+@endif
 
             <div class="footer">
                 Generated on {{ now()->format('l, F j, Y \a\t g:i A') }} • {{ $schoolName }} • Powered by MyAcademy SMS
