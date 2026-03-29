@@ -312,9 +312,10 @@ class SettingsController extends Controller
                 'rc_show_psychomotor', 'rc_show_school_fees', 'rc_show_signatures',
             ];
             foreach ($boolKeys as $key) {
-                // Use has() to check if checkbox was submitted, then get the value
-                $settings[$key] = $request->has($key) && $request->input($key) == '1';
-                \Log::info("Setting {$key} to: " . ($settings[$key] ? 'true' : 'false') . " (has: " . ($request->has($key) ? 'yes' : 'no') . ", value: " . $request->input($key, 'null') . ")");
+                // A hidden input with value="0" is always submitted; the checkbox
+                // with value="1" is only submitted when checked. So has($key)==true
+                // always — we compare input($key) directly to '1'.
+                $settings[$key] = $request->input($key) === '1';
             }
 
             // School fees details
@@ -376,21 +377,9 @@ class SettingsController extends Controller
             }
 
             File::put($settingsPath, json_encode($settings, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
-            
-            // Clear cache aggressively
+
+            // Bust the settings cache key so the next request picks up the new JSON.
             \Illuminate\Support\Facades\Cache::forget('myacademy_settings_cache');
-            \Illuminate\Support\Facades\Cache::flush();
-            
-            // Clear config cache
-            \Illuminate\Support\Facades\Artisan::call('config:clear');
-            \Illuminate\Support\Facades\Artisan::call('cache:clear');
-            
-            // Force opcache reset
-            if (function_exists('opcache_reset')) {
-                opcache_reset();
-            }
-            
-            \Log::info('Settings saved and cache cleared', $settings);
 
             return back()->with('status', 'Report card settings saved.');
             
