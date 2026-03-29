@@ -39,6 +39,14 @@ class User extends Authenticatable
     ];
 
     /**
+     * Get the tenant that the user belongs to.
+     */
+    public function tenant()
+    {
+        return $this->belongsTo(Tenant::class);
+    }
+
+    /**
      * The attributes that should be cast.
      *
      * @var array<string, string>
@@ -115,5 +123,16 @@ class User extends Authenticatable
     public function isTeacher(): bool
     {
         return $this->role === 'teacher';
+    }
+
+    public function isParent(): bool
+    {
+        return $this->role === 'parent';
+    }
+
+    public function students()
+    {
+        return $this->belongsToMany(Student::class, 'parent_student', 'user_id', 'student_id')
+            ->withTimestamps();
     }
 }

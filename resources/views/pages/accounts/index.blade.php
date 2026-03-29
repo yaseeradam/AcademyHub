@@ -1,9 +1,17 @@
 @php
     use App\Models\Transaction;
+    use App\Support\ReportCardService;
+
+    // We can use the existing settings json logic to store opening balance
+    $settingsPath = storage_path('app/myacademy/settings.json');
+    $settings = file_exists($settingsPath) ? json_decode(file_get_contents($settingsPath), true) : [];
+    $openingBalance = (float) ($settings['bursar_opening_balance'] ?? 0);
 
     $incomeTotal = (float) Transaction::query()->where('type', 'Income')->where('is_void', false)->sum('amount_paid');
     $expenseTotal = (float) Transaction::query()->where('type', 'Expense')->where('is_void', false)->sum('amount_paid');
-    $net = $incomeTotal - $expenseTotal;
+    
+    // Net is calculated from opening balance + income - expenses
+    $net = $openingBalance + $incomeTotal - $expenseTotal;
 
     $recent = Transaction::query()
         ->with('student')
@@ -43,10 +51,10 @@
         </x-page-header>
 
         <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <x-stat-card label="Opening Balance" :value="config('myacademy.currency_symbol').' '.number_format($openingBalance, 2)" iconBg="bg-blue-50" iconColor="text-blue-600" />
             <x-stat-card label="Total Income" :value="config('myacademy.currency_symbol').' '.number_format($incomeTotal, 2)" iconBg="bg-green-50" iconColor="text-green-600" />
             <x-stat-card label="Total Expenses" :value="config('myacademy.currency_symbol').' '.number_format($expenseTotal, 2)" iconBg="bg-orange-50" iconColor="text-orange-600" />
-            <x-stat-card label="Net" :value="config('myacademy.currency_symbol').' '.number_format($net, 2)" iconBg="bg-indigo-50" iconColor="text-indigo-600" />
-            <x-stat-card label="Transactions" :value="number_format((int) Transaction::query()->count())" />
+            <x-stat-card label="Net Balance" :value="config('myacademy.currency_symbol').' '.number_format($net, 2)" iconBg="bg-indigo-50" iconColor="text-indigo-600" />
         </div>
 
         <div class="grid grid-cols-1 gap-4 lg:grid-cols-3">

@@ -249,7 +249,29 @@
                 </div>
 
                 <div class="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
-                    <div class="text-sm font-semibold text-gray-900">Guardian</div>
+                    <div class="text-sm font-semibold text-gray-900">Linked Parents</div>
+                    <div class="mt-2 text-xs text-gray-500">Select parent accounts to grant them portal access to this student.</div>
+
+                    <div class="mt-4">
+                        <select
+                            wire:model="parent_ids"
+                            multiple
+                            class="w-full rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-700 shadow-sm focus:border-brand-500 focus:ring-brand-500"
+                            style="min-height: 120px;"
+                        >
+                            @foreach ($this->availableParents as $parent)
+                                <option value="{{ $parent->id }}">{{ $parent->name }} ({{ $parent->email }})</option>
+                            @endforeach
+                        </select>
+                        <div class="mt-1 text-xs text-gray-500">Hold Ctrl/Cmd to select multiple.</div>
+                        @error('parent_ids')
+                            <div class="mt-2 text-sm text-orange-700">{{ $message }}</div>
+                        @enderror
+                    </div>
+                </div>
+
+                <div class="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
+                    <div class="text-sm font-semibold text-gray-900">Emergency & Guardian Info</div>
 
                     <div class="mt-5 space-y-4">
                         <div>

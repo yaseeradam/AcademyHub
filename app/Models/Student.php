@@ -56,6 +56,12 @@ class Student extends Model
         return $this->hasMany(Transaction::class);
     }
 
+    public function parents(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class, 'parent_student', 'student_id', 'user_id')
+            ->withTimestamps();
+    }
+
     public function getFullNameAttribute(): string
     {
         return trim("{$this->first_name} {$this->last_name}");

@@ -9,11 +9,52 @@
 <div class="space-y-6">
     <x-page-header title="Billing" subtitle="Record fees and expenses" accent="billing">
         <x-slot:actions>
-            @if ($canTransactions)
+            @if ($user?->role === 'bursar')
                 <a href="{{ route('accounts') }}" class="btn-outline">Accounts</a>
             @endif
         </x-slot:actions>
     </x-page-header>
+
+    {{-- Financial Overview Cards --}}
+    @if ($user?->role === 'admin' || $user?->role === 'bursar')
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+            <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 flex items-center justify-between">
+                <div>
+                    <p class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Total Income</p>
+                    <h3 class="text-2xl font-black text-emerald-600">
+                        {{ config('myacademy.currency_symbol', '₦') }}{{ number_format($this->totalIncome, 2) }}
+                    </h3>
+                </div>
+                <div class="h-12 w-12 rounded-full bg-emerald-50 text-emerald-500 flex items-center justify-center">
+                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 flex items-center justify-between">
+                <div>
+                    <p class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Total Expenses</p>
+                    <h3 class="text-2xl font-black text-rose-500">
+                        {{ config('myacademy.currency_symbol', '₦') }}{{ number_format($this->totalExpenses, 2) }}
+                    </h3>
+                </div>
+                <div class="h-12 w-12 rounded-full bg-rose-50 text-rose-500 flex items-center justify-center">
+                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"></path></svg>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 flex items-center justify-between">
+                <div>
+                    <p class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Net Balance</p>
+                    <h3 class="text-2xl font-black {{ $this->netBalance >= 0 ? 'text-slate-900' : 'text-rose-600' }}">
+                        {{ config('myacademy.currency_symbol', '₦') }}{{ number_format($this->netBalance, 2) }}
+                    </h3>
+                </div>
+                <div class="h-12 w-12 rounded-full bg-slate-50 text-slate-500 flex items-center justify-center">
+                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3"></path></svg>
+                </div>
+            </div>
+        </div>
+    @endif
 
     @if ($canTransactions)
         <div class="rounded-2xl bg-gradient-to-br from-emerald-50 to-emerald-100/50 p-6 shadow-sm ring-1 ring-emerald-200/50">

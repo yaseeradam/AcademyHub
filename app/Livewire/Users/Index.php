@@ -96,7 +96,7 @@ class Index extends Component
         $rules = [
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users', 'email')],
-            'role' => ['required', Rule::in(['admin', 'bursar', 'teacher'])],
+            'role' => ['required', Rule::in(['admin', 'bursar', 'teacher', 'parent'])],
             'isActive' => ['required', 'in:0,1'],
             'password' => ['nullable', 'string', 'min:8'],
         ];
@@ -206,7 +206,7 @@ class Index extends Component
         $user = User::query()->findOrFail($this->editingUserId);
 
         $rules = [
-            'editRole' => ['required', Rule::in(['admin', 'bursar', 'teacher'])],
+            'editRole' => ['required', Rule::in(['admin', 'bursar', 'teacher', 'parent'])],
             'editIsActive' => ['required', 'in:0,1'],
             'newPassword' => ['nullable', 'string', 'min:8'],
         ];
