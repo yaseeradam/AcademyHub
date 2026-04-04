@@ -21,6 +21,7 @@ class Index extends Component
     public string $tab = 'transactions';
 
     public ?int $studentId = null;
+    public ?int $selectedClassId = null;
     public string $type = 'Income';
     public string $category = 'Tuition';
     public ?int $term = null;
@@ -91,17 +92,36 @@ class Index extends Component
         $this->filterTo = now()->toDateString();
     }
 
+    public function updatedSelectedClassId(): void
+    {
+        $this->studentId = null; // Reset student selection when class changes
+        $this->filterStudentId = null; // Reset filter student selection
+        unset($this->students); // Clear cached students
+    }
+
+    public function updatedFilterStudentId(): void
+    {
+        unset($this->transactions);
+    }
+
+    public function updatedTab(): void
+    {
+        // Clear cached data when switching tabs for better performance
+        unset($this->transactions, $this->debtors, $this->feeStructures);
+        
+        // Reset selections when switching tabs to avoid confusion
+        if ($this->tab !== 'transactions') {
+            $this->selectedClassId = null;
+            $this->studentId = null;
+        }
+    }
+
     public function updatedFilterType(): void
     {
         unset($this->transactions);
     }
 
     public function updatedFilterCategory(): void
-    {
-        unset($this->transactions);
-    }
-
-    public function updatedFilterStudentId(): void
     {
         unset($this->transactions);
     }
@@ -169,17 +189,24 @@ class Index extends Component
     #[Computed]
     public function students()
     {
-        return Student::query()
+        $query = Student::query()
             ->with(['schoolClass', 'section'])
-            ->orderBy('last_name')
-            ->get();
+            ->where('status', 'Active')
+            ->orderBy('last_name');
+
+        // Filter by selected class if specified
+        if ($this->selectedClassId) {
+            $query->where('class_id', $this->selectedClassId);
+        }
+
+        return $query->get();
     }
 
     #[Computed]
     public function transactions()
     {
         $query = Transaction::query()
-            ->with('student')
+            ->with('student:id,first_name,last_name,admission_number') // Only load needed fields
             ->orderByDesc('date')
             ->orderByDesc('id');
 
@@ -198,6 +225,11 @@ class Index extends Component
 
         if ($this->filterStudentId) {
             $query->where('student_id', $this->filterStudentId);
+        } elseif ($this->selectedClassId) {
+            // Filter by class if no specific student selected
+            $query->whereHas('student', function($q) {
+                $q->where('class_id', $this->selectedClassId);
+            });
         }
 
         if ($this->filterSession) {
