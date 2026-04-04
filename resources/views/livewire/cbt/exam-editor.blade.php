@@ -74,95 +74,101 @@
         </div>
     @endif
 
-    <div x-show="tab === 'details'" class="rounded-2xl bg-white p-6 shadow-lg">
+    <div x-show="tab === 'details'" class="rounded-2xl bg-white p-6 shadow-lg border border-gray-200">
         @if ($canEdit)
-            <div class="grid gap-4 lg:grid-cols-2">
+            <div class="grid gap-6 lg:grid-cols-2">
                 <div class="lg:col-span-2">
-                    <label class="text-xs font-semibold uppercase text-gray-500">Title</label>
-                    <input wire:model="title" class="mt-1 input w-full" />
-                    @error('title') <div class="mt-1 text-xs text-orange-700">{{ $message }}</div> @enderror
+                    <label class="block text-sm font-bold text-gray-800 mb-2">Title</label>
+                    <input wire:model="title" class="w-full px-4 py-3 text-base border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 bg-white shadow-sm" />
+                    @error('title') <div class="mt-2 text-sm text-red-600 font-medium">{{ $message }}</div> @enderror
                 </div>
                 <div>
-                    <label class="text-xs font-semibold uppercase text-gray-500">Class</label>
-                    <select wire:model.live="classId" class="mt-1 select w-full">
-                        <option value="">Select</option>
+                    <label class="block text-sm font-bold text-gray-800 mb-2">Class</label>
+                    <select wire:model.live="classId" class="w-full px-4 py-3 text-base border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 bg-white shadow-sm">
+                        <option value="" class="text-gray-500">Select Class</option>
                         @foreach ($this->classes as $class)
-                            <option value="{{ $class->id }}">{{ $class->name }}</option>
+                            <option value="{{ $class->id }}" class="text-gray-900">{{ $class->name }}</option>
                         @endforeach
                     </select>
-                    @error('classId') <div class="mt-1 text-xs text-orange-700">{{ $message }}</div> @enderror
+                    @error('classId') <div class="mt-2 text-sm text-red-600 font-medium">{{ $message }}</div> @enderror
                 </div>
                 <div>
-                    <label class="text-xs font-semibold uppercase text-gray-500">Subject</label>
-                    <select wire:model.live="subjectId" @disabled(! $classId) class="mt-1 select w-full">
-                        <option value="">Select</option>
+                    <label class="block text-sm font-bold text-gray-800 mb-2">Subject</label>
+                    <select wire:model.live="subjectId" @disabled(! $classId) class="w-full px-4 py-3 text-base border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 bg-white shadow-sm disabled:bg-gray-100 disabled:text-gray-500">
+                        <option value="" class="text-gray-500">Select Subject</option>
                         @foreach ($this->subjects as $subject)
-                            <option value="{{ $subject->id }}">{{ $subject->name }}</option>
+                            <option value="{{ $subject->id }}" class="text-gray-900">{{ $subject->name }}</option>
                         @endforeach
                     </select>
-                    @error('subjectId') <div class="mt-1 text-xs text-orange-700">{{ $message }}</div> @enderror
+                    @error('subjectId') <div class="mt-2 text-sm text-red-600 font-medium">{{ $message }}</div> @enderror
                 </div>
                 <div>
-                    <label class="text-xs font-semibold uppercase text-gray-500">Duration (min)</label>
-                    <input wire:model="durationMinutes" type="number" min="1" class="mt-1 input w-full" />
-                    @error('durationMinutes') <div class="mt-1 text-xs text-orange-700">{{ $message }}</div> @enderror
+                    <label class="block text-sm font-bold text-gray-800 mb-2">Duration (minutes)</label>
+                    <input wire:model="durationMinutes" type="number" min="1" class="w-full px-4 py-3 text-base border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 bg-white shadow-sm" />
+                    @error('durationMinutes') <div class="mt-2 text-sm text-red-600 font-medium">{{ $message }}</div> @enderror
                 </div>
                 <div>
-                    <label class="text-xs font-semibold uppercase text-gray-500">Term</label>
-                    <select wire:model.live="term" class="mt-1 select w-full">
-                        <option value="1">1</option>
-                        <option value="2">2</option>
-                        <option value="3">3</option>
+                    <label class="block text-sm font-bold text-gray-800 mb-2">Term</label>
+                    <select wire:model.live="term" class="w-full px-4 py-3 text-base border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 bg-white shadow-sm">
+                        <option value="1" class="text-gray-900">Term 1</option>
+                        <option value="2" class="text-gray-900">Term 2</option>
+                        <option value="3" class="text-gray-900">Term 3</option>
                     </select>
                 </div>
                 <div class="lg:col-span-2">
-                    <label class="text-xs font-semibold uppercase text-gray-500">Session</label>
-                    <input wire:model="session" class="mt-1 input w-full" placeholder="2025/2026" />
-                    @error('session') <div class="mt-1 text-xs text-orange-700">{{ $message }}</div> @enderror
+                    <label class="block text-sm font-bold text-gray-800 mb-2">Session</label>
+                    <input wire:model="session" class="w-full px-4 py-3 text-base border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 bg-white shadow-sm" placeholder="2025/2026" />
+                    @error('session') <div class="mt-2 text-sm text-red-600 font-medium">{{ $message }}</div> @enderror
                 </div>
             </div>
 
             @if ($me?->role === 'admin')
-                <div class="mt-4 grid gap-4 lg:grid-cols-2">
-                    <div>
-                        <label class="text-xs font-semibold uppercase text-gray-500">Start Time</label>
-                        <input wire:model="startsAt" type="datetime-local" class="mt-1 input w-full" />
-                    </div>
-                    <div>
-                        <label class="text-xs font-semibold uppercase text-gray-500">End Time</label>
-                        <input wire:model="endsAt" type="datetime-local" class="mt-1 input w-full" />
-                    </div>
-                    <div>
-                        <label class="text-xs font-semibold uppercase text-gray-500">PIN</label>
-                        <input wire:model="pin" class="mt-1 input w-full font-mono" placeholder="1234" />
-                    </div>
-                    <div>
-                        <label class="text-xs font-semibold uppercase text-gray-500">Grace Minutes</label>
-                        <input wire:model="graceMinutes" type="number" min="0" class="mt-1 input w-full" />
-                    </div>
-                    <div class="lg:col-span-2">
-                        <label class="text-xs font-semibold uppercase text-gray-500">Allowed CIDRs</label>
-                        <textarea wire:model="allowedCidrs" rows="2" class="mt-1 w-full rounded-lg border px-3 py-2 text-sm" placeholder="192.168.99.0/24"></textarea>
-                    </div>
-                    <div class="lg:col-span-2">
-                        <label class="flex items-center gap-2">
-                            <input type="checkbox" wire:model="showScore" class="rounded" />
-                            <span class="text-xs font-semibold uppercase text-gray-500">Show Score After Submit</span>
-                        </label>
+                <div class="mt-8 pt-6 border-t border-gray-200">
+                    <h3 class="text-lg font-bold text-gray-800 mb-4">Advanced Settings</h3>
+                    <div class="grid gap-6 lg:grid-cols-2">
+                        <div>
+                            <label class="block text-sm font-bold text-gray-800 mb-2">Start Time</label>
+                            <input wire:model="startsAt" type="datetime-local" class="w-full px-4 py-3 text-base border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 bg-white shadow-sm" />
+                        </div>
+                        <div>
+                            <label class="block text-sm font-bold text-gray-800 mb-2">End Time</label>
+                            <input wire:model="endsAt" type="datetime-local" class="w-full px-4 py-3 text-base border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 bg-white shadow-sm" />
+                        </div>
+                        <div>
+                            <label class="block text-sm font-bold text-gray-800 mb-2">PIN</label>
+                            <input wire:model="pin" class="w-full px-4 py-3 text-base border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 bg-white shadow-sm font-mono" placeholder="1234" />
+                        </div>
+                        <div>
+                            <label class="block text-sm font-bold text-gray-800 mb-2">Grace Minutes</label>
+                            <input wire:model="graceMinutes" type="number" min="0" class="w-full px-4 py-3 text-base border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 bg-white shadow-sm" />
+                        </div>
+                        <div class="lg:col-span-2">
+                            <label class="block text-sm font-bold text-gray-800 mb-2">Allowed CIDRs</label>
+                            <textarea wire:model="allowedCidrs" rows="3" class="w-full px-4 py-3 text-base border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 bg-white shadow-sm" placeholder="192.168.99.0/24"></textarea>
+                        </div>
+                        <div class="lg:col-span-2">
+                            <label class="flex items-center gap-3 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                                <input type="checkbox" wire:model="showScore" class="w-5 h-5 text-blue-600 border-2 border-gray-300 rounded focus:ring-blue-500" />
+                                <span class="text-sm font-bold text-gray-800">Show Score After Submit</span>
+                            </label>
+                        </div>
                     </div>
                 </div>
             @endif
 
-            <div class="mt-4">
-                <label class="text-xs font-semibold uppercase text-gray-500">Description</label>
-                <textarea wire:model="description" rows="2" class="mt-1 w-full rounded-lg border px-3 py-2 text-sm"></textarea>
+            <div class="mt-6">
+                <label class="block text-sm font-bold text-gray-800 mb-2">Description</label>
+                <textarea wire:model="description" rows="4" class="w-full px-4 py-3 text-base border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 bg-white shadow-sm"></textarea>
             </div>
         @else
-            <div class="grid gap-3 text-sm">
-                <div><span class="font-semibold">Class:</span> {{ $exam->schoolClass?->name ?? '-' }}</div>
-                <div><span class="font-semibold">Subject:</span> {{ $exam->subject?->name ?? '-' }}</div>
-                <div><span class="font-semibold">Duration:</span> {{ (int) $exam->duration_minutes }} min</div>
-                <div><span class="font-semibold">Term:</span> {{ $exam->term }} | <span class="font-semibold">Session:</span> {{ $exam->session }}</div>
+            <div class="bg-gray-50 rounded-lg p-6 border border-gray-200">
+                <div class="grid gap-4 text-base">
+                    <div class="flex"><span class="font-bold text-gray-800 w-24">Class:</span> <span class="text-gray-900">{{ $exam->schoolClass?->name ?? '-' }}</span></div>
+                    <div class="flex"><span class="font-bold text-gray-800 w-24">Subject:</span> <span class="text-gray-900">{{ $exam->subject?->name ?? '-' }}</span></div>
+                    <div class="flex"><span class="font-bold text-gray-800 w-24">Duration:</span> <span class="text-gray-900">{{ (int) $exam->duration_minutes }} minutes</span></div>
+                    <div class="flex"><span class="font-bold text-gray-800 w-24">Term:</span> <span class="text-gray-900">{{ $exam->term }}</span></div>
+                    <div class="flex"><span class="font-bold text-gray-800 w-24">Session:</span> <span class="text-gray-900">{{ $exam->session }}</span></div>
+                </div>
             </div>
         @endif
     </div>
@@ -178,82 +184,100 @@
         </div>
     @endif
 
-    <div x-show="tab === 'questions'" class="rounded-2xl bg-white p-6 shadow-lg">
+    <div x-show="tab === 'questions'" class="rounded-2xl bg-white p-6 shadow-lg border border-gray-200">
         @if ($canEdit)
-            <div class="rounded-lg border-2 border-dashed border-violet-200 bg-violet-50 p-4">
-                <div class="text-sm font-semibold text-gray-900">{{ $editingQuestionId ? 'Edit' : 'Add' }} Question</div>
-                <textarea wire:model="questionPrompt" rows="2" class="mt-2 w-full rounded-lg border px-3 py-2 text-sm" placeholder="Question..."></textarea>
-                @error('questionPrompt') <div class="mt-1 text-xs text-orange-700">{{ $message }}</div> @enderror
+            <div class="rounded-lg border-2 border-dashed border-violet-300 bg-violet-50 p-6">
+                <div class="text-lg font-bold text-gray-900 mb-4">{{ $editingQuestionId ? 'Edit' : 'Add' }} Question</div>
+                <textarea wire:model="questionPrompt" rows="3" class="w-full px-4 py-3 text-base border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 bg-white shadow-sm" placeholder="Enter your question here..."></textarea>
+                @error('questionPrompt') <div class="mt-2 text-sm text-red-600 font-medium">{{ $message }}</div> @enderror
                 
-                <div class="mt-3 grid gap-3 lg:grid-cols-[200px,1fr]">
+                <div class="mt-6 grid gap-6 lg:grid-cols-[200px,1fr]">
                     <div>
-                        <label class="text-xs font-semibold uppercase text-gray-500">Type</label>
-                        <select wire:model="questionType" class="mt-1 select w-full">
-                            <option value="mcq">MCQ</option>
-                            <option value="theory">Theory</option>
+                        <label class="block text-sm font-bold text-gray-800 mb-2">Question Type</label>
+                        <select wire:model="questionType" class="w-full px-4 py-3 text-base border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 bg-white shadow-sm">
+                            <option value="mcq" class="text-gray-900">Multiple Choice (MCQ)</option>
+                            <option value="theory" class="text-gray-900">Theory/Essay</option>
                         </select>
                     </div>
 
                     @if ($questionType === 'mcq')
-                        <div class="grid gap-2 lg:grid-cols-4">
-                            @for ($i = 0; $i < 4; $i++)
-                                <div>
-                                    <div class="flex items-center gap-2">
-                                        <input type="radio" wire:model="correctIndex" value="{{ $i }}" id="opt{{ $i }}" />
-                                        <label for="opt{{ $i }}" class="text-xs font-semibold text-gray-500">{{ chr(65 + $i) }}</label>
+                        <div>
+                            <label class="block text-sm font-bold text-gray-800 mb-2">Answer Options</label>
+                            <div class="grid gap-3 lg:grid-cols-2">
+                                @for ($i = 0; $i < 4; $i++)
+                                    <div class="p-3 bg-white border-2 border-gray-200 rounded-lg">
+                                        <div class="flex items-center gap-3 mb-2">
+                                            <input type="radio" wire:model="correctIndex" value="{{ $i }}" id="opt{{ $i }}" class="w-4 h-4 text-green-600 border-2 border-gray-300 focus:ring-green-500" />
+                                            <label for="opt{{ $i }}" class="text-sm font-bold text-gray-800">Option {{ chr(65 + $i) }} {{ $correctIndex == $i ? '(Correct Answer)' : '' }}</label>
+                                        </div>
+                                        <input wire:model="optionLabels.{{ $i }}" class="w-full px-3 py-2 text-base border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 bg-white" placeholder="Enter option {{ chr(65 + $i) }}" />
                                     </div>
-                                    <input wire:model="optionLabels.{{ $i }}" class="mt-1 input w-full text-sm" placeholder="Option {{ chr(65 + $i) }}" />
-                                </div>
-                            @endfor
+                                @endfor
+                            </div>
                         </div>
                     @else
-                        <div class="rounded-lg border border-dashed border-violet-200 bg-white px-3 py-2 text-xs text-gray-500">
-                            Theory questions accept written answers from students and are not auto-graded.
+                        <div class="p-4 rounded-lg border-2 border-dashed border-blue-300 bg-blue-50">
+                            <div class="text-sm font-bold text-blue-800 mb-2">Theory Question</div>
+                            <div class="text-sm text-blue-700">
+                                Theory questions allow students to write detailed answers. These questions require manual marking by teachers.
+                            </div>
                         </div>
                     @endif
                 </div>
                 
-                <div class="mt-3 flex items-center gap-2">
-                    <input wire:model="questionMarks" type="number" min="1" class="input w-20 text-sm" placeholder="Marks" />
-                    <button wire:click="saveQuestion" class="btn-primary">{{ $editingQuestionId ? 'Update' : 'Add' }}</button>
-                    @if ($editingQuestionId)
-                        <button wire:click="startNewQuestion" class="btn-outline">Cancel</button>
-                    @endif
+                <div class="mt-6 flex items-center gap-4">
+                    <div>
+                        <label class="block text-sm font-bold text-gray-800 mb-2">Marks</label>
+                        <input wire:model="questionMarks" type="number" min="1" class="w-24 px-3 py-2 text-base border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 bg-white" placeholder="10" />
+                    </div>
+                    <div class="flex gap-3 mt-6">
+                        <button wire:click="saveQuestion" class="px-6 py-3 bg-green-600 text-white font-bold rounded-lg hover:bg-green-700 shadow-md">{{ $editingQuestionId ? 'Update Question' : 'Add Question' }}</button>
+                        @if ($editingQuestionId)
+                            <button wire:click="startNewQuestion" class="px-6 py-3 bg-gray-500 text-white font-bold rounded-lg hover:bg-gray-600 shadow-md">Cancel</button>
+                        @endif
+                    </div>
                 </div>
             </div>
         @endif
 
-        <div class="mt-4 space-y-2">
+        <div class="mt-6 space-y-4">
             @forelse ($exam->questions as $q)
-                <div class="rounded-lg border bg-gray-50 p-3">
+                <div class="rounded-lg border-2 border-gray-300 bg-gray-50 p-4 shadow-sm">
                     <div class="flex items-start justify-between">
                         <div class="flex-1">
-                            <div class="text-sm font-semibold text-gray-900">Q{{ $loop->iteration }}. {{ $q->prompt }}</div>
-                            <div class="mt-2">
+                            <div class="text-base font-bold text-gray-900 mb-3">Q{{ $loop->iteration }}. {{ $q->prompt }}</div>
+                            <div class="mt-3">
                                 @if ($q->type === 'theory')
-                                    <span class="rounded bg-slate-200 px-2 py-1 text-xs font-semibold text-slate-700">Theory</span>
+                                    <span class="inline-block rounded-lg bg-blue-200 px-3 py-2 text-sm font-bold text-blue-800">Theory Question</span>
                                 @else
-                                    <div class="grid gap-1 text-xs lg:grid-cols-4">
+                                    <div class="grid gap-2 lg:grid-cols-2">
                                         @foreach ($q->options as $opt)
-                                            <div class="rounded bg-white px-2 py-1 {{ $opt->is_correct ? 'ring-2 ring-emerald-500' : '' }}">
-                                                <span class="font-semibold">{{ chr(65 + $loop->index) }}.</span> {{ $opt->label }}
+                                            <div class="rounded-lg bg-white px-3 py-2 border-2 {{ $opt->is_correct ? 'border-green-500 bg-green-50' : 'border-gray-200' }}">
+                                                <span class="font-bold text-gray-800">{{ chr(65 + $loop->index) }}.</span> 
+                                                <span class="text-gray-900">{{ $opt->label }}</span>
+                                                @if ($opt->is_correct)
+                                                    <span class="ml-2 text-green-600 font-bold">✓ Correct</span>
+                                                @endif
                                             </div>
                                         @endforeach
                                     </div>
                                 @endif
                             </div>
-                            <div class="mt-1 text-xs text-gray-500">Marks: {{ (int) $q->marks }}</div>
+                            <div class="mt-3 text-sm font-bold text-gray-700">Marks: {{ (int) $q->marks }}</div>
                         </div>
                         @if ($canEdit)
-                            <div class="flex gap-1">
-                                <button wire:click="editQuestion({{ $q->id }})" class="rounded bg-gray-200 px-2 py-1 text-xs font-semibold hover:bg-gray-300">Edit</button>
-                                <button wire:click="deleteQuestion({{ $q->id }})" class="rounded bg-rose-600 px-2 py-1 text-xs font-semibold text-white hover:bg-rose-700">Del</button>
+                            <div class="flex gap-2 ml-4">
+                                <button wire:click="editQuestion({{ $q->id }})" class="px-4 py-2 bg-blue-500 text-white font-bold rounded-lg hover:bg-blue-600 text-sm">Edit</button>
+                                <button wire:click="deleteQuestion({{ $q->id }})" class="px-4 py-2 bg-red-600 text-white font-bold rounded-lg hover:bg-red-700 text-sm">Delete</button>
                             </div>
                         @endif
                     </div>
                 </div>
             @empty
-                <div class="rounded-lg border-2 border-dashed bg-gray-50 p-6 text-center text-sm text-gray-600">No questions yet</div>
+                <div class="rounded-lg border-2 border-dashed border-gray-300 bg-gray-50 p-8 text-center">
+                    <div class="text-base font-medium text-gray-600">No questions added yet</div>
+                    <div class="text-sm text-gray-500 mt-1">Click "Add Question" above to create your first question</div>
+                </div>
             @endforelse
         </div>
     </div>
