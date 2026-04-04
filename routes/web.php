@@ -107,6 +107,9 @@ Route::middleware(['auth', 'active'])->group(function () {
         if ($user?->role === 'teacher') {
             return view('pages.dashboard-teacher');
         }
+        if ($user?->role === 'bursar') {
+            return view('pages.dashboard-bursar');
+        }
 
         return view('pages.dashboard');
     })->name('dashboard');
