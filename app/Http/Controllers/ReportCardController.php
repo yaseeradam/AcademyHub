@@ -17,15 +17,20 @@ class ReportCardController extends Controller
     public function download(Request $request, Student $student): Response
     {
         $user = $request->user();
-        abort_unless($user && $user->hasPermission('results.broadsheet'), 403);
 
-        if ($user->role === 'teacher') {
-            $allowed = SubjectAllocation::query()
-                ->where('teacher_id', $user->id)
-                ->where('class_id', $student->class_id)
-                ->exists();
+        if ($user->role === 'parent') {
+            abort_unless($user->students()->where('students.id', $student->id)->exists(), 403);
+        } else {
+            abort_unless($user && $user->hasPermission('results.broadsheet'), 403);
 
-            abort_unless($allowed, 403);
+            if ($user->role === 'teacher') {
+                $allowed = SubjectAllocation::query()
+                    ->where('teacher_id', $user->id)
+                    ->where('class_id', $student->class_id)
+                    ->exists();
+
+                abort_unless($allowed, 403);
+            }
         }
 
         $term = (int) $request->query('term', 1);
@@ -34,7 +39,7 @@ class ReportCardController extends Controller
         abort_unless($term >= 1 && $term <= 3, 422);
         abort_unless(preg_match('/^\d{4}\/\d{4}$/', $session) === 1, 422);
 
-        if ($user->role === 'teacher') {
+        if ($user->role === 'teacher' || $user->role === 'parent') {
             $published = ResultPublication::query()
                 ->where('class_id', $student->class_id)
                 ->where('term', $term)

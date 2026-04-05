@@ -20,6 +20,7 @@
                     <option value="admin">Admin</option>
                     <option value="bursar">Bursar</option>
                     <option value="teacher">Teacher</option>
+                    <option value="parent">Parent</option>
                 </select>
             </div>
 
@@ -66,6 +67,7 @@
                     <option value="teacher">Teacher</option>
                     <option value="bursar">Bursar</option>
                     <option value="admin">Admin</option>
+                    <option value="parent">Parent</option>
                 </select>
             </div>
 
@@ -181,6 +183,7 @@
                                                 <option value="teacher">Teacher</option>
                                                 <option value="bursar">Bursar</option>
                                                 <option value="admin">Admin</option>
+                                                <option value="parent">Parent</option>
                                             </select>
                                         </div>
                                         <div class="lg:col-span-2">

@@ -229,18 +229,19 @@
                             </a>
                         @endif
 
-                        @if ($user?->role === 'admin')
-                            <a href="{{ route('settings.index') }}" class="card-interactive p-4 text-center">
+                            </a>
+                        @endif
+
+                        @if ($user?->is_super_admin)
+                            <a href="{{ route('superadmin.dashboard') }}" class="card-interactive p-4 text-center">
                                 <div
-                                    class="mx-auto mb-2 grid h-12 w-12 place-items-center rounded-lg bg-gray-50 text-gray-600">
+                                    class="mx-auto mb-2 grid h-12 w-12 place-items-center rounded-lg bg-slate-800 text-sky-400 border border-slate-700">
                                     <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                         stroke-width="2">
-                                        <circle cx="12" cy="12" r="3" />
-                                        <path
-                                            d="M12 1v6M12 17v6M4.22 4.22l4.24 4.24M15.54 15.54l4.24 4.24M1 12h6M17 12h6M4.22 19.78l4.24-4.24M15.54 8.46l4.24-4.24" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                                     </svg>
                                 </div>
-                                <div class="text-xs font-semibold text-gray-700">Settings</div>
+                                <div class="text-xs font-semibold text-gray-700">Dev Dashboard</div>
                             </a>
                         @endif
                     </div>
@@ -437,16 +438,17 @@
                     </a>
                 @endif
 
-                @if ($user?->role === 'admin')
-                    <a href="{{ route('settings.index') }}" wire:navigate
-                        class="{{ request()->routeIs('settings*') ? 'bg-amber-500 text-white shadow-md' : 'text-slate-700 hover:bg-amber-50' }} mb-0.5 group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-bold transition-all">
-                        <svg class="h-5 w-5 flex-shrink-0 {{ request()->routeIs('settings*') ? 'text-white' : 'text-gray-600' }}"
+                    </a>
+                @endif
+
+                @if ($user?->is_super_admin)
+                    <a href="{{ route('superadmin.dashboard') }}" wire:navigate
+                        class="{{ request()->routeIs('superadmin.*') ? 'bg-slate-800 text-sky-400 shadow-md' : 'text-slate-700 hover:bg-slate-100' }} mt-4 mb-0.5 group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-bold transition-all border border-slate-200">
+                        <svg class="h-5 w-5 flex-shrink-0 {{ request()->routeIs('superadmin.*') ? 'text-sky-400' : 'text-slate-600' }}"
                             viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                            <circle cx="12" cy="12" r="3" />
-                            <path
-                                d="M12 1v6m0 6v6M5.64 5.64l4.24 4.24m4.24 4.24l4.24 4.24M1 12h6m6 0h6M5.64 18.36l4.24-4.24m4.24-4.24l4.24-4.24" />
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                         </svg>
-                        <span class="sidebar-text">Settings</span>
+                        <span class="sidebar-text">Dev Dashboard</span>
                     </a>
                 @endif
             </nav>

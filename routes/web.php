@@ -107,6 +107,8 @@ Route::middleware(['auth', 'active'])->group(function () {
         if ($user?->role === 'teacher') {
             return view('pages.dashboard-teacher');
         }
+        if ($user?->role === 'parent') {
+            return view('pages.dashboard-parent');
         if ($user?->role === 'bursar') {
             return view('pages.dashboard-bursar');
         }
@@ -256,7 +258,7 @@ Route::middleware(['auth', 'active'])->group(function () {
         Route::get('/certificates/{certificate}/download', [CertificateController::class, 'download'])->name('certificates.download');
     });
 
-    Route::middleware('role:admin,bursar')->group(function () {
+    Route::middleware('role:bursar')->group(function () {
         Route::view('/accounts', 'pages.accounts.index')->middleware('permission:billing.transactions')->name('accounts');
     });
 
@@ -290,4 +292,12 @@ Route::middleware(['auth', 'active'])->group(function () {
         Route::get('/cbt/exams/{exam}/export', [CbtExportController::class, 'examResults'])
             ->name('cbt.exams.export');
     });
+});
+
+// ══════════════════════════════════════════════════════════════════════
+// SUPER ADMIN ROUTES (Multi-Tenant Management)
+// ══════════════════════════════════════════════════════════════════════
+Route::middleware(['auth', 'superadmin'])->prefix('superadmin')->name('superadmin.')->group(function() {
+    Route::get('/', \App\Http\Controllers\SuperAdmin\DashboardController::class)->name('dashboard');
+    Route::resource('tenants', \App\Http\Controllers\SuperAdmin\TenantController::class)->except(['show']);
 });

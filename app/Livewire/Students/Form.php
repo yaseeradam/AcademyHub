@@ -38,6 +38,7 @@ class Form extends Component
     public ?string $guardian_address = null;
     public string $status = 'Active';
     public array $customFieldValues = [];
+    public array $parent_ids = [];
 
     public $passport = null;
 
@@ -62,6 +63,7 @@ class Form extends Component
             $this->guardian_address = $student->guardian_address;
             $this->status = $student->status;
             $this->customFieldValues = $student->custom_fields ?? [];
+            $this->parent_ids = $student->parents()->pluck('users.id')->map(fn($id) => (string) $id)->toArray();
         } else {
             $this->admission_number = $this->generateAdmissionNumber();
         }
@@ -71,6 +73,12 @@ class Form extends Component
     public function customFields()
     {
         return CustomField::active()->ordered()->where('form_type', 'student')->get();
+    }
+
+    #[Computed]
+    public function availableParents()
+    {
+        return \App\Models\User::query()->where('role', 'parent')->orderBy('name')->get();
     }
 
     #[Computed]
@@ -129,6 +137,8 @@ class Form extends Component
             'guardian_phone' => ['nullable', 'string', 'max:30'],
             'guardian_address' => ['nullable', 'string', 'max:255'],
             'status' => ['required', Rule::in(['Active', 'Graduated', 'Expelled'])],
+            'parent_ids' => ['array'],
+            'parent_ids.*' => ['exists:users,id'],
         ];
 
         if ($this->passport) {
@@ -181,6 +191,7 @@ class Form extends Component
         }
 
         unset($data['passport']);
+        unset($data['parent_ids']);
         $data['admission_number'] = $this->admission_number;
         $data['custom_fields'] = $this->customFieldValues;
 
@@ -210,6 +221,7 @@ class Form extends Component
         }
 
         $student->save();
+        $student->parents()->sync($this->parent_ids);
 
         $isNew = !$this->student;
         $this->dispatch('student-saved', [

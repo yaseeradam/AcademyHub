@@ -345,6 +345,30 @@ class Index extends Component
     }
 
     #[Computed]
+    public function totalIncome()
+    {
+        return Transaction::query()
+            ->where('is_void', false)
+            ->where('type', 'Income')
+            ->sum('amount_paid');
+    }
+
+    #[Computed]
+    public function totalExpenses()
+    {
+        return Transaction::query()
+            ->where('is_void', false)
+            ->where('type', 'Expense')
+            ->sum('amount_paid');
+    }
+
+    #[Computed]
+    public function netBalance()
+    {
+        return $this->totalIncome - $this->totalExpenses;
+    }
+
+    #[Computed]
     public function feeStructures()
     {
         $query = FeeStructure::query()
