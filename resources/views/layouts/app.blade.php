@@ -116,6 +116,20 @@
                             <div class="text-xs font-semibold text-gray-700">Students</div>
                         </a>
 
+                        @if ($user?->role === 'parent')
+                            <a href="{{ route('students.index') }}" class="card-interactive p-4 text-center">
+                                <div
+                                    class="mx-auto mb-2 grid h-12 w-12 place-items-center rounded-lg bg-pink-50 text-pink-600">
+                                    <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2">
+                                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                                        <circle cx="12" cy="7" r="4" />
+                                    </svg>
+                                </div>
+                                <div class="text-xs font-semibold text-gray-700">My Children</div>
+                            </a>
+                        @endif
+
                         @if ($user?->role === 'admin' || $user?->role === 'teacher')
                         @if ($user?->role === 'admin')
                             <a href="{{ route('teachers') }}" class="card-interactive p-4 text-center">
@@ -332,6 +346,18 @@
                     </svg>
                     <span class="sidebar-text">Students</span>
                 </a>
+
+                @if ($user?->role === 'parent')
+                    <a href="{{ route('students.index') }}" wire:navigate
+                        class="{{ request()->routeIs('students.*') ? 'bg-amber-500 text-white shadow-md' : 'text-slate-700 hover:bg-amber-50' }} mb-0.5 group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-bold transition-all">
+                        <svg class="h-5 w-5 flex-shrink-0 {{ request()->routeIs('students.*') ? 'text-white' : 'text-pink-600' }}"
+                            viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                            <circle cx="12" cy="7" r="4" />
+                        </svg>
+                        <span class="sidebar-text">My Children</span>
+                    </a>
+                @endif
 
                 @if ($user?->role === 'admin')
                     <a href="{{ route('teachers') }}" wire:navigate
