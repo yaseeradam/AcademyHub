@@ -200,6 +200,16 @@ class ExamEditor extends Component
     public function availableTeachers()
     {
         $exam = $this->exam;
+        
+        // If exam doesn't have class and subject set, return all active teachers
+        if (!$exam->class_id || !$exam->subject_id) {
+            return User::query()
+                ->where('role', 'teacher')
+                ->where('is_active', true)
+                ->orderBy('name')
+                ->get();
+        }
+        
         return User::query()
             ->where('role', 'teacher')
             ->where('is_active', true)

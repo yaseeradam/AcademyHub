@@ -109,6 +109,8 @@ Route::middleware(['auth', 'active'])->group(function () {
         }
         if ($user?->role === 'parent') {
             return view('pages.dashboard-parent');
+        if ($user?->role === 'bursar') {
+            return view('pages.dashboard-bursar');
         }
 
         return view('pages.dashboard');

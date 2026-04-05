@@ -208,46 +208,6 @@
                         </a>
                         @endif
 
-                        @if ($user?->role === 'admin' || $user?->role === 'bursar')
-                            <a href="{{ route('billing.index') }}" class="card-interactive p-4 text-center">
-                                <div
-                                    class="mx-auto mb-2 grid h-12 w-12 place-items-center rounded-lg bg-purple-50 text-purple-600">
-                                    <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                        stroke-width="2">
-                                        <path d="M12 1v22" />
-                                        <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7H14a3.5 3.5 0 0 1 0 7H6" />
-                                    </svg>
-                                </div>
-                                <div class="text-xs font-semibold text-gray-700">Billing</div>
-                            </a>
-
-                            <a href="{{ route('accounts') }}" class="card-interactive p-4 text-center">
-                                <div
-                                    class="mx-auto mb-2 grid h-12 w-12 place-items-center rounded-lg bg-yellow-50 text-yellow-600">
-                                    <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                        stroke-width="2">
-                                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
-                                    </svg>
-                                </div>
-                                <div class="text-xs font-semibold text-gray-700">Accounts</div>
-                            </a>
-
-                            @if ($showSavingsLoan)
-                                <a href="{{ route('savings-loan.index') }}" class="card-interactive p-4 text-center">
-                                    <div
-                                        class="mx-auto mb-2 grid h-12 w-12 place-items-center rounded-lg bg-emerald-50 text-emerald-600">
-                                        <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                            stroke-width="2">
-                                            <path d="M20 7H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z" />
-                                            <path d="M16 17v2a2 2 0 0 1-2 2H10a2 2 0 0 1-2-2v-2" />
-                                            <path d="M6 11h.01M10 11h.01" />
-                                        </svg>
-                                    </div>
-                                    <div class="text-xs font-semibold text-gray-700">Savings/Loan</div>
-                                </a>
-                            @endif
-                        @endif
-
                         @if (in_array($user?->role, ['admin', 'teacher', 'bursar'], true))
                             <a href="{{ route('more-features') }}" class="card-interactive p-4 text-center">
                                 <div
@@ -435,16 +395,6 @@
                     <span class="sidebar-text">Attendance</span>
                 </a>
 
-                <a href="{{ route('analytics.dashboard') }}" wire:navigate
-                    class="{{ request()->routeIs('analytics.*') ? 'bg-amber-500 text-white shadow-md' : 'text-slate-700 hover:bg-amber-50' }} mb-0.5 group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-bold transition-all">
-                    <svg class="h-5 w-5 flex-shrink-0 {{ request()->routeIs('analytics.*') ? 'text-white' : 'text-indigo-600' }}"
-                        viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                        <path d="M3 3v18h18" />
-                        <path d="M18.7 8l-5.1 5.2-2.8-2.7L7 14.3" />
-                    </svg>
-                    <span class="sidebar-text">Analytics</span>
-                </a>
-
                 <a href="{{ route('messages') }}" wire:navigate
                     class="{{ request()->routeIs('messages') ? 'bg-amber-500 text-white shadow-md' : 'text-slate-700 hover:bg-amber-50' }} mb-0.5 group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-bold transition-all">
                     <svg class="h-5 w-5 flex-shrink-0 {{ request()->routeIs('messages') ? 'text-white' : 'text-purple-600' }}"
@@ -473,40 +423,6 @@
                             class="ml-auto rounded-full bg-orange-100 px-2 py-1 text-[10px] font-black uppercase tracking-wider text-orange-800">Locked</span>
                     @endif
                 </a>
-                @endif
-
-                @if ($user?->role === 'admin' || $user?->role === 'bursar')
-                    <a href="{{ route('billing.index') }}" wire:navigate
-                        class="{{ request()->routeIs('billing.*') ? 'bg-amber-500 text-white shadow-md' : 'text-slate-700 hover:bg-amber-50' }} mb-0.5 group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-bold transition-all">
-                        <svg class="h-5 w-5 flex-shrink-0 {{ request()->routeIs('billing.*') ? 'text-white' : 'text-purple-600' }}"
-                            viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                            <rect x="1" y="4" width="22" height="16" rx="2" ry="2" />
-                            <line x1="1" y1="10" x2="23" y2="10" />
-                        </svg>
-                        <span class="sidebar-text">Billing</span>
-                    </a>
-                    <a href="{{ route('accounts') }}" wire:navigate
-                        class="{{ request()->routeIs('accounts') ? 'bg-amber-500 text-white shadow-md' : 'text-slate-700 hover:bg-amber-50' }} mb-0.5 group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-bold transition-all">
-                        <svg class="h-5 w-5 flex-shrink-0 {{ request()->routeIs('accounts') ? 'text-white' : 'text-yellow-600' }}"
-                            viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                            <line x1="12" y1="1" x2="12" y2="23" />
-                            <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
-                        </svg>
-                        <span class="sidebar-text">Accounts</span>
-                    </a>
-
-                    @if ($showSavingsLoan)
-                        <a href="{{ route('savings-loan.index') }}" wire:navigate
-                            class="{{ request()->routeIs('savings-loan.*') ? 'bg-amber-500 text-white shadow-md' : 'text-slate-700 hover:bg-amber-50' }} mb-0.5 group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-bold transition-all">
-                            <svg class="h-5 w-5 flex-shrink-0 {{ request()->routeIs('savings-loan.*') ? 'text-white' : 'text-emerald-600' }}"
-                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                                <rect x="3" y="7" width="18" height="10" rx="2" ry="2" />
-                                <path d="M16 17v2a2 2 0 0 1-2 2H10a2 2 0 0 1-2-2v-2" />
-                                <path d="M6 12h.01M10 12h.01" />
-                            </svg>
-                            <span class="sidebar-text">Savings/Loan</span>
-                        </a>
-                    @endif
                 @endif
 
                 @if (in_array($user?->role, ['admin', 'teacher', 'bursar'], true))
