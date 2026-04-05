@@ -104,11 +104,14 @@ Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])
 Route::middleware(['auth', 'active'])->group(function () {
     Route::get('/dashboard', function () {
         $user = auth()->user();
+        if ($user?->role === 'admin') {
+            return view('pages.dashboard');
+        }
         if ($user?->role === 'teacher') {
             return view('pages.dashboard-teacher');
         }
         if ($user?->role === 'parent') {
-            return view('pages.dashboard-parent');
+            return redirect()->route('parents.dashboard');
         }
         if ($user?->role === 'bursar') {
             return view('pages.dashboard-bursar');
@@ -129,6 +132,8 @@ Route::middleware(['auth', 'active'])->group(function () {
         Route::post('/randomize-photos', [PhotoRandomizerController::class, 'randomize'])->name('photos.randomize');
         
         Route::get('/marketplace', MarketplaceIndex::class)->name('marketplace');
+
+        Route::get('/parents', \App\Livewire\Parents\Management::class)->name('parents.index');
 
         Route::get('/students/create', StudentsForm::class)->name('students.create');
         Route::get('/students/{student}/edit', StudentsForm::class)->name('students.edit');
@@ -189,6 +194,10 @@ Route::middleware(['auth', 'active'])->group(function () {
 
         Route::get('/savings-loan', SavingsLoanIndex::class)
             ->name('savings-loan.index');
+    });
+
+    Route::middleware('role:parent')->group(function () {
+        Route::get('/parents/dashboard', \App\Livewire\Parents\Dashboard::class)->name('parents.dashboard');
     });
 
     Route::middleware('role:admin,teacher')->group(function () {

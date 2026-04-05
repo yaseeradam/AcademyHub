@@ -249,8 +249,88 @@
                 </div>
 
                 <div class="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
+                    <div class="flex items-center justify-between mb-4">
+                        <div>
+                            <div class="text-sm font-semibold text-gray-900">Create Parent Account</div>
+                            <div class="text-xs text-gray-500 mt-1">Create a new parent account and link to this student</div>
+                        </div>
+                        <label class="flex items-center">
+                            <input type="checkbox" wire:model.live="create_parent_account" class="rounded border-gray-300 text-brand-600 focus:ring-brand-500">
+                            <span class="ml-2 text-sm font-medium text-gray-700">Create Account</span>
+                        </label>
+                    </div>
+
+                    @if($create_parent_account)
+                        <div class="space-y-4 border-t border-gray-100 pt-4">
+                            <div>
+                                <label class="text-sm font-semibold text-gray-700">Parent Name <span class="text-red-500">*</span></label>
+                                <input
+                                    wire:model.live="parent_name"
+                                    type="text"
+                                    placeholder="Enter parent's full name"
+                                    class="mt-2 w-full rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-700 shadow-sm focus:border-brand-500 focus:ring-brand-500"
+                                />
+                                @error('parent_name')
+                                    <div class="mt-2 text-sm text-orange-700">{{ $message }}</div>
+                                @enderror
+                            </div>
+
+                            <div>
+                                <label class="text-sm font-semibold text-gray-700">Email Address <span class="text-red-500">*</span></label>
+                                <input
+                                    wire:model.live="parent_email"
+                                    type="email"
+                                    placeholder="Enter email for login"
+                                    class="mt-2 w-full rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-700 shadow-sm focus:border-brand-500 focus:ring-brand-500"
+                                />
+                                @error('parent_email')
+                                    <div class="mt-2 text-sm text-orange-700">{{ $message }}</div>
+                                @enderror
+                            </div>
+
+                            <div>
+                                <label class="text-sm font-semibold text-gray-700">Phone Number</label>
+                                <input
+                                    wire:model.live="parent_phone"
+                                    type="text"
+                                    placeholder="Enter phone number"
+                                    class="mt-2 w-full rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-700 shadow-sm focus:border-brand-500 focus:ring-brand-500"
+                                />
+                                @error('parent_phone')
+                                    <div class="mt-2 text-sm text-orange-700">{{ $message }}</div>
+                                @enderror
+                            </div>
+
+                            <div>
+                                <label class="text-sm font-semibold text-gray-700">Password <span class="text-red-500">*</span></label>
+                                <input
+                                    wire:model.live="parent_password"
+                                    type="password"
+                                    placeholder="Enter login password"
+                                    class="mt-2 w-full rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-700 shadow-sm focus:border-brand-500 focus:ring-brand-500"
+                                />
+                                @error('parent_password')
+                                    <div class="mt-2 text-sm text-orange-700">{{ $message }}</div>
+                                @enderror
+                            </div>
+
+                            <div class="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                                <div class="flex items-start gap-2">
+                                    <svg class="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    </svg>
+                                    <div class="text-sm text-blue-800">
+                                        <strong>Note:</strong> The parent will be able to log in with the email and password above to view their child's academic progress, attendance, and fees.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    @endif
+                </div>
+
+                <div class="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
                     <div class="text-sm font-semibold text-gray-900">Linked Parents</div>
-                    <div class="mt-2 text-xs text-gray-500">Select parent accounts to grant them portal access to this student.</div>
+                    <div class="mt-2 text-xs text-gray-500">Select existing parent accounts to grant them portal access to this student.</div>
 
                     <div class="mt-4">
                         <select
@@ -454,13 +534,16 @@
         const studentsUrl = '{{ route('students.index') }}';
         const downloadUrl = data?.downloadUrl;
         const isNew = !!data?.isNew;
+        const parentCreated = !!data?.parentCreated;
+        const parentEmail = data?.parentEmail;
+        const parentPassword = data?.parentPassword;
 
         const overlay = document.createElement('div');
         overlay.className = 'fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm';
         overlay.style.animation = 'fadeIn 0.2s ease-out';
 
         const panel = document.createElement('div');
-        panel.className = 'bg-white rounded-3xl shadow-2xl max-w-md w-full transform';
+        panel.className = 'bg-white rounded-3xl shadow-2xl max-w-lg w-full transform';
         panel.style.animation = 'slideUp 0.3s ease-out';
 
         const header = document.createElement('div');
@@ -489,7 +572,7 @@
         body.className = 'p-6';
 
         const message = document.createElement('p');
-        message.className = 'text-gray-700 text-lg leading-relaxed';
+        message.className = 'text-gray-700 text-lg leading-relaxed mb-4';
         const actionText = isNew ? 'created' : 'updated';
         const nameText = data?.name ? String(data.name) : 'Student';
         const admissionText = data?.admission ? String(data.admission) : '';
@@ -498,6 +581,28 @@
             : `${nameText} has been ${actionText} successfully.`;
 
         body.appendChild(message);
+
+        // Add parent account info if created
+        if (parentCreated && parentEmail && parentPassword) {
+            const parentInfo = document.createElement('div');
+            parentInfo.className = 'bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4';
+            parentInfo.innerHTML = `
+                <div class="flex items-start gap-3">
+                    <svg class="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                    </svg>
+                    <div>
+                        <h4 class="font-semibold text-blue-900 mb-2">Parent Account Created</h4>
+                        <div class="text-sm text-blue-800 space-y-1">
+                            <div><strong>Email:</strong> ${parentEmail}</div>
+                            <div><strong>Password:</strong> ${parentPassword}</div>
+                            <div class="text-xs text-blue-600 mt-2">Please share these login details with the parent.</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            body.appendChild(parentInfo);
+        }
 
         const actions = document.createElement('div');
         actions.className = 'p-6 pt-0 flex gap-3';

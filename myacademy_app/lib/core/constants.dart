@@ -15,7 +15,15 @@ class AppColors {
 }
 
 class ApiConstants {
-  // Use 10.0.2.2 for Android emulator interacting with localhost on host machine
-  // Or the machine's IP address if testing on physical device
-  static const String baseUrl = 'http://10.0.2.2:8000/api';
+  // Laravel API Base URL
+  // For Flutter Web (Chrome): Use full URL with port
+  static const String baseUrl = 'http://localhost:8000/api';
+  
+  // Alternative URLs for different setups:
+  // For mobile development: 'http://127.0.0.1:8000/api'
+  // For physical device on same network: 'http://192.168.1.5:8000/api' (replace with your IP)
+  // For Android emulator: 'http://10.0.2.2:8000/api'
+  // For iOS simulator: 'http://127.0.0.1:8000/api'
+  
+  // Note: Flutter Web requires 'localhost' instead of '127.0.0.1' for CORS
 }

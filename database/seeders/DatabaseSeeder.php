@@ -152,5 +152,10 @@ class DatabaseSeeder extends Seeder
                 ]);
             }
         }
+
+        // Seed parent accounts if they don't exist
+        if (User::query()->where('role', 'parent')->count() === 0) {
+            $this->call(ParentSeeder::class);
+        }
     }
 }

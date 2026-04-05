@@ -145,6 +145,20 @@
                                 </div>
                                 <div class="text-xs font-semibold text-gray-700">Teachers</div>
                             </a>
+
+                            <a href="{{ route('parents.index') }}" class="card-interactive p-4 text-center">
+                                <div
+                                    class="mx-auto mb-2 grid h-12 w-12 place-items-center rounded-lg bg-pink-50 text-pink-600">
+                                    <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2">
+                                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                                        <circle cx="9" cy="7" r="4" />
+                                        <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+                                        <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                                    </svg>
+                                </div>
+                                <div class="text-xs font-semibold text-gray-700">Parents</div>
+                            </a>
                         @endif
 
                         <a href="{{ route('classes.index') }}" class="card-interactive p-4 text-center">
@@ -370,6 +384,18 @@
                             <path d="M16 3.13a4 4 0 0 1 0 7.75" />
                         </svg>
                         <span class="sidebar-text">Teachers</span>
+                    </a>
+
+                    <a href="{{ route('parents.index') }}" wire:navigate
+                        class="{{ request()->routeIs('parents.*') ? 'bg-amber-500 text-white shadow-md' : 'text-slate-700 hover:bg-amber-50' }} mb-0.5 group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-bold transition-all">
+                        <svg class="h-5 w-5 flex-shrink-0 {{ request()->routeIs('parents.*') ? 'text-white' : 'text-pink-600' }}"
+                            viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                            <circle cx="9" cy="7" r="4" />
+                            <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+                            <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                        </svg>
+                        <span class="sidebar-text">Parents</span>
                     </a>
                 @endif
 

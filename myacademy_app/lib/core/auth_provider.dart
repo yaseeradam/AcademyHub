@@ -10,8 +10,15 @@ class User {
   final String name;
   final String email;
   final String role;
+  final bool? isSuperAdmin;
 
-  User({required this.id, required this.name, required this.email, required this.role});
+  User({
+    required this.id, 
+    required this.name, 
+    required this.email, 
+    required this.role,
+    this.isSuperAdmin,
+  });
 
   factory User.fromJson(Map<String, dynamic> json) {
     return User(
@@ -19,7 +26,18 @@ class User {
       name: json['name'],
       email: json['email'],
       role: json['role'] ?? 'user',
+      isSuperAdmin: json['is_super_admin'] == 1 || json['is_super_admin'] == true,
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'name': name,
+      'email': email,
+      'role': role,
+      'is_super_admin': isSuperAdmin,
+    };
   }
 }
 
@@ -82,34 +100,59 @@ class AuthProvider extends ChangeNotifier {
       final response = await _dio.post('/login', data: {
         'email': email,
         'password': password,
+        'device_name': 'flutter_web_app',
       });
 
+      print('Raw response data: ${response.data}');
+      print('Token: ${response.data['token']}');
+      print('User data: ${response.data['user']}');
+
+      // Laravel API returns token and user directly
       _token = response.data['token'];
-      _user = User.fromJson(response.data['user']);
+      
+      print('About to parse user...');
+      try {
+        _user = User.fromJson(response.data['user']);
+        print('User parsed successfully: ${_user?.name}');
+      } catch (userError) {
+        print('Error parsing user: $userError');
+        throw userError;
+      }
 
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString('auth_token', _token!);
       
       _dio.options.headers['Authorization'] = 'Bearer $_token';
       
+      print('Login completed successfully');
       _isLoading = false;
       notifyListeners();
       return true;
     } on DioException catch (e) {
       _isLoading = false;
-      if (e.response?.statusCode == 422) {
-        _error = 'Invalid email or password.';
-      } else {
-        _error = 'Network error. Please try again.';
-      }
+      print('DioException: $e');
+      _error = 'Network error. Please try again.';
       notifyListeners();
       return false;
     } catch (e) {
       _isLoading = false;
-      _error = 'An unexpected error occurred';
+      print('General Exception during login: $e');
+      print('Exception type: ${e.runtimeType}');
+      _error = 'Login failed: ${e.toString()}';
       notifyListeners();
       return false;
     }
+  }
+
+  Future<bool> checkAuthStatus() async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('auth_token');
+    return token != null && _user != null;
+  }
+
+  Future<bool> isFirstTime() async {
+    final prefs = await SharedPreferences.getInstance();
+    return !(prefs.getBool('onboarding_completed') ?? false);
   }
 
   Future<void> logout() async {
