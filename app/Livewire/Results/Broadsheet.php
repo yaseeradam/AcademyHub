@@ -37,20 +37,23 @@ class Broadsheet extends Component
 
     public function updatedClassId(): void
     {
-        unset($this->subjects, $this->rows, $this->isPublished);
+        // Force refresh of computed properties
+        $this->dispatch('$refresh');
     }
 
     public function updatedTerm(): void
     {
-        unset($this->rows, $this->isPublished);
+        // Force refresh of computed properties
+        $this->dispatch('$refresh');
     }
 
     public function updatedSession(): void
     {
-        unset($this->rows, $this->isPublished);
+        // Force refresh of computed properties
+        $this->dispatch('$refresh');
     }
 
-    #[Computed]
+    #[Computed(persist: false)]
     public function isPublished(): bool
     {
         if (!$this->classId || !$this->session) {
@@ -65,7 +68,7 @@ class Broadsheet extends Component
             ->exists();
     }
 
-    #[Computed]
+    #[Computed(persist: false)]
     public function classes()
     {
         $user = auth()->user();
@@ -80,7 +83,7 @@ class Broadsheet extends Component
             ->get();
     }
 
-    #[Computed]
+    #[Computed(persist: false)]
     public function subjects()
     {
         if (!$this->classId) {
@@ -99,7 +102,7 @@ class Broadsheet extends Component
         return Subject::query()->whereIn('id', $ids)->orderBy('name')->get();
     }
 
-    #[Computed]
+    #[Computed(persist: false)]
     public function rows(): Collection
     {
         if (!$this->classId || !$this->session) {
@@ -159,9 +162,7 @@ class Broadsheet extends Component
                 $lastScore = $row['grandTotal'];
             }
 
-            $row['position'] = $rank;
-
-            return $row;
+            return array_merge($row, ['position' => $rank]);
         });
 
         return $sorted;

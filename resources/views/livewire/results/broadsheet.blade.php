@@ -9,12 +9,6 @@
                 </div>
                 <div class="flex flex-wrap items-center gap-3">
                     <a href="{{ route('results.entry') }}" class="rounded-xl bg-white/20 px-5 py-2.5 text-sm font-semibold text-white shadow-lg backdrop-blur-sm transition-all hover:bg-white/30 hover:shadow-xl">Score Entry</a>
-                    @if ($classId && $this->isPublished)
-                        <button wire:click="generateBulk" wire:loading.attr="disabled" class="rounded-xl bg-white px-5 py-2.5 text-sm font-semibold text-emerald-600 shadow-lg transition-all hover:bg-emerald-50 hover:shadow-xl disabled:opacity-50">
-                            <span wire:loading.remove wire:target="generateBulk">Bulk Report Cards</span>
-                            <span wire:loading wire:target="generateBulk">Generating...</span>
-                        </button>
-                    @endif
                     @if ($classId && auth()->user()?->role === 'admin')
                         @if ($this->isPublished)
                             <button wire:click="unpublish" wire:loading.attr="disabled" class="rounded-xl bg-red-500 px-5 py-2.5 text-sm font-semibold text-white shadow-lg transition-all hover:bg-red-600 hover:shadow-xl disabled:opacity-50">
@@ -27,6 +21,12 @@
                                 <span wire:loading wire:target="publish">Publishing...</span>
                             </button>
                         @endif
+                    @endif
+                    @if ($classId && $this->isPublished)
+                        <button wire:click="generateBulk" wire:loading.attr="disabled" class="rounded-xl bg-white px-5 py-2.5 text-sm font-semibold text-emerald-600 shadow-lg transition-all hover:bg-emerald-50 hover:shadow-xl disabled:opacity-50">
+                            <span wire:loading.remove wire:target="generateBulk">Bulk Report Cards</span>
+                            <span wire:loading wire:target="generateBulk">Generating...</span>
+                        </button>
                     @endif
                 </div>
             </div>
@@ -44,6 +44,7 @@
                 <div>
                     <label class="text-xs font-semibold uppercase tracking-wider text-gray-500">Class</label>
                     <select
+                        wire:key="class-select-{{ $classId ?: 'empty' }}"
                         wire:model.live="classId"
                         class="mt-2 select min-w-52"
                     >
@@ -57,6 +58,7 @@
                 <div>
                     <label class="text-xs font-semibold uppercase tracking-wider text-gray-500">Session</label>
                     <input
+                        wire:key="session-input-{{ $classId ?: 'empty' }}"
                         wire:model.live.debounce.300ms="session"
                         type="text"
                         placeholder="2025/2026"
@@ -67,6 +69,7 @@
                 <div>
                     <label class="text-xs font-semibold uppercase tracking-wider text-gray-500">Term</label>
                     <select
+                        wire:key="term-select-{{ $classId ?: 'empty' }}"
                         wire:model.live="term"
                         class="mt-2 select min-w-24"
                     >
@@ -90,7 +93,8 @@
             <div class="mt-2 text-sm text-gray-600">Allocate subjects to this class to populate the broadsheet.</div>
         </div>
     @else
-        <div class="overflow-x-auto overflow-hidden rounded-2xl bg-white shadow-lg">
+        <div class="overflow-x-auto overflow-hidden rounded-2xl bg-white shadow-lg" 
+             wire:key="broadsheet-table-{{ $classId }}-{{ $term }}-{{ $session }}">
             <x-table class="text-xs">
                 <thead class="bg-gradient-to-r from-emerald-500 to-cyan-600 text-[11px] font-semibold uppercase tracking-wider text-white">
                 <tr>

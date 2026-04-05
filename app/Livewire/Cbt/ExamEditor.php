@@ -228,7 +228,7 @@ class ExamEditor extends Component
         }
 
         $this->subjectId = null;
-        unset($this->subjects);
+        $this->dispatch('refresh');
         $this->resetValidation();
     }
 
@@ -315,7 +315,7 @@ class ExamEditor extends Component
 
         Audit::log('cbt.exam_updated', $exam);
 
-        unset($this->exam);
+        $this->dispatch('refresh');
         $this->dispatch('alert', message: 'Exam details saved.', type: 'success');
     }
 
@@ -442,7 +442,7 @@ class ExamEditor extends Component
         Audit::log($this->editingQuestionId ? 'cbt.question_updated' : 'cbt.question_created', $this->exam);
 
         $this->startNewQuestion();
-        unset($this->exam);
+        $this->dispatch('refresh');
         $this->dispatch('alert', message: 'Question saved.', type: 'success');
     }
 
@@ -462,7 +462,7 @@ class ExamEditor extends Component
             $this->startNewQuestion();
         }
 
-        unset($this->exam);
+        $this->dispatch('refresh');
         $this->dispatch('alert', message: 'Question deleted.', type: 'success');
     }
 
@@ -486,7 +486,7 @@ class ExamEditor extends Component
             'student_id' => $attempt->student_id,
         ]);
 
-        unset($this->exam);
+        $this->dispatch('refresh');
         $this->dispatch('alert', message: 'Attempt reset. Student can retake.', type: 'success');
     }
 
@@ -693,7 +693,7 @@ class ExamEditor extends Component
         ]);
 
         $this->cancelReview();
-        unset($this->exam);
+        $this->dispatch('refresh');
         $this->dispatch('alert', message: 'Theory marks saved.', type: 'success');
     }
 
@@ -735,7 +735,7 @@ class ExamEditor extends Component
             'percent' => $percent,
         ])->save();
 
-        unset($this->exam);
+        $this->dispatch('refresh');
     }
 
     public function startIpOverride(int $attemptId): void
@@ -788,7 +788,7 @@ class ExamEditor extends Component
         ]);
 
         $this->cancelIpOverride();
-        unset($this->exam);
+        $this->dispatch('refresh');
         $this->dispatch('alert', message: 'Allowed IP updated.', type: 'success');
     }
 
@@ -810,7 +810,7 @@ class ExamEditor extends Component
             'attempt_id' => $attempt->id,
         ]);
 
-        unset($this->exam);
+        $this->dispatch('refresh');
         $this->dispatch('alert', message: 'IP lock cleared.', type: 'success');
     }
 
@@ -915,7 +915,7 @@ class ExamEditor extends Component
             'attempt_id' => $attemptId,
         ]);
 
-        unset($this->exam);
+        $this->dispatch('refresh');
         $this->dispatch('alert', message: 'Attempt terminated.', type: 'success');
     }
 
@@ -1018,7 +1018,7 @@ class ExamEditor extends Component
             'attempt_id' => $attemptId,
         ]);
 
-        unset($this->exam);
+        $this->dispatch('refresh');
         $this->dispatch('alert', message: 'Attempt submitted.', type: 'success');
     }
 
@@ -1137,7 +1137,7 @@ class ExamEditor extends Component
 
         $this->showRejectForm = false;
         $this->reviewNote = '';
-        unset($this->exam);
+        $this->dispatch('refresh');
         $this->dispatch('alert', message: 'Submitted to admin.', type: 'success');
     }
 
@@ -1156,7 +1156,7 @@ class ExamEditor extends Component
             'published' => (bool) $exam->published_at,
         ]);
 
-        unset($this->exam);
+        $this->dispatch('refresh');
         $this->dispatch('alert', message: $exam->published_at ? 'Exam is now live.' : 'Exam paused.', type: 'success');
     }
 
@@ -1194,7 +1194,7 @@ class ExamEditor extends Component
 
         $this->showRejectForm = false;
         $this->reviewNote = '';
-        unset($this->exam);
+        $this->dispatch('refresh');
         $this->dispatch('alert', message: 'Exam approved.', type: 'success');
     }
 
@@ -1262,7 +1262,7 @@ class ExamEditor extends Component
 
         $this->showRejectForm = false;
         $this->reviewNote = '';
-        unset($this->exam);
+        $this->dispatch('refresh');
         $this->dispatch('alert', message: 'Exam rejected.', type: 'success');
     }
 
@@ -1366,7 +1366,7 @@ class ExamEditor extends Component
         }
 
         Audit::log('cbt.all_exams_ended', $exam, ['count' => $count]);
-        unset($this->exam);
+        $this->dispatch('refresh');
         $this->dispatch('alert', message: "Ended {$count} active exam(s).", type: 'success');
     }
 
@@ -1486,7 +1486,7 @@ class ExamEditor extends Component
         );
 
         $this->cancelForward();
-        unset($this->exam);
+        $this->dispatch('refresh');
         $this->dispatch('alert', message: 'Forwarded to teacher.', type: 'success');
     }
 

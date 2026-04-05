@@ -165,12 +165,14 @@ class Index extends Component
     {
         if (in_array($property, ['classFilter', 'sectionFilter', 'statusFilter', 'search'], true)) {
             $this->resetPage();
-            unset($this->students, $this->stats);
+            // Force refresh of computed properties
+            $this->dispatch('$refresh');
         }
 
         if ($property === 'classFilter') {
             $this->sectionFilter = 'all';
-            unset($this->sections);
+            // Force refresh of sections computed property
+            $this->dispatch('$refresh');
         }
     }
 
@@ -186,9 +188,7 @@ class Index extends Component
 
     public function render()
     {
-        return view('livewire.students.index', [
-            'students' => $this->students,
-        ]);
+        return view('livewire.students.index');
     }
 
     private function teacherClassIds(): Collection

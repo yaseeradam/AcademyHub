@@ -119,29 +119,36 @@
                             $row = $scores[$student->id] ?? ['ca1' => 0, 'ca2' => 0, 'exam' => 0];
                             $total = (int) ($row['ca1'] ?? 0) + (int) ($row['ca2'] ?? 0) + (int) ($row['exam'] ?? 0);
                             $grade = \App\Models\Score::gradeForTotal($total, $maxMarks['ca1'] + $maxMarks['ca2'] + $maxMarks['exam']);
+                            
+                            // Check for validation errors
+                            $ca1Error = isset($validationErrors["{$student->id}.ca1"]);
+                            $ca2Error = isset($validationErrors["{$student->id}.ca2"]);
+                            $examError = isset($validationErrors["{$student->id}.exam"]);
+                            $hasError = $ca1Error || $ca2Error || $examError;
                         @endphp
-                        <tr class="bg-white hover:bg-indigo-50 transition-colors">
+                        <tr class="bg-white hover:bg-indigo-50 transition-colors {{ $hasError ? 'error-row' : '' }}" 
+                            data-student-id="{{ $student->id }}">
                             <td class="px-5 py-4 bg-gray-100">
                                 <div class="text-sm font-semibold text-gray-900">{{ $student->full_name }}</div>
                                 <div class="mt-1 text-xs text-gray-500">{{ $student->admission_number }}</div>
                             </td>
-                            <td class="px-5 py-4 text-right bg-blue-100">
-                                <input wire:model.lazy="scores.{{ $student->id }}.ca1" type="number" min="0"
-                                    max="{{ $maxMarks['ca1'] }}" step="1"
-                                    oninput="this.value !== '' && (this.value = Math.max(+this.min, Math.min(+this.max, +this.value)))"
-                                    class="w-20 rounded-lg border-2 border-blue-300 bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500" />
+                            <td class="px-5 py-4 text-right {{ $ca1Error ? 'bg-red-100' : 'bg-blue-100' }}">
+                                <input wire:model.lazy="scores.{{ $student->id }}.ca1" 
+                                    type="number" min="0" max="{{ $maxMarks['ca1'] }}" step="1"
+                                    data-student-id="{{ $student->id }}" data-field="ca1"
+                                    class="w-20 rounded-lg border-2 {{ $ca1Error ? 'border-red-500 bg-red-50' : 'border-blue-300 bg-white' }} px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500" />
                             </td>
-                            <td class="px-5 py-4 text-right bg-green-100">
-                                <input wire:model.lazy="scores.{{ $student->id }}.ca2" type="number" min="0"
-                                    max="{{ $maxMarks['ca2'] }}" step="1"
-                                    oninput="this.value !== '' && (this.value = Math.max(+this.min, Math.min(+this.max, +this.value)))"
-                                    class="w-20 rounded-lg border-2 border-green-300 bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm focus:border-green-500 focus:ring-2 focus:ring-green-500" />
+                            <td class="px-5 py-4 text-right {{ $ca2Error ? 'bg-red-100' : 'bg-green-100' }}">
+                                <input wire:model.lazy="scores.{{ $student->id }}.ca2" 
+                                    type="number" min="0" max="{{ $maxMarks['ca2'] }}" step="1"
+                                    data-student-id="{{ $student->id }}" data-field="ca2"
+                                    class="w-20 rounded-lg border-2 {{ $ca2Error ? 'border-red-500 bg-red-50' : 'border-green-300 bg-white' }} px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm focus:border-green-500 focus:ring-2 focus:ring-green-500" />
                             </td>
-                            <td class="px-5 py-4 text-right bg-amber-100">
-                                <input wire:model.lazy="scores.{{ $student->id }}.exam" type="number" min="0"
-                                    max="{{ $maxMarks['exam'] }}" step="1"
-                                    oninput="this.value !== '' && (this.value = Math.max(+this.min, Math.min(+this.max, +this.value)))"
-                                    class="w-20 rounded-lg border-2 border-amber-300 bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm focus:border-amber-500 focus:ring-2 focus:ring-amber-500" />
+                            <td class="px-5 py-4 text-right {{ $examError ? 'bg-red-100' : 'bg-amber-100' }}">
+                                <input wire:model.lazy="scores.{{ $student->id }}.exam" 
+                                    type="number" min="0" max="{{ $maxMarks['exam'] }}" step="1"
+                                    data-student-id="{{ $student->id }}" data-field="exam"
+                                    class="w-20 rounded-lg border-2 {{ $examError ? 'border-red-500 bg-red-50' : 'border-amber-300 bg-white' }} px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm focus:border-amber-500 focus:ring-2 focus:ring-amber-500" />
                             </td>
                             <td class="px-5 py-4 text-right bg-purple-100">
                                 <span
@@ -172,6 +179,70 @@
             </div>
 
             <script>
+                // Add shake animation styles
+                const shakeStyles = `
+                    <style id="shake-animation-styles">
+                        @keyframes shake {
+                            0%, 100% { transform: translateX(0); }
+                            10%, 30%, 50%, 70%, 90% { transform: translateX(-3px); }
+                            20%, 40%, 60%, 80% { transform: translateX(3px); }
+                        }
+                        
+                        .shake-row {
+                            animation: shake 0.6s ease-in-out;
+                            background-color: #fef2f2 !important;
+                        }
+                        
+                        .error-row {
+                            background-color: #fef2f2;
+                        }
+                        
+                        .error-row:hover {
+                            background-color: #fecaca !important;
+                        }
+                        
+                        .shake-input {
+                            animation: shake 0.6s ease-in-out;
+                            border-color: #ef4444 !important;
+                            background-color: #fef2f2 !important;
+                        }
+                    </style>
+                `;
+                
+                // Add styles to head if not already present
+                if (!document.getElementById('shake-animation-styles')) {
+                    document.head.insertAdjacentHTML('beforeend', shakeStyles);
+                }
+                
+                // Listen for shake-row events from Livewire
+                document.addEventListener('livewire:init', () => {
+                    Livewire.on('shake-row', (event) => {
+                        const data = event[0] || event;
+                        const studentId = data.studentId;
+                        const field = data.field;
+                        
+                        // Find the row and input field
+                        const row = document.querySelector(`tr[data-student-id="${studentId}"]`);
+                        const input = document.querySelector(`input[data-student-id="${studentId}"][data-field="${field}"]`);
+                        
+                        if (row && input) {
+                            // Add shake classes
+                            row.classList.add('shake-row');
+                            input.classList.add('shake-input');
+                            
+                            // Remove shake classes after animation completes
+                            setTimeout(() => {
+                                row.classList.remove('shake-row');
+                                input.classList.remove('shake-input');
+                            }, 600);
+                            
+                            // Focus the input field to draw attention
+                            input.focus();
+                            input.select();
+                        }
+                    });
+                });
+                
                 document.addEventListener('DOMContentLoaded', function () {
                     const table = document.querySelector('tbody');
                     if (!table) return;

@@ -132,8 +132,7 @@ class Index extends Component
     public function updatedClassId(): void
     {
         $this->sectionId = null;
-        unset($this->sections, $this->students);
-
+        
         if ($this->classId) {
             $this->sectionId = Section::query()
                 ->where('class_id', $this->classId)
@@ -142,12 +141,13 @@ class Index extends Component
         }
 
         $this->syncSheetFromSelection();
+        $this->dispatch('$refresh');
     }
 
     public function updatedSectionId(): void
     {
-        unset($this->students);
         $this->syncSheetFromSelection();
+        $this->dispatch('$refresh');
     }
 
     public function updatedDate(): void

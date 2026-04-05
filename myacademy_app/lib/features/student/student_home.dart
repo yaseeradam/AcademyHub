@@ -114,7 +114,7 @@ class _StudentHomeState extends State<StudentHome> {
                       contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
                       title: Text(subj['subject'], style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
                       subtitle: Padding(
-                        padding: const EdgeInsets.top(4.0),
+                        padding: const EdgeInsets.only(top: 4.0),
                         child: Text('CA: ${subj['ca1'] + subj['ca2']} • Exam: ${subj['exam']} • Total: ${subj['total']}'),
                       ),
                       trailing: Container(
