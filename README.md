@@ -1,4 +1,4 @@
-# MyAcademy (Offline Edition)
+# MyAcademy
 
 ## ⚡ QUICK START - Just 3 Steps!
 
@@ -10,13 +10,7 @@
 
 ---
 
-MyAcademy is an offline-first School Management System designed to run **100% on a local network (LAN)** for schools with limited internet access.
-
-## LAN Deployment Model
-
-- **Host (Server):** The school admin laptop runs Apache + MySQL (Laragon recommended).
-- **Clients:** Teachers connect over Wi‑Fi to the host IP (example: `http://192.168.1.5`) to enter scores.
-- **Offline constraint:** No external CDNs for runtime assets (fonts/scripts are local or system fonts).
+MyAcademy is a comprehensive School Management System built with Laravel.
 
 ## Stack
 
@@ -70,8 +64,7 @@ npm run build
 php artisan serve --host=0.0.0.0 --port=8000
 ```
 
-Open on the host: `http://127.0.0.1:8000`  
-Open on clients: `http://<HOST_LAN_IP>:8000`
+Open: `http://127.0.0.1:8000`
 
 ## Demo Accounts (seeded)
 

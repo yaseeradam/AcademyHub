@@ -101,6 +101,14 @@ Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])
     ->middleware('auth')
     ->name('logout');
 
+// Student dashboard route (session-based, not auth-based)
+Route::get('/student/dashboard', function () {
+    if (!session('student_id')) {
+        return redirect()->route('login');
+    }
+    return view('pages.dashboard-student');
+})->name('student.dashboard');
+
 Route::middleware(['auth', 'active'])->group(function () {
     Route::get('/dashboard', function () {
         $user = auth()->user();

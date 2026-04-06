@@ -1,13 +1,36 @@
 <x-layouts.guest>
-    <div class="min-h-screen flex items-center justify-center relative overflow-hidden p-4 sm:p-6 lg:p-8">
-        <!-- Background Image with Overlay -->
+    <div class="min-h-screen flex items-center justify-end relative overflow-hidden p-4 sm:p-6 lg:p-8">
+        <!-- Dynamic Background Images -->
         <div class="absolute inset-0 z-0">
-            <img 
-                src="{{ asset('images/bg.png') }}" 
-                alt="School background" 
-                class="w-full h-full object-cover"
-            />
-            <div class="absolute inset-0 bg-gradient-to-br from-amber-900/60 via-orange-900/50 to-slate-900/60"></div>
+            <!-- Staff Background -->
+            <div id="staff-bg" class="absolute inset-0 transition-opacity duration-500">
+                <img 
+                    src="{{ asset('bgs/admin.png') }}" 
+                    alt="Staff background" 
+                    class="w-full h-full object-cover"
+                />
+                <div class="absolute inset-0 bg-gradient-to-br from-blue-900/30 via-indigo-900/25 to-slate-900/30"></div>
+            </div>
+            
+            <!-- Parent Background -->
+            <div id="parent-bg" class="absolute inset-0 transition-opacity duration-500 opacity-0">
+                <img 
+                    src="{{ asset('bgs/parent.png') }}" 
+                    alt="Parent background" 
+                    class="w-full h-full object-cover"
+                />
+                <div class="absolute inset-0 bg-gradient-to-br from-pink-900/30 via-rose-900/25 to-slate-900/30"></div>
+            </div>
+            
+            <!-- Student Background -->
+            <div id="student-bg" class="absolute inset-0 transition-opacity duration-500 opacity-0">
+                <img 
+                    src="{{ asset('bgs/student.png') }}" 
+                    alt="Student background" 
+                    class="w-full h-full object-cover"
+                />
+                <div class="absolute inset-0 bg-gradient-to-br from-green-900/30 via-emerald-900/25 to-slate-900/30"></div>
+            </div>
         </div>
 
         <div class="w-full max-w-md relative z-10">
@@ -17,82 +40,256 @@
                 <div class="relative rounded-3xl bg-white/10 backdrop-blur-2xl shadow-2xl border border-white/20 overflow-hidden">
                     <!-- Header -->
                     <div class="p-8 text-center border-b border-white/10">
-                        <div class="mx-auto grid h-16 w-16 place-items-center rounded-2xl bg-gradient-to-br from-amber-500 to-orange-600 shadow-lg mb-4">
-                            <svg class="h-8 w-8 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                                <path d="M12 3 1 9l11 6 9-4.91V17a2 2 0 0 1-1.1 1.79l-7.4 3.7a2 2 0 0 1-1.8 0l-7.4-3.7A2 2 0 0 1 2 17V9" />
-                                <path d="M12 21V9" />
-                            </svg>
-                        </div>
                         <h1 class="text-2xl font-black text-white mb-1">
                             {{ config('myacademy.school_name', config('app.name', 'MyAcademy')) }}
                         </h1>
                         <p class="text-sm text-white/70">School Management System</p>
+                        <div class="mt-3">
+                            <h3 id="login-type-title" class="text-lg font-bold text-white">Staff Login</h3>
+                        </div>
                     </div>
 
-                    <!-- Form -->
-                    <div class="p-8">
-                        <form class="space-y-5" method="POST" action="{{ route('login.store') }}">
-                            @csrf
-
-                            <div>
-                                <label class="text-sm font-semibold text-white/90 mb-2 block" for="email">Email Address</label>
-                                <input
-                                    id="email"
-                                    name="email"
-                                    type="email"
-                                    value="{{ old('email') }}"
-                                    autocomplete="username"
-                                    required
-                                    class="w-full rounded-xl border-0 bg-white/10 backdrop-blur-sm px-4 py-3 text-sm text-white placeholder:text-white/50 ring-1 ring-white/20 focus:ring-2 focus:ring-amber-400 transition"
-                                    placeholder="admin@myacademy.local"
-                                />
-                                @error('email')
-                                    <div class="mt-2 text-xs text-red-300">{{ $message }}</div>
-                                @enderror
-                            </div>
-
-                            <div>
-                                <label class="text-sm font-semibold text-white/90 mb-2 block" for="password">Password</label>
-                                <input
-                                    id="password"
-                                    name="password"
-                                    type="password"
-                                    autocomplete="current-password"
-                                    required
-                                    class="w-full rounded-xl border-0 bg-white/10 backdrop-blur-sm px-4 py-3 text-sm text-white placeholder:text-white/50 ring-1 ring-white/20 focus:ring-2 focus:ring-amber-400 transition"
-                                    placeholder="••••••••"
-                                />
-                                @error('password')
-                                    <div class="mt-2 text-xs text-red-300">{{ $message }}</div>
-                                @enderror
-                            </div>
-
-                            <label class="flex items-center gap-2 text-sm text-white/80 cursor-pointer">
-                                <input
-                                    type="checkbox"
-                                    name="remember"
-                                    class="h-4 w-4 rounded border-white/30 bg-white/10 text-amber-500 focus:ring-amber-400"
-                                />
-                                Remember me for 30 days
-                            </label>
-
-                            <button
-                                type="submit"
-                                class="w-full rounded-xl bg-gradient-to-r from-amber-500 to-orange-600 px-4 py-3.5 text-sm font-bold text-white shadow-lg hover:shadow-xl hover:from-amber-600 hover:to-orange-700 transition-all duration-200"
+                    <!-- Login Type Tabs -->
+                    <div class="px-8 pt-6">
+                        <div class="flex rounded-xl bg-white/5 p-1 backdrop-blur-sm border border-white/10">
+                            <button 
+                                type="button" 
+                                id="staff-tab" 
+                                class="flex-1 rounded-lg px-3 py-2 text-xs font-bold text-white transition-all duration-200 bg-white/20 shadow-sm"
+                                onclick="switchLoginType('staff')"
                             >
-                                Sign in to Dashboard
+                                <div class="flex items-center justify-center gap-1.5">
+                                    <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+                                    </svg>
+                                    <span>School Staff</span>
+                                </div>
                             </button>
-                        </form>
+                            <button 
+                                type="button" 
+                                id="parent-tab" 
+                                class="flex-1 rounded-lg px-3 py-2 text-xs font-bold text-white/70 transition-all duration-200 hover:text-white hover:bg-white/10"
+                                onclick="switchLoginType('parent')"
+                            >
+                                <div class="flex items-center justify-center gap-1.5">
+                                    <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                                    </svg>
+                                    <span>Parent</span>
+                                </div>
+                            </button>
+                            <button 
+                                type="button" 
+                                id="student-tab" 
+                                class="flex-1 rounded-lg px-3 py-2 text-xs font-bold text-white/70 transition-all duration-200 hover:text-white hover:bg-white/10"
+                                onclick="switchLoginType('student')"
+                            >
+                                <div class="flex items-center justify-center gap-1.5">
+                                    <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5z"></path>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"></path>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"></path>
+                                    </svg>
+                                    <span>Student</span>
+                                </div>
+                            </button>
+                        </div>
                     </div>
+
+                    <!-- Dynamic Login Form Content -->
+                    <div class="p-8 pt-6">
+                        <!-- Staff Login Form -->
+                        <div id="staff-form" class="login-form">
+                            <form class="space-y-5" method="POST" action="{{ route('login.store') }}">
+                                @csrf
+                                <input type="hidden" name="login_type" value="staff">
+
+                                <div>
+                                    <label class="text-sm font-semibold text-white/90 mb-2 block" for="staff-email">Email Address</label>
+                                    <input
+                                        id="staff-email"
+                                        name="email"
+                                        type="email"
+                                        value="{{ old('email') }}"
+                                        autocomplete="username"
+                                        required
+                                        class="w-full rounded-xl border-0 bg-white/10 backdrop-blur-sm px-4 py-3 text-sm text-white placeholder:text-white/50 ring-1 ring-white/20 focus:ring-2 focus:ring-blue-400 transition"
+                                        placeholder="admin@myacademy.local"
+                                    />
+                                </div>
+
+                                <div>
+                                    <label class="text-sm font-semibold text-white/90 mb-2 block" for="staff-password">Password</label>
+                                    <input
+                                        id="staff-password"
+                                        name="password"
+                                        type="password"
+                                        autocomplete="current-password"
+                                        required
+                                        class="w-full rounded-xl border-0 bg-white/10 backdrop-blur-sm px-4 py-3 text-sm text-white placeholder:text-white/50 ring-1 ring-white/20 focus:ring-2 focus:ring-blue-400 transition"
+                                        placeholder="••••••••"
+                                    />
+                                </div>
+
+
+                                <button
+                                    type="submit"
+                                    class="w-full rounded-xl bg-gradient-to-r from-blue-500 to-indigo-600 px-4 py-3.5 text-sm font-bold text-white shadow-lg hover:shadow-xl hover:from-blue-600 hover:to-indigo-700 transition-all duration-200"
+                                >
+                                    Sign in to Dashboard
+                                </button>
+                            </form>
+                        </div>
+
+                        <!-- Parent Login Form -->
+                        <div id="parent-form" class="login-form hidden">
+                            <form class="space-y-5" method="POST" action="{{ route('login.store') }}">
+                                @csrf
+                                <input type="hidden" name="login_type" value="parent">
+
+                                <div>
+                                    <label class="text-sm font-semibold text-white/90 mb-2 block" for="parent-email">Email Address</label>
+                                    <input
+                                        id="parent-email"
+                                        name="email"
+                                        type="email"
+                                        value="{{ old('email') }}"
+                                        autocomplete="username"
+                                        required
+                                        class="w-full rounded-xl border-0 bg-white/10 backdrop-blur-sm px-4 py-3 text-sm text-white placeholder:text-white/50 ring-1 ring-white/20 focus:ring-2 focus:ring-pink-400 transition"
+                                        placeholder="parent@email.com"
+                                    />
+                                </div>
+
+                                <div>
+                                    <label class="text-sm font-semibold text-white/90 mb-2 block" for="parent-password">Password</label>
+                                    <input
+                                        id="parent-password"
+                                        name="password"
+                                        type="password"
+                                        autocomplete="current-password"
+                                        required
+                                        class="w-full rounded-xl border-0 bg-white/10 backdrop-blur-sm px-4 py-3 text-sm text-white placeholder:text-white/50 ring-1 ring-white/20 focus:ring-2 focus:ring-pink-400 transition"
+                                        placeholder="••••••••"
+                                    />
+                                </div>
+
+
+                                <button
+                                    type="submit"
+                                    class="w-full rounded-xl bg-gradient-to-r from-pink-500 to-rose-600 px-4 py-3.5 text-sm font-bold text-white shadow-lg hover:shadow-xl hover:from-pink-600 hover:to-rose-700 transition-all duration-200"
+                                >
+                                    Access Parent Portal
+                                </button>
+                            </form>
+                        </div>
+
+                        <!-- Student Login Form -->
+                        <div id="student-form" class="login-form hidden">
+                            <form class="space-y-5" method="POST" action="{{ route('login.store') }}">
+                                @csrf
+                                <input type="hidden" name="login_type" value="student">
+
+                                <div>
+                                    <label class="text-sm font-semibold text-white/90 mb-2 block" for="student-admission">Admission Number</label>
+                                    <input
+                                        id="student-admission"
+                                        name="admission_number"
+                                        type="text"
+                                        value="{{ old('admission_number') }}"
+                                        autocomplete="username"
+                                        required
+                                        class="w-full rounded-xl border-0 bg-white/10 backdrop-blur-sm px-4 py-3 text-sm text-white placeholder:text-white/50 ring-1 ring-white/20 focus:ring-2 focus:ring-green-400 transition"
+                                        placeholder="STU20240001"
+                                    />
+                                </div>
+
+                                <div>
+                                    <label class="text-sm font-semibold text-white/90 mb-2 block" for="student-password">Password</label>
+                                    <input
+                                        id="student-password"
+                                        name="password"
+                                        type="password"
+                                        autocomplete="current-password"
+                                        required
+                                        class="w-full rounded-xl border-0 bg-white/10 backdrop-blur-sm px-4 py-3 text-sm text-white placeholder:text-white/50 ring-1 ring-white/20 focus:ring-2 focus:ring-green-400 transition"
+                                        placeholder="••••••••"
+                                    />
+                                </div>
+
+
+                                <button
+                                    type="submit"
+                                    class="w-full rounded-xl bg-gradient-to-r from-green-500 to-emerald-600 px-4 py-3.5 text-sm font-bold text-white shadow-lg hover:shadow-xl hover:from-green-600 hover:to-emerald-700 transition-all duration-200"
+                                >
+                                    Access Student Portal
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Error Messages -->
+                    @if ($errors->any())
+                        <div class="px-8 pb-6">
+                            <div class="rounded-xl bg-red-500/20 border border-red-400/30 p-4">
+                                @foreach ($errors->all() as $error)
+                                    <div class="text-sm text-red-200">{{ $error }}</div>
+                                @endforeach
+                            </div>
+                        </div>
+                    @endif
                 </div>
             </div>
 
-            <!-- Footer -->
-            <div class="mt-6 text-center">
-                <p class="text-sm font-semibold text-white/90 drop-shadow-lg">
-                    Offline Edition • LAN Network Only
-                </p>
-            </div>
+
         </div>
     </div>
+
+    <script>
+        function switchLoginType(type) {
+            // Hide all forms
+            document.querySelectorAll('.login-form').forEach(form => {
+                form.classList.add('hidden');
+            });
+            
+            // Hide all backgrounds
+            document.querySelectorAll('[id$="-bg"]').forEach(bg => {
+                bg.classList.remove('opacity-100');
+                bg.classList.add('opacity-0');
+            });
+            
+            // Remove active state from all tabs
+            document.querySelectorAll('[id$="-tab"]').forEach(tab => {
+                tab.classList.remove('bg-white/20', 'shadow-sm', 'text-white');
+                tab.classList.add('text-white/70', 'hover:text-white', 'hover:bg-white/10');
+            });
+            
+            // Show selected form
+            document.getElementById(type + '-form').classList.remove('hidden');
+            
+            // Show selected background
+            document.getElementById(type + '-bg').classList.remove('opacity-0');
+            document.getElementById(type + '-bg').classList.add('opacity-100');
+            
+            // Activate selected tab
+            const activeTab = document.getElementById(type + '-tab');
+            activeTab.classList.add('bg-white/20', 'shadow-sm', 'text-white');
+            activeTab.classList.remove('text-white/70', 'hover:text-white', 'hover:bg-white/10');
+            
+            // Update title in header
+            const titleElement = document.getElementById('login-type-title');
+            if (type === 'staff') {
+                titleElement.textContent = 'Staff Login';
+            } else if (type === 'parent') {
+                titleElement.textContent = 'Parent Portal';
+            } else if (type === 'student') {
+                titleElement.textContent = 'Student Portal';
+            }
+        }
+        
+        // Initialize with staff tab active
+        document.addEventListener('DOMContentLoaded', function() {
+            switchLoginType('staff');
+        });
+    </script>
 </x-layouts.guest>
