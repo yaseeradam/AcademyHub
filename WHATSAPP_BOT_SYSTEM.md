@@ -2,7 +2,7 @@
 
 ## 📋 Overview
 
-The MyAcademy WhatsApp Bot is a comprehensive automated messaging system that allows parents to receive real-time notifications about their children's school activities and interact with the school through WhatsApp. This system provides a FREE alternative to expensive WhatsApp Business API solutions.
+The MyAcademy WhatsApp Bot is a comprehensive automated messaging system that allows parents to receive real-time notifications about their children's school activities and interact with the school through WhatsApp. This system is included with your MyAcademy subscription.
 
 ## 🎯 Key Features
 
@@ -46,13 +46,13 @@ The MyAcademy WhatsApp Bot is a comprehensive automated messaging system that al
 
 ## 💰 Cost Analysis
 
-### FREE Solution (Recommended)
-- **Setup Cost**: ₦0
-- **Monthly Cost**: ₦0
+### MyAcademy WhatsApp Bot (Included)
+- **Setup Cost**: Included in subscription
+- **Monthly Cost**: Included in subscription
 - **Per Message**: ₦0
-- **Requirements**: Dedicated WhatsApp number + Server
+- **Requirements**: Dedicated WhatsApp number
 
-### Paid Alternatives (For Comparison)
+### Alternative SMS Solutions (For Comparison)
 - **Twilio WhatsApp API**: ~₦70 per message
 - **TermiiSMS**: ~₦25 per message
 - **360Dialog**: ~₦50 per message
@@ -60,7 +60,7 @@ The MyAcademy WhatsApp Bot is a comprehensive automated messaging system that al
 **Example Monthly Savings**:
 - 100 parents × 30 messages = 3,000 messages
 - Twilio cost: ₦210,000/month
-- Our solution: ₦0/month
+- MyAcademy WhatsApp Bot: Included
 - **Savings: ₦210,000/month**
 
 ## 🛠️ Technical Stack
@@ -80,10 +80,10 @@ The MyAcademy WhatsApp Bot is a comprehensive automated messaging system that al
 - **HTTP Client**: axios
 
 ### Infrastructure
-- **Server**: Ubuntu/CentOS VPS
-- **Web Server**: Nginx
-- **Process Manager**: PM2
-- **Monitoring**: PM2 monitoring dashboard
+- **Server**: Managed cloud infrastructure
+- **Web Server**: Nginx (managed)
+- **Process Manager**: PM2 (managed)
+- **Monitoring**: 24/7 uptime monitoring
 
 ## 📱 Bot Conversation Examples
 
@@ -195,25 +195,22 @@ CREATE TABLE whatsapp_logs (
 
 ## 🚀 Deployment Strategy
 
-### Phase 1: Development Setup
-1. Set up Node.js bot service locally
-2. Create Laravel API endpoints
-3. Test with personal WhatsApp number
-4. Implement basic commands (attendance, results)
+### Managed Deployment
+MyAcademy handles all deployment and infrastructure management as part of the subscription service.
 
-### Phase 2: Production Deployment
-1. Deploy to VPS server
-2. Configure PM2 for bot service
-3. Set up SSL certificates
-4. Configure domain and webhooks
+### WhatsApp Bot Setup
+1. Provide dedicated WhatsApp business number
+2. MyAcademy team configures bot service
+3. Test with school admin WhatsApp number
+4. Verify basic commands (attendance, results)
 
-### Phase 3: Parent Onboarding
+### Parent Onboarding
 1. Create registration process
 2. Train school staff on bot management
 3. Gradual rollout to parent groups
 4. Monitor and optimize performance
 
-### Phase 4: Advanced Features
+### Advanced Features
 1. Add rich media support
 2. Implement subscription management
 3. Add analytics and reporting
@@ -284,16 +281,16 @@ CREATE TABLE whatsapp_logs (
 ## 📞 Support Structure
 
 ### Technical Support
-- **Level 1**: School IT staff
-- **Level 2**: Development team
+- **Level 1**: MyAcademy support team (24/7)
+- **Level 2**: School IT staff training
 - **Level 3**: Infrastructure team
-- **Emergency**: 24/7 monitoring
+- **Emergency**: Dedicated hotline
 
 ### Parent Support
-- **Registration Help**: School admin office
-- **Usage Training**: Parent orientation sessions
-- **Technical Issues**: Dedicated support number
-- **Feedback**: Monthly parent surveys
+- **Registration Help**: MyAcademy support + School admin
+- **Usage Training**: Online tutorials & parent orientation
+- **Technical Issues**: MyAcademy support hotline
+- **Feedback**: In-app feedback system
 
 ## 🎯 Future Enhancements
 
@@ -318,24 +315,22 @@ CREATE TABLE whatsapp_logs (
 ## 📋 Implementation Checklist
 
 ### Prerequisites
+- [ ] MyAcademy subscription active
 - [ ] Dedicated WhatsApp business number
-- [ ] VPS server with Node.js support
-- [ ] SSL certificate for API endpoints
-- [ ] Database backup strategy
+- [ ] School admin contact for coordination
 
-### Development Phase
-- [ ] Set up Node.js bot service
-- [ ] Create Laravel API endpoints
-- [ ] Implement parent registration
-- [ ] Add basic bot commands
-- [ ] Test message delivery
+### Setup Phase (Managed by MyAcademy)
+- [ ] Bot service configuration
+- [ ] API endpoint integration
+- [ ] Parent registration system
+- [ ] Bot commands implementation
+- [ ] Message delivery testing
 
-### Deployment Phase
-- [ ] Configure production server
-- [ ] Set up PM2 process manager
-- [ ] Configure monitoring and alerts
-- [ ] Create deployment scripts
-- [ ] Perform load testing
+### Activation Phase
+- [ ] Production server ready
+- [ ] Monitoring and alerts configured
+- [ ] Performance testing completed
+- [ ] School staff training scheduled
 
 ### Launch Phase
 - [ ] Train school staff

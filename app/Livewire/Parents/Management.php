@@ -118,7 +118,7 @@ class Management extends Component
             'custom_fields' => $this->phone ? ['phone' => $this->phone] : null,
         ]);
 
-        Audit::log('parents.created', $parent->id, [
+        Audit::log('parents.created', $parent, [
             'name' => $parent->name,
             'email' => $parent->email,
         ]);
@@ -136,7 +136,7 @@ class Management extends Component
 
         $this->selectedParent->students()->sync($this->selectedChildren);
 
-        Audit::log('parents.children_linked', $this->selectedParent->id, [
+        Audit::log('parents.children_linked', $this->selectedParent, [
             'parent_name' => $this->selectedParent->name,
             'children_count' => count($this->selectedChildren),
             'children_ids' => $this->selectedChildren,
@@ -157,7 +157,7 @@ class Management extends Component
         $parent->students()->detach();
         $parent->delete();
 
-        Audit::log('parents.deleted', $parentId, [
+        Audit::log('parents.deleted', $parent, [
             'name' => $parent->name,
             'email' => $parent->email,
         ]);

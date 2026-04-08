@@ -114,4 +114,28 @@ class Student extends Model
             ->orderBy('name')
             ->get();
     }
+
+    public function homeworkSubmissions(): HasMany
+    {
+        return $this->hasMany(HomeworkSubmission::class);
+    }
+
+    public function attendanceMarks(): HasMany
+    {
+        return $this->hasMany(AttendanceMark::class);
+    }
+
+    public function getHomeworkForStudent()
+    {
+        return Homework::where('class_id', $this->class_id)
+            ->where(function($query) {
+                $query->whereNull('section_id')
+                      ->orWhere('section_id', $this->section_id);
+            })
+            ->with(['subject', 'teacher', 'submissions' => function($query) {
+                $query->where('student_id', $this->id);
+            }])
+            ->orderBy('due_date', 'desc')
+            ->get();
+    }
 }

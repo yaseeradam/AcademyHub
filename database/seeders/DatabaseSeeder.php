@@ -21,7 +21,7 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        User::query()->firstOrCreate(
+        User::query()->updateOrCreate(
             ['email' => env('MYACADEMY_ADMIN_EMAIL', 'admin@myacademy.local')],
             [
                 'name' => 'Super Admin',
@@ -31,7 +31,7 @@ class DatabaseSeeder extends Seeder
             ]
         );
 
-        User::query()->firstOrCreate(
+        User::query()->updateOrCreate(
             ['email' => 'bursar@myacademy.local'],
             [
                 'name' => 'Bursar',

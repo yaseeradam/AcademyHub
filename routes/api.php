@@ -42,3 +42,13 @@ Route::middleware('auth:sanctum')->group(function () {
     // Offline Sync Engine
     Route::post('/sync', [SyncController::class, 'handleSync']);
 });
+
+// WhatsApp Bot Routes
+Route::prefix('whatsapp')->group(function () {
+    Route::get('parent/{phone}', [\App\Http\Controllers\Api\WhatsAppController::class, 'getParent']);
+    Route::get('attendance/{parentId}', [\App\Http\Controllers\Api\WhatsAppController::class, 'getAttendance']);
+    Route::get('results/{parentId}', [\App\Http\Controllers\Api\WhatsAppController::class, 'getResults']);
+    Route::get('fees/{parentId}', [\App\Http\Controllers\Api\WhatsAppController::class, 'getFees']);
+    Route::post('register', [\App\Http\Controllers\Api\WhatsAppController::class, 'registerParent']);
+    Route::post('verify', [\App\Http\Controllers\Api\WhatsAppController::class, 'verifyOTP']);
+});

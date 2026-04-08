@@ -34,6 +34,7 @@ use App\Livewire\Attendance\Teachers as TeacherAttendance;
 use App\Livewire\Certificates\Index as CertificatesIndex;
 use App\Livewire\Certificates\Manager as CertificatesManager;
 use App\Livewire\Events\Index as EventsIndex;
+use App\Livewire\Homework\Index as HomeworkIndex;
 use App\Livewire\Results\Entry as ResultsEntry;
 use App\Livewire\Results\Broadsheet as ResultsBroadsheet;
 use App\Livewire\Results\Submissions as ResultsSubmissions;
@@ -92,6 +93,11 @@ Route::get('/cbt/portal/{attempt}', CbtPortalTake::class)->name('cbt.portal.take
 Route::get('/cbt/student', CbtPortalStart::class)->name('cbt.student');
 Route::get('/cbt/student/{attempt}', CbtPortalTake::class)->name('cbt.student.take');
 
+// Fresh CSRF token endpoint — used by JS logout to prevent 419 Page Expired
+Route::get('/csrf-token', function () {
+    return response()->json(['token' => csrf_token()]);
+});
+
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthenticatedSessionController::class, 'create'])->name('login');
     Route::post('/login', [AuthenticatedSessionController::class, 'store'])->name('login.store');
@@ -102,12 +108,21 @@ Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])
     ->name('logout');
 
 // Student dashboard route (session-based, not auth-based)
-Route::get('/student/dashboard', function () {
-    if (!session('student_id')) {
-        return redirect()->route('login');
-    }
-    return view('pages.dashboard-student');
-})->name('student.dashboard');
+Route::get('/student/dashboard', \App\Livewire\Student\Dashboard::class)
+    ->middleware('student.session')
+    ->name('student.dashboard');
+
+Route::get('/student/homework', \App\Livewire\Student\Homework::class)
+    ->middleware('student.session')
+    ->name('student.homework');
+
+Route::get('/student/results', \App\Livewire\Student\Results::class)
+    ->middleware('student.session')
+    ->name('student.results');
+
+Route::get('/student/attendance', \App\Livewire\Student\Attendance::class)
+    ->middleware('student.session')
+    ->name('student.attendance');
 
 Route::middleware(['auth', 'active'])->group(function () {
     Route::get('/dashboard', function () {
@@ -140,6 +155,7 @@ Route::middleware(['auth', 'active'])->group(function () {
         Route::post('/randomize-photos', [PhotoRandomizerController::class, 'randomize'])->name('photos.randomize');
         
         Route::get('/marketplace', MarketplaceIndex::class)->name('marketplace');
+        Route::get('/marketplace/product/{product}', \App\Livewire\Marketplace\ProductDetail::class)->name('marketplace.product');
 
         Route::get('/parents', \App\Livewire\Parents\Management::class)->name('parents.index');
 
@@ -247,6 +263,9 @@ Route::middleware(['auth', 'active'])->group(function () {
             ->name('analytics.export.cbt');
 
         Route::get('/results/entry', ResultsEntry::class)->middleware('permission:results.entry,results.review')->name('results.entry');
+
+        Route::get('/homework', HomeworkIndex::class)->name('homework.index');
+        Route::get('/homework/{id}/submissions', \App\Livewire\Homework\Submissions::class)->name('homework.submissions');
 
         
         Route::get('/settings/debug', function() {

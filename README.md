@@ -1,16 +1,6 @@
 # MyAcademy
 
-## ⚡ QUICK START - Just 3 Steps!
-
-1. **Install Laragon** - https://laragon.org/download/
-2. **Copy files** to `C:\laragon\www\`
-3. **Double-click** `MYACADEMY.bat` → Select option 1
-
-**Done!** See `QUICK_START.md` for details.
-
----
-
-MyAcademy is a comprehensive School Management System built with Laravel.
+MyAcademy is a comprehensive cloud-based School Management System built with Laravel.
 
 ## Stack
 
@@ -25,18 +15,12 @@ MyAcademy is a comprehensive School Management System built with Laravel.
 - `admin`: full access + Settings + Backup/Restore
 - `bursar`: Finance only
 - `teacher`: Academics (scores / broadsheet)
+- `student`: Student portal (homework, results, attendance)
+- `parent`: Parent portal (view children's data)
 
-## Local Setup (Windows / Laragon)
+## Production Deployment
 
-1) Enable GD extension (required for certificates)
-
-```powershell
-Double-click ENABLE_GD.bat
-```
-
-Then restart Laragon.
-
-2) Install dependencies
+1) Install dependencies
 
 ```powershell
 php .\composer.phar install
@@ -45,8 +29,12 @@ npm install
 
 2) Configure `.env`
 
-- Set MySQL credentials (`DB_*`)
-- (Optional) set admin seed credentials:
+- Set `APP_ENV=production`
+- Set `APP_DEBUG=false`
+- Set `APP_URL` to your domain
+- Configure MySQL credentials (`DB_*`)
+- Set mail credentials for notifications
+- Set admin credentials:
   - `MYACADEMY_ADMIN_EMAIL`
   - `MYACADEMY_ADMIN_PASSWORD`
 
@@ -57,20 +45,53 @@ php artisan migrate --force
 php artisan db:seed --force
 ```
 
-4) Build assets and run
+4) Build assets
 
-```powershell
+```bash
 npm run build
-php artisan serve --host=0.0.0.0 --port=8000
 ```
 
-Open: `http://127.0.0.1:8000`
+5) Configure web server (Nginx/Apache) and SSL certificate
+
+6) Set proper permissions
+
+```bash
+chmod -R 755 storage bootstrap/cache
+chown -R www-data:www-data storage bootstrap/cache
+```
+
+7) Optimize for production
+
+```bash
+php artisan config:cache
+php artisan route:cache
+php artisan view:cache
+```
+
+## Features
+
+- Student & Staff Management
+- Academic Records & Results
+- Attendance Tracking
+- Fee Management
+- Report Cards & Certificates
+- **Student Portal** (Homework, Results, Attendance)
+- **Parent Portal** (View children's progress)
+- Homework Assignment & Submission
+- WhatsApp Bot Integration
+- Backup & Restore
+- Multi-role Access Control
+
+## Pricing
+
+MyAcademy is a paid cloud-based service. Contact us for pricing and subscription plans.
 
 ## Demo Accounts (seeded)
 
 - `admin@myacademy.local` / `password`
 - `bursar@myacademy.local` / `password`
 - `teacher@myacademy.local` / `password`
+- Student login: Use admission number (e.g., `STU20240001`) with password format: `firstname + last4digits` (e.g., `john0001`)
 
 ## Backup & Restore (Admin)
 
@@ -79,9 +100,24 @@ Settings → Backup & Restore:
 - **Backup Now:** creates `database.sql` (mysqldump) + zips it with `public/uploads`
 - **Restore:** uploads a backup zip, enters maintenance mode, wipes DB + uploads, then restores
 
-If `mysqldump` / `mysql` are not in PATH, set:
+If `mysqldump` / `mysql` are not in PATH on your server, set:
 
-- `MYACADEMY_MYSQLDUMP` (example: `C:\Program Files\MySQL\MySQL Server 9.5\bin\mysqldump.exe`)
-- `MYACADEMY_MYSQL` (example: `C:\Program Files\MySQL\MySQL Server 9.5\bin\mysql.exe`)
+- `MYACADEMY_MYSQLDUMP` (example: `/usr/bin/mysqldump`)
+- `MYACADEMY_MYSQL` (example: `/usr/bin/mysql`)
 
-# MyAcademyV2
+## Server Requirements
+
+- PHP 8.2 or higher
+- MySQL 5.7+ or MariaDB 10.3+
+- Composer
+- Node.js 18+ & NPM
+- GD Extension (for certificates)
+- SSL Certificate (recommended)
+
+## Support
+
+For technical support and inquiries, contact the MyAcademy team.
+
+---
+
+© 2024 MyAcademy - Cloud School Management System

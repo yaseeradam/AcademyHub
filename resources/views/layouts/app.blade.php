@@ -290,7 +290,7 @@
                 <div class="border-t border-gray-100 p-4">
                     <form method="POST" action="{{ route('logout') }}" id="mobileLogoutForm">
                         @csrf
-                        <button type="button" onclick="confirmLogout('mobileLogoutForm')"
+                        <button type="button" onclick="doLogout('mobileLogoutForm')"
                             class="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-br from-slate-700 to-slate-900 px-4 py-3 text-sm font-bold text-white shadow-md hover:shadow-lg transition-all">
                             <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                 stroke-width="2.5">
@@ -458,6 +458,19 @@
                     <span class="sidebar-text">Attendance</span>
                 </a>
 
+                <a href="{{ route('homework.index') }}" wire:navigate
+                    class="{{ request()->routeIs('homework.*') ? 'bg-amber-500 text-white shadow-md' : 'text-slate-700 hover:bg-amber-50' }} mb-0.5 group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-bold transition-all">
+                    <svg class="h-5 w-5 flex-shrink-0 {{ request()->routeIs('homework.*') ? 'text-white' : 'text-purple-600' }}"
+                        viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                        <polyline points="14 2 14 8 20 8" />
+                        <line x1="16" y1="13" x2="8" y2="13" />
+                        <line x1="16" y1="17" x2="8" y2="17" />
+                        <polyline points="10 9 9 9 8 9" />
+                    </svg>
+                    <span class="sidebar-text">Homework</span>
+                </a>
+
                 <a href="{{ route('messages') }}" wire:navigate
                     class="{{ request()->routeIs('messages') ? 'bg-amber-500 text-white shadow-md' : 'text-slate-700 hover:bg-amber-50' }} mb-0.5 group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-bold transition-all">
                     <svg class="h-5 w-5 flex-shrink-0 {{ request()->routeIs('messages') ? 'text-white' : 'text-purple-600' }}"
@@ -573,7 +586,7 @@
 
                         <form method="POST" action="{{ route('logout') }}" id="logoutForm" class="hidden md:block">
                             @csrf
-                            <button type="button" onclick="confirmLogout()"
+                            <button type="button" onclick="doLogout()"
                                 class="inline-flex items-center justify-center rounded-xl bg-gradient-to-br from-slate-700 to-slate-900 px-4 py-2.5 text-sm font-bold text-white shadow-md hover:shadow-lg transition-all">
                                 Logout
                             </button>
@@ -655,38 +668,20 @@
     </script>
 
     <script>
-        function confirmLogout(formId = 'logoutForm') {
-            const modal = document.createElement('div');
-            modal.className = 'fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm';
-            modal.style.animation = 'fadeIn 0.2s ease-out';
-
-            const isDark = document.documentElement.classList.contains('dark');
-            modal.innerHTML = `
-                    <div class="${isDark ? 'bg-[#1e1e1e]' : 'bg-white'} rounded-3xl shadow-2xl max-w-md w-full transform" style="animation: slideUp 0.3s ease-out">
-                        <div class="bg-gradient-to-r from-slate-700 to-slate-900 p-6 rounded-t-3xl">
-                            <div class="flex items-center gap-4">
-                                <svg class="h-12 w-12 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
-                                <h3 class="text-2xl font-bold text-white">Confirm Logout</h3>
-                            </div>
-                        </div>
-                        <div class="p-6">
-                            <p class="${isDark ? 'text-gray-300' : 'text-gray-700'} text-lg leading-relaxed">Are you sure you want to logout?</p>
-                        </div>
-                        <div class="p-6 pt-0 flex gap-3">
-                            <button onclick="document.getElementById('${formId}').submit()" class="flex-1 bg-gradient-to-r from-slate-700 to-slate-900 text-white font-bold py-3 px-6 rounded-xl hover:shadow-lg transition-all">
-                                Yes, Logout
-                            </button>
-                            <button onclick="this.closest('.fixed').remove()" class="flex-1 ${isDark ? 'bg-[#333] text-gray-200 hover:bg-[#3a3a3a]' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'} font-bold py-3 px-6 rounded-xl transition-all">
-                                Cancel
-                            </button>
-                        </div>
-                    </div>
-                `;
-
-            document.body.appendChild(modal);
-            modal.onclick = (e) => { if (e.target === modal) modal.remove(); };
+        function doLogout(formId = 'logoutForm') {
+            // Fetch a fresh CSRF token to prevent 419 Page Expired on logout
+            fetch('/csrf-token', { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.token) {
+                        document.querySelector('meta[name="csrf-token"]').setAttribute('content', data.token);
+                        document.querySelectorAll('input[name="_token"]').forEach(el => el.value = data.token);
+                    }
+                })
+                .catch(() => {})
+                .finally(() => {
+                    document.getElementById(formId).submit();
+                });
         }
     </script>
 

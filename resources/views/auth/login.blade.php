@@ -1,5 +1,5 @@
 <x-layouts.guest>
-    <div class="min-h-screen flex items-center justify-end relative overflow-hidden p-4 sm:p-6 lg:p-8">
+    <div class="min-h-screen flex items-center justify-start relative overflow-hidden p-4 sm:p-6 lg:p-8">
         <!-- Dynamic Background Images -->
         <div class="absolute inset-0 z-0">
             <!-- Staff Background -->
@@ -228,13 +228,14 @@
                         </div>
                     </div>
 
-                    <!-- Error Messages -->
-                    @if ($errors->any())
+                    <!-- Success Message -->
+                    @if (session('success'))
                         <div class="px-8 pb-6">
-                            <div class="rounded-xl bg-red-500/20 border border-red-400/30 p-4">
-                                @foreach ($errors->all() as $error)
-                                    <div class="text-sm text-red-200">{{ $error }}</div>
-                                @endforeach
+                            <div class="rounded-xl bg-green-500/20 border border-green-400/30 p-4 flex items-start gap-3">
+                                <svg class="h-5 w-5 text-green-300 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                <div class="text-sm text-green-200">{{ session('success') }}</div>
                             </div>
                         </div>
                     @endif
@@ -244,6 +245,88 @@
 
         </div>
     </div>
+
+    <!-- Error Modal -->
+    @if ($errors->any())
+        <div id="error-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+            <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden animate-fade-in">
+                <!-- Modal Header -->
+                <div class="bg-gradient-to-r from-red-500 to-rose-600 px-6 py-4 flex items-center gap-3">
+                    <div class="h-10 w-10 rounded-full bg-white/20 flex items-center justify-center">
+                        <svg class="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-bold text-white">Login Failed</h3>
+                        <p class="text-sm text-white/80">Please check the following errors</p>
+                    </div>
+                </div>
+                
+                <!-- Modal Body -->
+                <div class="px-6 py-5 space-y-3">
+                    @foreach ($errors->all() as $error)
+                        <div class="flex items-start gap-3 text-gray-700">
+                            <svg class="h-5 w-5 text-red-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                            <p class="text-sm">{{ $error }}</p>
+                        </div>
+                    @endforeach
+                </div>
+                
+                <!-- Modal Footer -->
+                <div class="px-6 py-4 bg-gray-50 flex justify-end">
+                    <button 
+                        onclick="closeErrorModal()" 
+                        class="px-6 py-2.5 bg-gradient-to-r from-red-500 to-rose-600 text-white text-sm font-semibold rounded-lg hover:from-red-600 hover:to-rose-700 transition-all duration-200 shadow-md hover:shadow-lg"
+                    >
+                        Try Again
+                    </button>
+                </div>
+            </div>
+        </div>
+    @endif
+
+    <style>
+        @keyframes fade-in {
+            from {
+                opacity: 0;
+                transform: scale(0.95) translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+        .animate-fade-in {
+            animation: fade-in 0.3s ease-out;
+        }
+    </style>
+
+    <script>
+        function closeErrorModal() {
+            const modal = document.getElementById('error-modal');
+            if (modal) {
+                modal.style.opacity = '0';
+                setTimeout(() => modal.remove(), 200);
+            }
+        }
+        
+        // Close modal on Escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeErrorModal();
+            }
+        });
+        
+        // Close modal on backdrop click
+        document.getElementById('error-modal')?.addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeErrorModal();
+            }
+        });
+    </script>
 
     <script>
         function switchLoginType(type) {

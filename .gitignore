@@ -17,3 +17,9 @@ yarn-error.log
 /.fleet
 /.idea
 /.vscode
+
+# WhatsApp Bot
+/whatsapp-bot/.env
+/whatsapp-bot/.wwebjs_auth
+/whatsapp-bot/.wwebjs_cache
+/whatsapp-bot/node_modules

@@ -26,9 +26,7 @@ class AppServiceProvider extends ServiceProvider
     {
         Student::observe(StudentObserver::class);
 
-        Blade::if('premium', function (string $feature) {
-            return true;
-        });
+
 
         $settings = \Illuminate\Support\Facades\Cache::rememberForever('myacademy_settings_cache', function () {
             $path = storage_path('app/myacademy/settings.json');
