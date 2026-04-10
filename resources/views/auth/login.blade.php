@@ -3,33 +3,19 @@
         <!-- Dynamic Background Images -->
         <div class="absolute inset-0 z-0">
             <!-- Staff Background -->
-            <div id="staff-bg" class="absolute inset-0 transition-opacity duration-500">
-                <img 
-                    src="{{ asset('bgs/admin.png') }}" 
-                    alt="Staff background" 
-                    class="w-full h-full object-cover"
-                />
-                <div class="absolute inset-0 bg-gradient-to-br from-blue-900/30 via-indigo-900/25 to-slate-900/30"></div>
+            <div id="staff-bg" class="login-bg absolute inset-0" style="opacity:1">
+                <img src="{{ asset('bgs/admin.png') }}" alt="Staff background" class="login-bg-img w-full h-full object-cover" />
+                <div class="absolute inset-0 bg-gradient-to-br from-blue-900/40 via-indigo-900/30 to-slate-900/40"></div>
             </div>
-            
             <!-- Parent Background -->
-            <div id="parent-bg" class="absolute inset-0 transition-opacity duration-500 opacity-0">
-                <img 
-                    src="{{ asset('bgs/parent.png') }}" 
-                    alt="Parent background" 
-                    class="w-full h-full object-cover"
-                />
-                <div class="absolute inset-0 bg-gradient-to-br from-pink-900/30 via-rose-900/25 to-slate-900/30"></div>
+            <div id="parent-bg" class="login-bg absolute inset-0" style="opacity:0">
+                <img src="{{ asset('bgs/parent.png') }}" alt="Parent background" class="login-bg-img w-full h-full object-cover" />
+                <div class="absolute inset-0 bg-gradient-to-br from-pink-900/40 via-rose-900/30 to-slate-900/40"></div>
             </div>
-            
             <!-- Student Background -->
-            <div id="student-bg" class="absolute inset-0 transition-opacity duration-500 opacity-0">
-                <img 
-                    src="{{ asset('bgs/student.png') }}" 
-                    alt="Student background" 
-                    class="w-full h-full object-cover"
-                />
-                <div class="absolute inset-0 bg-gradient-to-br from-green-900/30 via-emerald-900/25 to-slate-900/30"></div>
+            <div id="student-bg" class="login-bg absolute inset-0" style="opacity:0">
+                <img src="{{ asset('bgs/student.png') }}" alt="Student background" class="login-bg-img w-full h-full object-cover" />
+                <div class="absolute inset-0 bg-gradient-to-br from-green-900/40 via-emerald-900/30 to-slate-900/40"></div>
             </div>
         </div>
 
@@ -290,17 +276,34 @@
 
     <style>
         @keyframes fade-in {
-            from {
-                opacity: 0;
-                transform: scale(0.95) translateY(-10px);
-            }
-            to {
-                opacity: 1;
-                transform: scale(1) translateY(0);
-            }
+            from { opacity: 0; transform: scale(0.95) translateY(-10px); }
+            to   { opacity: 1; transform: scale(1) translateY(0); }
         }
-        .animate-fade-in {
-            animation: fade-in 0.3s ease-out;
+        .animate-fade-in { animation: fade-in 0.3s ease-out; }
+
+        @keyframes form-in {
+            from { opacity: 0; transform: translateY(10px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .login-form-animate { animation: form-in 0.35s ease-out forwards; }
+
+        /* Smooth crossfade */
+        .login-bg {
+            transition: opacity 0.9s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Ken Burns on active bg image */
+        @keyframes kenburns {
+            0%   { transform: scale(1)    translate(0, 0); }
+            50%  { transform: scale(1.1)  translate(-1.5%, -1%); }
+            100% { transform: scale(1)    translate(0, 0); }
+        }
+        .login-bg-img {
+            transform-origin: center center;
+            will-change: transform;
+        }
+        .login-bg.is-active .login-bg-img {
+            animation: kenburns 14s ease-in-out infinite;
         }
     </style>
 
@@ -331,48 +334,48 @@
     <script>
         function switchLoginType(type) {
             // Hide all forms
-            document.querySelectorAll('.login-form').forEach(form => {
-                form.classList.add('hidden');
+            document.querySelectorAll('.login-form').forEach(f => f.classList.add('hidden'));
+
+            // Fade out all backgrounds & stop Ken Burns
+            document.querySelectorAll('.login-bg').forEach(bg => {
+                bg.style.opacity = '0';
+                bg.classList.remove('is-active');
+                const img = bg.querySelector('.login-bg-img');
+                if (img) img.style.animation = 'none';
             });
-            
-            // Hide all backgrounds
-            document.querySelectorAll('[id$="-bg"]').forEach(bg => {
-                bg.classList.remove('opacity-100');
-                bg.classList.add('opacity-0');
-            });
-            
-            // Remove active state from all tabs
+
+            // Reset all tabs
             document.querySelectorAll('[id$="-tab"]').forEach(tab => {
                 tab.classList.remove('bg-white/20', 'shadow-sm', 'text-white');
-                tab.classList.add('text-white/70', 'hover:text-white', 'hover:bg-white/10');
+                tab.classList.add('text-white/70');
             });
-            
-            // Show selected form
-            document.getElementById(type + '-form').classList.remove('hidden');
-            
-            // Show selected background
-            document.getElementById(type + '-bg').classList.remove('opacity-0');
-            document.getElementById(type + '-bg').classList.add('opacity-100');
-            
-            // Activate selected tab
+
+            // Show form with animation
+            const activeForm = document.getElementById(type + '-form');
+            activeForm.classList.remove('hidden');
+            activeForm.classList.remove('login-form-animate');
+            void activeForm.offsetWidth;
+            activeForm.classList.add('login-form-animate');
+
+            // Fade in background & restart Ken Burns
+            const activeBg = document.getElementById(type + '-bg');
+            activeBg.style.opacity = '1';
+            const img = activeBg.querySelector('.login-bg-img');
+            img.style.animation = 'none';
+            void img.offsetWidth; // force reflow to restart keyframe
+            img.style.animation = '';
+            activeBg.classList.add('is-active');
+
+            // Activate tab
             const activeTab = document.getElementById(type + '-tab');
             activeTab.classList.add('bg-white/20', 'shadow-sm', 'text-white');
-            activeTab.classList.remove('text-white/70', 'hover:text-white', 'hover:bg-white/10');
-            
-            // Update title in header
-            const titleElement = document.getElementById('login-type-title');
-            if (type === 'staff') {
-                titleElement.textContent = 'Staff Login';
-            } else if (type === 'parent') {
-                titleElement.textContent = 'Parent Portal';
-            } else if (type === 'student') {
-                titleElement.textContent = 'Student Portal';
-            }
+            activeTab.classList.remove('text-white/70');
+
+            // Update title
+            const titles = { staff: 'Staff Login', parent: 'Parent Portal', student: 'Student Portal' };
+            document.getElementById('login-type-title').textContent = titles[type];
         }
-        
-        // Initialize with staff tab active
-        document.addEventListener('DOMContentLoaded', function() {
-            switchLoginType('staff');
-        });
+
+        document.addEventListener('DOMContentLoaded', () => switchLoginType('staff'));
     </script>
 </x-layouts.guest>

@@ -11,6 +11,7 @@
         'attendance' => 'Attendance',
         'results' => 'Results',
         'finance' => 'Finance',
+        'analytics' => 'Analytics',
     ];
 
     $initials = collect(explode(' ', $student->full_name))
@@ -84,6 +85,23 @@
             ->where('student_id', $student->id)
             ->join('attendance_sheets', 'attendance_sheets.id', '=', 'attendance_marks.sheet_id')
             ->max('attendance_sheets.date');
+    }
+
+    $performanceData = [];
+    if ($tab === 'analytics') {
+        $service = app(\App\Support\StudentPerformanceService::class);
+        $currentTerm = \App\Models\AcademicTerm::where('is_active', true)->first();
+        if (!$currentTerm) {
+            $currentTerm = \App\Models\AcademicTerm::latest()->first();
+        }
+        if ($currentTerm) {
+            $performanceData = [
+                'overview' => $service->getOverview($student, $currentTerm->term_number, $currentTerm->academicSession->name ?? now()->format('Y') . '/' . (now()->format('Y') + 1)),
+                'attendance_impact' => $service->getAttendanceImpact($student, $currentTerm->term_number, $currentTerm->academicSession->name ?? now()->format('Y') . '/' . (now()->format('Y') + 1)),
+                'homework_performance' => $service->getHomeworkPerformance($student),
+                'cbt_performance' => $service->getCbtPerformance($student),
+            ];
+        }
     }
 @endphp
 
@@ -358,6 +376,187 @@
                         @endforelse
                     </tbody>
                 </x-table>
+            </div>
+        @elseif ($tab === 'analytics')
+            <div class="space-y-4">
+                <div class="card-padded">
+                    <div class="text-sm font-semibold text-gray-900">Performance Analytics</div>
+                    <div class="mt-1 text-sm text-gray-600">Comprehensive performance tracking and insights.</div>
+                </div>
+
+                @if(!empty($performanceData))
+                    {{-- Academic Performance --}}
+                    <div class="card">
+                        <div class="border-b border-gray-100 px-6 py-4">
+                            <div class="flex items-center gap-2">
+                                <svg class="h-5 w-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                <div class="text-sm font-semibold text-gray-900">Academic Performance</div>
+                            </div>
+                        </div>
+                        <div class="p-6">
+                            @if(isset($performanceData['overview']) && $performanceData['overview']['total_subjects'] > 0)
+                                <div class="grid grid-cols-2 gap-4 lg:grid-cols-4">
+                                    <div class="rounded-lg border border-gray-200 bg-gradient-to-br from-blue-50 to-blue-100/50 p-4">
+                                        <div class="text-xs font-semibold uppercase tracking-wide text-blue-600">Average Score</div>
+                                        <div class="mt-2 text-2xl font-bold text-gray-900">{{ $performanceData['overview']['average_score'] }}</div>
+                                    </div>
+                                    <div class="rounded-lg border border-gray-200 bg-gradient-to-br from-purple-50 to-purple-100/50 p-4">
+                                        <div class="text-xs font-semibold uppercase tracking-wide text-purple-600">Current Grade</div>
+                                        <div class="mt-2 text-2xl font-bold text-gray-900">{{ $performanceData['overview']['grade'] }}</div>
+                                    </div>
+                                    <div class="rounded-lg border border-gray-200 bg-gradient-to-br from-green-50 to-green-100/50 p-4">
+                                        <div class="text-xs font-semibold uppercase tracking-wide text-green-600">Subjects Passed</div>
+                                        <div class="mt-2 text-2xl font-bold text-gray-900">{{ $performanceData['overview']['subjects_passed'] }}/{{ $performanceData['overview']['total_subjects'] }}</div>
+                                    </div>
+                                    <div class="rounded-lg border border-gray-200 bg-gradient-to-br from-indigo-50 to-indigo-100/50 p-4">
+                                        <div class="text-xs font-semibold uppercase tracking-wide text-indigo-600">Highest Score</div>
+                                        <div class="mt-2 text-2xl font-bold text-gray-900">{{ $performanceData['overview']['highest_score'] }}</div>
+                                    </div>
+                                </div>
+                            @else
+                                <div class="rounded-lg border border-dashed border-gray-300 bg-gray-50 p-6 text-center">
+                                    <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                                    <div class="mt-3 text-sm font-medium text-gray-900">No scores recorded yet</div>
+                                    <div class="mt-1 text-xs text-gray-500">Scores will appear here once entered for the current term</div>
+                                </div>
+                            @endif
+                        </div>
+                    </div>
+
+                    {{-- Attendance --}}
+                    <div class="card">
+                        <div class="border-b border-gray-100 px-6 py-4">
+                            <div class="flex items-center gap-2">
+                                <svg class="h-5 w-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+                                <div class="text-sm font-semibold text-gray-900">Attendance Overview</div>
+                            </div>
+                        </div>
+                        <div class="p-6">
+                            @if(isset($performanceData['attendance_impact']) && $performanceData['attendance_impact']['total_days'] > 0)
+                                <div class="grid grid-cols-2 gap-4 lg:grid-cols-5">
+                                    <div class="rounded-lg border border-gray-200 bg-gradient-to-br from-green-50 to-green-100/50 p-4">
+                                        <div class="text-xs font-semibold uppercase tracking-wide text-green-600">Attendance Rate</div>
+                                        <div class="mt-2 text-2xl font-bold text-gray-900">{{ $performanceData['attendance_impact']['attendance_rate'] }}%</div>
+                                    </div>
+                                    <div class="rounded-lg border border-gray-200 bg-white p-4">
+                                        <div class="text-xs font-semibold uppercase tracking-wide text-gray-500">Present</div>
+                                        <div class="mt-2 text-2xl font-bold text-green-600">{{ $performanceData['attendance_impact']['present_days'] }}</div>
+                                    </div>
+                                    <div class="rounded-lg border border-gray-200 bg-white p-4">
+                                        <div class="text-xs font-semibold uppercase tracking-wide text-gray-500">Absent</div>
+                                        <div class="mt-2 text-2xl font-bold text-red-600">{{ $performanceData['attendance_impact']['absent_days'] }}</div>
+                                    </div>
+                                    <div class="rounded-lg border border-gray-200 bg-white p-4">
+                                        <div class="text-xs font-semibold uppercase tracking-wide text-gray-500">Late</div>
+                                        <div class="mt-2 text-2xl font-bold text-yellow-600">{{ $performanceData['attendance_impact']['late_days'] }}</div>
+                                    </div>
+                                    <div class="rounded-lg border border-gray-200 bg-white p-4">
+                                        <div class="text-xs font-semibold uppercase tracking-wide text-gray-500">Total Days</div>
+                                        <div class="mt-2 text-2xl font-bold text-gray-900">{{ $performanceData['attendance_impact']['total_days'] }}</div>
+                                    </div>
+                                </div>
+                                <div class="mt-4 rounded-lg border border-blue-200 bg-blue-50 p-4">
+                                    <div class="flex items-start gap-3">
+                                        <svg class="h-5 w-5 text-blue-600 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                        <div class="text-sm font-medium text-blue-900">{{ $performanceData['attendance_impact']['correlation'] }}</div>
+                                    </div>
+                                </div>
+                            @else
+                                <div class="rounded-lg border border-dashed border-gray-300 bg-gray-50 p-6 text-center">
+                                    <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                                    <div class="mt-3 text-sm font-medium text-gray-900">No attendance records yet</div>
+                                    <div class="mt-1 text-xs text-gray-500">Attendance data will appear here once marked</div>
+                                </div>
+                            @endif
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
+                        {{-- Homework Performance --}}
+                        <div class="card">
+                            <div class="border-b border-gray-100 px-6 py-4">
+                                <div class="flex items-center gap-2">
+                                    <svg class="h-5 w-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
+                                    <div class="text-sm font-semibold text-gray-900">Homework Performance</div>
+                                </div>
+                            </div>
+                            <div class="p-6">
+                                @if(isset($performanceData['homework_performance']) && $performanceData['homework_performance']['total_assignments'] > 0)
+                                    <div class="space-y-3">
+                                        <div class="flex items-center justify-between rounded-lg border border-gray-200 bg-white p-3">
+                                            <span class="text-sm text-gray-600">Total Assignments</span>
+                                            <span class="text-lg font-bold text-gray-900">{{ $performanceData['homework_performance']['total_assignments'] }}</span>
+                                        </div>
+                                        <div class="flex items-center justify-between rounded-lg border border-gray-200 bg-white p-3">
+                                            <span class="text-sm text-gray-600">Submitted</span>
+                                            <span class="text-lg font-bold text-green-600">{{ $performanceData['homework_performance']['submitted'] }}</span>
+                                        </div>
+                                        <div class="flex items-center justify-between rounded-lg border border-gray-200 bg-white p-3">
+                                            <span class="text-sm text-gray-600">On Time</span>
+                                            <span class="text-lg font-bold text-blue-600">{{ $performanceData['homework_performance']['on_time'] }}</span>
+                                        </div>
+                                        <div class="flex items-center justify-between rounded-lg border border-gray-200 bg-gradient-to-br from-purple-50 to-purple-100/50 p-3">
+                                            <span class="text-sm font-semibold text-purple-700">Average Grade</span>
+                                            <span class="text-lg font-bold text-purple-900">{{ $performanceData['homework_performance']['average_grade'] }}</span>
+                                        </div>
+                                    </div>
+                                @else
+                                    <div class="rounded-lg border border-dashed border-gray-300 bg-gray-50 p-6 text-center">
+                                        <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                                        <div class="mt-3 text-sm font-medium text-gray-900">No homework yet</div>
+                                        <div class="mt-1 text-xs text-gray-500">Data will appear once submitted</div>
+                                    </div>
+                                @endif
+                            </div>
+                        </div>
+
+                        {{-- CBT Performance --}}
+                        <div class="card">
+                            <div class="border-b border-gray-100 px-6 py-4">
+                                <div class="flex items-center gap-2">
+                                    <svg class="h-5 w-5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                                    <div class="text-sm font-semibold text-gray-900">CBT Exam Performance</div>
+                                </div>
+                            </div>
+                            <div class="p-6">
+                                @if(isset($performanceData['cbt_performance']) && $performanceData['cbt_performance']['total_exams'] > 0)
+                                    <div class="space-y-3">
+                                        <div class="flex items-center justify-between rounded-lg border border-gray-200 bg-white p-3">
+                                            <span class="text-sm text-gray-600">Total Exams</span>
+                                            <span class="text-lg font-bold text-gray-900">{{ $performanceData['cbt_performance']['total_exams'] }}</span>
+                                        </div>
+                                        <div class="flex items-center justify-between rounded-lg border border-gray-200 bg-white p-3">
+                                            <span class="text-sm text-gray-600">Average Score</span>
+                                            <span class="text-lg font-bold text-blue-600">{{ $performanceData['cbt_performance']['average_percent'] }}%</span>
+                                        </div>
+                                        <div class="flex items-center justify-between rounded-lg border border-gray-200 bg-white p-3">
+                                            <span class="text-sm text-gray-600">Exams Passed</span>
+                                            <span class="text-lg font-bold text-green-600">{{ $performanceData['cbt_performance']['exams_passed'] }}</span>
+                                        </div>
+                                        <div class="flex items-center justify-between rounded-lg border border-gray-200 bg-gradient-to-br from-orange-50 to-orange-100/50 p-3">
+                                            <span class="text-sm font-semibold text-orange-700">Highest Score</span>
+                                            <span class="text-lg font-bold text-orange-900">{{ $performanceData['cbt_performance']['highest_score'] }}</span>
+                                        </div>
+                                    </div>
+                                @else
+                                    <div class="rounded-lg border border-dashed border-gray-300 bg-gray-50 p-6 text-center">
+                                        <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                                        <div class="mt-3 text-sm font-medium text-gray-900">No CBT exams yet</div>
+                                        <div class="mt-1 text-xs text-gray-500">Results will appear once completed</div>
+                                    </div>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+                @else
+                    <div class="card-padded text-center">
+                        <div class="mx-auto grid h-16 w-16 place-items-center rounded-full bg-yellow-50 text-yellow-600">
+                            <svg class="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                        </div>
+                        <div class="mt-4 text-sm font-semibold text-gray-900">No Academic Term Available</div>
+                        <div class="mt-2 text-sm text-gray-600">Please set up an academic term to view performance analytics</div>
+                    </div>
+                @endif
             </div>
         @else
             <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">

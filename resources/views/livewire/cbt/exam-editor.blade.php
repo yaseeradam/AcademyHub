@@ -8,7 +8,7 @@
         default => 'neutral',
     };
     $canEdit = (bool) $this->canEdit;
-    $tab = $this->tab ?? 'details';
+    $tab = $this->tab;
     $hasTheory = $exam->questions->contains('type', 'theory');
 @endphp
 
@@ -31,27 +31,40 @@
                     <a href="{{ route('cbt.index') }}" class="rounded-lg bg-white/20 px-4 py-2 text-sm font-semibold text-white backdrop-blur-sm hover:bg-white/30">Back</a>
                     
                     @if ($canEdit)
-                        <button wire:click="saveDetails" class="rounded-lg bg-white px-4 py-2 text-sm font-semibold text-violet-600 hover:bg-pink-50">Save</button>
+                        <button wire:click="saveDetails" class="rounded-lg bg-white px-4 py-2 text-sm font-semibold text-violet-600 hover:bg-pink-50">Save Details</button>
                     @endif
-                    
+
                     @if ($me?->role === 'teacher' && $canEdit)
-                        <button wire:click="submitToAdmin" class="rounded-lg bg-emerald-500 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-600">Submit</button>
+                        <button wire:click="submitToAdmin" class="rounded-lg bg-emerald-500 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-600">Submit to Admin</button>
                     @endif
-                    
+
+                    @if ($me?->role === 'admin' && in_array($status, ['draft', 'assigned', 'submitted'], true))
+                        <button wire:click="quickApprove" class="rounded-lg bg-emerald-500 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-600">✓ Go Live</button>
+                    @endif
+
                     @if ($me?->role === 'admin' && $status === 'submitted')
-                        <button wire:click="approve" class="rounded-lg bg-emerald-500 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-600">Approve</button>
                         <button wire:click="startReject" class="rounded-lg bg-orange-500 px-4 py-2 text-sm font-semibold text-white hover:bg-orange-600">Reject</button>
                     @endif
-                    
+
                     @if ($me?->role === 'admin' && $status === 'approved')
-                        <button wire:click="togglePublish" class="rounded-lg bg-white px-4 py-2 text-sm font-semibold text-violet-600 hover:bg-pink-50">{{ $exam->published_at ? 'Pause' : 'Go Live' }}</button>
+                        <button wire:click="togglePublish" class="rounded-lg bg-white px-4 py-2 text-sm font-semibold text-violet-600 hover:bg-pink-50">{{ $exam->published_at ? 'Pause' : 'Resume' }}</button>
                     @endif
                 </div>
             </div>
             
-            <div class="mt-6 flex flex-wrap gap-2 border-t border-white/20 pt-4">
+            @if ($status === 'approved' && $exam->access_code)
+                <div class="mt-4 flex flex-wrap items-center gap-3 rounded-xl bg-white/10 px-4 py-2.5">
+                    <span class="text-xs font-semibold text-white/70">Student Link:</span>
+                    <a href="{{ route('cbt.student', ['code' => $exam->access_code]) }}" target="_blank" class="font-mono text-sm font-bold text-white underline underline-offset-2">
+                        /cbt/student?code={{ $exam->access_code }}
+                    </a>
+                    <span class="text-xs text-white/60">(share this with students)</span>
+                </div>
+            @endif
+
+            <div class="mt-4 flex flex-wrap gap-2 border-t border-white/20 pt-4">
+                <button @click="tab = 'questions'" :class="tab === 'questions' ? 'bg-white text-violet-600' : 'bg-white/10 text-white hover:bg-white/20'" class="rounded-lg px-4 py-2 text-sm font-semibold transition">Questions ({{ $exam->questions->count() }})</button>
                 <button @click="tab = 'details'" :class="tab === 'details' ? 'bg-white text-violet-600' : 'bg-white/10 text-white hover:bg-white/20'" class="rounded-lg px-4 py-2 text-sm font-semibold transition">Details</button>
-                <button @click="tab = 'questions'" :class="tab === 'questions' ? 'bg-white text-violet-600' : 'bg-white/10 text-white hover:bg-white/20'" class="rounded-lg px-4 py-2 text-sm font-semibold transition">Questions</button>
                 @if ($status === 'approved')
                     <button @click="tab = 'monitor'" :class="tab === 'monitor' ? 'bg-white text-violet-600' : 'bg-white/10 text-white hover:bg-white/20'" class="rounded-lg px-4 py-2 text-sm font-semibold transition">Monitor</button>
                 @endif
@@ -186,43 +199,42 @@
 
     <div x-show="tab === 'questions'" class="rounded-2xl bg-white p-6 shadow-lg border border-gray-200">
         @if ($canEdit)
-            <div class="rounded-lg border-2 border-dashed border-violet-300 bg-violet-50 p-6">
+            <div class="rounded-lg border-2 border-dashed border-violet-300 bg-violet-50 p-6"
+                x-data="{ qtype: '{{ $questionType }}' }"
+                x-init="$watch('qtype', v => @this.set('questionType', v))"
+            >
                 <div class="text-lg font-bold text-gray-900 mb-4">{{ $editingQuestionId ? 'Edit' : 'Add' }} Question</div>
                 <textarea wire:model="questionPrompt" rows="3" class="w-full px-4 py-3 text-base border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 bg-white shadow-sm" placeholder="Enter your question here..."></textarea>
                 @error('questionPrompt') <div class="mt-2 text-sm text-red-600 font-medium">{{ $message }}</div> @enderror
-                
+
                 <div class="mt-6 grid gap-6 lg:grid-cols-[200px,1fr]">
                     <div>
                         <label class="block text-sm font-bold text-gray-800 mb-2">Question Type</label>
-                        <select wire:model="questionType" class="w-full px-4 py-3 text-base border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 bg-white shadow-sm">
-                            <option value="mcq" class="text-gray-900">Multiple Choice (MCQ)</option>
-                            <option value="theory" class="text-gray-900">Theory/Essay</option>
+                        <select x-model="qtype" class="w-full px-4 py-3 text-base border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 bg-white shadow-sm">
+                            <option value="mcq">Multiple Choice (MCQ)</option>
+                            <option value="theory">Theory/Essay</option>
                         </select>
                     </div>
 
-                    @if ($questionType === 'mcq')
-                        <div>
-                            <label class="block text-sm font-bold text-gray-800 mb-2">Answer Options</label>
-                            <div class="grid gap-3 lg:grid-cols-2">
-                                @for ($i = 0; $i < 4; $i++)
-                                    <div class="p-3 bg-white border-2 border-gray-200 rounded-lg">
-                                        <div class="flex items-center gap-3 mb-2">
-                                            <input type="radio" wire:model="correctIndex" value="{{ $i }}" id="opt{{ $i }}" class="w-4 h-4 text-green-600 border-2 border-gray-300 focus:ring-green-500" />
-                                            <label for="opt{{ $i }}" class="text-sm font-bold text-gray-800">Option {{ chr(65 + $i) }} {{ $correctIndex == $i ? '(Correct Answer)' : '' }}</label>
-                                        </div>
-                                        <input wire:model="optionLabels.{{ $i }}" class="w-full px-3 py-2 text-base border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 bg-white" placeholder="Enter option {{ chr(65 + $i) }}" />
+                    <div x-show="qtype === 'mcq'" x-cloak>
+                        <label class="block text-sm font-bold text-gray-800 mb-2">Answer Options</label>
+                        <div class="grid gap-3 lg:grid-cols-2">
+                            @for ($i = 0; $i < 4; $i++)
+                                <div class="p-3 bg-white border-2 border-gray-200 rounded-lg">
+                                    <div class="flex items-center gap-3 mb-2">
+                                        <input type="radio" wire:model="correctIndex" value="{{ $i }}" id="opt{{ $i }}" class="w-4 h-4 text-green-600 border-2 border-gray-300 focus:ring-green-500" />
+                                        <label for="opt{{ $i }}" class="text-sm font-bold text-gray-800">Option {{ chr(65 + $i) }} {{ $correctIndex == $i ? '(Correct Answer)' : '' }}</label>
                                     </div>
-                                @endfor
-                            </div>
+                                    <input wire:model="optionLabels.{{ $i }}" class="w-full px-3 py-2 text-base border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 bg-white" placeholder="Enter option {{ chr(65 + $i) }}" />
+                                </div>
+                            @endfor
                         </div>
-                    @else
-                        <div class="p-4 rounded-lg border-2 border-dashed border-blue-300 bg-blue-50">
-                            <div class="text-sm font-bold text-blue-800 mb-2">Theory Question</div>
-                            <div class="text-sm text-blue-700">
-                                Theory questions allow students to write detailed answers. These questions require manual marking by teachers.
-                            </div>
-                        </div>
-                    @endif
+                    </div>
+
+                    <div x-show="qtype === 'theory'" x-cloak class="p-4 rounded-lg border-2 border-dashed border-blue-300 bg-blue-50">
+                        <div class="text-sm font-bold text-blue-800 mb-2">Theory Question</div>
+                        <div class="text-sm text-blue-700">Students write a detailed answer. Requires manual marking.</div>
+                    </div>
                 </div>
                 
                 <div class="mt-6 flex items-center gap-4">

@@ -6,93 +6,97 @@
             <div class="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
                 <div>
                     <h1 class="text-3xl font-bold text-white">Welcome Back, {{ $student->first_name }}!</h1>
-                    <p class="mt-2 text-base text-green-50">{{ $student->schoolClass->name ?? 'N/A' }} {{ $student->section ? '- ' . $student->section->name : '' }}</p>
+                    <p class="mt-2 text-base text-green-50">{{ $student->schoolClass->name ?? 'N/A' }}{{ $student->section ? ' - ' . $student->section->name : '' }}</p>
                     <div class="mt-2 flex items-center gap-4 text-sm text-green-100">
                         <span>{{ $student->admission_number }}</span>
                         <span>•</span>
-                        <span>Session {{ config('myacademy.current_session') }} - Term {{ config('myacademy.current_term') }}</span>
+                        <span>Session {{ config('myacademy.current_session') }} — Term {{ config('myacademy.current_term') }}</span>
                     </div>
                 </div>
-                @if($student->passport_photo_url)
-                <div class="flex-shrink-0">
-                    <img src="{{ $student->passport_photo_url }}" alt="{{ $student->full_name }}" class="h-24 w-24 rounded-full border-4 border-white shadow-lg object-cover">
+                <div class="flex items-center gap-4">
+                    @if($student->passport_photo_url)
+                        <img src="{{ $student->passport_photo_url }}" alt="{{ $student->full_name }}" class="h-20 w-20 rounded-full border-4 border-white shadow-lg object-cover">
+                    @else
+                        <div class="h-20 w-20 rounded-full border-4 border-white bg-white/20 flex items-center justify-center text-white text-2xl font-bold shadow-lg">
+                            {{ substr($student->first_name, 0, 1) }}
+                        </div>
+                    @endif
                 </div>
-                @endif
             </div>
         </div>
     </div>
 
     <!-- Quick Stats -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+    <div class="grid grid-cols-2 gap-4 lg:grid-cols-4">
         <!-- Attendance -->
-        <div class="rounded-2xl bg-white p-6 shadow-lg">
+        <div class="rounded-2xl bg-gradient-to-br from-green-500 to-green-600 p-6 text-white shadow-lg">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-sm font-semibold text-gray-600">Attendance Rate</p>
-                    <p class="text-3xl font-bold text-gray-900">{{ $stats['attendance_rate'] }}%</p>
-                    <p class="text-xs text-gray-500 mt-1">{{ $stats['present_days'] }}/{{ $stats['total_days'] }} days</p>
+                    <p class="text-green-100">Attendance Rate</p>
+                    <p class="text-3xl font-bold">{{ $stats['attendance_rate'] }}%</p>
+                    <p class="text-sm text-green-100">{{ $stats['present_days'] }}/{{ $stats['total_days'] }} days</p>
                 </div>
-                <div class="rounded-full bg-green-100 p-3">
-                    <svg class="h-6 w-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                <div class="rounded-full bg-white/20 p-3">
+                    <svg class="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                     </svg>
                 </div>
             </div>
         </div>
 
         <!-- Average Score -->
-        <div class="rounded-2xl bg-white p-6 shadow-lg">
+        <div class="rounded-2xl bg-gradient-to-br from-blue-500 to-blue-600 p-6 text-white shadow-lg">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-sm font-semibold text-gray-600">Average Score</p>
-                    <p class="text-3xl font-bold text-gray-900">{{ $stats['average_score'] }}%</p>
-                    <p class="text-xs text-gray-500 mt-1">{{ $stats['total_subjects'] }} subjects</p>
+                    <p class="text-blue-100">Average Score</p>
+                    <p class="text-3xl font-bold">{{ $stats['average_score'] }}%</p>
+                    <p class="text-sm text-blue-100">{{ $stats['total_subjects'] }} subjects</p>
                 </div>
-                <div class="rounded-full bg-blue-100 p-3">
-                    <svg class="h-6 w-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                <div class="rounded-full bg-white/20 p-3">
+                    <svg class="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
                     </svg>
                 </div>
             </div>
         </div>
 
         <!-- Class Position -->
-        <div class="rounded-2xl bg-white p-6 shadow-lg">
+        <div class="rounded-2xl bg-gradient-to-br from-yellow-500 to-orange-500 p-6 text-white shadow-lg">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-sm font-semibold text-gray-600">Class Position</p>
-                    <p class="text-3xl font-bold text-gray-900">
+                    <p class="text-yellow-100">Class Position</p>
+                    <p class="text-3xl font-bold">
                         @if($stats['position'])
                             #{{ $stats['position'] }}
                         @else
                             N/A
                         @endif
                     </p>
-                    <p class="text-xs text-gray-500 mt-1">of {{ $stats['total_students'] }} students</p>
+                    <p class="text-sm text-yellow-100">of {{ $stats['total_students'] }} students</p>
                 </div>
-                <div class="rounded-full bg-yellow-100 p-3">
-                    <svg class="h-6 w-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"></path>
+                <div class="rounded-full bg-white/20 p-3">
+                    <svg class="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/>
                     </svg>
                 </div>
             </div>
         </div>
 
         <!-- Homework -->
-        <div class="rounded-2xl bg-white p-6 shadow-lg">
+        <div class="rounded-2xl bg-gradient-to-br {{ $stats['overdue_homework'] > 0 ? 'from-red-500 to-red-600' : 'from-purple-500 to-purple-600' }} p-6 text-white shadow-lg">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-sm font-semibold text-gray-600">Pending Homework</p>
-                    <p class="text-3xl font-bold text-gray-900">{{ $stats['pending_homework'] }}</p>
+                    <p class="{{ $stats['overdue_homework'] > 0 ? 'text-red-100' : 'text-purple-100' }}">Pending Homework</p>
+                    <p class="text-3xl font-bold">{{ $stats['pending_homework'] }}</p>
                     @if($stats['overdue_homework'] > 0)
-                        <p class="text-xs text-red-600 mt-1 font-semibold">{{ $stats['overdue_homework'] }} overdue</p>
+                        <p class="text-sm text-red-100">{{ $stats['overdue_homework'] }} overdue</p>
                     @else
-                        <p class="text-xs text-gray-500 mt-1">All up to date</p>
+                        <p class="text-sm text-purple-100">All up to date</p>
                     @endif
                 </div>
-                <div class="rounded-full {{ $stats['overdue_homework'] > 0 ? 'bg-red-100' : 'bg-purple-100' }} p-3">
-                    <svg class="h-6 w-6 {{ $stats['overdue_homework'] > 0 ? 'text-red-600' : 'text-purple-600' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                <div class="rounded-full bg-white/20 p-3">
+                    <svg class="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                     </svg>
                 </div>
             </div>
@@ -103,15 +107,11 @@
     @if(count($stats['grades']) > 0)
     <div class="rounded-2xl bg-white p-6 shadow-lg">
         <h3 class="text-lg font-bold text-gray-900 mb-4">Grade Distribution</h3>
-        <div class="grid grid-cols-2 md:grid-cols-6 gap-4">
+        <div class="grid grid-cols-3 sm:grid-cols-6 gap-3">
             @foreach(['A', 'B', 'C', 'D', 'E', 'F'] as $grade)
-                <div class="text-center p-4 rounded-lg {{ isset($stats['grades'][$grade]) ? 'bg-green-50 border-2 border-green-200' : 'bg-gray-50' }}">
-                    <div class="text-2xl font-bold {{ isset($stats['grades'][$grade]) ? 'text-green-600' : 'text-gray-400' }}">
-                        {{ $grade }}
-                    </div>
-                    <div class="text-sm text-gray-600 mt-1">
-                        {{ $stats['grades'][$grade] ?? 0 }} {{ Str::plural('subject', $stats['grades'][$grade] ?? 0) }}
-                    </div>
+                <div class="text-center p-4 rounded-xl {{ isset($stats['grades'][$grade]) ? 'bg-green-50 border-2 border-green-200' : 'bg-gray-50 border-2 border-transparent' }}">
+                    <div class="text-2xl font-bold {{ isset($stats['grades'][$grade]) ? 'text-green-600' : 'text-gray-300' }}">{{ $grade }}</div>
+                    <div class="text-sm text-gray-500 mt-1">{{ $stats['grades'][$grade] ?? 0 }} {{ Str::plural('subject', $stats['grades'][$grade] ?? 0) }}</div>
                 </div>
             @endforeach
         </div>
@@ -119,17 +119,17 @@
     @endif
 
     <!-- Quick Actions -->
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <a href="{{ route('student.homework') }}" class="block rounded-2xl bg-white p-6 shadow-lg hover:shadow-xl transition group">
             <div class="flex items-center gap-4">
                 <div class="rounded-full bg-purple-100 p-4 group-hover:bg-purple-200 transition">
                     <svg class="h-8 w-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                     </svg>
                 </div>
                 <div>
                     <h4 class="text-lg font-bold text-gray-900">View Homework</h4>
-                    <p class="text-sm text-gray-600">Check and submit assignments</p>
+                    <p class="text-sm text-gray-500">Check and submit assignments</p>
                 </div>
             </div>
         </a>
@@ -138,12 +138,12 @@
             <div class="flex items-center gap-4">
                 <div class="rounded-full bg-blue-100 p-4 group-hover:bg-blue-200 transition">
                     <svg class="h-8 w-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
                     </svg>
                 </div>
                 <div>
                     <h4 class="text-lg font-bold text-gray-900">View Results</h4>
-                    <p class="text-sm text-gray-600">Check your academic performance</p>
+                    <p class="text-sm text-gray-500">Check your academic performance</p>
                 </div>
             </div>
         </a>

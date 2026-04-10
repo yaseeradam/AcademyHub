@@ -69,6 +69,7 @@ class ExamEditor extends Component
     public bool $showForwardModal = false;
     public ?int $forwardAttemptId = null;
     public ?int $forwardTeacherId = null;
+    public string $tab = 'details';
 
     public function mount(CbtExam $exam): void
     {
@@ -82,6 +83,7 @@ class ExamEditor extends Component
         }
 
         $this->examId = (int) $exam->id;
+        $this->tab = (string) request('tab', 'details');
 
         $this->fillFromExam($exam);
     }
@@ -140,7 +142,7 @@ class ExamEditor extends Component
         }
 
         if ($user->role === 'admin') {
-            return in_array($exam->status, ['draft', 'assigned', 'rejected'], true);
+            return true; // Admin can always edit (questions/details) unless attempts exist
         }
 
         if ($user->role !== 'teacher') {
@@ -1139,6 +1141,35 @@ class ExamEditor extends Component
         $this->reviewNote = '';
         $this->dispatch('refresh');
         $this->dispatch('alert', message: 'Submitted to admin.', type: 'success');
+    }
+
+    public function quickApprove(): void
+    {
+        $user = auth()->user();
+        abort_unless($user?->role === 'admin', 403);
+
+        $exam = $this->exam;
+
+        if ($exam->questions->isEmpty()) {
+            $this->dispatch('alert', message: 'Add at least one question before going live.', type: 'warning');
+            return;
+        }
+
+        $code = $exam->access_code ?: $this->generateAccessCode();
+
+        $exam->forceFill([
+            'status' => 'approved',
+            'access_code' => $code,
+            'reviewed_by' => $user->id,
+            'reviewed_at' => now(),
+            'published_at' => $exam->published_at ?? now(),
+            'note' => null,
+        ])->save();
+
+        Audit::log('cbt.exam_approved', $exam, ['reviewed_by' => $user->id]);
+
+        $this->dispatch('refresh');
+        $this->dispatch('alert', message: 'Exam is now live. Code: '.$code, type: 'success');
     }
 
     public function togglePublish(): void

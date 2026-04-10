@@ -5,7 +5,7 @@
     </div>
 
     <!-- Stats Cards -->
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+    <div class="grid grid-cols-2 gap-4 lg:grid-cols-4">
         <div class="rounded-2xl bg-white p-6 shadow-lg">
             <div class="text-center">
                 <p class="text-sm font-semibold text-gray-600">Total Days</p>

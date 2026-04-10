@@ -124,6 +124,10 @@ Route::get('/student/attendance', \App\Livewire\Student\Attendance::class)
     ->middleware('student.session')
     ->name('student.attendance');
 
+Route::get('/student/performance', \App\Livewire\Student\Performance::class)
+    ->middleware('student.session')
+    ->name('student.performance');
+
 Route::middleware(['auth', 'active'])->group(function () {
     Route::get('/dashboard', function () {
         $user = auth()->user();
@@ -222,6 +226,7 @@ Route::middleware(['auth', 'active'])->group(function () {
 
     Route::middleware('role:parent')->group(function () {
         Route::get('/parents/dashboard', \App\Livewire\Parents\Dashboard::class)->name('parents.dashboard');
+        Route::get('/parents/performance', \App\Livewire\Student\Performance::class)->name('parents.performance');
     });
 
     Route::middleware('role:admin,teacher')->group(function () {
@@ -245,6 +250,10 @@ Route::middleware(['auth', 'active'])->group(function () {
         Route::get('/analytics', \App\Livewire\Analytics\Dashboard::class)
             ->middleware('permission:analytics.view')
             ->name('analytics.dashboard');
+        
+        Route::get('/analytics/student-performance', \App\Livewire\Analytics\StudentPerformance::class)
+            ->middleware('permission:analytics.view')
+            ->name('analytics.student-performance');
         
         Route::get('/analytics/export/performance', [\App\Http\Controllers\AnalyticsExportController::class, 'exportPerformanceData'])
             ->middleware('permission:analytics.view')
