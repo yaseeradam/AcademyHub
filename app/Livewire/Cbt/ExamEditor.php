@@ -14,7 +14,9 @@ use App\Models\Subject;
 use App\Models\SubjectAllocation;
 use App\Models\User;
 use App\Support\Audit;
+use App\Support\CbtQuestionImporter;
 use Illuminate\Support\Facades\DB;
+use Livewire\WithFileUploads;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
@@ -28,6 +30,8 @@ use Livewire\Component;
 #[Title('CBT Exam')]
 class ExamEditor extends Component
 {
+    use WithFileUploads;
+
     public int $examId;
 
     public string $title = '';
@@ -70,6 +74,23 @@ class ExamEditor extends Component
     public ?int $forwardAttemptId = null;
     public ?int $forwardTeacherId = null;
     public string $tab = 'details';
+    public bool $shuffleQuestions = false;
+
+    // AI generation
+    public bool $showAiPanel = false;
+    public string $aiTopic = '';
+    public int $aiCount = 5;
+    public string $aiType = 'mcq';
+    public int $aiMarks = 1;
+    public bool $aiLoading = false;
+    /** @var array<int, array<string,mixed>> */
+    public array $aiPreview = [];
+
+    // File import
+    public bool $showImportPanel = false;
+    public $importFile = null;
+    /** @var array<int, array<string,mixed>> */
+    public array $importPreview = [];
 
     public function mount(CbtExam $exam): void
     {
@@ -105,6 +126,7 @@ class ExamEditor extends Component
         $this->graceMinutes = (int) ($exam->grace_minutes ?? 0);
         $this->allowedCidrs = (string) ($exam->allowed_cidrs ?? '');
         $this->showScore = (bool) ($exam->show_score ?? false);
+        $this->shuffleQuestions = (bool) ($exam->shuffle_questions ?? false);
     }
 
     #[Computed]
@@ -311,6 +333,7 @@ class ExamEditor extends Component
             $allowed = trim((string) ($data['allowedCidrs'] ?? ''));
             $attrs['allowed_cidrs'] = $allowed !== '' ? $allowed : null;
             $attrs['show_score'] = (bool) ($this->showScore ?? false);
+            $attrs['shuffle_questions'] = (bool) ($this->shuffleQuestions ?? false);
         }
 
         $exam->forceFill($attrs)->save();
@@ -350,6 +373,8 @@ class ExamEditor extends Component
         $this->correctIndex = $correctIndex;
 
         $this->resetValidation();
+        $this->dispatch('questionTypeUpdated', $this->questionType);
+        $this->dispatch('scrollToForm');
     }
 
     public function startNewQuestion(): void
@@ -444,7 +469,7 @@ class ExamEditor extends Component
         Audit::log($this->editingQuestionId ? 'cbt.question_updated' : 'cbt.question_created', $this->exam);
 
         $this->startNewQuestion();
-        $this->dispatch('refresh');
+        unset($this->exam);
         $this->dispatch('alert', message: 'Question saved.', type: 'success');
     }
 
@@ -464,7 +489,7 @@ class ExamEditor extends Component
             $this->startNewQuestion();
         }
 
-        $this->dispatch('refresh');
+        unset($this->exam);
         $this->dispatch('alert', message: 'Question deleted.', type: 'success');
     }
 
@@ -1519,6 +1544,170 @@ class ExamEditor extends Component
         $this->cancelForward();
         $this->dispatch('refresh');
         $this->dispatch('alert', message: 'Forwarded to teacher.', type: 'success');
+    }
+
+    // ── AI Generation ──────────────────────────────────────────────────────
+
+
+    public function saveShuffle(): void
+    {
+        $this->exam->forceFill(['shuffle_questions' => (bool) $this->shuffleQuestions])->save();
+        $this->dispatch('alert', message: $this->shuffleQuestions ? 'Shuffle enabled.' : 'Shuffle disabled.', type: 'success');
+    }
+
+    public function openAiPanel(): void
+    {
+        abort_unless($this->canEdit, 403);
+        $this->showAiPanel = true;
+        $this->showImportPanel = false;
+        $this->aiPreview = [];
+        $this->resetValidation();
+    }
+
+    public function closeAiPanel(): void
+    {
+        $this->showAiPanel = false;
+        $this->aiPreview = [];
+    }
+
+    public function generateAiQuestions(): void
+    {
+        abort_unless($this->canEdit, 403);
+
+        $this->validate([
+            'aiTopic' => ['required', 'string', 'max:200'],
+            'aiCount' => ['required', 'integer', 'min:1', 'max:20'],
+            'aiType'  => ['required', 'in:mcq,theory,mixed'],
+            'aiMarks' => ['required', 'integer', 'min:1', 'max:100'],
+        ]);
+
+        $exam    = $this->exam;
+        $subject = $exam->subject?->name ?? 'General';
+
+        try {
+            if ($this->aiType === 'mixed') {
+                $half         = (int) ceil($this->aiCount / 2);
+                $mcq          = \App\Support\CbtQuestionImporter::fromAi($this->aiTopic, $subject, $half, 'mcq', $this->aiMarks);
+                $theory       = \App\Support\CbtQuestionImporter::fromAi($this->aiTopic, $subject, $this->aiCount - $half, 'theory', $this->aiMarks);
+                $this->aiPreview = array_merge($mcq, $theory);
+            } else {
+                $this->aiPreview = \App\Support\CbtQuestionImporter::fromAi($this->aiTopic, $subject, $this->aiCount, $this->aiType, $this->aiMarks);
+            }
+        } catch (\Throwable $e) {
+            $this->dispatch('alert', message: $e->getMessage(), type: 'error');
+        }
+    }
+
+    public function removeAiPreviewItem(int $index): void
+    {
+        unset($this->aiPreview[$index]);
+        $this->aiPreview = array_values($this->aiPreview);
+    }
+
+    public function insertAiQuestions(): void
+    {
+        abort_unless($this->canEdit, 403);
+
+        if (empty($this->aiPreview)) {
+            $this->dispatch('alert', message: 'No questions to insert.', type: 'warning');
+            return;
+        }
+
+        $count = count($this->aiPreview);
+        $this->bulkInsertQuestions($this->aiPreview);
+        $this->aiPreview = [];
+        $this->showAiPanel = false;
+        unset($this->exam);
+        $this->dispatch('alert', message: "{$count} AI questions added.", type: 'success');
+    }
+
+    public function openImportPanel(): void
+    {
+        abort_unless($this->canEdit, 403);
+        $this->showImportPanel = true;
+        $this->showAiPanel = false;
+        $this->importPreview = [];
+        $this->importFile = null;
+        $this->resetValidation();
+    }
+
+    public function closeImportPanel(): void
+    {
+        $this->showImportPanel = false;
+        $this->importPreview = [];
+        $this->importFile = null;
+    }
+
+    public function parseImportFile(): void
+    {
+        abort_unless($this->canEdit, 403);
+
+        $this->validate([
+            'importFile' => ['required', 'file', 'max:2048', 'mimes:txt,text'],
+        ]);
+
+        try {
+            $this->importPreview = \App\Support\CbtQuestionImporter::fromFile($this->importFile);
+        } catch (\Throwable $e) {
+            $this->dispatch('alert', message: $e->getMessage(), type: 'error');
+        }
+    }
+
+    public function removeImportPreviewItem(int $index): void
+    {
+        unset($this->importPreview[$index]);
+        $this->importPreview = array_values($this->importPreview);
+    }
+
+    public function insertImportQuestions(): void
+    {
+        abort_unless($this->canEdit, 403);
+
+        if (empty($this->importPreview)) {
+            $this->dispatch('alert', message: 'No questions to insert.', type: 'warning');
+            return;
+        }
+
+        $count = count($this->importPreview);
+        $this->bulkInsertQuestions($this->importPreview);
+        $this->importPreview = [];
+        $this->showImportPanel = false;
+        unset($this->exam);
+        $this->dispatch('alert', message: "{$count} questions imported from file.", type: 'success');
+    }
+
+    private function bulkInsertQuestions(array $questions): void
+    {
+        DB::transaction(function () use ($questions) {
+            $nextPos = (int) CbtQuestion::query()->where('exam_id', $this->examId)->max('position');
+
+            foreach ($questions as $q) {
+                $type    = $q['type'] ?? 'mcq';
+                $nextPos++;
+
+                $question = CbtQuestion::query()->create([
+                    'exam_id'  => $this->examId,
+                    'type'     => $type,
+                    'prompt'   => trim((string) $q['prompt']),
+                    'marks'    => max(1, (int) ($q['marks'] ?? 1)),
+                    'position' => $nextPos,
+                ]);
+
+                if ($type === 'mcq' && ! empty($q['options'])) {
+                    foreach ($q['options'] as $i => $label) {
+                        if (trim((string) $label) === '') continue;
+                        CbtOption::query()->create([
+                            'question_id' => $question->id,
+                            'label'       => trim((string) $label),
+                            'is_correct'  => $i === (int) ($q['correct'] ?? 0),
+                            'position'    => $i + 1,
+                        ]);
+                    }
+                }
+            }
+        });
+
+        Audit::log('cbt.questions_bulk_inserted', $this->exam, ['count' => count($questions)]);
     }
 
     public function deleteExam()

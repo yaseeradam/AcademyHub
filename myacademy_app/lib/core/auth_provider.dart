@@ -12,81 +12,72 @@ class User {
   final String role;
   final bool? isSuperAdmin;
 
-  User({
-    required this.id, 
-    required this.name, 
-    required this.email, 
-    required this.role,
-    this.isSuperAdmin,
-  });
+  User({required this.id, required this.name, required this.email, required this.role, this.isSuperAdmin});
 
-  factory User.fromJson(Map<String, dynamic> json) {
-    return User(
-      id: json['id'],
-      name: json['name'],
-      email: json['email'],
-      role: json['role'] ?? 'user',
-      isSuperAdmin: json['is_super_admin'] == 1 || json['is_super_admin'] == true,
-    );
-  }
+  factory User.fromJson(Map<String, dynamic> json) => User(
+        id: json['id'],
+        name: json['name'],
+        email: json['email'],
+        role: json['role'] ?? 'user',
+        isSuperAdmin: json['is_super_admin'] == 1 || json['is_super_admin'] == true,
+      );
 
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'name': name,
-      'email': email,
-      'role': role,
-      'is_super_admin': isSuperAdmin,
-    };
-  }
+  Map<String, dynamic> toJson() => {
+        'id': id, 'name': name, 'email': email,
+        'role': role, 'is_super_admin': isSuperAdmin,
+      };
 }
 
 class AuthProvider extends ChangeNotifier {
   final Dio _dio = Dio(BaseOptions(
     baseUrl: ApiConstants.baseUrl,
-    headers: {
-      'Accept': 'application/json',
-    },
+    headers: {'Accept': 'application/json'},
   ));
 
-  User? _user;
+  User?   _user;
   String? _token;
-  bool _isLoading = true;
+  bool    _isLoading = true;
+  bool    _initialSyncDone = false;
   String? _error;
 
-  User? get user => _user;
-  String? get token => _token;
-  bool get isAuthenticated => _token != null && _user != null;
-  bool get isLoading => _isLoading;
-  String? get error => _error;
-  Dio get dio => _dio;
+  User?   get user             => _user;
+  String? get token            => _token;
+  bool    get isAuthenticated  => _token != null && _user != null;
+  bool    get isLoading        => _isLoading;
+  bool    get initialSyncDone  => _initialSyncDone;
+  String? get error            => _error;
+  Dio     get dio              => _dio;
 
-  late final ApiService _apiService = ApiService(_dio);
+  late final ApiService  _apiService  = ApiService(_dio);
   late final SyncService _syncService = SyncService(_dio);
 
-  ApiService get apiService => _apiService;
+  ApiService  get apiService  => _apiService;
   SyncService get syncService => _syncService;
 
-  AuthProvider() {
-    _init();
-  }
+  AuthProvider() { _init(); }
 
   Future<void> _init() async {
     final prefs = await SharedPreferences.getInstance();
     _token = prefs.getString('auth_token');
-    
+
     if (_token != null) {
       _dio.options.headers['Authorization'] = 'Bearer $_token';
       try {
         final response = await _dio.get('/user');
         _user = User.fromJson(response.data['data']);
-      } catch (e) {
+        _initialSyncDone = prefs.getBool('initial_sync_done') ?? false;
+
+        // Background refresh silently on every app open after first sync
+        if (_initialSyncDone && _user != null) {
+          _syncService.backgroundRefresh(_user!.role);
+        }
+      } catch (_) {
         _token = null;
         await prefs.remove('auth_token');
         _dio.options.headers.remove('Authorization');
       }
     }
-    
+
     _isLoading = false;
     notifyListeners();
   }
@@ -100,54 +91,38 @@ class AuthProvider extends ChangeNotifier {
       final response = await _dio.post('/login', data: {
         'email': email,
         'password': password,
-        'device_name': 'flutter_web_app',
+        'device_name': 'myacademy_app',
       });
 
-      print('Raw response data: ${response.data}');
-      print('Token: ${response.data['token']}');
-      print('User data: ${response.data['user']}');
-
-      // Laravel API returns token and user directly
       _token = response.data['token'];
-      
-      print('About to parse user...');
-      try {
-        _user = User.fromJson(response.data['user']);
-        print('User parsed successfully: ${_user?.name}');
-      } catch (userError) {
-        print('Error parsing user: $userError');
-        throw userError;
-      }
+      _user  = User.fromJson(response.data['user']);
 
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString('auth_token', _token!);
-      
       _dio.options.headers['Authorization'] = 'Bearer $_token';
-      
-      print('Login completed successfully');
+
+      _initialSyncDone = prefs.getBool('initial_sync_done') ?? false;
+
       _isLoading = false;
       notifyListeners();
       return true;
-    } on DioException catch (e) {
+    } on DioException {
       _isLoading = false;
-      print('DioException: $e');
-      _error = 'Network error. Please try again.';
+      _error = 'Network error. Please check your connection.';
       notifyListeners();
       return false;
     } catch (e) {
       _isLoading = false;
-      print('General Exception during login: $e');
-      print('Exception type: ${e.runtimeType}');
-      _error = 'Login failed: ${e.toString()}';
+      _error = 'Login failed. Please try again.';
       notifyListeners();
       return false;
     }
   }
 
-  Future<bool> checkAuthStatus() async {
-    final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString('auth_token');
-    return token != null && _user != null;
+  /// Called by InitialSyncScreen when sync completes
+  void markSyncDone() {
+    _initialSyncDone = true;
+    notifyListeners();
   }
 
   Future<bool> isFirstTime() async {
@@ -157,20 +132,18 @@ class AuthProvider extends ChangeNotifier {
 
   Future<void> logout() async {
     try {
-      if (_token != null) {
-        await _dio.post('/logout');
-      }
-    } catch (e) {
-      // Ignore
-    }
+      if (_token != null) await _dio.post('/logout');
+    } catch (_) {}
 
-    _token = null;
-    _user = null;
-    
+    _token           = null;
+    _user            = null;
+    _initialSyncDone = false;
+
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('auth_token');
+    await prefs.remove('initial_sync_done');
     _dio.options.headers.remove('Authorization');
-    
+
     notifyListeners();
   }
 }

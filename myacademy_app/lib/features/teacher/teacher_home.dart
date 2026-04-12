@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../core/auth_provider.dart';
-import '../../core/constants.dart';
-import '../../core/sync_status_widget.dart';
+import '../../core/database_helper.dart';
+import '../../core/mobile_layout.dart';
 
 class TeacherHome extends StatefulWidget {
   const TeacherHome({super.key});
@@ -12,82 +13,146 @@ class TeacherHome extends StatefulWidget {
 }
 
 class _TeacherHomeState extends State<TeacherHome> {
-  List<dynamic> _students = [];
-  bool _isLoading = true;
-  String? _error;
+  final _db = DatabaseHelper();
+  List<Map<String, dynamic>> _classes = [];
+  bool _loading = true;
 
   @override
   void initState() {
     super.initState();
-    _fetchStudents();
+    _loadClasses();
   }
 
-  Future<void> _fetchStudents() async {
+  Future<void> _loadClasses() async {
     final auth = context.read<AuthProvider>();
     try {
-      final responseData = await auth.apiService.getWithCache('/students');
-      if (mounted) {
-        setState(() {
-          // Laravel paginated response returns data in 'data' key
-          _students = responseData['data'] ?? [];
-          _isLoading = false;
-        });
-      }
-    } catch (e) {
-      if (mounted) {
-        setState(() {
-          _error = 'Failed to load students list.';
-          _isLoading = false;
-        });
-      }
-    }
+      final data = await auth.apiService.getWithCache('/teacher/classes');
+      final list = (data['data'] as List).cast<Map<String, dynamic>>();
+      setState(() => _classes = list);
+    } catch (_) {}
+    setState(() => _loading = false);
   }
 
   @override
   Widget build(BuildContext context) {
-    if (_isLoading) return const Scaffold(body: Center(child: CircularProgressIndicator()));
-    if (_error != null) {
-      return Scaffold(
-        appBar: AppBar(title: const Text('My Classes')),
-        body: Center(child: Text(_error!)),
-      );
-    }
+    final user = context.watch<AuthProvider>().user;
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('My Classes'),
-        actions: [
-          const SyncStatusWidget(),
-          IconButton(
-            icon: const Icon(Icons.logout),
-            onPressed: () => context.read<AuthProvider>().logout(),
-          ),
-        ],
+    return MobileLayout(
+      title: 'MyAcademy',
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Welcome, ${user?.name ?? 'Teacher'}!',
+                style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Color(0xFF0F172A))),
+            const SizedBox(height: 4),
+            const Text('Manage your classes and students',
+                style: TextStyle(fontSize: 15, color: Color(0xFF64748B))),
+            const SizedBox(height: 28),
+            _buildMyClasses(),
+            const SizedBox(height: 28),
+            _buildQuickActions(context),
+          ],
+        ),
       ),
-      body: _students.isEmpty
-          ? const Center(child: Text('No students found.'))
-          : ListView.builder(
-              padding: const EdgeInsets.all(16),
-              itemCount: _students.length,
-              itemBuilder: (context, index) {
-                final student = _students[index];
-                return Card(
-                  margin: const EdgeInsets.only(bottom: 12),
-                  child: ListTile(
-                    leading: CircleAvatar(
-                      backgroundColor: AppColors.primary.withOpacity(0.2),
-                      child: Text(student['first_name'][0], style: const TextStyle(color: AppColors.primaryDark)),
+    );
+  }
+
+  Widget _buildMyClasses() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text('My Classes', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF0F172A))),
+        const SizedBox(height: 12),
+        if (_loading)
+          const Center(child: CircularProgressIndicator())
+        else if (_classes.isEmpty)
+          Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16), border: Border.all(color: const Color(0xFFF1F5F9))),
+            child: const Center(child: Text('No classes assigned yet.', style: TextStyle(color: Color(0xFF64748B)))),
+          )
+        else
+          ...(_classes.map((c) => Container(
+                margin: const EdgeInsets.only(bottom: 10),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(color: const Color(0xFFF1F5F9)),
+                  boxShadow: const [BoxShadow(color: Color(0x0A000000), blurRadius: 4, offset: Offset(0, 2))],
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(color: const Color(0xFF3B82F6).withOpacity(0.1), borderRadius: BorderRadius.circular(10)),
+                      child: const Icon(Icons.class_, color: Color(0xFF3B82F6), size: 20),
                     ),
-                    title: Text('${student['first_name']} ${student['last_name']}', style: const TextStyle(fontWeight: FontWeight.bold)),
-                    subtitle: Text(student['admission_number'] ?? 'No admission #'),
-                    trailing: const Icon(Icons.chevron_right, color: AppColors.textSecondary),
-                    onTap: () {
-                      // Navigate to score entry
-                    },
-                  ),
-                );
-              },
+                    const SizedBox(width: 14),
+                    Expanded(
+                      child: Text(c['name'] as String,
+                          style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15, color: Color(0xFF0F172A))),
+                    ),
+                    const Icon(Icons.chevron_right, color: Color(0xFF9CA3AF), size: 20),
+                  ],
+                ),
+              ))),
+      ],
+    );
+  }
+
+  Widget _buildQuickActions(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text('Quick Actions', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF0F172A))),
+        const SizedBox(height: 16),
+        GridView.count(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          crossAxisCount: 2,
+          crossAxisSpacing: 16,
+          mainAxisSpacing: 16,
+          childAspectRatio: 1.2,
+          children: [
+            _actionCard('Take Attendance', Icons.how_to_reg, const Color(0xFF10B981), () => context.go('/attendance')),
+            _actionCard('Enter Scores', Icons.edit_note, const Color(0xFF3B82F6), () => context.go('/scores')),
+            _actionCard('Homework', Icons.assignment, const Color(0xFF8B5CF6), () => context.go('/homework')),
+            _actionCard('CBT Exams', Icons.computer, const Color(0xFFF59E0B), () => context.go('/cbt')),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _actionCard(String title, IconData icon, Color color, VoidCallback onTap) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: const [BoxShadow(color: Color(0x0A000000), blurRadius: 4, offset: Offset(0, 2))],
+          border: Border.all(color: const Color(0xFFF1F5F9)),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(color: color.withOpacity(0.1), borderRadius: BorderRadius.circular(12)),
+              child: Icon(icon, color: color, size: 24),
             ),
+            const SizedBox(height: 12),
+            Text(title,
+                style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Color(0xFF374151)),
+                textAlign: TextAlign.center),
+          ],
+        ),
+      ),
     );
   }
 }

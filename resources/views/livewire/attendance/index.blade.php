@@ -124,7 +124,7 @@
             </div>
         </div>
 
-        @if($this->visibleStudents->count() > 0)
+        @if($this->dateRecords->count() > 0)
             <div class="overflow-x-auto">
                 <x-table>
                     <thead>
@@ -136,23 +136,31 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach($this->visibleStudents as $student)
-                            @php
-                                $status = $marks[$student->id]['status'] ?? 'Present';
-                                $note = $marks[$student->id]['note'] ?? '';
-                            @endphp
+                        @foreach($this->dateRecords as $mark)
+                            @php $student = $mark->student; @endphp
                             <tr>
                                 <td>
-                                    <div class="font-semibold text-slate-900">{{ $student->full_name }}</div>
-                                    <div class="text-xs text-slate-500">{{ $student->admission_number }}</div>
+                                    <div class="flex items-center gap-3">
+                                        @if($student?->passport_photo_url)
+                                            <img src="{{ $student->passport_photo_url }}" alt="{{ $student->full_name }}" class="w-9 h-9 rounded-full object-cover flex-shrink-0" />
+                                        @else
+                                            <div class="w-9 h-9 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold text-xs flex-shrink-0">
+                                                {{ substr($student?->first_name ?? '?', 0, 1) }}{{ substr($student?->last_name ?? '', 0, 1) }}
+                                            </div>
+                                        @endif
+                                        <div>
+                                            <div class="font-semibold text-slate-900">{{ $student?->full_name ?? '—' }}</div>
+                                            <div class="text-xs text-slate-500">{{ $student?->admission_number }}</div>
+                                        </div>
+                                    </div>
                                 </td>
-                                <td class="text-slate-700 text-sm">{{ $student->class->name ?? 'N/A' }}</td>
+                                <td class="text-slate-700 text-sm">{{ $student?->schoolClass?->name ?? 'N/A' }}</td>
                                 <td>
-                                    <x-status-badge variant="{{ $status === 'Present' ? 'success' : ($status === 'Absent' ? 'danger' : ($status === 'Late' ? 'warning' : 'default')) }}">
-                                        {{ $status }}
+                                    <x-status-badge variant="{{ $mark->status === 'Present' ? 'success' : ($mark->status === 'Absent' ? 'danger' : ($mark->status === 'Late' ? 'warning' : 'default')) }}">
+                                        {{ $mark->status }}
                                     </x-status-badge>
                                 </td>
-                                <td class="text-sm text-slate-600">{{ $note ?: '-' }}</td>
+                                <td class="text-sm text-slate-600">{{ $mark->note ?: '-' }}</td>
                             </tr>
                         @endforeach
                     </tbody>

@@ -3,67 +3,71 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
+use App\Models\AcademicTerm;
+use App\Models\Score;
 use App\Models\Student;
-use App\Support\ReportCardService;
+use App\Models\SubjectAllocation;
+use Illuminate\Http\Request;
 
 class StudentController extends Controller
 {
     public function index(Request $request)
     {
-        $user = $request->user();
-        $query = Student::with(['schoolClass', 'section'])->orderBy('last_name');
+        $user  = $request->user();
+        $query = Student::with(['schoolClass', 'section'])->where('status', 'Active')->orderBy('last_name');
 
-        // Role-based filtering
         if ($user->role === 'parent') {
-            // Future phase 6 implementation for parents seeing only their kids
-            // $query->whereHas('parents', function($q) use ($user) {
-            //     $q->where('users.id', $user->id);
-            // });
-        } elseif ($user->role === 'teacher') {
-            // Future logic for teacher seeing only their class, but for now they can see all
+            $childIds = $user->students()->pluck('students.id');
+            $query->whereIn('id', $childIds);
         } elseif ($user->role === 'student') {
-            // A student user could only see themselves
-            // $query->where('user_id', $user->id);
+            $query->where('user_id', $user->id);
+        } elseif ($user->role === 'teacher') {
+            $classIds = SubjectAllocation::where('teacher_id', $user->id)->distinct()->pluck('class_id');
+            $query->whereIn('class_id', $classIds);
         }
 
-        $students = $query->paginate(20);
-
-        return response()->json($students);
+        return response()->json($query->paginate(20));
     }
 
-    public function reportCard(Request $request, int $id, ReportCardService $reportCardService)
+    public function reportCard(Request $request, int $id)
     {
-        // Simple permission check (in a real app, use Policies)
-        $user = $request->user();
-        if (!in_array($user->role, ['admin', 'teacher', 'parent', 'student'])) {
-            return response()->json(['error' => 'Unauthorized'], 403);
+        $user    = $request->user();
+        $student = Student::with(['schoolClass', 'section'])->findOrFail($id);
+
+        // Authorization
+        if ($user->role === 'parent') {
+            abort_unless($user->students()->where('students.id', $id)->exists(), 403);
+        } elseif ($user->role === 'student') {
+            abort_unless($student->user_id === $user->id, 403);
+        } elseif ($user->role === 'teacher') {
+            $classIds = SubjectAllocation::where('teacher_id', $user->id)->distinct()->pluck('class_id')->toArray();
+            abort_unless(in_array($student->class_id, $classIds), 403);
         }
 
-        $student = Student::with(['schoolClass', 'section'])->findOrFail($id);
-        
-        // This is a mockup of fetching the report card data as JSON instead of PDF
-        $options = $reportCardService->build();
-        
-        // Dummy data structure for the app to consume
-        $data = [
-            'student' => $student,
-            'session' => $request->query('session', '2025/2026'),
-            'term' => $request->query('term', 1),
-            'options' => $options,
-            'subjects' => [
-                // Real implementation would gather Results model here
-                ['subject' => 'Mathematics', 'ca1' => 15, 'ca2' => 10, 'exam' => 60, 'total' => 85, 'grade' => 'A'],
-                ['subject' => 'English', 'ca1' => 12, 'ca2' => 15, 'exam' => 50, 'total' => 77, 'grade' => 'B'],
-                ['subject' => 'Science', 'ca1' => 18, 'ca2' => 18, 'exam' => 60, 'total' => 96, 'grade' => 'A+'],
-            ],
-            'attendance' => 95,
-            'remarks' => [
-                'teacher' => 'Excellent performance.',
-                'principal' => 'Keep it up.'
-            ]
-        ];
+        $term    = (int) $request->query('term', AcademicTerm::activeTermNumber());
+        $session = $request->query('session', AcademicTerm::activeSessionName());
 
-        return response()->json(['data' => $data]);
+        $scores = Score::where('student_id', $id)
+            ->where('term', $term)
+            ->where('session', $session)
+            ->with('subject:id,name')
+            ->get()
+            ->map(fn($s) => [
+                'subject' => $s->subject?->name ?? 'Unknown',
+                'ca1'     => $s->ca1,
+                'ca2'     => $s->ca2,
+                'exam'    => $s->exam,
+                'total'   => $s->total,
+                'grade'   => $s->grade,
+            ]);
+
+        return response()->json([
+            'data' => [
+                'student'    => $student,
+                'session'    => $session,
+                'term'       => $term,
+                'subjects'   => $scores,
+            ],
+        ]);
     }
 }

@@ -54,6 +54,11 @@ class Index extends Component
         return Section::where('class_id', $this->class_id)->orderBy('name')->get();
     }
 
+    public function updatedClassId()
+    {
+        $this->section_id = '';
+    }
+
     public function create()
     {
         $this->resetForm();
@@ -100,8 +105,26 @@ class Index extends Component
             Homework::findOrFail($this->homeworkId)->update($data);
             session()->flash('message', 'Homework updated successfully.');
         } else {
-            Homework::create($data);
+            $hw = Homework::create($data);
             session()->flash('message', 'Homework created successfully.');
+
+            // Notify all students in the class
+            $students = \App\Models\Student::query()
+                ->where('class_id', $hw->class_id)
+                ->where('status', 'Active')
+                ->when($hw->section_id, fn($q) => $q->where('section_id', $hw->section_id))
+                ->pluck('id');
+
+            $subject = \App\Models\Subject::find($hw->subject_id)?->name ?? 'a subject';
+            foreach ($students as $studentId) {
+                \App\Models\StudentNotification::send(
+                    $studentId,
+                    'New Homework: ' . $hw->title,
+                    "New {$subject} homework assigned. Due: " . $hw->due_date->format('M d, Y'),
+                    'homework',
+                    route('student.homework')
+                );
+            }
         }
 
         $this->closeModal();
@@ -201,7 +224,11 @@ class Index extends Component
     private function tryGeminiAPI($prompt)
     {
         try {
-            $apiKey = 'AIzaSyCpxhMyCyY6F9wvbPycf3499YdOvn1noMU';
+            $apiKey = env('GEMINI_API_KEY');
+            if (empty($apiKey)) {
+                \Illuminate\Support\Facades\Log::warning('Gemini API key not configured');
+                return null;
+            }
             
             $response = \Illuminate\Support\Facades\Http::withOptions(['verify' => false])
                 ->timeout(30)
@@ -239,7 +266,11 @@ class Index extends Component
     private function tryGroqAPI($prompt)
     {
         try {
-            $apiKey = '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';
+            $apiKey = env('GROQ_API_KEY');
+            if (empty($apiKey)) {
+                \Illuminate\Support\Facades\Log::warning('Groq API key not configured');
+                return null;
+            }
             
             $response = \Illuminate\Support\Facades\Http::withOptions(['verify' => false])
                 ->timeout(30)

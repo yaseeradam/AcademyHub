@@ -94,9 +94,7 @@
                 <div class="mt-5">
                     <label class="block text-sm font-semibold text-gray-700 mb-2">Content *</label>
                     <textarea 
-                        wire:model="content" 
-                        x-data="{ content: @entangle('content') }" 
-                        x-model="content"
+                        wire:model="content"
                         rows="8" 
                         placeholder="Content will be generated here, or you can write/paste your own..." 
                         class="block w-full px-4 py-3 text-sm rounded-xl border border-gray-300 bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition resize-none"

@@ -15,11 +15,12 @@
 
 @php
 $navItems = [
-    ['route' => 'student.dashboard',   'label' => 'Dashboard',   'color' => 'text-green-600',  'icon' => '<rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>'],
-    ['route' => 'student.homework',    'label' => 'Homework',    'color' => 'text-purple-600', 'icon' => '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>'],
-    ['route' => 'student.results',     'label' => 'Results',     'color' => 'text-blue-600',   'icon' => '<path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>'],
-    ['route' => 'student.attendance',  'label' => 'Attendance',  'color' => 'text-teal-600',   'icon' => '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><polyline points="16 11 18 13 22 9"/>'],
-    ['route' => 'student.performance', 'label' => 'Performance', 'color' => 'text-orange-600', 'icon' => '<path d="M22 12h-4l-3 9L9 3l-3 9H2"/>'],
+    ['route' => 'student.dashboard',      'label' => 'Dashboard',      'color' => 'text-green-600',  'icon' => '<rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>'],
+    ['route' => 'student.homework',       'label' => 'Homework',       'color' => 'text-purple-600', 'icon' => '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>'],
+    ['route' => 'student.results',        'label' => 'Results',        'color' => 'text-blue-600',   'icon' => '<path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>'],
+    ['route' => 'student.attendance',     'label' => 'Attendance',     'color' => 'text-teal-600',   'icon' => '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><polyline points="16 11 18 13 22 9"/>'],
+    ['route' => 'student.performance',    'label' => 'Performance',    'color' => 'text-orange-600', 'icon' => '<path d="M22 12h-4l-3 9L9 3l-3 9H2"/>'],
+    ['route' => 'student.notifications',  'label' => 'Notifications',  'color' => 'text-green-600',  'icon' => '<path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>'],
 ];
 @endphp
 
@@ -33,7 +34,7 @@ $navItems = [
         <div class="flex h-full flex-col bg-white shadow-xl">
             <div class="flex items-center justify-between border-b border-gray-100 px-4 py-4">
                 <div class="flex items-center gap-3">
-                    @php($schoolLogo = config('myacademy.school_logo'))
+                    @php $schoolLogo = config('myacademy.school_logo'); @endphp
                     <div class="grid h-9 w-9 place-items-center overflow-hidden rounded-lg bg-green-500 text-white shadow-sm flex-shrink-0">
                         @if($schoolLogo)
                             <img src="{{ asset('uploads/' . str_replace('\\', '/', $schoolLogo)) }}" alt="Logo" class="h-full w-full object-contain p-1 bg-white rounded-md" />
@@ -68,7 +69,7 @@ $navItems = [
             </nav>
 
             <div class="border-t border-gray-100 p-4">
-                <form method="POST" action="{{ route('logout') }}">
+                <form method="POST" action="{{ route('student.logout') }}">
                     @csrf
                     <button type="submit" class="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-br from-slate-700 to-slate-900 px-4 py-3 text-sm font-bold text-white shadow-md hover:shadow-lg transition-all">
                         <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
@@ -82,7 +83,7 @@ $navItems = [
     <!-- Desktop Sidebar -->
     <aside id="desktopSidebar" class="fixed inset-y-0 left-0 hidden w-64 flex-col bg-white shadow-xl transition-all duration-300 lg:flex">
         <div class="flex items-center justify-between border-b border-slate-200 px-4 py-4">
-            @php($schoolLogo = config('myacademy.school_logo'))
+            @php $schoolLogo = config('myacademy.school_logo'); @endphp
             <div class="flex items-center gap-2.5 min-w-0">
                 <div class="grid h-9 w-9 place-items-center overflow-hidden rounded-lg bg-green-500 text-white shadow-sm flex-shrink-0">
                     @if($schoolLogo)
@@ -120,7 +121,7 @@ $navItems = [
         </nav>
 
         <div class="border-t border-slate-100 p-3">
-            <form method="POST" action="{{ route('logout') }}">
+            <form method="POST" action="{{ route('student.logout') }}">
                 @csrf
                 <button type="submit" class="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-br from-slate-700 to-slate-900 px-4 py-2.5 text-sm font-bold text-white shadow-md hover:shadow-lg transition-all">
                     <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
@@ -147,6 +148,21 @@ $navItems = [
                     </div>
                 </div>
                 <div class="flex items-center gap-3">
+                    @php
+                        $unreadCount = 0;
+                        try {
+                            $studentId = session('student_id');
+                            $unreadCount = $studentId ? \App\Models\StudentNotification::where('student_id', $studentId)->whereNull('read_at')->count() : 0;
+                        } catch (\Exception $e) {}
+                    @endphp
+                    <a href="{{ route('student.notifications') }}" class="relative rounded-xl p-2.5 text-gray-500 hover:bg-white hover:shadow-md transition-all">
+                        <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+                        </svg>
+                        @if(($unreadCount ?? 0) > 0)
+                            <span class="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs font-black text-white">{{ ($unreadCount ?? 0) > 9 ? '9+' : ($unreadCount ?? 0) }}</span>
+                        @endif
+                    </a>
                     <div class="hidden md:flex items-center gap-2.5 rounded-xl bg-white p-1.5 shadow-sm ring-1 ring-gray-200">
                         <div class="grid h-9 w-9 place-items-center rounded-lg bg-gradient-to-br from-green-500 to-emerald-600 text-white">
                             <span class="text-sm font-bold">{{ mb_substr(session('student_name', 'S'), 0, 1) }}</span>
@@ -156,7 +172,7 @@ $navItems = [
                             <div class="text-xs font-semibold text-gray-500">{{ session('student_admission') }}</div>
                         </div>
                     </div>
-                    <form method="POST" action="{{ route('logout') }}" class="hidden md:block">
+                    <form method="POST" action="{{ route('student.logout') }}" class="hidden md:block">
                         @csrf
                         <button type="submit" class="inline-flex items-center justify-center rounded-xl bg-gradient-to-br from-slate-700 to-slate-900 px-4 py-2.5 text-sm font-bold text-white shadow-md hover:shadow-lg transition-all">
                             Logout

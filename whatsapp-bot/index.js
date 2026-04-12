@@ -70,12 +70,40 @@ client.on('message', async msg => {
     
     console.log('📩 Message received from:', msg.from, '| Text:', msg.body);
     try {
-        const text = msg.body.toLowerCase().trim();
-        const args = text.split(' ');
+        const rawText = (msg.body || '').trim();
+        if (!rawText) {
+            return msg.reply('Please send a text command. Type: help');
+        }
+
+        const text = rawText.toLowerCase();
+        const args = text.split(/\s+/);
         const command = args[0];
+        const greetings = new Set(['hi', 'hello', 'hey', 'start', 'menu']);
+        const publicCommands = new Set([
+            'attendance',
+            'results',
+            'fees',
+            'report',
+            'help',
+            'contact',
+            'subscribe',
+            'unsubscribe',
+            'ai',
+            'ask',
+            'register',
+            'verify'
+        ]);
         
         // Extract plain phone number from things like '1234567890@c.us'
         const phone = msg.from.split('@')[0];
+
+        if (greetings.has(command)) {
+            return msg.reply(
+                '👋 Welcome to MyAcademy Bot!\n' +
+                'To register: register [email] [admission_number]\n' +
+                'Type: help'
+            );
+        }
 
         if (command === 'register') {
             console.log('🔑 Processing register command...');
@@ -118,14 +146,51 @@ client.on('message', async msg => {
             const res = await axios.get(`${API_URL}/parent/${phone}`);
             parentInfo = res.data.parent;
         } catch (e) {
-            // Only send 'not registered' message if they typed a known command other than register/verify
-            if (['attendance', 'results', 'fees', 'report', 'help', 'contact'].includes(command)) {
-                return msg.reply('👋 Welcome to MyAcademy Bot!\nTo register: register [email] [admission_number]');
+            // Reply to known commands when not registered
+            if (publicCommands.has(command)) {
+                return msg.reply(
+                    '👋 Welcome to MyAcademy Bot!\n' +
+                    'To register: register [email] [admission_number]\n' +
+                    'Type: help'
+                );
             }
-            return; // Ignore other random messages
+            return msg.reply('Type: help');
         }
 
         const parentId = parentInfo.id;
+
+        if (command === 'ai' || command === 'ask') {
+            if (args.length < 2) {
+                return msg.reply('Usage: ai [your question]');
+            }
+
+            let key = null;
+            let question = rawText.split(/\s+/).slice(1).join(' ').trim();
+            if (/^[A-Z0-9]{8,12}$/.test(args[1]) && args.length >= 3) {
+                key = args[1];
+                question = rawText.split(/\s+/).slice(2).join(' ').trim();
+            }
+
+            if (!question) {
+                return msg.reply('Usage: ai [your question]');
+            }
+
+            const res = await axios.post(`${API_URL}/ai/ask`, {
+                parent_id: parentId,
+                key: key,
+                question: question
+            });
+
+            if (!res.data || !res.data.success) {
+                const code = res.data ? res.data.code : null;
+                if (code === 'key_invalid') {
+                    return msg.reply('❌ Invalid AI key. Please check and try again.');
+                }
+                return msg.reply('❌ AI service is unavailable right now. Please try again.');
+            }
+
+            return msg.reply(res.data.answer || '✅ AI request completed.');
+        }
 
         if (command === 'attendance') {
             const res = await axios.get(`${API_URL}/attendance/${parentId}`);
@@ -160,11 +225,45 @@ client.on('message', async msg => {
             return msg.reply('💰 Fee records are currently up to date.');
         }
 
-        if (command === 'help') {
-            console.log('❓ Processing help command...');
-            return msg.reply('Available commands:\n- attendance\n- results\n- fees\n- register\n- verify');
+        if (command === 'report') {
+            return msg.reply('📄 Report cards are not available via WhatsApp yet. Please use the parent portal.');
         }
 
+        if (command === 'subscribe') {
+            await axios.post(`${API_URL}/subscribe/${parentId}`);
+            return msg.reply('✅ You are now subscribed to notifications.');
+        }
+
+        if (command === 'unsubscribe') {
+            await axios.post(`${API_URL}/unsubscribe/${parentId}`);
+            return msg.reply('✅ You have been unsubscribed from notifications.');
+        }
+
+        if (command === 'contact') {
+            const res = await axios.get(`${API_URL}/contact`);
+            const phoneValue = res.data.phone || 'not set';
+            const emailValue = res.data.email || 'not set';
+            return msg.reply(`☎️ School Contact\nPhone: ${phoneValue}\nEmail: ${emailValue}`);
+        }
+
+        if (command === 'help') {
+            console.log('❓ Processing help command...');
+            return msg.reply(
+                'Available commands:\n' +
+                '- attendance\n' +
+                '- results\n' +
+                '- fees\n' +
+                '- report\n' +
+                '- subscribe\n' +
+                '- unsubscribe\n' +
+                '- contact\n' +
+                '- ai [question]\n' +
+                '- register\n' +
+                '- verify'
+            );
+        }
+
+        return msg.reply('Type: help');
     } catch (e) {
         console.error('\n❌ ERROR processing message:');
         console.error('From:', msg.from);

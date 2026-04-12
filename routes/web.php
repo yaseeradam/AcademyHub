@@ -107,6 +107,9 @@ Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])
     ->middleware('auth')
     ->name('logout');
 
+Route::post('/student/logout', [AuthenticatedSessionController::class, 'studentLogout'])
+    ->name('student.logout');
+
 // Student dashboard route (session-based, not auth-based)
 Route::get('/student/dashboard', \App\Livewire\Student\Dashboard::class)
     ->middleware('student.session')
@@ -127,6 +130,10 @@ Route::get('/student/attendance', \App\Livewire\Student\Attendance::class)
 Route::get('/student/performance', \App\Livewire\Student\Performance::class)
     ->middleware('student.session')
     ->name('student.performance');
+
+Route::get('/student/notifications', \App\Livewire\Student\Notifications::class)
+    ->middleware('student.session')
+    ->name('student.notifications');
 
 Route::middleware(['auth', 'active'])->group(function () {
     Route::get('/dashboard', function () {
@@ -246,6 +253,13 @@ Route::middleware(['auth', 'active'])->group(function () {
             ->name('cbt.exams.edit');
         Route::get('/cbt/exams/{exam}/pdf', [CbtExportController::class, 'examPdf'])
             ->name('cbt.exams.pdf');
+        Route::get('/cbt/sample-download', function () {
+            $content = "1. What is the powerhouse of the cell?\nA. Nucleus\nB. Mitochondria\nC. Ribosome\nD. Golgi body\nANS: B\nMARKS: 2\n\n2. Which planet is closest to the sun?\nA. Earth\nB. Venus\nC. Mercury\nD. Mars\nANS: C\nMARKS: 1\n\n3. What is the chemical symbol for water?\nA. CO2\nB. H2O\nC. NaCl\nD. O2\nANS: B\nMARKS: 1\n\n4. Define photosynthesis and explain its importance to plants.\nTYPE: theory\nMARKS: 5\n\n5. Describe the water cycle.\nTYPE: theory\nMARKS: 4\n";
+            return response($content, 200, [
+                'Content-Type'        => 'text/plain',
+                'Content-Disposition' => 'attachment; filename="sample_questions.txt"',
+            ]);
+        })->name('cbt.sample-download');
 
         Route::get('/analytics', \App\Livewire\Analytics\Dashboard::class)
             ->middleware('permission:analytics.view')

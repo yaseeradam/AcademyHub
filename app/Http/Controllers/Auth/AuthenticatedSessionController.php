@@ -211,5 +211,13 @@ class AuthenticatedSessionController extends Controller
 
         return redirect()->route('login');
     }
+
+    public function studentLogout(Request $request): RedirectResponse
+    {
+        $request->session()->forget(['student_id', 'student_name', 'student_admission', 'student_class', 'login_type']);
+        $request->session()->regenerateToken();
+
+        return redirect()->route('login');
+    }
 }
 

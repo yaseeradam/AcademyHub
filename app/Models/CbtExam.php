@@ -36,6 +36,8 @@ class CbtExam extends Model
         'pin',
         'grace_minutes',
         'allowed_cidrs',
+        'show_score',
+        'shuffle_questions',
     ];
 
     protected $casts = [

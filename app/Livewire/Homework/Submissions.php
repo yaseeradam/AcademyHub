@@ -4,6 +4,8 @@ namespace App\Livewire\Homework;
 
 use App\Models\Homework;
 use App\Models\HomeworkSubmission;
+use App\Models\StudentNotification;
+use Illuminate\Support\Str;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
@@ -25,7 +27,7 @@ class Submissions extends Component
 
     public function render()
     {
-        $submissions = HomeworkSubmission::with('student.user')
+        $submissions = HomeworkSubmission::with('student')
             ->where('homework_id', $this->homework->id)
             ->latest('submitted_at')
             ->get();
@@ -47,18 +49,31 @@ class Submissions extends Component
     public function saveGrade()
     {
         $this->validate([
-            'grade' => 'nullable|numeric|min:0|max:100',
+            'grade'    => 'nullable|numeric|min:0|max:100',
             'feedback' => 'nullable|string|max:1000',
         ]);
 
         HomeworkSubmission::findOrFail($this->submissionId)->update([
-            'grade' => $this->grade,
-            'feedback' => $this->feedback,
+            'grade'     => $this->grade,
+            'feedback'  => $this->feedback,
             'graded_at' => now(),
         ]);
 
-        session()->flash('message', 'Grade saved successfully.');
+        $submission = HomeworkSubmission::with('homework')->find($this->submissionId);
+        if ($submission) {
+            StudentNotification::send(
+                $submission->student_id,
+                'Homework Graded: ' . ($submission->homework->title ?? 'Assignment'),
+                $this->grade !== null
+                    ? "You scored {$this->grade}/100." . ($this->feedback ? ' Teacher: ' . Str::limit($this->feedback, 80) : '')
+                    : ($this->feedback ?? ''),
+                'grade',
+                route('student.homework')
+            );
+        }
+
         $this->closeGradeModal();
+        $this->dispatch('alert', message: 'Grade saved successfully.', type: 'success');
     }
 
     public function closeGradeModal()

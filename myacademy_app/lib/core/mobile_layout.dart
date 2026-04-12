@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'constants.dart';
 import 'auth_provider.dart';
+import 'sync_status_widget.dart';
 
 class MobileLayout extends StatefulWidget {
   final Widget child;
@@ -138,6 +139,9 @@ class MobileHeader extends StatelessWidget {
                       ],
                     ),
                   ),
+                  // Sync dot
+                  const SyncDot(),
+                  const SizedBox(width: 8),
                   // Notification bell
                   Container(
                     padding: const EdgeInsets.all(8),

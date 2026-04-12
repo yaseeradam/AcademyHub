@@ -212,6 +212,9 @@ class Form extends Component
         // Create parent account if requested
         $parentUser = null;
         if ($this->create_parent_account) {
+            $normalizedPhone = preg_replace('/\D+/', '', $this->parent_phone);
+            $normalizedPhone = $normalizedPhone !== '' ? $normalizedPhone : null;
+
             $parentUser = User::create([
                 'name' => $this->parent_name,
                 'email' => $this->parent_email,
@@ -219,6 +222,9 @@ class Form extends Component
                 'role' => 'parent',
                 'is_active' => true,
                 'custom_fields' => $this->parent_phone ? ['phone' => $this->parent_phone] : null,
+                'whatsapp_phone' => $normalizedPhone,
+                'whatsapp_verified' => (bool) $normalizedPhone,
+                'whatsapp_subscribed' => (bool) $normalizedPhone,
             ]);
 
             Audit::log('parents.created_during_student_registration', $parentUser->id, [

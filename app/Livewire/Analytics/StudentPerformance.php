@@ -5,6 +5,7 @@ namespace App\Livewire\Analytics;
 use App\Models\Student;
 use App\Models\SchoolClass;
 use App\Models\AcademicTerm;
+use App\Models\SubjectAllocation;
 use App\Support\StudentPerformanceService;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
@@ -36,23 +37,47 @@ class StudentPerformance extends Component
         $currentTerm = AcademicTerm::active() ?? AcademicTerm::latest()->first();
         $this->selectedTerm = $currentTerm?->term_number ?? 1;
         $this->selectedSession = $currentTerm?->academicSession?->name ?? now()->format('Y') . '/' . (now()->format('Y') + 1);
-        
-        // Auto-select student if passed via query parameter
+
         if (request()->has('student')) {
-            $this->selectedStudent = (int) request('student');
+            $studentId = (int) request('student');
+            // For teachers, verify the student belongs to one of their assigned classes
+            if ($user->role === 'teacher') {
+                $assignedClassIds = $this->teacherClassIds();
+                $student = Student::where('id', $studentId)->whereIn('class_id', $assignedClassIds)->first();
+                $this->selectedStudent = $student?->id;
+            } else {
+                $this->selectedStudent = $studentId;
+            }
         }
+    }
+
+    private function teacherClassIds(): array
+    {
+        return SubjectAllocation::where('teacher_id', auth()->id())
+            ->distinct()->pluck('class_id')->toArray();
     }
 
     #[Computed]
     public function classes()
     {
+        $user = auth()->user();
+        if ($user->role === 'teacher') {
+            $classIds = $this->teacherClassIds();
+            return SchoolClass::whereIn('id', $classIds)->orderBy('level')->get();
+        }
         return SchoolClass::orderBy('level')->get();
     }
 
     #[Computed]
     public function students()
     {
+        $user = auth()->user();
         $query = Student::query()->where('status', 'Active');
+
+        if ($user->role === 'teacher') {
+            $assignedClassIds = $this->teacherClassIds();
+            $query->whereIn('class_id', $assignedClassIds);
+        }
 
         if ($this->selectedClass) {
             $query->where('class_id', $this->selectedClass);
@@ -101,6 +126,13 @@ class StudentPerformance extends Component
 
     public function selectStudent(int $studentId)
     {
+        $user = auth()->user();
+        if ($user->role === 'teacher') {
+            $assignedClassIds = $this->teacherClassIds();
+            if (!Student::where('id', $studentId)->whereIn('class_id', $assignedClassIds)->exists()) {
+                return;
+            }
+        }
         $this->selectedStudent = $studentId;
     }
 

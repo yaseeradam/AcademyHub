@@ -42,7 +42,7 @@
                     <tr class="bg-white hover:bg-gray-50">
                         <td class="px-5 py-4">
                             <div class="text-sm font-semibold text-gray-900">
-                                {{ $submission->student->user->name }}
+                                {{ $submission->student->full_name }}
                             </div>
                             <div class="text-xs text-gray-500">
                                 {{ $submission->student->admission_number }}
@@ -104,7 +104,7 @@
                     @if($submission)
                         <div class="mb-4 p-4 bg-gray-50 rounded-xl">
                             <div class="text-sm font-semibold text-gray-900 mb-2">
-                                {{ $submission->student->user->name }}
+                                {{ $submission->student->full_name }}
                             </div>
                             <div class="text-sm text-gray-700 whitespace-pre-wrap">
                                 {{ $submission->submission }}

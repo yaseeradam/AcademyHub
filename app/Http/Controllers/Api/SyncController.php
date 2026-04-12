@@ -3,79 +3,103 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\AttendanceMark;
+use App\Models\AttendanceSheet;
+use App\Models\Score;
+use App\Models\SubjectAllocation;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class SyncController extends Controller
 {
-    /**
-     * Handle incoming offline mutations from the Flutter app.
-     * Expects a JSON payload: {'mutations': [{ 'id': 1, 'endpoint': '/api/...', 'action': 'POST', 'payload': {...} }]}
-     */
     public function handleSync(Request $request)
     {
         $mutations = $request->input('mutations', []);
-        
+
         if (empty($mutations)) {
-            return response()->json(['success_ids' => [], 'message' => 'No mutations provided.']);
+            return response()->json(['success_ids' => []]);
         }
 
         $successIds = [];
-        $failedIds = [];
+        $failedIds  = [];
 
         DB::beginTransaction();
-        
         try {
             foreach ($mutations as $mutation) {
-                try {
-                    $id = $mutation['id'] ?? null;
-                    $endpoint = $mutation['endpoint'] ?? '';
-                    $action = strtoupper($mutation['action'] ?? '');
-                    $payload = $mutation['payload'] ?? [];
-                    
-                    if (!$id || !$endpoint || !in_array($action, ['POST', 'PUT', 'PATCH', 'DELETE'])) {
-                        Log::warning("Invalid mutation payload dropped", ['mutation' => $mutation]);
-                        continue;
-                    }
+                $id       = $mutation['id'] ?? null;
+                $endpoint = $mutation['endpoint'] ?? '';
+                $action   = strtoupper($mutation['action'] ?? '');
+                $payload  = $mutation['payload'] ?? [];
 
-                    // Process dynamic endpoints (Phase 7 implementation strategy)
-                    // In a full production scenario, we would route these to internal controllers 
-                    // or dedicated action classes. For phase 7 prototype, we mark successful if valid.
-                    // Let's implement basic handling for a hypothetical "mark attendance" or "score entry" sync
-                    
+                if (!$id || !$endpoint) continue;
+
+                try {
                     if (str_contains($endpoint, 'attendance')) {
-                        // $this->syncAttendance($action, $payload);
+                        $this->syncAttendance($request->user(), $payload);
                     } elseif (str_contains($endpoint, 'scores')) {
-                        // $this->syncScores($action, $payload);
+                        $this->syncScores($request->user(), $payload);
                     }
-                    
-                    // Mark as successfully processed server-side
                     $successIds[] = $id;
-                    
                 } catch (\Exception $e) {
-                    Log::error("Failed to sync mutation ID {$mutation['id']}", ['error' => $e->getMessage()]);
-                    $failedIds[] = $mutation['id'];
+                    Log::error("Sync failed for mutation $id", ['error' => $e->getMessage()]);
+                    $failedIds[] = $id;
                 }
             }
-            
             DB::commit();
-            
-            return response()->json([
-                'status' => 'success',
-                'success_ids' => $successIds,
-                'failed_ids' => $failedIds,
-            ]);
-            
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error("Fatal error during batch sync", ['error' => $e->getMessage()]);
-            
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Batch sync failed completely.',
-                'error' => $e->getMessage(),
-            ], 500);
+            Log::error('Fatal sync error', ['error' => $e->getMessage()]);
+            return response()->json(['status' => 'error', 'message' => $e->getMessage()], 500);
         }
+
+        return response()->json(['status' => 'success', 'success_ids' => $successIds, 'failed_ids' => $failedIds]);
+    }
+
+    private function syncAttendance($user, array $payload): void
+    {
+        $classId = $payload['class_id'] ?? null;
+        abort_unless($classId && $this->teacherOwnsClass($user, $classId), 403);
+
+        $sheet = AttendanceSheet::firstOrCreate(
+            [
+                'class_id' => $classId,
+                'date'     => $payload['date'],
+                'term'     => $payload['term'],
+                'session'  => $payload['session'],
+            ],
+            ['taken_by' => $user->id]
+        );
+
+        foreach ($payload['marks'] ?? [] as $mark) {
+            AttendanceMark::updateOrCreate(
+                ['sheet_id' => $sheet->id, 'student_id' => $mark['student_id']],
+                ['status' => $mark['status'], 'note' => $mark['note'] ?? null]
+            );
+        }
+    }
+
+    private function syncScores($user, array $payload): void
+    {
+        foreach ($payload['scores'] ?? [] as $s) {
+            abort_unless($this->teacherOwnsClass($user, $s['class_id']), 403);
+
+            Score::updateOrCreate(
+                [
+                    'student_id' => $s['student_id'],
+                    'subject_id' => $s['subject_id'],
+                    'class_id'   => $s['class_id'],
+                    'term'       => $s['term'],
+                    'session'    => $s['session'],
+                ],
+                ['ca1' => $s['ca1'] ?? 0, 'ca2' => $s['ca2'] ?? 0, 'exam' => $s['exam'] ?? 0]
+            );
+        }
+    }
+
+    private function teacherOwnsClass($user, int $classId): bool
+    {
+        if ($user->role === 'admin') return true;
+        return SubjectAllocation::where('teacher_id', $user->id)->where('class_id', $classId)->exists();
     }
 }

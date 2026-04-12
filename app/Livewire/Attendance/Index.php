@@ -47,6 +47,16 @@ class Index extends Component
     }
 
     #[Computed]
+    public function dateRecords()
+    {
+        return AttendanceMark::query()
+            ->with(['student', 'sheet'])
+            ->whereHas('sheet', fn($q) => $q->where('date', $this->date))
+            ->get()
+            ->sortBy(fn($m) => $m->student?->last_name);
+    }
+
+    #[Computed]
     public function classes()
     {
         return SchoolClass::query()->orderBy('level')->get();

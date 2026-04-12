@@ -9,6 +9,9 @@
                     <p class="mt-2 text-base text-indigo-50">Create parent accounts and link them to their children.</p>
                 </div>
                 <div class="flex items-center gap-3">
+                    <button wire:click="syncWhatsappPhones" class="rounded-xl bg-white/90 px-5 py-2.5 text-sm font-semibold text-indigo-700 shadow-lg transition-all hover:bg-white hover:shadow-xl">
+                        Sync WhatsApp Numbers
+                    </button>
                     <button wire:click="openCreateModal" class="rounded-xl bg-white px-5 py-2.5 text-sm font-semibold text-indigo-600 shadow-lg transition-all hover:bg-indigo-50 hover:shadow-xl">
                         Create Parent Account
                     </button>
@@ -34,6 +37,7 @@
                     <tr>
                         <th class="px-6 py-4 text-left text-sm font-semibold">Parent</th>
                         <th class="px-6 py-4 text-left text-sm font-semibold">Email</th>
+                        <th class="px-6 py-4 text-left text-sm font-semibold">WhatsApp</th>
                         <th class="px-6 py-4 text-center text-sm font-semibold">Children</th>
                         <th class="px-6 py-4 text-left text-sm font-semibold">Status</th>
                         <th class="px-6 py-4 text-right text-sm font-semibold">Actions</th>
@@ -58,6 +62,7 @@
                                 </div>
                             </td>
                             <td class="px-6 py-4 text-gray-700">{{ $parent->email }}</td>
+                            <td class="px-6 py-4 text-gray-700">{{ $parent->whatsapp_phone ?? 'Not set' }}</td>
                             <td class="px-6 py-4 text-center">
                                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
                                     {{ $parent->students_count }} {{ Str::plural('child', $parent->students_count) }}
@@ -70,6 +75,9 @@
                             </td>
                             <td class="px-6 py-4 text-right">
                                 <div class="flex items-center justify-end gap-2">
+                                    <button wire:click="openEditWhatsappModal({{ $parent->id }})" class="text-sm font-semibold text-indigo-600 hover:text-indigo-700">
+                                        Edit WhatsApp
+                                    </button>
                                     <button wire:click="openLinkModal({{ $parent->id }})" class="text-sm font-semibold text-indigo-600 hover:text-indigo-700">
                                         Link Children
                                     </button>
@@ -81,7 +89,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="5" class="px-6 py-12 text-center text-gray-500">
+                            <td colspan="6" class="px-6 py-12 text-center text-gray-500">
                                 <svg class="mx-auto h-12 w-12 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                                 </svg>
@@ -125,8 +133,8 @@
                         @error('password') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
                     </div>
                     <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">Phone Number (Optional)</label>
-                        <input wire:model="phone" type="text" class="input w-full" placeholder="Enter phone number" />
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">WhatsApp Number (Optional)</label>
+                        <input wire:model="phone" type="text" class="input w-full" placeholder="Enter WhatsApp number (digits only)" />
                         @error('phone') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
                     </div>
                 </div>
@@ -135,6 +143,32 @@
                         Create Account
                     </button>
                     <button wire:click="closeCreateModal" class="flex-1 btn-secondary">
+                        Cancel
+                    </button>
+                </div>
+            </div>
+        </div>
+    @endif
+
+    <!-- Edit WhatsApp Modal -->
+    @if($showEditWhatsappModal)
+        <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+            <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full">
+                <div class="bg-gradient-to-r from-indigo-500 to-purple-600 p-6 rounded-t-2xl">
+                    <h3 class="text-xl font-bold text-white">Update WhatsApp Number</h3>
+                </div>
+                <div class="p-6 space-y-4">
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">WhatsApp Number</label>
+                        <input wire:model="whatsappPhone" type="text" class="input w-full" placeholder="Enter WhatsApp number (digits only)" />
+                        @error('whatsappPhone') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+                    </div>
+                </div>
+                <div class="p-6 pt-0 flex gap-3">
+                    <button wire:click="updateWhatsappPhone" class="flex-1 btn-primary">
+                        Save
+                    </button>
+                    <button wire:click="closeEditWhatsappModal" class="flex-1 btn-secondary">
                         Cancel
                     </button>
                 </div>

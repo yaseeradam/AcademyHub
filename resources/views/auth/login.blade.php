@@ -122,7 +122,8 @@
                                     type="submit"
                                     class="w-full rounded-xl bg-gradient-to-r from-blue-500 to-indigo-600 px-4 py-3.5 text-sm font-bold text-white shadow-lg hover:shadow-xl hover:from-blue-600 hover:to-indigo-700 transition-all duration-200"
                                 >
-                                    Sign in to Dashboard
+                                    <span class="btn-text">Sign in to Dashboard</span>
+                                    <span class="btn-loading hidden">Signing in...</span>
                                 </button>
                             </form>
                         </div>
@@ -165,7 +166,8 @@
                                     type="submit"
                                     class="w-full rounded-xl bg-gradient-to-r from-pink-500 to-rose-600 px-4 py-3.5 text-sm font-bold text-white shadow-lg hover:shadow-xl hover:from-pink-600 hover:to-rose-700 transition-all duration-200"
                                 >
-                                    Access Parent Portal
+                                    <span class="btn-text">Access Parent Portal</span>
+                                    <span class="btn-loading hidden">Signing in...</span>
                                 </button>
                             </form>
                         </div>
@@ -208,7 +210,8 @@
                                     type="submit"
                                     class="w-full rounded-xl bg-gradient-to-r from-green-500 to-emerald-600 px-4 py-3.5 text-sm font-bold text-white shadow-lg hover:shadow-xl hover:from-green-600 hover:to-emerald-700 transition-all duration-200"
                                 >
-                                    Access Student Portal
+                                    <span class="btn-text">Access Student Portal</span>
+                                    <span class="btn-loading hidden">Signing in...</span>
                                 </button>
                             </form>
                         </div>
@@ -377,5 +380,15 @@
         }
 
         document.addEventListener('DOMContentLoaded', () => switchLoginType('staff'));
+
+        document.querySelectorAll('.login-form form').forEach(form => {
+            form.addEventListener('submit', function () {
+                const btn = this.querySelector('button[type="submit"]');
+                if (!btn) return;
+                btn.disabled = true;
+                btn.querySelector('.btn-text').classList.add('hidden');
+                btn.querySelector('.btn-loading').classList.remove('hidden');
+            });
+        });
     </script>
 </x-layouts.guest>
