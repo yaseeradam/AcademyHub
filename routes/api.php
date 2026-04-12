@@ -69,14 +69,16 @@ Route::middleware('auth:sanctum')->group(function () {
 
 // WhatsApp Bot
 Route::prefix('whatsapp')->group(function () {
-    Route::get('parent/{phone}',        [\App\Http\Controllers\Api\WhatsAppController::class, 'getParent']);
+    Route::get('user/{phone}',          [\App\Http\Controllers\Api\WhatsAppController::class, 'getUser']);
     Route::get('attendance/{parentId}', [\App\Http\Controllers\Api\WhatsAppController::class, 'getAttendance']);
     Route::get('results/{parentId}',    [\App\Http\Controllers\Api\WhatsAppController::class, 'getResults']);
     Route::get('fees/{parentId}',       [\App\Http\Controllers\Api\WhatsAppController::class, 'getFees']);
     Route::get('contact',               [\App\Http\Controllers\Api\WhatsAppController::class, 'getContact']);
-    Route::post('subscribe/{parentId}', [\App\Http\Controllers\Api\WhatsAppController::class, 'subscribe']);
-    Route::post('unsubscribe/{parentId}',[\App\Http\Controllers\Api\WhatsAppController::class, 'unsubscribe']);
+    Route::post('subscribe/{userId}',   [\App\Http\Controllers\Api\WhatsAppController::class, 'subscribe']);
+    Route::post('unsubscribe/{userId}', [\App\Http\Controllers\Api\WhatsAppController::class, 'unsubscribe']);
     Route::post('ai/ask',               [\App\Http\Controllers\Api\WhatsAppController::class, 'askAi']);
-    Route::post('register',             [\App\Http\Controllers\Api\WhatsAppController::class, 'registerParent']);
+    Route::post('register',             [\App\Http\Controllers\Api\WhatsAppController::class, 'registerUser']);
     Route::post('verify',               [\App\Http\Controllers\Api\WhatsAppController::class, 'verifyOTP']);
+    Route::post('staff/homework',       [\App\Http\Controllers\Api\WhatsAppController::class, 'staffHomework']);
+    Route::post('admin/broadcast',      [\App\Http\Controllers\Api\WhatsAppController::class, 'adminBroadcast']);
 });

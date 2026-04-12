@@ -236,37 +236,31 @@ class Entry extends Component
     {
         $this->subjectId = null;
         $this->scores = [];
-        $this->validationErrors = []; // Clear validation errors
-        
-        // Force refresh of computed properties
-        $this->dispatch('$refresh');
+        $this->validationErrors = [];
+        // Bust Livewire 3 computed property cache
+        unset($this->subjects, $this->students, $this->isPublished, $this->submission, $this->submissions);
     }
 
     public function updatedSubjectId(): void
     {
-        $this->validationErrors = []; // Clear validation errors
+        $this->validationErrors = [];
         $this->loadExistingScores();
-        
-        // Force refresh of computed properties
-        $this->dispatch('$refresh');
+        // Bust Livewire 3 computed property cache
+        unset($this->students, $this->isPublished, $this->submission, $this->submissions);
     }
 
     public function updatedTerm(): void
     {
-        $this->validationErrors = []; // Clear validation errors
+        $this->validationErrors = [];
         $this->loadExistingScores();
-        
-        // Force refresh of computed properties
-        $this->dispatch('$refresh');
+        unset($this->isPublished, $this->submission, $this->submissions);
     }
 
     public function updatedSession(): void
     {
-        $this->validationErrors = []; // Clear validation errors
+        $this->validationErrors = [];
         $this->loadExistingScores();
-        
-        // Force refresh of computed properties
-        $this->dispatch('$refresh');
+        unset($this->isPublished, $this->submission, $this->submissions);
     }
 
     public function updatedScores(mixed $value, ?string $name = null): void

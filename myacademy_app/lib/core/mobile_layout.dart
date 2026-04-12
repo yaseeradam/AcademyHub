@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'constants.dart';
 import 'auth_provider.dart';
@@ -201,7 +202,7 @@ class MobileHeader extends StatelessWidget {
                               ),
                             ),
                             Text(
-                              user?.role?.toUpperCase() ?? 'USER',
+                              user?.role.toUpperCase() ?? 'USER',
                               style: const TextStyle(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w600,
@@ -366,9 +367,7 @@ class MobileSidebar extends StatelessWidget {
 
   void _logout(BuildContext context) async {
     await context.read<AuthProvider>().logout();
-    if (context.mounted) {
-      Navigator.of(context).pushNamedAndRemoveUntil('/login', (route) => false);
-    }
+    if (context.mounted) context.go('/login');
   }
 }
 
@@ -407,86 +406,41 @@ class NavigationGrid extends StatelessWidget {
   List<NavigationItem> _getNavigationItems(String role) {
     final baseItems = [
       NavigationItem(
-        icon: Icons.dashboard,
-        label: 'Dashboard',
+        icon: Icons.home,
+        label: 'Home',
         color: const Color(0xFF6366F1),
-        onTap: (context) => Navigator.pushReplacementNamed(context, '/dashboard'),
-      ),
-      NavigationItem(
-        icon: Icons.person,
-        label: 'Profile',
-        color: const Color(0xFFEC4899),
-        onTap: (context) => Navigator.pushNamed(context, '/profile'),
-      ),
-      NavigationItem(
-        icon: Icons.people,
-        label: 'Students',
-        color: const Color(0xFF3B82F6),
-        onTap: (context) => Navigator.pushNamed(context, '/students'),
+        onTap: (context) { Navigator.of(context).pop(); context.go('/'); },
       ),
     ];
 
     if (role == 'admin' || role == 'teacher') {
       baseItems.addAll([
         NavigationItem(
-          icon: Icons.class_,
-          label: 'Classes',
-          color: const Color(0xFF64748B),
-          onTap: (context) => Navigator.pushNamed(context, '/classes'),
-        ),
-        NavigationItem(
-          icon: Icons.book,
-          label: 'Subjects',
-          color: const Color(0xFF64748B),
-          onTap: (context) => Navigator.pushNamed(context, '/subjects'),
+          icon: Icons.how_to_reg,
+          label: 'Attendance',
+          color: const Color(0xFF3B82F6),
+          onTap: (context) { Navigator.of(context).pop(); context.go('/attendance'); },
         ),
         NavigationItem(
           icon: Icons.edit_note,
           label: 'Scores',
           color: const Color(0xFF10B981),
-          onTap: (context) => Navigator.pushNamed(context, '/scores'),
+          onTap: (context) { Navigator.of(context).pop(); context.go('/scores'); },
         ),
         NavigationItem(
-          icon: Icons.how_to_reg,
-          label: 'Attendance',
-          color: const Color(0xFF3B82F6),
-          onTap: (context) => Navigator.pushNamed(context, '/attendance'),
+          icon: Icons.assignment,
+          label: 'Homework',
+          color: const Color(0xFF8B5CF6),
+          onTap: (context) { Navigator.of(context).pop(); context.go('/homework'); },
         ),
         NavigationItem(
           icon: Icons.computer,
           label: 'CBT',
-          color: const Color(0xFF8B5CF6),
-          onTap: (context) => Navigator.pushNamed(context, '/cbt'),
-          isLocked: false,
+          color: const Color(0xFFF59E0B),
+          onTap: (context) { Navigator.of(context).pop(); context.go('/cbt'); },
         ),
       ]);
     }
-
-    if (role == 'admin') {
-      baseItems.addAll([
-        NavigationItem(
-          icon: Icons.school,
-          label: 'Teachers',
-          color: const Color(0xFFF97316),
-          onTap: (context) => Navigator.pushNamed(context, '/teachers'),
-        ),
-        NavigationItem(
-          icon: Icons.settings,
-          label: 'Settings',
-          color: const Color(0xFF6B7280),
-          onTap: (context) => Navigator.pushNamed(context, '/settings'),
-        ),
-      ]);
-    }
-
-    baseItems.add(
-      NavigationItem(
-        icon: Icons.more_horiz,
-        label: 'More',
-        color: const Color(0xFF64748B),
-        onTap: (context) => Navigator.pushNamed(context, '/more'),
-      ),
-    );
 
     return baseItems;
   }

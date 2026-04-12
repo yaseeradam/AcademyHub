@@ -1,20 +1,29 @@
-<x-layouts.guest>
+<?php if (isset($component)) { $__componentOriginal1e6834b7596effc838ab3adb1475b477 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginal1e6834b7596effc838ab3adb1475b477 = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.layouts.guest','data' => []] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component->withName('layouts.guest'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
+<?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
+<?php endif; ?>
+<?php $component->withAttributes([]); ?>
     <div class="min-h-screen flex items-center justify-start relative overflow-hidden p-4 sm:p-6 lg:p-8">
         <!-- Dynamic Background Images -->
         <div class="absolute inset-0 z-0">
             <!-- Staff Background -->
             <div id="staff-bg" class="login-bg absolute inset-0" style="opacity:1">
-                <img src="{{ asset('bgs/admin.png') }}" alt="Staff background" class="login-bg-img w-full h-full object-cover" />
+                <img src="<?php echo e(asset('bgs/admin.png')); ?>" alt="Staff background" class="login-bg-img w-full h-full object-cover" />
                 <div class="absolute inset-0 bg-gradient-to-br from-blue-900/20 via-indigo-900/10 to-slate-900/20"></div>
             </div>
             <!-- Parent Background -->
             <div id="parent-bg" class="login-bg absolute inset-0" style="opacity:0">
-                <img src="{{ asset('bgs/parent.png') }}" alt="Parent background" class="login-bg-img w-full h-full object-cover" />
+                <img src="<?php echo e(asset('bgs/parent.png')); ?>" alt="Parent background" class="login-bg-img w-full h-full object-cover" />
                 <div class="absolute inset-0 bg-gradient-to-br from-pink-900/20 via-rose-900/10 to-slate-900/20"></div>
             </div>
             <!-- Student Background -->
             <div id="student-bg" class="login-bg absolute inset-0" style="opacity:0">
-                <img src="{{ asset('bgs/student.png') }}" alt="Student background" class="login-bg-img w-full h-full object-cover" />
+                <img src="<?php echo e(asset('bgs/student.png')); ?>" alt="Student background" class="login-bg-img w-full h-full object-cover" />
                 <div class="absolute inset-0 bg-gradient-to-br from-green-900/20 via-emerald-900/10 to-slate-900/20"></div>
             </div>
         </div>
@@ -27,7 +36,8 @@
                     <!-- Header -->
                     <div class="p-8 text-center border-b border-white/10">
                         <h1 class="text-2xl font-black text-white mb-1">
-                            {{ config('myacademy.school_name', config('app.name', 'MyAcademy')) }}
+                            <?php echo e(config('myacademy.school_name', config('app.name', 'MyAcademy'))); ?>
+
                         </h1>
                         <p class="text-sm text-white/70">School Management System</p>
                         <div class="mt-3">
@@ -86,8 +96,8 @@
                     <div class="p-8 pt-6">
                         <!-- Staff Login Form -->
                         <div id="staff-form" class="login-form">
-                            <form class="space-y-5" method="POST" action="{{ route('login.store') }}">
-                                @csrf
+                            <form class="space-y-5" method="POST" action="<?php echo e(route('login.store')); ?>">
+                                <?php echo csrf_field(); ?>
                                 <input type="hidden" name="login_type" value="staff">
 
                                 <div>
@@ -96,7 +106,7 @@
                                         id="staff-email"
                                         name="email"
                                         type="email"
-                                        value="{{ old('email') }}"
+                                        value="<?php echo e(old('email')); ?>"
                                         autocomplete="username"
                                         required
                                         class="w-full rounded-xl border-0 bg-white/10 backdrop-blur-sm px-4 py-3 text-sm text-white placeholder:text-white/50 ring-1 ring-white/20 focus:ring-2 focus:ring-blue-400 transition"
@@ -130,8 +140,8 @@
 
                         <!-- Parent Login Form -->
                         <div id="parent-form" class="login-form hidden">
-                            <form class="space-y-5" method="POST" action="{{ route('login.store') }}">
-                                @csrf
+                            <form class="space-y-5" method="POST" action="<?php echo e(route('login.store')); ?>">
+                                <?php echo csrf_field(); ?>
                                 <input type="hidden" name="login_type" value="parent">
 
                                 <div>
@@ -140,7 +150,7 @@
                                         id="parent-email"
                                         name="email"
                                         type="email"
-                                        value="{{ old('email') }}"
+                                        value="<?php echo e(old('email')); ?>"
                                         autocomplete="username"
                                         required
                                         class="w-full rounded-xl border-0 bg-white/10 backdrop-blur-sm px-4 py-3 text-sm text-white placeholder:text-white/50 ring-1 ring-white/20 focus:ring-2 focus:ring-pink-400 transition"
@@ -174,8 +184,8 @@
 
                         <!-- Student Login Form -->
                         <div id="student-form" class="login-form hidden">
-                            <form class="space-y-5" method="POST" action="{{ route('login.store') }}">
-                                @csrf
+                            <form class="space-y-5" method="POST" action="<?php echo e(route('login.store')); ?>">
+                                <?php echo csrf_field(); ?>
                                 <input type="hidden" name="login_type" value="student">
 
                                 <div>
@@ -184,7 +194,7 @@
                                         id="student-admission"
                                         name="admission_number"
                                         type="text"
-                                        value="{{ old('admission_number') }}"
+                                        value="<?php echo e(old('admission_number')); ?>"
                                         autocomplete="username"
                                         required
                                         class="w-full rounded-xl border-0 bg-white/10 backdrop-blur-sm px-4 py-3 text-sm text-white placeholder:text-white/50 ring-1 ring-white/20 focus:ring-2 focus:ring-green-400 transition"
@@ -218,16 +228,16 @@
                     </div>
 
                     <!-- Success Message -->
-                    @if (session('success'))
+                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(session('success')): ?>
                         <div class="px-8 pb-6">
                             <div class="rounded-xl bg-green-500/20 border border-green-400/30 p-4 flex items-start gap-3">
                                 <svg class="h-5 w-5 text-green-300 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                                 </svg>
-                                <div class="text-sm text-green-200">{{ session('success') }}</div>
+                                <div class="text-sm text-green-200"><?php echo e(session('success')); ?></div>
                             </div>
                         </div>
-                    @endif
+                    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                 </div>
             </div>
 
@@ -236,7 +246,7 @@
     </div>
 
     <!-- Error Modal -->
-    @if ($errors->any())
+    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($errors->any()): ?>
         <div id="error-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
             <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden animate-fade-in">
                 <!-- Modal Header -->
@@ -254,14 +264,14 @@
                 
                 <!-- Modal Body -->
                 <div class="px-6 py-5 space-y-3">
-                    @foreach ($errors->all() as $error)
+                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $errors->all(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $error): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                         <div class="flex items-start gap-3 text-gray-700">
                             <svg class="h-5 w-5 text-red-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                             </svg>
-                            <p class="text-sm">{{ $error }}</p>
+                            <p class="text-sm"><?php echo e($error); ?></p>
                         </div>
-                    @endforeach
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                 </div>
                 
                 <!-- Modal Footer -->
@@ -275,7 +285,7 @@
                 </div>
             </div>
         </div>
-    @endif
+    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
 
     <style>
         @keyframes fade-in {
@@ -391,4 +401,14 @@
             });
         });
     </script>
-</x-layouts.guest>
+ <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginal1e6834b7596effc838ab3adb1475b477)): ?>
+<?php $attributes = $__attributesOriginal1e6834b7596effc838ab3adb1475b477; ?>
+<?php unset($__attributesOriginal1e6834b7596effc838ab3adb1475b477); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginal1e6834b7596effc838ab3adb1475b477)): ?>
+<?php $component = $__componentOriginal1e6834b7596effc838ab3adb1475b477; ?>
+<?php unset($__componentOriginal1e6834b7596effc838ab3adb1475b477); ?>
+<?php endif; ?>
+<?php /**PATH C:\laragon\www\myacademy-laravel\resources\views/auth/login.blade.php ENDPATH**/ ?>

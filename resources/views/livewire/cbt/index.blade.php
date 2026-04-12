@@ -78,11 +78,9 @@
             <div class="text-sm font-semibold text-gray-900">{{ $exams->count() }} Exams</div>
             <select wire:model.live="statusFilter" class="select w-40">
                 <option value="">All Status</option>
-                <option value="assigned">Assigned</option>
                 <option value="draft">Draft</option>
-                <option value="submitted">Submitted</option>
-                <option value="approved">Approved</option>
-                <option value="rejected">Rejected</option>
+                <option value="live">Live</option>
+                <option value="ended">Ended</option>
             </select>
         </div>
     </div>
@@ -91,10 +89,8 @@
         @forelse ($exams as $exam)
             @php
                 $variant = match ($exam->status) {
-                    'approved' => 'success',
-                    'submitted' => 'info',
-                    'assigned' => 'info',
-                    'rejected' => 'warning',
+                    'live' => 'success',
+                    'ended' => 'info',
                     default => 'neutral',
                 };
             @endphp
@@ -103,8 +99,8 @@
                     <div class="flex-1">
                         <div class="text-sm font-semibold text-gray-900">{{ $exam->title }}</div>
                         <div class="mt-1 text-xs text-gray-500">{{ $exam->schoolClass?->name }} • {{ $exam->subject?->name }}</div>
-                        @if ($exam->status === 'rejected' && $exam->note)
-                            <div class="mt-2 rounded bg-orange-50 px-2 py-1 text-xs text-orange-700">{{ $exam->note }}</div>
+                        @if ($exam->status === 'live' && $exam->note)
+                            <div class="mt-2 rounded bg-amber-50 px-2 py-1 text-xs text-amber-700">{{ $exam->note }}</div>
                         @endif
                     </div>
                     <x-status-badge variant="{{ $variant }}">{{ ucfirst($exam->status) }}</x-status-badge>
@@ -113,7 +109,7 @@
                 <div class="mt-3 flex items-center gap-4 text-xs text-gray-600">
                     <div><span class="font-semibold">{{ (int) $exam->questions_count }}</span> Questions</div>
                     <div><span class="font-semibold">{{ (int) $exam->attempts_count }}</span> Attempts</div>
-                    @if ($exam->status === 'approved' && $exam->access_code)
+                    @if ($exam->status === 'live' && $exam->access_code)
                         <div class="font-mono font-semibold text-amber-600">{{ $exam->access_code }}</div>
                     @endif
                 </div>
@@ -121,7 +117,7 @@
                 <div class="mt-3 flex items-center justify-between border-t pt-3">
                     <div class="text-xs text-gray-500">{{ $exam->creator?->name ?? 'User' }}</div>
                     <a href="{{ route('cbt.exams.edit', $exam) }}" class="rounded-lg bg-gray-100 px-3 py-1 text-xs font-semibold hover:bg-gray-200">
-                        {{ in_array($exam->status, ['draft', 'assigned', 'rejected'], true) ? 'Edit' : 'Open' }}
+                        {{ $exam->status === 'draft' ? 'Edit' : 'Open' }}
                     </a>
                 </div>
             </div>

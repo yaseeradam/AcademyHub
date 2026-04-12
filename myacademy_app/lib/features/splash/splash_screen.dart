@@ -3,10 +3,10 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:animated_text_kit/animated_text_kit.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../core/auth_provider.dart';
 import 'onboarding_screen.dart';
-import '../auth/login_screen_new.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -107,35 +107,17 @@ class _SplashScreenState extends State<SplashScreen>
 
   void _navigateToNextScreen() async {
     final authProvider = context.read<AuthProvider>();
-    
-    // Check if user is already logged in
-    final isLoggedIn = await authProvider.checkAuthStatus();
-    
-    if (mounted) {
-      if (isLoggedIn) {
-        // User is logged in, go to main app
-        Navigator.of(context).pushReplacementNamed('/dashboard');
+    if (!mounted) return;
+
+    if (authProvider.isAuthenticated) {
+      context.go('/');
+    } else {
+      final isFirst = await authProvider.isFirstTime();
+      if (!mounted) return;
+      if (isFirst) {
+        context.go('/onboarding');
       } else {
-        // First time user, show onboarding
-        Navigator.of(context).pushReplacement(
-          PageRouteBuilder(
-            pageBuilder: (context, animation, secondaryAnimation) =>
-                const OnboardingScreen(),
-            transitionsBuilder: (context, animation, secondaryAnimation, child) {
-              return SlideTransition(
-                position: Tween<Offset>(
-                  begin: const Offset(1.0, 0.0),
-                  end: Offset.zero,
-                ).animate(CurvedAnimation(
-                  parent: animation,
-                  curve: Curves.easeInOutCubic,
-                )),
-                child: child,
-              );
-            },
-            transitionDuration: const Duration(milliseconds: 1000),
-          ),
-        );
+        context.go('/login');
       }
     }
   }

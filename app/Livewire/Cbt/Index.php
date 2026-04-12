@@ -97,7 +97,7 @@ class Index extends Component
         }
 
         $user = auth()->user();
-        abort_unless($user, 403);
+        abort_unless((bool) $user, 403);
 
         if ($user->role === 'admin') {
             $ids = SubjectAllocation::query()->where('class_id', $this->classId)->pluck('subject_id')->unique();
@@ -144,8 +144,7 @@ class Index extends Component
         }
 
         $exam = DB::transaction(function () use ($user, $data) {
-            $isAdmin = $user->role === 'admin';
-            $code = $isAdmin ? $this->generateAccessCode() : null;
+            $code = $this->generateAccessCode();
 
             return CbtExam::query()->create([
                 'title' => trim($data['title']),
@@ -154,11 +153,8 @@ class Index extends Component
                 'term' => (int) $data['term'],
                 'session' => trim((string) ($data['session'] ?? '')) !== '' ? trim((string) $data['session']) : null,
                 'duration_minutes' => (int) $data['durationMinutes'],
-                'status' => $isAdmin ? 'approved' : 'draft',
+                'status' => 'draft',
                 'access_code' => $code,
-                'published_at' => $isAdmin ? now() : null,
-                'reviewed_by' => $isAdmin ? $user->id : null,
-                'reviewed_at' => $isAdmin ? now() : null,
                 'created_by' => $user->id,
                 'assigned_teacher_id' => $user->id,
             ]);
@@ -201,7 +197,7 @@ class Index extends Component
                 'assignedTeacher:id,name',
             ])
             ->withCount(['questions', 'attempts'])
-            ->orderByRaw("CASE status WHEN 'submitted' THEN 0 WHEN 'rejected' THEN 1 WHEN 'assigned' THEN 2 WHEN 'draft' THEN 3 WHEN 'approved' THEN 4 ELSE 5 END")
+            ->orderByRaw("CASE status WHEN 'live' THEN 0 WHEN 'draft' THEN 1 WHEN 'ended' THEN 2 ELSE 3 END")
             ->orderByDesc('id');
 
         if ($user->role === 'teacher') {

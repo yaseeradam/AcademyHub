@@ -125,6 +125,9 @@ class AuthProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Used by SplashScreen to check if already authenticated
+  bool get isReady => !_isLoading;
+
   Future<bool> isFirstTime() async {
     final prefs = await SharedPreferences.getInstance();
     return !(prefs.getBool('onboarding_completed') ?? false);

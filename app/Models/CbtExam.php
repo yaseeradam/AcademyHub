@@ -31,6 +31,7 @@ class CbtExam extends Model
         'reviewed_at',
         'note',
         'published_at',
+        'results_released_at',
         'starts_at',
         'ends_at',
         'pin',
@@ -53,10 +54,14 @@ class CbtExam extends Model
         'reviewed_by' => 'integer',
         'reviewed_at' => 'datetime',
         'published_at' => 'datetime',
+        'results_released_at' => 'datetime',
         'starts_at' => 'datetime',
         'ends_at' => 'datetime',
         'grace_minutes' => 'integer',
+        'show_score' => 'boolean',
+        'shuffle_questions' => 'boolean',
     ];
+
 
     public function schoolClass(): BelongsTo
     {

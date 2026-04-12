@@ -9,45 +9,51 @@ use Illuminate\Support\Facades\Log;
 
 class WhatsAppController extends Controller
 {
-    public function getParent($phone)
+    public function getUser($phone)
     {
-        $parent = \App\Models\User::where('whatsapp_phone', $phone)
-            ->where('role', 'parent')
-            ->with('students.schoolClass')
+        $user = \App\Models\User::where('whatsapp_phone', $phone)
+            ->whereIn('role', ['parent', 'teacher', 'admin', 'superadmin', 'bursar'])
             ->first();
 
-        if (!$parent) {
-            return response()->json(['success' => false, 'message' => 'Parent not found'], 404);
+        if (!$user) {
+            return response()->json(['success' => false, 'message' => 'User not found'], 404);
+        }
+        
+        if ($user->role === 'parent') {
+            $user->load('students.schoolClass');
         }
 
-        return response()->json(['success' => true, 'parent' => $parent]);
+        return response()->json(['success' => true, 'user' => $user]);
     }
 
-    public function registerParent(Request $request)
+    public function registerUser(Request $request)
     {
         $request->validate([
             'email' => 'required|email',
-            'admission_number' => 'required',
             'phone' => 'required'
         ]);
 
-        $parent = \App\Models\User::where('email', $request->email)->where('role', 'parent')->first();
-        if (!$parent) {
-            return response()->json(['success' => false, 'message' => 'Parent email not found'], 404);
+        $user = \App\Models\User::where('email', $request->email)
+            ->whereIn('role', ['parent', 'teacher', 'admin', 'superadmin', 'bursar'])
+            ->first();
+            
+        if (!$user) {
+            return response()->json(['success' => false, 'message' => 'Authorized user email not found'], 404);
         }
 
-        $student = \App\Models\Student::where('admission_number', $request->admission_number)->first();
-        if (!$student) {
-            return response()->json(['success' => false, 'message' => 'Student not found'], 404);
-        }
-
-        if (!$parent->students()->where('student_id', $student->id)->exists()) {
-            return response()->json(['success' => false, 'message' => 'Student not linked to this parent email'], 403);
+        if ($user->role === 'parent') {
+            if (!$request->admission_number) {
+                return response()->json(['success' => false, 'message' => 'Parents must provide admission_number'], 400);
+            }
+            $student = \App\Models\Student::where('admission_number', $request->admission_number)->first();
+            if (!$student || !$user->students()->where('student_id', $student->id)->exists()) {
+                return response()->json(['success' => false, 'message' => 'Student not linked to this parent email'], 403);
+            }
         }
 
         $otp = rand(100000, 999999);
         \Illuminate\Support\Facades\Cache::put('whatsapp_otp_' . $request->phone, [
-            'parent_id' => $parent->id,
+            'user_id' => $user->id,
             'otp' => $otp
         ], now()->addMinutes(10));
 
@@ -66,17 +72,19 @@ class WhatsAppController extends Controller
             return response()->json(['success' => false, 'message' => 'Invalid or expired OTP'], 400);
         }
 
-        $parent = \App\Models\User::find($cached['parent_id']);
-        $parent->whatsapp_phone = $request->phone;
-        $parent->whatsapp_verified = true;
-        $parent->whatsapp_subscribed = true;
-        $parent->save();
+        $user = \App\Models\User::find($cached['user_id']);
+        $user->whatsapp_phone = $request->phone;
+        $user->whatsapp_verified = true;
+        $user->whatsapp_subscribed = true;
+        $user->save();
 
         \Illuminate\Support\Facades\Cache::forget('whatsapp_otp_' . $request->phone);
 
-        $parent->load('students.schoolClass');
+        if ($user->role === 'parent') {
+            $user->load('students.schoolClass');
+        }
 
-        return response()->json(['success' => true, 'message' => 'Registration successful', 'parent' => $parent]);
+        return response()->json(['success' => true, 'message' => 'Registration successful', 'user' => $user]);
     }
 
     public function getAttendance($parentId)
@@ -117,12 +125,11 @@ class WhatsAppController extends Controller
             'question' => 'required|string|max:1000',
         ]);
 
-        $parent = \App\Models\User::where('role', 'parent')
-            ->whereKey($request->parent_id)
+        $user = \App\Models\User::whereKey($request->parent_id)
             ->firstOrFail();
 
-        if (!empty($request->key) && !empty($parent->whatsapp_ai_key_hash)) {
-            if (hash('sha256', $request->key) !== $parent->whatsapp_ai_key_hash) {
+        if (!empty($request->key) && !empty($user->whatsapp_ai_key_hash)) {
+            if (hash('sha256', $request->key) !== $user->whatsapp_ai_key_hash) {
                 return response()->json([
                     'success' => false,
                     'code' => 'key_invalid',
@@ -139,17 +146,35 @@ class WhatsAppController extends Controller
             ], 500);
         }
 
-        $context = $this->buildParentContext($parent);
+        if ($user->role === 'parent') {
+            $context = $this->buildParentContext($user);
+            $systemInstruction = 'You are MyAcademy Parent Assistant. Answer only using the provided parent and student data. If the answer is not in the data, say you do not have access to that information. Keep responses concise and clear.';
+            $contextString = "Parent Data:\n" . json_encode($context, JSON_UNESCAPED_SLASHES) . "\n\nQuestion: " . $request->question;
+        } else {
+            $context = [
+               'staff' => [
+                   'name' => $user->name,
+                   'email' => $user->email,
+                   'role' => $user->role
+               ],
+               'school' => [
+                 'name' => config('myacademy.school_name')
+               ]
+            ];
+            $systemInstruction = 'You are MyAcademy Staff Assistant. Answer the staff member\'s question concisely. Be helpful and professional.';
+            $contextString = "Staff Data:\n" . json_encode($context, JSON_UNESCAPED_SLASHES) . "\n\nQuestion: " . $request->question;
+        }
+
         $payload = [
             'model' => 'llama-3.3-70b-versatile',
             'messages' => [
                 [
                     'role' => 'system',
-                    'content' => 'You are MyAcademy Parent Assistant. Answer only using the provided parent and student data. If the answer is not in the data, say you do not have access to that information. Keep responses concise and clear.'
+                    'content' => $systemInstruction
                 ],
                 [
                     'role' => 'user',
-                    'content' => "Parent Data:\n" . json_encode($context, JSON_UNESCAPED_SLASHES) . "\n\nQuestion: " . $request->question
+                    'content' => $contextString
                 ]
             ],
             'temperature' => 0.3,
@@ -249,20 +274,20 @@ class WhatsAppController extends Controller
         ];
     }
 
-    public function subscribe($parentId)
+    public function subscribe($userId)
     {
-        $parent = \App\Models\User::where('role', 'parent')->whereKey($parentId)->firstOrFail();
-        $parent->whatsapp_subscribed = true;
-        $parent->save();
+        $user = \App\Models\User::findOrFail($userId);
+        $user->whatsapp_subscribed = true;
+        $user->save();
 
         return response()->json(['success' => true, 'message' => 'Subscribed']);
     }
 
-    public function unsubscribe($parentId)
+    public function unsubscribe($userId)
     {
-        $parent = \App\Models\User::where('role', 'parent')->whereKey($parentId)->firstOrFail();
-        $parent->whatsapp_subscribed = false;
-        $parent->save();
+        $user = \App\Models\User::findOrFail($userId);
+        $user->whatsapp_subscribed = false;
+        $user->save();
 
         return response()->json(['success' => true, 'message' => 'Unsubscribed']);
     }
@@ -274,5 +299,75 @@ class WhatsAppController extends Controller
             'phone' => config('myacademy.school_phone'),
             'email' => config('myacademy.school_email'),
         ]);
+    }
+
+    public function staffHomework(Request $request)
+    {
+        $request->validate([
+            'user_id' => 'required',
+            'class' => 'required',
+            'description' => 'required'
+        ]);
+
+        $user = \App\Models\User::findOrFail($request->user_id);
+        if (!in_array($user->role, ['teacher', 'admin', 'superadmin'])) {
+            return response()->json(['success' => false, 'message' => 'Unauthorized role'], 403);
+        }
+
+        $schoolClass = \App\Models\SchoolClass::where('name', 'like', '%' . $request->class . '%')->first();
+        if (!$schoolClass) {
+            return response()->json(['success' => false, 'message' => 'Class not found'], 404);
+        }
+
+        $academicSession = \App\Models\AcademicSession::active()->first();
+        $academicTerm = \App\Models\AcademicTerm::active()->first();
+
+        if (!$academicSession || !$academicTerm) {
+            return response()->json(['success' => false, 'message' => 'Session data unavailable'], 400);
+        }
+
+        $homework = new \App\Models\Homework();
+        $homework->title = 'WhatsApp Assignment: ' . $schoolClass->name;
+        $homework->description = $request->description;
+        $homework->school_class_id = $schoolClass->id;
+        $homework->teacher_id = $user->id;
+        $homework->academic_session_id = $academicSession->id;
+        $homework->academic_term_id = $academicTerm->id;
+        $homework->due_date = now()->addDays(2)->toDateString();
+        $homework->save();
+
+        return response()->json(['success' => true, 'message' => 'Homework assigned']);
+    }
+
+    public function adminBroadcast(Request $request)
+    {
+        $request->validate([
+            'user_id' => 'required',
+            'target' => 'required',
+            'message' => 'required'
+        ]);
+
+        $user = \App\Models\User::findOrFail($request->user_id);
+        if (!in_array($user->role, ['admin', 'superadmin'])) {
+            return response()->json(['success' => false, 'message' => 'Unauthorized broadcast attempt.'], 403);
+        }
+
+        $target = strtolower($request->target);
+        $query = \App\Models\User::where('whatsapp_subscribed', true)
+            ->whereNotNull('whatsapp_phone')
+            ->where('id', '!=', $user->id);
+
+        if ($target === 'parents' || $target === 'parent') {
+            $query->where('role', 'parent');
+        } elseif ($target === 'staff') {
+            $query->whereIn('role', ['teacher', 'bursar', 'admin']);
+        } elseif ($target === 'all') {
+            // Keep all
+        } else {
+             return response()->json(['success' => false, 'message' => 'Invalid target. Use Parents, Staff, or All.'], 400);
+        }
+
+        $phones = $query->pluck('whatsapp_phone')->toArray();
+        return response()->json(['success' => true, 'phones' => $phones]);
     }
 }

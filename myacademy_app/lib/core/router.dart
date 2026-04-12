@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'auth_provider.dart';
-import '../features/auth/login_screen.dart';
+import '../features/auth/login_screen_new.dart' as login;
 import '../features/auth/initial_sync_screen.dart';
 import '../features/student/student_home.dart';
 import '../features/teacher/teacher_home.dart';
@@ -36,7 +36,7 @@ class AppRouter {
       routes: [
         GoRoute(
           path: '/login',
-          builder: (_, __) => const LoginScreen(),
+          builder: (_, __) => const login.LoginScreen(),
         ),
         GoRoute(
           path: '/sync',

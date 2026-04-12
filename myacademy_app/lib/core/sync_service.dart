@@ -143,10 +143,18 @@ class SyncService {
 
   Future<void> _syncParentData(int term, String session) async {
     _emit('Downloading children data...', 0.2);
-    await _tryFetch(() => dio.get('/students'));
+    await _tryFetch(() async {
+      final r        = await dio.get('/students');
+      final students = (r.data['data'] as List?)?.cast<Map<String, dynamic>>() ?? [];
+      await _db.upsertStudents(students);
+    });
 
     _emit('Downloading fee records...', 0.4);
-    await _tryFetch(() => dio.get('/billing'));
+    await _tryFetch(() async {
+      final r = await dio.get('/billing');
+      // Cache is saved by ApiService; billing is read-only so no local table needed
+      // The raw response is already cached via cache_storage by getWithCache
+    });
 
     _emit('Downloading homework...', 0.6);
     await _fetchHomework();

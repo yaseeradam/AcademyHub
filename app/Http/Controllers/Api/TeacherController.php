@@ -13,15 +13,20 @@ use Illuminate\Http\Request;
 
 class TeacherController extends Controller
 {
-    /** GET /api/teacher/classes — classes assigned to the teacher */
+    /** GET /api/teacher/classes — classes assigned to the teacher (admin gets all) */
     public function classes(Request $request)
     {
-        $classIds = SubjectAllocation::where('teacher_id', $request->user()->id)
-            ->distinct()->pluck('class_id');
+        $user = $request->user();
 
-        $classes = \App\Models\SchoolClass::whereIn('id', $classIds)
-            ->orderBy('level')
-            ->get(['id', 'name', 'level']);
+        if ($user->role === 'admin') {
+            $classes = \App\Models\SchoolClass::orderBy('level')->get(['id', 'name', 'level']);
+        } else {
+            $classIds = SubjectAllocation::where('teacher_id', $user->id)
+                ->distinct()->pluck('class_id');
+            $classes = \App\Models\SchoolClass::whereIn('id', $classIds)
+                ->orderBy('level')
+                ->get(['id', 'name', 'level']);
+        }
 
         return response()->json(['data' => $classes]);
     }
@@ -44,13 +49,20 @@ class TeacherController extends Controller
     {
         $this->authorizeClass($request, $classId);
 
-        $subjects = SubjectAllocation::where('teacher_id', $request->user()->id)
-            ->where('class_id', $classId)
-            ->with('subject:id,name,code')
-            ->get()
-            ->pluck('subject')
-            ->unique('id')
-            ->values();
+        if ($request->user()->role === 'admin') {
+            $subjectIds = SubjectAllocation::where('class_id', $classId)
+                ->distinct()->pluck('subject_id');
+            $subjects = \App\Models\Subject::whereIn('id', $subjectIds)
+                ->get(['id', 'name', 'code']);
+        } else {
+            $subjects = SubjectAllocation::where('teacher_id', $request->user()->id)
+                ->where('class_id', $classId)
+                ->with('subject:id,name,code')
+                ->get()
+                ->pluck('subject')
+                ->unique('id')
+                ->values();
+        }
 
         return response()->json(['data' => $subjects]);
     }

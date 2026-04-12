@@ -1,10 +1,8 @@
 @php
     $status = (string) ($exam->status ?? 'draft');
     $variant = match ($status) {
-        'approved' => 'success',
-        'submitted' => 'info',
-        'assigned' => 'info',
-        'rejected' => 'warning',
+        'live' => 'success',
+        'ended' => 'info',
         default => 'neutral',
     };
     $canEdit = (bool) $this->canEdit;
@@ -20,7 +18,7 @@
                     <h1 class="text-2xl font-bold text-white">{{ $exam->title }}</h1>
                     <div class="mt-2 flex flex-wrap items-center gap-2">
                         <x-status-badge variant="{{ $variant }}">{{ ucfirst($status) }}</x-status-badge>
-                        @if ($status === 'approved' && $exam->access_code)
+                        @if ($status === 'live' && $exam->access_code)
                             <span class="rounded-lg bg-white/20 px-3 py-1 text-xs font-black text-white backdrop-blur-sm">
                                 Code: {{ $exam->access_code }}
                             </span>
@@ -34,25 +32,33 @@
                         <button wire:click="saveDetails" class="rounded-lg bg-white px-4 py-2 text-sm font-semibold text-violet-600 hover:bg-pink-50">Save Details</button>
                     @endif
 
-                    @if ($me?->role === 'teacher' && $canEdit)
-                        <button wire:click="submitToAdmin" class="rounded-lg bg-emerald-500 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-600">Submit to Admin</button>
+                    @if ($status === 'draft')
+                        <button wire:click="goLive" class="rounded-lg bg-emerald-500 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-600">✓ Go Live</button>
                     @endif
 
-                    @if ($me?->role === 'admin' && in_array($status, ['draft', 'assigned', 'submitted'], true))
-                        <button wire:click="quickApprove" class="rounded-lg bg-emerald-500 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-600">✓ Go Live</button>
+                    @if ($status === 'live')
+                        <button wire:click="endAllExams"
+                            wire:confirm="End exam and force-submit all active attempts?"
+                            class="rounded-lg bg-red-500 px-4 py-2 text-sm font-semibold text-white hover:bg-red-600">
+                            ⏹ End Exam
+                        </button>
                     @endif
 
-                    @if ($me?->role === 'admin' && $status === 'submitted')
-                        <button wire:click="startReject" class="rounded-lg bg-orange-500 px-4 py-2 text-sm font-semibold text-white hover:bg-orange-600">Reject</button>
-                    @endif
-
-                    @if ($me?->role === 'admin' && $status === 'approved')
-                        <button wire:click="togglePublish" class="rounded-lg bg-white px-4 py-2 text-sm font-semibold text-violet-600 hover:bg-pink-50">{{ $exam->published_at ? 'Pause' : 'Resume' }}</button>
+                    @if (in_array($status, ['live', 'ended'], true) && !$exam->results_released_at)
+                        <button wire:click="releaseResults"
+                            wire:confirm="Release results to students? They will be able to see their scores if 'Show Score' is enabled."
+                            class="rounded-lg bg-amber-500 px-4 py-2 text-sm font-semibold text-white hover:bg-amber-600">
+                            📊 Release Results
+                        </button>
+                    @elseif($exam->results_released_at)
+                        <span class="rounded-lg bg-white/20 px-4 py-2 text-sm font-semibold text-emerald-300 backdrop-blur-sm">
+                            ✓ Results Released
+                        </span>
                     @endif
                 </div>
             </div>
             
-            @if ($status === 'approved' && $exam->access_code)
+            @if ($status === 'live' && $exam->access_code)
                 <div class="mt-4 flex flex-wrap items-center gap-3 rounded-xl bg-white/10 px-4 py-2.5">
                     <span class="text-xs font-semibold text-white/70">Student Link:</span>
                     <a href="{{ route('cbt.student', ['code' => $exam->access_code]) }}" target="_blank" class="font-mono text-sm font-bold text-white underline underline-offset-2">
@@ -65,27 +71,22 @@
             <div class="mt-4 flex flex-wrap gap-2 border-t border-white/20 pt-4">
                 <button @click="tab = 'questions'" :class="tab === 'questions' ? 'bg-white text-violet-600' : 'bg-white/10 text-white hover:bg-white/20'" class="rounded-lg px-4 py-2 text-sm font-semibold transition">Questions ({{ $exam->questions->count() }})</button>
                 <button @click="tab = 'details'" :class="tab === 'details' ? 'bg-white text-violet-600' : 'bg-white/10 text-white hover:bg-white/20'" class="rounded-lg px-4 py-2 text-sm font-semibold transition">Details</button>
-                @if ($status === 'approved')
-                    <button @click="tab = 'monitor'" :class="tab === 'monitor' ? 'bg-white text-violet-600' : 'bg-white/10 text-white hover:bg-white/20'" class="rounded-lg px-4 py-2 text-sm font-semibold transition">Monitor</button>
+                @if (in_array($status, ['live', 'ended'], true))
+                    <button @click="tab = 'monitor'" :class="tab === 'monitor' ? 'bg-white text-violet-600' : 'bg-white/10 text-white hover:bg-white/20'" class="rounded-lg px-4 py-2 text-sm font-semibold transition">
+                        Monitor
+                        @php $ongoingCount = $exam->attempts->filter(fn($a) => $a->started_at && !$a->submitted_at && !$a->terminated_at)->count(); @endphp
+                        @if($ongoingCount > 0)
+                            <span class="ml-1 inline-flex h-5 w-5 items-center justify-center rounded-full bg-green-500 text-[10px] font-black text-white">{{ $ongoingCount }}</span>
+                        @endif
+                    </button>
                 @endif
                 <button @click="tab = 'actions'" :class="tab === 'actions' ? 'bg-white text-violet-600' : 'bg-white/10 text-white hover:bg-white/20'" class="rounded-lg px-4 py-2 text-sm font-semibold transition">Actions</button>
             </div>
+
         </div>
     </div>
 
-    @if ($status === 'rejected' && $exam->note)
-        <div class="rounded-lg border border-orange-200 bg-orange-50 p-4 text-sm text-orange-900">
-            <div class="font-semibold">Admin note:</div>
-            <div class="mt-1">{{ $exam->note }}</div>
-        </div>
-    @endif
 
-    @if ($status === 'assigned' && $exam->request_note)
-        <div class="rounded-lg border border-indigo-200 bg-indigo-50 p-4 text-sm text-indigo-900">
-            <div class="font-semibold">Admin request:</div>
-            <div class="mt-1">{{ $exam->request_note }}</div>
-        </div>
-    @endif
 
     <div x-show="tab === 'details'" class="rounded-2xl bg-white p-6 shadow-lg border border-gray-200">
         @if ($canEdit)
@@ -186,16 +187,7 @@
         @endif
     </div>
 
-    @if ($me?->role === 'admin' && $showRejectForm)
-        <div class="rounded-lg border border-orange-200 bg-orange-50 p-4">
-            <div class="flex items-center justify-between">
-                <div class="text-sm font-semibold">Reject Exam</div>
-                <button wire:click="cancelReject" class="btn-outline">Cancel</button>
-            </div>
-            <textarea wire:model="reviewNote" rows="2" class="mt-3 w-full rounded-lg border px-3 py-2 text-sm"></textarea>
-            <button wire:click="confirmReject" class="mt-2 btn-primary">Confirm</button>
-        </div>
-    @endif
+
 
     <div x-show="tab === 'questions'" class="rounded-2xl bg-white p-6 shadow-lg border border-gray-200">
         @if ($canEdit)
@@ -459,7 +451,7 @@ ANS: C</pre>
     </div>
 
     <div x-show="tab === 'monitor'" class="space-y-4">
-        @if ($status === 'approved')
+        @if (in_array($status, ['live', 'ended'], true))
             @php
                 $roster = collect();
                 $submittedCount = 0;
@@ -643,15 +635,26 @@ ANS: C</pre>
                             {{ $response !== '' ? $response : 'No answer submitted.' }}
                         </div>
                         <div class="mt-3 flex items-center gap-3">
-                            <label class="text-xs font-semibold uppercase text-gray-500">Marks ({{ (int) $question->marks }})</label>
-                            <input
-                                type="number"
-                                min="0"
-                                max="{{ (int) $question->marks }}"
-                                wire:model.defer="theoryMarks.{{ $question->id }}"
-                                class="input w-24 text-sm"
-                            />
-                            @error("theoryMarks.{$question->id}") <div class="text-xs text-rose-600">{{ $message }}</div> @enderror
+                            <div>
+                                <label class="text-xs font-semibold uppercase text-gray-500">Marks ({{ (int) $question->marks }})</label>
+                                <input
+                                    type="number"
+                                    min="0"
+                                    max="{{ (int) $question->marks }}"
+                                    wire:model.defer="theoryMarks.{{ $question->id }}"
+                                    class="input w-24 text-sm mt-1"
+                                />
+                                @error("theoryMarks.{$question->id}") <div class="text-xs text-rose-600">{{ $message }}</div> @enderror
+                            </div>
+                            <div class="flex-1">
+                                <label class="text-xs font-semibold uppercase text-gray-500">Comment (Optional)</label>
+                                <input
+                                    type="text"
+                                    wire:model.defer="theoryComments.{{ $question->id }}"
+                                    placeholder="Add a short comment..."
+                                    class="input w-full text-sm mt-1"
+                                />
+                            </div>
                         </div>
                     </div>
                 @endforeach
@@ -669,7 +672,7 @@ ANS: C</pre>
                 <span class="text-xl">📄</span>
                 <span>Download PDF</span>
             </a>
-            @if ($status === 'approved' && $exam->access_code)
+            @if ($status === 'live' && $exam->access_code)
                 <a href="{{ route('cbt.student', ['code' => $exam->access_code]) }}" target="_blank" class="flex items-center gap-3 rounded-lg border border-blue-200 bg-blue-50 p-4 text-sm font-semibold text-blue-700 transition hover:border-blue-300 hover:bg-blue-100">
                     <span class="text-xl">🎓</span>
                     <span>Student Portal</span>
@@ -680,15 +683,17 @@ ANS: C</pre>
                     <span class="text-xl">📊</span>
                     <span>Export CSV</span>
                 </a>
-                @if ($status === 'approved')
+                @if (in_array($status, ['live', 'ended'], true))
                     <button wire:click="transferToResults" onclick="return confirm('Transfer CBT scores to academic results?')" class="flex w-full items-center gap-3 rounded-lg border border-emerald-200 bg-emerald-50 p-4 text-left text-sm font-semibold text-emerald-700 transition hover:border-emerald-300 hover:bg-emerald-100">
                         <span class="text-xl">✅</span>
                         <span>Transfer to Results</span>
                     </button>
-                    <button wire:click="endAllExams" onclick="return confirm('End this exam?')" class="flex w-full items-center gap-3 rounded-lg border border-orange-200 bg-orange-50 p-4 text-left text-sm font-semibold text-orange-700 transition hover:border-orange-300 hover:bg-orange-100">
-                        <span class="text-xl">⏹️</span>
-                        <span>End This Exam</span>
-                    </button>
+                    @if ($status === 'live')
+                        <button wire:click="endAllExams" onclick="return confirm('End this exam?')" class="flex w-full items-center gap-3 rounded-lg border border-orange-200 bg-orange-50 p-4 text-left text-sm font-semibold text-orange-700 transition hover:border-orange-300 hover:bg-orange-100">
+                            <span class="text-xl">⏹️</span>
+                            <span>End This Exam</span>
+                        </button>
+                    @endif
                 @endif
                 <button wire:click="$set('showDeleteModal', true)" class="flex w-full items-center gap-3 rounded-lg border border-red-200 bg-red-50 p-4 text-left text-sm font-semibold text-red-700 transition hover:border-red-300 hover:bg-red-100">
                     <span class="text-xl">🗑️</span>

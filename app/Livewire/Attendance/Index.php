@@ -150,14 +150,16 @@ class Index extends Component
                 ->value('id');
         }
 
+        // Bust Livewire 3 computed property cache
+        unset($this->sections, $this->students, $this->visibleStudents, $this->markCounts);
         $this->syncSheetFromSelection();
-        $this->dispatch('$refresh');
     }
 
     public function updatedSectionId(): void
     {
+        // Bust Livewire 3 computed property cache
+        unset($this->students, $this->visibleStudents, $this->markCounts);
         $this->syncSheetFromSelection();
-        $this->dispatch('$refresh');
     }
 
     public function updatedDate(): void

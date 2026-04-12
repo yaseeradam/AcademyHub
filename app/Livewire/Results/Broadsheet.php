@@ -37,20 +37,17 @@ class Broadsheet extends Component
 
     public function updatedClassId(): void
     {
-        // Force refresh of computed properties
-        $this->dispatch('$refresh');
+        unset($this->subjects, $this->rows, $this->isPublished);
     }
 
     public function updatedTerm(): void
     {
-        // Force refresh of computed properties
-        $this->dispatch('$refresh');
+        unset($this->rows, $this->isPublished);
     }
 
     public function updatedSession(): void
     {
-        // Force refresh of computed properties
-        $this->dispatch('$refresh');
+        unset($this->rows, $this->isPublished);
     }
 
     #[Computed(persist: false)]

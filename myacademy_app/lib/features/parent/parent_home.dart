@@ -38,8 +38,12 @@ class _ParentHomeState extends State<ParentHome> with SingleTickerProviderStateM
     // Try network first, fall back to cache/local
     try {
       final r = await auth.apiService.getWithCache('/students');
-      _children = ((r['data'] as List?) ?? []).cast<Map<String, dynamic>>();
-    } catch (_) {}
+      final list = ((r['data'] as List?) ?? []).cast<Map<String, dynamic>>();
+      await _db.upsertStudents(list);
+      _children = list;
+    } catch (_) {
+      _children = await _db.getAllStudents();
+    }
 
     try {
       final r = await auth.apiService.getWithCache('/billing');

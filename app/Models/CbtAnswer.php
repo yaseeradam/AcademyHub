@@ -17,6 +17,7 @@ class CbtAnswer extends Model
         'is_correct',
         'text_answer',
         'awarded_marks',
+        'teacher_comment',
     ];
 
     protected $casts = [

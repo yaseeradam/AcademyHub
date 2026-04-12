@@ -119,6 +119,10 @@ Route::get('/student/homework', \App\Livewire\Student\Homework::class)
     ->middleware('student.session')
     ->name('student.homework');
 
+Route::get('/student/exams', \App\Livewire\Student\Exams::class)
+    ->middleware('student.session')
+    ->name('student.exams');
+
 Route::get('/student/results', \App\Livewire\Student\Results::class)
     ->middleware('student.session')
     ->name('student.results');
@@ -134,6 +138,10 @@ Route::get('/student/performance', \App\Livewire\Student\Performance::class)
 Route::get('/student/notifications', \App\Livewire\Student\Notifications::class)
     ->middleware('student.session')
     ->name('student.notifications');
+
+Route::get('/student/profile', \App\Livewire\Student\Profile::class)
+    ->middleware('student.session')
+    ->name('student.profile');
 
 Route::middleware(['auth', 'active'])->group(function () {
     Route::get('/dashboard', function () {
@@ -341,6 +349,7 @@ Route::middleware(['auth', 'active'])->group(function () {
         Route::post('/settings/restore', [BackupController::class, 'restore'])->middleware('permission:backup.manage')->name('settings.restore');
         Route::get('/settings/audit-logs', AuditLogsIndex::class)->middleware('permission:audit.view')->name('settings.audit-logs');
         Route::get('/settings/custom-fields', CustomFields::class)->name('settings.custom-fields');
+        Route::get('/settings/subscription', \App\Livewire\Admin\SubscriptionBilling::class)->name('settings.subscription');
 
         Route::get('/promotions', PromotionsIndex::class)->name('promotions');
         Route::get('/academic-sessions', AcademicSessions::class)->name('academic-sessions');

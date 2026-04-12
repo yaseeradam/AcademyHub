@@ -99,6 +99,12 @@ class Index extends Component
             $query->whereIn('class_id', $teacherClassIds);
         }
 
+        if ($user?->role === 'parent') {
+            $query->whereHas('parents', function ($q) use ($user) {
+                $q->where('users.id', $user->id);
+            });
+        }
+
         if ($this->classFilter !== 'all') {
             if ($teacherClassIds && !$teacherClassIds->contains((int) $this->classFilter)) {
                 return Student::query()->whereRaw('1 = 0')->paginate(15);
@@ -145,6 +151,12 @@ class Index extends Component
                 return ['total' => 0, 'boys' => 0, 'girls' => 0, 'alumni' => 0];
             }
             $query->whereIn('class_id', $classIds);
+        }
+
+        if ($user?->role === 'parent') {
+            $query->whereHas('parents', function ($q) use ($user) {
+                $q->where('users.id', $user->id);
+            });
         }
 
         $row = $query->selectRaw("

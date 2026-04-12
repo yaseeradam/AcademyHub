@@ -10,11 +10,8 @@ class AnnouncementController extends Controller
 {
     public function index(Request $request)
     {
-        // For now, load all valid announcements
-        $query = Announcement::query()
-            ->latest('created_at');
-            
-        $announcements = $query->paginate(20);
-        return response()->json($announcements);
+        $query = Announcement::query()->latest('created_at');
+        $announcements = $query->get();
+        return response()->json(['data' => $announcements]);
     }
 }

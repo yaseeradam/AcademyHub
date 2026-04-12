@@ -44,6 +44,12 @@ class Index extends Component
         return CustomField::active()->ordered()->where('form_type', 'teacher')->get();
     }
 
+    #[Computed]
+    public function parentCustomFields()
+    {
+        return CustomField::active()->ordered()->where('form_type', 'parent')->get();
+    }
+
     public function updatedSearch(): void
     {
         $this->resetPage();
@@ -101,8 +107,9 @@ class Index extends Component
             'password' => ['nullable', 'string', 'min:8'],
         ];
 
-        // Add teacher custom field validation
-        foreach ($this->teacherCustomFields as $field) {
+        // Add role-specific custom field validation
+        $relevantCustomFields = $this->role === 'parent' ? $this->parentCustomFields : $this->teacherCustomFields;
+        foreach ($relevantCustomFields as $field) {
             $fieldRules = $field->required ? ['required'] : ['nullable'];
             match ($field->type) {
                 'number' => $fieldRules[] = 'numeric',
@@ -211,8 +218,9 @@ class Index extends Component
             'newPassword' => ['nullable', 'string', 'min:8'],
         ];
 
-        // Add teacher custom field validation for edit
-        foreach ($this->teacherCustomFields as $field) {
+        // Add role-specific custom field validation for edit
+        $relevantCustomFields = $this->editRole === 'parent' ? $this->parentCustomFields : $this->teacherCustomFields;
+        foreach ($relevantCustomFields as $field) {
             $fieldRules = $field->required ? ['required'] : ['nullable'];
             match ($field->type) {
                 'number' => $fieldRules[] = 'numeric',

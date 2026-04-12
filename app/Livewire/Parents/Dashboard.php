@@ -78,7 +78,7 @@ class Dashboard extends Component
 
         $attendance = AttendanceMark::query()
             ->where('student_id', $this->selectedChild->id)
-            ->whereHas('attendanceSheet', function ($query) {
+            ->whereHas('sheet', function ($query) {
                 $query->where('term', $this->term)
                       ->where('session', $this->session);
             })

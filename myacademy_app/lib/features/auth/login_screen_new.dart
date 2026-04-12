@@ -1,5 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../core/auth_provider.dart';
 
@@ -31,14 +32,20 @@ class _LoginScreenState extends State<LoginScreen> {
     setState(() => _isLoading = true);
 
     try {
-      await context.read<AuthProvider>().login(
+      final success = await context.read<AuthProvider>().login(
         _emailController.text.trim(),
         _passwordController.text,
       );
-      
-      // Navigate to main app after successful login
-      if (mounted) {
-        Navigator.of(context).pushReplacementNamed('/dashboard');
+      // go_router redirect handles navigation automatically after login
+      if (!success && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(context.read<AuthProvider>().error ?? 'Login failed'),
+            backgroundColor: const Color(0xFFF43F5E),
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          ),
+        );
       }
     } catch (e) {
       if (mounted) {

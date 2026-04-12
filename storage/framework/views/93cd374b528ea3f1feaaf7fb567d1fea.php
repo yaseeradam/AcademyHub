@@ -1,4 +1,4 @@
-@php
+<?php
     use App\Models\AcademicTerm;
     use App\Models\AttendanceMark;
     use App\Models\CbtExam;
@@ -83,11 +83,11 @@
     $totalScores = $examStats['totalScores'];
     $passScores = $examStats['passScores'];
     $failScores = $examStats['failScores'];
-@endphp
+?>
 
-@extends('layouts.app')
 
-@section('content')
+
+<?php $__env->startSection('content'); ?>
     <div class="space-y-6">
         <section class="space-y-4">
             <div class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-amber-600 via-orange-600 to-orange-700 shadow-2xl transition-all duration-500 hover:shadow-amber-500/50">
@@ -104,7 +104,8 @@
                             </div>
                             
                             <div class="mt-4 text-4xl font-black tracking-tight text-white sm:text-5xl">
-                                {{ $schoolName }}
+                                <?php echo e($schoolName); ?>
+
                             </div>
                             
                             <div class="mt-3 flex flex-wrap items-center gap-3">
@@ -115,33 +116,33 @@
                                         <line x1="8" y1="2" x2="8" y2="6"/>
                                         <line x1="3" y1="10" x2="21" y2="10"/>
                                     </svg>
-                                    <span class="text-sm font-bold text-white">{{ $currentTerm ? $currentTerm->name : 'No Active Term' }}</span>
+                                    <span class="text-sm font-bold text-white"><?php echo e($currentTerm ? $currentTerm->name : 'No Active Term'); ?></span>
                                 </div>
                                 <div class="inline-flex items-center gap-2 rounded-xl bg-white/20 px-4 py-2 backdrop-blur-md">
                                     <svg class="h-4 w-4 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                         <circle cx="12" cy="12" r="10"/>
                                         <polyline points="12 6 12 12 16 14"/>
                                     </svg>
-                                    <span class="text-sm font-bold text-white">{{ $currentWeekLabel }}</span>
+                                    <span class="text-sm font-bold text-white"><?php echo e($currentWeekLabel); ?></span>
                                 </div>
                                 <div class="inline-flex items-center gap-2 rounded-xl bg-white/20 px-4 py-2 backdrop-blur-md">
                                     <svg class="h-4 w-4 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                         <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
                                         <circle cx="9" cy="7" r="4"/>
                                     </svg>
-                                    <span class="text-sm font-bold text-white">{{ number_format((int) $studentsTotal) }} Students</span>
+                                    <span class="text-sm font-bold text-white"><?php echo e(number_format((int) $studentsTotal)); ?> Students</span>
                                 </div>
                             </div>
 
                             <div class="mt-6 flex flex-wrap gap-3">
-                                <a href="{{ route('attendance') }}" class="group/btn inline-flex items-center gap-2 rounded-xl bg-white px-5 py-3 font-bold text-amber-600 shadow-lg transition-shadow duration-200 hover:shadow-xl">
+                                <a href="<?php echo e(route('attendance')); ?>" class="group/btn inline-flex items-center gap-2 rounded-xl bg-white px-5 py-3 font-bold text-amber-600 shadow-lg transition-shadow duration-200 hover:shadow-xl">
                                     <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                         <path d="M9 11l3 3L22 4"/>
                                         <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
                                     </svg>
                                     Take Attendance
                                 </a>
-                                <a href="{{ route('results.entry') }}" class="inline-flex items-center gap-2 rounded-xl bg-white/20 px-5 py-3 font-bold text-white backdrop-blur-md transition-all hover:bg-white/30">
+                                <a href="<?php echo e(route('results.entry')); ?>" class="inline-flex items-center gap-2 rounded-xl bg-white/20 px-5 py-3 font-bold text-white backdrop-blur-md transition-all hover:bg-white/30">
                                     <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                         <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
                                         <polyline points="14 2 14 8 20 8"/>
@@ -150,7 +151,7 @@
                                     </svg>
                                     Enter Results
                                 </a>
-                                <a href="{{ route('billing.index') }}" class="inline-flex items-center gap-2 rounded-xl bg-white/20 px-5 py-3 font-bold text-white backdrop-blur-md transition-all hover:bg-white/30">
+                                <a href="<?php echo e(route('billing.index')); ?>" class="inline-flex items-center gap-2 rounded-xl bg-white/20 px-5 py-3 font-bold text-white backdrop-blur-md transition-all hover:bg-white/30">
                                     <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                         <line x1="12" y1="1" x2="12" y2="23"/>
                                         <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
@@ -167,7 +168,7 @@
         <section class="space-y-3">
             <div class="flex items-center justify-between">
                 <div class="text-sm font-semibold text-slate-900">Today at a Glance</div>
-                <div class="text-xs text-slate-500">Signed in as {{ $user?->name ?? 'Admin' }}</div>
+                <div class="text-xs text-slate-500">Signed in as <?php echo e($user?->name ?? 'Admin'); ?></div>
             </div>
 
             <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
@@ -176,8 +177,8 @@
                     <div class="flex items-start justify-between gap-4">
                         <div>
                             <div class="text-xs font-medium uppercase tracking-wide text-blue-600">Total Students</div>
-                            <div class="mt-2.5 text-3xl font-bold tracking-tight text-slate-900">{{ number_format($studentsTotal) }}</div>
-                            <div class="mt-1.5 text-xs text-slate-600">{{ $studentsBoys }}M / {{ $studentsGirls }}F</div>
+                            <div class="mt-2.5 text-3xl font-bold tracking-tight text-slate-900"><?php echo e(number_format($studentsTotal)); ?></div>
+                            <div class="mt-1.5 text-xs text-slate-600"><?php echo e($studentsBoys); ?>M / <?php echo e($studentsGirls); ?>F</div>
                         </div>
                         <div class="icon-3d grid h-14 w-14 place-items-center rounded-xl bg-gradient-to-br from-blue-400 to-blue-600 text-white shadow-lg shadow-blue-500/30">
                             <svg class="h-7 w-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -194,7 +195,7 @@
                     <div class="flex items-start justify-between gap-4">
                         <div>
                             <div class="text-xs font-medium uppercase tracking-wide text-purple-600">Teachers</div>
-                            <div class="mt-2.5 text-3xl font-bold tracking-tight text-slate-900">{{ number_format($teachersTotal) }}</div>
+                            <div class="mt-2.5 text-3xl font-bold tracking-tight text-slate-900"><?php echo e(number_format($teachersTotal)); ?></div>
                             <div class="mt-1.5 text-xs text-slate-600">teaching staff</div>
                         </div>
                         <div class="icon-3d grid h-14 w-14 place-items-center rounded-xl bg-gradient-to-br from-purple-400 to-purple-600 text-white shadow-lg shadow-purple-500/30">
@@ -211,7 +212,7 @@
                     <div class="flex items-start justify-between gap-4">
                         <div>
                             <div class="text-xs font-medium uppercase tracking-wide text-indigo-600">Classes</div>
-                            <div class="mt-2.5 text-3xl font-bold tracking-tight text-slate-900">{{ number_format($classesTotal) }}</div>
+                            <div class="mt-2.5 text-3xl font-bold tracking-tight text-slate-900"><?php echo e(number_format($classesTotal)); ?></div>
                             <div class="mt-1.5 text-xs text-slate-600">active classes</div>
                         </div>
                         <div class="icon-3d grid h-14 w-14 place-items-center rounded-xl bg-gradient-to-br from-indigo-400 to-indigo-600 text-white shadow-lg shadow-indigo-500/30">
@@ -230,8 +231,8 @@
                     <div class="flex items-start justify-between gap-4">
                         <div>
                             <div class="text-xs font-medium uppercase tracking-wide text-green-600">Attendance</div>
-                            <div class="mt-2.5 text-3xl font-bold tracking-tight text-slate-900">{{ $attendanceRate }}%</div>
-                            <div class="mt-1.5 text-xs text-slate-600">{{ $presentToday }}/{{ $attendanceToday }} today</div>
+                            <div class="mt-2.5 text-3xl font-bold tracking-tight text-slate-900"><?php echo e($attendanceRate); ?>%</div>
+                            <div class="mt-1.5 text-xs text-slate-600"><?php echo e($presentToday); ?>/<?php echo e($attendanceToday); ?> today</div>
                         </div>
                         <div class="icon-3d grid h-14 w-14 place-items-center rounded-xl bg-gradient-to-br from-green-400 to-green-600 text-white shadow-lg shadow-green-500/30">
                             <svg class="h-7 w-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -247,7 +248,7 @@
                     <div class="flex items-start justify-between gap-4">
                         <div>
                             <div class="text-xs font-medium uppercase tracking-wide text-amber-600">Active Exams</div>
-                            <div class="mt-2.5 text-3xl font-bold tracking-tight text-slate-900">{{ number_format($activeExams) }}</div>
+                            <div class="mt-2.5 text-3xl font-bold tracking-tight text-slate-900"><?php echo e(number_format($activeExams)); ?></div>
                             <div class="mt-1.5 text-xs text-slate-600">ongoing CBT</div>
                         </div>
                         <div class="icon-3d grid h-14 w-14 place-items-center rounded-xl bg-gradient-to-br from-amber-400 to-amber-600 text-white shadow-lg shadow-amber-500/30">
@@ -275,7 +276,25 @@
                             <div class="text-sm font-semibold text-slate-900">Attendance</div>
                             <div class="mt-1 text-sm text-slate-600">7-day present vs absent trend.</div>
                         </div>
-                        <x-status-badge variant="info">This week</x-status-badge>
+                        <?php if (isset($component)) { $__componentOriginal8c81617a70e11bcf247c4db924ab1b62 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginal8c81617a70e11bcf247c4db924ab1b62 = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.status-badge','data' => ['variant' => 'info']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component->withName('status-badge'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
+<?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
+<?php endif; ?>
+<?php $component->withAttributes(['variant' => 'info']); ?>This week <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginal8c81617a70e11bcf247c4db924ab1b62)): ?>
+<?php $attributes = $__attributesOriginal8c81617a70e11bcf247c4db924ab1b62; ?>
+<?php unset($__attributesOriginal8c81617a70e11bcf247c4db924ab1b62); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginal8c81617a70e11bcf247c4db924ab1b62)): ?>
+<?php $component = $__componentOriginal8c81617a70e11bcf247c4db924ab1b62; ?>
+<?php unset($__componentOriginal8c81617a70e11bcf247c4db924ab1b62); ?>
+<?php endif; ?>
                     </div>
                     <div class="mt-4">
                         <canvas id="attendanceTrendChart" height="220"></canvas>
@@ -289,7 +308,25 @@
                             <div class="text-sm font-semibold text-slate-900">Exam Status</div>
                             <div class="mt-1 text-sm text-slate-600">Performance snapshot.</div>
                         </div>
-                        <x-status-badge variant="success">Ongoing</x-status-badge>
+                        <?php if (isset($component)) { $__componentOriginal8c81617a70e11bcf247c4db924ab1b62 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginal8c81617a70e11bcf247c4db924ab1b62 = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.status-badge','data' => ['variant' => 'success']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component->withName('status-badge'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
+<?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
+<?php endif; ?>
+<?php $component->withAttributes(['variant' => 'success']); ?>Ongoing <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginal8c81617a70e11bcf247c4db924ab1b62)): ?>
+<?php $attributes = $__attributesOriginal8c81617a70e11bcf247c4db924ab1b62; ?>
+<?php unset($__attributesOriginal8c81617a70e11bcf247c4db924ab1b62); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginal8c81617a70e11bcf247c4db924ab1b62)): ?>
+<?php $component = $__componentOriginal8c81617a70e11bcf247c4db924ab1b62; ?>
+<?php unset($__componentOriginal8c81617a70e11bcf247c4db924ab1b62); ?>
+<?php endif; ?>
                     </div>
                     <div class="mt-4">
                         <canvas id="examPerformanceChart" height="220"></canvas>
@@ -303,11 +340,20 @@
                             <div class="text-sm font-semibold text-slate-900">Latest Score Entry</div>
                             <div class="mt-1 text-sm text-slate-600">Most recent updates across classes.</div>
                         </div>
-                        <a href="{{ route('results.entry') }}" class="btn-outline">Open Entry</a>
+                        <a href="<?php echo e(route('results.entry')); ?>" class="btn-outline">Open Entry</a>
                     </div>
 
                     <div class="mt-4">
-                        <x-table>
+                        <?php if (isset($component)) { $__componentOriginal163c8ba6efb795223894d5ffef5034f5 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginal163c8ba6efb795223894d5ffef5034f5 = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.table','data' => []] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component->withName('table'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
+<?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
+<?php endif; ?>
+<?php $component->withAttributes([]); ?>
                             <thead class="bg-slate-50 text-xs font-semibold uppercase tracking-wider text-slate-500">
                                 <tr>
                                     <th class="px-5 py-3">Student</th>
@@ -318,43 +364,55 @@
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-slate-100">
-                                @forelse ($latestScores as $row)
+                                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__empty_1 = true; $__currentLoopData = $latestScores; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $row): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                                     <tr class="bg-white hover:bg-slate-50">
                                         <td class="px-5 py-4">
-                                            <div class="text-sm font-semibold text-slate-900">{{ $row->student?->full_name ?? '—' }}</div>
-                                            <div class="mt-1 text-xs text-slate-500">{{ $row->student?->admission_number ?? '' }}</div>
+                                            <div class="text-sm font-semibold text-slate-900"><?php echo e($row->student?->full_name ?? '—'); ?></div>
+                                            <div class="mt-1 text-xs text-slate-500"><?php echo e($row->student?->admission_number ?? ''); ?></div>
                                         </td>
-                                        <td class="px-5 py-4 text-sm text-slate-700">{{ $row->schoolClass?->name ?? '—' }}</td>
+                                        <td class="px-5 py-4 text-sm text-slate-700"><?php echo e($row->schoolClass?->name ?? '—'); ?></td>
                                         <td class="px-5 py-4 text-sm text-slate-700">
-                                            <div class="font-medium text-slate-900">{{ $row->subject?->name ?? '—' }}</div>
-                                            <div class="mt-1 text-xs text-slate-500">{{ $row->subject?->code ?? '' }}</div>
+                                            <div class="font-medium text-slate-900"><?php echo e($row->subject?->name ?? '—'); ?></div>
+                                            <div class="mt-1 text-xs text-slate-500"><?php echo e($row->subject?->code ?? ''); ?></div>
                                         </td>
-                                        <td class="px-5 py-4 text-right text-sm font-semibold text-slate-900">{{ $row->total }}</td>
-                                        <td class="px-5 py-4 text-right text-sm text-slate-600">{{ $row->updated_at?->diffForHumans() }}</td>
+                                        <td class="px-5 py-4 text-right text-sm font-semibold text-slate-900"><?php echo e($row->total); ?></td>
+                                        <td class="px-5 py-4 text-right text-sm text-slate-600"><?php echo e($row->updated_at?->diffForHumans()); ?></td>
                                     </tr>
-                                @empty
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                                     <tr>
                                         <td colspan="5" class="px-5 py-10 text-center text-sm text-slate-500">
                                             No score records yet.
                                         </td>
                                     </tr>
-                                @endforelse
+                                <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                             </tbody>
-                        </x-table>
+                         <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginal163c8ba6efb795223894d5ffef5034f5)): ?>
+<?php $attributes = $__attributesOriginal163c8ba6efb795223894d5ffef5034f5; ?>
+<?php unset($__attributesOriginal163c8ba6efb795223894d5ffef5034f5); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginal163c8ba6efb795223894d5ffef5034f5)): ?>
+<?php $component = $__componentOriginal163c8ba6efb795223894d5ffef5034f5; ?>
+<?php unset($__componentOriginal163c8ba6efb795223894d5ffef5034f5); ?>
+<?php endif; ?>
                     </div>
                 </div>
             </div>
         </section>
     </div>
-@endsection
+<?php $__env->stopSection(); ?>
 
-@push('scripts')
+<?php $__env->startPush('scripts'); ?>
     <script>
         window.dashboardData = {
-            attendance: @json($attendanceData),
-            examPass: {{ $passScores }},
-            examFail: {{ $failScores }}
+            attendance: <?php echo json_encode($attendanceData, 15, 512) ?>,
+            examPass: <?php echo e($passScores); ?>,
+            examFail: <?php echo e($failScores); ?>
+
         };
     </script>
-    @vite('resources/js/pages/dashboard.js')
-@endpush
+    <?php echo app('Illuminate\Foundation\Vite')('resources/js/pages/dashboard.js'); ?>
+<?php $__env->stopPush(); ?>
+
+<?php echo $__env->make('layouts.app', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\laragon\www\myacademy-laravel\resources\views/pages/dashboard.blade.php ENDPATH**/ ?>

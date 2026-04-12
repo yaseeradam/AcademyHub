@@ -55,6 +55,8 @@ class ExamEditor extends Component
     public bool $showRejectForm = false;
     public string $reviewNote = '';
 
+    public array $theoryComments = [];
+
     public ?int $editingAttemptIpId = null;
     public string $allowedIp = '';
 
@@ -174,7 +176,7 @@ class ExamEditor extends Component
         $isAssignee = (int) $exam->created_by === (int) $user->id
             || (int) ($exam->assigned_teacher_id ?? 0) === (int) $user->id;
 
-        return $isAssignee && in_array($exam->status, ['draft', 'assigned', 'rejected'], true);
+        return $isAssignee && $exam->status === 'draft';
     }
 
     #[Computed]
@@ -623,10 +625,12 @@ class ExamEditor extends Component
 
         $this->reviewAttemptId = $attempt->id;
         $this->theoryMarks = [];
+        $this->theoryComments = [];
 
         foreach ($exam->questions->where('type', 'theory') as $question) {
             $answer = $attempt->answers->firstWhere('question_id', $question->id);
             $this->theoryMarks[$question->id] = $answer?->awarded_marks;
+            $this->theoryComments[$question->id] = $answer?->teacher_comment;
         }
     }
 
@@ -634,6 +638,7 @@ class ExamEditor extends Component
     {
         $this->reviewAttemptId = null;
         $this->theoryMarks = [];
+        $this->theoryComments = [];
         $this->resetValidation();
     }
 
@@ -701,6 +706,7 @@ class ExamEditor extends Component
                     'option_id' => null,
                     'text_answer' => $textAnswer !== '' ? $textAnswer : null,
                     'awarded_marks' => $value,
+                    'teacher_comment' => $this->theoryComments[$question->id] ?? null,
                     'is_correct' => null,
                 ]
             );
@@ -1106,74 +1112,18 @@ class ExamEditor extends Component
         return redirect()->route('cbt.exams.edit', $newExam);
     }
 
-    public function submitToAdmin(): void
+    // ── Lifecycle Management ───────────────────────────────────────────────
+
+    public function goLive(): void
     {
         $user = auth()->user();
-        abort_unless($user?->role === 'teacher', 403);
-        abort_unless($this->canEdit, 403);
+        abort_unless($user && in_array($user->role, ['admin', 'teacher'], true), 403);
 
         $exam = $this->exam;
-        $questions = $exam->questions;
 
-        if ($questions->isEmpty()) {
-            $this->dispatch('alert', message: 'Add at least one question before submitting.', type: 'warning');
-            return;
+        if ($user->role === 'teacher') {
+            abort_unless($this->canEdit, 403);
         }
-
-        foreach ($questions as $q) {
-            if ($q->type === 'theory') {
-                continue;
-            }
-
-            $options = $q->options;
-            if ($options->count() < 2) {
-                $this->dispatch('alert', message: 'Each question must have options.', type: 'warning');
-                return;
-            }
-
-            $correctCount = $options->where('is_correct', true)->count();
-            if ($correctCount !== 1) {
-                $this->dispatch('alert', message: 'Each question must have exactly one correct option.', type: 'warning');
-                return;
-            }
-        }
-
-        $exam->forceFill([
-            'status' => 'submitted',
-            'submitted_at' => now(),
-            'reviewed_by' => null,
-            'reviewed_at' => null,
-            'note' => null,
-        ])->save();
-
-        Audit::log('cbt.exam_submitted', $exam);
-
-        $adminIds = User::query()
-            ->where('role', 'admin')
-            ->where('is_active', true)
-            ->pluck('id');
-
-        foreach ($adminIds as $adminId) {
-            InAppNotification::query()->create([
-                'user_id' => (int) $adminId,
-                'title' => 'CBT exam submitted',
-                'body' => "{$user->name} submitted an exam for approval: {$exam->title}.",
-                'link' => route('cbt.exams.edit', $exam),
-            ]);
-        }
-
-        $this->showRejectForm = false;
-        $this->reviewNote = '';
-        $this->dispatch('refresh');
-        $this->dispatch('alert', message: 'Submitted to admin.', type: 'success');
-    }
-
-    public function quickApprove(): void
-    {
-        $user = auth()->user();
-        abort_unless($user?->role === 'admin', 403);
-
-        $exam = $this->exam;
 
         if ($exam->questions->isEmpty()) {
             $this->dispatch('alert', message: 'Add at least one question before going live.', type: 'warning');
@@ -1183,165 +1133,67 @@ class ExamEditor extends Component
         $code = $exam->access_code ?: $this->generateAccessCode();
 
         $exam->forceFill([
-            'status' => 'approved',
+            'status' => 'live',
             'access_code' => $code,
-            'reviewed_by' => $user->id,
-            'reviewed_at' => now(),
-            'published_at' => $exam->published_at ?? now(),
-            'note' => null,
-        ])->save();
-
-        Audit::log('cbt.exam_approved', $exam, ['reviewed_by' => $user->id]);
-
-        $this->dispatch('refresh');
-        $this->dispatch('alert', message: 'Exam is now live. Code: '.$code, type: 'success');
-    }
-
-    public function togglePublish(): void
-    {
-        $user = auth()->user();
-        abort_unless($user?->role === 'admin', 403);
-
-        $exam = $this->exam;
-        abort_unless($exam->status === 'approved', 403);
-
-        $exam->published_at = $exam->published_at ? null : now();
-        $exam->save();
-
-        Audit::log('cbt.exam_publish_toggled', $exam, [
-            'published' => (bool) $exam->published_at,
-        ]);
-
-        $this->dispatch('refresh');
-        $this->dispatch('alert', message: $exam->published_at ? 'Exam is now live.' : 'Exam paused.', type: 'success');
-    }
-
-    public function approve(): void
-    {
-        $user = auth()->user();
-        abort_unless($user?->role === 'admin', 403);
-
-        $exam = $this->exam;
-        if ($exam->status !== 'submitted') {
-            $this->dispatch('alert', message: 'Only submitted exams can be approved.', type: 'warning');
-            return;
-        }
-
-        $code = $exam->access_code ?: $this->generateAccessCode();
-
-        $exam->forceFill([
-            'status' => 'approved',
-            'access_code' => $code,
-            'reviewed_by' => $user->id,
-            'reviewed_at' => now(),
-            'note' => null,
             'published_at' => now(),
         ])->save();
 
-        Audit::log('cbt.exam_approved', $exam, ['reviewed_by' => $user->id]);
+        Audit::log('cbt.exam_live', $exam, ['user_id' => $user->id]);
 
-        $notifyUserId = (int) ($exam->assigned_teacher_id ?: $exam->created_by);
-        InAppNotification::query()->create([
-            'user_id' => $notifyUserId,
-            'title' => 'CBT exam approved',
-            'body' => "Your CBT exam was approved: {$exam->title}. Code: {$code}",
-            'link' => route('cbt.exams.edit', $exam),
-        ]);
-
-        $this->showRejectForm = false;
-        $this->reviewNote = '';
         $this->dispatch('refresh');
-        $this->dispatch('alert', message: 'Exam approved.', type: 'success');
-    }
-
-    public function startReject(): void
-    {
-        $user = auth()->user();
-        abort_unless($user?->role === 'admin', 403);
-
-        $exam = $this->exam;
-        if ($exam->status !== 'submitted') {
-            $this->dispatch('alert', message: 'Only submitted exams can be rejected.', type: 'warning');
-            return;
-        }
-
-        $this->showRejectForm = true;
-        $this->reviewNote = '';
-        $this->resetValidation();
-    }
-
-    public function cancelReject(): void
-    {
-        $user = auth()->user();
-        abort_unless($user?->role === 'admin', 403);
-
-        $this->showRejectForm = false;
-        $this->reviewNote = '';
-        $this->resetValidation();
-    }
-
-    public function confirmReject(): void
-    {
-        $user = auth()->user();
-        abort_unless($user?->role === 'admin', 403);
-
-        $exam = $this->exam;
-        if ($exam->status !== 'submitted') {
-            $this->dispatch('alert', message: 'This exam has already been reviewed.', type: 'warning');
-            $this->cancelReject();
-            return;
-        }
-
-        $this->validate([
-            'reviewNote' => ['required', 'string', 'min:3', 'max:2000'],
-        ]);
-
-        $note = trim($this->reviewNote);
-
-        $exam->forceFill([
-            'status' => 'rejected',
-            'reviewed_by' => $user->id,
-            'reviewed_at' => now(),
-            'note' => $note,
-            'published_at' => null,
-        ])->save();
-
-        Audit::log('cbt.exam_rejected', $exam, ['reviewed_by' => $user->id, 'note' => $note]);
-
-        $notifyUserId = (int) ($exam->assigned_teacher_id ?: $exam->created_by);
-        InAppNotification::query()->create([
-            'user_id' => $notifyUserId,
-            'title' => 'CBT exam rejected',
-            'body' => "Your CBT exam was rejected: {$note}",
-            'link' => route('cbt.exams.edit', $exam),
-        ]);
-
-        $this->showRejectForm = false;
-        $this->reviewNote = '';
-        $this->dispatch('refresh');
-        $this->dispatch('alert', message: 'Exam rejected.', type: 'success');
+        $this->dispatch('alert', message: 'Exam is now live. Students can take it.', type: 'success');
     }
 
     private function generateAccessCode(): string
     {
         for ($i = 0; $i < 20; $i++) {
             $code = 'CBT-'.strtoupper(bin2hex(random_bytes(3)));
-
-            $exists = CbtExam::query()->where('access_code', $code)->exists();
-            if (! $exists) {
+            if (! CbtExam::query()->where('access_code', $code)->exists()) {
                 return $code;
             }
         }
-
-        return 'CBT-'.strtoupper(Str::random(8));
+        return 'CBT-'.strtoupper(\Illuminate\Support\Str::random(8));
     }
+
+    public function releaseResults(): void
+    {
+        $user = auth()->user();
+        abort_unless($user && in_array($user->role, ['admin', 'teacher'], true), 403);
+
+        $exam = $this->exam;
+
+        if ($user->role === 'teacher') {
+            $canAccess = (int) $exam->created_by === (int) $user->id
+                || (int) ($exam->assigned_teacher_id ?? 0) === (int) $user->id;
+            abort_unless($canAccess, 403);
+        }
+
+        if ($exam->results_released_at) {
+            $this->dispatch('alert', message: 'Results have already been released.', type: 'warning');
+            return;
+        }
+
+        $exam->forceFill(['results_released_at' => now()])->save();
+
+        Audit::log('cbt.results_released', $exam, ['released_by' => $user->id]);
+
+        $this->dispatch('refresh');
+        $this->dispatch('alert', message: 'Results released to students.', type: 'success');
+    }
+
 
     public function endAllExams(): void
     {
         $user = auth()->user();
-        abort_unless($user?->role === 'admin', 403);
+        abort_unless($user && in_array($user->role, ['admin', 'teacher'], true), 403);
 
         $exam = $this->exam;
+        
+        if ($user->role === 'teacher') {
+            $canAccess = (int) $exam->created_by === (int) $user->id
+                || (int) ($exam->assigned_teacher_id ?? 0) === (int) $user->id;
+            abort_unless($canAccess, 403);
+        }
         $inProgressAttempts = CbtAttempt::query()
             ->where('exam_id', $exam->id)
             ->whereNotNull('started_at')
@@ -1421,9 +1273,11 @@ class ExamEditor extends Component
             $count++;
         }
 
+        $exam->forceFill(['status' => 'ended'])->save();
+
         Audit::log('cbt.all_exams_ended', $exam, ['count' => $count]);
         $this->dispatch('refresh');
-        $this->dispatch('alert', message: "Ended {$count} active exam(s).", type: 'success');
+        $this->dispatch('alert', message: "Exam ended. {$count} active attempt(s) forcibly submitted.", type: 'success');
     }
 
     public function transferToResults(): void

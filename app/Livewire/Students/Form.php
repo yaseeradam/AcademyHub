@@ -110,7 +110,8 @@ class Form extends Component
     public function updatedClassId(): void
     {
         $this->section_id = null;
-        $this->dispatch('$refresh');
+        // Bust Livewire 3 computed property cache so sections dropdown updates immediately
+        unset($this->sections);
     }
 
     private function generateAdmissionNumber(): string
@@ -227,7 +228,7 @@ class Form extends Component
                 'whatsapp_subscribed' => (bool) $normalizedPhone,
             ]);
 
-            Audit::log('parents.created_during_student_registration', $parentUser->id, [
+            Audit::log('parents.created_during_student_registration', $parentUser, [
                 'parent_name' => $parentUser->name,
                 'parent_email' => $parentUser->email,
                 'student_name' => $this->first_name . ' ' . $this->last_name,

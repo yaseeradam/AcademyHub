@@ -29,7 +29,7 @@ class CustomFields extends Component
         'name' => 'required|string|max:255|regex:/^[a-z_]+$/',
         'label' => 'required|string|max:255',
         'type' => 'required|in:text,number,date,select,textarea,checkbox',
-        'formType' => 'required|in:student,teacher',
+        'formType' => 'required|in:student,teacher,parent',
         'required' => 'boolean',
         'options' => 'nullable|string',
         'placeholder' => 'nullable|string|max:255',
