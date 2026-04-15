@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="utf-8" />
-    <title>Report Card - {{ $student->admission_number }}</title>
+    <title>Report Card - <?php echo e($student->admission_number); ?></title>
     <style>
         @page {
             margin: 15mm;
@@ -410,13 +410,13 @@
 </head>
 
 <body>
-    @php
+    <?php
         $schoolName = config('myacademy.school_name', config('app.name', 'MyAcademy'));
         $logo = config('myacademy.school_logo');
         $logoPath = $logo ? public_path('uploads/' . str_replace('\\', '/', $logo)) : null;
         $logoExists = $logoPath && file_exists($logoPath);
-    @endphp
-        @php
+    ?>
+        <?php
     $opts = $rcOptions ?? [];
     $showPosition = $opts['show_position'] ?? true;
     $showAttendance = $opts['show_attendance'] ?? true;
@@ -429,40 +429,42 @@
     $showPsychomotor = $opts['show_psychomotor'] ?? false;
     $showSchoolFees = $opts['show_school_fees'] ?? false;
     $showSignatures = $opts['show_signatures'] ?? false;
-@endphp
+?>
 
-    @if($logoExists && $showWatermark)
+    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($logoExists && $showWatermark): ?>
         <div class="watermark">
-            <img src="{{ $logoPath }}" alt="" style="width: 100%; height: 100%; object-fit: contain;" />
+            <img src="<?php echo e($logoPath); ?>" alt="" style="width: 100%; height: 100%; object-fit: contain;" />
         </div>
-    @endif
+    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
 
     <div class="page">
         <div class="header-block">
             <div class="header-table">
-                @if($logoExists)
+                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($logoExists): ?>
                     <div class="header-cell logo-cell">
-                        <img src="{{ $logoPath }}" alt="Logo" class="logo" />
+                        <img src="<?php echo e($logoPath); ?>" alt="Logo" class="logo" />
                     </div>
-                @endif
+                <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                 <div class="header-cell">
-                    <div class="school-name">{{ $schoolName }}</div>
-                    @if(config('myacademy.school_motto'))
-                        <div class="school-details" style="font-style: italic;">{{ config('myacademy.school_motto') }}</div>
-                    @endif
-                    @if(config('myacademy.school_address'))
-                        <div class="school-details">{{ config('myacademy.school_address') }}</div>
-                    @endif
-                    @if(config('myacademy.school_phone') || config('myacademy.school_email'))
+                    <div class="school-name"><?php echo e($schoolName); ?></div>
+                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(config('myacademy.school_motto')): ?>
+                        <div class="school-details" style="font-style: italic;"><?php echo e(config('myacademy.school_motto')); ?></div>
+                    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(config('myacademy.school_address')): ?>
+                        <div class="school-details"><?php echo e(config('myacademy.school_address')); ?></div>
+                    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(config('myacademy.school_phone') || config('myacademy.school_email')): ?>
                         <div class="school-details">
-                            {{ config('myacademy.school_phone') }}
-                            @if(config('myacademy.school_phone') && config('myacademy.school_email')) | @endif
-                            {{ config('myacademy.school_email') }}
+                            <?php echo e(config('myacademy.school_phone')); ?>
+
+                            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(config('myacademy.school_phone') && config('myacademy.school_email')): ?> | <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                            <?php echo e(config('myacademy.school_email')); ?>
+
                         </div>
-                    @endif
+                    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                     <div class="badge-row">
                         <span class="badge">Report Card</span>
-                        <span class="session-badge">{{ $session }} • Term {{ $term }}</span>
+                        <span class="session-badge"><?php echo e($session); ?> • Term <?php echo e($term); ?></span>
                     </div>
                 </div>
             </div>
@@ -471,50 +473,50 @@
         <div class="content">
             <div class="student-bar">
                 
-                @php($siBorderColor = '#06b6d4')
-                @php($siBgColor = '#0f172a')
-                @php($siLabelColor = '#06b6d4')
-                @php($siValueColor = '#e2e8f0')
-                @php($siDotColor = '#1e293b')
-                @include('pdf.partials.rc-student-info')
+                <?php ($siBorderColor = '#06b6d4'); ?>
+                <?php ($siBgColor = '#0f172a'); ?>
+                <?php ($siLabelColor = '#06b6d4'); ?>
+                <?php ($siValueColor = '#e2e8f0'); ?>
+                <?php ($siDotColor = '#1e293b'); ?>
+                <?php echo $__env->make('pdf.partials.rc-student-info', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
 
-                @if($student->passport_photo)
+                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($student->passport_photo): ?>
                     <div class="photo-cell">
-                        <img src="{{ public_path('uploads/' . str_replace('\\', '/', $student->passport_photo)) }}"
+                        <img src="<?php echo e(public_path('uploads/' . str_replace('\\', '/', $student->passport_photo))); ?>"
                             alt="Photo" class="photo" />
                     </div>
-                @endif
+                <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
             </div>
 
             <div class="stats">
                 <div class="stat-card">
                     <div class="stat-inner amber">
                         <div class="stat-label">Total Score</div>
-                        <div class="stat-value">{{ $grandTotal }}</div>
+                        <div class="stat-value"><?php echo e($grandTotal); ?></div>
                     </div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-inner green">
                         <div class="stat-label">Average</div>
-                        <div class="stat-value">{{ number_format($average, 1) }}%</div>
+                        <div class="stat-value"><?php echo e(number_format($average, 1)); ?>%</div>
                     </div>
                 </div>
-                @if($showPosition)
+                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($showPosition): ?>
                 <div class="stat-card">
                     <div class="stat-inner">
                         <div class="stat-label">Position</div>
-                        <div class="stat-value">{{ $position }}</div>
+                        <div class="stat-value"><?php echo e($position); ?></div>
                     </div>
                 </div>
-                @endif
-                @if($showClassAverage)
+                <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($showClassAverage): ?>
                 <div class="stat-card">
                     <div class="stat-inner purple">
                         <div class="stat-label">Class Avg</div>
-                        <div class="stat-value">{{ number_format($classAverage, 1) }}%</div>
+                        <div class="stat-value"><?php echo e(number_format($classAverage, 1)); ?>%</div>
                     </div>
                 </div>
-                @endif
+                <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
             </div>
 
             <table>
@@ -526,27 +528,27 @@
                         <th style="width: 10%;">Exam</th>
                         <th style="width: 10%;">Total</th>
                         <th style="width: 10%;">Grade</th>
-                        @if($showClassAverage)<th style="width: 10%;">Class Avg</th>@endif
-                        @if($showPosition)<th style="width: 10%;">Position</th>@endif
+                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($showClassAverage): ?><th style="width: 10%;">Class Avg</th><?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($showPosition): ?><th style="width: 10%;">Position</th><?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach ($rows as $row)
+                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $rows; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $row): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                         <tr>
-                            <td class="subj">{{ $row['subject']->name }}</td>
-                            <td>{{ $row['ca1'] ?? '—' }}</td>
-                            <td>{{ $row['ca2'] ?? '—' }}</td>
-                            <td>{{ $row['exam'] ?? '—' }}</td>
-                            <td class="bold">{{ $row['total'] ?? '—' }}</td>
-                            <td class="bold">{{ $row['grade'] ?? '—' }}</td>
-                            @if($showClassAverage)<td>{{ $row['class_avg'] ?? '—' }}</td>@endif
-                            @if($showPosition)<td>{{ $row['position'] ?? '—' }}</td>@endif
+                            <td class="subj"><?php echo e($row['subject']->name); ?></td>
+                            <td><?php echo e($row['ca1'] ?? '—'); ?></td>
+                            <td><?php echo e($row['ca2'] ?? '—'); ?></td>
+                            <td><?php echo e($row['exam'] ?? '—'); ?></td>
+                            <td class="bold"><?php echo e($row['total'] ?? '—'); ?></td>
+                            <td class="bold"><?php echo e($row['grade'] ?? '—'); ?></td>
+                            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($showClassAverage): ?><td><?php echo e($row['class_avg'] ?? '—'); ?></td><?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($showPosition): ?><td><?php echo e($row['position'] ?? '—'); ?></td><?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                         </tr>
-                    @endforeach
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                 </tbody>
             </table>
 
-            @if($showGradingKey)
+            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($showGradingKey): ?>
             <div class="grading-bar">
                 <div class="gr-cell"><strong>A:</strong> 70-100</div>
                 <div class="gr-cell"><strong>B:</strong> 60-69</div>
@@ -554,72 +556,73 @@
                 <div class="gr-cell"><strong>D:</strong> 40-49</div>
                 <div class="gr-cell"><strong>F:</strong> 0-39</div>
             </div>
-            @endif
+            <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
 
-            @if($showAttendance)
+            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($showAttendance): ?>
             <div class="att-bar">
                 <div class="att-cell">
                     <div class="att-inner">
                         <div class="att-label">Times Opened</div>
-                        <div class="att-value">{{ $timesOpened ?? '—' }}</div>
+                        <div class="att-value"><?php echo e($timesOpened ?? '—'); ?></div>
                     </div>
                 </div>
                 <div class="att-cell">
                     <div class="att-inner">
                         <div class="att-label">Times Present</div>
-                        <div class="att-value">{{ $timesPresent ?? '—' }}</div>
+                        <div class="att-value"><?php echo e($timesPresent ?? '—'); ?></div>
                     </div>
                 </div>
                 <div class="att-cell">
                     <div class="att-inner">
                         <div class="att-label">Times Absent</div>
-                        <div class="att-value">{{ $timesAbsent ?? '—' }}</div>
+                        <div class="att-value"><?php echo e($timesAbsent ?? '—'); ?></div>
                     </div>
                 </div>
             </div>
-            @endif
+            <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
 
-            @if($showTeacherRemarks)
+            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($showTeacherRemarks): ?>
             <div class="remarks-card">
                 <div class="remarks-label">Class Teacher's Remarks</div>
-                <div class="remarks-text">{{ $teacherRemarks ?? 'No remarks provided.' }}</div>
+                <div class="remarks-text"><?php echo e($teacherRemarks ?? 'No remarks provided.'); ?></div>
             </div>
-            @endif
+            <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
 
-            @if($showPrincipalRemarks)
+            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($showPrincipalRemarks): ?>
             <div class="remarks-card">
                 <div class="remarks-label">Principal's Remarks</div>
-                <div class="remarks-text">{{ $principalRemarks ?? 'No remarks provided.' }}</div>
+                <div class="remarks-text"><?php echo e($principalRemarks ?? 'No remarks provided.'); ?></div>
             </div>
-            @endif
+            <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
 
-            @if($showNextTermDate)
+            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($showNextTermDate): ?>
             <div class="next-term-bar">
-                Next Term Begins: {{ $nextTermDate ?? 'To be announced' }}
+                Next Term Begins: <?php echo e($nextTermDate ?? 'To be announced'); ?>
+
             </div>
-            @endif
+            <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
 
             
-                @php($rcBorderColor = '#06b6d4')
-                @php($rcBgLight = '#1e293b')
-                @php($rcTitleColor = '#06b6d4')
-                @php($rcLabelColor = '#e2e8f0')
-                @include('pdf.partials.rc-psychomotor')
-                @include('pdf.partials.rc-school-fees')
+                <?php ($rcBorderColor = '#06b6d4'); ?>
+                <?php ($rcBgLight = '#1e293b'); ?>
+                <?php ($rcTitleColor = '#06b6d4'); ?>
+                <?php ($rcLabelColor = '#e2e8f0'); ?>
+                <?php echo $__env->make('pdf.partials.rc-psychomotor', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
+                <?php echo $__env->make('pdf.partials.rc-school-fees', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
 
-@if($showSignatures)
+<?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($showSignatures): ?>
 <div class="signatures">
                 <div class="sig">
-                    @if(($signatureImages['teacher'] ?? null) && file_exists($signatureImages['teacher']))
-                            <img src="{{ $signatureImages['teacher'] }}" alt="Teacher Signature" style="max-height: 40px; max-width: 100px; object-fit: contain; margin-bottom: 4px;" />
-                        @endif
+                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(($signatureImages['teacher'] ?? null) && file_exists($signatureImages['teacher'])): ?>
+                            <img src="<?php echo e($signatureImages['teacher']); ?>" alt="Teacher Signature" style="max-height: 40px; max-width: 100px; object-fit: contain; margin-bottom: 4px;" />
+                        <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                         <div class="sig-line">Class Teacher</div>
                     <div class="sig-sub">Signature & Date</div>
                 </div>
                 <div class="sig">
-                    @if(($signatureImages['principal'] ?? null) && file_exists($signatureImages['principal']))
-                            <img src="{{ $signatureImages['principal'] }}" alt="Principal Signature" style="max-height: 40px; max-width: 100px; object-fit: contain; margin-bottom: 4px;" />
-                        @endif
+                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(($signatureImages['principal'] ?? null) && file_exists($signatureImages['principal'])): ?>
+                            <img src="<?php echo e($signatureImages['principal']); ?>" alt="Principal Signature" style="max-height: 40px; max-width: 100px; object-fit: contain; margin-bottom: 4px;" />
+                        <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                         <div class="sig-line">Principal</div>
                     <div class="sig-sub">Signature & Stamp</div>
                 </div>
@@ -628,13 +631,13 @@
                     <div class="sig-sub">Signature & Date</div>
                 </div>
             </div>
-@endif
+<?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
 
             <div class="footer">
-                Generated on {{ now()->format('l, F j, Y \a\t g:i A') }} • {{ $schoolName }} • Powered by MyAcademy SMS
+                Generated on <?php echo e(now()->format('l, F j, Y \a\t g:i A')); ?> • <?php echo e($schoolName); ?> • Powered by MyAcademy SMS
             </div>
         </div>
     </div>
 </body>
 
-</html>
+</html><?php /**PATH C:\laragon\www\myacademy-laravel\resources\views/pdf/report-card-modern.blade.php ENDPATH**/ ?>

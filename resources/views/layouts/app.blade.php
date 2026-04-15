@@ -108,10 +108,8 @@
                                     class="mx-auto mb-2 grid h-12 w-12 place-items-center rounded-lg bg-blue-50 text-blue-600">
                                     <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                         stroke-width="2">
-                                        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-                                        <circle cx="9" cy="7" r="4" />
-                                        <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
-                                        <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                                        <path d="M22 10v6M2 10l10-5 10 5-10 5z"/>
+                                        <path d="M6 12v5c3 3 9 3 12 0v-5"/>
                                     </svg>
                                 </div>
                                 <div class="text-xs font-semibold text-gray-700">Students</div>
@@ -124,8 +122,7 @@
                                     class="mx-auto mb-2 grid h-12 w-12 place-items-center rounded-lg bg-pink-50 text-pink-600">
                                     <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                         stroke-width="2">
-                                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-                                        <circle cx="12" cy="7" r="4" />
+                                        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
                                     </svg>
                                 </div>
                                 <div class="text-xs font-semibold text-gray-700">My Children</div>
@@ -139,10 +136,10 @@
                                     class="mx-auto mb-2 grid h-12 w-12 place-items-center rounded-lg bg-orange-50 text-orange-600">
                                     <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                         stroke-width="2">
-                                        <path d="M2 7l10-5 10 5-10 5L2 7z" />
-                                        <path d="M12 12v10" />
-                                        <path d="M22 7v10l-10 5" />
-                                        <path d="M2 7v10l10 5" />
+                                        <rect x="2" y="3" width="20" height="13" rx="2"/>
+                                        <polyline points="8 21 12 17 16 21"/>
+                                        <line x1="7" y1="9" x2="17" y2="9"/>
+                                        <line x1="7" y1="13" x2="12" y2="13"/>
                                     </svg>
                                 </div>
                                 <div class="text-xs font-semibold text-gray-700">Teachers</div>
@@ -153,10 +150,8 @@
                                     class="mx-auto mb-2 grid h-12 w-12 place-items-center rounded-lg bg-pink-50 text-pink-600">
                                     <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                         stroke-width="2">
-                                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-                                        <circle cx="9" cy="7" r="4" />
-                                        <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
-                                        <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                                        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                                        <polyline points="9 22 9 12 15 12 15 22"/>
                                     </svg>
                                 </div>
                                 <div class="text-xs font-semibold text-gray-700">Parents</div>
@@ -168,10 +163,8 @@
                                 class="mx-auto mb-2 grid h-12 w-12 place-items-center rounded-lg bg-slate-50 text-slate-700">
                                 <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                     stroke-width="2">
-                                    <path d="M4 4h16v16H4z" />
-                                    <path d="M8 8h8" />
-                                    <path d="M8 12h8" />
-                                    <path d="M8 16h5" />
+                                    <path d="M3 21h18M5 21V7l7-4 7 4v14M10 21v-6h4v6"/>
+                                    <path d="M10 11h.01M14 11h.01M10 15h.01M14 15h.01"/>
                                 </svg>
                             </div>
                             <div class="text-xs font-semibold text-gray-700">Classes</div>
@@ -244,15 +237,7 @@
                                     class="mx-auto mb-2 grid h-12 w-12 place-items-center rounded-lg bg-slate-50 text-slate-700">
                                     <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                         stroke-width="2">
-                                        <path d="M12 6v.01" />
-                                        <path d="M12 12v.01" />
-                                        <path d="M12 18v.01" />
-                                        <path d="M7 6v.01" />
-                                        <path d="M7 12v.01" />
-                                        <path d="M7 18v.01" />
-                                        <path d="M17 6v.01" />
-                                        <path d="M17 12v.01" />
-                                        <path d="M17 18v.01" />
+                                        <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
                                     </svg>
                                 </div>
                                 <div class="text-xs font-semibold text-gray-700">More</div>
@@ -368,8 +353,8 @@
                         class="{{ request()->routeIs('students.*') ? 'bg-amber-500 text-white shadow-md' : 'text-slate-700 hover:bg-amber-50' }} mb-0.5 group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-bold transition-all">
                         <svg class="h-5 w-5 flex-shrink-0 {{ request()->routeIs('students.*') ? 'text-white' : 'text-blue-600' }}"
                             viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-                            <circle cx="12" cy="7" r="4" />
+                            <path d="M22 10v6M2 10l10-5 10 5-10 5z"/>
+                            <path d="M6 12v5c3 3 9 3 12 0v-5"/>
                         </svg>
                         <span class="sidebar-text">Students</span>
                     </a>
@@ -380,8 +365,7 @@
                         class="{{ request()->routeIs('students.*') ? 'bg-amber-500 text-white shadow-md' : 'text-slate-700 hover:bg-amber-50' }} mb-0.5 group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-bold transition-all">
                         <svg class="h-5 w-5 flex-shrink-0 {{ request()->routeIs('students.*') ? 'text-white' : 'text-pink-600' }}"
                             viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-                            <circle cx="12" cy="7" r="4" />
+                            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
                         </svg>
                         <span class="sidebar-text">My Children</span>
                     </a>
@@ -392,10 +376,10 @@
                         class="{{ request()->routeIs('teachers') || request()->routeIs('teachers.*') ? 'bg-amber-500 text-white shadow-md' : 'text-slate-700 hover:bg-amber-50' }} mb-0.5 group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-bold transition-all">
                         <svg class="h-5 w-5 flex-shrink-0 {{ request()->routeIs('teachers') || request()->routeIs('teachers.*') ? 'text-white' : 'text-orange-600' }}"
                             viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-                            <circle cx="9" cy="7" r="4" />
-                            <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
-                            <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                            <rect x="2" y="3" width="20" height="13" rx="2"/>
+                            <polyline points="8 21 12 17 16 21"/>
+                            <line x1="7" y1="9" x2="17" y2="9"/>
+                            <line x1="7" y1="13" x2="12" y2="13"/>
                         </svg>
                         <span class="sidebar-text">Teachers</span>
                     </a>
@@ -404,10 +388,8 @@
                         class="{{ request()->routeIs('parents.*') ? 'bg-amber-500 text-white shadow-md' : 'text-slate-700 hover:bg-amber-50' }} mb-0.5 group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-bold transition-all">
                         <svg class="h-5 w-5 flex-shrink-0 {{ request()->routeIs('parents.*') ? 'text-white' : 'text-pink-600' }}"
                             viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-                            <circle cx="9" cy="7" r="4" />
-                            <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
-                            <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                            <polyline points="9 22 9 12 15 12 15 22"/>
                         </svg>
                         <span class="sidebar-text">Parents</span>
                     </a>
@@ -418,8 +400,8 @@
                         class="{{ request()->routeIs('classes.*') ? 'bg-amber-500 text-white shadow-md' : 'text-slate-700 hover:bg-amber-50' }} mb-0.5 group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-bold transition-all">
                         <svg class="h-5 w-5 flex-shrink-0 {{ request()->routeIs('classes.*') ? 'text-white' : 'text-slate-600' }}"
                             viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
-                            <line x1="3" y1="9" x2="21" y2="9" />
+                            <path d="M3 21h18M5 21V7l7-4 7 4v14M10 21v-6h4v6"/>
+                            <path d="M10 11h.01M14 11h.01M10 15h.01M14 15h.01"/>
                         </svg>
                         <span class="sidebar-text">Classes</span>
                     </a>
@@ -450,11 +432,8 @@
                         class="{{ request()->routeIs('results.broadsheet') ? 'bg-amber-500 text-white shadow-md' : 'text-slate-700 hover:bg-amber-50' }} mb-0.5 group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-bold transition-all">
                         <svg class="h-5 w-5 flex-shrink-0 {{ request()->routeIs('results.broadsheet') ? 'text-white' : 'text-emerald-600' }}"
                             viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                            <polyline points="14 2 14 8 20 8" />
-                            <line x1="16" y1="13" x2="8" y2="13" />
-                            <line x1="16" y1="17" x2="8" y2="17" />
-                            <polyline points="10 9 9 9 8 9" />
+                            <rect x="3" y="3" width="18" height="18" rx="2"/>
+                            <path d="M3 9h18M3 15h18M9 3v18M15 3v18"/>
                         </svg>
                         <span class="sidebar-text">Broadsheet</span>
                     </a>
@@ -476,11 +455,10 @@
                     class="{{ request()->routeIs('homework.*') ? 'bg-amber-500 text-white shadow-md' : 'text-slate-700 hover:bg-amber-50' }} mb-0.5 group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-bold transition-all">
                     <svg class="h-5 w-5 flex-shrink-0 {{ request()->routeIs('homework.*') ? 'text-white' : 'text-purple-600' }}"
                         viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                        <polyline points="14 2 14 8 20 8" />
-                        <line x1="16" y1="13" x2="8" y2="13" />
-                        <line x1="16" y1="17" x2="8" y2="17" />
-                        <polyline points="10 9 9 9 8 9" />
+                        <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/>
+                        <rect x="8" y="2" width="8" height="4" rx="1"/>
+                        <line x1="16" y1="11" x2="8" y2="11"/>
+                        <line x1="16" y1="15" x2="12" y2="15"/>
                     </svg>
                     <span class="sidebar-text">Homework</span>
                 </a>
@@ -520,9 +498,7 @@
                         class="{{ request()->routeIs('more-features') ? 'bg-amber-500 text-white shadow-md' : 'text-slate-700 hover:bg-amber-50' }} mb-0.5 group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-bold transition-all">
                         <svg class="h-5 w-5 flex-shrink-0 {{ request()->routeIs('more-features') ? 'text-white' : 'text-slate-600' }}"
                             viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                            <circle cx="12" cy="12" r="1" />
-                            <circle cx="19" cy="12" r="1" />
-                            <circle cx="5" cy="12" r="1" />
+                            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
                         </svg>
                         <span class="sidebar-text">More Features</span>
                     </a>
@@ -564,8 +540,7 @@
         </aside>
 
         <div id="mainContent" class="lg:pl-64 transition-all duration-300">
-            <header class="sticky top-0 z-10 border-b border-slate-100 bg-white/80 backdrop-blur-xl shadow-md">
-                <div class="h-1.5 bg-gradient-to-r from-amber-500 via-orange-500 to-amber-500"></div>
+            <header class="sticky top-0 z-10 border-b border-slate-100 bg-white/80 backdrop-blur-xl shadow-sm">
                 <div class="flex h-16 items-center justify-between px-6">
                     <div class="flex items-center gap-4">
                         <!-- Mobile Menu Button -->

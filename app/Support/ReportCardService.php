@@ -45,17 +45,44 @@ class ReportCardService
             ->get()
             ->keyBy('subject_id');
 
-        $rows = $subjects->map(function (Subject $subject) use ($scores) {
+        // Per-subject class averages and positions
+        $allClassScores = Score::query()
+            ->where('class_id', $student->class_id)
+            ->where('term', $term)
+            ->where('session', $session)
+            ->whereIn('subject_id', $subjectIds)
+            ->get(['subject_id', 'student_id', 'total']);
+
+        $subjectClassAvgs = $allClassScores
+            ->groupBy('subject_id')
+            ->map(fn ($rows) => round($rows->avg('total'), 1));
+
+        $subjectPositions = $allClassScores
+            ->groupBy('subject_id')
+            ->map(function ($rows) use ($student) {
+                $sorted = $rows->sortByDesc('total')->values();
+                $rank = 1; $last = null; $pos = 1;
+                foreach ($sorted as $i => $r) {
+                    if ($last !== null && $r->total !== $last) { $rank = $i + 1; }
+                    if ((int) $r->student_id === (int) $student->id) { $pos = $rank; break; }
+                    $last = $r->total;
+                }
+                return $pos;
+            });
+
+        $rows = $subjects->map(function (Subject $subject) use ($scores, $subjectClassAvgs, $subjectPositions) {
             /** @var \App\Models\Score|null $score */
             $score = $scores->get($subject->id);
 
             return [
-                'subject' => $subject,
-                'ca1' => $score?->ca1 ?? null,
-                'ca2' => $score?->ca2 ?? null,
-                'exam' => $score?->exam ?? null,
-                'total' => $score?->total ?? null,
-                'grade' => $score?->grade ?? ($score ? Score::gradeForTotal((int) $score->total, max(0, (int) config('myacademy.results_ca1_max', 20)) + max(0, (int) config('myacademy.results_ca2_max', 20)) + max(0, (int) config('myacademy.results_exam_max', 60))) : null),
+                'subject'   => $subject,
+                'ca1'       => $score?->ca1 ?? null,
+                'ca2'       => $score?->ca2 ?? null,
+                'exam'      => $score?->exam ?? null,
+                'total'     => $score?->total ?? null,
+                'grade'     => $score?->grade ?? ($score ? Score::gradeForTotal((int) $score->total, max(0, (int) config('myacademy.results_ca1_max', 20)) + max(0, (int) config('myacademy.results_ca2_max', 20)) + max(0, (int) config('myacademy.results_exam_max', 60))) : null),
+                'class_avg' => $subjectClassAvgs->get($subject->id),
+                'position'  => $score ? $subjectPositions->get($subject->id) : null,
             ];
         });
 

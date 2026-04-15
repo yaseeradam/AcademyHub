@@ -55,7 +55,7 @@ class DashboardContent extends StatelessWidget {
                 Text(
                   'Welcome back, ${user?.name ?? 'User'}!',
                   style: const TextStyle(
-                    fontSize: 24,
+                    fontSize: 30,
                     fontWeight: FontWeight.bold,
                     color: Colors.white,
                   ),
@@ -64,14 +64,14 @@ class DashboardContent extends StatelessWidget {
                 Text(
                   'Role: ${user?.role?.toUpperCase() ?? 'USER'}',
                   style: TextStyle(
-                    fontSize: 16,
+                    fontSize: 20,
                     color: Colors.white.withOpacity(0.9),
                     fontWeight: FontWeight.w500,
                   ),
                 ),
                 const SizedBox(height: 16),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                   decoration: BoxDecoration(
                     color: Colors.white.withOpacity(0.2),
                     borderRadius: BorderRadius.circular(20),
@@ -79,7 +79,7 @@ class DashboardContent extends StatelessWidget {
                   child: Text(
                     'MyAcademy Dashboard',
                     style: TextStyle(
-                      fontSize: 14,
+                      fontSize: 17,
                       color: Colors.white.withOpacity(0.9),
                       fontWeight: FontWeight.w600,
                     ),
