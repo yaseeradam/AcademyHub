@@ -17,18 +17,24 @@ class ExamDashboard extends Component
 {
     public function mount(): void
     {
-        $user = auth()->user();
-        abort_unless($user && in_array($user->role, ['admin', 'teacher', 'parent'], true) === false, 403);
+        $studentId = session('student_id');
+        if (!$studentId) {
+            $user = auth()->user();
+            abort_unless($user && in_array($user->role, ['admin', 'teacher', 'parent'], true) === false, 403);
+        }
     }
 
     #[Computed]
     public function student(): ?Student
     {
+        $studentId = session('student_id');
+        if ($studentId) {
+            return Student::with(['schoolClass'])->find($studentId);
+        }
+
         $user = auth()->user();
         if (!$user) return null;
 
-        // The student account may be directly tied to a user with role 'student'
-        // or via admission number stored on user record
         return Student::query()
             ->where('email', $user->email)
             ->orWhere('admission_number', $user->admission_number ?? '')

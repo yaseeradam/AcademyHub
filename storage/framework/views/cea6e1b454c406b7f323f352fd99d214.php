@@ -1,20 +1,39 @@
-@php
+<?php
     $cbtInstalled = $this->isCbtInstalled();
     $savingsLoanInstalled = $this->isSavingsLoanInstalled();
-@endphp
+?>
 
 <div class="space-y-6">
-    <x-page-header title="Marketplace" subtitle="Discover and install premium modules and extensions." accent="more">
-        <x-slot:actions>
-            <a href="{{ route('more-features') }}" class="btn-outline">Back</a>
-        </x-slot:actions>
-    </x-page-header>
+    <?php if (isset($component)) { $__componentOriginalf8d4ea307ab1e58d4e472a43c8548d8e = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginalf8d4ea307ab1e58d4e472a43c8548d8e = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.page-header','data' => ['title' => 'Marketplace','subtitle' => 'Discover and install premium modules and extensions.','accent' => 'more']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component->withName('page-header'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
+<?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
+<?php endif; ?>
+<?php $component->withAttributes(['title' => 'Marketplace','subtitle' => 'Discover and install premium modules and extensions.','accent' => 'more']); ?>
+         <?php $__env->slot('actions', null, []); ?> 
+            <a href="<?php echo e(route('more-features')); ?>" class="btn-outline">Back</a>
+         <?php $__env->endSlot(); ?>
+     <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginalf8d4ea307ab1e58d4e472a43c8548d8e)): ?>
+<?php $attributes = $__attributesOriginalf8d4ea307ab1e58d4e472a43c8548d8e; ?>
+<?php unset($__attributesOriginalf8d4ea307ab1e58d4e472a43c8548d8e); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginalf8d4ea307ab1e58d4e472a43c8548d8e)): ?>
+<?php $component = $__componentOriginalf8d4ea307ab1e58d4e472a43c8548d8e; ?>
+<?php unset($__componentOriginalf8d4ea307ab1e58d4e472a43c8548d8e); ?>
+<?php endif; ?>
 
-    @if ($errors->has('premium'))
+    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($errors->has('premium')): ?>
         <div class="card-padded border border-orange-200 bg-orange-50/60 text-sm text-orange-900">
-            {{ $errors->first('premium') }}
+            <?php echo e($errors->first('premium')); ?>
+
         </div>
-    @endif
+    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
 
     <!-- Featured Products Section -->
     <div class="space-y-4">
@@ -25,7 +44,7 @@
         
         <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-2">
             <!-- AgentPro Product -->
-            <a href="{{ route('marketplace.product', 'agent-pro') }}" class="group block">
+            <a href="<?php echo e(route('marketplace.product', 'agent-pro')); ?>" class="group block">
                 <div class="card-padded hover:shadow-lg transition-all duration-200 border-2 border-transparent group-hover:border-pink-200 group-hover:bg-pink-50/30">
                     <div class="flex items-start gap-4">
                         <div class="flex-shrink-0">
@@ -63,7 +82,7 @@
             </a>
 
             <!-- Homework Product -->
-            <a href="{{ route('marketplace.product', 'homework') }}" class="group block">
+            <a href="<?php echo e(route('marketplace.product', 'homework')); ?>" class="group block">
                 <div class="card-padded hover:shadow-lg transition-all duration-200 border-2 border-transparent group-hover:border-cyan-200 group-hover:bg-cyan-50/30">
                     <div class="flex items-start gap-4">
                         <div class="flex-shrink-0">
@@ -100,7 +119,7 @@
                 </div>
             </a>
             <!-- WhatsApp Bot Product -->
-            <a href="{{ route('marketplace.product', 'whatsapp-bot') }}" class="group block">
+            <a href="<?php echo e(route('marketplace.product', 'whatsapp-bot')); ?>" class="group block">
                 <div class="card-padded hover:shadow-lg transition-all duration-200 border-2 border-transparent group-hover:border-green-200 group-hover:bg-green-50/30">
                     <div class="flex items-start gap-4">
                         <div class="flex-shrink-0">
@@ -138,7 +157,7 @@
             </a>
 
             <!-- Students/Parents Dashboard Product -->
-            <a href="{{ route('marketplace.product', 'student-dashboard') }}" class="group block">
+            <a href="<?php echo e(route('marketplace.product', 'student-dashboard')); ?>" class="group block">
                 <div class="card-padded hover:shadow-lg transition-all duration-200 border-2 border-transparent group-hover:border-blue-200 group-hover:bg-blue-50/30">
                     <div class="flex items-start gap-4">
                         <div class="flex-shrink-0">
@@ -177,7 +196,7 @@
             </a>
 
             <!-- CBT Product -->
-            <a href="{{ route('marketplace.product', 'cbt') }}" class="group block">
+            <a href="<?php echo e(route('marketplace.product', 'cbt')); ?>" class="group block">
                 <div class="card-padded hover:shadow-lg transition-all duration-200 border-2 border-transparent group-hover:border-purple-200 group-hover:bg-purple-50/30">
                     <div class="flex items-start gap-4">
                         <div class="flex-shrink-0">
@@ -206,11 +225,29 @@
                                     <span class="text-xs text-gray-500">Examination</span>
                                 </div>
                                 <div class="text-right">
-                                    @if ($cbtInstalled)
-                                        <x-status-badge variant="success">Installed</x-status-badge>
-                                    @else
+                                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($cbtInstalled): ?>
+                                        <?php if (isset($component)) { $__componentOriginal8c81617a70e11bcf247c4db924ab1b62 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginal8c81617a70e11bcf247c4db924ab1b62 = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.status-badge','data' => ['variant' => 'success']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component->withName('status-badge'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
+<?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
+<?php endif; ?>
+<?php $component->withAttributes(['variant' => 'success']); ?>Installed <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginal8c81617a70e11bcf247c4db924ab1b62)): ?>
+<?php $attributes = $__attributesOriginal8c81617a70e11bcf247c4db924ab1b62; ?>
+<?php unset($__attributesOriginal8c81617a70e11bcf247c4db924ab1b62); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginal8c81617a70e11bcf247c4db924ab1b62)): ?>
+<?php $component = $__componentOriginal8c81617a70e11bcf247c4db924ab1b62; ?>
+<?php unset($__componentOriginal8c81617a70e11bcf247c4db924ab1b62); ?>
+<?php endif; ?>
+                                    <?php else: ?>
                                         <div class="text-xs text-gray-500">650 downloads</div>
-                                    @endif
+                                    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                                 </div>
                             </div>
                         </div>
@@ -219,7 +256,7 @@
             </a>
 
             <!-- Savings/Loan Product -->
-            <a href="{{ route('marketplace.product', 'savings-loan') }}" class="group block">
+            <a href="<?php echo e(route('marketplace.product', 'savings-loan')); ?>" class="group block">
                 <div class="card-padded hover:shadow-lg transition-all duration-200 border-2 border-transparent group-hover:border-emerald-200 group-hover:bg-emerald-50/30">
                     <div class="flex items-start gap-4">
                         <div class="flex-shrink-0">
@@ -248,11 +285,29 @@
                                     <span class="text-xs text-gray-500">Finance</span>
                                 </div>
                                 <div class="text-right">
-                                    @if ($savingsLoanInstalled)
-                                        <x-status-badge variant="success">Installed</x-status-badge>
-                                    @else
+                                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($savingsLoanInstalled): ?>
+                                        <?php if (isset($component)) { $__componentOriginal8c81617a70e11bcf247c4db924ab1b62 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginal8c81617a70e11bcf247c4db924ab1b62 = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.status-badge','data' => ['variant' => 'success']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component->withName('status-badge'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
+<?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
+<?php endif; ?>
+<?php $component->withAttributes(['variant' => 'success']); ?>Installed <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginal8c81617a70e11bcf247c4db924ab1b62)): ?>
+<?php $attributes = $__attributesOriginal8c81617a70e11bcf247c4db924ab1b62; ?>
+<?php unset($__attributesOriginal8c81617a70e11bcf247c4db924ab1b62); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginal8c81617a70e11bcf247c4db924ab1b62)): ?>
+<?php $component = $__componentOriginal8c81617a70e11bcf247c4db924ab1b62; ?>
+<?php unset($__componentOriginal8c81617a70e11bcf247c4db924ab1b62); ?>
+<?php endif; ?>
+                                    <?php else: ?>
                                         <div class="text-xs text-gray-500">420 downloads</div>
-                                    @endif
+                                    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                                 </div>
                             </div>
                         </div>
@@ -261,4 +316,4 @@
             </a>
         </div>
     </div>
-</div>
+</div><?php /**PATH C:\laragon\www\myacademy-laravel\resources\views/livewire/marketplace/index.blade.php ENDPATH**/ ?>

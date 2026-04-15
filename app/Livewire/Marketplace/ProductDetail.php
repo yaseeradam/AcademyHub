@@ -62,9 +62,9 @@ class ProductDetail extends Component
                 ]
             ],
             'student-dashboard' => [
-                'name' => 'Student Dashboard',
-                'short_description' => 'Complete student portal with results & attendance',
-                'description' => 'A comprehensive student portal that provides students with access to their academic records, attendance history, results, and school announcements in a user-friendly interface.',
+                'name' => 'Students/Parents Dashboard',
+                'short_description' => 'Complete portal with results & attendance for students and parents',
+                'description' => 'A comprehensive portal that provides students and parents with access to academic records, attendance history, results, and school announcements in a user-friendly interface.',
                 'icon' => 'student',
                 'color' => 'blue',
                 'price' => 'FREE',
@@ -167,6 +167,75 @@ class ProductDetail extends Component
                     'Transparent financial tracking',
                     'Automated loan calculations',
                     'Reduce manual paperwork'
+                ]
+            ],
+            'agent-pro' => [
+                'name' => 'AgentPro AI',
+                'short_description' => 'Intelligent AI assistant platform integration',
+                'description' => 'AgentPro AI is a revolutionary contextual AI assistant built for schools. It directly connects with student datasets, tracking attendance, results, fees, and more to answer inquiries intelligently and warmly like a live school administrator.',
+                'icon' => 'robot',
+                'color' => 'pink',
+                'price' => 'FREE',
+                'category' => 'AI',
+                'rating' => '5.0',
+                'downloads' => '4.1k',
+                'features' => [
+                    'Natural language queries',
+                    'Student performance analysis',
+                    'Attendance tracking',
+                    'Fee payment status',
+                    'Warm human-like personality',
+                    'Real-time database integration'
+                ],
+                'screenshots' => [
+                    'agentpro-1.png',
+                    'agentpro-2.png',
+                    'agentpro-3.png'
+                ],
+                'requirements' => [
+                    'MyAcademy system',
+                    'Internet connection',
+                    'API access configuration'
+                ],
+                'benefits' => [
+                    'Instant answers 24/7',
+                    'Reduces administrative burden',
+                    'Highly accurate database reads',
+                    'Zero-learning curve chat interface'
+                ]
+            ],
+            'homework' => [
+                'name' => 'Homework & Assignments',
+                'short_description' => 'Manage and track student assignments',
+                'description' => 'A complete assignment creation and submission platform. Teachers can generate homework with AI, assign it to classes, and students can submit their work directly from the portal for grading.',
+                'icon' => 'document',
+                'color' => 'cyan',
+                'price' => 'FREE',
+                'category' => 'Education',
+                'rating' => '4.8',
+                'downloads' => '2.8k',
+                'features' => [
+                    'AI-powered assignment generation',
+                    'Due date enforcement',
+                    'Digital submissions handling',
+                    'Inline grading & feedback',
+                    'Push notifications for students',
+                    'Class/Section filtering'
+                ],
+                'screenshots' => [
+                    'homework-1.png',
+                    'homework-2.png',
+                    'homework-3.png'
+                ],
+                'requirements' => [
+                    'MyAcademy system',
+                    'Active Student & Teacher accounts'
+                ],
+                'benefits' => [
+                    'Streamlined assignment workflow',
+                    'Automated due date tracking',
+                    'Easy submission management',
+                    'Built-in AI content generation'
                 ]
             ]
         ];

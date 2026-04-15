@@ -11,7 +11,7 @@
                         <div class="h-2 w-2 animate-pulse rounded-full bg-green-400"></div>
                         <span class="text-sm font-bold text-white">Parent Portal</span>
                     </div>
-                    <h1 class="text-3xl font-black text-white sm:text-4xl">Welcome back, {{ auth()->user()->name }}</h1>
+                    <h1 class="text-3xl font-black text-white sm:text-4xl">Welcome back, <?php echo e(auth()->user()->name); ?></h1>
                     <p class="mt-2 text-base text-amber-50">Track your children's progress and stay updated.</p>
                 </div>
                 <div class="flex items-center gap-3">
@@ -20,7 +20,7 @@
                             <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
                             <circle cx="9" cy="7" r="4"/>
                         </svg>
-                        {{ $this->children->count() }} {{ Str::plural('Child', $this->children->count()) }} linked
+                        <?php echo e($this->children->count()); ?> <?php echo e(Str::plural('Child', $this->children->count())); ?> linked
                     </div>
                 </div>
             </div>
@@ -28,46 +28,48 @@
     </div>
 
     <!-- Children Selection -->
-    @if($this->children->count() > 1)
+    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($this->children->count() > 1): ?>
         <div class="space-y-3">
             <div class="text-sm font-semibold text-slate-900">Select Child</div>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                @foreach($this->children as $child)
+                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $this->children; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $child): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                     <button 
-                        wire:click="selectChild({{ $child->id }})"
-                        class="flex items-center gap-3 p-4 rounded-2xl border transition-all duration-300 {{ $selectedChildId === $child->id ? 'border-amber-500 bg-amber-50/50 shadow-md ring-1 ring-amber-500' : 'border-gray-200 bg-white hover:border-amber-300 hover:shadow-sm' }}"
+                        wire:click="selectChild(<?php echo e($child->id); ?>)"
+                        class="flex items-center gap-3 p-4 rounded-2xl border transition-all duration-300 <?php echo e($selectedChildId === $child->id ? 'border-amber-500 bg-amber-50/50 shadow-md ring-1 ring-amber-500' : 'border-gray-200 bg-white hover:border-amber-300 hover:shadow-sm'); ?>"
                     >
-                        @if($child->passport_photo_url)
-                            <img src="{{ $child->passport_photo_url }}" class="h-12 w-12 rounded-full object-cover ring-2 ring-white shadow-sm" />
-                        @else
+                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($child->passport_photo_url): ?>
+                            <img src="<?php echo e($child->passport_photo_url); ?>" class="h-12 w-12 rounded-full object-cover ring-2 ring-white shadow-sm" />
+                        <?php else: ?>
                             <div class="h-12 w-12 rounded-full bg-amber-100 flex items-center justify-center text-amber-700 font-bold shadow-inner">
-                                {{ substr($child->first_name, 0, 1) }}
+                                <?php echo e(substr($child->first_name, 0, 1)); ?>
+
                             </div>
-                        @endif
+                        <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                         <div class="text-left">
-                            <div class="text-sm font-bold text-slate-900">{{ $child->full_name }}</div>
-                            <div class="text-xs text-slate-500">{{ $child->schoolClass?->name ?? 'Unassigned' }}</div>
+                            <div class="text-sm font-bold text-slate-900"><?php echo e($child->full_name); ?></div>
+                            <div class="text-xs text-slate-500"><?php echo e($child->schoolClass?->name ?? 'Unassigned'); ?></div>
                         </div>
                     </button>
-                @endforeach
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
             </div>
         </div>
-    @endif
+    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
 
-    @if($this->selectedChild)
+    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($this->selectedChild): ?>
         <!-- Selected Child Info -->
         <div class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-100">
             <div class="flex items-center gap-4 mb-6">
-                @if($this->selectedChild->passport_photo_url)
-                    <img src="{{ $this->selectedChild->passport_photo_url }}" class="h-16 w-16 rounded-full object-cover shadow-md ring-2 ring-white" />
-                @else
+                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($this->selectedChild->passport_photo_url): ?>
+                    <img src="<?php echo e($this->selectedChild->passport_photo_url); ?>" class="h-16 w-16 rounded-full object-cover shadow-md ring-2 ring-white" />
+                <?php else: ?>
                     <div class="h-16 w-16 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center text-white font-bold text-2xl shadow-md">
-                        {{ substr($this->selectedChild->first_name, 0, 1) }}
+                        <?php echo e(substr($this->selectedChild->first_name, 0, 1)); ?>
+
                     </div>
-                @endif
+                <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                 <div>
-                    <h2 class="text-2xl font-black tracking-tight text-slate-900">{{ $this->selectedChild->full_name }}</h2>
-                    <p class="text-sm font-medium text-slate-600">{{ $this->selectedChild->admission_number }} • {{ $this->selectedChild->schoolClass?->name ?? 'Unassigned' }} {{ $this->selectedChild->section?->name ?? '' }}</p>
+                    <h2 class="text-2xl font-black tracking-tight text-slate-900"><?php echo e($this->selectedChild->full_name); ?></h2>
+                    <p class="text-sm font-medium text-slate-600"><?php echo e($this->selectedChild->admission_number); ?> • <?php echo e($this->selectedChild->schoolClass?->name ?? 'Unassigned'); ?> <?php echo e($this->selectedChild->section?->name ?? ''); ?></p>
                 </div>
             </div>
 
@@ -95,8 +97,8 @@
                 <div class="flex items-start justify-between gap-4">
                     <div>
                         <div class="text-xs font-medium uppercase tracking-wide text-blue-600">Average Score</div>
-                        <div class="mt-2.5 text-3xl font-bold tracking-tight text-slate-900">{{ $this->childPerformanceStats['average'] }}%</div>
-                        <div class="mt-1.5 text-xs text-slate-600">Grade: {{ $this->childPerformanceStats['grade'] }}</div>
+                        <div class="mt-2.5 text-3xl font-bold tracking-tight text-slate-900"><?php echo e($this->childPerformanceStats['average']); ?>%</div>
+                        <div class="mt-1.5 text-xs text-slate-600">Grade: <?php echo e($this->childPerformanceStats['grade']); ?></div>
                     </div>
                     <div class="icon-3d grid h-14 w-14 place-items-center rounded-xl bg-gradient-to-br from-blue-400 to-blue-600 text-white shadow-lg shadow-blue-500/30">
                         <svg class="h-7 w-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -112,8 +114,8 @@
                 <div class="flex items-start justify-between gap-4">
                     <div>
                         <div class="text-xs font-medium uppercase tracking-wide text-green-600">Attendance</div>
-                        <div class="mt-2.5 text-3xl font-bold tracking-tight text-slate-900">{{ $this->childAttendance['percentage'] }}%</div>
-                        <div class="mt-1.5 text-xs text-slate-600">{{ $this->childAttendance['present'] }}/{{ $this->childAttendance['total'] }} days</div>
+                        <div class="mt-2.5 text-3xl font-bold tracking-tight text-slate-900"><?php echo e($this->childAttendance['percentage']); ?>%</div>
+                        <div class="mt-1.5 text-xs text-slate-600"><?php echo e($this->childAttendance['present']); ?>/<?php echo e($this->childAttendance['total']); ?> days</div>
                     </div>
                     <div class="icon-3d grid h-14 w-14 place-items-center rounded-xl bg-gradient-to-br from-green-400 to-green-600 text-white shadow-lg shadow-green-500/30">
                         <svg class="h-7 w-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -129,8 +131,8 @@
                 <div class="flex items-start justify-between gap-4">
                     <div>
                         <div class="text-xs font-medium uppercase tracking-wide text-amber-600">Outstanding Fees</div>
-                        <div class="mt-2.5 text-3xl font-bold tracking-tight text-slate-900">₦{{ number_format($this->childFees['outstanding']) }}</div>
-                        <div class="mt-1.5 text-xs text-slate-600">Paid: ₦{{ number_format($this->childFees['paid']) }}</div>
+                        <div class="mt-2.5 text-3xl font-bold tracking-tight text-slate-900">₦<?php echo e(number_format($this->childFees['outstanding'])); ?></div>
+                        <div class="mt-1.5 text-xs text-slate-600">Paid: ₦<?php echo e(number_format($this->childFees['paid'])); ?></div>
                     </div>
                     <div class="icon-3d grid h-14 w-14 place-items-center rounded-xl bg-gradient-to-br from-amber-400 to-orange-600 text-white shadow-lg shadow-amber-500/30">
                         <svg class="h-7 w-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -146,8 +148,8 @@
                 <div class="flex items-start justify-between gap-4">
                     <div>
                         <div class="text-xs font-medium uppercase tracking-wide text-purple-600">Subjects Taken</div>
-                        <div class="mt-2.5 text-3xl font-bold tracking-tight text-slate-900">{{ $this->childPerformanceStats['subjects'] }}</div>
-                        <div class="mt-1.5 text-xs text-slate-600">Total: {{ $this->childPerformanceStats['total'] }} marks</div>
+                        <div class="mt-2.5 text-3xl font-bold tracking-tight text-slate-900"><?php echo e($this->childPerformanceStats['subjects']); ?></div>
+                        <div class="mt-1.5 text-xs text-slate-600">Total: <?php echo e($this->childPerformanceStats['total']); ?> marks</div>
                     </div>
                     <div class="icon-3d grid h-14 w-14 place-items-center rounded-xl bg-gradient-to-br from-purple-400 to-purple-600 text-white shadow-lg shadow-purple-500/30">
                         <svg class="h-7 w-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -159,19 +161,28 @@
         </div>
 
         <!-- Recent Scores -->
-        @if($this->childScores->isNotEmpty())
+        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($this->childScores->isNotEmpty()): ?>
             <div class="relative overflow-hidden rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-100">
                 <div class="absolute -left-12 -top-12 h-32 w-32 rounded-full bg-slate-500/5"></div>
                 <div class="flex items-center justify-between mb-6">
                     <h3 class="text-lg font-bold tracking-tight text-slate-900">Recent Scores</h3>
-                    <a href="{{ route('results.report-card', ['student' => $this->selectedChild, 'term' => $term, 'session' => $session]) }}" 
+                    <a href="<?php echo e(route('results.report-card', ['student' => $this->selectedChild, 'term' => $term, 'session' => $session])); ?>" 
                        target="_blank" 
                        class="btn-outline">
                         Download Report Card
                     </a>
                 </div>
                 <div class="mt-4">
-                    <x-table>
+                    <?php if (isset($component)) { $__componentOriginal163c8ba6efb795223894d5ffef5034f5 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginal163c8ba6efb795223894d5ffef5034f5 = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.table','data' => []] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component->withName('table'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
+<?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
+<?php endif; ?>
+<?php $component->withAttributes([]); ?>
                         <thead class="bg-slate-50 text-xs font-semibold uppercase tracking-wider text-slate-500">
                             <tr>
                                 <th class="px-5 py-3 text-left">Subject</th>
@@ -182,36 +193,46 @@
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-slate-100">
-                            @foreach($this->childScores as $score)
+                            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $this->childScores; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $score): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                 <tr class="bg-white hover:bg-slate-50 cursor-default">
-                                    <td class="px-5 py-4 text-sm font-semibold text-slate-900">{{ $score->subject->name }}</td>
-                                    <td class="px-5 py-4 text-sm text-right text-slate-700">{{ $score->ca ?? '—' }}</td>
-                                    <td class="px-5 py-4 text-sm text-right text-slate-700">{{ $score->exam ?? '—' }}</td>
-                                    <td class="px-5 py-4 text-sm text-right font-bold text-slate-900">{{ $score->total ?? '—' }}</td>
+                                    <td class="px-5 py-4 text-sm font-semibold text-slate-900"><?php echo e($score->subject->name); ?></td>
+                                    <td class="px-5 py-4 text-sm text-right text-slate-700"><?php echo e($score->ca ?? '—'); ?></td>
+                                    <td class="px-5 py-4 text-sm text-right text-slate-700"><?php echo e($score->exam ?? '—'); ?></td>
+                                    <td class="px-5 py-4 text-sm text-right font-bold text-slate-900"><?php echo e($score->total ?? '—'); ?></td>
                                     <td class="px-5 py-4 text-right">
                                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold
-                                            {{ ($score->total ?? 0) >= 70 ? 'bg-green-100 text-green-700' : 
-                                               (($score->total ?? 0) >= 50 ? 'bg-amber-100 text-amber-700' : 'bg-red-100 text-red-700') }}">
-                                            {{ $this->getGrade($score->total ?? 0) }}
+                                            <?php echo e(($score->total ?? 0) >= 70 ? 'bg-green-100 text-green-700' : 
+                                               (($score->total ?? 0) >= 50 ? 'bg-amber-100 text-amber-700' : 'bg-red-100 text-red-700')); ?>">
+                                            <?php echo e($this->getGrade($score->total ?? 0)); ?>
+
                                         </span>
                                     </td>
                                 </tr>
-                            @endforeach
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                         </tbody>
-                    </x-table>
+                     <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginal163c8ba6efb795223894d5ffef5034f5)): ?>
+<?php $attributes = $__attributesOriginal163c8ba6efb795223894d5ffef5034f5; ?>
+<?php unset($__attributesOriginal163c8ba6efb795223894d5ffef5034f5); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginal163c8ba6efb795223894d5ffef5034f5)): ?>
+<?php $component = $__componentOriginal163c8ba6efb795223894d5ffef5034f5; ?>
+<?php unset($__componentOriginal163c8ba6efb795223894d5ffef5034f5); ?>
+<?php endif; ?>
                 </div>
             </div>
-        @else
+        <?php else: ?>
             <div class="rounded-2xl bg-white p-8 text-center shadow-lg">
                 <svg class="mx-auto h-12 w-12 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                 </svg>
                 <h3 class="mt-4 text-lg font-semibold text-gray-900">No scores available</h3>
-                <p class="mt-2 text-gray-500">Scores for {{ $this->selectedChild->full_name }} will appear here once teachers enter them.</p>
+                <p class="mt-2 text-gray-500">Scores for <?php echo e($this->selectedChild->full_name); ?> will appear here once teachers enter them.</p>
             </div>
-        @endif
+        <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
 
-    @elseif($this->children->isEmpty())
+    <?php elseif($this->children->isEmpty()): ?>
         <!-- No Children Linked -->
         <div class="rounded-2xl bg-white p-8 text-center shadow-lg">
             <svg class="mx-auto h-16 w-16 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -220,12 +241,12 @@
             <h3 class="mt-4 text-xl font-semibold text-gray-900">No children linked</h3>
             <p class="mt-2 text-gray-500">Please contact the school administrator to link your children to this parent account.</p>
             <div class="mt-6">
-                <a href="{{ route('profile') }}" class="btn-primary">
+                <a href="<?php echo e(route('profile')); ?>" class="btn-primary">
                     Update Profile
                 </a>
             </div>
         </div>
-    @else
+    <?php else: ?>
         <!-- Select a Child -->
         <div class="rounded-2xl bg-white p-8 text-center shadow-lg">
             <svg class="mx-auto h-16 w-16 text-pink-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -234,5 +255,5 @@
             <h3 class="mt-4 text-xl font-semibold text-gray-900">Select a child</h3>
             <p class="mt-2 text-gray-500">Choose one of your children above to view their academic progress and information.</p>
         </div>
-    @endif
-</div>
+    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+</div><?php /**PATH C:\laragon\www\myacademy-laravel\resources\views/livewire/parents/dashboard.blade.php ENDPATH**/ ?>

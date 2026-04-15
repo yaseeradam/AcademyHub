@@ -39,6 +39,11 @@ class Submissions extends Component
 
     public function gradeSubmission($id)
     {
+        if ($this->homework->due_date < now()->startOfDay()) {
+            $this->dispatch('alert', message: 'You cannot grade or edit grades after the homework due date has passed.', type: 'error');
+            return;
+        }
+
         $submission = HomeworkSubmission::findOrFail($id);
         $this->submissionId = $submission->id;
         $this->grade = $submission->grade;

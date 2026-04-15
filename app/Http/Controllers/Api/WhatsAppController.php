@@ -125,8 +125,7 @@ class WhatsAppController extends Controller
             'question' => 'required|string|max:1000',
         ]);
 
-        $user = \App\Models\User::whereKey($request->parent_id)
-            ->firstOrFail();
+        $user = \App\Models\User::whereKey($request->parent_id)->firstOrFail();
 
         if (!empty($request->key) && !empty($user->whatsapp_ai_key_hash)) {
             if (hash('sha256', $request->key) !== $user->whatsapp_ai_key_hash) {
@@ -138,94 +137,17 @@ class WhatsAppController extends Controller
             }
         }
 
-        $keys = array_filter(array_map('trim', explode(',', env('GROQ_API_KEY', ''))));
-        if (empty($keys)) {
+        $agentPro = new \App\Services\AgentProService($user);
+        $answer = $agentPro->ask($request->question);
+
+        if (str_contains($answer, 'error occurred') || str_contains($answer, 'API key not configured')) {
             return response()->json([
                 'success' => false,
-                'message' => 'Groq API key not configured',
-            ], 500);
-        }
-
-        if ($user->role === 'parent') {
-            $context = $this->buildParentContext($user);
-            $systemInstruction = 'You are MyAcademy Parent Assistant. Answer only using the provided parent and student data. If the answer is not in the data, say you do not have access to that information. Keep responses concise and clear.';
-            $contextString = "Parent Data:\n" . json_encode($context, JSON_UNESCAPED_SLASHES) . "\n\nQuestion: " . $request->question;
-        } else {
-            $context = [
-               'staff' => [
-                   'name' => $user->name,
-                   'email' => $user->email,
-                   'role' => $user->role
-               ],
-               'school' => [
-                 'name' => config('myacademy.school_name')
-               ]
-            ];
-            $systemInstruction = 'You are MyAcademy Staff Assistant. Answer the staff member\'s question concisely. Be helpful and professional.';
-            $contextString = "Staff Data:\n" . json_encode($context, JSON_UNESCAPED_SLASHES) . "\n\nQuestion: " . $request->question;
-        }
-
-        $payload = [
-            'model' => 'llama-3.3-70b-versatile',
-            'messages' => [
-                [
-                    'role' => 'system',
-                    'content' => $systemInstruction
-                ],
-                [
-                    'role' => 'user',
-                    'content' => $contextString
-                ]
-            ],
-            'temperature' => 0.3,
-            'max_tokens' => 800
-        ];
-
-        $response = null;
-        foreach ($keys as $apiKey) {
-            $response = Http::withOptions(['verify' => false])
-                ->timeout(30)
-                ->withHeaders([
-                    'Authorization' => 'Bearer ' . $apiKey,
-                    'Content-Type' => 'application/json',
-                ])->post('https://api.groq.com/openai/v1/chat/completions', $payload);
-
-            // Break on success or non-quota error
-            if ($response->successful()) {
-                break;
-            }
-
-            // 429 = rate limit / quota exceeded — try next key
-            if ($response->status() !== 429) {
-                break;
-            }
-
-            Log::warning('Groq key quota exceeded, trying next key', ['status' => $response->status()]);
-        }
-
-        if (!$response || !$response->successful()) {
-            Log::error('Groq AI request failed on all keys', [
-                'status' => $response?->status(),
-                'body' => $response?->body(),
-            ]);
-
-            return response()->json([
-                'success' => false,
-                'message' => 'AI request failed',
+                'message' => $answer,
             ], 502);
         }
 
-        $data = $response->json();
-        $answer = $data['choices'][0]['message']['content'] ?? null;
-
-        if (!$answer) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Empty AI response',
-            ], 502);
-        }
-
-        return response()->json(['success' => true, 'answer' => trim($answer)]);
+        return response()->json(['success' => true, 'answer' => $answer]);
     }
 
     private function buildParentContext(\App\Models\User $parent): array

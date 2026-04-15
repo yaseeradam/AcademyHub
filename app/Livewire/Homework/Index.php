@@ -22,6 +22,8 @@ class Index extends Component
     public $homeworkId;
     public $isFormattingWithAI = false;
     
+    public $search = '';
+
     public $class_id = '';
     public $section_id = '';
     public $subject_id = '';
@@ -31,9 +33,18 @@ class Index extends Component
 
     public function render()
     {
-        $homework = Homework::with(['class', 'section', 'subject', 'submissions'])
-            ->where('teacher_id', auth()->id())
-            ->latest()
+        $query = Homework::with(['class', 'section', 'subject', 'submissions'])
+            ->where('teacher_id', auth()->id());
+
+        if (!empty($this->search)) {
+            $query->where(function($q) {
+                $q->where('title', 'like', '%' . $this->search . '%')
+                  ->orWhereHas('class', fn($sq) => $sq->where('name', 'like', '%' . $this->search . '%'))
+                  ->orWhereHas('subject', fn($sq) => $sq->where('name', 'like', '%' . $this->search . '%'));
+            });
+        }
+
+        $homework = $query->latest()
             ->paginate(10);
 
         $classes = SchoolClass::orderBy('name')->get();
@@ -54,6 +65,11 @@ class Index extends Component
         return Section::where('class_id', $this->class_id)->orderBy('name')->get();
     }
 
+    public function updatedSearch()
+    {
+        $this->resetPage();
+    }
+
     public function updatedClassId()
     {
         $this->section_id = '';
@@ -69,6 +85,11 @@ class Index extends Component
     {
         $homework = Homework::findOrFail($id);
         
+        if ($homework->due_date < now()->startOfDay()) {
+            session()->flash('error', 'Cannot edit a homework assignment that has passed its due date.');
+            return;
+        }
+
         $this->homeworkId = $homework->id;
         $this->class_id = $homework->class_id;
         $this->section_id = $homework->section_id;

@@ -21,17 +21,25 @@ class Exams extends Component
 
     public function render()
     {
-        $user = auth()->user();
-        abort_unless($user && $user->role === 'student', 403);
+        $studentId = session('student_id');
+        if (!$studentId) {
+            $user = auth()->user();
+            if ($user && $user->role === 'student') {
+                $studentId = \App\Models\Student::where('admission_number', $user->email)->first()?->id;
+            }
+        }
+
+        $student = \App\Models\Student::find($studentId);
+        abort_unless((bool) $student, 403);
 
         $now = now();
 
         // Get all live exams matching student's class
         $exams = CbtExam::query()
             ->where('status', 'live')
-            ->where('class_id', $user->class_id)
-            ->with(['subject', 'attempts' => function ($query) use ($user) {
-                $query->where('student_id', $user->id);
+            ->where('class_id', $student->class_id)
+            ->with(['subject', 'attempts' => function ($query) use ($student) {
+                $query->where('student_id', $student->id);
             }, 'questions' => function ($query) {
                 $query->select('exam_id', 'id', 'type');
             }])
@@ -101,6 +109,6 @@ class Exams extends Component
 
         return view('livewire.student.exams', [
             'exams' => $queue,
-        ])->layout('components.layouts.student');
+        ])->layout('layouts.student');
     }
 }

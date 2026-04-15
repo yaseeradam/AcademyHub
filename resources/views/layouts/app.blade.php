@@ -696,6 +696,9 @@
 
             <!-- Global Modal -->
             <livewire:global-modal />
+
+            <!-- AgentPro Chatbot -->
+            <livewire:agent-pro-chat />
         </div>
     </div>
 

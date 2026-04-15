@@ -151,6 +151,20 @@
     @endif
 
     <div class="card-padded">
+        <div class="mb-4 flex items-center justify-between">
+            <div class="relative w-full max-w-sm">
+                <input type="text" wire:model.live.debounce.300ms="search" placeholder="Search homework..." class="block w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg bg-white focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                    </svg>
+                </div>
+            </div>
+            <div class="text-sm text-gray-500">
+                Found {{ $homework->total() }} results
+            </div>
+        </div>
+
         <x-table>
             <thead class="bg-gray-50 text-xs font-semibold uppercase tracking-wider text-gray-500">
                 <tr>
@@ -194,9 +208,16 @@
                                 <a href="{{ route('homework.submissions', $hw->id) }}" class="text-sm font-semibold text-green-600 hover:text-green-700">
                                     View ({{ $hw->submissions->count() }})
                                 </a>
-                                <button wire:click="edit({{ $hw->id }})" class="text-sm font-semibold text-blue-600 hover:text-blue-700">
-                                    Edit
-                                </button>
+                                @if($hw->due_date < now()->startOfDay())
+                                    <span class="text-sm font-semibold text-gray-400 cursor-not-allowed" title="Cannot edit past due date">
+                                        <svg class="h-4 w-4 inline mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg> 
+                                        Locked
+                                    </span>
+                                @else
+                                    <button wire:click="edit({{ $hw->id }})" class="text-sm font-semibold text-blue-600 hover:text-blue-700">
+                                        Edit
+                                    </button>
+                                @endif
                                 <button wire:click="delete({{ $hw->id }})" wire:confirm="Are you sure you want to delete this homework?" class="text-sm font-semibold text-red-600 hover:text-red-700">
                                     Delete
                                 </button>
