@@ -3,58 +3,71 @@ import 'package:provider/provider.dart';
 import 'auth_provider.dart';
 import 'sync_service.dart';
 
-class SyncStatusWidget extends StatelessWidget {
-  const SyncStatusWidget({super.key});
+class SyncDot extends StatefulWidget {
+  const SyncDot({super.key});
+
+  @override
+  State<SyncDot> createState() => _SyncDotState();
+}
+
+class _SyncDotState extends State<SyncDot> with SingleTickerProviderStateMixin {
+  late AnimationController _blink;
+  late Animation<double> _opacity;
+
+  @override
+  void initState() {
+    super.initState();
+    _blink = AnimationController(vsync: this, duration: const Duration(milliseconds: 800))
+      ..repeat(reverse: true);
+    _opacity = Tween<double>(begin: 0.2, end: 1.0).animate(_blink);
+  }
+
+  @override
+  void dispose() {
+    _blink.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    final auth = context.read<AuthProvider>();
-    
-    return StreamBuilder<SyncStatus>(
-      stream: auth.syncService.syncStatusStream,
-      initialData: SyncStatus.synced,
-      builder: (context, snapshot) {
-        final status = snapshot.data ?? SyncStatus.synced;
-        
-        IconData icon;
-        Color color;
-        String tooltip;
+    final syncService = context.read<AuthProvider>().syncService;
 
-        switch (status) {
-          case SyncStatus.syncing:
-            icon = Icons.sync;
-            color = Colors.amber;
-            tooltip = 'Syncing offline changes...';
-            break;
-          case SyncStatus.offline:
-            icon = Icons.cloud_off;
-            color = Colors.red;
-            tooltip = 'Offline (changes stored locally)';
-            break;
-          case SyncStatus.error:
-            icon = Icons.error_outline;
-            color = Colors.orange;
-            tooltip = 'Sync failed. Will retry later.';
-            break;
-          case SyncStatus.synced:
-            icon = Icons.cloud_done;
-            color = Colors.green;
-            tooltip = 'All data synced';
-            break;
+    return StreamBuilder<int>(
+      stream: syncService.pendingCountStream,
+      initialData: 0,
+      builder: (context, snapshot) {
+        final hasPending = (snapshot.data ?? 0) > 0;
+
+        if (hasPending) {
+          return Tooltip(
+            message: '${snapshot.data} change(s) pending sync',
+            child: FadeTransition(
+              opacity: _opacity,
+              child: _dot(const Color(0xFFEF4444)),
+            ),
+          );
         }
 
         return Tooltip(
-          message: tooltip,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0),
-            child: Icon(
-              icon,
-              color: color,
-              size: 20,
-            ),
-          ),
+          message: 'All data synced',
+          child: _dot(const Color(0xFF22C55E)),
         );
       },
     );
   }
+
+  Widget _dot(Color color) => Container(
+        width: 10,
+        height: 10,
+        decoration: BoxDecoration(
+          color: color,
+          shape: BoxShape.circle,
+          boxShadow: [BoxShadow(color: color.withOpacity(0.4), blurRadius: 4, spreadRadius: 1)],
+        ),
+      );
+}
+
+// Keep old widget name as alias so nothing else breaks
+class SyncStatusWidget extends SyncDot {
+  const SyncStatusWidget({super.key});
 }

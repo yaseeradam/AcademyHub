@@ -34,6 +34,7 @@ use App\Livewire\Attendance\Teachers as TeacherAttendance;
 use App\Livewire\Certificates\Index as CertificatesIndex;
 use App\Livewire\Certificates\Manager as CertificatesManager;
 use App\Livewire\Events\Index as EventsIndex;
+use App\Livewire\Homework\Index as HomeworkIndex;
 use App\Livewire\Results\Entry as ResultsEntry;
 use App\Livewire\Results\Broadsheet as ResultsBroadsheet;
 use App\Livewire\Results\Submissions as ResultsSubmissions;
@@ -92,6 +93,11 @@ Route::get('/cbt/portal/{attempt}', CbtPortalTake::class)->name('cbt.portal.take
 Route::get('/cbt/student', CbtPortalStart::class)->name('cbt.student');
 Route::get('/cbt/student/{attempt}', CbtPortalTake::class)->name('cbt.student.take');
 
+// Fresh CSRF token endpoint — used by JS logout to prevent 419 Page Expired
+Route::get('/csrf-token', function () {
+    return response()->json(['token' => csrf_token()]);
+});
+
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthenticatedSessionController::class, 'create'])->name('login');
     Route::post('/login', [AuthenticatedSessionController::class, 'store'])->name('login.store');
@@ -101,14 +107,54 @@ Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])
     ->middleware('auth')
     ->name('logout');
 
+Route::post('/student/logout', [AuthenticatedSessionController::class, 'studentLogout'])
+    ->name('student.logout');
+
+// Student dashboard route (session-based, not auth-based)
+Route::get('/student/dashboard', \App\Livewire\Student\Dashboard::class)
+    ->middleware('student.session')
+    ->name('student.dashboard');
+
+Route::get('/student/homework', \App\Livewire\Student\Homework::class)
+    ->middleware('student.session')
+    ->name('student.homework');
+
+Route::get('/student/exams', \App\Livewire\Student\Exams::class)
+    ->middleware('student.session')
+    ->name('student.exams');
+
+Route::get('/student/results', \App\Livewire\Student\Results::class)
+    ->middleware('student.session')
+    ->name('student.results');
+
+Route::get('/student/attendance', \App\Livewire\Student\Attendance::class)
+    ->middleware('student.session')
+    ->name('student.attendance');
+
+Route::get('/student/performance', \App\Livewire\Student\Performance::class)
+    ->middleware('student.session')
+    ->name('student.performance');
+
+Route::get('/student/notifications', \App\Livewire\Student\Notifications::class)
+    ->middleware('student.session')
+    ->name('student.notifications');
+
+Route::get('/student/profile', \App\Livewire\Student\Profile::class)
+    ->middleware('student.session')
+    ->name('student.profile');
+
 Route::middleware(['auth', 'active'])->group(function () {
     Route::get('/dashboard', function () {
         $user = auth()->user();
+        if ($user?->role === 'admin') {
+            return view('pages.dashboard');
+        }
         if ($user?->role === 'teacher') {
             return view('pages.dashboard-teacher');
         }
         if ($user?->role === 'parent') {
-            return view('pages.dashboard-parent');
+            return redirect()->route('parents.dashboard');
+        }
         if ($user?->role === 'bursar') {
             return view('pages.dashboard-bursar');
         }
@@ -128,6 +174,9 @@ Route::middleware(['auth', 'active'])->group(function () {
         Route::post('/randomize-photos', [PhotoRandomizerController::class, 'randomize'])->name('photos.randomize');
         
         Route::get('/marketplace', MarketplaceIndex::class)->name('marketplace');
+        Route::get('/marketplace/product/{product}', \App\Livewire\Marketplace\ProductDetail::class)->name('marketplace.product');
+
+        Route::get('/parents', \App\Livewire\Parents\Management::class)->name('parents.index');
 
         Route::get('/students/create', StudentsForm::class)->name('students.create');
         Route::get('/students/{student}/edit', StudentsForm::class)->name('students.edit');
@@ -190,6 +239,11 @@ Route::middleware(['auth', 'active'])->group(function () {
             ->name('savings-loan.index');
     });
 
+    Route::middleware('role:parent')->group(function () {
+        Route::get('/parents/dashboard', \App\Livewire\Parents\Dashboard::class)->name('parents.dashboard');
+        Route::get('/parents/performance', \App\Livewire\Student\Performance::class)->name('parents.performance');
+    });
+
     Route::middleware('role:admin,teacher')->group(function () {
         Route::view('/institute', 'pages.institute.index')->name('institute');
         Route::view('/teachers', 'pages.teachers.index')->name('teachers');
@@ -207,10 +261,21 @@ Route::middleware(['auth', 'active'])->group(function () {
             ->name('cbt.exams.edit');
         Route::get('/cbt/exams/{exam}/pdf', [CbtExportController::class, 'examPdf'])
             ->name('cbt.exams.pdf');
+        Route::get('/cbt/sample-download', function () {
+            $content = "1. What is the powerhouse of the cell?\nA. Nucleus\nB. Mitochondria\nC. Ribosome\nD. Golgi body\nANS: B\nMARKS: 2\n\n2. Which planet is closest to the sun?\nA. Earth\nB. Venus\nC. Mercury\nD. Mars\nANS: C\nMARKS: 1\n\n3. What is the chemical symbol for water?\nA. CO2\nB. H2O\nC. NaCl\nD. O2\nANS: B\nMARKS: 1\n\n4. Define photosynthesis and explain its importance to plants.\nTYPE: theory\nMARKS: 5\n\n5. Describe the water cycle.\nTYPE: theory\nMARKS: 4\n";
+            return response($content, 200, [
+                'Content-Type'        => 'text/plain',
+                'Content-Disposition' => 'attachment; filename="sample_questions.txt"',
+            ]);
+        })->name('cbt.sample-download');
 
         Route::get('/analytics', \App\Livewire\Analytics\Dashboard::class)
             ->middleware('permission:analytics.view')
             ->name('analytics.dashboard');
+        
+        Route::get('/analytics/student-performance', \App\Livewire\Analytics\StudentPerformance::class)
+            ->middleware('permission:analytics.view')
+            ->name('analytics.student-performance');
         
         Route::get('/analytics/export/performance', [\App\Http\Controllers\AnalyticsExportController::class, 'exportPerformanceData'])
             ->middleware('permission:analytics.view')
@@ -229,6 +294,9 @@ Route::middleware(['auth', 'active'])->group(function () {
             ->name('analytics.export.cbt');
 
         Route::get('/results/entry', ResultsEntry::class)->middleware('permission:results.entry,results.review')->name('results.entry');
+
+        Route::get('/homework', HomeworkIndex::class)->name('homework.index');
+        Route::get('/homework/{id}/submissions', \App\Livewire\Homework\Submissions::class)->name('homework.submissions');
 
         
         Route::get('/settings/debug', function() {
@@ -281,6 +349,7 @@ Route::middleware(['auth', 'active'])->group(function () {
         Route::post('/settings/restore', [BackupController::class, 'restore'])->middleware('permission:backup.manage')->name('settings.restore');
         Route::get('/settings/audit-logs', AuditLogsIndex::class)->middleware('permission:audit.view')->name('settings.audit-logs');
         Route::get('/settings/custom-fields', CustomFields::class)->name('settings.custom-fields');
+        Route::get('/settings/subscription', \App\Livewire\Admin\SubscriptionBilling::class)->name('settings.subscription');
 
         Route::get('/promotions', PromotionsIndex::class)->name('promotions');
         Route::get('/academic-sessions', AcademicSessions::class)->name('academic-sessions');

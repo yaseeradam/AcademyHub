@@ -14,7 +14,9 @@ use App\Models\Subject;
 use App\Models\SubjectAllocation;
 use App\Models\User;
 use App\Support\Audit;
+use App\Support\CbtQuestionImporter;
 use Illuminate\Support\Facades\DB;
+use Livewire\WithFileUploads;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
@@ -28,6 +30,8 @@ use Livewire\Component;
 #[Title('CBT Exam')]
 class ExamEditor extends Component
 {
+    use WithFileUploads;
+
     public int $examId;
 
     public string $title = '';
@@ -51,6 +55,8 @@ class ExamEditor extends Component
     public bool $showRejectForm = false;
     public string $reviewNote = '';
 
+    public array $theoryComments = [];
+
     public ?int $editingAttemptIpId = null;
     public string $allowedIp = '';
 
@@ -69,6 +75,24 @@ class ExamEditor extends Component
     public bool $showForwardModal = false;
     public ?int $forwardAttemptId = null;
     public ?int $forwardTeacherId = null;
+    public string $tab = 'details';
+    public bool $shuffleQuestions = false;
+
+    // AI generation
+    public bool $showAiPanel = false;
+    public string $aiTopic = '';
+    public int $aiCount = 5;
+    public string $aiType = 'mcq';
+    public int $aiMarks = 1;
+    public bool $aiLoading = false;
+    /** @var array<int, array<string,mixed>> */
+    public array $aiPreview = [];
+
+    // File import
+    public bool $showImportPanel = false;
+    public $importFile = null;
+    /** @var array<int, array<string,mixed>> */
+    public array $importPreview = [];
 
     public function mount(CbtExam $exam): void
     {
@@ -82,6 +106,7 @@ class ExamEditor extends Component
         }
 
         $this->examId = (int) $exam->id;
+        $this->tab = (string) request('tab', 'details');
 
         $this->fillFromExam($exam);
     }
@@ -103,6 +128,7 @@ class ExamEditor extends Component
         $this->graceMinutes = (int) ($exam->grace_minutes ?? 0);
         $this->allowedCidrs = (string) ($exam->allowed_cidrs ?? '');
         $this->showScore = (bool) ($exam->show_score ?? false);
+        $this->shuffleQuestions = (bool) ($exam->shuffle_questions ?? false);
     }
 
     #[Computed]
@@ -140,7 +166,7 @@ class ExamEditor extends Component
         }
 
         if ($user->role === 'admin') {
-            return in_array($exam->status, ['draft', 'assigned', 'rejected'], true);
+            return true; // Admin can always edit (questions/details) unless attempts exist
         }
 
         if ($user->role !== 'teacher') {
@@ -150,7 +176,7 @@ class ExamEditor extends Component
         $isAssignee = (int) $exam->created_by === (int) $user->id
             || (int) ($exam->assigned_teacher_id ?? 0) === (int) $user->id;
 
-        return $isAssignee && in_array($exam->status, ['draft', 'assigned', 'rejected'], true);
+        return $isAssignee && $exam->status === 'draft';
     }
 
     #[Computed]
@@ -228,7 +254,7 @@ class ExamEditor extends Component
         }
 
         $this->subjectId = null;
-        unset($this->subjects);
+        $this->dispatch('refresh');
         $this->resetValidation();
     }
 
@@ -309,13 +335,14 @@ class ExamEditor extends Component
             $allowed = trim((string) ($data['allowedCidrs'] ?? ''));
             $attrs['allowed_cidrs'] = $allowed !== '' ? $allowed : null;
             $attrs['show_score'] = (bool) ($this->showScore ?? false);
+            $attrs['shuffle_questions'] = (bool) ($this->shuffleQuestions ?? false);
         }
 
         $exam->forceFill($attrs)->save();
 
         Audit::log('cbt.exam_updated', $exam);
 
-        unset($this->exam);
+        $this->dispatch('refresh');
         $this->dispatch('alert', message: 'Exam details saved.', type: 'success');
     }
 
@@ -348,6 +375,8 @@ class ExamEditor extends Component
         $this->correctIndex = $correctIndex;
 
         $this->resetValidation();
+        $this->dispatch('questionTypeUpdated', $this->questionType);
+        $this->dispatch('scrollToForm');
     }
 
     public function startNewQuestion(): void
@@ -486,7 +515,7 @@ class ExamEditor extends Component
             'student_id' => $attempt->student_id,
         ]);
 
-        unset($this->exam);
+        $this->dispatch('refresh');
         $this->dispatch('alert', message: 'Attempt reset. Student can retake.', type: 'success');
     }
 
@@ -596,10 +625,12 @@ class ExamEditor extends Component
 
         $this->reviewAttemptId = $attempt->id;
         $this->theoryMarks = [];
+        $this->theoryComments = [];
 
         foreach ($exam->questions->where('type', 'theory') as $question) {
             $answer = $attempt->answers->firstWhere('question_id', $question->id);
             $this->theoryMarks[$question->id] = $answer?->awarded_marks;
+            $this->theoryComments[$question->id] = $answer?->teacher_comment;
         }
     }
 
@@ -607,6 +638,7 @@ class ExamEditor extends Component
     {
         $this->reviewAttemptId = null;
         $this->theoryMarks = [];
+        $this->theoryComments = [];
         $this->resetValidation();
     }
 
@@ -674,6 +706,7 @@ class ExamEditor extends Component
                     'option_id' => null,
                     'text_answer' => $textAnswer !== '' ? $textAnswer : null,
                     'awarded_marks' => $value,
+                    'teacher_comment' => $this->theoryComments[$question->id] ?? null,
                     'is_correct' => null,
                 ]
             );
@@ -693,7 +726,7 @@ class ExamEditor extends Component
         ]);
 
         $this->cancelReview();
-        unset($this->exam);
+        $this->dispatch('refresh');
         $this->dispatch('alert', message: 'Theory marks saved.', type: 'success');
     }
 
@@ -735,7 +768,7 @@ class ExamEditor extends Component
             'percent' => $percent,
         ])->save();
 
-        unset($this->exam);
+        $this->dispatch('refresh');
     }
 
     public function startIpOverride(int $attemptId): void
@@ -788,7 +821,7 @@ class ExamEditor extends Component
         ]);
 
         $this->cancelIpOverride();
-        unset($this->exam);
+        $this->dispatch('refresh');
         $this->dispatch('alert', message: 'Allowed IP updated.', type: 'success');
     }
 
@@ -810,7 +843,7 @@ class ExamEditor extends Component
             'attempt_id' => $attempt->id,
         ]);
 
-        unset($this->exam);
+        $this->dispatch('refresh');
         $this->dispatch('alert', message: 'IP lock cleared.', type: 'success');
     }
 
@@ -915,7 +948,7 @@ class ExamEditor extends Component
             'attempt_id' => $attemptId,
         ]);
 
-        unset($this->exam);
+        $this->dispatch('refresh');
         $this->dispatch('alert', message: 'Attempt terminated.', type: 'success');
     }
 
@@ -1018,7 +1051,7 @@ class ExamEditor extends Component
             'attempt_id' => $attemptId,
         ]);
 
-        unset($this->exam);
+        $this->dispatch('refresh');
         $this->dispatch('alert', message: 'Attempt submitted.', type: 'success');
     }
 
@@ -1079,213 +1112,88 @@ class ExamEditor extends Component
         return redirect()->route('cbt.exams.edit', $newExam);
     }
 
-    public function submitToAdmin(): void
+    // ── Lifecycle Management ───────────────────────────────────────────────
+
+    public function goLive(): void
     {
         $user = auth()->user();
-        abort_unless($user?->role === 'teacher', 403);
-        abort_unless($this->canEdit, 403);
+        abort_unless($user && in_array($user->role, ['admin', 'teacher'], true), 403);
 
         $exam = $this->exam;
-        $questions = $exam->questions;
 
-        if ($questions->isEmpty()) {
-            $this->dispatch('alert', message: 'Add at least one question before submitting.', type: 'warning');
-            return;
+        if ($user->role === 'teacher') {
+            abort_unless($this->canEdit, 403);
         }
 
-        foreach ($questions as $q) {
-            if ($q->type === 'theory') {
-                continue;
-            }
-
-            $options = $q->options;
-            if ($options->count() < 2) {
-                $this->dispatch('alert', message: 'Each question must have options.', type: 'warning');
-                return;
-            }
-
-            $correctCount = $options->where('is_correct', true)->count();
-            if ($correctCount !== 1) {
-                $this->dispatch('alert', message: 'Each question must have exactly one correct option.', type: 'warning');
-                return;
-            }
-        }
-
-        $exam->forceFill([
-            'status' => 'submitted',
-            'submitted_at' => now(),
-            'reviewed_by' => null,
-            'reviewed_at' => null,
-            'note' => null,
-        ])->save();
-
-        Audit::log('cbt.exam_submitted', $exam);
-
-        $adminIds = User::query()
-            ->where('role', 'admin')
-            ->where('is_active', true)
-            ->pluck('id');
-
-        foreach ($adminIds as $adminId) {
-            InAppNotification::query()->create([
-                'user_id' => (int) $adminId,
-                'title' => 'CBT exam submitted',
-                'body' => "{$user->name} submitted an exam for approval: {$exam->title}.",
-                'link' => route('cbt.exams.edit', $exam),
-            ]);
-        }
-
-        $this->showRejectForm = false;
-        $this->reviewNote = '';
-        unset($this->exam);
-        $this->dispatch('alert', message: 'Submitted to admin.', type: 'success');
-    }
-
-    public function togglePublish(): void
-    {
-        $user = auth()->user();
-        abort_unless($user?->role === 'admin', 403);
-
-        $exam = $this->exam;
-        abort_unless($exam->status === 'approved', 403);
-
-        $exam->published_at = $exam->published_at ? null : now();
-        $exam->save();
-
-        Audit::log('cbt.exam_publish_toggled', $exam, [
-            'published' => (bool) $exam->published_at,
-        ]);
-
-        unset($this->exam);
-        $this->dispatch('alert', message: $exam->published_at ? 'Exam is now live.' : 'Exam paused.', type: 'success');
-    }
-
-    public function approve(): void
-    {
-        $user = auth()->user();
-        abort_unless($user?->role === 'admin', 403);
-
-        $exam = $this->exam;
-        if ($exam->status !== 'submitted') {
-            $this->dispatch('alert', message: 'Only submitted exams can be approved.', type: 'warning');
+        if ($exam->questions->isEmpty()) {
+            $this->dispatch('alert', message: 'Add at least one question before going live.', type: 'warning');
             return;
         }
 
         $code = $exam->access_code ?: $this->generateAccessCode();
 
         $exam->forceFill([
-            'status' => 'approved',
+            'status' => 'live',
             'access_code' => $code,
-            'reviewed_by' => $user->id,
-            'reviewed_at' => now(),
-            'note' => null,
             'published_at' => now(),
         ])->save();
 
-        Audit::log('cbt.exam_approved', $exam, ['reviewed_by' => $user->id]);
+        Audit::log('cbt.exam_live', $exam, ['user_id' => $user->id]);
 
-        $notifyUserId = (int) ($exam->assigned_teacher_id ?: $exam->created_by);
-        InAppNotification::query()->create([
-            'user_id' => $notifyUserId,
-            'title' => 'CBT exam approved',
-            'body' => "Your CBT exam was approved: {$exam->title}. Code: {$code}",
-            'link' => route('cbt.exams.edit', $exam),
-        ]);
-
-        $this->showRejectForm = false;
-        $this->reviewNote = '';
-        unset($this->exam);
-        $this->dispatch('alert', message: 'Exam approved.', type: 'success');
-    }
-
-    public function startReject(): void
-    {
-        $user = auth()->user();
-        abort_unless($user?->role === 'admin', 403);
-
-        $exam = $this->exam;
-        if ($exam->status !== 'submitted') {
-            $this->dispatch('alert', message: 'Only submitted exams can be rejected.', type: 'warning');
-            return;
-        }
-
-        $this->showRejectForm = true;
-        $this->reviewNote = '';
-        $this->resetValidation();
-    }
-
-    public function cancelReject(): void
-    {
-        $user = auth()->user();
-        abort_unless($user?->role === 'admin', 403);
-
-        $this->showRejectForm = false;
-        $this->reviewNote = '';
-        $this->resetValidation();
-    }
-
-    public function confirmReject(): void
-    {
-        $user = auth()->user();
-        abort_unless($user?->role === 'admin', 403);
-
-        $exam = $this->exam;
-        if ($exam->status !== 'submitted') {
-            $this->dispatch('alert', message: 'This exam has already been reviewed.', type: 'warning');
-            $this->cancelReject();
-            return;
-        }
-
-        $this->validate([
-            'reviewNote' => ['required', 'string', 'min:3', 'max:2000'],
-        ]);
-
-        $note = trim($this->reviewNote);
-
-        $exam->forceFill([
-            'status' => 'rejected',
-            'reviewed_by' => $user->id,
-            'reviewed_at' => now(),
-            'note' => $note,
-            'published_at' => null,
-        ])->save();
-
-        Audit::log('cbt.exam_rejected', $exam, ['reviewed_by' => $user->id, 'note' => $note]);
-
-        $notifyUserId = (int) ($exam->assigned_teacher_id ?: $exam->created_by);
-        InAppNotification::query()->create([
-            'user_id' => $notifyUserId,
-            'title' => 'CBT exam rejected',
-            'body' => "Your CBT exam was rejected: {$note}",
-            'link' => route('cbt.exams.edit', $exam),
-        ]);
-
-        $this->showRejectForm = false;
-        $this->reviewNote = '';
-        unset($this->exam);
-        $this->dispatch('alert', message: 'Exam rejected.', type: 'success');
+        $this->dispatch('refresh');
+        $this->dispatch('alert', message: 'Exam is now live. Students can take it.', type: 'success');
     }
 
     private function generateAccessCode(): string
     {
         for ($i = 0; $i < 20; $i++) {
             $code = 'CBT-'.strtoupper(bin2hex(random_bytes(3)));
-
-            $exists = CbtExam::query()->where('access_code', $code)->exists();
-            if (! $exists) {
+            if (! CbtExam::query()->where('access_code', $code)->exists()) {
                 return $code;
             }
         }
-
-        return 'CBT-'.strtoupper(Str::random(8));
+        return 'CBT-'.strtoupper(\Illuminate\Support\Str::random(8));
     }
+
+    public function releaseResults(): void
+    {
+        $user = auth()->user();
+        abort_unless($user && in_array($user->role, ['admin', 'teacher'], true), 403);
+
+        $exam = $this->exam;
+
+        if ($user->role === 'teacher') {
+            $canAccess = (int) $exam->created_by === (int) $user->id
+                || (int) ($exam->assigned_teacher_id ?? 0) === (int) $user->id;
+            abort_unless($canAccess, 403);
+        }
+
+        if ($exam->results_released_at) {
+            $this->dispatch('alert', message: 'Results have already been released.', type: 'warning');
+            return;
+        }
+
+        $exam->forceFill(['results_released_at' => now()])->save();
+
+        Audit::log('cbt.results_released', $exam, ['released_by' => $user->id]);
+
+        $this->dispatch('refresh');
+        $this->dispatch('alert', message: 'Results released to students.', type: 'success');
+    }
+
 
     public function endAllExams(): void
     {
         $user = auth()->user();
-        abort_unless($user?->role === 'admin', 403);
+        abort_unless($user && in_array($user->role, ['admin', 'teacher'], true), 403);
 
         $exam = $this->exam;
+        
+        if ($user->role === 'teacher') {
+            $canAccess = (int) $exam->created_by === (int) $user->id
+                || (int) ($exam->assigned_teacher_id ?? 0) === (int) $user->id;
+            abort_unless($canAccess, 403);
+        }
         $inProgressAttempts = CbtAttempt::query()
             ->where('exam_id', $exam->id)
             ->whereNotNull('started_at')
@@ -1365,9 +1273,11 @@ class ExamEditor extends Component
             $count++;
         }
 
+        $exam->forceFill(['status' => 'ended'])->save();
+
         Audit::log('cbt.all_exams_ended', $exam, ['count' => $count]);
-        unset($this->exam);
-        $this->dispatch('alert', message: "Ended {$count} active exam(s).", type: 'success');
+        $this->dispatch('refresh');
+        $this->dispatch('alert', message: "Exam ended. {$count} active attempt(s) forcibly submitted.", type: 'success');
     }
 
     public function transferToResults(): void
@@ -1486,8 +1396,172 @@ class ExamEditor extends Component
         );
 
         $this->cancelForward();
-        unset($this->exam);
+        $this->dispatch('refresh');
         $this->dispatch('alert', message: 'Forwarded to teacher.', type: 'success');
+    }
+
+    // ── AI Generation ──────────────────────────────────────────────────────
+
+
+    public function saveShuffle(): void
+    {
+        $this->exam->forceFill(['shuffle_questions' => (bool) $this->shuffleQuestions])->save();
+        $this->dispatch('alert', message: $this->shuffleQuestions ? 'Shuffle enabled.' : 'Shuffle disabled.', type: 'success');
+    }
+
+    public function openAiPanel(): void
+    {
+        abort_unless($this->canEdit, 403);
+        $this->showAiPanel = true;
+        $this->showImportPanel = false;
+        $this->aiPreview = [];
+        $this->resetValidation();
+    }
+
+    public function closeAiPanel(): void
+    {
+        $this->showAiPanel = false;
+        $this->aiPreview = [];
+    }
+
+    public function generateAiQuestions(): void
+    {
+        abort_unless($this->canEdit, 403);
+
+        $this->validate([
+            'aiTopic' => ['required', 'string', 'max:200'],
+            'aiCount' => ['required', 'integer', 'min:1', 'max:20'],
+            'aiType'  => ['required', 'in:mcq,theory,mixed'],
+            'aiMarks' => ['required', 'integer', 'min:1', 'max:100'],
+        ]);
+
+        $exam    = $this->exam;
+        $subject = $exam->subject?->name ?? 'General';
+
+        try {
+            if ($this->aiType === 'mixed') {
+                $half         = (int) ceil($this->aiCount / 2);
+                $mcq          = \App\Support\CbtQuestionImporter::fromAi($this->aiTopic, $subject, $half, 'mcq', $this->aiMarks);
+                $theory       = \App\Support\CbtQuestionImporter::fromAi($this->aiTopic, $subject, $this->aiCount - $half, 'theory', $this->aiMarks);
+                $this->aiPreview = array_merge($mcq, $theory);
+            } else {
+                $this->aiPreview = \App\Support\CbtQuestionImporter::fromAi($this->aiTopic, $subject, $this->aiCount, $this->aiType, $this->aiMarks);
+            }
+        } catch (\Throwable $e) {
+            $this->dispatch('alert', message: $e->getMessage(), type: 'error');
+        }
+    }
+
+    public function removeAiPreviewItem(int $index): void
+    {
+        unset($this->aiPreview[$index]);
+        $this->aiPreview = array_values($this->aiPreview);
+    }
+
+    public function insertAiQuestions(): void
+    {
+        abort_unless($this->canEdit, 403);
+
+        if (empty($this->aiPreview)) {
+            $this->dispatch('alert', message: 'No questions to insert.', type: 'warning');
+            return;
+        }
+
+        $count = count($this->aiPreview);
+        $this->bulkInsertQuestions($this->aiPreview);
+        $this->aiPreview = [];
+        $this->showAiPanel = false;
+        unset($this->exam);
+        $this->dispatch('alert', message: "{$count} AI questions added.", type: 'success');
+    }
+
+    public function openImportPanel(): void
+    {
+        abort_unless($this->canEdit, 403);
+        $this->showImportPanel = true;
+        $this->showAiPanel = false;
+        $this->importPreview = [];
+        $this->importFile = null;
+        $this->resetValidation();
+    }
+
+    public function closeImportPanel(): void
+    {
+        $this->showImportPanel = false;
+        $this->importPreview = [];
+        $this->importFile = null;
+    }
+
+    public function parseImportFile(): void
+    {
+        abort_unless($this->canEdit, 403);
+
+        $this->validate([
+            'importFile' => ['required', 'file', 'max:2048', 'mimes:txt,text'],
+        ]);
+
+        try {
+            $this->importPreview = \App\Support\CbtQuestionImporter::fromFile($this->importFile);
+        } catch (\Throwable $e) {
+            $this->dispatch('alert', message: $e->getMessage(), type: 'error');
+        }
+    }
+
+    public function removeImportPreviewItem(int $index): void
+    {
+        unset($this->importPreview[$index]);
+        $this->importPreview = array_values($this->importPreview);
+    }
+
+    public function insertImportQuestions(): void
+    {
+        abort_unless($this->canEdit, 403);
+
+        if (empty($this->importPreview)) {
+            $this->dispatch('alert', message: 'No questions to insert.', type: 'warning');
+            return;
+        }
+
+        $count = count($this->importPreview);
+        $this->bulkInsertQuestions($this->importPreview);
+        $this->importPreview = [];
+        $this->showImportPanel = false;
+        unset($this->exam);
+        $this->dispatch('alert', message: "{$count} questions imported from file.", type: 'success');
+    }
+
+    private function bulkInsertQuestions(array $questions): void
+    {
+        DB::transaction(function () use ($questions) {
+            $nextPos = (int) CbtQuestion::query()->where('exam_id', $this->examId)->max('position');
+
+            foreach ($questions as $q) {
+                $type    = $q['type'] ?? 'mcq';
+                $nextPos++;
+
+                $question = CbtQuestion::query()->create([
+                    'exam_id'  => $this->examId,
+                    'type'     => $type,
+                    'prompt'   => trim((string) $q['prompt']),
+                    'marks'    => max(1, (int) ($q['marks'] ?? 1)),
+                    'position' => $nextPos,
+                ]);
+
+                if ($type === 'mcq' && ! empty($q['options'])) {
+                    foreach ($q['options'] as $i => $label) {
+                        if (trim((string) $label) === '') continue;
+                        CbtOption::query()->create([
+                            'question_id' => $question->id,
+                            'label'       => trim((string) $label),
+                            'is_correct'  => $i === (int) ($q['correct'] ?? 0),
+                            'position'    => $i + 1,
+                        ]);
+                    }
+                }
+            }
+        });
+
+        Audit::log('cbt.questions_bulk_inserted', $this->exam, ['count' => count($questions)]);
     }
 
     public function deleteExam()

@@ -14,19 +14,14 @@ class MyAcademyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MultiProvider(
-      providers: [
-        ChangeNotifierProvider(create: (_) => AuthProvider()),
-      ],
-      child: Builder(
-        builder: (context) {
-          final authProvider = context.read<AuthProvider>();
-          final router = AppRouter.router(authProvider);
-
+    return ChangeNotifierProvider(
+      create: (_) => AuthProvider(),
+      child: Consumer<AuthProvider>(
+        builder: (context, authProvider, _) {
           return MaterialApp.router(
             title: 'MyAcademy',
             theme: AppTheme.lightTheme,
-            routerConfig: router,
+            routerConfig: AppRouter.router(authProvider),
             debugShowCheckedModeBanner: false,
           );
         },

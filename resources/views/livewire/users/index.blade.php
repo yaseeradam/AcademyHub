@@ -86,9 +86,10 @@
                 <div class="mt-1 text-xs text-gray-500">If blank, a strong password is generated.</div>
             </div>
 
-            {{-- Teacher Custom Fields --}}
-            @if($this->teacherCustomFields->count() > 0)
-                @foreach($this->teacherCustomFields as $field)
+            {{-- Role-Specific Custom Fields (Create) --}}
+            @php $createFields = $role === 'parent' ? $this->parentCustomFields : $this->teacherCustomFields; @endphp
+            @if($createFields->count() > 0)
+                @foreach($createFields as $field)
                     <div class="lg:col-span-3" wire:key="create-cf-{{ $field->id }}">
                         <label class="text-xs font-semibold uppercase tracking-wider text-gray-500">
                             {{ $field->label }}
@@ -204,9 +205,10 @@
                                                 placeholder="Min 8 characters" />
                                         </div>
 
-                                        {{-- Teacher Custom Fields (edit) --}}
-                                        @if($this->teacherCustomFields->count() > 0)
-                                            @foreach($this->teacherCustomFields as $field)
+                                        {{-- Role-Specific Custom Fields (Edit) --}}
+                                        @php $editFields = $editRole === 'parent' ? $this->parentCustomFields : $this->teacherCustomFields; @endphp
+                                        @if($editFields->count() > 0)
+                                            @foreach($editFields as $field)
                                                 <div class="lg:col-span-2" wire:key="edit-cf-{{ $field->id }}-{{ $user->id }}">
                                                     <label class="text-xs font-semibold uppercase tracking-wider text-gray-500">
                                                         {{ $field->label }}

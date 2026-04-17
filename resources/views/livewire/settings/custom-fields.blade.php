@@ -1,7 +1,7 @@
 <div class="space-y-6">
     <x-page-header
         title="Custom Fields"
-        subtitle="Manage additional fields for student & teacher registration."
+        subtitle="Manage additional fields for student, teacher & parent registration."
         accent="settings"
     >
         <x-slot:actions>
@@ -28,6 +28,11 @@
             <svg class="mr-1 inline h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
             Teacher Form
         </button>
+        <button wire:click="$set('filterFormType', 'parent')"
+                class="rounded-lg px-4 py-2 text-sm font-medium transition-all {{ $filterFormType === 'parent' ? 'bg-blue-600 text-white shadow-sm' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
+            <svg class="mr-1 inline h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+            Parent Form
+        </button>
     </div>
 
     <!-- Fields List -->
@@ -52,6 +57,8 @@
                                     <h4 class="font-medium text-gray-900">{{ $field['label'] }}</h4>
                                     @if(($field['form_type'] ?? 'student') === 'student')
                                         <span class="inline-flex items-center rounded-full bg-blue-50 px-2 py-0.5 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-700/10">Student</span>
+                                    @elseif(($field['form_type'] ?? '') === 'parent')
+                                        <span class="inline-flex items-center rounded-full bg-green-50 px-2 py-0.5 text-xs font-medium text-green-700 ring-1 ring-inset ring-green-700/10">Parent</span>
                                     @else
                                         <span class="inline-flex items-center rounded-full bg-purple-50 px-2 py-0.5 text-xs font-medium text-purple-700 ring-1 ring-inset ring-purple-700/10">Teacher</span>
                                     @endif
@@ -110,7 +117,7 @@
                     <!-- Form Type Selector -->
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">Add to Form</label>
-                        <div class="grid grid-cols-2 gap-3">
+                        <div class="grid grid-cols-3 gap-3">
                             <label class="relative flex cursor-pointer items-center rounded-xl border-2 p-3 transition-all
                                 {{ $formType === 'student' ? 'border-blue-500 bg-blue-50 ring-1 ring-blue-500' : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50' }}">
                                 <input type="radio" wire:model.live="formType" value="student" class="sr-only">
@@ -134,6 +141,19 @@
                                     <div>
                                         <div class="text-sm font-semibold {{ $formType === 'teacher' ? 'text-purple-900' : 'text-gray-900' }}">Teacher</div>
                                         <div class="text-xs {{ $formType === 'teacher' ? 'text-purple-600' : 'text-gray-500' }}">Staff form</div>
+                                    </div>
+                                </div>
+                            </label>
+                            <label class="relative flex cursor-pointer items-center rounded-xl border-2 p-3 transition-all
+                                {{ $formType === 'parent' ? 'border-green-500 bg-green-50 ring-1 ring-green-500' : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50' }}">
+                                <input type="radio" wire:model.live="formType" value="parent" class="sr-only">
+                                <div class="flex items-center gap-2.5">
+                                    <div class="flex h-8 w-8 items-center justify-center rounded-lg {{ $formType === 'parent' ? 'bg-green-500 text-white' : 'bg-gray-100 text-gray-500' }}">
+                                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                                    </div>
+                                    <div>
+                                        <div class="text-sm font-semibold {{ $formType === 'parent' ? 'text-green-900' : 'text-gray-900' }}">Parent</div>
+                                        <div class="text-xs {{ $formType === 'parent' ? 'text-green-600' : 'text-gray-500' }}">Parent form</div>
                                     </div>
                                 </div>
                             </label>

@@ -102,19 +102,32 @@
                             <div class="text-xs font-semibold text-gray-700">Profile</div>
                         </a>
 
-                        <a href="{{ route('students.index') }}" class="card-interactive p-4 text-center">
-                            <div
-                                class="mx-auto mb-2 grid h-12 w-12 place-items-center rounded-lg bg-blue-50 text-blue-600">
-                                <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                    stroke-width="2">
-                                    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-                                    <circle cx="9" cy="7" r="4" />
-                                    <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
-                                    <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-                                </svg>
-                            </div>
-                            <div class="text-xs font-semibold text-gray-700">Students</div>
-                        </a>
+                        @if ($user?->role !== 'parent')
+                            <a href="{{ route('students.index') }}" class="card-interactive p-4 text-center">
+                                <div
+                                    class="mx-auto mb-2 grid h-12 w-12 place-items-center rounded-lg bg-blue-50 text-blue-600">
+                                    <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2">
+                                        <path d="M22 10v6M2 10l10-5 10 5-10 5z"/>
+                                        <path d="M6 12v5c3 3 9 3 12 0v-5"/>
+                                    </svg>
+                                </div>
+                                <div class="text-xs font-semibold text-gray-700">Students</div>
+                            </a>
+                        @endif
+
+                        @if ($user?->role === 'parent')
+                            <a href="{{ route('students.index') }}" class="card-interactive p-4 text-center">
+                                <div
+                                    class="mx-auto mb-2 grid h-12 w-12 place-items-center rounded-lg bg-pink-50 text-pink-600">
+                                    <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2">
+                                        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                                    </svg>
+                                </div>
+                                <div class="text-xs font-semibold text-gray-700">My Children</div>
+                            </a>
+                        @endif
 
                         @if ($user?->role === 'admin' || $user?->role === 'teacher')
                         @if ($user?->role === 'admin')
@@ -123,13 +136,25 @@
                                     class="mx-auto mb-2 grid h-12 w-12 place-items-center rounded-lg bg-orange-50 text-orange-600">
                                     <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                         stroke-width="2">
-                                        <path d="M2 7l10-5 10 5-10 5L2 7z" />
-                                        <path d="M12 12v10" />
-                                        <path d="M22 7v10l-10 5" />
-                                        <path d="M2 7v10l10 5" />
+                                        <rect x="2" y="3" width="20" height="13" rx="2"/>
+                                        <polyline points="8 21 12 17 16 21"/>
+                                        <line x1="7" y1="9" x2="17" y2="9"/>
+                                        <line x1="7" y1="13" x2="12" y2="13"/>
                                     </svg>
                                 </div>
                                 <div class="text-xs font-semibold text-gray-700">Teachers</div>
+                            </a>
+
+                            <a href="{{ route('parents.index') }}" class="card-interactive p-4 text-center">
+                                <div
+                                    class="mx-auto mb-2 grid h-12 w-12 place-items-center rounded-lg bg-pink-50 text-pink-600">
+                                    <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2">
+                                        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                                        <polyline points="9 22 9 12 15 12 15 22"/>
+                                    </svg>
+                                </div>
+                                <div class="text-xs font-semibold text-gray-700">Parents</div>
                             </a>
                         @endif
 
@@ -138,10 +163,8 @@
                                 class="mx-auto mb-2 grid h-12 w-12 place-items-center rounded-lg bg-slate-50 text-slate-700">
                                 <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                     stroke-width="2">
-                                    <path d="M4 4h16v16H4z" />
-                                    <path d="M8 8h8" />
-                                    <path d="M8 12h8" />
-                                    <path d="M8 16h5" />
+                                    <path d="M3 21h18M5 21V7l7-4 7 4v14M10 21v-6h4v6"/>
+                                    <path d="M10 11h.01M14 11h.01M10 15h.01M14 15h.01"/>
                                 </svg>
                             </div>
                             <div class="text-xs font-semibold text-gray-700">Classes</div>
@@ -214,21 +237,34 @@
                                     class="mx-auto mb-2 grid h-12 w-12 place-items-center rounded-lg bg-slate-50 text-slate-700">
                                     <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                         stroke-width="2">
-                                        <path d="M12 6v.01" />
-                                        <path d="M12 12v.01" />
-                                        <path d="M12 18v.01" />
-                                        <path d="M7 6v.01" />
-                                        <path d="M7 12v.01" />
-                                        <path d="M7 18v.01" />
-                                        <path d="M17 6v.01" />
-                                        <path d="M17 12v.01" />
-                                        <path d="M17 18v.01" />
+                                        <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
                                     </svg>
                                 </div>
                                 <div class="text-xs font-semibold text-gray-700">More</div>
                             </a>
                         @endif
 
+                        @if ($user?->role === 'admin')
+                            <a href="{{ route('settings.index') }}" class="card-interactive p-4 text-center">
+                                <div
+                                    class="mx-auto mb-2 grid h-12 w-12 place-items-center rounded-lg bg-gray-50 text-gray-600">
+                                    <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2">
+                                        <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" />
+                                        <circle cx="12" cy="12" r="3" />
+                                    </svg>
+                                </div>
+                                <div class="text-xs font-semibold text-gray-700">Settings</div>
+                            </a>
+
+                            <a href="{{ route('settings.subscription') }}" class="card-interactive p-4 text-center">
+                                <div class="mx-auto mb-2 grid h-12 w-12 place-items-center rounded-lg bg-green-50 text-green-600">
+                                    <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                        <rect x="2" y="5" width="20" height="14" rx="2" />
+                                        <line x1="2" y1="10" x2="22" y2="10" />
+                                    </svg>
+                                </div>
+                                <div class="text-xs font-semibold text-gray-700">Billing</div>
                             </a>
                         @endif
 
@@ -251,7 +287,7 @@
                 <div class="border-t border-gray-100 p-4">
                     <form method="POST" action="{{ route('logout') }}" id="mobileLogoutForm">
                         @csrf
-                        <button type="button" onclick="confirmLogout('mobileLogoutForm')"
+                        <button type="button" onclick="doLogout('mobileLogoutForm')"
                             class="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-br from-slate-700 to-slate-900 px-4 py-3 text-sm font-bold text-white shadow-md hover:shadow-lg transition-all">
                             <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                 stroke-width="2.5">
@@ -312,27 +348,50 @@
                     <span class="sidebar-text">Dashboard</span>
                 </a>
 
-                <a href="{{ route('students.index') }}" wire:navigate
-                    class="{{ request()->routeIs('students.*') ? 'bg-amber-500 text-white shadow-md' : 'text-slate-700 hover:bg-amber-50' }} mb-0.5 group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-bold transition-all">
-                    <svg class="h-5 w-5 flex-shrink-0 {{ request()->routeIs('students.*') ? 'text-white' : 'text-blue-600' }}"
-                        viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-                        <circle cx="12" cy="7" r="4" />
-                    </svg>
-                    <span class="sidebar-text">Students</span>
-                </a>
+                @if ($user?->role !== 'parent')
+                    <a href="{{ route('students.index') }}" wire:navigate
+                        class="{{ request()->routeIs('students.*') ? 'bg-amber-500 text-white shadow-md' : 'text-slate-700 hover:bg-amber-50' }} mb-0.5 group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-bold transition-all">
+                        <svg class="h-5 w-5 flex-shrink-0 {{ request()->routeIs('students.*') ? 'text-white' : 'text-blue-600' }}"
+                            viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                            <path d="M22 10v6M2 10l10-5 10 5-10 5z"/>
+                            <path d="M6 12v5c3 3 9 3 12 0v-5"/>
+                        </svg>
+                        <span class="sidebar-text">Students</span>
+                    </a>
+                @endif
+
+                @if ($user?->role === 'parent')
+                    <a href="{{ route('students.index') }}" wire:navigate
+                        class="{{ request()->routeIs('students.*') ? 'bg-amber-500 text-white shadow-md' : 'text-slate-700 hover:bg-amber-50' }} mb-0.5 group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-bold transition-all">
+                        <svg class="h-5 w-5 flex-shrink-0 {{ request()->routeIs('students.*') ? 'text-white' : 'text-pink-600' }}"
+                            viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                        </svg>
+                        <span class="sidebar-text">My Children</span>
+                    </a>
+                @endif
 
                 @if ($user?->role === 'admin')
                     <a href="{{ route('teachers') }}" wire:navigate
                         class="{{ request()->routeIs('teachers') || request()->routeIs('teachers.*') ? 'bg-amber-500 text-white shadow-md' : 'text-slate-700 hover:bg-amber-50' }} mb-0.5 group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-bold transition-all">
                         <svg class="h-5 w-5 flex-shrink-0 {{ request()->routeIs('teachers') || request()->routeIs('teachers.*') ? 'text-white' : 'text-orange-600' }}"
                             viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-                            <circle cx="9" cy="7" r="4" />
-                            <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
-                            <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                            <rect x="2" y="3" width="20" height="13" rx="2"/>
+                            <polyline points="8 21 12 17 16 21"/>
+                            <line x1="7" y1="9" x2="17" y2="9"/>
+                            <line x1="7" y1="13" x2="12" y2="13"/>
                         </svg>
                         <span class="sidebar-text">Teachers</span>
+                    </a>
+
+                    <a href="{{ route('parents.index') }}" wire:navigate
+                        class="{{ request()->routeIs('parents.*') ? 'bg-amber-500 text-white shadow-md' : 'text-slate-700 hover:bg-amber-50' }} mb-0.5 group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-bold transition-all">
+                        <svg class="h-5 w-5 flex-shrink-0 {{ request()->routeIs('parents.*') ? 'text-white' : 'text-pink-600' }}"
+                            viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                            <polyline points="9 22 9 12 15 12 15 22"/>
+                        </svg>
+                        <span class="sidebar-text">Parents</span>
                     </a>
                 @endif
 
@@ -341,8 +400,8 @@
                         class="{{ request()->routeIs('classes.*') ? 'bg-amber-500 text-white shadow-md' : 'text-slate-700 hover:bg-amber-50' }} mb-0.5 group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-bold transition-all">
                         <svg class="h-5 w-5 flex-shrink-0 {{ request()->routeIs('classes.*') ? 'text-white' : 'text-slate-600' }}"
                             viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
-                            <line x1="3" y1="9" x2="21" y2="9" />
+                            <path d="M3 21h18M5 21V7l7-4 7 4v14M10 21v-6h4v6"/>
+                            <path d="M10 11h.01M14 11h.01M10 15h.01M14 15h.01"/>
                         </svg>
                         <span class="sidebar-text">Classes</span>
                     </a>
@@ -373,11 +432,8 @@
                         class="{{ request()->routeIs('results.broadsheet') ? 'bg-amber-500 text-white shadow-md' : 'text-slate-700 hover:bg-amber-50' }} mb-0.5 group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-bold transition-all">
                         <svg class="h-5 w-5 flex-shrink-0 {{ request()->routeIs('results.broadsheet') ? 'text-white' : 'text-emerald-600' }}"
                             viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                            <polyline points="14 2 14 8 20 8" />
-                            <line x1="16" y1="13" x2="8" y2="13" />
-                            <line x1="16" y1="17" x2="8" y2="17" />
-                            <polyline points="10 9 9 9 8 9" />
+                            <rect x="3" y="3" width="18" height="18" rx="2"/>
+                            <path d="M3 9h18M3 15h18M9 3v18M15 3v18"/>
                         </svg>
                         <span class="sidebar-text">Broadsheet</span>
                     </a>
@@ -393,6 +449,18 @@
                         <polyline points="16 11 18 13 22 9" />
                     </svg>
                     <span class="sidebar-text">Attendance</span>
+                </a>
+
+                <a href="{{ route('homework.index') }}" wire:navigate
+                    class="{{ request()->routeIs('homework.*') ? 'bg-amber-500 text-white shadow-md' : 'text-slate-700 hover:bg-amber-50' }} mb-0.5 group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-bold transition-all">
+                    <svg class="h-5 w-5 flex-shrink-0 {{ request()->routeIs('homework.*') ? 'text-white' : 'text-purple-600' }}"
+                        viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/>
+                        <rect x="8" y="2" width="8" height="4" rx="1"/>
+                        <line x1="16" y1="11" x2="8" y2="11"/>
+                        <line x1="16" y1="15" x2="12" y2="15"/>
+                    </svg>
+                    <span class="sidebar-text">Homework</span>
                 </a>
 
                 <a href="{{ route('messages') }}" wire:navigate
@@ -430,14 +498,30 @@
                         class="{{ request()->routeIs('more-features') ? 'bg-amber-500 text-white shadow-md' : 'text-slate-700 hover:bg-amber-50' }} mb-0.5 group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-bold transition-all">
                         <svg class="h-5 w-5 flex-shrink-0 {{ request()->routeIs('more-features') ? 'text-white' : 'text-slate-600' }}"
                             viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                            <circle cx="12" cy="12" r="1" />
-                            <circle cx="19" cy="12" r="1" />
-                            <circle cx="5" cy="12" r="1" />
+                            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
                         </svg>
                         <span class="sidebar-text">More Features</span>
                     </a>
                 @endif
 
+                @if ($user?->role === 'admin')
+                    <a href="{{ route('settings.index') }}" wire:navigate
+                        class="{{ request()->routeIs('settings.*') && !request()->routeIs('settings.subscription') ? 'bg-amber-500 text-white shadow-md' : 'text-slate-700 hover:bg-amber-50' }} mb-0.5 group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-bold transition-all">
+                        <svg class="h-5 w-5 flex-shrink-0 {{ request()->routeIs('settings.*') && !request()->routeIs('settings.subscription') ? 'text-white' : 'text-gray-600' }}"
+                            viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                            <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" />
+                            <circle cx="12" cy="12" r="3" />
+                        </svg>
+                        <span class="sidebar-text">Settings</span>
+                    </a>
+
+                    <a href="{{ route('settings.subscription') }}" wire:navigate
+                        class="{{ request()->routeIs('settings.subscription') ? 'bg-amber-500 text-white shadow-md' : 'text-slate-700 hover:bg-amber-50' }} mb-0.5 group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-bold transition-all">
+                        <svg class="h-5 w-5 flex-shrink-0 {{ request()->routeIs('settings.subscription') ? 'text-white' : 'text-green-600' }}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                            <rect x="2" y="5" width="20" height="14" rx="2" />
+                            <line x1="2" y1="10" x2="22" y2="10" />
+                        </svg>
+                        <span class="sidebar-text">Billing</span>
                     </a>
                 @endif
 
@@ -456,8 +540,7 @@
         </aside>
 
         <div id="mainContent" class="lg:pl-64 transition-all duration-300">
-            <header class="sticky top-0 z-10 border-b border-slate-100 bg-white/80 backdrop-blur-xl shadow-md">
-                <div class="h-1.5 bg-gradient-to-r from-amber-500 via-orange-500 to-amber-500"></div>
+            <header class="sticky top-0 z-10 border-b border-slate-100 bg-white/80 backdrop-blur-xl shadow-sm">
                 <div class="flex h-16 items-center justify-between px-6">
                     <div class="flex items-center gap-4">
                         <!-- Mobile Menu Button -->
@@ -501,7 +584,7 @@
 
                         <form method="POST" action="{{ route('logout') }}" id="logoutForm" class="hidden md:block">
                             @csrf
-                            <button type="button" onclick="confirmLogout()"
+                            <button type="button" onclick="doLogout()"
                                 class="inline-flex items-center justify-center rounded-xl bg-gradient-to-br from-slate-700 to-slate-900 px-4 py-2.5 text-sm font-bold text-white shadow-md hover:shadow-lg transition-all">
                                 Logout
                             </button>
@@ -510,6 +593,77 @@
                 </div>
             </header>
 
+            @if(isset($subscriptionDueDate) && auth()->user()?->role === 'admin')
+                @if($subscriptionIsPastDue && $subscriptionDaysPastDue <= 14)
+                    <div class="fixed inset-x-0 bottom-0 z-50 pb-2 sm:pb-5">
+                        <div class="mx-auto max-w-7xl px-2 sm:px-6 lg:px-8">
+                            <div class="rounded-lg bg-red-600 p-2 shadow-lg sm:p-3">
+                                <div class="flex flex-wrap items-center justify-between">
+                                    <div class="flex w-0 flex-1 items-center">
+                                        <span class="flex rounded-lg bg-red-800 p-2">
+                                            <svg class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                            </svg>
+                                        </span>
+                                        <p class="ml-3 truncate font-medium text-white">
+                                            <span class="md:hidden">Subscription Expired! Edit mode locked.</span>
+                                            <span class="hidden md:inline">Your system subscription has expired. Edit features are locked. Please renew.</span>
+                                        </p>
+                                    </div>
+                                    <div class="order-3 mt-2 w-full flex-shrink-0 sm:order-2 sm:mt-0 sm:w-auto">
+                                        <a href="{{ route('billing.index') }}" class="flex items-center justify-center rounded-md border border-transparent bg-white px-4 py-2 text-sm font-medium text-red-600 shadow-sm hover:bg-red-50">
+                                            Pay Now
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <style>
+                        #mainContent main input,
+                        #mainContent main select,
+                        #mainContent main textarea,
+                        #mainContent main button:not(.allow-billing) {
+                            pointer-events: none !important;
+                            opacity: 0.6 !important;
+                        }
+                    </style>
+                @elseif(!$subscriptionIsPastDue && $subscriptionDaysUntilDue <= 7)
+                    <div class="fixed inset-x-0 bottom-0 z-50 pb-2 sm:pb-5">
+                        <div class="mx-auto max-w-7xl px-2 sm:px-6 lg:px-8">
+                            <div class="rounded-lg bg-amber-500 p-2 shadow-lg sm:p-3">
+                                <div class="flex flex-wrap items-center justify-between">
+                                    <div class="flex w-0 flex-1 items-center">
+                                        <span class="flex rounded-lg bg-amber-600 p-2">
+                                            <svg class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                            </svg>
+                                        </span>
+                                        <p class="ml-3 truncate font-medium text-white">
+                                            <span class="md:hidden">Subscription due in {{ $subscriptionDaysUntilDue }} days!</span>
+                                            <span class="hidden md:inline">Your system subscription expires in {{ $subscriptionDaysUntilDue }} days. Please renew to avoid interruption.</span>
+                                        </p>
+                                    </div>
+                                    <div class="order-3 mt-2 w-full flex-shrink-0 sm:order-2 sm:mt-0 sm:w-auto">
+                                        <a href="{{ route('billing.index') }}" class="flex items-center justify-center rounded-md border border-transparent bg-white px-4 py-2 text-sm font-medium text-amber-600 shadow-sm hover:bg-amber-50">
+                                            Renew Now
+                                        </a>
+                                    </div>
+                                    <div class="order-2 flex-shrink-0 sm:order-3 sm:ml-2">
+                                        <button type="button" onclick="this.closest('.fixed').remove()" class="-mr-1 flex p-2 rounded-md hover:bg-amber-600 focus:outline-none focus:ring-2 focus:ring-white sm:-mr-2">
+                                            <span class="sr-only">Dismiss</span>
+                                            <svg class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                @endif
+            @endif
+
             <main class="px-6 py-6">
                 @yield('content')
                 {{ $slot ?? '' }}
@@ -517,6 +671,9 @@
 
             <!-- Global Modal -->
             <livewire:global-modal />
+
+            <!-- AgentPro Chatbot -->
+            <livewire:agent-pro-chat />
         </div>
     </div>
 
@@ -583,38 +740,20 @@
     </script>
 
     <script>
-        function confirmLogout(formId = 'logoutForm') {
-            const modal = document.createElement('div');
-            modal.className = 'fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm';
-            modal.style.animation = 'fadeIn 0.2s ease-out';
-
-            const isDark = document.documentElement.classList.contains('dark');
-            modal.innerHTML = `
-                    <div class="${isDark ? 'bg-[#1e1e1e]' : 'bg-white'} rounded-3xl shadow-2xl max-w-md w-full transform" style="animation: slideUp 0.3s ease-out">
-                        <div class="bg-gradient-to-r from-slate-700 to-slate-900 p-6 rounded-t-3xl">
-                            <div class="flex items-center gap-4">
-                                <svg class="h-12 w-12 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
-                                <h3 class="text-2xl font-bold text-white">Confirm Logout</h3>
-                            </div>
-                        </div>
-                        <div class="p-6">
-                            <p class="${isDark ? 'text-gray-300' : 'text-gray-700'} text-lg leading-relaxed">Are you sure you want to logout?</p>
-                        </div>
-                        <div class="p-6 pt-0 flex gap-3">
-                            <button onclick="document.getElementById('${formId}').submit()" class="flex-1 bg-gradient-to-r from-slate-700 to-slate-900 text-white font-bold py-3 px-6 rounded-xl hover:shadow-lg transition-all">
-                                Yes, Logout
-                            </button>
-                            <button onclick="this.closest('.fixed').remove()" class="flex-1 ${isDark ? 'bg-[#333] text-gray-200 hover:bg-[#3a3a3a]' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'} font-bold py-3 px-6 rounded-xl transition-all">
-                                Cancel
-                            </button>
-                        </div>
-                    </div>
-                `;
-
-            document.body.appendChild(modal);
-            modal.onclick = (e) => { if (e.target === modal) modal.remove(); };
+        function doLogout(formId = 'logoutForm') {
+            // Fetch a fresh CSRF token to prevent 419 Page Expired on logout
+            fetch('/csrf-token', { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.token) {
+                        document.querySelector('meta[name="csrf-token"]').setAttribute('content', data.token);
+                        document.querySelectorAll('input[name="_token"]').forEach(el => el.value = data.token);
+                    }
+                })
+                .catch(() => {})
+                .finally(() => {
+                    document.getElementById(formId).submit();
+                });
         }
     </script>
 

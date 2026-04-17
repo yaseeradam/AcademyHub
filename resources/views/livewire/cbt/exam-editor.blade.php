@@ -1,14 +1,12 @@
 @php
     $status = (string) ($exam->status ?? 'draft');
     $variant = match ($status) {
-        'approved' => 'success',
-        'submitted' => 'info',
-        'assigned' => 'info',
-        'rejected' => 'warning',
+        'live' => 'success',
+        'ended' => 'info',
         default => 'neutral',
     };
     $canEdit = (bool) $this->canEdit;
-    $tab = $this->tab ?? 'details';
+    $tab = $this->tab;
     $hasTheory = $exam->questions->contains('type', 'theory');
 @endphp
 
@@ -20,7 +18,7 @@
                     <h1 class="text-2xl font-bold text-white">{{ $exam->title }}</h1>
                     <div class="mt-2 flex flex-wrap items-center gap-2">
                         <x-status-badge variant="{{ $variant }}">{{ ucfirst($status) }}</x-status-badge>
-                        @if ($status === 'approved' && $exam->access_code)
+                        @if ($status === 'live' && $exam->access_code)
                             <span class="rounded-lg bg-white/20 px-3 py-1 text-xs font-black text-white backdrop-blur-sm">
                                 Code: {{ $exam->access_code }}
                             </span>
@@ -31,48 +29,64 @@
                     <a href="{{ route('cbt.index') }}" class="rounded-lg bg-white/20 px-4 py-2 text-sm font-semibold text-white backdrop-blur-sm hover:bg-white/30">Back</a>
                     
                     @if ($canEdit)
-                        <button wire:click="saveDetails" class="rounded-lg bg-white px-4 py-2 text-sm font-semibold text-violet-600 hover:bg-pink-50">Save</button>
+                        <button wire:click="saveDetails" class="rounded-lg bg-white px-4 py-2 text-sm font-semibold text-violet-600 hover:bg-pink-50">Save Details</button>
                     @endif
-                    
-                    @if ($me?->role === 'teacher' && $canEdit)
-                        <button wire:click="submitToAdmin" class="rounded-lg bg-emerald-500 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-600">Submit</button>
+
+                    @if ($status === 'draft')
+                        <button wire:click="goLive" class="rounded-lg bg-emerald-500 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-600">✓ Go Live</button>
                     @endif
-                    
-                    @if ($me?->role === 'admin' && $status === 'submitted')
-                        <button wire:click="approve" class="rounded-lg bg-emerald-500 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-600">Approve</button>
-                        <button wire:click="startReject" class="rounded-lg bg-orange-500 px-4 py-2 text-sm font-semibold text-white hover:bg-orange-600">Reject</button>
+
+                    @if ($status === 'live')
+                        <button wire:click="endAllExams"
+                            wire:confirm="End exam and force-submit all active attempts?"
+                            class="rounded-lg bg-red-500 px-4 py-2 text-sm font-semibold text-white hover:bg-red-600">
+                            ⏹ End Exam
+                        </button>
                     @endif
-                    
-                    @if ($me?->role === 'admin' && $status === 'approved')
-                        <button wire:click="togglePublish" class="rounded-lg bg-white px-4 py-2 text-sm font-semibold text-violet-600 hover:bg-pink-50">{{ $exam->published_at ? 'Pause' : 'Go Live' }}</button>
+
+                    @if (in_array($status, ['live', 'ended'], true) && !$exam->results_released_at)
+                        <button wire:click="releaseResults"
+                            wire:confirm="Release results to students? They will be able to see their scores if 'Show Score' is enabled."
+                            class="rounded-lg bg-amber-500 px-4 py-2 text-sm font-semibold text-white hover:bg-amber-600">
+                            📊 Release Results
+                        </button>
+                    @elseif($exam->results_released_at)
+                        <span class="rounded-lg bg-white/20 px-4 py-2 text-sm font-semibold text-emerald-300 backdrop-blur-sm">
+                            ✓ Results Released
+                        </span>
                     @endif
                 </div>
             </div>
             
-            <div class="mt-6 flex flex-wrap gap-2 border-t border-white/20 pt-4">
+            @if ($status === 'live' && $exam->access_code)
+                <div class="mt-4 flex flex-wrap items-center gap-3 rounded-xl bg-white/10 px-4 py-2.5">
+                    <span class="text-xs font-semibold text-white/70">Student Link:</span>
+                    <a href="{{ route('cbt.student', ['code' => $exam->access_code]) }}" target="_blank" class="font-mono text-sm font-bold text-white underline underline-offset-2">
+                        /cbt/student?code={{ $exam->access_code }}
+                    </a>
+                    <span class="text-xs text-white/60">(share this with students)</span>
+                </div>
+            @endif
+
+            <div class="mt-4 flex flex-wrap gap-2 border-t border-white/20 pt-4">
+                <button @click="tab = 'questions'" :class="tab === 'questions' ? 'bg-white text-violet-600' : 'bg-white/10 text-white hover:bg-white/20'" class="rounded-lg px-4 py-2 text-sm font-semibold transition">Questions ({{ $exam->questions->count() }})</button>
                 <button @click="tab = 'details'" :class="tab === 'details' ? 'bg-white text-violet-600' : 'bg-white/10 text-white hover:bg-white/20'" class="rounded-lg px-4 py-2 text-sm font-semibold transition">Details</button>
-                <button @click="tab = 'questions'" :class="tab === 'questions' ? 'bg-white text-violet-600' : 'bg-white/10 text-white hover:bg-white/20'" class="rounded-lg px-4 py-2 text-sm font-semibold transition">Questions</button>
-                @if ($status === 'approved')
-                    <button @click="tab = 'monitor'" :class="tab === 'monitor' ? 'bg-white text-violet-600' : 'bg-white/10 text-white hover:bg-white/20'" class="rounded-lg px-4 py-2 text-sm font-semibold transition">Monitor</button>
+                @if (in_array($status, ['live', 'ended'], true))
+                    <button @click="tab = 'monitor'" :class="tab === 'monitor' ? 'bg-white text-violet-600' : 'bg-white/10 text-white hover:bg-white/20'" class="rounded-lg px-4 py-2 text-sm font-semibold transition">
+                        Monitor
+                        @php $ongoingCount = $exam->attempts->filter(fn($a) => $a->started_at && !$a->submitted_at && !$a->terminated_at)->count(); @endphp
+                        @if($ongoingCount > 0)
+                            <span class="ml-1 inline-flex h-5 w-5 items-center justify-center rounded-full bg-green-500 text-[10px] font-black text-white">{{ $ongoingCount }}</span>
+                        @endif
+                    </button>
                 @endif
                 <button @click="tab = 'actions'" :class="tab === 'actions' ? 'bg-white text-violet-600' : 'bg-white/10 text-white hover:bg-white/20'" class="rounded-lg px-4 py-2 text-sm font-semibold transition">Actions</button>
             </div>
+
         </div>
     </div>
 
-    @if ($status === 'rejected' && $exam->note)
-        <div class="rounded-lg border border-orange-200 bg-orange-50 p-4 text-sm text-orange-900">
-            <div class="font-semibold">Admin note:</div>
-            <div class="mt-1">{{ $exam->note }}</div>
-        </div>
-    @endif
 
-    @if ($status === 'assigned' && $exam->request_note)
-        <div class="rounded-lg border border-indigo-200 bg-indigo-50 p-4 text-sm text-indigo-900">
-            <div class="font-semibold">Admin request:</div>
-            <div class="mt-1">{{ $exam->request_note }}</div>
-        </div>
-    @endif
 
     <div x-show="tab === 'details'" class="rounded-2xl bg-white p-6 shadow-lg border border-gray-200">
         @if ($canEdit)
@@ -173,56 +187,210 @@
         @endif
     </div>
 
-    @if ($me?->role === 'admin' && $showRejectForm)
-        <div class="rounded-lg border border-orange-200 bg-orange-50 p-4">
-            <div class="flex items-center justify-between">
-                <div class="text-sm font-semibold">Reject Exam</div>
-                <button wire:click="cancelReject" class="btn-outline">Cancel</button>
-            </div>
-            <textarea wire:model="reviewNote" rows="2" class="mt-3 w-full rounded-lg border px-3 py-2 text-sm"></textarea>
-            <button wire:click="confirmReject" class="mt-2 btn-primary">Confirm</button>
-        </div>
-    @endif
+
 
     <div x-show="tab === 'questions'" class="rounded-2xl bg-white p-6 shadow-lg border border-gray-200">
         @if ($canEdit)
-            <div class="rounded-lg border-2 border-dashed border-violet-300 bg-violet-50 p-6">
+            {{-- Toolbar: AI + Import + Shuffle --}}
+            <div class="mb-5 flex flex-wrap items-center gap-2">
+                <button wire:click="openAiPanel" class="flex items-center gap-2 rounded-lg bg-violet-600 px-4 py-2 text-sm font-semibold text-white hover:bg-violet-700">&#10024; Generate with AI</button>
+                <button wire:click="openImportPanel" class="flex items-center gap-2 rounded-lg bg-sky-600 px-4 py-2 text-sm font-semibold text-white hover:bg-sky-700">&#128194; Import from File</button>
+                <a href="{{ route('cbt.sample-download') }}" class="flex items-center gap-2 rounded-lg border border-sky-300 bg-white px-4 py-2 text-sm font-semibold text-sky-700 hover:bg-sky-50">&#11015; Sample File</a>
+                <label class="ml-auto flex cursor-pointer items-center gap-2 rounded-lg border border-gray-200 bg-gray-50 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-100">
+                    <input type="checkbox" wire:model="shuffleQuestions" wire:change="saveShuffle" class="h-4 w-4 rounded text-violet-600" />
+                    Shuffle Questions
+                </label>
+            </div>
+
+            {{-- AI Panel --}}
+            @if ($showAiPanel)
+                <div class="mb-5 rounded-xl border-2 border-violet-200 bg-violet-50 p-5">
+                    <div class="mb-3 flex items-center justify-between">
+                        <div class="font-bold text-violet-900">✨ AI Question Generator</div>
+                        <button wire:click="closeAiPanel" class="text-xs text-gray-500 hover:text-gray-700">✕ Close</button>
+                    </div>
+                    <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                        <div class="sm:col-span-2">
+                            <label class="text-xs font-bold uppercase text-gray-600">Topic / Instruction</label>
+                            <input wire:model="aiTopic" class="mt-1 w-full rounded-lg border-2 border-gray-200 px-3 py-2 text-sm focus:border-violet-400" placeholder="e.g. Photosynthesis, World War II, Algebra" />
+                            @error('aiTopic') <div class="mt-1 text-xs text-red-600">{{ $message }}</div> @enderror
+                        </div>
+                        <div>
+                            <label class="text-xs font-bold uppercase text-gray-600">Type</label>
+                            <select wire:model="aiType" class="mt-1 w-full rounded-lg border-2 border-gray-200 px-3 py-2 text-sm focus:border-violet-400">
+                                <option value="mcq">MCQ Only</option>
+                                <option value="theory">Theory Only</option>
+                                <option value="mixed">Mixed (MCQ + Theory)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="text-xs font-bold uppercase text-gray-600">Count</label>
+                            <input wire:model="aiCount" type="number" min="1" max="20" class="mt-1 w-full rounded-lg border-2 border-gray-200 px-3 py-2 text-sm focus:border-violet-400" />
+                        </div>
+                        <div>
+                            <label class="text-xs font-bold uppercase text-gray-600">Marks each</label>
+                            <input wire:model="aiMarks" type="number" min="1" max="100" class="mt-1 w-full rounded-lg border-2 border-gray-200 px-3 py-2 text-sm focus:border-violet-400" />
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <button wire:click="generateAiQuestions" wire:loading.attr="disabled" wire:target="generateAiQuestions" class="rounded-lg bg-violet-600 px-5 py-2 text-sm font-bold text-white hover:bg-violet-700 disabled:opacity-60">
+                            <span wire:loading.remove wire:target="generateAiQuestions">Generate Questions</span>
+                            <span wire:loading wire:target="generateAiQuestions">Generating… please wait</span>
+                        </button>
+                    </div>
+
+                    @if (! empty($aiPreview))
+                        <div class="mt-4 space-y-2">
+                            <div class="text-xs font-bold uppercase text-gray-600">Preview — {{ count($aiPreview) }} questions</div>
+                            @foreach ($aiPreview as $idx => $q)
+                                <div class="rounded-lg border border-violet-200 bg-white p-3 text-sm">
+                                    <div class="flex items-start justify-between gap-2">
+                                        <div class="flex-1">
+                                            <span class="mr-2 rounded bg-violet-100 px-1.5 py-0.5 text-xs font-bold text-violet-700">{{ strtoupper($q['type']) }}</span>
+                                            <span class="font-medium text-gray-900">{{ $q['prompt'] }}</span>
+                                            <span class="ml-2 text-xs text-gray-400">({{ $q['marks'] }} mark{{ $q['marks'] != 1 ? 's' : '' }})</span>
+                                        </div>
+                                        <button wire:click="removeAiPreviewItem({{ $idx }})" class="text-xs text-red-500 hover:text-red-700">✕</button>
+                                    </div>
+                                    @if (($q['type'] ?? '') === 'mcq' && ! empty($q['options']))
+                                        <div class="mt-2 grid grid-cols-2 gap-1">
+                                            @foreach ($q['options'] as $oi => $opt)
+                                                <div class="rounded px-2 py-1 text-xs {{ $oi === ($q['correct'] ?? 0) ? 'bg-green-100 font-bold text-green-800' : 'bg-gray-50 text-gray-700' }}">
+                                                    {{ chr(65 + $oi) }}. {{ $opt }}
+                                                    @if ($oi === ($q['correct'] ?? 0)) <span class="ml-1">✓</span> @endif
+                                                </div>
+                                            @endforeach
+                                        </div>
+                                    @endif
+                                </div>
+                            @endforeach
+                            <button wire:click="insertAiQuestions" class="mt-2 rounded-lg bg-emerald-600 px-5 py-2 text-sm font-bold text-white hover:bg-emerald-700">
+                                Add {{ count($aiPreview) }} Questions to Exam
+                            </button>
+                        </div>
+                    @endif
+                </div>
+            @endif
+
+            {{-- File Import Panel --}}
+            @if ($showImportPanel)
+                <div class="mb-5 rounded-xl border-2 border-sky-200 bg-sky-50 p-5">
+                    <div class="mb-3 flex items-center justify-between">
+                        <div class="font-bold text-sky-900">📂 Import Questions from File</div>
+                        <button wire:click="closeImportPanel" class="text-xs text-gray-500 hover:text-gray-700">✕ Close</button>
+                    </div>
+                    <details class="mb-3 rounded-lg border border-sky-200 bg-white p-3 text-xs text-gray-600">
+                        <summary class="cursor-pointer font-semibold text-sky-700">File Format Guide (click to expand)</summary>
+                        <div class="mt-3 space-y-3">
+                            <p class="text-gray-700">Save as <strong>.txt</strong> from Notepad or Word (File → Save As → Plain Text). One blank line between questions.</p>
+                            <pre class="rounded bg-gray-50 p-3 font-mono text-xs leading-relaxed">1. What is the powerhouse of the cell?
+A. Nucleus
+B. Mitochondria
+C. Ribosome
+D. Golgi body
+ANS: B
+MARKS: 2
+
+2. Define osmosis.
+TYPE: theory
+MARKS: 5
+
+3. Which planet is closest to the sun?
+A. Earth
+B. Venus
+C. Mercury
+D. Mars
+ANS: C</pre>
+                            <ul class="list-disc space-y-1 pl-4 text-gray-600">
+                                <li>Question starts with a number and dot: <code class="rounded bg-gray-100 px-1">1.</code></li>
+                                <li>Options are <code class="rounded bg-gray-100 px-1">A.</code> <code class="rounded bg-gray-100 px-1">B.</code> <code class="rounded bg-gray-100 px-1">C.</code> <code class="rounded bg-gray-100 px-1">D.</code></li>
+                                <li>Correct answer: <code class="rounded bg-gray-100 px-1">ANS: B</code></li>
+                                <li>Theory question: add <code class="rounded bg-gray-100 px-1">TYPE: theory</code> (no options needed)</li>
+                                <li><code class="rounded bg-gray-100 px-1">MARKS: 2</code> is optional — defaults to 1</li>
+                                <li>Questions with no options are auto-treated as theory</li>
+                            </ul>
+                        </div>
+                    </details>
+                    <div class="flex items-center gap-3">
+                        <input type="file" wire:model="importFile" accept=".txt" class="text-sm text-gray-700" />
+                        <button wire:click="parseImportFile" wire:loading.attr="disabled" wire:target="parseImportFile,importFile" class="rounded-lg bg-sky-600 px-4 py-2 text-sm font-bold text-white hover:bg-sky-700 disabled:opacity-60">
+                            <span wire:loading.remove wire:target="parseImportFile,importFile">Parse File</span>
+                            <span wire:loading wire:target="parseImportFile,importFile">Parsing…</span>
+                        </button>
+                        <a href="{{ route('cbt.sample-download') }}" class="rounded-lg border border-sky-300 bg-white px-4 py-2 text-sm font-bold text-sky-700 hover:bg-sky-50">⬇ Sample File</a>
+                    </div>
+                    @error('importFile') <div class="mt-1 text-xs text-red-600">{{ $message }}</div> @enderror
+
+                    @if (! empty($importPreview))
+                        <div class="mt-4 space-y-2">
+                            <div class="text-xs font-bold uppercase text-gray-600">Preview — {{ count($importPreview) }} questions found</div>
+                            @foreach ($importPreview as $idx => $q)
+                                <div class="rounded-lg border border-sky-200 bg-white p-3 text-sm">
+                                    <div class="flex items-start justify-between gap-2">
+                                        <div class="flex-1">
+                                            <span class="mr-2 rounded bg-sky-100 px-1.5 py-0.5 text-xs font-bold text-sky-700">{{ strtoupper($q['type']) }}</span>
+                                            <span class="font-medium text-gray-900">{{ $q['prompt'] }}</span>
+                                            <span class="ml-2 text-xs text-gray-400">({{ $q['marks'] }} mark{{ $q['marks'] != 1 ? 's' : '' }})</span>
+                                        </div>
+                                        <button wire:click="removeImportPreviewItem({{ $idx }})" class="text-xs text-red-500 hover:text-red-700">✕</button>
+                                    </div>
+                                    @if (($q['type'] ?? '') === 'mcq' && ! empty($q['options']))
+                                        <div class="mt-2 grid grid-cols-2 gap-1">
+                                            @foreach ($q['options'] as $oi => $opt)
+                                                <div class="rounded px-2 py-1 text-xs {{ $oi === ($q['correct'] ?? 0) ? 'bg-green-100 font-bold text-green-800' : 'bg-gray-50 text-gray-700' }}">
+                                                    {{ chr(65 + $oi) }}. {{ $opt }}
+                                                    @if ($oi === ($q['correct'] ?? 0)) <span class="ml-1">✓</span> @endif
+                                                </div>
+                                            @endforeach
+                                        </div>
+                                    @endif
+                                </div>
+                            @endforeach
+                            <button wire:click="insertImportQuestions" class="mt-2 rounded-lg bg-emerald-600 px-5 py-2 text-sm font-bold text-white hover:bg-emerald-700">
+                                Add {{ count($importPreview) }} Questions to Exam
+                            </button>
+                        </div>
+                    @endif
+                </div>
+            @endif
+
+            {{-- Manual question form --}}
+            <div id="question-form" class="rounded-lg border-2 border-dashed p-6 transition-all duration-300 {{ $editingQuestionId ? 'border-blue-400 bg-blue-50' : 'border-violet-300 bg-violet-50' }}"
+                x-data="{ qtype: '{{ $questionType }}' }"
+                x-init="Livewire.on('questionTypeUpdated', t => qtype = t)"
+            >
                 <div class="text-lg font-bold text-gray-900 mb-4">{{ $editingQuestionId ? 'Edit' : 'Add' }} Question</div>
                 <textarea wire:model="questionPrompt" rows="3" class="w-full px-4 py-3 text-base border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 bg-white shadow-sm" placeholder="Enter your question here..."></textarea>
                 @error('questionPrompt') <div class="mt-2 text-sm text-red-600 font-medium">{{ $message }}</div> @enderror
-                
+
                 <div class="mt-6 grid gap-6 lg:grid-cols-[200px,1fr]">
                     <div>
                         <label class="block text-sm font-bold text-gray-800 mb-2">Question Type</label>
-                        <select wire:model="questionType" class="w-full px-4 py-3 text-base border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 bg-white shadow-sm">
-                            <option value="mcq" class="text-gray-900">Multiple Choice (MCQ)</option>
-                            <option value="theory" class="text-gray-900">Theory/Essay</option>
+                        <select x-model="qtype" wire:model="questionType" class="w-full px-4 py-3 text-base border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 bg-white shadow-sm">
+                            <option value="mcq">Multiple Choice (MCQ)</option>
+                            <option value="theory">Theory/Essay</option>
                         </select>
                     </div>
 
-                    @if ($questionType === 'mcq')
-                        <div>
-                            <label class="block text-sm font-bold text-gray-800 mb-2">Answer Options</label>
-                            <div class="grid gap-3 lg:grid-cols-2">
-                                @for ($i = 0; $i < 4; $i++)
-                                    <div class="p-3 bg-white border-2 border-gray-200 rounded-lg">
-                                        <div class="flex items-center gap-3 mb-2">
-                                            <input type="radio" wire:model="correctIndex" value="{{ $i }}" id="opt{{ $i }}" class="w-4 h-4 text-green-600 border-2 border-gray-300 focus:ring-green-500" />
-                                            <label for="opt{{ $i }}" class="text-sm font-bold text-gray-800">Option {{ chr(65 + $i) }} {{ $correctIndex == $i ? '(Correct Answer)' : '' }}</label>
-                                        </div>
-                                        <input wire:model="optionLabels.{{ $i }}" class="w-full px-3 py-2 text-base border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 bg-white" placeholder="Enter option {{ chr(65 + $i) }}" />
+                    <div x-show="qtype === 'mcq'" x-cloak>
+                        <label class="block text-sm font-bold text-gray-800 mb-2">Answer Options</label>
+                        <div class="grid gap-3 lg:grid-cols-2">
+                            @for ($i = 0; $i < 4; $i++)
+                                <div class="p-3 bg-white border-2 border-gray-200 rounded-lg">
+                                    <div class="flex items-center gap-3 mb-2">
+                                        <input type="radio" wire:model="correctIndex" value="{{ $i }}" id="opt{{ $i }}" class="w-4 h-4 text-green-600 border-2 border-gray-300 focus:ring-green-500" />
+                                        <label for="opt{{ $i }}" class="text-sm font-bold text-gray-800">Option {{ chr(65 + $i) }} {{ $correctIndex == $i ? '(Correct Answer)' : '' }}</label>
                                     </div>
-                                @endfor
-                            </div>
+                                    <input wire:model="optionLabels.{{ $i }}" class="w-full px-3 py-2 text-base border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 bg-white" placeholder="Enter option {{ chr(65 + $i) }}" />
+                                </div>
+                            @endfor
                         </div>
-                    @else
-                        <div class="p-4 rounded-lg border-2 border-dashed border-blue-300 bg-blue-50">
-                            <div class="text-sm font-bold text-blue-800 mb-2">Theory Question</div>
-                            <div class="text-sm text-blue-700">
-                                Theory questions allow students to write detailed answers. These questions require manual marking by teachers.
-                            </div>
-                        </div>
-                    @endif
+                    </div>
+
+                    <div x-show="qtype === 'theory'" x-cloak class="p-4 rounded-lg border-2 border-dashed border-blue-300 bg-blue-50">
+                        <div class="text-sm font-bold text-blue-800 mb-2">Theory Question</div>
+                        <div class="text-sm text-blue-700">Students write a detailed answer. Requires manual marking.</div>
+                    </div>
                 </div>
                 
                 <div class="mt-6 flex items-center gap-4">
@@ -242,7 +410,7 @@
 
         <div class="mt-6 space-y-4">
             @forelse ($exam->questions as $q)
-                <div class="rounded-lg border-2 border-gray-300 bg-gray-50 p-4 shadow-sm">
+                <div class="rounded-lg border-2 p-4 shadow-sm transition-all {{ $editingQuestionId === $q->id ? 'border-blue-400 bg-blue-50' : 'border-gray-300 bg-gray-50' }}">
                     <div class="flex items-start justify-between">
                         <div class="flex-1">
                             <div class="text-base font-bold text-gray-900 mb-3">Q{{ $loop->iteration }}. {{ $q->prompt }}</div>
@@ -283,7 +451,7 @@
     </div>
 
     <div x-show="tab === 'monitor'" class="space-y-4">
-        @if ($status === 'approved')
+        @if (in_array($status, ['live', 'ended'], true))
             @php
                 $roster = collect();
                 $submittedCount = 0;
@@ -467,15 +635,26 @@
                             {{ $response !== '' ? $response : 'No answer submitted.' }}
                         </div>
                         <div class="mt-3 flex items-center gap-3">
-                            <label class="text-xs font-semibold uppercase text-gray-500">Marks ({{ (int) $question->marks }})</label>
-                            <input
-                                type="number"
-                                min="0"
-                                max="{{ (int) $question->marks }}"
-                                wire:model.defer="theoryMarks.{{ $question->id }}"
-                                class="input w-24 text-sm"
-                            />
-                            @error("theoryMarks.{$question->id}") <div class="text-xs text-rose-600">{{ $message }}</div> @enderror
+                            <div>
+                                <label class="text-xs font-semibold uppercase text-gray-500">Marks ({{ (int) $question->marks }})</label>
+                                <input
+                                    type="number"
+                                    min="0"
+                                    max="{{ (int) $question->marks }}"
+                                    wire:model.defer="theoryMarks.{{ $question->id }}"
+                                    class="input w-24 text-sm mt-1"
+                                />
+                                @error("theoryMarks.{$question->id}") <div class="text-xs text-rose-600">{{ $message }}</div> @enderror
+                            </div>
+                            <div class="flex-1">
+                                <label class="text-xs font-semibold uppercase text-gray-500">Comment (Optional)</label>
+                                <input
+                                    type="text"
+                                    wire:model.defer="theoryComments.{{ $question->id }}"
+                                    placeholder="Add a short comment..."
+                                    class="input w-full text-sm mt-1"
+                                />
+                            </div>
                         </div>
                     </div>
                 @endforeach
@@ -493,7 +672,7 @@
                 <span class="text-xl">📄</span>
                 <span>Download PDF</span>
             </a>
-            @if ($status === 'approved' && $exam->access_code)
+            @if ($status === 'live' && $exam->access_code)
                 <a href="{{ route('cbt.student', ['code' => $exam->access_code]) }}" target="_blank" class="flex items-center gap-3 rounded-lg border border-blue-200 bg-blue-50 p-4 text-sm font-semibold text-blue-700 transition hover:border-blue-300 hover:bg-blue-100">
                     <span class="text-xl">🎓</span>
                     <span>Student Portal</span>
@@ -504,15 +683,17 @@
                     <span class="text-xl">📊</span>
                     <span>Export CSV</span>
                 </a>
-                @if ($status === 'approved')
+                @if (in_array($status, ['live', 'ended'], true))
                     <button wire:click="transferToResults" onclick="return confirm('Transfer CBT scores to academic results?')" class="flex w-full items-center gap-3 rounded-lg border border-emerald-200 bg-emerald-50 p-4 text-left text-sm font-semibold text-emerald-700 transition hover:border-emerald-300 hover:bg-emerald-100">
                         <span class="text-xl">✅</span>
                         <span>Transfer to Results</span>
                     </button>
-                    <button wire:click="endAllExams" onclick="return confirm('End this exam?')" class="flex w-full items-center gap-3 rounded-lg border border-orange-200 bg-orange-50 p-4 text-left text-sm font-semibold text-orange-700 transition hover:border-orange-300 hover:bg-orange-100">
-                        <span class="text-xl">⏹️</span>
-                        <span>End This Exam</span>
-                    </button>
+                    @if ($status === 'live')
+                        <button wire:click="endAllExams" onclick="return confirm('End this exam?')" class="flex w-full items-center gap-3 rounded-lg border border-orange-200 bg-orange-50 p-4 text-left text-sm font-semibold text-orange-700 transition hover:border-orange-300 hover:bg-orange-100">
+                            <span class="text-xl">⏹️</span>
+                            <span>End This Exam</span>
+                        </button>
+                    @endif
                 @endif
                 <button wire:click="$set('showDeleteModal', true)" class="flex w-full items-center gap-3 rounded-lg border border-red-200 bg-red-50 p-4 text-left text-sm font-semibold text-red-700 transition hover:border-red-300 hover:bg-red-100">
                     <span class="text-xl">🗑️</span>
@@ -594,3 +775,14 @@
         </div>
     @endif
 </div>
+
+<script>
+    document.addEventListener('livewire:init', () => {
+        Livewire.on('scrollToForm', () => {
+            setTimeout(() => {
+                const el = document.getElementById('question-form');
+                if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 50);
+        });
+    });
+</script>

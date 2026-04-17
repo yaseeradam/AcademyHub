@@ -6,6 +6,9 @@
 	        ['route' => 'users.index', 'title' => 'User Management', 'desc' => 'Create accounts, assign roles, activate/deactivate', 'icon' => 'M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M9 7a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75', 'color' => 'indigo', 'roles' => ['admin']],
 	        ['route' => 'imports.index', 'title' => 'Imports', 'desc' => 'Bulk import students, teachers, and subjects (CSV)', 'icon' => 'M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3', 'color' => 'cyan', 'roles' => ['admin']],
 
+	        ['route' => 'analytics.dashboard', 'title' => 'Analytics Dashboard', 'desc' => 'School-wide performance and attendance analytics', 'icon' => 'M3 13h8V3H3v10zM13 21h8V11h-8v10zM13 3h8v6h-8V3zM3 21h8v-6H3v6z', 'color' => 'blue', 'roles' => ['admin', 'teacher']],
+	        ['route' => 'analytics.student-performance', 'title' => 'Student Performance Analytics', 'desc' => 'Track individual student progress and identify improvement areas', 'icon' => 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z', 'color' => 'emerald', 'roles' => ['admin', 'teacher']],
+
 	        ['route' => 'announcements', 'title' => 'Announcements', 'desc' => 'School-wide announcements', 'icon' => 'M3 11l18-5v12L3 13v-2zm4 10a2 2 0 0 1-2-2v-2l4 1v3a2 2 0 0 1-2 2z', 'color' => 'orange', 'roles' => ['admin', 'teacher', 'bursar']],
 	        ['route' => 'notifications', 'title' => 'Notifications', 'desc' => 'In-app notifications', 'icon' => 'M18 8a6 6 0 0 0-12 0c0 7-3 7-3 7h18s-3 0-3-7zm-6 13a2 2 0 0 0 2-2h-4a2 2 0 0 0 2 2z', 'color' => 'slate', 'roles' => ['admin', 'teacher', 'bursar']],
 

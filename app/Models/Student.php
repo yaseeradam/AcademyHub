@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Homework;
 
 class Student extends Model
 {
@@ -112,6 +113,30 @@ class Student extends Model
         return Subject::query()
             ->whereIn('id', $classSubjects->diff($removed)->merge($added))
             ->orderBy('name')
+            ->get();
+    }
+
+    public function homeworkSubmissions(): HasMany
+    {
+        return $this->hasMany(HomeworkSubmission::class);
+    }
+
+    public function attendanceMarks(): HasMany
+    {
+        return $this->hasMany(AttendanceMark::class);
+    }
+
+    public function getHomeworkForStudent()
+    {
+        return Homework::where('class_id', $this->class_id)
+            ->where(function($query) {
+                $query->whereNull('section_id')
+                      ->orWhere('section_id', $this->section_id);
+            })
+            ->with(['subject', 'teacher', 'submissions' => function($query) {
+                $query->where('student_id', $this->id);
+            }])
+            ->orderBy('due_date', 'desc')
             ->get();
     }
 }

@@ -47,6 +47,16 @@ class Index extends Component
     }
 
     #[Computed]
+    public function dateRecords()
+    {
+        return AttendanceMark::query()
+            ->with(['student', 'sheet'])
+            ->whereHas('sheet', fn($q) => $q->where('date', $this->date))
+            ->get()
+            ->sortBy(fn($m) => $m->student?->last_name);
+    }
+
+    #[Computed]
     public function classes()
     {
         return SchoolClass::query()->orderBy('level')->get();
@@ -132,8 +142,7 @@ class Index extends Component
     public function updatedClassId(): void
     {
         $this->sectionId = null;
-        unset($this->sections, $this->students);
-
+        
         if ($this->classId) {
             $this->sectionId = Section::query()
                 ->where('class_id', $this->classId)
@@ -141,12 +150,15 @@ class Index extends Component
                 ->value('id');
         }
 
+        // Bust Livewire 3 computed property cache
+        unset($this->sections, $this->students, $this->visibleStudents, $this->markCounts);
         $this->syncSheetFromSelection();
     }
 
     public function updatedSectionId(): void
     {
-        unset($this->students);
+        // Bust Livewire 3 computed property cache
+        unset($this->students, $this->visibleStudents, $this->markCounts);
         $this->syncSheetFromSelection();
     }
 

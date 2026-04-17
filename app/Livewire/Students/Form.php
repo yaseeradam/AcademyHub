@@ -6,9 +6,12 @@ use App\Models\SchoolClass;
 use App\Models\Section;
 use App\Models\Student;
 use App\Models\CustomField;
+use App\Models\User;
+use App\Support\Audit;
 use App\Traits\DispatchesModals;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
@@ -39,6 +42,13 @@ class Form extends Component
     public string $status = 'Active';
     public array $customFieldValues = [];
     public array $parent_ids = [];
+
+    // Parent registration fields
+    public bool $create_parent_account = false;
+    public string $parent_name = '';
+    public string $parent_email = '';
+    public string $parent_phone = '';
+    public string $parent_password = '';
 
     public $passport = null;
 
@@ -100,7 +110,8 @@ class Form extends Component
     public function updatedClassId(): void
     {
         $this->section_id = null;
-        $this->dispatch('$refresh');
+        // Bust Livewire 3 computed property cache so sections dropdown updates immediately
+        unset($this->sections);
     }
 
     private function generateAdmissionNumber(): string
@@ -139,7 +150,16 @@ class Form extends Component
             'status' => ['required', Rule::in(['Active', 'Graduated', 'Expelled'])],
             'parent_ids' => ['array'],
             'parent_ids.*' => ['exists:users,id'],
+            'create_parent_account' => ['boolean'],
         ];
+
+        // Add parent account validation if creating parent
+        if ($this->create_parent_account) {
+            $rules['parent_name'] = ['required', 'string', 'max:255'];
+            $rules['parent_email'] = ['required', 'email', 'unique:users,email'];
+            $rules['parent_phone'] = ['nullable', 'string', 'max:20'];
+            $rules['parent_password'] = ['required', 'string', 'min:6'];
+        }
 
         if ($this->passport) {
             $rules['passport'] = ['image', 'max:2048'];
@@ -190,8 +210,38 @@ class Form extends Component
             throw $e;
         }
 
+        // Create parent account if requested
+        $parentUser = null;
+        if ($this->create_parent_account) {
+            $normalizedPhone = preg_replace('/\D+/', '', $this->parent_phone);
+            $normalizedPhone = $normalizedPhone !== '' ? $normalizedPhone : null;
+
+            $parentUser = User::create([
+                'name' => $this->parent_name,
+                'email' => $this->parent_email,
+                'password' => Hash::make($this->parent_password),
+                'role' => 'parent',
+                'is_active' => true,
+                'custom_fields' => $this->parent_phone ? ['phone' => $this->parent_phone] : null,
+                'whatsapp_phone' => $normalizedPhone,
+                'whatsapp_verified' => (bool) $normalizedPhone,
+                'whatsapp_subscribed' => (bool) $normalizedPhone,
+            ]);
+
+            Audit::log('parents.created_during_student_registration', $parentUser, [
+                'parent_name' => $parentUser->name,
+                'parent_email' => $parentUser->email,
+                'student_name' => $this->first_name . ' ' . $this->last_name,
+            ]);
+        }
+
         unset($data['passport']);
         unset($data['parent_ids']);
+        unset($data['create_parent_account']);
+        unset($data['parent_name']);
+        unset($data['parent_email']);
+        unset($data['parent_phone']);
+        unset($data['parent_password']);
         $data['admission_number'] = $this->admission_number;
         $data['custom_fields'] = $this->customFieldValues;
 
@@ -221,7 +271,13 @@ class Form extends Component
         }
 
         $student->save();
-        $student->parents()->sync($this->parent_ids);
+        
+        // Link parent to student
+        $parentIds = $this->parent_ids;
+        if ($parentUser) {
+            $parentIds[] = (string) $parentUser->id;
+        }
+        $student->parents()->sync($parentIds);
 
         $isNew = !$this->student;
         $this->dispatch('student-saved', [
@@ -229,6 +285,9 @@ class Form extends Component
             'name' => $student->full_name,
             'admission' => $student->admission_number,
             'downloadUrl' => route('students.admission-form', $student),
+            'parentCreated' => $parentUser ? true : false,
+            'parentEmail' => $parentUser?->email,
+            'parentPassword' => $this->create_parent_account ? $this->parent_password : null,
         ]);
 
         return null;

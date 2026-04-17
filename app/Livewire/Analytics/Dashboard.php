@@ -145,14 +145,13 @@ class Dashboard extends Component
         };
 
         $query = AttendanceMark::query()
-            ->where('date', '>=', $startDate)
-            ->where('date', '<=', now());
+            ->whereHas('sheet', fn($q) => $q->where('date', '>=', $startDate)->where('date', '<=', now()));
 
         if ($this->selectedClass) {
             $query->whereHas('student', fn($q) => $q->where('class_id', $this->selectedClass));
         }
 
-        $marks = $query->get();
+        $marks = $query->with('sheet')->get();
         $total = $marks->count();
         $present = $marks->where('status', 'Present')->count();
         $absent = $marks->where('status', 'Absent')->count();
@@ -162,7 +161,7 @@ class Dashboard extends Component
         $dailyTrend = [];
         for ($i = 6; $i >= 0; $i--) {
             $date = now()->subDays($i);
-            $dayMarks = $marks->where('date', $date->format('Y-m-d'));
+            $dayMarks = $marks->filter(fn($m) => optional($m->sheet)->date === $date->format('Y-m-d'));
             $dayTotal = $dayMarks->count();
             $dayPresent = $dayMarks->where('status', 'Present')->count();
             
@@ -322,8 +321,7 @@ class Dashboard extends Component
 
         $marks = AttendanceMark::query()
             ->whereHas('student', fn($q) => $q->where('class_id', $classId))
-            ->where('date', '>=', $startDate)
-            ->where('date', '<=', now())
+            ->whereHas('sheet', fn($q) => $q->where('date', '>=', $startDate)->where('date', '<=', now()))
             ->get();
 
         $total = $marks->count();

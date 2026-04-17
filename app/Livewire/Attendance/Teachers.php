@@ -103,30 +103,30 @@ class Teachers extends Component
 
     public function updatedDate(): void
     {
-        unset($this->teachers);
         $this->syncSheetFromSelection();
+        $this->dispatch('$refresh');
     }
 
     public function updatedTerm(): void
     {
-        unset($this->teachers);
         $this->syncSheetFromSelection();
+        $this->dispatch('$refresh');
     }
 
     public function updatedSession(): void
     {
-        unset($this->teachers);
         $this->syncSheetFromSelection();
+        $this->dispatch('$refresh');
     }
 
     public function updatedSearch(): void
     {
-        unset($this->visibleTeachers);
+        $this->dispatch('$refresh');
     }
 
     public function updatedOnlyExceptions(): void
     {
-        unset($this->visibleTeachers);
+        $this->dispatch('$refresh');
     }
 
     public function setTool(string $tool): void

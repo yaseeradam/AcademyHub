@@ -60,12 +60,12 @@ class AppTheme {
         ),
         hintStyle: GoogleFonts.spaceGrotesk(color: AppColors.textSecondary),
       ),
-      cardTheme: CardTheme(
+      cardTheme: const CardThemeData(
         color: Colors.white,
         elevation: 0,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-          side: const BorderSide(color: Color(0xFFF1F5F9)),
+          borderRadius: BorderRadius.all(Radius.circular(16)),
+          side: BorderSide(color: Color(0xFFF1F5F9)),
         ),
       ),
     );

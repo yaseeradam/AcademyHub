@@ -151,18 +151,50 @@
                 </div>
 
                 <div class="mt-8 grid gap-5 sm:grid-cols-2">
-                    @if ($exam->show_score)
+                    @php
+                        $showScoreNow = $exam->show_score && $exam->results_released_at;
+                        $pendingRelease = !$exam->show_score || !$exam->results_released_at;
+                    @endphp
+
+                    @if ($exam->show_score && $exam->results_released_at)
+                        {{-- Instant mode OR manual release has happened --}}
                         <div class="rounded-2xl bg-emerald-50 p-6 text-center shadow-sm">
                             <div class="text-xs font-semibold uppercase tracking-wider text-slate-600">Your Score</div>
                             <div class="mt-3 text-5xl font-bold text-emerald-700">
                                 {{ (int) $attempt->score }}
                                 <span class="text-3xl text-slate-400">/{{ (int) $attempt->max_score }}</span>
                             </div>
+                            <div class="mt-2 text-sm font-semibold text-emerald-600">
+                                {{ (int) $attempt->percent }}%
+                            </div>
                             @if ($hasTheory)
-                                <div class="mt-2 text-xs font-semibold text-slate-500">Theory answers are not auto-graded.</div>
+                                <div class="mt-2 text-xs font-semibold text-slate-500">Theory questions marked separately.</div>
                             @endif
                         </div>
+                    @elseif ($exam->show_score && !$exam->results_released_at)
+                        {{-- show_score=true but teacher hasn't released yet --}}
+                        <div class="rounded-2xl bg-amber-50 p-6 text-center shadow-sm border border-amber-200">
+                            <div class="grid h-12 w-12 place-items-center rounded-full bg-amber-100 mx-auto mb-3">
+                                <svg class="h-6 w-6 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                            </div>
+                            <div class="text-sm font-bold text-amber-800">Results Pending</div>
+                            <div class="mt-1 text-xs text-amber-700">Your teacher will release scores shortly.</div>
+                        </div>
+                    @else
+                        {{-- show_score=false: teacher will release manually --}}
+                        <div class="rounded-2xl bg-sky-50 p-6 text-center shadow-sm border border-sky-200">
+                            <div class="grid h-12 w-12 place-items-center rounded-full bg-sky-100 mx-auto mb-3">
+                                <svg class="h-6 w-6 text-sky-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                                </svg>
+                            </div>
+                            <div class="text-sm font-bold text-sky-800">Submission Successful</div>
+                            <div class="mt-1 text-xs text-sky-700">Results will be released by your teacher.</div>
+                        </div>
                     @endif
+
                     <div class="rounded-2xl bg-sky-50 p-6 text-center shadow-sm">
                         <div class="text-xs font-semibold uppercase tracking-wider text-slate-600">Submitted At</div>
                         <div class="mt-3 text-xl font-bold text-slate-900">{{ $attempt->submitted_at?->format('g:i A') }}</div>
@@ -176,6 +208,7 @@
                     </a>
                 </div>
             </div>
+
         @else
             <!-- Question Map Toggle (Mobile Only) -->
             <button @click="$dispatch('toggle-question-map')" class="mb-4 flex w-full items-center justify-between rounded-xl bg-white p-3 shadow-md ring-1 ring-slate-100 lg:hidden">

@@ -178,6 +178,12 @@ class Take extends Component
         $this->startedAtIso = $startedAt?->toIso8601String();
         $this->durationSeconds = max(1, (int) ($attempt->exam->duration_minutes ?? 1)) * 60;
 
+        // Shuffle question order per-student if enabled (seed by attempt id for consistency)
+        if ($attempt->exam->shuffle_questions) {
+            $questions = $attempt->exam->questions->shuffle();
+            $attempt->exam->setRelation('questions', $questions);
+        }
+
         $this->loadAnswers();
         $this->currentIndex = 0;
     }

@@ -96,94 +96,92 @@ class Index extends Component
     {
         $this->studentId = null; // Reset student selection when class changes
         $this->filterStudentId = null; // Reset filter student selection
-        unset($this->students); // Clear cached students
+        $this->dispatch('$refresh');
     }
 
     public function updatedFilterStudentId(): void
     {
-        unset($this->transactions);
+        $this->dispatch('$refresh');
     }
 
     public function updatedTab(): void
     {
-        // Clear cached data when switching tabs for better performance
-        unset($this->transactions, $this->debtors, $this->feeStructures);
-        
         // Reset selections when switching tabs to avoid confusion
         if ($this->tab !== 'transactions') {
             $this->selectedClassId = null;
             $this->studentId = null;
         }
+        $this->dispatch('$refresh');
     }
 
     public function updatedFilterType(): void
     {
-        unset($this->transactions);
+        $this->dispatch('$refresh');
     }
 
     public function updatedFilterCategory(): void
     {
-        unset($this->transactions);
+        $this->dispatch('$refresh');
     }
 
     public function updatedFilterSession(): void
     {
-        unset($this->transactions);
+        $this->dispatch('$refresh');
     }
 
     public function updatedFilterTerm(): void
     {
-        unset($this->transactions);
+        $this->dispatch('$refresh');
     }
 
     public function updatedFilterFrom(): void
     {
-        unset($this->transactions);
+        $this->dispatch('$refresh');
     }
 
     public function updatedFilterTo(): void
     {
-        unset($this->transactions);
+        $this->dispatch('$refresh');
     }
 
     public function updatedIncludeVoided(): void
     {
-        unset($this->transactions);
+        $this->dispatch('$refresh');
     }
 
     public function updatedDebtorsCategory(): void
     {
-        unset($this->debtors);
+        $this->dispatch('$refresh');
     }
 
     public function updatedDebtorsSession(): void
     {
-        unset($this->debtors);
+        $this->dispatch('$refresh');
     }
 
     public function updatedDebtorsTerm(): void
     {
-        unset($this->debtors);
+        $this->dispatch('$refresh');
     }
 
     public function updatedFeeFilterClassId(): void
     {
-        unset($this->feeStructures);
+        $this->dispatch('$refresh');
     }
 
     public function updatedFeeFilterCategory(): void
     {
-        unset($this->feeStructures);
+        $this->dispatch('$refresh');
     }
 
     public function updatedFeeFilterTerm(): void
     {
-        unset($this->feeStructures);
+        $this->dispatch('$refresh');
     }
 
     public function updatedFeeFilterSession(): void
     {
-        unset($this->feeStructures);
+        $this->dispatch('$refresh');
     }
 
     #[Computed]
@@ -483,7 +481,7 @@ class Index extends Component
             }
 
             $this->cancelEditFee();
-            unset($this->feeStructures);
+            $this->dispatch('$refresh');
 
             $this->dispatch('alert', message: 'Fee structure saved successfully!', type: 'success');
         } catch (\Exception $e) {
@@ -506,7 +504,7 @@ class Index extends Component
             'session' => $fee->session,
         ]);
 
-        unset($this->feeStructures);
+        $this->dispatch('$refresh');
         $this->dispatch('alert', message: 'Fee structure deleted.', type: 'success');
     }
 
@@ -562,8 +560,8 @@ class Index extends Component
             $this->reset(['studentId', 'amountPaid']);
             $this->amountPaid = '';
 
-            // Clear cached computed properties so the UI reflects the new data
-            unset($this->transactions, $this->debtors);
+            // Force refresh of computed properties
+            $this->dispatch('$refresh');
 
             $this->dispatch('alert', message: 'Transaction saved successfully!', type: 'success');
         } catch (\Exception $e) {
@@ -610,8 +608,8 @@ class Index extends Component
 
         $this->cancelVoid();
 
-        // Clear cached computed properties so the UI reflects the voided transaction
-        unset($this->transactions, $this->debtors);
+        // Force refresh of computed properties
+        $this->dispatch('$refresh');
 
         $this->dispatch('alert', message: 'Transaction voided.', type: 'warning');
     }

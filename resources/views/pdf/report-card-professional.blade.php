@@ -172,8 +172,8 @@
                         <th style="width: 10%;">Exam</th>
                         <th style="width: 10%;">Total</th>
                         <th style="width: 10%;">Grade</th>
-                        <th style="width: 10%;">Class Avg</th>
-                        <th style="width: 10%;">Position</th>
+                        @if($showClassAverage)<th style="width: 10%;">Class Avg</th>@endif
+                        @if($showPosition)<th style="width: 10%;">Position</th>@endif
                     </tr>
                 </thead>
                 <tbody>
@@ -185,8 +185,8 @@
                             <td>{{ $row['exam'] ?? '—' }}</td>
                             <td><strong>{{ $row['total'] ?? '—' }}</strong></td>
                             <td><strong>{{ $row['grade'] ?? '—' }}</strong></td>
-                            <td>{{ $row['class_avg'] ?? '—' }}</td>
-                            <td>{{ $row['position'] ?? '—' }}</td>
+                            @if($showClassAverage)<td>{{ $row['class_avg'] ?? '—' }}</td>@endif
+                            @if($showPosition)<td>{{ $row['position'] ?? '—' }}</td>@endif
                         </tr>
                     @endforeach
                 </tbody>

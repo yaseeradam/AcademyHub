@@ -30,6 +30,11 @@ class Entry extends Component
     public string $session = '';
     public ?int $rejectingId = null;
     public string $rejectNote = '';
+    
+    /**
+     * @var array<int, string> Track validation errors for specific student fields
+     */
+    public array $validationErrors = [];
 
     /**
      * @var array<int, array{ca1:int|null, ca2:int|null, exam:int|null}>
@@ -231,25 +236,31 @@ class Entry extends Component
     {
         $this->subjectId = null;
         $this->scores = [];
-        unset($this->subjects, $this->students);
+        $this->validationErrors = [];
+        // Bust Livewire 3 computed property cache
+        unset($this->subjects, $this->students, $this->isPublished, $this->submission, $this->submissions);
     }
 
     public function updatedSubjectId(): void
     {
+        $this->validationErrors = [];
         $this->loadExistingScores();
-        unset($this->submission);
+        // Bust Livewire 3 computed property cache
+        unset($this->students, $this->isPublished, $this->submission, $this->submissions);
     }
 
     public function updatedTerm(): void
     {
+        $this->validationErrors = [];
         $this->loadExistingScores();
-        unset($this->submission, $this->isPublished);
+        unset($this->isPublished, $this->submission, $this->submissions);
     }
 
     public function updatedSession(): void
     {
+        $this->validationErrors = [];
         $this->loadExistingScores();
-        unset($this->submission, $this->isPublished);
+        unset($this->isPublished, $this->submission, $this->submissions);
     }
 
     public function updatedScores(mixed $value, ?string $name = null): void
@@ -273,6 +284,7 @@ class Entry extends Component
 
         $studentId = (int) $parts[0];
         $field = (string) end($parts);
+        $errorKey = "{$studentId}.{$field}";
 
         $maxMarks = $this->maxMarks();
         if (! array_key_exists($field, $maxMarks)) {
@@ -284,18 +296,25 @@ class Entry extends Component
         }
 
         $score = (int) $value;
+        $max = $maxMarks[$field];
+
+        // Clear any existing error for this field
+        unset($this->validationErrors[$errorKey]);
 
         if ($score < 0) {
             $this->scores[$studentId][$field] = 0;
+            $this->validationErrors[$errorKey] = 'negative';
             $this->dispatch('alert', message: 'Scores cannot be negative.', type: 'warning');
+            $this->dispatch('shake-row', studentId: $studentId, field: $field);
             return;
         }
 
-        $max = $maxMarks[$field];
         if ($score > $max) {
             $label = strtoupper($field);
             $this->scores[$studentId][$field] = $max;
+            $this->validationErrors[$errorKey] = 'exceeded';
             $this->dispatch('alert', message: "{$label} max is {$max}.", type: 'warning');
+            $this->dispatch('shake-row', studentId: $studentId, field: $field);
         }
     }
 
@@ -384,6 +403,7 @@ class Entry extends Component
         });
 
         $this->dispatch('alert', message: 'Scores saved.', type: 'success');
+        $this->validationErrors = []; // Clear all validation errors after successful save
         $this->loadExistingScores();
     }
 
@@ -441,7 +461,6 @@ class Entry extends Component
             ]);
         }
 
-        unset($this->submission);
         $this->dispatch('alert', message: 'Submitted to admin.', type: 'success');
         $this->dispatch('$refresh');
     }
@@ -564,7 +583,6 @@ class Entry extends Component
         $this->rejectingId = null;
         $this->rejectNote = '';
         $this->resetValidation();
-        unset($this->submissions);
         $this->dispatch('alert', message: 'Submission rejected.', type: 'success');
         $this->dispatch('$refresh');
     }

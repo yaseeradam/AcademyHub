@@ -3,30 +3,29 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use App\Models\Transaction;
+use Illuminate\Http\Request;
 
 class BillingController extends Controller
 {
     public function index(Request $request)
     {
-        $user = $request->user();
-        
-        $query = Transaction::with('student')
+        $user  = $request->user();
+        $query = Transaction::with('student:id,first_name,last_name,admission_number')
+            ->where('is_void', false)
             ->orderByDesc('date')
             ->orderByDesc('id');
 
         if ($user->role === 'parent') {
-            // Find all transactions for children of this parent
-            // $query->whereIn('student_id', $user->students()->pluck('students.id'));
+            $childIds = $user->students()->pluck('students.id');
+            $query->whereIn('student_id', $childIds);
         } elseif ($user->role === 'student') {
-            // $query->where('student_id', $user->student_id);
+            abort_unless($user->student_id, 403);
+            $query->where('student_id', $user->student_id);
         } elseif (!in_array($user->role, ['admin', 'bursar'])) {
-            return response()->json(['error' => 'Unauthorized access'], 403);
+            abort(403);
         }
 
-        $transactions = $query->paginate(20);
-
-        return response()->json($transactions);
+        return response()->json($query->paginate(20));
     }
 }
