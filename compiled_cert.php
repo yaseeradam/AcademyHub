@@ -1,7 +1,6 @@
 <?php $__env->startSection('content'); ?>
 <?php
     $hasPremium = true;
-    $isCertLocked = false;
     $certificateTemplate = old('certificate_template', config('myacademy.certificate_template', 'modern'));
     $certificateTemplatesData = [
         ['key' => 'modern',   'title' => 'Modern',   'desc' => 'Clean and contemporary design.',       'preview' => route('settings.templates.preview', ['type' => 'certificate', 'template' => 'modern']),   'free' => true],
@@ -345,4 +344,4 @@
 </div>
 <?php $__env->stopSection(); ?>
 
-<?php echo $__env->make('layouts.app', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\laragon\www\myacademy-laravel\resources\views/pages/settings/certificates.blade.php ENDPATH**/ ?>
+<?php echo $__env->make('layouts.app', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>

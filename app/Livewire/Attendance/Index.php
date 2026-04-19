@@ -9,6 +9,7 @@ use App\Models\AttendanceSheet;
 use App\Models\SchoolClass;
 use App\Models\Section;
 use App\Models\Student;
+use App\Models\SubjectAllocation;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
@@ -56,6 +57,13 @@ class Index extends Component
 
     private function getClasses()
     {
+        $user = auth()->user();
+        if ($user->role === 'teacher') {
+            $classIds = SubjectAllocation::where('teacher_id', $user->id)
+                ->pluck('class_id')
+                ->unique();
+            return SchoolClass::whereIn('id', $classIds)->orderBy('level')->get();
+        }
         return SchoolClass::query()->orderBy('level')->get();
     }
 

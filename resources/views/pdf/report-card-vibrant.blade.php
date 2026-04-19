@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <title>Report Card - {{ $student->admission_number }}</title>
     <style>
-        @page { margin: 12mm; }
+        @page { margin: 10mm; }
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: DejaVu Sans, Arial, sans-serif; font-size: 9px; color: #1f2937; background: #fff; }
 
@@ -27,7 +27,7 @@
         
         .circles { display: table; width: 100%; margin-bottom: 10px; }
         .circle-wrap { display: table-cell; width: 16.66%; text-align: center; padding: 2px; }
-        .circle { width: 60px; height: 60px; border-radius: 50%; margin: 0 auto; display: flex; flex-direction: column; align-items: center; justify-content: center; border: 3px solid white; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        .circle { width: 48px; height: 48px; border-radius: 50%; margin: 0 auto; display: flex; flex-direction: column; align-items: center; justify-content: center; border: 2px solid white; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
         .circle.pink { background: linear-gradient(135deg, #ec4899, #db2777); }
         .circle.purple { background: linear-gradient(135deg, #a855f7, #9333ea); }
         .circle.blue { background: linear-gradient(135deg, #3b82f6, #2563eb); }
@@ -35,7 +35,7 @@
         .circle.orange { background: linear-gradient(135deg, #f97316, #ea580c); }
         .circle.yellow { background: linear-gradient(135deg, #eab308, #ca8a04); }
         .circle-label { font-size: 6px; color: white; font-weight: 700; text-transform: uppercase; }
-        .circle-value { font-size: 14px; color: white; font-weight: 900; }
+        .circle-value { font-size: 11px; color: white; font-weight: 900; }
         
         table { width: 100%; border-collapse: collapse; margin-bottom: 10px; background: white; border-radius: 8px; overflow: hidden; }
         th { background: linear-gradient(135deg, #a855f7, #ec4899); color: white; padding: 6px 3px; font-size: 7px; font-weight: 800; text-transform: uppercase; }

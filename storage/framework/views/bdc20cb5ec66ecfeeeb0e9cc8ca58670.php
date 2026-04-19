@@ -1,19 +1,20 @@
 <!doctype html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="h-full">
+<html lang="<?php echo e(str_replace('_', '-', app()->getLocale())); ?>" class="h-full">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="csrf-token" content="{{ csrf_token() }}" />
-    <title>{{ config('myacademy.school_name', config('app.name', 'MyAcademy')) }} — Student Portal</title>
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
-    @livewireStyles
+    <meta name="csrf-token" content="<?php echo e(csrf_token()); ?>" />
+    <title><?php echo e(config('myacademy.school_name', config('app.name', 'MyAcademy'))); ?> — Student Portal</title>
+    <?php echo app('Illuminate\Foundation\Vite')(['resources/css/app.css', 'resources/js/app.js']); ?>
+    <?php echo \Livewire\Mechanisms\FrontendAssets\FrontendAssets::styles(); ?>
+
     <style>
         body { font-family: 'Space Grotesk', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif; }
     </style>
 </head>
 <body class="h-full bg-gradient-to-br from-green-50 via-white to-emerald-50 text-slate-900">
 
-@php
+<?php
 $navItems = [
     ['route' => 'student.dashboard',      'label' => 'Dashboard',      'color' => 'text-green-600',  'icon' => '<rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>'],
     ['route' => 'student.homework',       'label' => 'Homework',       'color' => 'text-purple-600', 'icon' => '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>'],
@@ -24,7 +25,7 @@ $navItems = [
     ['route' => 'student.notifications',  'label' => 'Notifications',  'color' => 'text-green-600',  'icon' => '<path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>'],
     ['route' => 'student.profile',        'label' => 'My Profile',     'color' => 'text-gray-600',   'icon' => '<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>'],
 ];
-@endphp
+?>
 
 <div id="app" class="min-h-screen">
 
@@ -36,17 +37,17 @@ $navItems = [
         <div class="flex h-full flex-col bg-white shadow-xl">
             <div class="flex items-center justify-between border-b border-gray-100 px-4 py-4">
                 <div class="flex items-center gap-3">
-                    @php $schoolLogo = config('myacademy.school_logo'); @endphp
+                    <?php $schoolLogo = config('myacademy.school_logo'); ?>
                     <div class="grid h-9 w-9 place-items-center overflow-hidden rounded-lg bg-green-500 text-white shadow-sm flex-shrink-0">
-                        @if($schoolLogo)
-                            <img src="{{ asset('uploads/' . str_replace('\\', '/', $schoolLogo)) }}" alt="Logo" class="h-full w-full object-contain p-1 bg-white rounded-md" />
-                        @else
+                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($schoolLogo): ?>
+                            <img src="<?php echo e(asset('uploads/' . str_replace('\\', '/', $schoolLogo))); ?>" alt="Logo" class="h-full w-full object-contain p-1 bg-white rounded-md" />
+                        <?php else: ?>
                             <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                                 <path d="M12 3 1 9l11 6 9-4.91V17a2 2 0 0 1-1.1 1.79l-7.4 3.7a2 2 0 0 1-1.8 0l-7.4-3.7A2 2 0 0 1 2 17V9"/><path d="M12 21V9"/>
                             </svg>
-                        @endif
+                        <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                     </div>
-                    <span class="text-sm font-bold text-slate-900 truncate">{{ config('myacademy.school_name', 'MyAcademy') }}</span>
+                    <span class="text-sm font-bold text-slate-900 truncate"><?php echo e(config('myacademy.school_name', 'MyAcademy')); ?></span>
                 </div>
                 <button id="closeMobileSidebar" class="rounded-lg p-2 text-gray-400 hover:bg-gray-100">
                     <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 18L18 6M6 6l12 12"/></svg>
@@ -54,18 +55,19 @@ $navItems = [
             </div>
 
             <nav class="flex-1 overflow-y-auto px-3 py-4 space-y-0.5">
-                @foreach($navItems as $item)
-                    <a href="{{ route($item['route']) }}"
-                       class="{{ request()->routeIs($item['route']) ? 'bg-green-500 text-white shadow-md' : 'text-slate-700 hover:bg-green-50' }} flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-bold transition-all">
-                        <svg class="h-5 w-5 flex-shrink-0 {{ request()->routeIs($item['route']) ? 'text-white' : $item['color'] }}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">{!! $item['icon'] !!}</svg>
-                        {{ $item['label'] }}
+                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $navItems; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $item): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                    <a href="<?php echo e(route($item['route'])); ?>"
+                       class="<?php echo e(request()->routeIs($item['route']) ? 'bg-green-500 text-white shadow-md' : 'text-slate-700 hover:bg-green-50'); ?> flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-bold transition-all">
+                        <svg class="h-5 w-5 flex-shrink-0 <?php echo e(request()->routeIs($item['route']) ? 'text-white' : $item['color']); ?>" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><?php echo $item['icon']; ?></svg>
+                        <?php echo e($item['label']); ?>
+
                     </a>
-                @endforeach
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
             </nav>
 
             <div class="border-t border-gray-100 p-4">
-                <form method="POST" action="{{ route('student.logout') }}">
-                    @csrf
+                <form method="POST" action="<?php echo e(route('student.logout')); ?>">
+                    <?php echo csrf_field(); ?>
                     <button type="submit" class="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-br from-slate-700 to-slate-900 px-4 py-3 text-sm font-bold text-white shadow-md hover:shadow-lg transition-all">
                         <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
                         Logout
@@ -78,19 +80,20 @@ $navItems = [
     <!-- Desktop Sidebar -->
     <aside id="desktopSidebar" class="fixed inset-y-0 left-0 hidden w-64 flex-col bg-white shadow-xl transition-all duration-300 lg:flex">
         <div class="flex items-center justify-between border-b border-slate-200 px-4 py-4">
-            @php $schoolLogo = config('myacademy.school_logo'); @endphp
+            <?php $schoolLogo = config('myacademy.school_logo'); ?>
             <div class="flex items-center gap-2.5 min-w-0">
                 <div class="grid h-9 w-9 place-items-center overflow-hidden rounded-lg bg-green-500 text-white shadow-sm flex-shrink-0">
-                    @if($schoolLogo)
-                        <img src="{{ asset('uploads/' . str_replace('\\', '/', $schoolLogo)) }}" alt="Logo" class="h-full w-full object-contain p-1 bg-white rounded-md" />
-                    @else
+                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($schoolLogo): ?>
+                        <img src="<?php echo e(asset('uploads/' . str_replace('\\', '/', $schoolLogo))); ?>" alt="Logo" class="h-full w-full object-contain p-1 bg-white rounded-md" />
+                    <?php else: ?>
                         <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                             <path d="M12 3 1 9l11 6 9-4.91V17a2 2 0 0 1-1.1 1.79l-7.4 3.7a2 2 0 0 1-1.8 0l-7.4-3.7A2 2 0 0 1 2 17V9"/><path d="M12 21V9"/>
                         </svg>
-                    @endif
+                    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                 </div>
                 <div class="sidebar-text truncate text-sm font-bold text-slate-900">
-                    {{ config('myacademy.school_name', 'MyAcademy') }}
+                    <?php echo e(config('myacademy.school_name', 'MyAcademy')); ?>
+
                 </div>
             </div>
             <button id="sidebarToggle" class="rounded-lg p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors flex-shrink-0">
@@ -99,18 +102,18 @@ $navItems = [
         </div>
 
         <nav class="flex-1 overflow-y-auto px-3 py-4 space-y-0.5">
-            @foreach($navItems as $item)
-                <a href="{{ route($item['route']) }}" wire:navigate
-                   class="{{ request()->routeIs($item['route']) ? 'bg-green-500 text-white shadow-md' : 'text-slate-700 hover:bg-green-50' }} flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-bold transition-all">
-                    <svg class="h-5 w-5 flex-shrink-0 {{ request()->routeIs($item['route']) ? 'text-white' : $item['color'] }}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">{!! $item['icon'] !!}</svg>
-                    <span class="sidebar-text">{{ $item['label'] }}</span>
+            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $navItems; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $item): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                <a href="<?php echo e(route($item['route'])); ?>" wire:navigate
+                   class="<?php echo e(request()->routeIs($item['route']) ? 'bg-green-500 text-white shadow-md' : 'text-slate-700 hover:bg-green-50'); ?> flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-bold transition-all">
+                    <svg class="h-5 w-5 flex-shrink-0 <?php echo e(request()->routeIs($item['route']) ? 'text-white' : $item['color']); ?>" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><?php echo $item['icon']; ?></svg>
+                    <span class="sidebar-text"><?php echo e($item['label']); ?></span>
                 </a>
-            @endforeach
+            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
         </nav>
 
         <div class="border-t border-slate-100 p-3">
-            <form method="POST" action="{{ route('student.logout') }}">
-                @csrf
+            <form method="POST" action="<?php echo e(route('student.logout')); ?>">
+                <?php echo csrf_field(); ?>
                 <button type="submit" class="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-br from-slate-700 to-slate-900 px-4 py-2.5 text-sm font-bold text-white shadow-md hover:shadow-lg transition-all">
                     <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
                     <span class="sidebar-text">Logout</span>
@@ -132,22 +135,41 @@ $navItems = [
                     </button>
                     <div class="min-w-0">
                         <div class="truncate text-sm font-black text-slate-900">Student Portal</div>
-                        <div class="text-xs font-semibold text-slate-500">{{ now()->format('l, F j, Y') }}</div>
+                        <div class="text-xs font-semibold text-slate-500"><?php echo e(now()->format('l, F j, Y')); ?></div>
                     </div>
                 </div>
                 <div class="flex items-center gap-3">
-                    <livewire:student.notification-bell />
+                    <?php
+$__split = function ($name, $params = []) {
+    return [$name, $params];
+};
+[$__name, $__params] = $__split('student.notification-bell', []);
+
+$key = null;
+
+$key ??= \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::generateKey('lw-265621068-0', null);
+
+$__html = app('livewire')->mount($__name, $__params, $key);
+
+echo $__html;
+
+unset($__html);
+unset($__name);
+unset($__params);
+unset($__split);
+if (isset($__slots)) unset($__slots);
+?>
                     <div class="hidden md:flex items-center gap-2.5 rounded-xl bg-white p-1.5 shadow-sm ring-1 ring-gray-200">
                         <div class="grid h-9 w-9 place-items-center rounded-lg bg-gradient-to-br from-green-500 to-emerald-600 text-white">
-                            <span class="text-sm font-bold">{{ mb_substr(session('student_name', 'S'), 0, 1) }}</span>
+                            <span class="text-sm font-bold"><?php echo e(mb_substr(session('student_name', 'S'), 0, 1)); ?></span>
                         </div>
                         <div class="hidden pr-2 leading-tight sm:block">
-                            <div class="text-sm font-bold text-gray-900">{{ session('student_name') }}</div>
-                            <div class="text-xs font-semibold text-gray-500">{{ session('student_admission') }}</div>
+                            <div class="text-sm font-bold text-gray-900"><?php echo e(session('student_name')); ?></div>
+                            <div class="text-xs font-semibold text-gray-500"><?php echo e(session('student_admission')); ?></div>
                         </div>
                     </div>
-                    <form method="POST" action="{{ route('student.logout') }}" class="hidden md:block">
-                        @csrf
+                    <form method="POST" action="<?php echo e(route('student.logout')); ?>" class="hidden md:block">
+                        <?php echo csrf_field(); ?>
                         <button type="submit" class="inline-flex items-center justify-center rounded-xl bg-gradient-to-br from-slate-700 to-slate-900 px-4 py-2.5 text-sm font-bold text-white shadow-md hover:shadow-lg transition-all">
                             Logout
                         </button>
@@ -157,19 +179,21 @@ $navItems = [
         </header>
 
         <main class="px-6 py-6">
-            @if(session('success'))
+            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(session('success')): ?>
                 <div class="mb-6 rounded-xl bg-green-50 border border-green-200 p-4 flex items-center gap-3">
                     <svg class="h-5 w-5 text-green-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
-                    <p class="text-sm font-medium text-green-800">{{ session('success') }}</p>
+                    <p class="text-sm font-medium text-green-800"><?php echo e(session('success')); ?></p>
                 </div>
-            @endif
-            {{ $slot }}
+            <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+            <?php echo e($slot); ?>
+
         </main>
     </div>
 </div>
 
-@livewireScripts
-@stack('scripts')
+<?php echo \Livewire\Mechanisms\FrontendAssets\FrontendAssets::scripts(); ?>
+
+<?php echo $__env->yieldPushContent('scripts'); ?>
 
 <script>
     // Desktop sidebar toggle
@@ -219,3 +243,4 @@ $navItems = [
     </div>
 </body>
 </html>
+<?php /**PATH C:\laragon\www\myacademy-laravel\resources\views/layouts/student.blade.php ENDPATH**/ ?>

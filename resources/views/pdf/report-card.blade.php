@@ -6,7 +6,7 @@
     <title>Report Card - {{ $student->admission_number }}</title>
     <style>
         @page {
-            margin: 15mm;
+            margin: 10mm;
         }
 
         * {
@@ -24,7 +24,7 @@
 
         .page-border {
             border: 4px solid #d97706;
-            padding: 20px;
+            padding: 12px;
             background: linear-gradient(to bottom, #fffbeb 0%, #ffffff 100%);
             position: relative;
             box-shadow: inset 0 0 0 2px #fbbf24;
@@ -213,11 +213,11 @@
 
         .summary-inner {
             background: linear-gradient(135deg, #d97706, #b45309);
-            border-radius: 10px;
-            padding: 12px 8px;
+            border-radius: 8px;
+            padding: 8px 4px;
             text-align: center;
-            box-shadow: 0 4px 10px rgba(217, 119, 6, 0.3);
-            border: 2px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 2px 6px rgba(217, 119, 6, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.2);
         }
 
         .summary-inner.green {
@@ -250,10 +250,9 @@
         }
 
         .summary-value {
-            font-size: 20px;
+            font-size: 15px;
             font-weight: 900;
             color: white;
-            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
         }
 
         /* ─── Scores Table ─── */
@@ -270,20 +269,20 @@
         th {
             background: linear-gradient(135deg, #d97706, #b45309, #92400e);
             color: white;
-            padding: 10px 6px;
+            padding: 7px 4px;
             text-align: center;
-            font-size: 8px;
+            font-size: 7px;
             font-weight: 900;
             text-transform: uppercase;
-            letter-spacing: 1px;
+            letter-spacing: 0.5px;
             border: 1px solid #b45309;
         }
 
         td {
-            padding: 6px 5px;
+            padding: 4px 4px;
             border: 1px solid #e5e7eb;
             text-align: center;
-            font-size: 9px;
+            font-size: 8px;
         }
 
         tr:nth-child(even) {

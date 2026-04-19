@@ -20,6 +20,55 @@
         body {
             font-family: 'Space Grotesk', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
         }
+
+        /* Softer, smoother admin/teacher sidebar */
+        #desktopSidebar {
+            background: rgba(255, 255, 255, 0.78);
+            -webkit-backdrop-filter: blur(16px);
+            backdrop-filter: blur(16px);
+            border-right: 1px solid rgba(15, 23, 42, 0.08);
+            box-shadow: 0 12px 36px rgba(15, 23, 42, 0.06);
+        }
+
+        #desktopSidebar nav a {
+            border-left-width: 0 !important; /* overrides Tailwind border-l-* */
+            border: 1px solid transparent;
+            border-radius: 16px !important;
+            font-weight: 600 !important;
+            letter-spacing: -0.01em;
+            transition: background-color 180ms ease, color 180ms ease, border-color 180ms ease;
+        }
+
+        #desktopSidebar nav a:hover {
+            background-color: rgba(15, 23, 42, 0.04) !important;
+            color: rgb(15 23 42) !important;
+        }
+
+        /* Active sidebar link uses existing `bg-amber-50` class as the hook */
+        #desktopSidebar nav a.bg-amber-50 {
+            background-color: rgba(15, 23, 42, 0.06) !important;
+            color: rgb(15 23 42) !important;
+            border-color: rgba(15, 23, 42, 0.10) !important;
+        }
+
+        #desktopSidebar nav a svg {
+            color: rgb(100 116 139) !important;
+            transition: color 180ms ease;
+        }
+
+        #desktopSidebar nav a:hover svg {
+            color: rgb(51 65 85) !important;
+        }
+
+        #desktopSidebar nav a.bg-amber-50 svg {
+            color: rgb(217 119 6) !important;
+        }
+
+        #mobileSidebar > div {
+            background: rgba(255, 255, 255, 0.92);
+            -webkit-backdrop-filter: blur(16px);
+            backdrop-filter: blur(16px);
+        }
     </style>
 
 </head>

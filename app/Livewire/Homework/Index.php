@@ -47,8 +47,23 @@ class Index extends Component
         $homework = $query->latest()
             ->paginate(10);
 
-        $classes = SchoolClass::orderBy('name')->get();
-        $subjects = Subject::orderBy('name')->get();
+        $user = auth()->user();
+
+        $classIds = $user->role === 'admin'
+            ? null
+            : \App\Models\SubjectAllocation::where('teacher_id', $user->id)->pluck('class_id')->unique();
+
+        $classes = $classIds === null
+            ? SchoolClass::orderBy('name')->get()
+            : SchoolClass::whereIn('id', $classIds)->orderBy('name')->get();
+
+        $subjects = $classIds === null
+            ? Subject::orderBy('name')->get()
+            : Subject::whereIn('id',
+                \App\Models\SubjectAllocation::where('teacher_id', $user->id)
+                    ->when($this->class_id, fn($q) => $q->where('class_id', $this->class_id))
+                    ->pluck('subject_id')->unique()
+              )->orderBy('name')->get();
 
         return view('livewire.homework.index', [
             'homework' => $homework,
@@ -105,12 +120,20 @@ class Index extends Component
     public function save()
     {
         $this->validate([
-            'class_id' => 'required|exists:classes,id',
+            'class_id'   => 'required|exists:classes,id',
             'subject_id' => 'required|exists:subjects,id',
-            'title' => 'required|string|max:255',
-            'content' => 'required|string',
-            'due_date' => 'required|date',
+            'title'      => 'required|string|max:255',
+            'content'    => 'required|string',
+            'due_date'   => 'required|date',
         ]);
+
+        $user = auth()->user();
+        if ($user->role !== 'admin') {
+            $allowed = \App\Models\SubjectAllocation::where('teacher_id', $user->id)
+                ->where('class_id', $this->class_id)
+                ->exists();
+            abort_unless($allowed, 403, 'You are not assigned to this class.');
+        }
 
         $data = [
             'teacher_id' => auth()->id(),

@@ -3,6 +3,7 @@
 @section('content')
 @php
     $hasPremium = true;
+    $isCertLocked = false;
     $certificateTemplate = old('certificate_template', config('myacademy.certificate_template', 'modern'));
     $certificateTemplatesData = [
         ['key' => 'modern',   'title' => 'Modern',   'desc' => 'Clean and contemporary design.',       'preview' => route('settings.templates.preview', ['type' => 'certificate', 'template' => 'modern']),   'free' => true],
@@ -258,8 +259,10 @@
                 <div class="text-sm font-black text-gray-900">Certificate Template</div>
                 <div class="mt-1 text-sm font-semibold text-gray-600">Choose your preferred certificate design.</div>
                 <div class="mt-4 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                    @foreach ($certificateTemplatesData as $ct)
-                        @php $isCertLocked = !$ct['free'] && !$hasPremium; @endphp
+                    <?php foreach ($certificateTemplatesData as $ct): ?>
+                        @php
+                            $isCertLocked = !$ct['free'] && !$hasPremium;
+                        @endphp
                         <label
                             :class="selectedCertificateTemplate === '{{ $ct['key'] }}' ? 'border-amber-400 ring-2 ring-amber-600 bg-amber-50/20' : 'border-white/60'"
                             class="group flex h-full cursor-pointer flex-col rounded-2xl border bg-white/60 p-5 shadow-sm ring-1 ring-white/50 backdrop-blur transition hover:border-amber-200 hover:shadow-md {{ $isCertLocked ? 'opacity-60' : '' }}">
@@ -295,7 +298,7 @@
                                 </button>
                             </div>
                         </label>
-                    @endforeach
+                    <?php endforeach; ?>
                 </div>
             </div>
 
