@@ -23,6 +23,7 @@ class Index extends Component
             ->update(['read_at' => now()]);
 
         $this->dispatch('alert', message: 'All notifications marked as read.', type: 'success');
+        $this->dispatch('notifications-updated');
     }
 
     public function markRead(int $id): void
@@ -46,6 +47,7 @@ class Index extends Component
         });
 
         $this->dispatch('alert', message: 'Notifications cleared.', type: 'success');
+        $this->dispatch('notifications-updated');
     }
 
     public function render()

@@ -1,173 +1,200 @@
 @php
     /** @var \Illuminate\Support\Collection<int, \App\Models\Subject> $subjects */
     $user = auth()->user();
+    $total = $subjects->count();
 @endphp
 
 @extends('layouts.app')
 
 @section('content')
-    <div class="space-y-6">
-        <div class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-cyan-500 via-blue-500 to-indigo-600 p-8 shadow-2xl">
-            <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSAxMCAwIEwgMCAwIDAgMTAiIGZpbGw9Im5vbmUiIHN0cm9rZT0id2hpdGUiIHN0cm9rZS1vcGFjaXR5PSIwLjEiIHN0cm9rZS13aWR0aD0iMSIvPjwvcGF0dGVybj48L2RlZnM+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0idXJsKCNncmlkKSIvPjwvc3ZnPg==')] opacity-30"></div>
-            <div class="relative flex items-center justify-between">
+<div class="space-y-6">
+
+    <x-page-header title="Subjects" subtitle="Create and manage subject codes used for results and allocations." accent="subjects">
+        <x-slot:actions>
+            <a href="{{ route('classes.index') }}" class="btn-outline">Manage Classes</a>
+        </x-slot:actions>
+    </x-page-header>
+
+    {{-- Stat Cards --}}
+    <div class="grid grid-cols-1 gap-5 sm:grid-cols-3">
+        <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-violet-500 to-purple-600 p-6 text-white shadow-lg">
+            <div class="absolute -right-6 -top-6 h-28 w-28 rounded-full bg-white/10"></div>
+            <div class="absolute right-4 bottom-4 h-16 w-16 rounded-full bg-white/10"></div>
+            <div class="relative flex items-start justify-between">
                 <div>
-                    <h1 class="text-3xl font-black text-white">Subjects</h1>
-                    <p class="mt-2 text-cyan-100">Create subject codes used for results and allocations</p>
+                    <div class="text-4xl font-black">{{ $total }}</div>
+                    <div class="mt-1 text-sm font-semibold text-white/80">Total Subjects</div>
                 </div>
-                <a href="{{ route('classes.index') }}" class="rounded-xl bg-white/20 px-4 py-2.5 text-sm font-semibold text-white backdrop-blur-sm transition-all hover:bg-white/30">Classes</a>
+                <div class="grid h-12 w-12 place-items-center rounded-xl bg-white/20">
+                    <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+                </div>
             </div>
         </div>
 
-        @if (session('modal'))
-            <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 2000)" class="fixed inset-0 z-50 flex items-center justify-center bg-black/20" x-transition>
-                <div class="rounded-2xl bg-white p-6 shadow-2xl">
-                    <div class="flex items-center gap-3">
-                        <div class="flex h-12 w-12 items-center justify-center rounded-full bg-green-100">
-                            <svg class="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                            </svg>
-                        </div>
-                        <div>
-                            <div class="text-lg font-bold text-gray-900">{{ session('modal')['message'] }}</div>
-                        </div>
-                    </div>
+        <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-blue-400 to-indigo-500 p-6 text-white shadow-lg">
+            <div class="absolute -right-6 -top-6 h-28 w-28 rounded-full bg-white/10"></div>
+            <div class="absolute right-4 bottom-4 h-16 w-16 rounded-full bg-white/10"></div>
+            <div class="relative flex items-start justify-between">
+                <div>
+                    <div class="text-4xl font-black">{{ $subjects->whereNotNull('code')->count() }}</div>
+                    <div class="mt-1 text-sm font-semibold text-white/80">With Codes</div>
+                </div>
+                <div class="grid h-12 w-12 place-items-center rounded-xl bg-white/20">
+                    <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
                 </div>
             </div>
-        @endif
+        </div>
 
-        @if ($errors->any())
-            <div class="card-padded border border-orange-200 bg-orange-50/60">
-                <div class="text-sm font-semibold text-orange-900">Please fix the following:</div>
-                <ul class="mt-2 list-disc space-y-1 pl-5 text-sm text-orange-900">
-                    @foreach ($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                    @endforeach
-                </ul>
+        <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-emerald-400 to-teal-500 p-6 text-white shadow-lg">
+            <div class="absolute -right-6 -top-6 h-28 w-28 rounded-full bg-white/10"></div>
+            <div class="absolute right-4 bottom-4 h-16 w-16 rounded-full bg-white/10"></div>
+            <div class="relative flex items-start justify-between">
+                <div>
+                    <div class="text-4xl font-black">{{ \App\Models\SubjectAllocation::distinct('subject_id')->count('subject_id') }}</div>
+                    <div class="mt-1 text-sm font-semibold text-white/80">Allocated</div>
+                </div>
+                <div class="grid h-12 w-12 place-items-center rounded-xl bg-white/20">
+                    <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+                </div>
             </div>
-        @endif
-
-        @if ($user?->role === 'admin')
-            <form method="POST" action="{{ route('subjects.store') }}" class="rounded-2xl border border-cyan-100 bg-gradient-to-br from-white to-cyan-50/30 p-6 shadow-lg backdrop-blur-sm">
-                @csrf
-                <div class="flex items-center gap-3">
-                    <div class="grid h-10 w-10 place-items-center rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 text-white shadow-lg">
-                        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M12 5v14M5 12h14" />
-                        </svg>
-                    </div>
-                    <div>
-                        <div class="text-sm font-bold text-cyan-900">Add New Subject</div>
-                        <div class="text-sm text-cyan-700">Create a subject for allocations</div>
-                    </div>
-                </div>
-
-                <div class="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
-                    <div class="sm:col-span-2">
-                        <label class="text-xs font-bold uppercase tracking-wider text-cyan-700">Subject name</label>
-                        <div class="mt-2">
-                            <input name="name" class="w-full rounded-lg border border-cyan-200 bg-white px-4 py-2.5 text-sm text-gray-700 shadow-sm focus:border-cyan-500 focus:ring-cyan-500" value="{{ old('name') }}" placeholder="e.g., Mathematics" required />
-                        </div>
-                    </div>
-                    <div>
-                        <label class="text-xs font-bold uppercase tracking-wider text-cyan-700">Code</label>
-                        <div class="mt-2">
-                            <input name="code" class="w-full rounded-lg border border-cyan-200 bg-white px-4 py-2.5 text-sm text-gray-700 shadow-sm focus:border-cyan-500 focus:ring-cyan-500" value="{{ old('code') }}" placeholder="e.g., MATH" required />
-                        </div>
-                    </div>
-                </div>
-
-                <div class="mt-6 flex justify-end">
-                    <button type="submit" class="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 px-6 py-2.5 text-sm font-bold text-white shadow-lg hover:from-cyan-600 hover:to-blue-700">
-                        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M12 5v14" />
-                            <path d="M5 12h14" />
-                        </svg>
-                        Add Subject
-                    </button>
-                </div>
-            </form>
-        @endif
-
-        <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            @forelse ($subjects as $subject)
-                @php
-                    $colors = [
-                        ['bg' => 'from-blue-50 to-indigo-100/60', 'ring' => 'ring-blue-300/40', 'icon' => 'from-blue-400 to-blue-600', 'shadow' => 'shadow-blue-500/30', 'badge' => 'bg-blue-100 text-blue-700 ring-blue-200', 'accent' => 'bg-blue-500'],
-                        ['bg' => 'from-purple-50 to-violet-100/60', 'ring' => 'ring-purple-300/40', 'icon' => 'from-purple-400 to-purple-600', 'shadow' => 'shadow-purple-500/30', 'badge' => 'bg-purple-100 text-purple-700 ring-purple-200', 'accent' => 'bg-purple-500'],
-                        ['bg' => 'from-emerald-50 to-green-100/60', 'ring' => 'ring-emerald-300/40', 'icon' => 'from-emerald-400 to-emerald-600', 'shadow' => 'shadow-emerald-500/30', 'badge' => 'bg-emerald-100 text-emerald-700 ring-emerald-200', 'accent' => 'bg-emerald-500'],
-                        ['bg' => 'from-orange-50 to-amber-100/60', 'ring' => 'ring-orange-300/40', 'icon' => 'from-orange-400 to-orange-600', 'shadow' => 'shadow-orange-500/30', 'badge' => 'bg-orange-100 text-orange-700 ring-orange-200', 'accent' => 'bg-orange-500'],
-                        ['bg' => 'from-pink-50 to-rose-100/60', 'ring' => 'ring-pink-300/40', 'icon' => 'from-pink-400 to-pink-600', 'shadow' => 'shadow-pink-500/30', 'badge' => 'bg-pink-100 text-pink-700 ring-pink-200', 'accent' => 'bg-pink-500'],
-                        ['bg' => 'from-cyan-50 to-teal-100/60', 'ring' => 'ring-cyan-300/40', 'icon' => 'from-cyan-400 to-cyan-600', 'shadow' => 'shadow-cyan-500/30', 'badge' => 'bg-cyan-100 text-cyan-700 ring-cyan-200', 'accent' => 'bg-cyan-500'],
-                    ];
-                    $color = $colors[$subject->id % count($colors)];
-                @endphp
-
-                <div class="group relative overflow-hidden rounded-3xl bg-gradient-to-br {{ $color['bg'] }} shadow-lg ring-1 {{ $color['ring'] }} transition-all duration-500 hover:shadow-2xl hover:-translate-y-2">
-                    <div class="absolute right-0 top-0 h-24 w-24 -translate-y-6 translate-x-6 rounded-full {{ $color['accent'] }} opacity-10"></div>
-                    <div class="absolute left-0 bottom-0 h-16 w-16 -translate-x-4 translate-y-4 rounded-full {{ $color['accent'] }} opacity-5"></div>
-                    
-                    <div class="relative p-6">
-                        <div class="flex items-start justify-between gap-3">
-                            <div class="icon-3d grid h-14 w-14 place-items-center rounded-2xl bg-gradient-to-br {{ $color['icon'] }} text-white shadow-xl {{ $color['shadow'] }} transition-transform duration-500 group-hover:rotate-12 group-hover:scale-110">
-                                <svg class="h-7 w-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
-                                    <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
-                                </svg>
-                            </div>
-                            <div class="inline-flex items-center gap-1.5 rounded-full {{ $color['badge'] }} px-3 py-1.5 text-xs font-black uppercase tracking-wider ring-1">
-                                {{ $subject->code }}
-                            </div>
-                        </div>
-
-                        <div class="mt-5">
-                            @if ($user?->role === 'admin')
-                                <form id="subject-update-{{ $subject->id }}" method="POST" action="{{ route('subjects.update', $subject) }}" class="space-y-3">
-                                    @csrf
-                                    @method('PATCH')
-                                    <input
-                                        name="name"
-                                        class="w-full rounded-xl border-0 bg-white/80 px-4 py-2.5 text-base font-bold text-slate-900 ring-1 ring-white/60 backdrop-blur-sm transition-all focus:bg-white focus:ring-2 focus:ring-white"
-                                        value="{{ old('name', $subject->name) }}"
-                                        required
-                                    />
-                                    <div class="flex gap-2">
-                                        <input
-                                            name="code"
-                                            class="w-24 rounded-xl border-0 bg-white/80 px-3 py-2 text-sm font-bold text-slate-900 ring-1 ring-white/60 backdrop-blur-sm transition-all focus:bg-white focus:ring-2 focus:ring-white"
-                                            value="{{ old('code', $subject->code) }}"
-                                            required
-                                        />
-                                        <button type="submit" class="flex-1 rounded-xl bg-white/90 px-4 py-2 text-sm font-bold text-slate-900 ring-1 ring-white/60 backdrop-blur-sm transition-all hover:bg-white hover:shadow-lg">
-                                            Save
-                                        </button>
-                                    </div>
-                                </form>
-                                <form method="POST" action="{{ route('subjects.destroy', $subject) }}" class="mt-2">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="w-full rounded-xl bg-red-500/10 px-4 py-2 text-sm font-bold text-red-600 ring-1 ring-red-200/50 backdrop-blur-sm transition-all hover:bg-red-500/20">
-                                        Delete
-                                    </button>
-                                </form>
-                            @else
-                                <div class="text-xl font-black tracking-tight text-slate-900">{{ $subject->name }}</div>
-                                <div class="mt-2 text-sm text-slate-600">Subject code: {{ $subject->code }}</div>
-                            @endif
-                        </div>
-                    </div>
-                </div>
-            @empty
-                <div class="col-span-full rounded-3xl bg-gradient-to-br from-slate-50 to-gray-100/60 p-12 text-center shadow-lg ring-1 ring-slate-200/50">
-                    <div class="mx-auto grid h-20 w-20 place-items-center rounded-2xl bg-gradient-to-br from-slate-400 to-slate-600 text-white shadow-xl">
-                        <svg class="h-10 w-10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
-                            <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
-                        </svg>
-                    </div>
-                    <div class="mt-6 text-xl font-black text-slate-900">No subjects yet</div>
-                    <div class="mt-2 text-sm text-slate-600">Add your first subject to get started</div>
-                </div>
-            @endforelse
         </div>
     </div>
+
+    @if (session('modal'))
+        <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 2000)" class="fixed inset-0 z-50 flex items-center justify-center bg-black/20" x-transition>
+            <div class="rounded-2xl bg-white p-6 shadow-2xl">
+                <div class="flex items-center gap-3">
+                    <div class="flex h-12 w-12 items-center justify-center rounded-full bg-green-100">
+                        <svg class="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                    </div>
+                    <div class="text-lg font-bold text-gray-900">{{ session('modal')['message'] }}</div>
+                </div>
+            </div>
+        </div>
+    @endif
+
+    @if ($errors->any())
+        <div class="rounded-2xl border border-orange-200 bg-orange-50/60 p-5">
+            <div class="text-sm font-semibold text-orange-900">Please fix the following:</div>
+            <ul class="mt-2 list-disc space-y-1 pl-5 text-sm text-orange-900">
+                @foreach ($errors->all() as $error)<li>{{ $error }}</li>@endforeach
+            </ul>
+        </div>
+    @endif
+
+    {{-- Add Form --}}
+    @if ($user?->role === 'admin')
+        <div class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-100">
+            <div class="mb-5 flex items-center gap-3 border-b border-slate-100 pb-4">
+                <div class="grid h-9 w-9 place-items-center rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 text-white shadow-sm">
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+                </div>
+                <div class="text-sm font-bold text-slate-800">Add New Subject</div>
+            </div>
+            <form method="POST" action="{{ route('subjects.store') }}" class="flex flex-col sm:flex-row items-end gap-4">
+                @csrf
+                <div class="flex-1">
+                    <label class="text-xs font-semibold uppercase tracking-wider text-slate-500">Subject Name</label>
+                    <input name="name" class="mt-2 input-compact w-full" value="{{ old('name') }}" placeholder="e.g., Mathematics" required />
+                </div>
+                <div class="w-32">
+                    <label class="text-xs font-semibold uppercase tracking-wider text-slate-500">Code</label>
+                    <input name="code" class="mt-2 input-compact w-full uppercase" value="{{ old('code') }}" placeholder="MATH" required />
+                </div>
+                <button type="submit" class="inline-flex items-center gap-2 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 px-5 py-2.5 text-sm font-bold text-white shadow-sm transition hover:from-violet-600 hover:to-purple-700">
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+                    Add Subject
+                </button>
+            </form>
+        </div>
+    @endif
+
+    {{-- Table Card --}}
+    <div class="rounded-2xl bg-white shadow-sm ring-1 ring-slate-100">
+        <div class="flex items-center justify-between border-b border-slate-100 p-5">
+            <div>
+                <div class="text-base font-bold text-slate-800">All Subjects</div>
+                <div class="mt-0.5 text-xs text-slate-400">{{ $total }} subject{{ $total !== 1 ? 's' : '' }} registered</div>
+            </div>
+        </div>
+
+        <div class="overflow-x-auto">
+            <table class="min-w-full">
+                <thead>
+                    <tr class="border-b border-slate-100 bg-slate-50/80 text-xs font-semibold uppercase tracking-wider text-slate-500">
+                        <th class="px-5 py-3 text-left">Subject Name</th>
+                        <th class="px-5 py-3 text-left">Code</th>
+                        @if ($user?->role === 'admin')
+                            <th class="px-5 py-3 text-right">Actions</th>
+                        @endif
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                    @forelse ($subjects as $subject)
+                        <tr class="group bg-white transition hover:bg-slate-50/80">
+                            @if ($user?->role === 'admin')
+                                <td class="px-5 py-4" colspan="3">
+                                    <div x-data="{ editing: false }" class="flex items-center justify-between w-full">
+                                        <div x-show="!editing" class="flex items-center justify-between w-full">
+                                            <div class="flex items-center gap-4">
+                                                <div class="grid h-9 w-9 place-items-center rounded-xl bg-gradient-to-br from-violet-400 to-purple-500 text-white text-xs font-black shadow-sm">
+                                                    {{ mb_substr($subject->name, 0, 1) }}
+                                                </div>
+                                                <div class="font-semibold text-slate-800">{{ $subject->name }}</div>
+                                                <span class="rounded-lg bg-slate-100 px-2.5 py-1 text-xs font-bold text-slate-600">{{ $subject->code }}</span>
+                                            </div>
+                                            <div class="flex items-center gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                <button @click="editing = true" type="button" class="rounded-lg bg-blue-50 px-3 py-1.5 text-xs font-bold text-blue-600 transition hover:bg-blue-100">Edit</button>
+                                                <form method="POST" action="{{ route('subjects.destroy', $subject) }}" class="inline-block" onsubmit="return confirm('Delete this subject?')">
+                                                    @csrf @method('DELETE')
+                                                    <button type="submit" class="rounded-lg bg-rose-50 px-3 py-1.5 text-xs font-bold text-rose-600 transition hover:bg-rose-100">Delete</button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                        <div x-show="editing" x-cloak class="w-full">
+                                            <form method="POST" action="{{ route('subjects.update', $subject) }}" class="flex items-center gap-4 w-full">
+                                                @csrf @method('PATCH')
+                                                <input name="name" class="input-compact flex-1" value="{{ old('name', $subject->name) }}" required />
+                                                <input name="code" class="input-compact w-32 uppercase" value="{{ old('code', $subject->code) }}" required />
+                                                <div class="flex items-center gap-2">
+                                                    <button type="submit" class="rounded-lg bg-violet-600 px-4 py-1.5 text-xs font-bold text-white hover:bg-violet-700">Save</button>
+                                                    <button @click="editing = false" type="button" class="btn-outline text-xs h-8 px-3">Cancel</button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </td>
+                            @else
+                                <td class="px-5 py-4">
+                                    <div class="flex items-center gap-3">
+                                        <div class="grid h-9 w-9 place-items-center rounded-xl bg-gradient-to-br from-violet-400 to-purple-500 text-white text-xs font-black shadow-sm">
+                                            {{ mb_substr($subject->name, 0, 1) }}
+                                        </div>
+                                        <div class="font-semibold text-slate-800">{{ $subject->name }}</div>
+                                    </div>
+                                </td>
+                                <td class="px-5 py-4">
+                                    <span class="rounded-lg bg-slate-100 px-2.5 py-1 text-xs font-bold text-slate-600">{{ $subject->code }}</span>
+                                </td>
+                            @endif
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="{{ $user?->role === 'admin' ? 3 : 2 }}" class="px-5 py-16 text-center">
+                                <div class="flex flex-col items-center gap-3">
+                                    <div class="grid h-16 w-16 place-items-center rounded-2xl bg-slate-100">
+                                        <svg class="h-8 w-8 text-slate-400" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+                                    </div>
+                                    <div class="text-sm font-semibold text-slate-600">No subjects found</div>
+                                    <div class="text-xs text-slate-400">Add your first subject to get started</div>
+                                </div>
+                            </td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
 @endsection

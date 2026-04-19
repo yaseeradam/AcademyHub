@@ -1,9 +1,11 @@
-@php
-    /** @var \App\Models\Student $student */
+import os
 
-    use App\Models\AttendanceMark;
-    use App\Models\Score;
-    use App\Models\Transaction;
+php_code = """@php
+    /** @var \\App\\Models\\Student $student */
+
+    use App\\Models\\AttendanceMark;
+    use App\\Models\\Score;
+    use App\\Models\\Transaction;
 
     $tab = request('tab', 'profile');
     $tabs = [
@@ -81,10 +83,10 @@
 
     $performanceData = [];
     if ($tab === 'analytics') {
-        $service = app(\App\Support\StudentPerformanceService::class);
-        $currentTerm = \App\Models\AcademicTerm::where('is_active', true)->first();
+        $service = app(\\App\\Support\\StudentPerformanceService::class);
+        $currentTerm = \\App\\Models\\AcademicTerm::where('is_active', true)->first();
         if (!$currentTerm) {
-            $currentTerm = \App\Models\AcademicTerm::latest()->first();
+            $currentTerm = \\App\\Models\\AcademicTerm::latest()->first();
         }
         if ($currentTerm) {
             $performanceData = [
@@ -102,38 +104,48 @@
 @section('content')
 <div class="space-y-6">
 
-    {{-- Profile Header Card --}}
-    <div class="rounded-2xl bg-white shadow-sm ring-1 ring-slate-100 px-6 py-6 mb-2">
-        <div class="flex flex-col gap-6 md:flex-row md:items-center justify-between">
+    {{-- Hero Card (Inherited directly from dashboard.blade.php style) --}}
+    <div class="relative overflow-hidden rounded-2xl shadow-xl" style="background-color: #1a2e4a;">
+        <div class="absolute inset-0" style="background: radial-gradient(ellipse at top left, #1e3a5f 0%, transparent 60%);"></div>
+        <div class="absolute right-0 top-0 bottom-0 w-48 opacity-10">
+            <svg viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full">
+                <circle cx="160" cy="100" r="130" stroke="white" stroke-width="0.5"/>
+                <circle cx="160" cy="100" r="90" stroke="white" stroke-width="0.5"/>
+                <circle cx="160" cy="100" r="50" stroke="white" stroke-width="0.5"/>
+            </svg>
+        </div>
+
+        <div class="relative flex flex-col md:flex-row md:items-end justify-between p-8 gap-6">
             {{-- Left: Avatar & Info --}}
-            <div class="flex items-center gap-5">
+            <div class="flex flex-col sm:flex-row items-center sm:items-start gap-6 relative z-10">
                 <div class="shrink-0 relative">
                     @if ($student->passport_photo_url)
-                        <img src="{{ $student->passport_photo_url }}" alt="{{ $student->full_name }}" class="h-20 w-20 rounded-2xl object-cover ring-4 ring-slate-50 shadow-sm" />
+                        <img src="{{ $student->passport_photo_url }}" alt="{{ $student->full_name }}" class="h-32 w-32 rounded-2xl object-cover ring-4 ring-white/20 shadow-xl" />
                     @else
-                        <div class="grid h-20 w-20 place-items-center rounded-2xl bg-gradient-to-br from-orange-400 to-amber-500 text-2xl font-bold text-white shadow-sm ring-4 ring-slate-50">
+                        <div class="grid h-32 w-32 place-items-center rounded-2xl bg-gradient-to-br from-orange-400 to-amber-500 text-4xl font-black text-white ring-4 ring-white/20 shadow-xl">
                             {{ $initials }}
                         </div>
                     @endif
+                    @php $statusColor = match($student->status) { 'Active' => 'bg-emerald-400', 'Graduated' => 'bg-emerald-400', default => 'bg-amber-400' }; @endphp
+                    <span class="absolute -bottom-2 -right-2 flex h-6 w-6 items-center justify-center rounded-full border-4 border-[#1a2e4a] {{ $statusColor }}"></span>
                 </div>
                 
-                <div>
-                    <div class="flex items-center gap-3">
-                        <h2 class="text-2xl font-bold text-slate-800 tracking-tight">{{ $student->full_name }}</h2>
-                        @php $statusColor = match($student->status) { 'Active' => 'bg-emerald-50 text-emerald-600 ring-emerald-200', 'Graduated' => 'bg-emerald-50 text-emerald-600 ring-emerald-200', default => 'bg-amber-50 text-amber-600 ring-amber-200' }; @endphp
-                        <span class="rounded-full px-2.5 py-0.5 text-xs font-semibold ring-1 {{ $statusColor }}">{{ $student->status }}</span>
+                <div class="text-center sm:text-left pt-2">
+                    <div class="flex items-center justify-center sm:justify-start gap-2 mb-2">
+                        <span class="text-sm font-semibold uppercase tracking-widest" style="color: #93c5fd;">Student Profile</span>
                     </div>
-                    <p class="mt-1 text-sm font-medium text-slate-500">{{ $studentMeta }}</p>
+                    <h2 class="text-3xl sm:text-4xl font-bold text-white tracking-tight">{{ $student->full_name }}</h2>
+                    <p class="mt-2 text-lg font-medium" style="color: #93c5fd;">{{ $studentMeta }}</p>
                     
-                    <div class="mt-4 flex flex-wrap gap-2">
-                        <a href="{{ route('students.admission-form', $student) }}" class="inline-flex items-center gap-1.5 rounded-lg bg-orange-50 px-3 py-1.5 text-xs font-bold text-orange-600 hover:bg-orange-100 transition">
+                    <div class="mt-5 flex flex-wrap justify-center sm:justify-start gap-2">
+                        <span class="inline-flex items-center gap-2 rounded-lg px-4 py-1.5 text-sm font-semibold text-white transition-colors hover:bg-white/20" style="background:rgba(255,255,255,0.12);">
                             <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
                             Admission Form
-                        </a>
+                        </span>
                         @if (auth()->user()?->role === 'admin')
-                            <a href="{{ route('students.edit', $student) }}" class="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-bold text-slate-600 hover:bg-slate-50 transition shadow-sm">
+                            <a href="{{ route('students.edit', $student) }}" class="inline-flex items-center gap-2 rounded-lg px-4 py-1.5 text-sm font-semibold text-white transition-colors hover:bg-white/20" style="background:rgba(255,255,255,0.12);">
                                 <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-                                Edit Profile
+                                Edit Record
                             </a>
                         @endif
                     </div>
@@ -141,16 +153,16 @@
             </div>
 
             {{-- Right: Actions & Status --}}
-            <div class="flex md:flex-col items-center md:items-end justify-between h-full gap-4">
-                <a href="{{ route('students.index') }}" class="inline-flex items-center gap-2 rounded-xl bg-slate-50 px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-100 transition ring-1 ring-slate-200 shadow-sm">
+            <div class="flex flex-col items-center md:items-end justify-between h-full gap-4 relative z-10 hidden sm:flex">
+                <a href="{{ route('students.index') }}" class="inline-flex items-center gap-2 rounded-lg px-4 py-1.5 text-sm font-semibold text-white transition-colors hover:bg-white/20" style="background:rgba(255,255,255,0.12);">
                     <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
-                    Back to List
+                    Back to Directory
                 </a>
                 
                 @if (auth()->user()?->role === 'admin')
                     <form method="POST" action="{{ route('students.destroy', $student) }}" class="mt-1" onsubmit="return confirm('Delete this student?')">
                         @csrf @method('DELETE')
-                        <button type="submit" class="text-xs font-semibold text-red-500 hover:text-red-700 hover:underline underline-offset-2 transition-colors">Delete Student</button>
+                        <button type="submit" class="text-xs font-semibold text-red-300 hover:text-red-400 transition-colors">Delete Student permanently</button>
                     </form>
                 @endif
             </div>
@@ -158,16 +170,14 @@
     </div>
 
 
-    {{-- Tab Navigation --}}
-    <div class="rounded-2xl bg-white p-1.5 shadow-sm ring-1 ring-slate-100 mb-6">
-        <div class="flex gap-1 overflow-x-auto">
-            @foreach ($tabs as $key => $label)
-                <a href="{{ route('students.show', ['student' => $student, 'tab' => $key]) }}"
-                    class="{{ $tab === $key ? 'bg-gradient-to-br from-orange-400 to-amber-500 text-white shadow-md shadow-orange-200' : 'text-slate-500 hover:text-slate-800 hover:bg-slate-50' }} flex-1 min-w-[100px] rounded-xl py-2.5 text-center text-sm font-bold transition whitespace-nowrap">
-                    {{ $label }}
-                </a>
-            @endforeach
-        </div>
+    {{-- Tab Navigation (Soft pill style) --}}
+    <div class="flex flex-wrap gap-2 mb-2">
+        @foreach ($tabs as $key => $label)
+            <a href="{{ route('students.show', ['student' => $student, 'tab' => $key]) }}"
+               class="rounded-xl px-5 py-2.5 text-sm font-semibold transition-all {{ $tab === $key ? 'bg-slate-800 text-white shadow-md' : 'bg-white text-slate-600 hover:bg-slate-50 ring-1 ring-slate-200' }}">
+                {{ $label }}
+            </a>
+        @endforeach
     </div>
 
     @if ($errors->any())
@@ -483,3 +493,7 @@
 
 </div>
 @endsection
+"""
+
+with open('resources/views/pages/students/show.blade.php', 'w', encoding='utf-8') as f:
+    f.write(php_code)

@@ -26,6 +26,7 @@ class Index extends Component
 
     public string $userSearch = '';
     public ?int $recipientId = null;
+    public bool $showNewChat = false;
 
     public string $body = '';
     public $attachment = null;
@@ -33,6 +34,19 @@ class Index extends Component
     public function updatedUserSearch(): void
     {
         unset($this->recipientOptions);
+    }
+
+    public function openNewChat(): void
+    {
+        $this->showNewChat = true;
+        $this->userSearch = '';
+        unset($this->recipientOptions);
+    }
+
+    public function closeNewChat(): void
+    {
+        $this->showNewChat = false;
+        $this->userSearch = '';
     }
 
     public function mount(): void
@@ -269,6 +283,8 @@ class Index extends Component
         $this->conversationId = $conversation->id;
         $this->recipientId = null;
         $this->body = '';
+        $this->showNewChat = false;
+        $this->userSearch = '';
         unset($this->conversations, $this->chatMessages);
         $this->dispatch('alert', message: 'Conversation started.', type: 'success');
     }
@@ -374,10 +390,12 @@ class Index extends Component
     private function allowedRecipientRoles(User $user): array
     {
         return match ($user->role) {
-            'admin' => ['admin', 'teacher', 'bursar'],
-            'teacher' => ['admin', 'teacher', 'bursar'],
-            'bursar' => ['admin', 'teacher', 'bursar'],
-            default => [],
+            'admin'   => ['admin', 'teacher', 'bursar', 'student', 'parent'],
+            'teacher' => ['admin', 'teacher', 'bursar', 'student', 'parent'],
+            'bursar'  => ['admin', 'teacher', 'bursar'],
+            'student' => ['admin', 'teacher'],
+            'parent'  => ['admin', 'teacher'],
+            default   => [],
         };
     }
 

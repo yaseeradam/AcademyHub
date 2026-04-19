@@ -14,6 +14,7 @@ class Student extends Model
     use HasFactory;
 
     protected $fillable = [
+        'user_id',
         'admission_number',
         'first_name',
         'last_name',
@@ -30,12 +31,23 @@ class Student extends Model
         'custom_fields',
     ];
 
+    protected $hidden = [
+        'password',
+    ];
+
     protected $casts = [
+        'user_id' => 'integer',
         'class_id' => 'integer',
         'section_id' => 'integer',
         'dob' => 'date',
+        'password' => 'hashed',
         'custom_fields' => 'array',
     ];
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
 
     public function schoolClass(): BelongsTo
     {

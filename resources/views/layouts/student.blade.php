@@ -236,5 +236,14 @@ $navItems = [
     document.getElementById('closeMobileSidebar').addEventListener('click', closeMobile);
     mobileOverlay.addEventListener('click', closeMobile);
 </script>
+    <!-- Global Loading Spinner for Livewire Navigation -->
+    <div x-data="{ loading: false }"
+         x-on:livewire:navigating.window="loading = true"
+         x-on:livewire:navigated.window="loading = false"
+         x-show="loading"
+         style="display: none;"
+         class="fixed inset-0 z-[9999] flex items-center justify-center bg-white/50 backdrop-blur-sm transition-opacity duration-300">
+        <div class="h-14 w-14 animate-spin rounded-full border-4 border-slate-200 border-t-amber-500 shadow-lg"></div>
+    </div>
 </body>
 </html>

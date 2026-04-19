@@ -19,9 +19,10 @@ use Livewire\Component;
 #[Title('Timetable')]
 class Index extends Component
 {
-    public ?int $classId = null;
-    public ?int $sectionId = null;
+    public $classId = null;
+    public $sectionId = null;
     public ?int $day = null;
+    public $debugPing = null;
 
     public ?int $editingId = null;
     public ?int $entryClassId = null;
@@ -100,7 +101,9 @@ class Index extends Component
 
     public function updatedClassId(): void
     {
+        \Log::info('Timetable: updatedClassId fired', ['classId' => $this->classId, 'type' => gettype($this->classId)]);
         $this->sectionId = null;
+        $this->editingId = null;
         unset($this->sections);
     }
 
@@ -351,12 +354,17 @@ class Index extends Component
             abort(403);
         }
 
-        $entries = TimetableEntry::query()
-            ->with(['subject:id,name', 'teacher:id,name'])
-            ->when($this->classId, fn ($q) => $q->where('class_id', $this->classId))
-            ->orderBy('day_of_week')
-            ->orderBy('starts_at')
-            ->get();
+        // Ensure classId is properly cast
+        $classId = $this->classId ? (int) $this->classId : null;
+
+        $entries = $classId
+            ? TimetableEntry::query()
+                ->with(['subject:id,name', 'teacher:id,name'])
+                ->where('class_id', $classId)
+                ->orderBy('day_of_week')
+                ->orderBy('starts_at')
+                ->get()
+            : collect();
 
         $days = collect([1, 2, 3, 4, 5])->map(fn ($day) => [
             'day' => $day,

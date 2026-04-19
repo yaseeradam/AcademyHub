@@ -14,7 +14,6 @@ use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
-use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
@@ -35,23 +34,7 @@ class Broadsheet extends Component
         $this->session = $this->session ?: $this->defaultSession();
     }
 
-    public function updatedClassId(): void
-    {
-        unset($this->subjects, $this->rows, $this->isPublished);
-    }
-
-    public function updatedTerm(): void
-    {
-        unset($this->rows, $this->isPublished);
-    }
-
-    public function updatedSession(): void
-    {
-        unset($this->rows, $this->isPublished);
-    }
-
-    #[Computed(persist: false)]
-    public function isPublished(): bool
+    private function getIsPublished(): bool
     {
         if (!$this->classId || !$this->session) {
             return false;
@@ -65,8 +48,7 @@ class Broadsheet extends Component
             ->exists();
     }
 
-    #[Computed(persist: false)]
-    public function classes()
+    private function getClasses()
     {
         $user = auth()->user();
 
@@ -80,8 +62,7 @@ class Broadsheet extends Component
             ->get();
     }
 
-    #[Computed(persist: false)]
-    public function subjects()
+    private function getSubjects()
     {
         if (!$this->classId) {
             return collect();
@@ -99,8 +80,7 @@ class Broadsheet extends Component
         return Subject::query()->whereIn('id', $ids)->orderBy('name')->get();
     }
 
-    #[Computed(persist: false)]
-    public function rows(): Collection
+    private function getRows(Collection $subjects): Collection
     {
         if (!$this->classId || !$this->session) {
             return collect();
@@ -112,7 +92,7 @@ class Broadsheet extends Component
             ->orderBy('last_name')
             ->get();
 
-        $subjectIds = $this->subjects->pluck('id');
+        $subjectIds = $subjects->pluck('id');
 
         $scores = Score::query()
             ->where('class_id', $this->classId)
@@ -133,36 +113,30 @@ class Broadsheet extends Component
             $grandTotal = 0;
 
             foreach ($subjectIds as $subjectId) {
-                /** @var \App\Models\Score|null $score */
                 $score = $map->get($subjectId);
                 $subjectTotals[$subjectId] = $score?->total ?? null;
                 $grandTotal += (int) ($score?->total ?? 0);
             }
 
-            $average = round($grandTotal / $subjectCount, 2);
-
             return [
-                'student' => $student,
+                'student'       => $student,
                 'subjectTotals' => $subjectTotals,
-                'grandTotal' => $grandTotal,
-                'average' => $average,
+                'grandTotal'    => $grandTotal,
+                'average'       => round($grandTotal / $subjectCount, 2),
             ];
         });
 
         $sorted = $rows->sortByDesc('grandTotal')->values();
-
         $rank = 0;
         $lastScore = null;
-        $sorted = $sorted->map(function (array $row, int $i) use (&$rank, &$lastScore) {
+
+        return $sorted->map(function (array $row, int $i) use (&$rank, &$lastScore) {
             if ($lastScore === null || $row['grandTotal'] !== $lastScore) {
                 $rank = $i + 1;
                 $lastScore = $row['grandTotal'];
             }
-
             return array_merge($row, ['position' => $rank]);
         });
-
-        return $sorted;
     }
 
     private function defaultSession(): string
@@ -188,7 +162,7 @@ class Broadsheet extends Component
             abort(400, 'Please select a class.');
         }
 
-        if (!$this->isPublished) {
+        if (!$this->getIsPublished()) {
             session()->flash('error', 'Results must be published first.');
             abort(400, 'Results must be published first.');
         }
@@ -320,6 +294,11 @@ class Broadsheet extends Component
         $user = auth()->user();
         abort_unless($user && $user->hasPermission('results.broadsheet'), 403);
 
-        return view('livewire.results.broadsheet');
+        $classes    = $this->getClasses();
+        $subjects   = $this->getSubjects();
+        $rows       = $this->getRows($subjects);
+        $isPublished = $this->getIsPublished();
+
+        return view('livewire.results.broadsheet', compact('classes', 'subjects', 'rows', 'isPublished'));
     }
 }

@@ -1,189 +1,200 @@
 @php
     /** @var \Illuminate\Support\Collection<int, \App\Models\SchoolClass> $classes */
     $user = auth()->user();
+    $total = $classes->count();
+    $totalStudents = $classes->sum('students_count');
+    $totalSubjects = $classes->sum('subjects_count');
 @endphp
 
 @extends('layouts.app')
 
 @section('content')
-    <div class="space-y-6">
-        <div class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-purple-500 via-violet-500 to-indigo-600 p-8 shadow-2xl">
-            <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSAxMCAwIEwgMCAwIDAgMTAiIGZpbGw9Im5vbmUiIHN0cm9rZT0id2hpdGUiIHN0cm9rZS1vcGFjaXR5PSIwLjEiIHN0cm9rZS13aWR0aD0iMSIvPjwvcGF0dGVybj48L2RlZnM+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0idXJsKCNncmlkKSIvPjwvc3ZnPg==')] opacity-30"></div>
-            <div class="relative flex items-center justify-between">
+<div class="space-y-6">
+
+    <x-page-header title="Classes" subtitle="Manage class levels and enrollment structure." accent="classes">
+        <x-slot:actions>
+            @if ($user?->role === 'admin')
+                <a href="{{ route('classes.manage') }}" class="btn-outline">Manage Sections</a>
+            @endif
+            <a href="{{ route('subjects.index') }}" class="btn-outline">Manage Subjects</a>
+        </x-slot:actions>
+    </x-page-header>
+
+    {{-- Stat Cards --}}
+    <div class="grid grid-cols-1 gap-5 sm:grid-cols-3">
+        <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-sky-400 to-blue-600 p-6 text-white shadow-lg">
+            <div class="absolute -right-6 -top-6 h-28 w-28 rounded-full bg-white/10"></div>
+            <div class="absolute right-4 bottom-4 h-16 w-16 rounded-full bg-white/10"></div>
+            <div class="relative flex items-start justify-between">
                 <div>
-                    <h1 class="text-3xl font-black text-white">Classes</h1>
-                    <p class="mt-2 text-purple-100">Manage class levels and enrollment structure</p>
+                    <div class="text-4xl font-black">{{ $total }}</div>
+                    <div class="mt-1 text-sm font-semibold text-white/80">Total Classes</div>
                 </div>
-                <a href="{{ route('subjects.index') }}" class="rounded-xl bg-white/20 px-4 py-2.5 text-sm font-semibold text-white backdrop-blur-sm transition-all hover:bg-white/30">Subjects</a>
+                <div class="grid h-12 w-12 place-items-center rounded-xl bg-white/20">
+                    <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                </div>
             </div>
         </div>
 
-        @if (session('modal'))
-            <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 2000)" class="fixed inset-0 z-50 flex items-center justify-center bg-black/20" x-transition>
-                <div class="rounded-2xl bg-white p-6 shadow-2xl">
-                    <div class="flex items-center gap-3">
-                        <div class="flex h-12 w-12 items-center justify-center rounded-full bg-green-100">
-                            <svg class="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                            </svg>
-                        </div>
-                        <div>
-                            <div class="text-lg font-bold text-gray-900">{{ session('modal')['message'] }}</div>
-                        </div>
-                    </div>
+        <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-orange-400 to-amber-500 p-6 text-white shadow-lg">
+            <div class="absolute -right-6 -top-6 h-28 w-28 rounded-full bg-white/10"></div>
+            <div class="absolute right-4 bottom-4 h-16 w-16 rounded-full bg-white/10"></div>
+            <div class="relative flex items-start justify-between">
+                <div>
+                    <div class="text-4xl font-black">{{ number_format($totalStudents) }}</div>
+                    <div class="mt-1 text-sm font-semibold text-white/80">Total Students</div>
+                </div>
+                <div class="grid h-12 w-12 place-items-center rounded-xl bg-white/20">
+                    <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
                 </div>
             </div>
-        @endif
-
-        @if ($errors->any())
-            <div class="card-padded border border-orange-200 bg-orange-50/60">
-                <div class="text-sm font-semibold text-orange-900">Please fix the following:</div>
-                <ul class="mt-2 list-disc space-y-1 pl-5 text-sm text-orange-900">
-                    @foreach ($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                    @endforeach
-                </ul>
-            </div>
-        @endif
-
-        @if ($user?->role === 'admin')
-            <form method="POST" action="{{ route('classes.store') }}" class="rounded-2xl border border-purple-100 bg-gradient-to-br from-white to-purple-50/30 p-6 shadow-lg backdrop-blur-sm">
-                @csrf
-                <div class="flex items-center gap-3">
-                    <div class="grid h-10 w-10 place-items-center rounded-xl bg-gradient-to-br from-purple-500 to-indigo-600 text-white shadow-lg">
-                        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M12 5v14M5 12h14" />
-                        </svg>
-                    </div>
-                    <div>
-                        <div class="text-sm font-bold text-purple-900">Add New Class</div>
-                        <div class="text-sm text-purple-700">Create a new class level</div>
-                    </div>
-                </div>
-
-                <div class="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
-                    <div class="sm:col-span-2">
-                        <label class="text-xs font-bold uppercase tracking-wider text-purple-700">Class name</label>
-                        <div class="mt-2">
-                            <input name="name" class="w-full rounded-lg border border-purple-200 bg-white px-4 py-2.5 text-sm text-gray-700 shadow-sm focus:border-purple-500 focus:ring-purple-500" value="{{ old('name') }}" placeholder="e.g., JSS 1A" required />
-                        </div>
-                    </div>
-                    <div>
-                        <label class="text-xs font-bold uppercase tracking-wider text-purple-700">Level</label>
-                        <div class="mt-2">
-                            <input name="level" type="number" class="w-full rounded-lg border border-purple-200 bg-white px-4 py-2.5 text-sm text-gray-700 shadow-sm focus:border-purple-500 focus:ring-purple-500" value="{{ old('level', 1) }}" min="1" max="30" required />
-                        </div>
-                    </div>
-                </div>
-
-                <div class="mt-6 flex justify-end">
-                    <button type="submit" class="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-purple-500 to-indigo-600 px-6 py-2.5 text-sm font-bold text-white shadow-lg hover:from-purple-600 hover:to-indigo-700">
-                        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M12 5v14" />
-                            <path d="M5 12h14" />
-                        </svg>
-                        Add Class
-                    </button>
-                </div>
-            </form>
-        @endif
-
-        <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
-            @forelse ($classes as $class)
-                @php
-                    $palette = [
-                        ['from' => 'from-amber-400', 'via' => 'via-orange-500', 'to' => 'to-orange-600', 'bg' => 'from-amber-50 to-orange-100/60', 'ring' => 'ring-amber-300/40', 'iconBg' => 'from-amber-400 to-orange-600', 'iconText' => 'text-amber-700', 'accent' => 'bg-amber-500', 'shadow' => 'shadow-amber-500/30', 'badge' => 'bg-amber-100 text-amber-700 ring-amber-200'],
-                        ['from' => 'from-emerald-400', 'via' => 'via-teal-500', 'to' => 'to-cyan-500', 'bg' => 'from-emerald-50 to-teal-100/60', 'ring' => 'ring-emerald-300/40', 'iconBg' => 'from-emerald-400 to-emerald-600', 'iconText' => 'text-emerald-700', 'accent' => 'bg-emerald-500', 'shadow' => 'shadow-emerald-500/30', 'badge' => 'bg-emerald-100 text-emerald-700 ring-emerald-200'],
-                        ['from' => 'from-orange-400', 'via' => 'via-amber-500', 'to' => 'to-yellow-500', 'bg' => 'from-orange-50 to-amber-100/60', 'ring' => 'ring-orange-300/40', 'iconBg' => 'from-orange-400 to-amber-600', 'iconText' => 'text-orange-700', 'accent' => 'bg-orange-500', 'shadow' => 'shadow-orange-500/30', 'badge' => 'bg-orange-100 text-orange-700 ring-orange-200'],
-                        ['from' => 'from-amber-400', 'via' => 'via-orange-500', 'to' => 'to-rose-500', 'bg' => 'from-amber-50 to-orange-100/60', 'ring' => 'ring-amber-300/40', 'iconBg' => 'from-amber-400 to-amber-600', 'iconText' => 'text-amber-700', 'accent' => 'bg-amber-500', 'shadow' => 'shadow-amber-500/30', 'badge' => 'bg-amber-100 text-amber-700 ring-amber-200'],
-                        ['from' => 'from-yellow-400', 'via' => 'via-amber-500', 'to' => 'to-orange-500', 'bg' => 'from-yellow-50 to-amber-100/60', 'ring' => 'ring-yellow-300/40', 'iconBg' => 'from-yellow-400 to-amber-600', 'iconText' => 'text-yellow-700', 'accent' => 'bg-yellow-500', 'shadow' => 'shadow-yellow-500/30', 'badge' => 'bg-yellow-100 text-yellow-700 ring-yellow-200'],
-                    ];
-                    $scheme = $palette[$class->id % count($palette)];
-                @endphp
-
-                <div class="group relative overflow-hidden rounded-3xl bg-gradient-to-br {{ $scheme['bg'] }} shadow-lg ring-1 {{ $scheme['ring'] }} transition-all duration-500 hover:shadow-2xl hover:-translate-y-2 hover:scale-[1.02]">
-                    <div class="absolute inset-0 bg-gradient-to-br {{ $scheme['from'] }} {{ $scheme['via'] }} {{ $scheme['to'] }} opacity-0 transition-opacity duration-500 group-hover:opacity-10"></div>
-                    <div class="h-2 bg-gradient-to-r {{ $scheme['from'] }} {{ $scheme['via'] }} {{ $scheme['to'] }}"></div>
-                    <div class="absolute right-0 top-0 h-32 w-32 -translate-y-8 translate-x-8 rounded-full {{ $scheme['accent'] }} opacity-10"></div>
-                    <div class="absolute left-0 bottom-0 h-24 w-24 -translate-x-6 translate-y-6 rounded-full {{ $scheme['accent'] }} opacity-5"></div>
-                    
-                    <div class="relative p-7">
-                        <div class="flex items-start justify-between gap-4">
-                            <div class="min-w-0 flex-1">
-                                <div class="inline-flex items-center gap-2 rounded-full {{ $scheme['badge'] }} px-3 py-1.5 text-xs font-bold uppercase tracking-wider ring-1 backdrop-blur-sm">
-                                    <svg class="h-3 w-3" viewBox="0 0 24 24" fill="currentColor">
-                                        <circle cx="12" cy="12" r="3"/>
-                                    </svg>
-                                    Level {{ $class->level }}
-                                </div>
-                                <div class="mt-3 truncate text-2xl font-black tracking-tight text-slate-900">{{ $class->name }}</div>
-                                <div class="mt-1.5 flex items-center gap-2 text-sm text-slate-600">
-                                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                        <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
-                                    </svg>
-                                    Academic year overview
-                                </div>
-                            </div>
-                            <div class="icon-3d grid h-16 w-16 place-items-center rounded-2xl bg-gradient-to-br {{ $scheme['iconBg'] }} text-white shadow-xl {{ $scheme['shadow'] }} transition-transform duration-500 group-hover:rotate-12 group-hover:scale-110">
-                                <svg class="h-8 w-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <rect x="2" y="7" width="20" height="14" rx="2" ry="2"/>
-                                    <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>
-                                </svg>
-                            </div>
-                        </div>
-
-                        <div class="mt-6 grid grid-cols-2 gap-4">
-                            @if ($user?->role === 'admin')
-                                <a href="{{ route('classes.subjects', $class) }}" class="group/stat relative overflow-hidden rounded-2xl bg-white/80 px-5 py-4 ring-1 ring-white/60 backdrop-blur-sm transition-all duration-300 hover:bg-white hover:shadow-lg">
-                                    <div class="absolute inset-0 bg-gradient-to-br {{ $scheme['from'] }} {{ $scheme['to'] }} opacity-0 transition-opacity duration-300 group-hover/stat:opacity-5"></div>
-                                    <div class="relative">
-                                        <div class="flex items-center gap-2 text-xs font-bold uppercase tracking-wider {{ $scheme['iconText'] }}">
-                                            <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                                                <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
-                                                <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
-                                            </svg>
-                                            Subjects
-                                        </div>
-                                        <div class="mt-2 text-3xl font-black tracking-tight text-slate-900">{{ number_format((int) $class->defaultSubjects->count()) }}</div>
-                                    </div>
-                                </a>
-                            @else
-                                <div class="group/stat relative overflow-hidden rounded-2xl bg-white/80 px-5 py-4 ring-1 ring-white/60 backdrop-blur-sm">
-                                    <div class="relative">
-                                        <div class="flex items-center gap-2 text-xs font-bold uppercase tracking-wider {{ $scheme['iconText'] }}">
-                                            <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                                                <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
-                                                <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
-                                            </svg>
-                                            Subjects
-                                        </div>
-                                        <div class="mt-2 text-3xl font-black tracking-tight text-slate-900">{{ number_format((int) $class->defaultSubjects->count()) }}</div>
-                                    </div>
-                                </div>
-                            @endif
-                            <div class="group/stat relative overflow-hidden rounded-2xl bg-white/80 px-5 py-4 ring-1 ring-white/60 backdrop-blur-sm transition-all duration-300 hover:bg-white hover:shadow-lg">
-                                <div class="absolute inset-0 bg-gradient-to-br {{ $scheme['from'] }} {{ $scheme['to'] }} opacity-0 transition-opacity duration-300 group-hover/stat:opacity-5"></div>
-                                <div class="relative">
-                                    <div class="flex items-center gap-2 text-xs font-bold uppercase tracking-wider {{ $scheme['iconText'] }}">
-                                        <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-                                            <circle cx="9" cy="7" r="4"/>
-                                        </svg>
-                                        Students
-                                    </div>
-                                    <div class="mt-2 text-3xl font-black tracking-tight text-slate-900">{{ number_format((int) $class->students_count) }}</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            @empty
-                <div class="card-padded sm:col-span-2 xl:col-span-3 text-center">
-                    <div class="text-sm font-semibold text-slate-900">No classes yet</div>
-                    <div class="mt-2 text-sm text-slate-600">Create your first class to begin admissions and allocations.</div>
-                </div>
-            @endforelse
         </div>
 
+        <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-violet-500 to-purple-600 p-6 text-white shadow-lg">
+            <div class="absolute -right-6 -top-6 h-28 w-28 rounded-full bg-white/10"></div>
+            <div class="absolute right-4 bottom-4 h-16 w-16 rounded-full bg-white/10"></div>
+            <div class="relative flex items-start justify-between">
+                <div>
+                    <div class="text-4xl font-black">{{ $totalSubjects }}</div>
+                    <div class="mt-1 text-sm font-semibold text-white/80">Subject Allocations</div>
+                </div>
+                <div class="grid h-12 w-12 place-items-center rounded-xl bg-white/20">
+                    <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+                </div>
+            </div>
+        </div>
     </div>
+
+    @if (session('modal'))
+        <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 2000)" class="fixed inset-0 z-50 flex items-center justify-center bg-black/20" x-transition>
+            <div class="rounded-2xl bg-white p-6 shadow-2xl">
+                <div class="flex items-center gap-3">
+                    <div class="flex h-12 w-12 items-center justify-center rounded-full bg-green-100">
+                        <svg class="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                    </div>
+                    <div class="text-lg font-bold text-gray-900">{{ session('modal')['message'] }}</div>
+                </div>
+            </div>
+        </div>
+    @endif
+
+    @if ($errors->any())
+        <div class="rounded-2xl border border-orange-200 bg-orange-50/60 p-5">
+            <div class="text-sm font-semibold text-orange-900">Please fix the following:</div>
+            <ul class="mt-2 list-disc space-y-1 pl-5 text-sm text-orange-900">
+                @foreach ($errors->all() as $error)<li>{{ $error }}</li>@endforeach
+            </ul>
+        </div>
+    @endif
+
+    {{-- Add Form --}}
+    @if ($user?->role === 'admin')
+        <div class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-100">
+            <div class="mb-5 flex items-center gap-3 border-b border-slate-100 pb-4">
+                <div class="grid h-9 w-9 place-items-center rounded-xl bg-gradient-to-br from-sky-400 to-blue-600 text-white shadow-sm">
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+                </div>
+                <div class="text-sm font-bold text-slate-800">Add New Class</div>
+            </div>
+            <form method="POST" action="{{ route('classes.store') }}" class="flex flex-col sm:flex-row items-end gap-4">
+                @csrf
+                <div class="flex-1">
+                    <label class="text-xs font-semibold uppercase tracking-wider text-slate-500">Class Name</label>
+                    <input name="name" class="mt-2 input-compact w-full" value="{{ old('name') }}" placeholder="e.g., JSS 1A" required />
+                </div>
+                <div class="w-32">
+                    <label class="text-xs font-semibold uppercase tracking-wider text-slate-500">Level</label>
+                    <input name="level" type="number" class="mt-2 input-compact w-full" value="{{ old('level', 1) }}" min="1" max="30" required />
+                </div>
+                <button type="submit" class="inline-flex items-center gap-2 rounded-xl bg-gradient-to-br from-sky-400 to-blue-600 px-5 py-2.5 text-sm font-bold text-white shadow-sm transition hover:from-sky-500 hover:to-blue-700">
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+                    Add Class
+                </button>
+            </form>
+        </div>
+    @endif
+
+    {{-- Table Card --}}
+    <div class="rounded-2xl bg-white shadow-sm ring-1 ring-slate-100">
+        <div class="flex items-center justify-between border-b border-slate-100 p-5">
+            <div>
+                <div class="text-base font-bold text-slate-800">All Classes</div>
+                <div class="mt-0.5 text-xs text-slate-400">{{ $total }} class{{ $total !== 1 ? 'es' : '' }} registered</div>
+            </div>
+        </div>
+
+        <div class="overflow-x-auto">
+            <table class="min-w-full">
+                <thead>
+                    <tr class="border-b border-slate-100 bg-slate-50/80 text-xs font-semibold uppercase tracking-wider text-slate-500">
+                        <th class="px-5 py-3 text-left">Class Name</th>
+                        <th class="px-5 py-3 text-center">Level</th>
+                        <th class="px-5 py-3 text-center">Subjects</th>
+                        <th class="px-5 py-3 text-center">Students</th>
+                        @if ($user?->role === 'admin')
+                            <th class="px-5 py-3 text-right">Actions</th>
+                        @endif
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                    @php
+                        $gradients = [
+                            'from-sky-400 to-blue-500',
+                            'from-violet-500 to-purple-600',
+                            'from-emerald-400 to-teal-500',
+                            'from-orange-400 to-amber-500',
+                            'from-pink-400 to-rose-500',
+                        ];
+                    @endphp
+                    @forelse ($classes as $class)
+                        @php $grad = $gradients[$class->id % count($gradients)]; @endphp
+                        <tr class="group bg-white transition hover:bg-slate-50/80">
+                            <td class="px-5 py-4">
+                                <div class="flex items-center gap-3">
+                                    <div class="grid h-9 w-9 place-items-center rounded-xl bg-gradient-to-br {{ $grad }} text-white text-xs font-black shadow-sm">
+                                        {{ mb_substr($class->name, 0, 2) }}
+                                    </div>
+                                    <div class="font-semibold text-slate-800">{{ $class->name }}</div>
+                                </div>
+                            </td>
+                            <td class="px-5 py-4 text-center">
+                                <span class="rounded-lg bg-slate-100 px-2.5 py-1 text-xs font-bold text-slate-600">Level {{ $class->level }}</span>
+                            </td>
+                            <td class="px-5 py-4 text-center">
+                                <span class="rounded-lg bg-violet-50 px-2.5 py-1 text-xs font-bold text-violet-600">{{ number_format((int) $class->subjects_count) }}</span>
+                            </td>
+                            <td class="px-5 py-4 text-center">
+                                <span class="rounded-lg bg-orange-50 px-2.5 py-1 text-xs font-bold text-orange-600">{{ number_format((int) $class->students_count) }}</span>
+                            </td>
+                            @if ($user?->role === 'admin')
+                                <td class="px-5 py-4 text-right">
+                                    <div class="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <a href="{{ route('classes.subjects', $class) }}" class="rounded-lg bg-blue-50 px-3 py-1.5 text-xs font-bold text-blue-600 transition hover:bg-blue-100">Subjects</a>
+                                        <form method="POST" action="{{ route('classes.destroy', $class) }}" class="inline-block" onsubmit="return confirm('Delete this class?')">
+                                            @csrf @method('DELETE')
+                                            <button type="submit" class="rounded-lg bg-rose-50 px-3 py-1.5 text-xs font-bold text-rose-600 transition hover:bg-rose-100">Delete</button>
+                                        </form>
+                                    </div>
+                                </td>
+                            @endif
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="{{ $user?->role === 'admin' ? 5 : 4 }}" class="px-5 py-16 text-center">
+                                <div class="flex flex-col items-center gap-3">
+                                    <div class="grid h-16 w-16 place-items-center rounded-2xl bg-slate-100">
+                                        <svg class="h-8 w-8 text-slate-400" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                                    </div>
+                                    <div class="text-sm font-semibold text-slate-600">No classes found</div>
+                                    <div class="text-xs text-slate-400">Create your first class to begin</div>
+                                </div>
+                            </td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
 @endsection

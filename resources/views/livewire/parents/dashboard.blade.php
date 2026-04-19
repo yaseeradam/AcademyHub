@@ -185,9 +185,9 @@
                             @foreach($this->childScores as $score)
                                 <tr class="bg-white hover:bg-slate-50 cursor-default">
                                     <td class="px-5 py-4 text-sm font-semibold text-slate-900">{{ $score->subject->name }}</td>
-                                    <td class="px-5 py-4 text-sm text-right text-slate-700">{{ $score->ca ?? '—' }}</td>
-                                    <td class="px-5 py-4 text-sm text-right text-slate-700">{{ $score->exam ?? '—' }}</td>
-                                    <td class="px-5 py-4 text-sm text-right font-bold text-slate-900">{{ $score->total ?? '—' }}</td>
+                                    <td class="px-5 py-4 text-sm text-right text-slate-700">{{ ($score->ca1 ?? 0) + ($score->ca2 ?? 0) }}</td>
+                                    <td class="px-5 py-4 text-sm text-right text-slate-700">{{ $score->exam ?? '-' }}</td>
+                                    <td class="px-5 py-4 text-sm text-right font-bold text-slate-900">{{ $score->total ?? '-' }}</td>
                                     <td class="px-5 py-4 text-right">
                                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold
                                             {{ ($score->total ?? 0) >= 70 ? 'bg-green-100 text-green-700' : 

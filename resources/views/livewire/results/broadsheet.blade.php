@@ -1,34 +1,55 @@
 <div class="space-y-6">
-    <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-emerald-500 via-teal-500 to-cyan-600 p-8 shadow-xl">
-        <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxwYXRoIGQ9Ik0zNiAxOGMzLjMxNCAwIDYgMi42ODYgNiA2cy0yLjY4NiA2LTYgNi02LTIuNjg2LTYtNiAyLjY4Ni02IDYtNiIgc3Ryb2tlPSIjZmZmIiBzdHJva2Utd2lkdGg9IjIiIG9wYWNpdHk9Ii4xIi8+PC9nPjwvc3ZnPg==')] opacity-30"></div>
-        <div class="relative">
-            <div class="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-                <div>
-                    <h1 class="text-3xl font-bold text-white">Broadsheet</h1>
-                    <p class="mt-2 text-base text-emerald-50">All students (rows) × all subjects (columns)</p>
+    <div class="relative overflow-hidden rounded-2xl shadow-xl" style="background-color: #1a2e4a;">
+        <div class="absolute inset-0" style="background: radial-gradient(ellipse at top left, #1e3a5f 0%, transparent 60%);"></div>
+        <div class="absolute right-0 top-0 bottom-0 w-48 opacity-10">
+            <svg viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full">
+                <circle cx="160" cy="100" r="130" stroke="white" stroke-width="0.5"/>
+                <circle cx="160" cy="100" r="90" stroke="white" stroke-width="0.5"/>
+                <circle cx="160" cy="100" r="50" stroke="white" stroke-width="0.5"/>
+            </svg>
+        </div>
+        <div class="relative flex flex-col gap-4 px-8 py-8 lg:flex-row lg:items-center lg:justify-between">
+            <div>
+                <div class="flex items-center gap-2 mb-3">
+                    <span class="h-2.5 w-2.5 rounded-full bg-emerald-400"></span>
+                    <span class="text-sm font-semibold uppercase tracking-widest" style="color:#93c5fd;">Results</span>
                 </div>
-                <div class="flex flex-wrap items-center gap-3">
-                    <a href="{{ route('results.entry') }}" class="rounded-xl bg-white/20 px-5 py-2.5 text-sm font-semibold text-white shadow-lg backdrop-blur-sm transition-all hover:bg-white/30 hover:shadow-xl">Score Entry</a>
-                    @if ($classId && auth()->user()?->role === 'admin')
-                        @if ($this->isPublished)
-                            <button wire:click="unpublish" wire:loading.attr="disabled" class="rounded-xl bg-red-500 px-5 py-2.5 text-sm font-semibold text-white shadow-lg transition-all hover:bg-red-600 hover:shadow-xl disabled:opacity-50">
-                                <span wire:loading.remove wire:target="unpublish">Unpublish</span>
-                                <span wire:loading wire:target="unpublish">Unpublishing...</span>
-                            </button>
-                        @else
-                            <button wire:click="publish" wire:loading.attr="disabled" class="rounded-xl bg-white px-5 py-2.5 text-sm font-semibold text-emerald-600 shadow-lg transition-all hover:bg-emerald-50 hover:shadow-xl disabled:opacity-50">
-                                <span wire:loading.remove wire:target="publish">Publish Results</span>
-                                <span wire:loading wire:target="publish">Publishing...</span>
-                            </button>
-                        @endif
-                    @endif
-                    @if ($classId && $this->isPublished)
-                        <button wire:click="generateBulk" wire:loading.attr="disabled" class="rounded-xl bg-white px-5 py-2.5 text-sm font-semibold text-emerald-600 shadow-lg transition-all hover:bg-emerald-50 hover:shadow-xl disabled:opacity-50">
-                            <span wire:loading.remove wire:target="generateBulk">Bulk Report Cards</span>
-                            <span wire:loading wire:target="generateBulk">Generating...</span>
+                <h1 class="text-4xl font-bold text-white tracking-tight">Broadsheet</h1>
+                <p class="mt-1.5 text-base font-medium" style="color:#93c5fd;">All students × all subjects</p>
+            </div>
+            <div class="flex flex-wrap items-center gap-3">
+                <a href="{{ route('results.entry') }}" class="inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold text-white transition-all" style="background:rgba(255,255,255,0.12);">
+                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                    </svg>
+                    Score Entry
+                </a>
+                @if ($classId && auth()->user()?->role === 'admin')
+                    @if ($isPublished)
+                        <button wire:click="unpublish" wire:loading.attr="disabled"
+                                class="inline-flex items-center gap-2 rounded-xl bg-red-500 px-4 py-2.5 text-sm font-semibold text-white transition-all hover:bg-red-600 disabled:opacity-50">
+                            <span wire:loading.remove wire:target="unpublish">Unpublish</span>
+                            <span wire:loading wire:target="unpublish">Unpublishing...</span>
+                        </button>
+                    @else
+                        <button wire:click="publish" wire:loading.attr="disabled"
+                                class="inline-flex items-center gap-2 rounded-xl bg-amber-500 px-4 py-2.5 text-sm font-semibold text-white transition-all hover:bg-amber-600 disabled:opacity-50">
+                            <span wire:loading.remove wire:target="publish">Publish Results</span>
+                            <span wire:loading wire:target="publish">Publishing...</span>
                         </button>
                     @endif
-                </div>
+                @endif
+                @if ($classId && $isPublished)
+                    <button wire:click="generateBulk" wire:loading.attr="disabled"
+                            class="inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold text-white transition-all disabled:opacity-50" style="background:rgba(255,255,255,0.12);">
+                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path d="M12 10v6m0 0-3-3m3 3 3-3M3 17a4 4 0 0 1 4-4h.01M17 17a4 4 0 0 0-4-4"/>
+                        </svg>
+                        <span wire:loading.remove wire:target="generateBulk">Bulk Report Cards</span>
+                        <span wire:loading wire:target="generateBulk">Generating...</span>
+                    </button>
+                @endif
             </div>
         </div>
     </div>
@@ -49,7 +70,7 @@
                         class="mt-2 select min-w-52"
                     >
                         <option value="">Select class</option>
-                        @foreach ($this->classes as $class)
+                        @foreach ($classes as $class)
                             <option value="{{ $class->id }}">{{ $class->name }}</option>
                         @endforeach
                     </select>
@@ -87,7 +108,7 @@
             <div class="text-lg font-semibold text-gray-900">Select a class</div>
             <div class="mt-2 text-sm text-gray-600">Choose a class to generate the broadsheet.</div>
         </div>
-    @elseif ($this->subjects->isEmpty())
+    @elseif ($subjects->isEmpty())
         <div class="rounded-2xl bg-white p-8 text-center shadow-lg">
             <div class="text-lg font-semibold text-gray-900">No subjects</div>
             <div class="mt-2 text-sm text-gray-600">Allocate subjects to this class to populate the broadsheet.</div>
@@ -96,10 +117,10 @@
         <div class="overflow-x-auto overflow-hidden rounded-2xl bg-white shadow-lg" 
              wire:key="broadsheet-table-{{ $classId }}-{{ $term }}-{{ $session }}">
             <x-table class="text-xs">
-                <thead class="bg-gradient-to-r from-emerald-500 to-cyan-600 text-[11px] font-semibold uppercase tracking-wider text-white">
+                <thead class="border-b border-slate-100 bg-slate-50 text-[11px] font-semibold uppercase tracking-wider text-slate-500">
                 <tr>
                     <th class="px-5 py-3">Student</th>
-                    @foreach ($this->subjects as $subject)
+                    @foreach ($subjects as $subject)
                         <th class="px-4 py-3 text-right whitespace-nowrap">{{ $subject->code }}</th>
                     @endforeach
                     <th class="px-4 py-3 text-right">Total</th>
@@ -109,14 +130,14 @@
                 </tr>
             </thead>
             <tbody class="divide-y divide-gray-100">
-                @forelse ($this->rows as $row)
+                @forelse ($rows as $row)
                     <tr class="bg-white hover:bg-gray-50">
                         <td class="px-5 py-4">
                             <div class="text-sm font-semibold text-gray-900">{{ $row['student']->full_name }}</div>
                             <div class="mt-1 text-xs text-gray-500">{{ $row['student']->admission_number }}</div>
                         </td>
 
-                        @foreach ($this->subjects as $subject)
+                        @foreach ($subjects as $subject)
                             @php($val = $row['subjectTotals'][$subject->id] ?? null)
                             <td class="px-4 py-4 text-right text-sm font-semibold {{ $val === null ? 'text-gray-300' : 'text-gray-900' }}">
                                 {{ $val ?? '—' }}
@@ -141,7 +162,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="{{ 1 + $this->subjects->count() + 4 }}" class="px-5 py-10 text-center text-sm text-gray-500">
+                        <td colspan="{{ 1 + $subjects->count() + 4 }}" class="px-5 py-10 text-center text-sm text-gray-500">
                             No students found.
                         </td>
                     </tr>

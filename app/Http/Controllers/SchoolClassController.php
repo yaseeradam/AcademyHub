@@ -17,6 +17,10 @@ class SchoolClassController extends Controller
         $classesQuery = SchoolClass::query()
             ->with('sections')
             ->withCount(['sections', 'students'])
+            ->addSelect([
+                'subjects_count' => \App\Models\SubjectAllocation::selectRaw('count(distinct subject_id)')
+                    ->whereColumn('class_id', 'classes.id'),
+            ])
             ->orderBy('level')
             ->orderBy('name');
 

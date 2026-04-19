@@ -6,7 +6,7 @@ use App\Http\Controllers\BillingExportController;
 use App\Http\Controllers\CbtExportController;
 use App\Http\Controllers\AdmissionFormController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
-use App\Http\Controllers\BackupController;
+
 use App\Http\Controllers\BulkReportCardsController;
 use App\Http\Controllers\CertificateController;
 use App\Http\Controllers\ReportCardController;
@@ -344,9 +344,7 @@ Route::middleware(['auth', 'active'])->group(function () {
         Route::get('/settings/templates', [SettingsController::class, 'showTemplates'])->name('settings.templates');
         Route::post('/settings/templates', [SettingsController::class, 'updateTemplates'])->name('settings.update-templates');
         Route::get('/settings/templates/preview/{type}/{template}', [SettingsController::class, 'previewTemplate'])->name('settings.templates.preview');
-        Route::get('/settings/backup', [BackupController::class, 'index'])->middleware('permission:backup.manage')->name('settings.backup');
-        Route::post('/settings/backup', [BackupController::class, 'create'])->middleware('permission:backup.manage')->name('settings.backup.create');
-        Route::post('/settings/restore', [BackupController::class, 'restore'])->middleware('permission:backup.manage')->name('settings.restore');
+
         Route::get('/settings/audit-logs', AuditLogsIndex::class)->middleware('permission:audit.view')->name('settings.audit-logs');
         Route::get('/settings/custom-fields', CustomFields::class)->name('settings.custom-fields');
         Route::get('/settings/subscription', \App\Livewire\Admin\SubscriptionBilling::class)->name('settings.subscription');

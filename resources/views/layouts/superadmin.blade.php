@@ -175,5 +175,14 @@
         </div>
     </main>
 
+    <!-- Global Loading Spinner for Livewire Navigation -->
+    <div x-data="{ loading: false }"
+         x-on:livewire:navigating.window="loading = true"
+         x-on:livewire:navigated.window="loading = false"
+         x-show="loading"
+         style="display: none;"
+         class="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-900/50 backdrop-blur-sm transition-opacity duration-300">
+        <div class="h-14 w-14 animate-spin rounded-full border-4 border-slate-700 border-t-sky-500 shadow-lg"></div>
+    </div>
 </body>
 </html>

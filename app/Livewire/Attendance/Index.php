@@ -12,7 +12,6 @@ use App\Models\Student;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
-use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
@@ -46,42 +45,36 @@ class Index extends Component
         $this->term = $this->term ?: $this->defaultTerm();
     }
 
-    #[Computed]
-    public function dateRecords()
+    private function getDateRecords()
     {
         return AttendanceMark::query()
-            ->with(['student', 'sheet'])
+            ->with(['student.schoolClass', 'sheet'])
             ->whereHas('sheet', fn($q) => $q->where('date', $this->date))
             ->get()
             ->sortBy(fn($m) => $m->student?->last_name);
     }
 
-    #[Computed]
-    public function classes()
+    private function getClasses()
     {
         return SchoolClass::query()->orderBy('level')->get();
     }
 
-    #[Computed]
-    public function sections()
+    private function getSections()
     {
         if (!$this->classId) {
             return collect();
         }
-
         return Section::query()
             ->where('class_id', $this->classId)
             ->orderBy('name')
             ->get();
     }
 
-    #[Computed]
-    public function students()
+    private function getStudents()
     {
         if (!$this->classId || !$this->sectionId) {
             return collect();
         }
-
         return Student::query()
             ->where('class_id', $this->classId)
             ->where('section_id', $this->sectionId)
@@ -90,75 +83,52 @@ class Index extends Component
             ->get();
     }
 
-    #[Computed]
-    public function visibleStudents()
+    private function getVisibleStudents($students)
     {
-        $students = $this->students;
-
         $query = trim($this->search);
         if ($query !== '') {
             $q = mb_strtolower($query);
             $students = $students->filter(function (Student $student) use ($q, $query) {
                 $name = mb_strtolower($student->full_name);
-                $adm = (string) ($student->admission_number ?? '');
-
+                $adm  = (string) ($student->admission_number ?? '');
                 return str_contains($name, $q) || str_contains($adm, $query);
             });
         }
-
         if ($this->onlyExceptions) {
             $students = $students->filter(function (Student $student) {
-                $status = (string) ($this->marks[$student->id]['status'] ?? 'Present');
-
-                return $status !== 'Present';
+                return ((string) ($this->marks[$student->id]['status'] ?? 'Present')) !== 'Present';
             });
         }
-
         return $students->values();
     }
 
-    #[Computed]
-    public function markCounts(): array
+    private function getMarkCounts($students): array
     {
-        $counts = [
-            'Present' => 0,
-            'Absent' => 0,
-            'Late' => 0,
-            'Excused' => 0,
-        ];
-
-        foreach ($this->students as $student) {
+        $counts = ['Present' => 0, 'Absent' => 0, 'Late' => 0, 'Excused' => 0];
+        foreach ($students as $student) {
             $status = (string) ($this->marks[$student->id]['status'] ?? 'Present');
             if (!array_key_exists($status, $counts)) {
                 $status = 'Present';
             }
-
             $counts[$status]++;
         }
-
         return $counts;
     }
 
     public function updatedClassId(): void
     {
         $this->sectionId = null;
-        
         if ($this->classId) {
             $this->sectionId = Section::query()
                 ->where('class_id', $this->classId)
                 ->orderBy('name')
                 ->value('id');
         }
-
-        // Bust Livewire 3 computed property cache
-        unset($this->sections, $this->students, $this->visibleStudents, $this->markCounts);
         $this->syncSheetFromSelection();
     }
 
     public function updatedSectionId(): void
     {
-        // Bust Livewire 3 computed property cache
-        unset($this->students, $this->visibleStudents, $this->markCounts);
         $this->syncSheetFromSelection();
     }
 
@@ -249,7 +219,7 @@ class Index extends Component
         $this->sheetId = $sheet->id;
 
         DB::transaction(function () use ($sheet) {
-            foreach ($this->students as $student) {
+            foreach ($this->getStudents() as $student) {
                 $row = $this->marks[$student->id] ?? [];
                 $status = (string) ($row['status'] ?? 'Present');
                 $note = $row['note'] ?? null;
@@ -282,7 +252,7 @@ class Index extends Component
             return;
         }
 
-        foreach ($this->students as $student) {
+        foreach ($this->getStudents() as $student) {
             $this->marks[$student->id]['status'] = $status;
         }
     }
@@ -309,17 +279,16 @@ class Index extends Component
     private function loadMarks(AttendanceSheet $sheet): void
     {
         $this->marks = [];
-
         $existing = AttendanceMark::query()
             ->where('sheet_id', $sheet->id)
             ->get()
             ->keyBy('student_id');
-
-        foreach ($this->students as $student) {
+        $students = $this->getStudents();
+        foreach ($students as $student) {
             $mark = $existing->get($student->id);
             $this->marks[$student->id] = [
                 'status' => $mark?->status ?? 'Present',
-                'note' => $mark?->note,
+                'note'   => $mark?->note,
             ];
         }
     }
@@ -402,6 +371,15 @@ class Index extends Component
 
     public function render()
     {
-        return view('livewire.attendance.index');
+        $students       = $this->getStudents();
+        $visibleStudents = $this->getVisibleStudents($students);
+        $markCounts     = $this->getMarkCounts($students);
+        $classes        = $this->getClasses();
+        $sections       = $this->getSections();
+        $dateRecords    = $this->getDateRecords();
+
+        return view('livewire.attendance.index', compact(
+            'students', 'visibleStudents', 'markCounts', 'classes', 'sections', 'dateRecords'
+        ));
     }
 }

@@ -117,38 +117,6 @@ class WhatsAppController extends Controller
         return response()->json(['success' => true, 'data' => []]);
     }
 
-    public function askAi(Request $request)
-    {
-        $request->validate([
-            'parent_id' => 'required|integer',
-            'key' => 'nullable|string',
-            'question' => 'required|string|max:1000',
-        ]);
-
-        $user = \App\Models\User::whereKey($request->parent_id)->firstOrFail();
-
-        if (!empty($request->key) && !empty($user->whatsapp_ai_key_hash)) {
-            if (hash('sha256', $request->key) !== $user->whatsapp_ai_key_hash) {
-                return response()->json([
-                    'success' => false,
-                    'code' => 'key_invalid',
-                    'message' => 'Invalid AI key',
-                ], 403);
-            }
-        }
-
-        $agentPro = new \App\Services\AgentProService($user);
-        $answer = $agentPro->ask($request->question);
-
-        if (str_contains($answer, 'error occurred') || str_contains($answer, 'API key not configured')) {
-            return response()->json([
-                'success' => false,
-                'message' => $answer,
-            ], 502);
-        }
-
-        return response()->json(['success' => true, 'answer' => $answer]);
-    }
 
     private function buildParentContext(\App\Models\User $parent): array
     {

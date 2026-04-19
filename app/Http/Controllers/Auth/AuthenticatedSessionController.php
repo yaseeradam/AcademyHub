@@ -147,17 +147,26 @@ class AuthenticatedSessionController extends Controller
                 ]);
             }
             
-            // For now, we'll use a simple password system for students
-            $expectedPassword = $this->generateStudentPassword($student);
-            
-            if (!Hash::check($request->password, Hash::make($expectedPassword))) {
-                // Try direct comparison for simple passwords
+            // If a custom password has been set, use it; otherwise fall back to the default scheme.
+            if ($student->password) {
+                if (! Hash::check($request->password, $student->password)) {
+                    Log::warning('Student login failed - invalid password', [
+                        'admission_number' => $request->admission_number,
+                        'student_id' => $student->id,
+                    ]);
+
+                    throw ValidationException::withMessages([
+                        'password' => 'Invalid password. Please try again or contact your teacher.',
+                    ]);
+                }
+            } else {
+                $expectedPassword = $this->generateStudentPassword($student);
                 if ($request->password !== $expectedPassword) {
                     Log::warning('Student login failed - invalid password', [
                         'admission_number' => $request->admission_number,
-                        'student_id' => $student->id
+                        'student_id' => $student->id,
                     ]);
-                    
+
                     throw ValidationException::withMessages([
                         'password' => 'Invalid password. Please try again or contact your teacher.',
                     ]);
@@ -220,4 +229,3 @@ class AuthenticatedSessionController extends Controller
         return redirect()->route('login');
     }
 }
-

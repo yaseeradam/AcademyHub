@@ -26,6 +26,9 @@ class User extends Authenticatable
         'profile_photo',
         'permissions',
         'custom_fields',
+        'whatsapp_phone',
+        'whatsapp_verified',
+        'whatsapp_subscribed',
     ];
 
     /**
@@ -58,6 +61,8 @@ class User extends Authenticatable
         'is_active' => 'boolean',
         'permissions' => 'array',
         'custom_fields' => 'array',
+        'whatsapp_verified' => 'boolean',
+        'whatsapp_subscribed' => 'boolean',
     ];
 
     public function hasPermission(string $permission): bool
@@ -135,5 +140,10 @@ class User extends Authenticatable
     {
         return $this->belongsToMany(Student::class, 'parent_student', 'user_id', 'student_id')
             ->withTimestamps();
+    }
+
+    public function children()
+    {
+        return $this->students();
     }
 }

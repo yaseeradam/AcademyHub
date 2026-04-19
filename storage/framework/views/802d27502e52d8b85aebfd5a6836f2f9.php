@@ -336,7 +336,7 @@
                 <?php ($user = auth()->user()); ?>
 
                 <a href="<?php echo e(route('dashboard')); ?>" wire:navigate
-                    class="<?php echo e(request()->routeIs('dashboard') ? 'bg-amber-500 text-white shadow-md' : 'text-slate-700 hover:bg-amber-50'); ?> mb-0.5 group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-bold transition-all">
+                    class="<?php echo e(request()->routeIs('dashboard') ? 'bg-amber-50 text-amber-700 border-l-2 border-amber-500' : 'text-slate-700 hover:bg-amber-50'); ?> mb-0.5 group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-bold transition-all">
                     <svg class="h-5 w-5 flex-shrink-0 <?php echo e(request()->routeIs('dashboard') ? 'text-white' : 'text-amber-600'); ?>"
                         viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                         <rect x="3" y="3" width="7" height="7" />
@@ -349,7 +349,7 @@
 
                 <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($user?->role !== 'parent'): ?>
                     <a href="<?php echo e(route('students.index')); ?>" wire:navigate
-                        class="<?php echo e(request()->routeIs('students.*') ? 'bg-amber-500 text-white shadow-md' : 'text-slate-700 hover:bg-amber-50'); ?> mb-0.5 group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-bold transition-all">
+                        class="<?php echo e(request()->routeIs('students.*') ? 'bg-amber-50 text-amber-700 border-l-2 border-amber-500' : 'text-slate-700 hover:bg-amber-50'); ?> mb-0.5 group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-bold transition-all">
                         <svg class="h-5 w-5 flex-shrink-0 <?php echo e(request()->routeIs('students.*') ? 'text-white' : 'text-blue-600'); ?>"
                             viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                             <path d="M22 10v6M2 10l10-5 10 5-10 5z"/>
@@ -361,7 +361,7 @@
 
                 <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($user?->role === 'parent'): ?>
                     <a href="<?php echo e(route('students.index')); ?>" wire:navigate
-                        class="<?php echo e(request()->routeIs('students.*') ? 'bg-amber-500 text-white shadow-md' : 'text-slate-700 hover:bg-amber-50'); ?> mb-0.5 group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-bold transition-all">
+                        class="<?php echo e(request()->routeIs('students.*') ? 'bg-amber-50 text-amber-700 border-l-2 border-amber-500' : 'text-slate-700 hover:bg-amber-50'); ?> mb-0.5 group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-bold transition-all">
                         <svg class="h-5 w-5 flex-shrink-0 <?php echo e(request()->routeIs('students.*') ? 'text-white' : 'text-pink-600'); ?>"
                             viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                             <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
@@ -372,7 +372,7 @@
 
                 <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($user?->role === 'admin'): ?>
                     <a href="<?php echo e(route('teachers')); ?>" wire:navigate
-                        class="<?php echo e(request()->routeIs('teachers') || request()->routeIs('teachers.*') ? 'bg-amber-500 text-white shadow-md' : 'text-slate-700 hover:bg-amber-50'); ?> mb-0.5 group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-bold transition-all">
+                        class="<?php echo e(request()->routeIs('teachers') || request()->routeIs('teachers.*') ? 'bg-amber-50 text-amber-700 border-l-2 border-amber-500' : 'text-slate-700 hover:bg-amber-50'); ?> mb-0.5 group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-bold transition-all">
                         <svg class="h-5 w-5 flex-shrink-0 <?php echo e(request()->routeIs('teachers') || request()->routeIs('teachers.*') ? 'text-white' : 'text-orange-600'); ?>"
                             viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                             <rect x="2" y="3" width="20" height="13" rx="2"/>
@@ -384,7 +384,7 @@
                     </a>
 
                     <a href="<?php echo e(route('parents.index')); ?>" wire:navigate
-                        class="<?php echo e(request()->routeIs('parents.*') ? 'bg-amber-500 text-white shadow-md' : 'text-slate-700 hover:bg-amber-50'); ?> mb-0.5 group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-bold transition-all">
+                        class="<?php echo e(request()->routeIs('parents.*') ? 'bg-amber-50 text-amber-700 border-l-2 border-amber-500' : 'text-slate-700 hover:bg-amber-50'); ?> mb-0.5 group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-bold transition-all">
                         <svg class="h-5 w-5 flex-shrink-0 <?php echo e(request()->routeIs('parents.*') ? 'text-white' : 'text-pink-600'); ?>"
                             viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                             <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
@@ -396,7 +396,7 @@
 
                 <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($user?->role === 'admin' || $user?->role === 'teacher'): ?>
                     <a href="<?php echo e(route('classes.index')); ?>" wire:navigate
-                        class="<?php echo e(request()->routeIs('classes.*') ? 'bg-amber-500 text-white shadow-md' : 'text-slate-700 hover:bg-amber-50'); ?> mb-0.5 group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-bold transition-all">
+                        class="<?php echo e(request()->routeIs('classes.*') ? 'bg-amber-50 text-amber-700 border-l-2 border-amber-500' : 'text-slate-700 hover:bg-amber-50'); ?> mb-0.5 group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-bold transition-all">
                         <svg class="h-5 w-5 flex-shrink-0 <?php echo e(request()->routeIs('classes.*') ? 'text-white' : 'text-slate-600'); ?>"
                             viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                             <path d="M3 21h18M5 21V7l7-4 7 4v14M10 21v-6h4v6"/>
@@ -406,7 +406,7 @@
                     </a>
 
                     <a href="<?php echo e(route('subjects.index')); ?>" wire:navigate
-                        class="<?php echo e(request()->routeIs('subjects.*') ? 'bg-amber-500 text-white shadow-md' : 'text-slate-700 hover:bg-amber-50'); ?> mb-0.5 group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-bold transition-all">
+                        class="<?php echo e(request()->routeIs('subjects.*') ? 'bg-amber-50 text-amber-700 border-l-2 border-amber-500' : 'text-slate-700 hover:bg-amber-50'); ?> mb-0.5 group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-bold transition-all">
                         <svg class="h-5 w-5 flex-shrink-0 <?php echo e(request()->routeIs('subjects.*') ? 'text-white' : 'text-indigo-600'); ?>"
                             viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                             <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
@@ -416,7 +416,7 @@
                     </a>
 
                     <a href="<?php echo e(route('results.entry')); ?>" wire:navigate
-                        class="<?php echo e(request()->routeIs('results.entry') ? 'bg-amber-500 text-white shadow-md' : 'text-slate-700 hover:bg-amber-50'); ?> mb-0.5 group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-bold transition-all">
+                        class="<?php echo e(request()->routeIs('results.entry') ? 'bg-amber-50 text-amber-700 border-l-2 border-amber-500' : 'text-slate-700 hover:bg-amber-50'); ?> mb-0.5 group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-bold transition-all">
                         <svg class="h-5 w-5 flex-shrink-0 <?php echo e(request()->routeIs('results.entry') ? 'text-white' : 'text-green-600'); ?>"
                             viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                             <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
@@ -428,7 +428,7 @@
 
                 <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($user?->role === 'admin'): ?>
                     <a href="<?php echo e(route('results.broadsheet')); ?>" wire:navigate
-                        class="<?php echo e(request()->routeIs('results.broadsheet') ? 'bg-amber-500 text-white shadow-md' : 'text-slate-700 hover:bg-amber-50'); ?> mb-0.5 group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-bold transition-all">
+                        class="<?php echo e(request()->routeIs('results.broadsheet') ? 'bg-amber-50 text-amber-700 border-l-2 border-amber-500' : 'text-slate-700 hover:bg-amber-50'); ?> mb-0.5 group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-bold transition-all">
                         <svg class="h-5 w-5 flex-shrink-0 <?php echo e(request()->routeIs('results.broadsheet') ? 'text-white' : 'text-emerald-600'); ?>"
                             viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                             <rect x="3" y="3" width="18" height="18" rx="2"/>
@@ -440,7 +440,7 @@
 
                 <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($user?->role === 'admin' || $user?->role === 'teacher'): ?>
                 <a href="<?php echo e(route('attendance')); ?>" wire:navigate
-                    class="<?php echo e(request()->routeIs('attendance') ? 'bg-amber-500 text-white shadow-md' : 'text-slate-700 hover:bg-amber-50'); ?> mb-0.5 group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-bold transition-all">
+                    class="<?php echo e(request()->routeIs('attendance') ? 'bg-amber-50 text-amber-700 border-l-2 border-amber-500' : 'text-slate-700 hover:bg-amber-50'); ?> mb-0.5 group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-bold transition-all">
                     <svg class="h-5 w-5 flex-shrink-0 <?php echo e(request()->routeIs('attendance') ? 'text-white' : 'text-blue-600'); ?>"
                         viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                         <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
@@ -451,7 +451,7 @@
                 </a>
 
                 <a href="<?php echo e(route('homework.index')); ?>" wire:navigate
-                    class="<?php echo e(request()->routeIs('homework.*') ? 'bg-amber-500 text-white shadow-md' : 'text-slate-700 hover:bg-amber-50'); ?> mb-0.5 group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-bold transition-all">
+                    class="<?php echo e(request()->routeIs('homework.*') ? 'bg-amber-50 text-amber-700 border-l-2 border-amber-500' : 'text-slate-700 hover:bg-amber-50'); ?> mb-0.5 group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-bold transition-all">
                     <svg class="h-5 w-5 flex-shrink-0 <?php echo e(request()->routeIs('homework.*') ? 'text-white' : 'text-purple-600'); ?>"
                         viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                         <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/>
@@ -463,7 +463,7 @@
                 </a>
 
                 <a href="<?php echo e(route('messages')); ?>" wire:navigate
-                    class="<?php echo e(request()->routeIs('messages') ? 'bg-amber-500 text-white shadow-md' : 'text-slate-700 hover:bg-amber-50'); ?> mb-0.5 group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-bold transition-all">
+                    class="<?php echo e(request()->routeIs('messages') ? 'bg-amber-50 text-amber-700 border-l-2 border-amber-500' : 'text-slate-700 hover:bg-amber-50'); ?> mb-0.5 group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-bold transition-all">
                     <svg class="h-5 w-5 flex-shrink-0 <?php echo e(request()->routeIs('messages') ? 'text-white' : 'text-purple-600'); ?>"
                         viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                         <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
@@ -496,7 +496,7 @@ if (isset($__slots)) unset($__slots);
                 <?php ($cbtHref = $cbtLocked ? route('more-features') : route('cbt.index')); ?>
                 <?php ($cbtIsActive = !$cbtLocked && request()->routeIs('cbt.*')); ?>
                 <a href="<?php echo e($cbtHref); ?>" wire:navigate
-                    class="<?php echo e($cbtIsActive ? 'bg-amber-500 text-white shadow-md' : 'text-slate-700 hover:bg-amber-50'); ?> <?php echo e($cbtLocked ? 'opacity-60' : ''); ?> mb-0.5 group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-bold transition-all">
+                    class="<?php echo e($cbtIsActive ? 'bg-amber-50 text-amber-700 border-l-2 border-amber-500' : 'text-slate-700 hover:bg-amber-50'); ?> <?php echo e($cbtLocked ? 'opacity-60' : ''); ?> mb-0.5 group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-bold transition-all">
                     <svg class="h-5 w-5 flex-shrink-0 <?php echo e($cbtIsActive ? 'text-white' : 'text-violet-600'); ?>"
                         viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                         <rect x="3" y="4" width="18" height="12" rx="2" ry="2" />
@@ -513,7 +513,7 @@ if (isset($__slots)) unset($__slots);
 
                 <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(in_array($user?->role, ['admin', 'teacher', 'bursar'], true)): ?>
                     <a href="<?php echo e(route('more-features')); ?>" wire:navigate
-                        class="<?php echo e(request()->routeIs('more-features') ? 'bg-amber-500 text-white shadow-md' : 'text-slate-700 hover:bg-amber-50'); ?> mb-0.5 group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-bold transition-all">
+                        class="<?php echo e(request()->routeIs('more-features') ? 'bg-amber-50 text-amber-700 border-l-2 border-amber-500' : 'text-slate-700 hover:bg-amber-50'); ?> mb-0.5 group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-bold transition-all">
                         <svg class="h-5 w-5 flex-shrink-0 <?php echo e(request()->routeIs('more-features') ? 'text-white' : 'text-slate-600'); ?>"
                             viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                             <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
@@ -524,7 +524,7 @@ if (isset($__slots)) unset($__slots);
 
                 <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($user?->role === 'admin'): ?>
                     <a href="<?php echo e(route('settings.index')); ?>" wire:navigate
-                        class="<?php echo e(request()->routeIs('settings.*') && !request()->routeIs('settings.subscription') ? 'bg-amber-500 text-white shadow-md' : 'text-slate-700 hover:bg-amber-50'); ?> mb-0.5 group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-bold transition-all">
+                        class="<?php echo e(request()->routeIs('settings.*') && !request()->routeIs('settings.subscription') ? 'bg-amber-50 text-amber-700 border-l-2 border-amber-500' : 'text-slate-700 hover:bg-amber-50'); ?> mb-0.5 group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-bold transition-all">
                         <svg class="h-5 w-5 flex-shrink-0 <?php echo e(request()->routeIs('settings.*') && !request()->routeIs('settings.subscription') ? 'text-white' : 'text-gray-600'); ?>"
                             viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                             <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" />
@@ -534,7 +534,7 @@ if (isset($__slots)) unset($__slots);
                     </a>
 
                     <a href="<?php echo e(route('settings.subscription')); ?>" wire:navigate
-                        class="<?php echo e(request()->routeIs('settings.subscription') ? 'bg-amber-500 text-white shadow-md' : 'text-slate-700 hover:bg-amber-50'); ?> mb-0.5 group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-bold transition-all">
+                        class="<?php echo e(request()->routeIs('settings.subscription') ? 'bg-amber-50 text-amber-700 border-l-2 border-amber-500' : 'text-slate-700 hover:bg-amber-50'); ?> mb-0.5 group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-bold transition-all">
                         <svg class="h-5 w-5 flex-shrink-0 <?php echo e(request()->routeIs('settings.subscription') ? 'text-white' : 'text-green-600'); ?>" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                             <rect x="2" y="5" width="20" height="14" rx="2" />
                             <line x1="2" y1="10" x2="22" y2="10" />
@@ -733,28 +733,7 @@ unset($__split);
 if (isset($__slots)) unset($__slots);
 ?>
 
-            <!-- AgentPro Chatbot -->
-            <?php
-$__split = function ($name, $params = []) {
-    return [$name, $params];
-};
-[$__name, $__params] = $__split('agent-pro-chat', []);
 
-$key = null;
-
-$key ??= \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::generateKey('lw-2859434850-3', null);
-
-$__html = app('livewire')->mount($__name, $__params, $key);
-
-echo $__html;
-
-unset($__html);
-unset($__name);
-unset($__params);
-unset($__split);
-if (isset($__slots)) unset($__slots);
-?>
-        </div>
     </div>
 
     <?php echo \Livewire\Mechanisms\FrontendAssets\FrontendAssets::scripts(); ?>
@@ -907,6 +886,16 @@ if (isset($__slots)) unset($__slots);
             mobileOverlay.classList.add('hidden');
         });
     </script>
+    <!-- Global Loading Spinner for Livewire Navigation -->
+    <div x-data="{ loading: false }"
+         x-on:livewire:navigating.window="loading = true"
+         x-on:livewire:navigated.window="loading = false"
+         x-show="loading"
+         style="display: none;"
+         class="fixed inset-0 z-[9999] flex items-center justify-center bg-white/50 backdrop-blur-sm transition-opacity duration-300">
+        <div class="h-14 w-14 animate-spin rounded-full border-4 border-slate-200 border-t-amber-500 shadow-lg"></div>
+    </div>
 </body>
 
-</html><?php /**PATH C:\laragon\www\myacademy-laravel\resources\views/layouts/app.blade.php ENDPATH**/ ?>
+</html>
+<?php /**PATH C:\laragon\www\myacademy-laravel\resources\views/layouts/app.blade.php ENDPATH**/ ?>

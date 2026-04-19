@@ -1,7 +1,5 @@
-@extends('layouts.app')
-
-@section('content')
-@php
+<?php $__env->startSection('content'); ?>
+<?php
     $hasPremium = true;
     $certificateTemplate = old('certificate_template', config('myacademy.certificate_template', 'modern'));
     $certificateTemplatesData = [
@@ -17,38 +15,58 @@
         ['key' => 'crimson',  'title' => 'Crimson',  'desc' => 'Bold red and professional.',           'preview' => route('settings.templates.preview', ['type' => 'certificate', 'template' => 'crimson']),  'free' => false],
         ['key' => 'ivory',    'title' => 'Ivory',    'desc' => 'Sophisticated pale tones.',            'preview' => route('settings.templates.preview', ['type' => 'certificate', 'template' => 'ivory']),    'free' => false],
     ];
-@endphp
+?>
 
-<div class="space-y-6" x-data="{ open: false, src: null, title: '', selectedCertificateTemplate: '{{ $certificateTemplate }}' }">
+<div class="space-y-6" x-data="{ open: false, src: null, title: '', selectedCertificateTemplate: '<?php echo e($certificateTemplate); ?>' }">
 
-    <x-page-header title="Certificate Settings" subtitle="Customize certificate design and templates." accent="settings" />
+    <?php if (isset($component)) { $__componentOriginalf8d4ea307ab1e58d4e472a43c8548d8e = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginalf8d4ea307ab1e58d4e472a43c8548d8e = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.page-header','data' => ['title' => 'Certificate Settings','subtitle' => 'Customize certificate design and templates.','accent' => 'settings']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component->withName('page-header'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
+<?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
+<?php endif; ?>
+<?php $component->withAttributes(['title' => 'Certificate Settings','subtitle' => 'Customize certificate design and templates.','accent' => 'settings']); ?>
+<?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginalf8d4ea307ab1e58d4e472a43c8548d8e)): ?>
+<?php $attributes = $__attributesOriginalf8d4ea307ab1e58d4e472a43c8548d8e; ?>
+<?php unset($__attributesOriginalf8d4ea307ab1e58d4e472a43c8548d8e); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginalf8d4ea307ab1e58d4e472a43c8548d8e)): ?>
+<?php $component = $__componentOriginalf8d4ea307ab1e58d4e472a43c8548d8e; ?>
+<?php unset($__componentOriginalf8d4ea307ab1e58d4e472a43c8548d8e); ?>
+<?php endif; ?>
 
     <div class="flex gap-2">
-        <a href="{{ route('settings.index') }}" class="btn-outline">← Back to Settings</a>
+        <a href="<?php echo e(route('settings.index')); ?>" class="btn-outline">← Back to Settings</a>
     </div>
 
-    @if (session('status'))
+    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(session('status')): ?>
         <div class="card-padded border border-green-200 bg-green-50/60 text-sm text-green-900">
-            {{ session('status') }}
-        </div>
-    @endif
+            <?php echo e(session('status')); ?>
 
-    @if ($errors->any())
+        </div>
+    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+
+    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($errors->any()): ?>
         <div class="card-padded border border-orange-200 bg-orange-50/60">
             <div class="text-sm font-semibold text-orange-900">Please fix the following:</div>
             <ul class="mt-2 list-disc space-y-1 pl-5 text-sm text-orange-900">
-                @foreach ($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
+                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $errors->all(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $error): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                    <li><?php echo e($error); ?></li>
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
             </ul>
         </div>
-    @endif
+    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
 
-    <form method="POST" action="{{ route('settings.update-certificates') }}" enctype="multipart/form-data">
-        @csrf
+    <form method="POST" action="<?php echo e(route('settings.update-certificates')); ?>" enctype="multipart/form-data">
+        <?php echo csrf_field(); ?>
         <div class="space-y-6">
 
-            {{-- Design Options --}}
+            
             <div class="rounded-3xl border border-gray-100 bg-gradient-to-br from-amber-50 to-rose-50/60 p-6 shadow-lg">
                 <div class="flex items-center gap-3 mb-5">
                     <div class="icon-3d grid h-12 w-12 place-items-center rounded-xl bg-gradient-to-br from-amber-500 to-rose-600 text-white shadow-lg shadow-amber-500/30">
@@ -64,7 +82,7 @@
                     <div class="grid grid-cols-1 gap-4 lg:grid-cols-3">
                         <div>
                             <label class="text-xs font-bold uppercase tracking-wider text-gray-700">Orientation</label>
-                            @php($orientation = old('certificate_orientation', config('myacademy.certificate_orientation', 'landscape')))
+                            <?php($orientation = old('certificate_orientation', config('myacademy.certificate_orientation', 'landscape')))
                             <select name="certificate_orientation" class="mt-2 w-full rounded-xl border-0 bg-white/80 px-4 py-3 text-sm font-semibold text-gray-900 ring-1 ring-white/60 backdrop-blur-sm focus:ring-2 focus:ring-amber-500">
                                 <option value="landscape" @selected($orientation === 'landscape')>Landscape</option>
                                 <option value="portrait" @selected($orientation === 'portrait')>Portrait</option>
@@ -259,43 +277,45 @@
                 <div class="mt-1 text-sm font-semibold text-gray-600">Choose your preferred certificate design.</div>
                 <div class="mt-4 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                     @foreach ($certificateTemplatesData as $ct)
-                        @php $isCertLocked = !$ct['free'] && !$hasPremium; @endphp
+                        @php $isCertLocked = !$ct['free'] && !$hasPremium; ?>
                         <label
-                            :class="selectedCertificateTemplate === '{{ $ct['key'] }}' ? 'border-amber-400 ring-2 ring-amber-600 bg-amber-50/20' : 'border-white/60'"
-                            class="group flex h-full cursor-pointer flex-col rounded-2xl border bg-white/60 p-5 shadow-sm ring-1 ring-white/50 backdrop-blur transition hover:border-amber-200 hover:shadow-md {{ $isCertLocked ? 'opacity-60' : '' }}">
-                            <input type="radio" name="certificate_template" value="{{ $ct['key'] }}" class="sr-only"
+                            :class="selectedCertificateTemplate === '<?php echo e($ct['key']); ?>' ? 'border-amber-400 ring-2 ring-amber-600 bg-amber-50/20' : 'border-white/60'"
+                            class="group flex h-full cursor-pointer flex-col rounded-2xl border bg-white/60 p-5 shadow-sm ring-1 ring-white/50 backdrop-blur transition hover:border-amber-200 hover:shadow-md <?php echo e($isCertLocked ? 'opacity-60' : ''); ?>">
+                            <input type="radio" name="certificate_template" value="<?php echo e($ct['key']); ?>" class="sr-only"
                                 x-model="selectedCertificateTemplate"
-                                @checked($certificateTemplate === $ct['key'])
-                                @disabled($isCertLocked) />
+                                <?php if($certificateTemplate === $ct['key']): echo 'checked'; endif; ?>
+                                <?php if($isCertLocked): echo 'disabled'; endif; ?> />
                             <div class="relative mb-4 w-full overflow-hidden rounded-xl border border-gray-200 bg-white pointer-events-none select-none" style="aspect-ratio: 1.414 / 1;">
                                 <div class="absolute inset-0" style="width:200%;height:200%;transform:scale(0.5);transform-origin:top left;">
-                                    <iframe src="{{ $ct['preview'] }}?html=1" class="w-full h-full border-0 bg-transparent" scrolling="no" tabindex="-1"></iframe>
+                                    <iframe src="<?php echo e($ct['preview']); ?>?html=1" class="w-full h-full border-0 bg-transparent" scrolling="no" tabindex="-1"></iframe>
                                 </div>
                             </div>
                             <div class="flex items-start justify-between gap-4">
                                 <div class="min-w-0">
                                     <div class="flex items-center gap-1.5 text-[13px] font-black text-gray-900">
-                                        {{ $ct['title'] }}
-                                        @if($isCertLocked)
+                                        <?php echo e($ct['title']); ?>
+
+                                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($isCertLocked): ?>
                                             <svg class="h-3 w-3 text-red-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-                                        @endif
+                                        <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                                     </div>
-                                    <div class="mt-1 line-clamp-2 text-[11px] font-semibold text-gray-600">{{ $ct['desc'] }}</div>
+                                    <div class="mt-1 line-clamp-2 text-[11px] font-semibold text-gray-600"><?php echo e($ct['desc']); ?></div>
                                 </div>
-                                <span class="inline-flex items-center rounded-full px-2 py-0.5 text-[9px] font-black {{ $ct['free'] ? 'bg-amber-100 text-amber-800' : 'bg-rose-100 text-rose-800' }}">
-                                    {{ $ct['free'] ? 'FREE' : 'PRO' }}
+                                <span class="inline-flex items-center rounded-full px-2 py-0.5 text-[9px] font-black <?php echo e($ct['free'] ? 'bg-amber-100 text-amber-800' : 'bg-rose-100 text-rose-800'); ?>">
+                                    <?php echo e($ct['free'] ? 'FREE' : 'PRO'); ?>
+
                                 </span>
                             </div>
                             <div class="mt-auto flex items-center justify-between pt-3">
-                                <div class="text-[9px] font-semibold uppercase tracking-wider text-gray-500">{{ $isCertLocked ? 'Locked' : 'Select' }}</div>
+                                <div class="text-[9px] font-semibold uppercase tracking-wider text-gray-500"><?php echo e($isCertLocked ? 'Locked' : 'Select'); ?></div>
                                 <button type="button"
                                     class="rounded-lg border border-slate-200 bg-white/80 px-2 py-1 text-[10px] font-bold text-slate-700 transition-colors hover:bg-white"
-                                    @click.stop="open = true; src = @js($ct['preview']); title = @js('Certificate · ' . $ct['title'])">
+                                    @click.stop="open = true; src = <?php echo \Illuminate\Support\Js::from($ct['preview'])->toHtml() ?>; title = <?php echo \Illuminate\Support\Js::from('Certificate · ' . $ct['title'])->toHtml() ?>">
                                     Full Preview
                                 </button>
                             </div>
                         </label>
-                    @endforeach
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                 </div>
             </div>
 
@@ -306,7 +326,7 @@
         </div>
     </form>
 
-    {{-- Preview Modal --}}
+    
     <div x-show="open" x-cloak class="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 p-4" @click.self="open = false">
         <div class="w-full max-w-5xl overflow-hidden rounded-3xl bg-white shadow-2xl ring-1 ring-black/5">
             <div class="flex items-center justify-between border-b border-slate-100 px-5 py-4">
@@ -320,4 +340,6 @@
     </div>
 
 </div>
-@endsection
+<?php $__env->stopSection(); ?>
+
+<?php echo $__env->make('layouts.app', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\laragon\www\myacademy-laravel\resources\views/pages/settings/certificates.blade.php ENDPATH**/ ?>

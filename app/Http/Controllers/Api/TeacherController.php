@@ -7,6 +7,7 @@ use App\Models\AcademicTerm;
 use App\Models\AttendanceMark;
 use App\Models\AttendanceSheet;
 use App\Models\Score;
+use App\Models\Section;
 use App\Models\Student;
 use App\Models\SubjectAllocation;
 use Illuminate\Http\Request;
@@ -88,11 +89,30 @@ class TeacherController extends Controller
     {
         $this->authorizeClass($request, $classId);
 
+        $sectionId = (int) $request->query('section_id', 0);
+        if ($sectionId <= 0) {
+            $sectionIds = Section::query()->where('class_id', $classId)->pluck('id');
+            if ($sectionIds->count() === 1) {
+                $sectionId = (int) $sectionIds->first();
+            } else {
+                return response()->json([
+                    'message' => 'section_id is required for attendance (multiple sections exist for this class).',
+                ], 422);
+            }
+        }
+
+        $sectionOk = Section::query()
+            ->where('id', $sectionId)
+            ->where('class_id', $classId)
+            ->exists();
+        abort_unless($sectionOk, 422, 'Invalid section_id for this class.');
+
         $date = $request->query('date', today()->toDateString());
         $term = $request->query('term', AcademicTerm::activeTermNumber());
         $session = $request->query('session', AcademicTerm::activeSessionName());
 
         $sheet = AttendanceSheet::where('class_id', $classId)
+            ->where('section_id', $sectionId)
             ->where('date', $date)
             ->where('term', $term)
             ->where('session', $session)
@@ -102,24 +122,45 @@ class TeacherController extends Controller
         return response()->json(['data' => $sheet]);
     }
 
-    /** POST /api/teacher/attendance — save attendance sheet + marks */
+    /** POST /api/teacher/attendance - save attendance sheet + marks */
     public function saveAttendance(Request $request)
     {
         $request->validate([
             'class_id'  => 'required|integer|exists:classes,id',
+            'section_id' => 'nullable|integer|exists:sections,id',
             'date'      => 'required|date',
             'term'      => 'required|integer',
             'session'   => 'required|string',
             'marks'     => 'required|array',
             'marks.*.student_id' => 'required|integer',
-            'marks.*.status'     => 'required|in:present,absent,late',
+            'marks.*.status'     => 'required|string',
         ]);
 
         $this->authorizeClass($request, $request->class_id);
 
+        $sectionId = (int) ($request->section_id ?? 0);
+        if ($sectionId <= 0) {
+            $sectionIds = Section::query()->where('class_id', $request->class_id)->pluck('id');
+            if ($sectionIds->count() === 1) {
+                $sectionId = (int) $sectionIds->first();
+            } else {
+                return response()->json([
+                    'message' => 'section_id is required for attendance (multiple sections exist for this class).',
+                    'errors' => ['section_id' => ['The section_id field is required.']],
+                ], 422);
+            }
+        }
+
+        $sectionOk = Section::query()
+            ->where('id', $sectionId)
+            ->where('class_id', (int) $request->class_id)
+            ->exists();
+        abort_unless($sectionOk, 422, 'Invalid section_id for this class.');
+
         $sheet = AttendanceSheet::firstOrCreate(
             [
                 'class_id' => $request->class_id,
+                'section_id' => $sectionId,
                 'date'     => $request->date,
                 'term'     => $request->term,
                 'session'  => $request->session,
@@ -128,9 +169,17 @@ class TeacherController extends Controller
         );
 
         foreach ($request->marks as $mark) {
+            $normalizedStatus = $this->normalizeAttendanceStatus($mark['status'] ?? null);
+            if (! $normalizedStatus) {
+                return response()->json([
+                    'message' => 'Invalid attendance status.',
+                    'errors' => ['marks' => ['Status must be one of: Present, Absent, Late, Excused.']],
+                ], 422);
+            }
+
             AttendanceMark::updateOrCreate(
                 ['sheet_id' => $sheet->id, 'student_id' => $mark['student_id']],
-                ['status' => $mark['status'], 'note' => $mark['note'] ?? null]
+                ['status' => $normalizedStatus, 'note' => $mark['note'] ?? null]
             );
         }
 
@@ -154,6 +203,7 @@ class TeacherController extends Controller
 
         foreach ($request->scores as $s) {
             $this->authorizeClass($request, $s['class_id']);
+            $this->authorizeSubject($request, (int) $s['class_id'], (int) $s['subject_id']);
 
             Score::updateOrCreate(
                 [
@@ -183,5 +233,33 @@ class TeacherController extends Controller
             ->exists();
 
         abort_unless($allowed, 403, 'Not assigned to this class.');
+    }
+
+    private function authorizeSubject(Request $request, int $classId, int $subjectId): void
+    {
+        if ($request->user()->role === 'admin') {
+            return;
+        }
+
+        $allowed = SubjectAllocation::query()
+            ->where('teacher_id', $request->user()->id)
+            ->where('class_id', $classId)
+            ->where('subject_id', $subjectId)
+            ->exists();
+
+        abort_unless($allowed, 403, 'Not assigned to this subject.');
+    }
+
+    private function normalizeAttendanceStatus(mixed $status): ?string
+    {
+        if (!is_string($status)) {
+            return null;
+        }
+
+        $normalized = ucfirst(mb_strtolower(trim($status)));
+
+        return in_array($normalized, ['Present', 'Absent', 'Late', 'Excused'], true)
+            ? $normalized
+            : null;
     }
 }

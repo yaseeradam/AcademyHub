@@ -20,47 +20,48 @@
     <div class="space-y-4">
         <div class="flex items-center justify-between">
             <h2 class="text-lg font-bold text-gray-900">Featured Products</h2>
-            <span class="text-sm text-gray-500">6 products available</span>
+            <span class="text-sm text-gray-500">7 products available</span>
         </div>
         
         <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-2">
-            <!-- AgentPro Product -->
-            <a href="{{ route('marketplace.product', 'agent-pro') }}" class="group block">
-                <div class="card-padded hover:shadow-lg transition-all duration-200 border-2 border-transparent group-hover:border-pink-200 group-hover:bg-pink-50/30">
+            <!-- Messages Product -->
+            <a href="{{ route('marketplace.product', 'messages') }}" class="group block">
+                <div class="card-padded hover:shadow-lg transition-all duration-200 border-2 border-transparent group-hover:border-amber-200 group-hover:bg-amber-50/30">
                     <div class="flex items-start gap-4">
                         <div class="flex-shrink-0">
-                            <div class="h-16 w-16 rounded-2xl bg-gradient-to-br from-pink-500 to-rose-600 flex items-center justify-center shadow-lg">
+                            <div class="h-16 w-16 rounded-2xl bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center shadow-lg">
                                 <svg class="h-8 w-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
                                 </svg>
                             </div>
                         </div>
                         <div class="flex-1 min-w-0">
                             <div class="flex items-start justify-between">
                                 <div>
-                                    <h3 class="text-lg font-bold text-gray-900 group-hover:text-pink-700 transition-colors">AgentPro AI</h3>
-                                    <p class="text-sm text-gray-600 mt-1">Intelligent AI assistant platform integration</p>
+                                    <h3 class="text-lg font-bold text-gray-900 group-hover:text-amber-700 transition-colors">Internal Messaging</h3>
+                                    <p class="text-sm text-gray-600 mt-1">Real-time staff & admin communication system</p>
                                 </div>
                                 <div class="flex items-center gap-1 text-amber-500">
                                     <svg class="h-4 w-4 fill-current" viewBox="0 0 20 20">
                                         <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
                                     </svg>
-                                    <span class="text-sm font-semibold">5.0</span>
+                                    <span class="text-sm font-semibold">4.7</span>
                                 </div>
                             </div>
                             <div class="mt-3 flex items-center justify-between">
                                 <div class="flex items-center gap-2">
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-pink-100 text-pink-800">FREE</span>
-                                    <span class="text-xs text-gray-500">AI</span>
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800">FREE</span>
+                                    <span class="text-xs text-gray-500">Communication</span>
                                 </div>
                                 <div class="text-right">
-                                    <div class="text-xs text-gray-500">4.1k downloads</div>
+                                    <div class="text-xs text-gray-500">1.5k downloads</div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </a>
+
 
             <!-- Homework Product -->
             <a href="{{ route('marketplace.product', 'homework') }}" class="group block">
