@@ -46,7 +46,7 @@ class Start extends Component
 
         $exam = CbtExam::query()
             ->where('access_code', $code)
-            ->where('status', 'approved')
+            ->whereIn('status', ['live', 'approved'])
             ->whereNotNull('published_at')
             ->first();
 

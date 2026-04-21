@@ -23,12 +23,15 @@ class User extends Authenticatable
         'password',
         'role',
         'is_active',
+        'is_super_admin',
+        'tenant_id',
         'profile_photo',
         'permissions',
         'custom_fields',
         'whatsapp_phone',
         'whatsapp_verified',
         'whatsapp_subscribed',
+        'is_class_teacher',
     ];
 
     /**
@@ -56,13 +59,15 @@ class User extends Authenticatable
      * @var array<string, string>
      */
     protected $casts = [
-        'email_verified_at' => 'datetime',
-        'password' => 'hashed',
-        'is_active' => 'boolean',
-        'permissions' => 'array',
-        'custom_fields' => 'array',
-        'whatsapp_verified' => 'boolean',
+        'email_verified_at'  => 'datetime',
+        'password'           => 'hashed',
+        'is_active'          => 'boolean',
+        'is_super_admin'     => 'boolean',
+        'permissions'        => 'array',
+        'custom_fields'      => 'array',
+        'whatsapp_verified'   => 'boolean',
         'whatsapp_subscribed' => 'boolean',
+        'is_class_teacher'    => 'boolean',
     ];
 
     public function hasPermission(string $permission): bool
@@ -119,6 +124,11 @@ class User extends Authenticatable
     public function isAdmin(): bool
     {
         return $this->role === 'admin';
+    }
+
+    public function isSuperAdmin(): bool
+    {
+        return (bool) $this->is_super_admin;
     }
 
     public function isBursar(): bool

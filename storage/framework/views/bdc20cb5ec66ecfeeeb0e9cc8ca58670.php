@@ -9,136 +9,204 @@
     <?php echo \Livewire\Mechanisms\FrontendAssets\FrontendAssets::styles(); ?>
 
     <style>
-        body { font-family: 'Space Grotesk', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif; }
+        body { font-family: 'Inter', 'Space Grotesk', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif; }
+        .nav-icon-box { width:36px; height:36px; border-radius:10px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+        .sidebar-scroll::-webkit-scrollbar { width:4px; }
+        .sidebar-scroll::-webkit-scrollbar-track { background:transparent; }
+        .sidebar-scroll::-webkit-scrollbar-thumb { background:#e2e8f0; border-radius:99px; }
     </style>
 </head>
-<body class="h-full bg-gradient-to-br from-green-50 via-white to-emerald-50 text-slate-900">
+<body class="h-full bg-[#f5f6fa] text-slate-900">
 
 <?php
+$schoolLogo      = config('myacademy.school_logo');
+$schoolName      = config('myacademy.school_name', 'MyAcademy');
+$studentName     = session('student_name', 'Student');
+$studentAdmission= session('student_admission', '');
+$studentInitial  = mb_strtoupper(mb_substr($studentName, 0, 1));
+
 $navItems = [
-    ['route' => 'student.dashboard',      'label' => 'Dashboard',      'color' => 'text-green-600',  'icon' => '<rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>'],
-    ['route' => 'student.homework',       'label' => 'Homework',       'color' => 'text-purple-600', 'icon' => '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>'],
-    ['route' => 'student.exams',          'label' => 'Exams',          'color' => 'text-amber-600',  'icon' => '<path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>'],
-    ['route' => 'student.results',        'label' => 'Results',        'color' => 'text-blue-600',   'icon' => '<path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>'],
-    ['route' => 'student.attendance',     'label' => 'Attendance',     'color' => 'text-teal-600',   'icon' => '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><polyline points="16 11 18 13 22 9"/>'],
-    ['route' => 'student.performance',    'label' => 'Performance',    'color' => 'text-orange-600', 'icon' => '<path d="M22 12h-4l-3 9L9 3l-3 9H2"/>'],
-    ['route' => 'student.notifications',  'label' => 'Notifications',  'color' => 'text-green-600',  'icon' => '<path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>'],
-    ['route' => 'student.profile',        'label' => 'My Profile',     'color' => 'text-gray-600',   'icon' => '<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>'],
+    ['route'=>'student.dashboard',     'label'=>'Dashboard',     'iconBg'=>'bg-blue-100',   'iconColor'=>'text-blue-500',   'icon'=>'<path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>'],
+    ['route'=>'student.homework',      'label'=>'Homework',      'iconBg'=>'bg-purple-100', 'iconColor'=>'text-purple-500', 'icon'=>'<path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>'],
+    ['route'=>'student.exams',         'label'=>'Exams',         'iconBg'=>'bg-orange-100', 'iconColor'=>'text-orange-500', 'icon'=>'<path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>'],
+    ['route'=>'student.results',       'label'=>'Results',       'iconBg'=>'bg-blue-100',   'iconColor'=>'text-blue-500',   'icon'=>'<path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>'],
+    ['route'=>'student.attendance',    'label'=>'Attendance',    'iconBg'=>'bg-teal-100',   'iconColor'=>'text-teal-500',   'icon'=>'<path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>'],
+    ['route'=>'student.performance',   'label'=>'Performance',   'iconBg'=>'bg-cyan-100',   'iconColor'=>'text-cyan-500',   'icon'=>'<path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/>'],
+    ['route'=>'student.notifications', 'label'=>'Notifications', 'iconBg'=>'bg-yellow-100', 'iconColor'=>'text-yellow-500', 'icon'=>'<path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>'],
+    ['route'=>'student.profile',       'label'=>'My Profile',    'iconBg'=>'bg-violet-100', 'iconColor'=>'text-violet-500', 'icon'=>'<path stroke-linecap="round" stroke-linejoin="round" d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>'],
 ];
+
+$pageLabel = 'Student Portal';
 ?>
 
-<div id="app" class="min-h-screen">
+<div id="app" class="flex min-h-screen">
 
-    <!-- Mobile Overlay -->
-    <div id="mobileSidebarOverlay" class="fixed inset-0 z-40 hidden bg-black/50 lg:hidden"></div>
+    
+    <div id="mobileSidebarOverlay" class="fixed inset-0 z-40 hidden bg-black/40 backdrop-blur-sm lg:hidden"></div>
 
-    <!-- Mobile Sidebar -->
-    <aside id="mobileSidebar" class="fixed inset-y-0 left-0 z-50 w-72 transform -translate-x-full transition-transform duration-300 lg:hidden">
-        <div class="flex h-full flex-col bg-white shadow-xl">
-            <div class="flex items-center justify-between border-b border-gray-100 px-4 py-4">
-                <div class="flex items-center gap-3">
-                    <?php $schoolLogo = config('myacademy.school_logo'); ?>
-                    <div class="grid h-9 w-9 place-items-center overflow-hidden rounded-lg bg-green-500 text-white shadow-sm flex-shrink-0">
-                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($schoolLogo): ?>
-                            <img src="<?php echo e(asset('uploads/' . str_replace('\\', '/', $schoolLogo))); ?>" alt="Logo" class="h-full w-full object-contain p-1 bg-white rounded-md" />
-                        <?php else: ?>
-                            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                                <path d="M12 3 1 9l11 6 9-4.91V17a2 2 0 0 1-1.1 1.79l-7.4 3.7a2 2 0 0 1-1.8 0l-7.4-3.7A2 2 0 0 1 2 17V9"/><path d="M12 21V9"/>
-                            </svg>
-                        <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
-                    </div>
-                    <span class="text-sm font-bold text-slate-900 truncate"><?php echo e(config('myacademy.school_name', 'MyAcademy')); ?></span>
-                </div>
-                <button id="closeMobileSidebar" class="rounded-lg p-2 text-gray-400 hover:bg-gray-100">
-                    <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 18L18 6M6 6l12 12"/></svg>
-                </button>
-            </div>
+    
+    <aside id="mobileSidebar"
+           class="fixed inset-y-0 left-0 z-50 flex w-72 -translate-x-full flex-col bg-[#f5f6fa] transition-transform duration-300 lg:hidden">
 
-            <nav class="flex-1 overflow-y-auto px-3 py-4 space-y-0.5">
-                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $navItems; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $item): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                    <a href="<?php echo e(route($item['route'])); ?>"
-                       class="<?php echo e(request()->routeIs($item['route']) ? 'bg-green-500 text-white shadow-md' : 'text-slate-700 hover:bg-green-50'); ?> flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-bold transition-all">
-                        <svg class="h-5 w-5 flex-shrink-0 <?php echo e(request()->routeIs($item['route']) ? 'text-white' : $item['color']); ?>" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><?php echo $item['icon']; ?></svg>
-                        <?php echo e($item['label']); ?>
-
-                    </a>
-                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
-            </nav>
-
-            <div class="border-t border-gray-100 p-4">
-                <form method="POST" action="<?php echo e(route('student.logout')); ?>">
-                    <?php echo csrf_field(); ?>
-                    <button type="submit" class="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-br from-slate-700 to-slate-900 px-4 py-3 text-sm font-bold text-white shadow-md hover:shadow-lg transition-all">
-                        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-                        Logout
-                    </button>
-                </form>
-            </div>
-        </div>
-    </aside>
-
-    <!-- Desktop Sidebar -->
-    <aside id="desktopSidebar" class="fixed inset-y-0 left-0 hidden w-64 flex-col bg-white shadow-xl transition-all duration-300 lg:flex">
-        <div class="flex items-center justify-between border-b border-slate-200 px-4 py-4">
-            <?php $schoolLogo = config('myacademy.school_logo'); ?>
-            <div class="flex items-center gap-2.5 min-w-0">
-                <div class="grid h-9 w-9 place-items-center overflow-hidden rounded-lg bg-green-500 text-white shadow-sm flex-shrink-0">
-                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($schoolLogo): ?>
-                        <img src="<?php echo e(asset('uploads/' . str_replace('\\', '/', $schoolLogo))); ?>" alt="Logo" class="h-full w-full object-contain p-1 bg-white rounded-md" />
-                    <?php else: ?>
-                        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                            <path d="M12 3 1 9l11 6 9-4.91V17a2 2 0 0 1-1.1 1.79l-7.4 3.7a2 2 0 0 1-1.8 0l-7.4-3.7A2 2 0 0 1 2 17V9"/><path d="M12 21V9"/>
-                        </svg>
-                    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
-                </div>
-                <div class="sidebar-text truncate text-sm font-bold text-slate-900">
-                    <?php echo e(config('myacademy.school_name', 'MyAcademy')); ?>
-
-                </div>
-            </div>
-            <button id="sidebarToggle" class="rounded-lg p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors flex-shrink-0">
-                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 18l-6-6 6-6"/></svg>
+        <div class="flex items-center justify-end px-4 pt-4">
+            <button id="closeMobileSidebar"
+                    class="rounded-xl bg-white p-2 text-slate-400 shadow-sm hover:text-slate-600">
+                <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
             </button>
         </div>
 
-        <nav class="flex-1 overflow-y-auto px-3 py-4 space-y-0.5">
+        
+        <div class="mx-3 mb-2 rounded-2xl bg-white p-4 shadow-sm">
+            <div class="flex items-center gap-3">
+                <div class="flex h-12 w-12 flex-shrink-0 items-center justify-center overflow-hidden rounded-xl bg-emerald-50 ring-2 ring-emerald-100">
+                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($schoolLogo): ?>
+                        <img src="<?php echo e(asset('uploads/'.str_replace('\\','/',$schoolLogo))); ?>" alt="Logo" class="h-full w-full object-contain p-1"/>
+                    <?php else: ?>
+                        <svg class="h-7 w-7 text-emerald-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 3L1 9l11 6 9-4.91V17a2 2 0 01-1.1 1.79l-7.4 3.7a2 2 0 01-1.8 0l-7.4-3.7A2 2 0 012 17V9"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 21V9"/>
+                        </svg>
+                    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                </div>
+                <div class="min-w-0">
+                    <div class="truncate text-sm font-extrabold leading-tight text-slate-900"><?php echo e($schoolName); ?></div>
+                    <div class="mt-0.5 text-[11px] font-semibold text-emerald-500">Smart Learning System</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="px-5 pb-1 pt-3">
+            <span class="text-[10px] font-black uppercase tracking-widest text-slate-400">Main Menu</span>
+        </div>
+
+        <nav class="flex-1 overflow-y-auto sidebar-scroll px-3 pb-3 space-y-0.5">
             <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $navItems; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $item): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                <a href="<?php echo e(route($item['route'])); ?>" wire:navigate
-                   class="<?php echo e(request()->routeIs($item['route']) ? 'bg-green-500 text-white shadow-md' : 'text-slate-700 hover:bg-green-50'); ?> flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-bold transition-all">
-                    <svg class="h-5 w-5 flex-shrink-0 <?php echo e(request()->routeIs($item['route']) ? 'text-white' : $item['color']); ?>" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><?php echo $item['icon']; ?></svg>
-                    <span class="sidebar-text"><?php echo e($item['label']); ?></span>
+                <?php $active = request()->routeIs($item['route']); ?>
+                <a href="<?php echo e(route($item['route'])); ?>"
+                   class="flex items-center gap-3 rounded-2xl px-3 py-2.5 transition-all
+                          <?php echo e($active ? 'bg-emerald-500 shadow-lg shadow-emerald-200' : 'hover:bg-white hover:shadow-sm'); ?>">
+                    <div class="nav-icon-box <?php echo e($active ? 'bg-white/20' : $item['iconBg']); ?>">
+                        <svg class="h-5 w-5 <?php echo e($active ? 'text-white' : $item['iconColor']); ?>" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><?php echo $item['icon']; ?></svg>
+                    </div>
+                    <span class="flex-1 text-sm font-bold <?php echo e($active ? 'text-white' : 'text-slate-700'); ?>"><?php echo e($item['label']); ?></span>
+                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($active): ?>
+                        <div class="flex h-6 w-6 items-center justify-center rounded-full bg-white/20">
+                            <svg class="h-3.5 w-3.5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+                        </div>
+                    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                 </a>
             <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
         </nav>
 
-        <div class="border-t border-slate-100 p-3">
+        <div class="p-3">
             <form method="POST" action="<?php echo e(route('student.logout')); ?>">
                 <?php echo csrf_field(); ?>
-                <button type="submit" class="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-br from-slate-700 to-slate-900 px-4 py-2.5 text-sm font-bold text-white shadow-md hover:shadow-lg transition-all">
-                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-                    <span class="sidebar-text">Logout</span>
+                <button type="submit" class="w-full flex items-center gap-3 rounded-2xl bg-slate-800 px-4 py-3.5 hover:bg-slate-900 transition-all">
+                    <div class="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl bg-red-500 shadow-md">
+                        <svg class="h-5 w-5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <div class="text-sm font-extrabold text-white">Logout</div>
+                        <div class="text-[11px] font-medium text-slate-400">See you later 👋</div>
+                    </div>
                 </button>
             </form>
         </div>
     </aside>
 
-    <!-- Main Content -->
-    <div id="mainContent" class="lg:pl-64 transition-all duration-300">
+    
+    <aside class="hidden w-72 flex-shrink-0 flex-col bg-[#f5f6fa] lg:flex">
 
-        <!-- Topbar -->
-        <header class="sticky top-0 z-10 border-b border-slate-100 bg-white/80 backdrop-blur-xl shadow-md">
-            <div class="h-1.5 bg-gradient-to-r from-green-500 via-emerald-500 to-teal-500"></div>
-            <div class="flex h-16 items-center justify-between px-6">
-                <div class="flex items-center gap-4">
-                    <button id="openMobileSidebar" class="rounded-xl p-2.5 text-gray-500 hover:bg-white hover:shadow-md transition-all lg:hidden">
-                        <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
-                    </button>
-                    <div class="min-w-0">
-                        <div class="truncate text-sm font-black text-slate-900">Student Portal</div>
-                        <div class="text-xs font-semibold text-slate-500"><?php echo e(now()->format('l, F j, Y')); ?></div>
-                    </div>
+        
+        <div class="mx-3 mt-4 mb-2 rounded-2xl bg-white p-4 shadow-sm">
+            <div class="flex items-center gap-3">
+                <div class="flex h-12 w-12 flex-shrink-0 items-center justify-center overflow-hidden rounded-xl bg-emerald-50 ring-2 ring-emerald-100">
+                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($schoolLogo): ?>
+                        <img src="<?php echo e(asset('uploads/'.str_replace('\\','/',$schoolLogo))); ?>" alt="Logo" class="h-full w-full object-contain p-1"/>
+                    <?php else: ?>
+                        <svg class="h-7 w-7 text-emerald-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 3L1 9l11 6 9-4.91V17a2 2 0 01-1.1 1.79l-7.4 3.7a2 2 0 01-1.8 0l-7.4-3.7A2 2 0 012 17V9"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 21V9"/>
+                        </svg>
+                    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                 </div>
-                <div class="flex items-center gap-3">
+                <div class="min-w-0">
+                    <div class="truncate text-sm font-extrabold leading-tight text-slate-900"><?php echo e($schoolName); ?></div>
+                    <div class="mt-0.5 text-[11px] font-semibold text-emerald-500">Smart Learning System</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="px-5 pb-1 pt-3">
+            <span class="text-[10px] font-black uppercase tracking-widest text-slate-400">Main Menu</span>
+        </div>
+
+        <nav class="flex-1 overflow-y-auto sidebar-scroll px-3 pb-3 space-y-0.5">
+            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $navItems; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $item): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                <?php $active = request()->routeIs($item['route']); ?>
+                <a href="<?php echo e(route($item['route'])); ?>" wire:navigate
+                   class="flex items-center gap-3 rounded-2xl px-3 py-2.5 transition-all
+                          <?php echo e($active ? 'bg-emerald-500 shadow-lg shadow-emerald-200' : 'hover:bg-white hover:shadow-sm'); ?>">
+                    <div class="nav-icon-box <?php echo e($active ? 'bg-white/20' : $item['iconBg']); ?>">
+                        <svg class="h-5 w-5 <?php echo e($active ? 'text-white' : $item['iconColor']); ?>" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><?php echo $item['icon']; ?></svg>
+                    </div>
+                    <span class="flex-1 text-sm font-bold <?php echo e($active ? 'text-white' : 'text-slate-700'); ?>"><?php echo e($item['label']); ?></span>
+                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($active): ?>
+                        <div class="flex h-6 w-6 items-center justify-center rounded-full bg-white/20">
+                            <svg class="h-3.5 w-3.5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+                        </div>
+                    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                </a>
+            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+        </nav>
+
+        <div class="p-3">
+            <form method="POST" action="<?php echo e(route('student.logout')); ?>">
+                <?php echo csrf_field(); ?>
+                <button type="submit" class="w-full flex items-center gap-3 rounded-2xl bg-slate-800 px-4 py-3.5 hover:bg-slate-900 transition-all">
+                    <div class="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl bg-red-500 shadow-md">
+                        <svg class="h-5 w-5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <div class="text-sm font-extrabold text-white">Logout</div>
+                        <div class="text-[11px] font-medium text-slate-400">See you later 👋</div>
+                    </div>
+                </button>
+            </form>
+        </div>
+    </aside>
+
+    
+    <div class="flex flex-1 min-w-0 flex-col">
+
+        
+        <header class="sticky top-0 z-10 flex h-[72px] items-center justify-between gap-4 border-b border-slate-200/60 bg-white px-6 shadow-sm">
+
+            
+            <div class="flex items-center gap-4">
+                <button id="openMobileSidebar"
+                        class="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 text-slate-500 hover:bg-slate-50 lg:hidden">
+                    <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/>
+                    </svg>
+                </button>
+                <div>
+                    <h1 class="text-lg font-extrabold tracking-tight text-slate-900"><?php echo e($pageLabel); ?></h1>
+                    <p class="text-xs font-medium text-slate-400"><?php echo e(now()->format('l, F j, Y')); ?></p>
+                </div>
+            </div>
+
+            
+            <div class="flex items-center gap-3">
+
+                
+                <div class="relative flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500 hover:bg-slate-50 transition-colors">
                     <?php
 $__split = function ($name, $params = []) {
     return [$name, $params];
@@ -159,36 +227,49 @@ unset($__params);
 unset($__split);
 if (isset($__slots)) unset($__slots);
 ?>
-                    <div class="hidden md:flex items-center gap-2.5 rounded-xl bg-white p-1.5 shadow-sm ring-1 ring-gray-200">
-                        <div class="grid h-9 w-9 place-items-center rounded-lg bg-gradient-to-br from-green-500 to-emerald-600 text-white">
-                            <span class="text-sm font-bold"><?php echo e(mb_substr(session('student_name', 'S'), 0, 1)); ?></span>
-                        </div>
-                        <div class="hidden pr-2 leading-tight sm:block">
-                            <div class="text-sm font-bold text-gray-900"><?php echo e(session('student_name')); ?></div>
-                            <div class="text-xs font-semibold text-gray-500"><?php echo e(session('student_admission')); ?></div>
-                        </div>
-                    </div>
-                    <form method="POST" action="<?php echo e(route('student.logout')); ?>" class="hidden md:block">
-                        <?php echo csrf_field(); ?>
-                        <button type="submit" class="inline-flex items-center justify-center rounded-xl bg-gradient-to-br from-slate-700 to-slate-900 px-4 py-2.5 text-sm font-bold text-white shadow-md hover:shadow-lg transition-all">
-                            Logout
-                        </button>
-                    </form>
                 </div>
+
+                
+                <div class="flex items-center gap-2.5 rounded-full border border-slate-200 bg-white py-1 pl-1 pr-4 shadow-sm">
+                    <div class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-emerald-500 text-white shadow-sm">
+                        <span class="text-sm font-extrabold leading-none"><?php echo e($studentInitial); ?></span>
+                    </div>
+                    <div class="hidden leading-tight sm:block">
+                        <div class="text-sm font-bold text-slate-800"><?php echo e($studentName); ?></div>
+                        <div class="text-[11px] font-semibold text-slate-400"><?php echo e($studentAdmission); ?></div>
+                    </div>
+                </div>
+
+                
+                <form method="POST" action="<?php echo e(route('student.logout')); ?>">
+                    <?php echo csrf_field(); ?>
+                    <button type="submit"
+                            class="flex items-center gap-2 rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-bold text-white shadow-md hover:bg-slate-800 transition-all">
+                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+                        </svg>
+                        <span class="hidden sm:inline">Logout</span>
+                    </button>
+                </form>
+
             </div>
         </header>
 
-        <main class="px-6 py-6">
+        
+        <main class="flex-1 overflow-y-auto px-6 py-6">
             <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(session('success')): ?>
-                <div class="mb-6 rounded-xl bg-green-50 border border-green-200 p-4 flex items-center gap-3">
-                    <svg class="h-5 w-5 text-green-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
-                    <p class="text-sm font-medium text-green-800"><?php echo e(session('success')); ?></p>
+                <div class="mb-6 flex items-center gap-3 rounded-2xl border border-green-200 bg-green-50 p-4">
+                    <svg class="h-5 w-5 flex-shrink-0 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                    </svg>
+                    <p class="text-sm font-semibold text-green-800"><?php echo e(session('success')); ?></p>
                 </div>
             <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
             <?php echo e($slot); ?>
 
         </main>
     </div>
+
 </div>
 
 <?php echo \Livewire\Mechanisms\FrontendAssets\FrontendAssets::scripts(); ?>
@@ -196,32 +277,10 @@ if (isset($__slots)) unset($__slots);
 <?php echo $__env->yieldPushContent('scripts'); ?>
 
 <script>
-    // Desktop sidebar toggle
-    const sidebar = document.getElementById('desktopSidebar');
-    const mainContent = document.getElementById('mainContent');
-    const toggleBtn = document.getElementById('sidebarToggle');
-    const sidebarTexts = document.querySelectorAll('.sidebar-text');
-    let isCollapsed = false;
-
-    toggleBtn.addEventListener('click', () => {
-        isCollapsed = !isCollapsed;
-        if (isCollapsed) {
-            sidebar.classList.replace('w-64', 'w-20');
-            mainContent.classList.replace('lg:pl-64', 'lg:pl-20');
-            sidebarTexts.forEach(t => t.classList.add('hidden'));
-            toggleBtn.querySelector('svg').style.transform = 'rotate(180deg)';
-        } else {
-            sidebar.classList.replace('w-20', 'w-64');
-            mainContent.classList.replace('lg:pl-20', 'lg:pl-64');
-            sidebarTexts.forEach(t => t.classList.remove('hidden'));
-            toggleBtn.querySelector('svg').style.transform = 'rotate(0deg)';
-        }
-    });
-
-    // Mobile sidebar
     const mobileSidebar = document.getElementById('mobileSidebar');
     const mobileOverlay = document.getElementById('mobileSidebarOverlay');
-    document.getElementById('openMobileSidebar').addEventListener('click', () => {
+
+    document.getElementById('openMobileSidebar')?.addEventListener('click', () => {
         mobileSidebar.classList.remove('-translate-x-full');
         mobileOverlay.classList.remove('hidden');
     });
@@ -229,18 +288,20 @@ if (isset($__slots)) unset($__slots);
         mobileSidebar.classList.add('-translate-x-full');
         mobileOverlay.classList.add('hidden');
     };
-    document.getElementById('closeMobileSidebar').addEventListener('click', closeMobile);
-    mobileOverlay.addEventListener('click', closeMobile);
+    document.getElementById('closeMobileSidebar')?.addEventListener('click', closeMobile);
+    mobileOverlay?.addEventListener('click', closeMobile);
 </script>
-    <!-- Global Loading Spinner for Livewire Navigation -->
-    <div x-data="{ loading: false }"
-         x-on:livewire:navigating.window="loading = true"
-         x-on:livewire:navigated.window="loading = false"
-         x-show="loading"
-         style="display: none;"
-         class="fixed inset-0 z-[9999] flex items-center justify-center bg-white/50 backdrop-blur-sm transition-opacity duration-300">
-        <div class="h-14 w-14 animate-spin rounded-full border-4 border-slate-200 border-t-amber-500 shadow-lg"></div>
-    </div>
+
+
+<div x-data="{ loading: false }"
+     x-on:livewire:navigating.window="loading = true"
+     x-on:livewire:navigated.window="loading = false"
+     x-show="loading"
+     style="display:none"
+     class="fixed inset-0 z-[9999] flex items-center justify-center bg-white/50 backdrop-blur-sm">
+    <div class="h-12 w-12 animate-spin rounded-full border-4 border-slate-200 border-t-emerald-500 shadow-lg"></div>
+</div>
+
 </body>
 </html>
 <?php /**PATH C:\laragon\www\myacademy-laravel\resources\views/layouts/student.blade.php ENDPATH**/ ?>

@@ -71,9 +71,7 @@ Route::get('/', function () {
         return redirect()->route('cbt.student');
     }
 
-    return auth()->check()
-        ? redirect()->route('dashboard')
-        : redirect()->route('login');
+    return view('welcome');
 });
 
 Route::get('/home', function () {
@@ -126,6 +124,44 @@ Route::get('/student/exams', \App\Livewire\Student\Exams::class)
 Route::get('/student/results', \App\Livewire\Student\Results::class)
     ->middleware('student.session')
     ->name('student.results');
+
+Route::get('/student/report-card', function (\Illuminate\Http\Request $request) {
+    $studentId = session('student_id');
+    abort_unless($studentId, 403);
+
+    $student = \App\Models\Student::with(['schoolClass', 'section'])->find($studentId);
+    abort_unless($student, 403);
+
+    $term    = (int) $request->query('term', config('myacademy.current_term', 1));
+    $session = (string) $request->query('session', config('myacademy.current_session', ''));
+
+    abort_unless($term >= 1 && $term <= 3, 422);
+
+    $published = \App\Models\ResultPublication::where('class_id', $student->class_id)
+        ->where('term', $term)->where('session', $session)
+        ->whereNotNull('published_at')->exists();
+    abort_unless($published, 403);
+
+    $data = app(\App\Support\ReportCardService::class)->build($student, $term, $session);
+
+    $template = (string) config('myacademy.report_card_template', 'standard');
+    $view = match ($template) {
+        'compact' => 'pdf.report-card-compact', 'elegant' => 'pdf.report-card-elegant',
+        'modern'  => 'pdf.report-card-modern',  'classic' => 'pdf.report-card-classic',
+        'vibrant' => 'pdf.report-card-vibrant',  'professional' => 'pdf.report-card-professional',
+        'royal'   => 'pdf.report-card-royal',    'fresh'   => 'pdf.report-card-fresh',
+        'sunset'  => 'pdf.report-card-sunset',
+        default   => 'pdf.report-card',
+    };
+
+    $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView($view, $data)->setPaper('a4');
+    $filename = 'report-card-' . $student->admission_number . '-' . $session . '-T' . $term . '.pdf';
+
+    return response($pdf->output(), 200, [
+        'Content-Type'        => 'application/pdf',
+        'Content-Disposition' => "attachment; filename=\"{$filename}\"",
+    ]);
+})->middleware('student.session')->name('student.report-card');
 
 Route::get('/student/attendance', \App\Livewire\Student\Attendance::class)
     ->middleware('student.session')
@@ -317,7 +353,6 @@ Route::middleware(['auth', 'active'])->group(function () {
         })->name('settings.debug');
         Route::get('/results/broadsheet', ResultsBroadsheet::class)->middleware('permission:results.broadsheet')->name('results.broadsheet');
         Route::get('/results/submissions', ResultsSubmissions::class)->middleware('role:admin')->name('results.submissions');
-        Route::get('/results/report-card/{student}', [ReportCardController::class, 'download'])->name('results.report-card');
 
         Route::get('/events', EventsIndex::class)->name('events');
         Route::get('/timetable', TimetableIndex::class)->name('timetable');
@@ -325,6 +360,11 @@ Route::middleware(['auth', 'active'])->group(function () {
         Route::get('/certificates', CertificatesManager::class)->name('certificates');
         Route::get('/certificates/{certificate}/download', [CertificateController::class, 'download'])->name('certificates.download');
     });
+
+    // Results (Shared between Admin, Teacher, and Parent)
+    Route::get('/results/report-card/{student}', [ReportCardController::class, 'download'])
+        ->middleware('role:admin,teacher,parent')
+        ->name('results.report-card');
 
     Route::middleware('role:bursar')->group(function () {
         Route::view('/accounts', 'pages.accounts.index')->middleware('permission:billing.transactions')->name('accounts');

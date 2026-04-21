@@ -139,73 +139,168 @@
 
         <div class="mx-auto w-full max-w-7xl px-6 pb-6 pt-5">
         @if ($submitted)
-            <div class="rounded-2xl bg-white p-7 shadow-lg ring-1 ring-slate-100">
-                <div>
-                    <div class="mb-6 grid h-20 w-20 place-items-center rounded-full bg-emerald-100">
-                        <svg class="h-10 w-10 text-emerald-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-                        </svg>
-                    </div>
-                    <h2 class="text-3xl font-bold text-slate-900">Exam Submitted</h2>
-                    <p class="mt-2 text-base text-slate-600">Your answers have been recorded.</p>
-                </div>
+            @php
+                $scorePercent   = (int) $attempt->percent;
+                $scoreInt       = (int) $attempt->score;
+                $maxInt         = (int) $attempt->max_score;
+                $showScore      = $exam->show_score && $exam->results_released_at && !$hasTheory;
+                $pendingRelease = $exam->show_score && (!$exam->results_released_at || $hasTheory);
+                // Score colour thresholds
+                $ringColor = $scorePercent >= 70 ? '#10b981' : ($scorePercent >= 50 ? '#f59e0b' : '#ef4444');
+                $ringBg    = $scorePercent >= 70 ? '#d1fae5' : ($scorePercent >= 50 ? '#fef3c7' : '#fee2e2');
+                $grade     = $scorePercent >= 70 ? 'Excellent' : ($scorePercent >= 50 ? 'Good' : 'Needs Work');
+                // SVG circle maths (r=54, circumference=339.3)
+                $circ = 339.3;
+                $dash = round($circ * $scorePercent / 100, 1);
+            @endphp
 
-                <div class="mt-8 grid gap-5 sm:grid-cols-2">
-                    @php
-                        $showScoreNow = $exam->show_score && $exam->results_released_at;
-                        $pendingRelease = !$exam->show_score || !$exam->results_released_at;
-                    @endphp
+            {{-- Full-page submitted state --}}
+            <div class="flex min-h-[70vh] flex-col items-center justify-center py-10"
+                 x-data="{ visible: false }" x-init="setTimeout(() => visible = true, 80)">
 
-                    @if ($exam->show_score && $exam->results_released_at)
-                        {{-- Instant mode OR manual release has happened --}}
-                        <div class="rounded-2xl bg-emerald-50 p-6 text-center shadow-sm">
-                            <div class="text-xs font-semibold uppercase tracking-wider text-slate-600">Your Score</div>
-                            <div class="mt-3 text-5xl font-bold text-emerald-700">
-                                {{ (int) $attempt->score }}
-                                <span class="text-3xl text-slate-400">/{{ (int) $attempt->max_score }}</span>
-                            </div>
-                            <div class="mt-2 text-sm font-semibold text-emerald-600">
-                                {{ (int) $attempt->percent }}%
-                            </div>
-                            @if ($hasTheory)
-                                <div class="mt-2 text-xs font-semibold text-slate-500">Theory questions marked separately.</div>
-                            @endif
-                        </div>
-                    @elseif ($exam->show_score && !$exam->results_released_at)
-                        {{-- show_score=true but teacher hasn't released yet --}}
-                        <div class="rounded-2xl bg-amber-50 p-6 text-center shadow-sm border border-amber-200">
-                            <div class="grid h-12 w-12 place-items-center rounded-full bg-amber-100 mx-auto mb-3">
-                                <svg class="h-6 w-6 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                {{-- Card --}}
+                <div class="w-full max-w-2xl"
+                     x-show="visible"
+                     x-transition:enter="transition duration-500 ease-out"
+                     x-transition:enter-start="opacity-0 translate-y-8"
+                     x-transition:enter-end="opacity-100 translate-y-0">
+
+                    {{-- Hero banner --}}
+                    <div class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-emerald-500 via-teal-500 to-cyan-500 px-8 py-10 text-center shadow-2xl">
+                        {{-- Decorative blobs --}}
+                        <div class="pointer-events-none absolute -left-10 -top-10 h-40 w-40 rounded-full bg-white/10 blur-2xl"></div>
+                        <div class="pointer-events-none absolute -bottom-10 -right-10 h-48 w-48 rounded-full bg-white/10 blur-2xl"></div>
+
+                        {{-- Animated check icon --}}
+                        <div class="relative mx-auto mb-5 flex h-24 w-24 items-center justify-center"
+                             x-data="{ done: false }" x-init="setTimeout(() => done = true, 300)">
+                            <svg class="absolute inset-0 h-24 w-24 -rotate-90" viewBox="0 0 120 120">
+                                <circle cx="60" cy="60" r="54" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="8"/>
+                                <circle cx="60" cy="60" r="54" fill="none" stroke="white" stroke-width="8"
+                                        stroke-linecap="round"
+                                        stroke-dasharray="339.3"
+                                        :stroke-dashoffset="done ? 0 : 339.3"
+                                        style="transition: stroke-dashoffset 1.2s cubic-bezier(0.4,0,0.2,1)"/>
+                            </svg>
+                            <div class="relative flex h-16 w-16 items-center justify-center rounded-full bg-white/20 backdrop-blur-sm"
+                                 :class="done ? 'scale-100' : 'scale-0'"
+                                 style="transition: transform 0.4s cubic-bezier(0.34,1.56,0.64,1) 0.6s">
+                                <svg class="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
                                 </svg>
                             </div>
-                            <div class="text-sm font-bold text-amber-800">Results Pending</div>
-                            <div class="mt-1 text-xs text-amber-700">Your teacher will release scores shortly.</div>
                         </div>
-                    @else
-                        {{-- show_score=false: teacher will release manually --}}
-                        <div class="rounded-2xl bg-sky-50 p-6 text-center shadow-sm border border-sky-200">
-                            <div class="grid h-12 w-12 place-items-center rounded-full bg-sky-100 mx-auto mb-3">
-                                <svg class="h-6 w-6 text-sky-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                                </svg>
-                            </div>
-                            <div class="text-sm font-bold text-sky-800">Submission Successful</div>
-                            <div class="mt-1 text-xs text-sky-700">Results will be released by your teacher.</div>
-                        </div>
-                    @endif
 
-                    <div class="rounded-2xl bg-sky-50 p-6 text-center shadow-sm">
-                        <div class="text-xs font-semibold uppercase tracking-wider text-slate-600">Submitted At</div>
-                        <div class="mt-3 text-xl font-bold text-slate-900">{{ $attempt->submitted_at?->format('g:i A') }}</div>
-                        <div class="mt-1 text-sm text-slate-600">{{ $attempt->submitted_at?->format('M j, Y') }}</div>
+                        <h2 class="text-3xl font-extrabold tracking-tight text-white">Exam Submitted!</h2>
+                        <p class="mt-2 text-base font-medium text-white/80">{{ $exam->title }}</p>
+                        <p class="mt-1 text-sm text-white/60">
+                            {{ $student->full_name ?? trim($student->first_name.' '.$student->last_name) }}
+                            &nbsp;&bull;&nbsp;
+                            <span class="font-mono">{{ $student->admission_number }}</span>
+                        </p>
                     </div>
-                </div>
 
-                <div class="mt-10">
-                    <a href="{{ route('cbt.student', ['code' => $examCode]) }}" class="inline-flex items-center gap-2 rounded-2xl bg-slate-900 px-8 py-4 text-base font-bold text-white shadow-md hover:bg-slate-800">
-                        Back to Exams
-                    </a>
+                    {{-- Stats row --}}
+                    <div class="mt-4 grid grid-cols-3 gap-4">
+                        {{-- Questions answered --}}
+                        <div class="flex flex-col items-center justify-center rounded-2xl bg-white px-4 py-5 shadow-md ring-1 ring-slate-100">
+                            <div class="text-3xl font-extrabold text-slate-800">{{ $totalQuestions }}</div>
+                            <div class="mt-1 text-center text-xs font-semibold uppercase tracking-wide text-slate-500">Questions</div>
+                        </div>
+                        {{-- Submitted time --}}
+                        <div class="flex flex-col items-center justify-center rounded-2xl bg-white px-4 py-5 shadow-md ring-1 ring-slate-100">
+                            <div class="text-2xl font-extrabold text-slate-800">{{ $attempt->submitted_at?->format('g:i') }}<span class="text-base font-semibold text-slate-400"> {{ $attempt->submitted_at?->format('A') }}</span></div>
+                            <div class="mt-1 text-center text-xs font-semibold uppercase tracking-wide text-slate-500">{{ $attempt->submitted_at?->format('M j, Y') }}</div>
+                        </div>
+                        {{-- Duration used --}}
+                        @php
+                            $usedSeconds = $attempt->started_at && $attempt->submitted_at
+                                ? (int) $attempt->started_at->diffInSeconds($attempt->submitted_at)
+                                : 0;
+                            $usedMin = floor($usedSeconds / 60);
+                            $usedSec = $usedSeconds % 60;
+                        @endphp
+                        <div class="flex flex-col items-center justify-center rounded-2xl bg-white px-4 py-5 shadow-md ring-1 ring-slate-100">
+                            <div class="text-2xl font-extrabold text-slate-800">{{ $usedMin }}<span class="text-base font-semibold text-slate-400">m {{ $usedSec }}s</span></div>
+                            <div class="mt-1 text-center text-xs font-semibold uppercase tracking-wide text-slate-500">Time Used</div>
+                        </div>
+                    </div>
+
+                    {{-- Score card --}}
+                    <div class="mt-4 rounded-2xl bg-white p-6 shadow-md ring-1 ring-slate-100">
+                        @if ($showScore)
+                            <div class="flex flex-col items-center gap-6 sm:flex-row">
+                                {{-- SVG score ring --}}
+                                <div class="relative flex-shrink-0">
+                                    <svg class="-rotate-90" width="140" height="140" viewBox="0 0 140 140">
+                                        <circle cx="70" cy="70" r="54" fill="none" stroke="{{ $ringBg }}" stroke-width="12"/>
+                                        <circle cx="70" cy="70" r="54" fill="none" stroke="{{ $ringColor }}" stroke-width="12"
+                                                stroke-linecap="round"
+                                                stroke-dasharray="{{ $circ }}"
+                                                stroke-dashoffset="{{ $circ - $dash }}"
+                                                style="transition: stroke-dashoffset 1.4s cubic-bezier(0.4,0,0.2,1)"/>
+                                    </svg>
+                                    <div class="absolute inset-0 flex flex-col items-center justify-center">
+                                        <span class="text-3xl font-extrabold" style="color:{{ $ringColor }}">{{ $scorePercent }}%</span>
+                                        <span class="text-xs font-bold text-slate-500">{{ $grade }}</span>
+                                    </div>
+                                </div>
+                                {{-- Score details --}}
+                                <div class="flex-1 text-center sm:text-left">
+                                    <div class="text-sm font-semibold uppercase tracking-wide text-slate-500">Your Score</div>
+                                    <div class="mt-1 text-5xl font-extrabold text-slate-900">
+                                        {{ $scoreInt }}<span class="text-2xl font-semibold text-slate-400">/{{ $maxInt }}</span>
+                                    </div>
+                                    @if ($hasTheory)
+                                        <div class="mt-3 inline-flex items-center gap-1.5 rounded-full bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-700 ring-1 ring-amber-200">
+                                            <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01"/><path stroke-linecap="round" stroke-linejoin="round" d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>
+                                            Theory questions will be marked separately
+                                        </div>
+                                    @endif
+                                </div>
+                            </div>
+                        @elseif ($pendingRelease)
+                            <div class="flex items-center gap-5">
+                                <div class="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-2xl bg-amber-100">
+                                    <svg class="h-8 w-8 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <div class="text-lg font-bold text-slate-800">Results Pending</div>
+                                    @if ($hasTheory)
+                                        <div class="mt-0.5 text-sm text-slate-500">This exam has theory questions that require manual marking. Your teacher will release results after grading.</div>
+                                    @else
+                                        <div class="mt-0.5 text-sm text-slate-500">Your teacher will release scores shortly. Check back later.</div>
+                                    @endif
+                                </div>
+                            </div>
+                        @else
+                            <div class="flex items-center gap-5">
+                                <div class="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-2xl bg-sky-100">
+                                    <svg class="h-8 w-8 text-sky-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <div class="text-lg font-bold text-slate-800">Answers Recorded</div>
+                                    <div class="mt-0.5 text-sm text-slate-500">Your submission is safe. Results will be announced by your teacher.</div>
+                                </div>
+                            </div>
+                        @endif
+                    </div>
+
+                    {{-- CTA --}}
+                    <div class="mt-6 flex justify-center">
+                        <a href="{{ route('cbt.student', ['code' => $examCode]) }}"
+                           class="inline-flex items-center gap-3 rounded-2xl bg-slate-900 px-10 py-4 text-base font-bold text-white shadow-lg transition hover:-translate-y-0.5 hover:bg-slate-800 hover:shadow-xl">
+                            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                            </svg>
+                            Back to Exams
+                        </a>
+                    </div>
+
                 </div>
             </div>
 

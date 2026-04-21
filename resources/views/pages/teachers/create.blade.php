@@ -208,15 +208,21 @@
                             <p class="text-xs text-gray-600">Enable login access for this teacher</p>
                         </div>
                         <label class="relative inline-flex items-center cursor-pointer">
-                            <input
-                                type="checkbox"
-                                name="is_active"
-                                value="1"
-                                @checked(old('is_active', true))
-                                class="sr-only peer"
-                            />
+                            <input type="checkbox" name="is_active" value="1" @checked(old('is_active', true)) class="sr-only peer" />
                             <div class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
                             <span class="ml-3 text-sm font-medium text-gray-700">Active</span>
+                        </label>
+                    </div>
+
+                    <div class="mt-4 flex items-center justify-between rounded-xl bg-amber-50 border border-amber-200 p-4">
+                        <div>
+                            <h3 class="text-sm font-semibold text-gray-900">Class Teacher</h3>
+                            <p class="text-xs text-gray-600">This teacher manages a class and takes attendance. Subject teachers do not get the Attendance menu.</p>
+                        </div>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" name="is_class_teacher" value="1" @checked(old('is_class_teacher', false)) class="sr-only peer" />
+                            <div class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-amber-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-500"></div>
+                            <span class="ml-3 text-sm font-medium text-gray-700">Class Teacher</span>
                         </label>
                     </div>
                 </div>

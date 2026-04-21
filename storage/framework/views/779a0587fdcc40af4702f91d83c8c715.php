@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Dev Console — {{ config('app.name') }}</title>
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <meta name="csrf-token" content="<?php echo e(csrf_token()); ?>">
+    <title>Dev Console — <?php echo e(config('app.name')); ?></title>
+    <?php echo app('Illuminate\Foundation\Vite')(['resources/css/app.css', 'resources/js/app.js']); ?>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.3/dist/cdn.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -463,8 +463,8 @@
         <nav class="sa-nav">
             <div class="sa-nav-label">Overview</div>
 
-            <a href="{{ route('superadmin.dashboard') }}"
-               class="{{ request()->routeIs('superadmin.dashboard') ? 'active' : '' }}">
+            <a href="<?php echo e(route('superadmin.dashboard')); ?>"
+               class="<?php echo e(request()->routeIs('superadmin.dashboard') ? 'active' : ''); ?>">
                 <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                     <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
                     <rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/>
@@ -474,16 +474,16 @@
 
             <div class="sa-nav-label" style="margin-top:12px;">School Instances</div>
 
-            <a href="{{ route('superadmin.tenants.index') }}"
-               class="{{ request()->routeIs('superadmin.tenants.*') ? 'active' : '' }}">
+            <a href="<?php echo e(route('superadmin.tenants.index')); ?>"
+               class="<?php echo e(request()->routeIs('superadmin.tenants.*') ? 'active' : ''); ?>">
                 <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
                 </svg>
                 All Schools
             </a>
 
-            <a href="{{ route('superadmin.tenants.create') }}"
-               class="{{ request()->routeIs('superadmin.tenants.create') ? 'active' : '' }}">
+            <a href="<?php echo e(route('superadmin.tenants.create')); ?>"
+               class="<?php echo e(request()->routeIs('superadmin.tenants.create') ? 'active' : ''); ?>">
                 <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                     <circle cx="12" cy="12" r="10"/>
                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v8m-4-4h8"/>
@@ -493,7 +493,7 @@
 
             <div class="sa-nav-label" style="margin-top:12px;">System</div>
 
-            <a href="{{ url('/dashboard') }}" target="_blank">
+            <a href="<?php echo e(url('/dashboard')); ?>" target="_blank">
                 <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
                 </svg>
@@ -504,15 +504,16 @@
 
         <!-- User Footer -->
         <div class="sa-user-footer">
-            <div class="sa-avatar">{{ mb_substr(auth()->user()->name ?? 'S', 0, 1) }}</div>
+            <div class="sa-avatar"><?php echo e(mb_substr(auth()->user()->name ?? 'S', 0, 1)); ?></div>
             <div style="flex:1; min-width:0;">
                 <div class="sa-user-name" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
-                    {{ auth()->user()->name ?? 'Super Admin' }}
+                    <?php echo e(auth()->user()->name ?? 'Super Admin'); ?>
+
                 </div>
                 <div class="sa-user-role">Super Admin</div>
             </div>
-            <form method="POST" action="{{ route('logout') }}" id="sa-logout-form">
-                @csrf
+            <form method="POST" action="<?php echo e(route('logout')); ?>" id="sa-logout-form">
+                <?php echo csrf_field(); ?>
                 <button type="submit" class="sa-logout-btn" title="Logout">
                     <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
@@ -527,14 +528,14 @@
         <!-- Topbar -->
         <header id="sa-topbar">
             <div>
-                <div class="sa-page-title">@yield('header_title', 'Dashboard')</div>
-                <div class="sa-page-sub">@yield('header_subtitle', 'Manage your multi-tenant workspace')</div>
+                <div class="sa-page-title"><?php echo $__env->yieldContent('header_title', 'Dashboard'); ?></div>
+                <div class="sa-page-sub"><?php echo $__env->yieldContent('header_subtitle', 'Manage your multi-tenant workspace'); ?></div>
             </div>
 
             <div style="display:flex; align-items:center; gap:12px;">
-                @hasSection('header_actions')
-                    @yield('header_actions')
-                @endif
+                <?php if (! empty(trim($__env->yieldContent('header_actions')))): ?>
+                    <?php echo $__env->yieldContent('header_actions'); ?>
+                <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                 <div class="sa-status-pill">
                     <span class="sa-status-dot"></span>
                     System Online
@@ -544,28 +545,31 @@
 
         <!-- Content -->
         <div id="sa-content">
-            @if(session('status'))
+            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(session('status')): ?>
                 <div class="sa-alert success">
                     <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                     </svg>
-                    {{ session('status') }}
-                </div>
-            @endif
+                    <?php echo e(session('status')); ?>
 
-            @if(session('error'))
+                </div>
+            <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+
+            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(session('error')): ?>
                 <div class="sa-alert error">
                     <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                     </svg>
-                    {{ session('error') }}
-                </div>
-            @endif
+                    <?php echo e(session('error')); ?>
 
-            @yield('content')
+                </div>
+            <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+
+            <?php echo $__env->yieldContent('content'); ?>
         </div>
     </div>
 
-@stack('scripts')
+<?php echo $__env->yieldPushContent('scripts'); ?>
 </body>
 </html>
+<?php /**PATH C:\laragon\www\myacademy-laravel\resources\views/layouts/superadmin.blade.php ENDPATH**/ ?>

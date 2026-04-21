@@ -94,7 +94,14 @@ class Take extends Component
     public function heartbeatTick(): void
     {
         $attempt = $this->attempt();
-        if ($attempt->terminated_at || $attempt->submitted_at) {
+
+        if ($attempt->terminated_at) {
+            session()->flash('error', 'Your exam attempt was terminated by an admin.');
+            $this->redirect(route('student.exams'));
+            return;
+        }
+
+        if ($attempt->submitted_at) {
             return;
         }
 
@@ -121,11 +128,15 @@ class Take extends Component
 
         $attempt = $this->attempt();
 
-        abort_unless($attempt->exam && $attempt->exam->status === 'approved', 403, 'Exam is not active.');
+        abort_unless($attempt->exam && in_array($attempt->exam->status, ['live', 'approved']), 403, 'Exam is not active.');
         abort_unless((bool) $attempt->exam->published_at, 403, 'Exam is not live.');
         abort_unless($attempt->student && $attempt->student->status === 'Active', 403, 'Student is not active.');
         abort_unless((int) $attempt->student->class_id === (int) $attempt->exam->class_id, 403);
-        abort_unless(!$attempt->terminated_at, 403, 'Your attempt was terminated by an admin.');
+        if ($attempt->terminated_at) {
+            session()->flash('error', 'Your exam attempt was terminated by an admin.');
+            redirect()->route('student.exams');
+            return;
+        }
 
         $ip = (string) request()->ip();
         $allowedCidrs = trim((string) ($attempt->exam->allowed_cidrs ?? ''));

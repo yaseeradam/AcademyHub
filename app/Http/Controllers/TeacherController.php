@@ -23,11 +23,12 @@ class TeacherController extends Controller
     public function store(Request $request)
     {
         $data = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users', 'email')],
-            'password' => ['required', 'string', 'min:8', 'confirmed'],
+            'name'      => ['required', 'string', 'max:255'],
+            'email'     => ['required', 'string', 'email', 'max:255', Rule::unique('users', 'email')],
+            'password'  => ['required', 'string', 'min:8', 'confirmed'],
             'is_active' => ['nullable', 'boolean'],
-            'photo' => ['nullable', 'image', 'max:2048'],
+            'is_class_teacher' => ['nullable', 'boolean'],
+            'photo'     => ['nullable', 'image', 'max:2048'],
         ]);
 
         $profilePhotoPath = null;
@@ -41,12 +42,13 @@ class TeacherController extends Controller
         }
 
         User::query()->create([
-            'name' => $data['name'],
-            'email' => $data['email'],
-            'password' => $data['password'],
-            'role' => 'teacher',
-            'is_active' => (bool) ($data['is_active'] ?? false),
-            'profile_photo' => $profilePhotoPath,
+            'name'             => $data['name'],
+            'email'            => $data['email'],
+            'password'         => $data['password'],
+            'role'             => 'teacher',
+            'is_active'        => (bool) ($data['is_active'] ?? false),
+            'is_class_teacher' => (bool) ($data['is_class_teacher'] ?? false),
+            'profile_photo'    => $profilePhotoPath,
         ]);
 
         return redirect()
@@ -83,15 +85,17 @@ class TeacherController extends Controller
         abort_unless($teacher->role === 'teacher', 404);
 
         $data = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users', 'email')->ignore($teacher->id)],
-            'password' => ['nullable', 'string', 'min:8', 'confirmed'],
-            'is_active' => ['nullable', 'boolean'],
+            'name'             => ['required', 'string', 'max:255'],
+            'email'            => ['required', 'string', 'email', 'max:255', Rule::unique('users', 'email')->ignore($teacher->id)],
+            'password'         => ['nullable', 'string', 'min:8', 'confirmed'],
+            'is_active'        => ['nullable', 'boolean'],
+            'is_class_teacher' => ['nullable', 'boolean'],
         ]);
 
-        $teacher->name = $data['name'];
-        $teacher->email = $data['email'];
-        $teacher->is_active = (bool) ($data['is_active'] ?? false);
+        $teacher->name             = $data['name'];
+        $teacher->email            = $data['email'];
+        $teacher->is_active        = (bool) ($data['is_active'] ?? false);
+        $teacher->is_class_teacher = (bool) ($data['is_class_teacher'] ?? false);
 
         if (! empty($data['password'])) {
             $teacher->password = $data['password'];

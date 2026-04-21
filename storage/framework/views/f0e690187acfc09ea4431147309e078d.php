@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="scroll-smooth">
+<html lang="<?php echo e(str_replace('_', '-', app()->getLocale())); ?>" class="scroll-smooth">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{{ config('app.name', 'MyAcademy') }} - A Joyful Place to Learn</title>
+    <title><?php echo e(config('app.name', 'MyAcademy')); ?> - A Joyful Place to Learn</title>
     
     <!-- Playful Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -11,7 +11,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
     
     <!-- Scripts & Styles -->
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <?php echo app('Illuminate\Foundation\Vite')(['resources/css/app.css', 'resources/js/app.js']); ?>
     
     <style>
         body {
@@ -168,7 +168,7 @@
                     <button @click="demoModalOpen = true" class="btn-outline-playful rounded-full px-5 py-2.5 text-base font-bold flex items-center gap-2">
                         ✨ Start Tour
                     </button>
-                    <a href="{{ route('login') }}" class="btn-playful rounded-full px-6 py-2.5 text-base font-bold">
+                    <a href="<?php echo e(route('login')); ?>" class="btn-playful rounded-full px-6 py-2.5 text-base font-bold">
                         Log In 🚀
                     </a>
                 </div>
@@ -216,7 +216,7 @@
                         <button @click="mobileMenuOpen = false; demoModalOpen = true" class="w-full text-center btn-outline-playful rounded-full px-6 py-3 text-lg font-bold">
                             ✨ Take a Tour
                         </button>
-                        <a href="{{ route('login') }}" class="w-full text-center btn-playful rounded-full px-6 py-3 text-lg font-bold">
+                        <a href="<?php echo e(route('login')); ?>" class="w-full text-center btn-playful rounded-full px-6 py-3 text-lg font-bold">
                             Log In 🚀
                         </a>
                     </div>
@@ -242,7 +242,7 @@
                         Replace your boring spreadsheets with a magical digital playground. MyAcademy connects parents, excites students, empowers teachers, and gives admins total peace of mind.
                     </p>
                     <div class="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4">
-                        <a href="{{ route('login') }}" class="w-full sm:w-auto btn-playful rounded-full px-8 py-4 text-lg font-bold text-center">
+                        <a href="<?php echo e(route('login')); ?>" class="w-full sm:w-auto btn-playful rounded-full px-8 py-4 text-lg font-bold text-center">
                             Start Free Trial 🎈
                         </a>
                         <button @click="demoModalOpen = true" class="w-full sm:w-auto btn-outline-playful rounded-full px-8 py-4 text-lg font-bold">
@@ -500,7 +500,7 @@
                 <h2 class="text-5xl font-heading font-extrabold text-slate-800 mb-6 relative z-10">Ready to join the fun? 🚀</h2>
                 <p class="text-xl text-slate-600 mb-10 font-medium relative z-10">Start exploring our playful school management ecosystem today and give your institution the modern upgrade it deserves.</p>
                 <div class="flex flex-col sm:flex-row justify-center gap-4 relative z-10">
-                    <a href="{{ route('login') }}" class="btn-playful rounded-full px-12 py-5 text-xl font-bold">Go to Login 🚪</a>
+                    <a href="<?php echo e(route('login')); ?>" class="btn-playful rounded-full px-12 py-5 text-xl font-bold">Go to Login 🚪</a>
                     <button @click="demoModalOpen = true" class="btn-outline-playful rounded-full px-12 py-5 text-xl font-bold bg-white">View Demo Codes 🔑</button>
                 </div>
             </div>
@@ -515,7 +515,7 @@
             <span class="text-2xl font-heading font-extrabold text-slate-800 tracking-tight">MyAcademy</span>
         </div>
         <p class="text-slate-500 font-medium">Making school management a joyful breeze.</p>
-        <p class="text-slate-400 text-sm mt-8">&copy; {{ date('Y') }} MyAcademy Inc. All smiles reserved. 😊</p>
+        <p class="text-slate-400 text-sm mt-8">&copy; <?php echo e(date('Y')); ?> MyAcademy Inc. All smiles reserved. 😊</p>
     </footer>
 
     <!-- Playful Demo Modal -->
@@ -561,7 +561,7 @@
                                 <div><span class="text-violet-400 text-sm font-bold uppercase tracking-wide">ID</span> <br/><span class="bg-white px-3 py-1 rounded-xl shadow-sm text-base">admin@myacademy.local</span></div>
                                 <div><span class="text-violet-400 text-sm font-bold uppercase tracking-wide">Secret Pass</span> <br/><span class="bg-white px-3 py-1 rounded-xl shadow-sm tracking-widest text-base">password</span></div>
                             </div>
-                            <a href="{{ route('login') }}" class="mt-6 block w-full text-center rounded-2xl bg-violet-500 py-3 font-bold text-white shadow-md hover:bg-violet-600 hover:-translate-y-1 transition">Play as Admin</a>
+                            <a href="<?php echo e(route('login')); ?>" class="mt-6 block w-full text-center rounded-2xl bg-violet-500 py-3 font-bold text-white shadow-md hover:bg-violet-600 hover:-translate-y-1 transition">Play as Admin</a>
                         </div>
 
                         <!-- Teacher -->
@@ -574,7 +574,7 @@
                                 <div><span class="text-emerald-400 text-sm font-bold uppercase tracking-wide">ID</span> <br/><span class="bg-white px-3 py-1 rounded-xl shadow-sm text-base">teacher@myacademy.local</span></div>
                                 <div><span class="text-emerald-400 text-sm font-bold uppercase tracking-wide">Secret Pass</span> <br/><span class="bg-white px-3 py-1 rounded-xl shadow-sm tracking-widest text-base">password</span></div>
                             </div>
-                            <a href="{{ route('login') }}" class="mt-6 block w-full text-center rounded-2xl bg-emerald-500 py-3 font-bold text-white shadow-md hover:bg-emerald-600 hover:-translate-y-1 transition">Play as Teacher</a>
+                            <a href="<?php echo e(route('login')); ?>" class="mt-6 block w-full text-center rounded-2xl bg-emerald-500 py-3 font-bold text-white shadow-md hover:bg-emerald-600 hover:-translate-y-1 transition">Play as Teacher</a>
                         </div>
 
                         <!-- Student -->
@@ -587,7 +587,7 @@
                                 <div><span class="text-sky-400 text-sm font-bold uppercase tracking-wide">Admission No.</span> <br/><span class="bg-white px-3 py-1 rounded-xl shadow-sm text-base">ADM-2026-0092</span></div>
                                 <div><span class="text-sky-400 text-sm font-bold uppercase tracking-wide">Secret Pass</span> <br/><span class="bg-white px-3 py-1 rounded-xl shadow-sm tracking-widest text-base">amina0092</span></div>
                             </div>
-                            <a href="{{ route('login') }}" class="mt-6 block w-full text-center rounded-2xl bg-sky-500 py-3 font-bold text-white shadow-md hover:bg-sky-600 hover:-translate-y-1 transition">Play as Student</a>
+                            <a href="<?php echo e(route('login')); ?>" class="mt-6 block w-full text-center rounded-2xl bg-sky-500 py-3 font-bold text-white shadow-md hover:bg-sky-600 hover:-translate-y-1 transition">Play as Student</a>
                         </div>
 
                         <!-- Parent -->
@@ -600,7 +600,7 @@
                                 <div><span class="text-pink-400 text-sm font-bold uppercase tracking-wide">ID</span> <br/><span class="bg-white px-3 py-1 rounded-xl shadow-sm text-base">parent1@myacademy.local</span></div>
                                 <div><span class="text-pink-400 text-sm font-bold uppercase tracking-wide">Secret Pass</span> <br/><span class="bg-white px-3 py-1 rounded-xl shadow-sm tracking-widest text-base">password</span></div>
                             </div>
-                            <a href="{{ route('login') }}" class="mt-6 block w-full text-center rounded-2xl bg-pink-500 py-3 font-bold text-white shadow-md hover:bg-pink-600 hover:-translate-y-1 transition">Play as Parent</a>
+                            <a href="<?php echo e(route('login')); ?>" class="mt-6 block w-full text-center rounded-2xl bg-pink-500 py-3 font-bold text-white shadow-md hover:bg-pink-600 hover:-translate-y-1 transition">Play as Parent</a>
                         </div>
                     </div>
                 </div>
@@ -610,3 +610,4 @@
 
 </body>
 </html>
+<?php /**PATH C:\laragon\www\myacademy-laravel\resources\views/welcome.blade.php ENDPATH**/ ?>
