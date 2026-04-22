@@ -23,7 +23,7 @@
 <?php $component->withAttributes(['title' => 'Classes','subtitle' => 'Manage class levels and enrollment structure.','accent' => 'classes']); ?>
          <?php $__env->slot('actions', null, []); ?> 
             <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($user?->role === 'admin'): ?>
-                <a href="<?php echo e(route('classes.manage')); ?>" class="btn-outline">Manage Sections</a>
+                <a href="<?php echo e(route('classes.index')); ?>" class="btn-outline">Manage Sections</a>
             <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
             <a href="<?php echo e(route('subjects.index')); ?>" class="btn-outline">Manage Subjects</a>
          <?php $__env->endSlot(); ?>

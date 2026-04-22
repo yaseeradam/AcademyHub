@@ -14,7 +14,7 @@
     <x-page-header title="Classes" subtitle="Manage class levels and enrollment structure." accent="classes">
         <x-slot:actions>
             @if ($user?->role === 'admin')
-                <a href="{{ route('classes.manage') }}" class="btn-outline">Manage Sections</a>
+                <a href="{{ route('classes.index') }}" class="btn-outline">Manage Sections</a>
             @endif
             <a href="{{ route('subjects.index') }}" class="btn-outline">Manage Subjects</a>
         </x-slot:actions>

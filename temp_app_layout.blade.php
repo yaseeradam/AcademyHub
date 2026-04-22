@@ -1,27 +1,24 @@
 <!doctype html>
-<html lang="<?php echo e(str_replace('_', '-', app()->getLocale())); ?>" class="h-full">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="h-full">
 <script>document.documentElement.classList.remove('dark'); try { localStorage.removeItem('darkMode') } catch(e){}</script>
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="csrf-token" content="<?php echo e(csrf_token()); ?>" />
-    <title><?php echo e(config('myacademy.school_name', config('app.name', 'MyAcademy'))); ?></title>
-    <?php echo app('Illuminate\Foundation\Vite')(['resources/css/app.css', 'resources/js/app.js']); ?>
-    <?php echo \Livewire\Mechanisms\FrontendAssets\FrontendAssets::styles(); ?>
-
+    <meta name="csrf-token" content="{{ csrf_token() }}" />
+    <title>{{ config('myacademy.school_name', config('app.name', 'MyAcademy')) }}</title>
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @livewireStyles
     <style>
         body { font-family: 'Inter', 'Space Grotesk', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif; }
         .nav-icon-box { width:36px; height:36px; border-radius:10px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
-        .sidebar-scroll::-webkit-scrollbar { width:6px; }
-        .sidebar-scroll::-webkit-scrollbar-track { background:rgba(148, 163, 184, 0.1); border-radius:99px; }
-        .sidebar-scroll::-webkit-scrollbar-thumb { background:#cbd5e1; border-radius:99px; }
-        .sidebar-scroll::-webkit-scrollbar-thumb:hover { background:#94a3b8; }
-        .sidebar-scroll { scrollbar-width: thin; scrollbar-color: #cbd5e1 rgba(148, 163, 184, 0.1); }
+        .sidebar-scroll::-webkit-scrollbar { width:4px; }
+        .sidebar-scroll::-webkit-scrollbar-track { background:transparent; }
+        .sidebar-scroll::-webkit-scrollbar-thumb { background:#e2e8f0; border-radius:99px; }
     </style>
 </head>
 <body class="h-full bg-[#f5f6fa] text-slate-900">
 
-<?php
+@php
 $hasCbt            = true;
 $appMode           = (string) config('myacademy.mode', 'full');
 $cbtLocked         = false;
@@ -40,14 +37,16 @@ $accent = match($user?->role) {
 };
 $activeBg  = "bg-{$accent}-500";
 $activeShadow = "shadow-{$accent}-200";
-?>
+@endphp
 
-<div id="app" class="flex h-screen overflow-hidden" x-data="{ sidebarCollapsed: localStorage.getItem('sidebarCollapsed') === 'true' }" x-init="$watch('sidebarCollapsed', val => localStorage.setItem('sidebarCollapsed', val))">
+<div id="app" class="flex min-h-screen">
 
-    
+    {{-- Mobile overlay --}}
     <div id="mobileSidebarOverlay" class="fixed inset-0 z-40 hidden bg-black/40 backdrop-blur-sm lg:hidden"></div>
 
-    
+    {{-- ══════════════════════════════════════
+         MOBILE SIDEBAR
+    ══════════════════════════════════════ --}}
     <aside id="mobileSidebar"
            class="fixed inset-y-0 left-0 z-50 flex w-72 -translate-x-full flex-col bg-[#f5f6fa] transition-transform duration-300 lg:hidden">
 
@@ -60,21 +59,21 @@ $activeShadow = "shadow-{$accent}-200";
             </button>
         </div>
 
-        
+        {{-- Branding --}}
         <div class="mx-3 mb-2 rounded-2xl bg-white p-4 shadow-sm">
             <div class="flex items-center gap-3">
                 <div class="flex h-12 w-12 flex-shrink-0 items-center justify-center overflow-hidden rounded-xl bg-violet-50 ring-2 ring-violet-100">
-                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($schoolLogo): ?>
-                        <img src="<?php echo e(asset('uploads/'.str_replace('\\','/',$schoolLogo))); ?>" alt="Logo" class="h-full w-full object-contain p-1"/>
-                    <?php else: ?>
+                    @if($schoolLogo)
+                        <img src="{{ asset('uploads/'.str_replace('\\','/',$schoolLogo)) }}" alt="Logo" class="h-full w-full object-contain p-1"/>
+                    @else
                         <svg class="h-7 w-7 text-violet-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M12 3L1 9l11 6 9-4.91V17a2 2 0 01-1.1 1.79l-7.4 3.7a2 2 0 01-1.8 0l-7.4-3.7A2 2 0 012 17V9"/>
                             <path stroke-linecap="round" stroke-linejoin="round" d="M12 21V9"/>
                         </svg>
-                    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                    @endif
                 </div>
                 <div class="min-w-0">
-                    <div class="truncate text-sm font-extrabold leading-tight text-slate-900"><?php echo e($schoolName); ?></div>
+                    <div class="truncate text-sm font-extrabold leading-tight text-slate-900">{{ $schoolName }}</div>
                     <div class="mt-0.5 text-[11px] font-semibold text-violet-500">Smart Learning System</div>
                 </div>
             </div>
@@ -84,13 +83,13 @@ $activeShadow = "shadow-{$accent}-200";
             <span class="text-[10px] font-black uppercase tracking-widest text-slate-400">Main Menu</span>
         </div>
 
-        <nav class="flex-1 overflow-y-auto sidebar-scroll px-3 pb-3 space-y-0.5 min-h-0">
-            <?php echo $__env->make('layouts.partials.app-nav', ['mobile' => true], array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
+        <nav class="flex-1 overflow-y-auto sidebar-scroll px-3 pb-3 space-y-0.5">
+            @include('layouts.partials.app-nav', ['mobile' => true])
         </nav>
 
         <div class="p-3">
-            <form method="POST" action="<?php echo e(route('logout')); ?>" id="mobileLogoutForm">
-                <?php echo csrf_field(); ?>
+            <form method="POST" action="{{ route('logout') }}" id="mobileLogoutForm">
+                @csrf
                 <button type="button" onclick="doLogout('mobileLogoutForm')"
                         class="w-full flex items-center gap-3 rounded-2xl bg-slate-800 px-4 py-3.5 hover:bg-slate-900 transition-all">
                     <div class="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl bg-red-500 shadow-md">
@@ -107,44 +106,50 @@ $activeShadow = "shadow-{$accent}-200";
         </div>
     </aside>
 
-    
-    <aside x-bind:class="sidebarCollapsed ? 'w-20' : 'w-72'" class="hidden flex-shrink-0 flex-col bg-[#f5f6fa] lg:flex transition-[width] duration-300 ease-in-out border-r border-slate-200/50">
+    {{-- ══════════════════════════════════════
+         DESKTOP SIDEBAR
+    ══════════════════════════════════════ --}}
+    <aside class="hidden w-72 flex-shrink-0 flex-col bg-[#f5f6fa] lg:flex">
 
-        
-        <div class="mx-3 mt-4 mb-2 rounded-2xl bg-white shadow-sm transition-all duration-300" x-bind:class="sidebarCollapsed ? 'p-2 mx-2' : 'p-4'">
-            <div class="flex items-center" x-bind:class="sidebarCollapsed ? 'justify-center' : 'gap-3'">
-                <div class="flex flex-shrink-0 items-center justify-center overflow-hidden rounded-xl bg-violet-50 ring-2 ring-violet-100 transition-all duration-300" x-bind:class="sidebarCollapsed ? 'h-10 w-10' : 'h-12 w-12'">
-                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($schoolLogo): ?>
-                        <img src="<?php echo e(asset('uploads/'.str_replace('\\','/',$schoolLogo))); ?>" alt="Logo" class="h-full w-full object-contain p-1"/>
-                    <?php else: ?>
-                        <svg class="text-violet-500 transition-all duration-300" x-bind:class="sidebarCollapsed ? 'h-5 w-5' : 'h-7 w-7'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        {{-- Branding --}}
+        <div class="mx-3 mt-4 mb-2 rounded-2xl bg-white p-4 shadow-sm">
+            <div class="flex items-center gap-3">
+                <div class="flex h-12 w-12 flex-shrink-0 items-center justify-center overflow-hidden rounded-xl bg-violet-50 ring-2 ring-violet-100">
+                    @if($schoolLogo)
+                        <img src="{{ asset('uploads/'.str_replace('\\','/',$schoolLogo)) }}" alt="Logo" class="h-full w-full object-contain p-1"/>
+                    @else
+                        <svg class="h-7 w-7 text-violet-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M12 3L1 9l11 6 9-4.91V17a2 2 0 01-1.1 1.79l-7.4 3.7a2 2 0 01-1.8 0l-7.4-3.7A2 2 0 012 17V9"/>
                             <path stroke-linecap="round" stroke-linejoin="round" d="M12 21V9"/>
                         </svg>
-                    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                    @endif
                 </div>
-                <div class="min-w-0" x-show="!sidebarCollapsed" x-transition.opacity>
-                    <div class="truncate text-sm font-extrabold leading-tight text-slate-900"><?php echo e($schoolName); ?></div>
+                <div class="min-w-0">
+                    <div class="truncate text-sm font-extrabold leading-tight text-slate-900">{{ $schoolName }}</div>
                     <div class="mt-0.5 text-[11px] font-semibold text-violet-500">Smart Learning System</div>
                 </div>
             </div>
         </div>
 
-        <nav class="flex-1 overflow-y-auto sidebar-scroll px-3 pb-3 space-y-0.5 min-h-0 mt-2">
-            <?php echo $__env->make('layouts.partials.app-nav', ['mobile' => false], array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
+        <div class="px-5 pb-1 pt-3">
+            <span class="text-[10px] font-black uppercase tracking-widest text-slate-400">Main Menu</span>
+        </div>
+
+        <nav class="flex-1 overflow-y-auto sidebar-scroll px-3 pb-3 space-y-0.5">
+            @include('layouts.partials.app-nav', ['mobile' => false])
         </nav>
 
-        <div class="p-3 transition-all duration-300" x-bind:class="sidebarCollapsed ? 'px-2' : 'p-3'">
-            <form method="POST" action="<?php echo e(route('logout')); ?>" id="logoutForm">
-                <?php echo csrf_field(); ?>
-                <button type="button" onclick="doLogout('logoutForm')" title="Logout"
-                        class="w-full flex items-center rounded-2xl bg-slate-800 hover:bg-slate-900 transition-all duration-300 shadow-sm" x-bind:class="sidebarCollapsed ? 'p-2 justify-center' : 'px-4 py-3.5 gap-3'">
-                    <div class="flex flex-shrink-0 items-center justify-center rounded-xl bg-red-500 shadow-md transition-all duration-300" x-bind:class="sidebarCollapsed ? 'h-10 w-10' : 'h-9 w-9'">
+        <div class="p-3">
+            <form method="POST" action="{{ route('logout') }}" id="logoutForm">
+                @csrf
+                <button type="button" onclick="doLogout('logoutForm')"
+                        class="w-full flex items-center gap-3 rounded-2xl bg-slate-800 px-4 py-3.5 hover:bg-slate-900 transition-all">
+                    <div class="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl bg-red-500 shadow-md">
                         <svg class="h-5 w-5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
                         </svg>
                     </div>
-                    <div x-show="!sidebarCollapsed" x-transition.opacity class="text-left flex-1 whitespace-nowrap overflow-hidden">
+                    <div>
                         <div class="text-sm font-extrabold text-white">Logout</div>
                         <div class="text-[11px] font-medium text-slate-400">See you later 👋</div>
                     </div>
@@ -153,10 +158,12 @@ $activeShadow = "shadow-{$accent}-200";
         </div>
     </aside>
 
-    
+    {{-- ══════════════════════════════════════
+         MAIN AREA
+    ══════════════════════════════════════ --}}
     <div class="flex flex-1 min-w-0 flex-col">
 
-        
+        {{-- Header --}}
         <header class="sticky top-0 z-10 flex h-[72px] items-center justify-between gap-4 border-b border-slate-200/60 bg-white px-6 shadow-sm">
 
             <div class="flex items-center gap-4">
@@ -166,62 +173,37 @@ $activeShadow = "shadow-{$accent}-200";
                         <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/>
                     </svg>
                 </button>
-                <button @click="sidebarCollapsed = !sidebarCollapsed" title="Toggle Menu"
-                        class="hidden h-9 w-9 items-center justify-center rounded-xl border border-slate-200 text-slate-500 hover:bg-slate-50 lg:flex transition-colors">
-                    <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/>
-                    </svg>
-                </button>
                 <div>
-                    <h1 class="text-lg font-extrabold tracking-tight text-slate-900"><?php echo e($schoolName); ?></h1>
-                    <p class="text-xs font-medium text-slate-400"><?php echo e(now()->format('l, F j, Y')); ?></p>
+                    <h1 class="text-lg font-extrabold tracking-tight text-slate-900">{{ $schoolName }}</h1>
+                    <p class="text-xs font-medium text-slate-400">{{ now()->format('l, F j, Y') }}</p>
                 </div>
             </div>
 
             <div class="flex items-center gap-3">
 
-                
+                {{-- Bell --}}
                 <div class="relative flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500 hover:bg-slate-50 transition-colors">
-                    <?php
-$__split = function ($name, $params = []) {
-    return [$name, $params];
-};
-[$__name, $__params] = $__split('notifications.bell', []);
-
-$key = null;
-
-$key ??= \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::generateKey('lw-2859434850-0', null);
-
-$__html = app('livewire')->mount($__name, $__params, $key);
-
-echo $__html;
-
-unset($__html);
-unset($__name);
-unset($__params);
-unset($__split);
-if (isset($__slots)) unset($__slots);
-?>
+                    <livewire:notifications.bell />
                 </div>
 
-                
-                <a href="<?php echo e(route('profile')); ?>"
+                {{-- User chip --}}
+                <a href="{{ route('profile') }}"
                    class="flex items-center gap-2.5 rounded-full border border-slate-200 bg-white py-1 pl-1 pr-4 shadow-sm hover:shadow-md transition-all">
-                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($user?->profile_photo_url): ?>
-                        <img src="<?php echo e($user->profile_photo_url); ?>" alt="<?php echo e($user->name); ?>"
+                    @if($user?->profile_photo_url)
+                        <img src="{{ $user->profile_photo_url }}" alt="{{ $user->name }}"
                              class="h-8 w-8 flex-shrink-0 rounded-full object-cover"/>
-                    <?php else: ?>
+                    @else
                         <div class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-violet-500 text-white shadow-sm">
-                            <span class="text-sm font-extrabold leading-none"><?php echo e($userInitial); ?></span>
+                            <span class="text-sm font-extrabold leading-none">{{ $userInitial }}</span>
                         </div>
-                    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                    @endif
                     <div class="hidden leading-tight sm:block">
-                        <div class="text-sm font-bold text-slate-800"><?php echo e($user?->name ?? 'User'); ?></div>
-                        <div class="text-[11px] font-semibold text-slate-400"><?php echo e(ucfirst($user?->role ?? 'user')); ?></div>
+                        <div class="text-sm font-bold text-slate-800">{{ $user?->name ?? 'User' }}</div>
+                        <div class="text-[11px] font-semibold text-slate-400">{{ ucfirst($user?->role ?? 'user') }}</div>
                     </div>
                 </a>
 
-                
+                {{-- Logout --}}
                 <button type="button" onclick="doLogout('logoutForm')"
                         class="flex items-center gap-2 rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-bold text-white shadow-md hover:bg-slate-800 transition-all">
                     <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
@@ -233,81 +215,41 @@ if (isset($__slots)) unset($__slots);
             </div>
         </header>
 
-        
-        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(isset($subscriptionDueDate) && $user?->role === 'admin'): ?>
-            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($subscriptionIsPastDue && $subscriptionDaysPastDue <= 14): ?>
+        {{-- Subscription banners --}}
+        @if(isset($subscriptionDueDate) && $user?->role === 'admin')
+            @if($subscriptionIsPastDue && $subscriptionDaysPastDue <= 14)
                 <div class="fixed inset-x-0 bottom-0 z-50 p-3">
                     <div class="mx-auto max-w-4xl rounded-2xl bg-red-600 px-5 py-3 shadow-xl flex items-center justify-between gap-4">
-                        <p class="text-sm font-bold text-white">Subscription expired — edit features are locked. <a href="<?php echo e(route('billing.index')); ?>" class="underline">Renew now</a></p>
+                        <p class="text-sm font-bold text-white">Subscription expired — edit features are locked. <a href="{{ route('billing.index') }}" class="underline">Renew now</a></p>
                     </div>
                 </div>
                 <style>#mainContent main input,#mainContent main select,#mainContent main textarea,#mainContent main button:not(.allow-billing){pointer-events:none!important;opacity:.6!important}</style>
-            <?php elseif(!$subscriptionIsPastDue && $subscriptionDaysUntilDue <= 7): ?>
+            @elseif(!$subscriptionIsPastDue && $subscriptionDaysUntilDue <= 7)
                 <div class="fixed inset-x-0 bottom-0 z-50 p-3">
                     <div class="mx-auto max-w-4xl rounded-2xl bg-amber-500 px-5 py-3 shadow-xl flex items-center justify-between gap-4">
-                        <p class="text-sm font-bold text-white">Subscription expires in <?php echo e($subscriptionDaysUntilDue); ?> days. <a href="<?php echo e(route('billing.index')); ?>" class="underline">Renew now</a></p>
+                        <p class="text-sm font-bold text-white">Subscription expires in {{ $subscriptionDaysUntilDue }} days. <a href="{{ route('billing.index') }}" class="underline">Renew now</a></p>
                         <button onclick="this.closest('.fixed').remove()" class="text-white/80 hover:text-white">
                             <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
                         </button>
                     </div>
                 </div>
-            <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
-        <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+            @endif
+        @endif
 
-        
+        {{-- Page content --}}
         <main class="flex-1 overflow-y-auto px-6 py-6">
-            <?php echo $__env->yieldContent('content'); ?>
-            <?php echo e($slot ?? ''); ?>
-
+            @yield('content')
+            {{ $slot ?? '' }}
         </main>
 
-        <?php
-$__split = function ($name, $params = []) {
-    return [$name, $params];
-};
-[$__name, $__params] = $__split('global-modal', []);
-
-$key = null;
-
-$key ??= \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::generateKey('lw-2859434850-1', null);
-
-$__html = app('livewire')->mount($__name, $__params, $key);
-
-echo $__html;
-
-unset($__html);
-unset($__name);
-unset($__params);
-unset($__split);
-if (isset($__slots)) unset($__slots);
-?>
+        <livewire:global-modal />
     </div>
 
 </div>
 
-<?php echo \Livewire\Mechanisms\FrontendAssets\FrontendAssets::scripts(); ?>
-
-<?php echo $__env->yieldPushContent('scripts'); ?>
-<?php if (isset($component)) { $__componentOriginale5bc9b34dd139a393f71cdc403b71855 = $component; } ?>
-<?php if (isset($attributes)) { $__attributesOriginale5bc9b34dd139a393f71cdc403b71855 = $attributes; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.notifications','data' => []] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
-<?php $component->withName('notifications'); ?>
-<?php if ($component->shouldRender()): ?>
-<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
-<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
-<?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
-<?php endif; ?>
-<?php $component->withAttributes([]); ?>
-<?php echo $__env->renderComponent(); ?>
-<?php endif; ?>
-<?php if (isset($__attributesOriginale5bc9b34dd139a393f71cdc403b71855)): ?>
-<?php $attributes = $__attributesOriginale5bc9b34dd139a393f71cdc403b71855; ?>
-<?php unset($__attributesOriginale5bc9b34dd139a393f71cdc403b71855); ?>
-<?php endif; ?>
-<?php if (isset($__componentOriginale5bc9b34dd139a393f71cdc403b71855)): ?>
-<?php $component = $__componentOriginale5bc9b34dd139a393f71cdc403b71855; ?>
-<?php unset($__componentOriginale5bc9b34dd139a393f71cdc403b71855); ?>
-<?php endif; ?>
+@livewireScripts
+@stack('scripts')
+<x-notifications />
 
 <script>
     // CSRF-safe logout
@@ -361,7 +303,7 @@ if (isset($__slots)) unset($__slots);
     });
 </script>
 
-
+{{-- Livewire navigation loading spinner --}}
 <div x-data="{ loading: false }"
      x-on:livewire:navigating.window="loading = true"
      x-on:livewire:navigated.window="loading = false"
@@ -372,4 +314,3 @@ if (isset($__slots)) unset($__slots);
 
 </body>
 </html>
-<?php /**PATH C:\laragon\www\myacademy-laravel\resources\views/layouts/app.blade.php ENDPATH**/ ?>

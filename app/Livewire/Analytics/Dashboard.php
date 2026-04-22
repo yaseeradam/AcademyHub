@@ -205,11 +205,11 @@ class Dashboard extends Component
 
         $transactions = Transaction::query()
             ->where('type', 'Income')
-            ->where('created_at', '>=', $startDate)
-            ->where('created_at', '<=', now())
+            ->where('date', '>=', $startDate)
+            ->where('date', '<=', now())
             ->get();
 
-        $totalRevenue = $transactions->sum('amount');
+        $totalRevenue = $transactions->sum('amount_paid');
         
         // Monthly trend (last 6 months)
         $monthlyTrend = [];
@@ -217,9 +217,9 @@ class Dashboard extends Component
             $month = now()->subMonths($i);
             $monthTransactions = Transaction::query()
                 ->where('type', 'Income')
-                ->whereYear('created_at', $month->year)
-                ->whereMonth('created_at', $month->month)
-                ->sum('amount');
+                ->whereYear('date', $month->year)
+                ->whereMonth('date', $month->month)
+                ->sum('amount_paid');
             
             $monthlyTrend[] = [
                 'month' => $month->format('M Y'),
@@ -231,7 +231,7 @@ class Dashboard extends Component
         $paymentMethods = $transactions->groupBy('payment_method')->map(function ($group, $method) {
             return [
                 'method' => $method ?: 'Cash',
-                'amount' => $group->sum('amount'),
+                'amount' => $group->sum('amount_paid'),
                 'count' => $group->count(),
             ];
         })->sortByDesc('amount')->values();

@@ -25,7 +25,8 @@
 
     <form wire:submit="save" class="space-y-6">
         <div class="grid grid-cols-1 gap-4 lg:grid-cols-3">
-            <div class="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm lg:col-span-2">
+            <div class="lg:col-span-2 space-y-4">
+                <div class="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
                 <div class="text-sm font-semibold text-gray-900">Bio</div>
 
                 <div class="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -281,59 +282,8 @@ unset($__errorArgs, $__bag); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendB
                         </div>
                     <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                 </div>
-            </div>
 
-            <div class="space-y-4">
-                <div class="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
-                    <div class="text-sm font-semibold text-gray-900">Passport Photo</div>
-
-                    <div class="mt-5">
-                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($passport): ?>
-                            <div class="flex items-center gap-3">
-                                <img
-                                    src="<?php echo e($passport->temporaryUrl()); ?>"
-                                    alt="Passport preview"
-                                    class="h-20 w-20 rounded-xl object-cover ring-1 ring-inset ring-gray-200"
-                                />
-                                <div class="text-xs text-gray-500">Preview (not saved yet)</div>
-                            </div>
-                        <?php elseif($student?->passport_photo_url): ?>
-                            <div class="flex items-center gap-3">
-                                <img
-                                    src="<?php echo e($student->passport_photo_url); ?>"
-                                    alt="<?php echo e($student->full_name); ?>"
-                                    class="h-20 w-20 rounded-xl object-cover ring-1 ring-inset ring-gray-200"
-                                />
-                                <div class="text-xs text-gray-500">Current photo</div>
-                            </div>
-                        <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
-
-                        <input
-                            type="file"
-                            wire:model="passport"
-                            accept="image/*"
-                            class="mt-3 block w-full text-sm text-gray-700 file:mr-4 file:rounded-lg file:border-0 file:bg-gray-100 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-gray-700 hover:file:bg-gray-200"
-                        />
-                        <div wire:loading wire:target="passport" class="mt-2 flex items-center gap-2 text-xs font-medium text-brand-600">
-                            <svg class="h-3 w-3 animate-spin" viewBox="0 0 24 24" fill="none">
-                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                            </svg>
-                            Uploading image...
-                        </div>
-                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__errorArgs = ['passport'];
-$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
-if ($__bag->has($__errorArgs[0])) :
-if (isset($message)) { $__messageOriginal = $message; }
-$message = $__bag->first($__errorArgs[0]); ?>
-                            <div class="mt-2 text-sm text-orange-700"><?php echo e($message); ?></div>
-                        <?php unset($message);
-if (isset($__messageOriginal)) { $message = $__messageOriginal; }
-endif;
-unset($__errorArgs, $__bag); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
-                    </div>
-                </div>
-
+                <!-- PARENT/GUARDIAN BLOCKS -->
                 <div class="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
                     <div class="flex items-center justify-between mb-4">
                         <div>
@@ -531,6 +481,59 @@ if (isset($__messageOriginal)) { $message = $__messageOriginal; }
 endif;
 unset($__errorArgs, $__bag); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                         </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="space-y-4">
+                <div class="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
+                    <div class="text-sm font-semibold text-gray-900">Passport Photo</div>
+
+                    <div class="mt-5">
+                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($passport): ?>
+                            <div class="flex items-center gap-3">
+                                <img
+                                    src="<?php echo e($passport->temporaryUrl()); ?>"
+                                    alt="Passport preview"
+                                    class="h-20 w-20 rounded-xl object-cover ring-1 ring-inset ring-gray-200"
+                                />
+                                <div class="text-xs text-gray-500">Preview (not saved yet)</div>
+                            </div>
+                        <?php elseif($student?->passport_photo_url): ?>
+                            <div class="flex items-center gap-3">
+                                <img
+                                    src="<?php echo e($student->passport_photo_url); ?>"
+                                    alt="<?php echo e($student->full_name); ?>"
+                                    class="h-20 w-20 rounded-xl object-cover ring-1 ring-inset ring-gray-200"
+                                />
+                                <div class="text-xs text-gray-500">Current photo</div>
+                            </div>
+                        <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+
+                        <input
+                            type="file"
+                            wire:model="passport"
+                            accept="image/*"
+                            class="mt-3 block w-full text-sm text-gray-700 file:mr-4 file:rounded-lg file:border-0 file:bg-gray-100 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-gray-700 hover:file:bg-gray-200"
+                        />
+                        <div wire:loading wire:target="passport" class="mt-2 flex items-center gap-2 text-xs font-medium text-brand-600">
+                            <svg class="h-3 w-3 animate-spin" viewBox="0 0 24 24" fill="none">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            Uploading image...
+                        </div>
+                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__errorArgs = ['passport'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                            <div class="mt-2 text-sm text-orange-700"><?php echo e($message); ?></div>
+                        <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                     </div>
                 </div>
 

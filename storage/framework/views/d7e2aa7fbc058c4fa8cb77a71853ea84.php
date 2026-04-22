@@ -1,14 +1,12 @@
-@extends('layouts.app')
-
-@section('content')
+<?php $__env->startSection('content'); ?>
     <div class="space-y-6">
-        {{-- Header --}}
+        
         <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
                 <h1 class="text-2xl font-bold text-gray-900">Add New Teacher</h1>
                 <p class="mt-1 text-sm text-gray-500">Create a teacher account with access to academic modules</p>
             </div>
-            <a href="{{ route('teachers') }}" 
+            <a href="<?php echo e(route('teachers')); ?>" 
                class="inline-flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 shadow-sm transition-all hover:bg-gray-50">
                 <svg class="h-4 w-4 text-gray-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M19 12H5M12 19l-7-7 7-7"/>
@@ -17,19 +15,19 @@
             </a>
         </div>
 
-        {{-- Status Messages --}}
-        @if (session('status'))
+        
+        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(session('status')): ?>
             <div class="rounded-lg border border-emerald-200 bg-emerald-50 p-4 shadow-sm">
                 <div class="flex items-center gap-3">
                     <svg class="h-5 w-5 text-emerald-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                     </svg>
-                    <p class="font-medium text-emerald-800">{{ session('status') }}</p>
+                    <p class="font-medium text-emerald-800"><?php echo e(session('status')); ?></p>
                 </div>
             </div>
-        @endif
+        <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
 
-        @if ($errors->any())
+        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($errors->any()): ?>
             <div class="rounded-lg border border-red-200 bg-red-50 p-4 shadow-sm">
                 <div class="flex items-start gap-3">
                     <svg class="mt-0.5 h-5 w-5 text-red-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -38,22 +36,22 @@
                     <div>
                         <h3 class="font-medium text-red-800">Please fix the following errors:</h3>
                         <ul class="mt-2 list-inside list-disc text-sm text-red-700">
-                            @foreach ($errors->all() as $error)
-                                <li>{{ $error }}</li>
-                            @endforeach
+                            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $errors->all(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $error): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                <li><?php echo e($error); ?></li>
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                         </ul>
                     </div>
                 </div>
             </div>
-        @endif
+        <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
 
-        {{-- Main Form --}}
-        <form method="POST" action="{{ route('teachers.store') }}" enctype="multipart/form-data" class="grid grid-cols-1 gap-6 lg:grid-cols-3">
-            @csrf
+        
+        <form method="POST" action="<?php echo e(route('teachers.store')); ?>" enctype="multipart/form-data" class="grid grid-cols-1 gap-6 lg:grid-cols-3">
+            <?php echo csrf_field(); ?>
             
-            {{-- Left Column (Takes 2/3 space) --}}
+            
             <div class="lg:col-span-2 space-y-6">
-                {{-- Personal Information --}}
+                
                 <div class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
                     <h2 class="text-base font-semibold text-gray-900 mb-4 border-b border-gray-100 pb-2">Personal Information</h2>
                     <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
@@ -63,7 +61,7 @@
                                 name="name"
                                 type="text"
                                 class="w-full rounded-lg border-2 border-gray-300 bg-white px-4 py-3 text-sm font-medium text-gray-900 shadow-sm transition-all focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 hover:border-gray-400"
-                                value="{{ old('name') }}"
+                                value="<?php echo e(old('name')); ?>"
                                 placeholder="e.g., Mrs. Anita Okoye"
                                 required
                                 autocomplete="name"
@@ -76,7 +74,7 @@
                                 name="email"
                                 type="email"
                                 class="w-full rounded-lg border-2 border-gray-300 bg-white px-4 py-3 text-sm font-medium text-gray-900 shadow-sm transition-all focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 hover:border-gray-400"
-                                value="{{ old('email') }}"
+                                value="<?php echo e(old('email')); ?>"
                                 placeholder="e.g., anita@school.edu"
                                 required
                                 autocomplete="email"
@@ -85,7 +83,7 @@
                     </div>
                 </div>
 
-                {{-- Security Settings & Toggles --}}
+                
                 <div class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
                     <h2 class="text-base font-semibold text-gray-900 mb-4 border-b border-gray-100 pb-2">Security & Roles</h2>
                     <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 mb-6">
@@ -122,7 +120,7 @@
                                 <span class="block text-xs text-gray-500">Enable login access</span>
                             </div>
                             <div class="relative inline-flex items-center">
-                                <input type="checkbox" name="is_active" value="1" @checked(old('is_active', true)) class="sr-only peer" />
+                                <input type="checkbox" name="is_active" value="1" <?php if(old('is_active', true)): echo 'checked'; endif; ?> class="sr-only peer" />
                                 <div class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-brand-500 peer-focus:ring-offset-2 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-600"></div>
                             </div>
                         </label>
@@ -133,7 +131,7 @@
                                 <span class="block text-xs text-gray-500">Allows managing attendance</span>
                             </div>
                             <div class="relative inline-flex items-center">
-                                <input type="checkbox" name="is_class_teacher" value="1" @checked(old('is_class_teacher', false)) class="sr-only peer" />
+                                <input type="checkbox" name="is_class_teacher" value="1" <?php if(old('is_class_teacher', false)): echo 'checked'; endif; ?> class="sr-only peer" />
                                 <div class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-brand-500 peer-focus:ring-offset-2 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-500"></div>
                             </div>
                         </label>
@@ -141,9 +139,9 @@
                 </div>
             </div>
             
-            {{-- Right Column (Takes 1/3 space) --}}
+            
             <div class="space-y-6">
-                {{-- Profile Photo --}}
+                
                 <div class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
                     <h2 class="text-base font-semibold text-gray-900 mb-4 border-b border-gray-100 pb-2">Profile Photo</h2>
                     <label for="photo" class="flex flex-col items-center justify-center w-full h-40 border-2 border-gray-300 border-dashed rounded-xl cursor-pointer bg-gray-50 hover:bg-gray-100 transition-colors group">
@@ -158,7 +156,7 @@
                     </label>
                 </div>
 
-                {{-- Action Buttons --}}
+                
                 <div class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm space-y-3">
                     <button type="submit" 
                             class="flex w-full justify-center items-center gap-2 rounded-lg bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-all hover:bg-brand-500">
@@ -170,7 +168,7 @@
                         </svg>
                         Create Teacher Account
                     </button>
-                    <a href="{{ route('teachers') }}" 
+                    <a href="<?php echo e(route('teachers')); ?>" 
                        class="flex w-full justify-center items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 transition-all hover:bg-gray-50">
                         Cancel
                     </a>
@@ -179,7 +177,7 @@
         </form>
     </div>
 
-    {{-- Loading Modal --}}
+    
     <div id="loadingModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-gray-900/50 backdrop-blur-sm">
         <div class="rounded-2xl bg-white p-8 shadow-xl max-w-sm w-full mx-4">
             <div class="flex flex-col items-center text-center">
@@ -192,9 +190,9 @@
             </div>
         </div>
     </div>
-@endsection
+<?php $__env->stopSection(); ?>
 
-@push('scripts')
+<?php $__env->startPush('scripts'); ?>
 <script>
 document.querySelector('form').addEventListener('submit', function(e) {
     document.getElementById('loadingModal').classList.remove('hidden');
@@ -220,4 +218,6 @@ document.getElementById('photo').addEventListener('change', function(e) {
     }
 });
 </script>
-@endpush
+<?php $__env->stopPush(); ?>
+
+<?php echo $__env->make('layouts.app', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\laragon\www\myacademy-laravel\resources\views/pages/teachers/create.blade.php ENDPATH**/ ?>

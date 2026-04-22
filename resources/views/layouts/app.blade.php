@@ -11,9 +11,11 @@
     <style>
         body { font-family: 'Inter', 'Space Grotesk', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif; }
         .nav-icon-box { width:36px; height:36px; border-radius:10px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
-        .sidebar-scroll::-webkit-scrollbar { width:4px; }
-        .sidebar-scroll::-webkit-scrollbar-track { background:transparent; }
-        .sidebar-scroll::-webkit-scrollbar-thumb { background:#e2e8f0; border-radius:99px; }
+        .sidebar-scroll::-webkit-scrollbar { width:6px; }
+        .sidebar-scroll::-webkit-scrollbar-track { background:rgba(148, 163, 184, 0.1); border-radius:99px; }
+        .sidebar-scroll::-webkit-scrollbar-thumb { background:#cbd5e1; border-radius:99px; }
+        .sidebar-scroll::-webkit-scrollbar-thumb:hover { background:#94a3b8; }
+        .sidebar-scroll { scrollbar-width: thin; scrollbar-color: #cbd5e1 rgba(148, 163, 184, 0.1); }
     </style>
 </head>
 <body class="h-full bg-[#f5f6fa] text-slate-900">
@@ -39,7 +41,7 @@ $activeBg  = "bg-{$accent}-500";
 $activeShadow = "shadow-{$accent}-200";
 @endphp
 
-<div id="app" class="flex min-h-screen">
+<div id="app" class="flex h-screen overflow-hidden" x-data="{ sidebarCollapsed: localStorage.getItem('sidebarCollapsed') === 'true' }" x-init="$watch('sidebarCollapsed', val => localStorage.setItem('sidebarCollapsed', val))">
 
     {{-- Mobile overlay --}}
     <div id="mobileSidebarOverlay" class="fixed inset-0 z-40 hidden bg-black/40 backdrop-blur-sm lg:hidden"></div>
@@ -83,7 +85,7 @@ $activeShadow = "shadow-{$accent}-200";
             <span class="text-[10px] font-black uppercase tracking-widest text-slate-400">Main Menu</span>
         </div>
 
-        <nav class="flex-1 overflow-y-auto sidebar-scroll px-3 pb-3 space-y-0.5">
+        <nav class="flex-1 overflow-y-auto sidebar-scroll px-3 pb-3 space-y-0.5 min-h-0">
             @include('layouts.partials.app-nav', ['mobile' => true])
         </nav>
 
@@ -109,47 +111,43 @@ $activeShadow = "shadow-{$accent}-200";
     {{-- ══════════════════════════════════════
          DESKTOP SIDEBAR
     ══════════════════════════════════════ --}}
-    <aside class="hidden w-72 flex-shrink-0 flex-col bg-[#f5f6fa] lg:flex">
+    <aside x-bind:class="sidebarCollapsed ? 'w-20' : 'w-72'" class="hidden flex-shrink-0 flex-col bg-[#f5f6fa] lg:flex transition-[width] duration-300 ease-in-out border-r border-slate-200/50">
 
         {{-- Branding --}}
-        <div class="mx-3 mt-4 mb-2 rounded-2xl bg-white p-4 shadow-sm">
-            <div class="flex items-center gap-3">
-                <div class="flex h-12 w-12 flex-shrink-0 items-center justify-center overflow-hidden rounded-xl bg-violet-50 ring-2 ring-violet-100">
+        <div class="mx-3 mt-4 mb-2 rounded-2xl bg-white shadow-sm transition-all duration-300" x-bind:class="sidebarCollapsed ? 'p-2 mx-2' : 'p-4'">
+            <div class="flex items-center" x-bind:class="sidebarCollapsed ? 'justify-center' : 'gap-3'">
+                <div class="flex flex-shrink-0 items-center justify-center overflow-hidden rounded-xl bg-violet-50 ring-2 ring-violet-100 transition-all duration-300" x-bind:class="sidebarCollapsed ? 'h-10 w-10' : 'h-12 w-12'">
                     @if($schoolLogo)
                         <img src="{{ asset('uploads/'.str_replace('\\','/',$schoolLogo)) }}" alt="Logo" class="h-full w-full object-contain p-1"/>
                     @else
-                        <svg class="h-7 w-7 text-violet-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <svg class="text-violet-500 transition-all duration-300" x-bind:class="sidebarCollapsed ? 'h-5 w-5' : 'h-7 w-7'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M12 3L1 9l11 6 9-4.91V17a2 2 0 01-1.1 1.79l-7.4 3.7a2 2 0 01-1.8 0l-7.4-3.7A2 2 0 012 17V9"/>
                             <path stroke-linecap="round" stroke-linejoin="round" d="M12 21V9"/>
                         </svg>
                     @endif
                 </div>
-                <div class="min-w-0">
+                <div class="min-w-0" x-show="!sidebarCollapsed" x-transition.opacity>
                     <div class="truncate text-sm font-extrabold leading-tight text-slate-900">{{ $schoolName }}</div>
                     <div class="mt-0.5 text-[11px] font-semibold text-violet-500">Smart Learning System</div>
                 </div>
             </div>
         </div>
 
-        <div class="px-5 pb-1 pt-3">
-            <span class="text-[10px] font-black uppercase tracking-widest text-slate-400">Main Menu</span>
-        </div>
-
-        <nav class="flex-1 overflow-y-auto sidebar-scroll px-3 pb-3 space-y-0.5">
+        <nav class="flex-1 overflow-y-auto sidebar-scroll px-3 pb-3 space-y-0.5 min-h-0 mt-2">
             @include('layouts.partials.app-nav', ['mobile' => false])
         </nav>
 
-        <div class="p-3">
+        <div class="p-3 transition-all duration-300" x-bind:class="sidebarCollapsed ? 'px-2' : 'p-3'">
             <form method="POST" action="{{ route('logout') }}" id="logoutForm">
                 @csrf
-                <button type="button" onclick="doLogout('logoutForm')"
-                        class="w-full flex items-center gap-3 rounded-2xl bg-slate-800 px-4 py-3.5 hover:bg-slate-900 transition-all">
-                    <div class="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl bg-red-500 shadow-md">
+                <button type="button" onclick="doLogout('logoutForm')" title="Logout"
+                        class="w-full flex items-center rounded-2xl bg-slate-800 hover:bg-slate-900 transition-all duration-300 shadow-sm" x-bind:class="sidebarCollapsed ? 'p-2 justify-center' : 'px-4 py-3.5 gap-3'">
+                    <div class="flex flex-shrink-0 items-center justify-center rounded-xl bg-red-500 shadow-md transition-all duration-300" x-bind:class="sidebarCollapsed ? 'h-10 w-10' : 'h-9 w-9'">
                         <svg class="h-5 w-5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
                         </svg>
                     </div>
-                    <div>
+                    <div x-show="!sidebarCollapsed" x-transition.opacity class="text-left flex-1 whitespace-nowrap overflow-hidden">
                         <div class="text-sm font-extrabold text-white">Logout</div>
                         <div class="text-[11px] font-medium text-slate-400">See you later 👋</div>
                     </div>
@@ -169,6 +167,12 @@ $activeShadow = "shadow-{$accent}-200";
             <div class="flex items-center gap-4">
                 <button id="openMobileSidebar"
                         class="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 text-slate-500 hover:bg-slate-50 lg:hidden">
+                    <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/>
+                    </svg>
+                </button>
+                <button @click="sidebarCollapsed = !sidebarCollapsed" title="Toggle Menu"
+                        class="hidden h-9 w-9 items-center justify-center rounded-xl border border-slate-200 text-slate-500 hover:bg-slate-50 lg:flex transition-colors">
                     <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/>
                     </svg>

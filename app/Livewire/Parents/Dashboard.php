@@ -2,11 +2,13 @@
 
 namespace App\Livewire\Parents;
 
+use App\Models\AcademicSession;
+use App\Models\AcademicTerm;
+use App\Models\AttendanceMark;
+use App\Models\Homework;
+use App\Models\ResultPublication;
 use App\Models\Score;
 use App\Models\Student;
-use App\Models\AcademicTerm;
-use App\Models\AcademicSession;
-use App\Models\AttendanceMark;
 use App\Models\Transaction;
 use Illuminate\Support\Collection;
 use Livewire\Attributes\Computed;
@@ -19,15 +21,14 @@ use Livewire\Component;
 class Dashboard extends Component
 {
     public ?int $selectedChildId = null;
-    public ?int $term = null;
+    public int $term = 1;
     public string $session = '';
 
     public function mount(): void
     {
-        $this->term = $this->term ?: AcademicTerm::activeTermNumber();
-        $this->session = $this->session ?: $this->defaultSession();
-        
-        // Auto-select first child if only one
+        $this->term    = AcademicTerm::activeTermNumber();
+        $this->session = AcademicSession::activeName() ?? $this->defaultSession();
+
         $children = $this->children;
         if ($children->count() === 1) {
             $this->selectedChildId = $children->first()->id;
@@ -46,141 +47,134 @@ class Dashboard extends Component
     #[Computed]
     public function selectedChild(): ?Student
     {
-        if (!$this->selectedChildId) {
-            return null;
-        }
-
+        if (! $this->selectedChildId) return null;
         return $this->children->firstWhere('id', $this->selectedChildId);
     }
 
     #[Computed]
-    public function childScores(): Collection
+    public function resultsPublished(): bool
     {
-        if (!$this->selectedChild) {
-            return collect();
-        }
+        if (! $this->selectedChild) return false;
+        return ResultPublication::where('class_id', $this->selectedChild->class_id)
+            ->where('term', $this->term)
+            ->where('session', $this->session)
+            ->whereNotNull('published_at')
+            ->exists();
+    }
 
-        return Score::query()
-            ->where('student_id', $this->selectedChild->id)
+    #[Computed]
+    public function scores(): Collection
+    {
+        if (! $this->selectedChild || ! $this->resultsPublished) return collect();
+        return Score::where('student_id', $this->selectedChild->id)
             ->where('term', $this->term)
             ->where('session', $this->session)
             ->with('subject')
-            ->orderBy('created_at', 'desc')
+            ->orderBy('subject_id')
             ->get();
     }
 
     #[Computed]
-    public function childAttendance(): array
+    public function performanceStats(): array
     {
-        if (!$this->selectedChild) {
-            return ['present' => 0, 'absent' => 0, 'total' => 0, 'percentage' => 0];
-        }
+        $scores = $this->scores;
+        if ($scores->isEmpty()) return ['average' => 0, 'subjects' => 0, 'passed' => 0, 'failed' => 0, 'position' => null, 'classSize' => 0];
 
-        $attendance = AttendanceMark::query()
-            ->where('student_id', $this->selectedChild->id)
-            ->whereHas('sheet', function ($query) {
-                $query->where('term', $this->term)
-                      ->where('session', $this->session);
-            })
-            ->get();
+        $maxTotal = max(1,
+            (int) config('myacademy.results_ca1_max', 20) +
+            (int) config('myacademy.results_ca2_max', 20) +
+            (int) config('myacademy.results_exam_max', 60)
+        );
 
-        $present = $attendance->where('status', 'Present')->count();
-        $absent = $attendance->where('status', 'Absent')->count();
-        $total = $attendance->count();
-        $percentage = $total > 0 ? round(($present / $total) * 100, 1) : 0;
+        $average   = round($scores->avg('total'), 1);
+        $passed    = $scores->whereNotIn('grade', ['F', 'E'])->count();
+        $failed    = $scores->whereIn('grade', ['F', 'E'])->count();
+        $myTotal   = $scores->sum('total');
 
-        return [
-            'present' => $present,
-            'absent' => $absent,
-            'total' => $total,
-            'percentage' => $percentage
-        ];
+        $classSize = Student::where('class_id', $this->selectedChild->class_id)->where('status', 'Active')->count();
+        $higher    = Score::where('class_id', $this->selectedChild->class_id)
+            ->where('session', $this->session)->where('term', $this->term)
+            ->selectRaw('student_id, SUM(total) as grand_total')
+            ->groupBy('student_id')
+            ->havingRaw('SUM(total) > ?', [$myTotal])
+            ->count();
+        $position = $higher + 1;
+
+        return compact('average', 'passed', 'failed', 'position', 'classSize', 'maxTotal') + ['subjects' => $scores->count()];
     }
 
     #[Computed]
-    public function childFees(): array
+    public function attendance(): array
     {
-        if (!$this->selectedChild) {
-            return ['paid' => 0, 'outstanding' => 0, 'total' => 0];
-        }
+        if (! $this->selectedChild) return ['present' => 0, 'absent' => 0, 'late' => 0, 'total' => 0, 'rate' => 0];
 
-        $transactions = Transaction::query()
-            ->where('student_id', $this->selectedChild->id)
-            ->where('session', $this->session)
-            ->where('is_void', false)
+        $marks = AttendanceMark::where('student_id', $this->selectedChild->id)
+            ->whereHas('sheet', fn ($q) => $q->where('term', $this->term)->where('session', $this->session))
             ->get();
 
-        $paid = $transactions->where('type', 'Payment')->sum('amount');
-        $charges = $transactions->where('type', 'Charge')->sum('amount');
+        $present = $marks->where('status', 'Present')->count();
+        $absent  = $marks->where('status', 'Absent')->count();
+        $late    = $marks->where('status', 'Late')->count();
+        $total   = $marks->count();
+        $rate    = $total > 0 ? round(($present / $total) * 100, 1) : 0;
+
+        return compact('present', 'absent', 'late', 'total', 'rate');
+    }
+
+    #[Computed]
+    public function fees(): array
+    {
+        if (! $this->selectedChild) return ['paid' => 0, 'outstanding' => 0, 'total' => 0];
+
+        $txns       = Transaction::where('student_id', $this->selectedChild->id)
+            ->where('session', $this->session)->where('is_void', false)->get();
+        $paid       = $txns->where('type', 'Payment')->sum('amount');
+        $charges    = $txns->where('type', 'Charge')->sum('amount');
         $outstanding = max(0, $charges - $paid);
 
-        return [
-            'paid' => $paid,
-            'outstanding' => $outstanding,
-            'total' => $charges
-        ];
+        return compact('paid', 'outstanding') + ['total' => $charges];
     }
 
     #[Computed]
-    public function childPerformanceStats(): array
+    public function homework(): Collection
     {
-        if (!$this->selectedChild || $this->childScores->isEmpty()) {
-            return ['average' => 0, 'total' => 0, 'subjects' => 0, 'grade' => 'N/A'];
-        }
+        if (! $this->selectedChild) return collect();
 
-        $scores = $this->childScores;
-        $total = $scores->sum('total');
-        $subjects = $scores->count();
-        $average = $subjects > 0 ? round($total / $subjects, 1) : 0;
-        
-        $grade = $this->calculateGrade($average);
-
-        return [
-            'average' => $average,
-            'total' => $total,
-            'subjects' => $subjects,
-            'grade' => $grade
-        ];
+        return Homework::where('class_id', $this->selectedChild->class_id)
+            ->where(fn ($q) => $q->whereNull('section_id')->orWhere('section_id', $this->selectedChild->section_id))
+            ->with(['subject', 'submissions' => fn ($q) => $q->where('student_id', $this->selectedChild->id)])
+            ->orderByDesc('due_date')
+            ->limit(6)
+            ->get();
     }
 
-    private function calculateGrade(float $average): string
+    #[Computed]
+    public function recentAttendance(): Collection
     {
-        if ($average >= 90) return 'A+';
-        if ($average >= 80) return 'A';
-        if ($average >= 70) return 'B';
-        if ($average >= 60) return 'C';
-        if ($average >= 50) return 'D';
-        return 'F';
+        if (! $this->selectedChild) return collect();
+
+        return AttendanceMark::where('student_id', $this->selectedChild->id)
+            ->with('sheet')
+            ->whereHas('sheet')
+            ->get()
+            ->sortByDesc(fn ($m) => $m->sheet->date)
+            ->take(7);
     }
 
-    public function getGrade(float $score): string
+    public function selectChild(int $id): void
     {
-        return $this->calculateGrade($score);
+        $this->selectedChildId = $id;
     }
 
     private function defaultSession(): string
     {
-        $active = AcademicSession::activeName();
-        if ($active) {
-            return $active;
-        }
-
-        $year = (int) now()->format('Y');
-        $next = $year + 1;
-
-        return "{$year}/{$next}";
-    }
-
-    public function selectChild(int $childId): void
-    {
-        $this->selectedChildId = $childId;
+        $y = (int) now()->format('Y');
+        return "{$y}/".($y + 1);
     }
 
     public function render()
     {
-        $user = auth()->user();
-        abort_unless($user && $user->isParent(), 403);
-
+        abort_unless(auth()->user()?->isParent(), 403);
         return view('livewire.parents.dashboard');
     }
 }

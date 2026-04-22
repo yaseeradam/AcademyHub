@@ -4,22 +4,57 @@
     $locked = $user?->role === 'teacher' && (in_array($submissionStatus, ['submitted', 'approved'], true) || $this->isPublished);
 @endphp
 
-<div class="space-y-6">
-    <x-page-header title="Score Entry" subtitle="Enter CA and Exam scores for students" accent="results">
-        <x-slot:actions>
-            @if($user?->role === 'admin')
-                <a href="{{ route('results.submissions') }}" class="btn-primary">Score Submissions</a>
-            @endif
-            <a href="{{ route('results.broadsheet') }}" class="btn-outline">Broadsheet</a>
-        </x-slot:actions>
-    </x-page-header>
+<div class="space-y-8">
+    {{-- Header Card --}}
+    <div class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-emerald-500 via-teal-600 to-cyan-700 p-8 shadow-2xl">
+        <div class="absolute -right-20 -top-20 h-40 w-40 rounded-full bg-white/10"></div>
+        <div class="absolute -bottom-10 -left-10 h-32 w-32 rounded-full bg-white/5"></div>
+        <div class="absolute right-6 bottom-6 h-16 w-16 rounded-full bg-white/10"></div>
+        
+        <div class="relative flex items-center justify-between">
+            <div class="flex items-center gap-4">
+                <div class="flex h-16 w-16 items-center justify-center rounded-2xl bg-white/20 backdrop-blur-sm">
+                    <svg class="h-8 w-8 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <path d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"/>
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="text-3xl font-black text-white">Score Entry</h1>
+                    <p class="mt-1 text-emerald-100">Enter CA and Exam scores for students</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-3">
+                @if($user?->role === 'admin')
+                    <a href="{{ route('results.submissions') }}" 
+                       class="flex items-center gap-2 rounded-xl bg-white/20 px-4 py-3 text-sm font-bold text-white backdrop-blur-sm transition-all hover:bg-white/30">
+                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                            <polyline points="14,2 14,8 20,8"/>
+                            <line x1="16" y1="13" x2="8" y2="13"/>
+                            <line x1="16" y1="17" x2="8" y2="17"/>
+                            <polyline points="10,9 9,9 8,9"/>
+                        </svg>
+                        Submissions
+                    </a>
+                @endif
+                <a href="{{ route('results.broadsheet') }}" 
+                   class="flex items-center gap-2 rounded-xl bg-white px-4 py-3 text-sm font-bold text-emerald-600 shadow-lg transition-all hover:bg-emerald-50 hover:shadow-xl">
+                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M3 3h18v18H3zM21 9H3M9 21V9"/>
+                    </svg>
+                    Broadsheet
+                </a>
+            </div>
+        </div>
+    </div>
 
-    <div class="card-padded">
-        <div class="grid grid-cols-1 gap-4 lg:grid-cols-6">
+    {{-- Filters & Controls Card --}}
+    <div class="rounded-3xl bg-white p-8 shadow-xl ring-1 ring-gray-200">
+        <div class="grid grid-cols-1 gap-6 lg:grid-cols-6">
             <div class="lg:col-span-2">
-                <label class="text-xs font-semibold uppercase tracking-wider text-gray-500">Class</label>
+                <label class="block text-sm font-black text-gray-900 mb-2">Class</label>
                 <select wire:key="class-dropdown-{{ $classId ?: 'empty' }}" wire:model.live="classId"
-                    class="mt-2 select">
+                    class="w-full rounded-xl border-2 border-gray-300 bg-white px-4 py-3 text-sm font-medium text-gray-900 shadow-sm transition-all focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/20 hover:border-gray-400">
                     <option value="">Select class</option>
                     @foreach ($this->classes as $class)
                         <option value="{{ $class->id }}">{{ $class->name }}</option>
@@ -28,9 +63,10 @@
             </div>
 
             <div class="lg:col-span-2">
-                <label class="text-xs font-semibold uppercase tracking-wider text-gray-500">Subject</label>
+                <label class="block text-sm font-black text-gray-900 mb-2">Subject</label>
                 <select wire:key="subject-dropdown-{{ $classId ?: 'empty' }}" wire:model.live="subjectId"
-                    @disabled(!$classId) class="mt-2 select">
+                    @disabled(!$classId) 
+                    class="w-full rounded-xl border-2 border-gray-300 bg-white px-4 py-3 text-sm font-medium text-gray-900 shadow-sm transition-all focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/20 hover:border-gray-400 disabled:opacity-50 disabled:cursor-not-allowed">
                     <option value="">Select subject</option>
                     @foreach ($this->subjects as $subject)
                         <option value="{{ $subject->id }}">{{ $subject->name }}</option>
@@ -39,8 +75,9 @@
             </div>
 
             <div>
-                <label class="text-xs font-semibold uppercase tracking-wider text-gray-500">Term</label>
-                <select wire:model.live="term" class="mt-2 select">
+                <label class="block text-sm font-black text-gray-900 mb-2">Term</label>
+                <select wire:model.live="term" 
+                    class="w-full rounded-xl border-2 border-gray-300 bg-white px-4 py-3 text-sm font-medium text-gray-900 shadow-sm transition-all focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/20 hover:border-gray-400">
                     <option value="1">Term 1</option>
                     <option value="2">Term 2</option>
                     <option value="3">Term 3</option>
@@ -48,135 +85,280 @@
             </div>
 
             <div>
-                <label class="text-xs font-semibold uppercase tracking-wider text-gray-500">Session</label>
+                <label class="block text-sm font-black text-gray-900 mb-2">Session</label>
                 <input wire:model.live.debounce.300ms="session" type="text" placeholder="2025/2026"
-                    class="mt-2 input-compact" />
+                    class="w-full rounded-xl border-2 border-gray-300 bg-white px-4 py-3 text-sm font-medium text-gray-900 shadow-sm transition-all focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/20 hover:border-gray-400" />
             </div>
         </div>
 
-        <div class="mt-4 flex flex-wrap items-center gap-3">
-            <button type="button" wire:click="save" @disabled(!$classId || !$subjectId || $locked) class="btn-primary">
+        <div class="mt-6 flex flex-wrap items-center gap-3">
+            <button type="button" wire:click="save" @disabled(!$classId || !$subjectId || $locked) 
+                class="flex items-center gap-2 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 px-6 py-3 text-sm font-bold text-white shadow-lg transition-all hover:from-emerald-600 hover:to-teal-600 hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed">
+                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+                    <polyline points="17,21 17,13 7,13 7,21"/>
+                    <polyline points="7,3 7,8 15,8"/>
+                </svg>
                 Save Scores
             </button>
 
             @if ($user?->role === 'teacher')
                 <button type="button" wire:click="submitScores" @disabled(!$classId || !$subjectId || $locked)
-                    class="btn-outline">
+                    class="flex items-center gap-2 rounded-xl border-2 border-emerald-300 bg-white px-6 py-3 text-sm font-bold text-emerald-700 shadow-sm transition-all hover:bg-emerald-50 hover:border-emerald-400 disabled:opacity-50 disabled:cursor-not-allowed">
+                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M22 2L11 13L4 6"/>
+                    </svg>
                     Submit to Admin
                 </button>
             @endif
 
             @if ($this->isPublished)
-                <x-status-badge variant="success">Published</x-status-badge>
+                <span class="inline-flex items-center rounded-full bg-emerald-100 px-3 py-1.5 text-xs font-bold text-emerald-800">
+                    <svg class="mr-1 h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M9 12l2 2 4-4M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    Published
+                </span>
             @endif
 
             @if ($user?->role === 'teacher' && $this->submission)
                 @php
                     $status = $this->submission->status ?? 'submitted';
-                    $variant = match ($status) {
-                        'approved' => 'success',
-                        'rejected' => 'warning',
-                        'submitted' => 'info',
-                        default => 'neutral',
+                    $statusConfig = match ($status) {
+                        'approved' => ['bg' => 'bg-emerald-100', 'text' => 'text-emerald-800', 'icon' => 'M9 12l2 2 4-4M21 12a9 9 0 11-18 0 9 9 0 0118 0z'],
+                        'rejected' => ['bg' => 'bg-red-100', 'text' => 'text-red-800', 'icon' => 'M6 18L18 6M6 6l12 12'],
+                        'submitted' => ['bg' => 'bg-blue-100', 'text' => 'text-blue-800', 'icon' => 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z'],
+                        default => ['bg' => 'bg-gray-100', 'text' => 'text-gray-800', 'icon' => 'M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z'],
                     };
                 @endphp
-                <x-status-badge variant="{{ $variant }}">{{ ucfirst($status) }}</x-status-badge>
+                <span class="inline-flex items-center rounded-full {{ $statusConfig['bg'] }} px-3 py-1.5 text-xs font-bold {{ $statusConfig['text'] }}">
+                    <svg class="mr-1 h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="{{ $statusConfig['icon'] }}"/>
+                    </svg>
+                    {{ ucfirst($status) }}
+                </span>
                 @if ($status === 'rejected' && $this->submission->note)
-                    <span class="text-xs text-orange-700">Note: {{ $this->submission->note }}</span>
+                    <div class="rounded-lg bg-red-50 border border-red-200 px-3 py-2">
+                        <span class="text-xs font-medium text-red-700">Note: {{ $this->submission->note }}</span>
+                    </div>
                 @endif
             @endif
         </div>
     </div>
 
     @if (!$classId)
-        <div class="card-padded text-center">
-            <div class="text-lg font-semibold text-gray-900">Select a class</div>
-            <div class="mt-2 text-sm text-gray-600">Choose a class to load students and subjects.</div>
-        </div>
-    @elseif (!$subjectId)
-        <div class="card-padded text-center">
-            <div class="text-lg font-semibold text-gray-900">Select a subject</div>
-            <div class="mt-2 text-sm text-gray-600">Only allocated subjects are shown for teachers.</div>
-        </div>
-    @else
-            @php
-                $maxMarks = $this->maxMarks();
-            @endphp
-            <x-table>
-                <thead class="bg-white text-xs font-bold uppercase tracking-wider text-gray-900">
-                    <tr>
-                        <th class="px-5 py-4 border-b-2 border-gray-300">Student</th>
-                        <th class="px-5 py-4 text-right border-b-2 border-gray-300">CA1 /{{ $maxMarks['ca1'] }}</th>
-                        <th class="px-5 py-4 text-right border-b-2 border-gray-300">CA2 /{{ $maxMarks['ca2'] }}</th>
-                        <th class="px-5 py-4 text-right border-b-2 border-gray-300">Exam /{{ $maxMarks['exam'] }}</th>
-                        <th class="px-5 py-4 text-right border-b-2 border-gray-300">Total</th>
-                        <th class="px-5 py-4 text-right border-b-2 border-gray-300">Grade</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-gray-200">
-                    @forelse ($this->students as $student)
-                        @php
-                            $row = $scores[$student->id] ?? ['ca1' => 0, 'ca2' => 0, 'exam' => 0];
-                            $total = (int) ($row['ca1'] ?? 0) + (int) ($row['ca2'] ?? 0) + (int) ($row['exam'] ?? 0);
-                            $grade = \App\Models\Score::gradeForTotal($total, $maxMarks['ca1'] + $maxMarks['ca2'] + $maxMarks['exam']);
-                            
-                            // Check for validation errors
-                            $ca1Error = isset($validationErrors["{$student->id}.ca1"]);
-                            $ca2Error = isset($validationErrors["{$student->id}.ca2"]);
-                            $examError = isset($validationErrors["{$student->id}.exam"]);
-                            $hasError = $ca1Error || $ca2Error || $examError;
-                        @endphp
-                        <tr class="bg-white hover:bg-indigo-50 transition-colors {{ $hasError ? 'error-row' : '' }}" 
-                            data-student-id="{{ $student->id }}">
-                            <td class="px-5 py-4 bg-gray-100">
-                                <div class="text-sm font-semibold text-gray-900">{{ $student->full_name }}</div>
-                                <div class="mt-1 text-xs text-gray-500">{{ $student->admission_number }}</div>
-                            </td>
-                            <td class="px-5 py-4 text-right {{ $ca1Error ? 'bg-red-100' : 'bg-blue-100' }}">
-                                <input wire:model.lazy="scores.{{ $student->id }}.ca1" 
-                                    type="number" min="0" max="{{ $maxMarks['ca1'] }}" step="1"
-                                    data-student-id="{{ $student->id }}" data-field="ca1"
-                                    class="w-20 rounded-lg border-2 {{ $ca1Error ? 'border-red-500 bg-red-50' : 'border-blue-300 bg-white' }} px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500" />
-                            </td>
-                            <td class="px-5 py-4 text-right {{ $ca2Error ? 'bg-red-100' : 'bg-green-100' }}">
-                                <input wire:model.lazy="scores.{{ $student->id }}.ca2" 
-                                    type="number" min="0" max="{{ $maxMarks['ca2'] }}" step="1"
-                                    data-student-id="{{ $student->id }}" data-field="ca2"
-                                    class="w-20 rounded-lg border-2 {{ $ca2Error ? 'border-red-500 bg-red-50' : 'border-green-300 bg-white' }} px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm focus:border-green-500 focus:ring-2 focus:ring-green-500" />
-                            </td>
-                            <td class="px-5 py-4 text-right {{ $examError ? 'bg-red-100' : 'bg-amber-100' }}">
-                                <input wire:model.lazy="scores.{{ $student->id }}.exam" 
-                                    type="number" min="0" max="{{ $maxMarks['exam'] }}" step="1"
-                                    data-student-id="{{ $student->id }}" data-field="exam"
-                                    class="w-20 rounded-lg border-2 {{ $examError ? 'border-red-500 bg-red-50' : 'border-amber-300 bg-white' }} px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm focus:border-amber-500 focus:ring-2 focus:ring-amber-500" />
-                            </td>
-                            <td class="px-5 py-4 text-right bg-purple-100">
-                                <span
-                                    class="inline-flex items-center justify-center rounded-lg bg-purple-100 px-3 py-2 text-sm font-bold text-purple-900">{{ $total }}</span>
-                            </td>
-                            <td class="px-5 py-4 text-right bg-gray-50">
-                                <x-status-badge variant="{{ in_array($grade, ['A', 'B'], true) ? 'success' : 'neutral' }}">
-                                    {{ $grade }}
-                                </x-status-badge>
-                            </td>
-                        </tr>
-                    @empty
-                        <tr>
-                            <td colspan="6" class="px-5 py-10 text-center text-sm text-gray-500">No students in this class.</td>
-                        </tr>
-                    @endforelse
-                </tbody>
-            </x-table>
-
-            <div class="mt-4 rounded-lg bg-blue-50 p-4">
-                <div class="text-xs font-semibold text-blue-900 mb-2">⌨️ Keyboard Shortcuts:</div>
-                <div class="grid grid-cols-2 gap-2 text-xs text-blue-700">
-                    <div><kbd class="px-2 py-1 bg-white rounded shadow-sm">Enter</kbd> Move down</div>
-                    <div><kbd class="px-2 py-1 bg-white rounded shadow-sm">Tab</kbd> Move right</div>
-                    <div><kbd class="px-2 py-1 bg-white rounded shadow-sm">↑↓←→</kbd> Arrow keys</div>
-                    <div><kbd class="px-2 py-1 bg-white rounded shadow-sm">Shift+Tab</kbd> Move left</div>
+        <div class="rounded-3xl bg-white p-12 text-center shadow-xl ring-1 ring-gray-200">
+            <div class="flex flex-col items-center gap-4">
+                <div class="flex h-16 w-16 items-center justify-center rounded-2xl bg-emerald-100">
+                    <svg class="h-8 w-8 text-emerald-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M22 10 12 5 2 10l10 5 10-5z"/>
+                        <path d="M6 12v5a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2v-5"/>
+                    </svg>
+                </div>
+                <div>
+                    <h3 class="text-lg font-bold text-gray-900">Select a class</h3>
+                    <p class="mt-1 text-sm text-gray-500">Choose a class to load students and subjects</p>
                 </div>
             </div>
+        </div>
+    @elseif (!$subjectId)
+        <div class="rounded-3xl bg-white p-12 text-center shadow-xl ring-1 ring-gray-200">
+            <div class="flex flex-col items-center gap-4">
+                <div class="flex h-16 w-16 items-center justify-center rounded-2xl bg-blue-100">
+                    <svg class="h-8 w-8 text-blue-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
+                        <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+                    </svg>
+                </div>
+                <div>
+                    <h3 class="text-lg font-bold text-gray-900">Select a subject</h3>
+                    <p class="mt-1 text-sm text-gray-500">Only allocated subjects are shown for teachers</p>
+                </div>
+            </div>
+        </div>
+    @else
+        @php
+            $maxMarks = $this->maxMarks();
+        @endphp
+        
+        {{-- Scoresheet Table Card --}}
+        <div class="overflow-hidden rounded-3xl bg-white shadow-2xl ring-1 ring-gray-200">
+            {{-- Table Header --}}
+            <div class="bg-gradient-to-r from-emerald-50 to-teal-50 px-8 py-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h2 class="text-xl font-black text-gray-900">Score Entry Sheet</h2>
+                        <p class="text-sm text-gray-600">Enter scores for each assessment component</p>
+                    </div>
+                    <div class="flex items-center gap-4 text-sm font-bold text-gray-700">
+                        <div class="flex items-center gap-2">
+                            <div class="h-3 w-3 rounded-full bg-blue-400"></div>
+                            <span>CA1 /{{ $maxMarks['ca1'] }}</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <div class="h-3 w-3 rounded-full bg-green-400"></div>
+                            <span>CA2 /{{ $maxMarks['ca2'] }}</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <div class="h-3 w-3 rounded-full bg-amber-400"></div>
+                            <span>Exam /{{ $maxMarks['exam'] }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            {{-- Table Content --}}
+            <div class="overflow-x-auto">
+                <table class="min-w-full">
+                    <thead>
+                        <tr class="border-b-2 border-gray-200 bg-gray-50">
+                            <th class="px-6 py-4 text-left text-xs font-black uppercase tracking-wider text-gray-700">Student</th>
+                            <th class="px-6 py-4 text-center text-xs font-black uppercase tracking-wider text-blue-700">CA1 /{{ $maxMarks['ca1'] }}</th>
+                            <th class="px-6 py-4 text-center text-xs font-black uppercase tracking-wider text-green-700">CA2 /{{ $maxMarks['ca2'] }}</th>
+                            <th class="px-6 py-4 text-center text-xs font-black uppercase tracking-wider text-amber-700">Exam /{{ $maxMarks['exam'] }}</th>
+                            <th class="px-6 py-4 text-center text-xs font-black uppercase tracking-wider text-purple-700">Total</th>
+                            <th class="px-6 py-4 text-center text-xs font-black uppercase tracking-wider text-gray-700">Grade</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100">
+                        @forelse ($this->students as $student)
+                            @php
+                                $row = $scores[$student->id] ?? ['ca1' => 0, 'ca2' => 0, 'exam' => 0];
+                                $total = (int) ($row['ca1'] ?? 0) + (int) ($row['ca2'] ?? 0) + (int) ($row['exam'] ?? 0);
+                                $grade = \App\Models\Score::gradeForTotal($total, $maxMarks['ca1'] + $maxMarks['ca2'] + $maxMarks['exam']);
+                                
+                                // Check for validation errors
+                                $ca1Error = isset($validationErrors["{$student->id}.ca1"]);
+                                $ca2Error = isset($validationErrors["{$student->id}.ca2"]);
+                                $examError = isset($validationErrors["{$student->id}.exam"]);
+                                $hasError = $ca1Error || $ca2Error || $examError;
+                            @endphp
+                            <tr class="group transition-all duration-200 hover:bg-gradient-to-r hover:from-emerald-50/50 hover:to-teal-50/50 {{ $hasError ? 'bg-red-50' : 'bg-white' }}" 
+                                data-student-id="{{ $student->id }}">
+                                {{-- Student Info --}}
+                                <td class="px-6 py-4">
+                                    <div class="flex items-center gap-4">
+                                        <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-gray-400 to-gray-500 text-white shadow-sm">
+                                            <span class="text-sm font-black">{{ substr($student->first_name, 0, 1) }}{{ substr($student->last_name, 0, 1) }}</span>
+                                        </div>
+                                        <div>
+                                            <div class="font-bold text-gray-900">{{ $student->full_name }}</div>
+                                            <div class="text-xs text-gray-500">{{ $student->admission_number }}</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                
+                                {{-- CA1 Score --}}
+                                <td class="px-6 py-4 text-center">
+                                    <div class="flex justify-center">
+                                        <input wire:model.lazy="scores.{{ $student->id }}.ca1" 
+                                            type="number" min="0" max="{{ $maxMarks['ca1'] }}" step="1"
+                                            data-student-id="{{ $student->id }}" data-field="ca1"
+                                            class="w-20 rounded-xl border-2 {{ $ca1Error ? 'border-red-400 bg-red-50' : 'border-blue-300 bg-blue-50' }} px-3 py-2 text-center text-sm font-bold text-gray-900 shadow-sm transition-all focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/20 hover:border-blue-400" />
+                                    </div>
+                                </td>
+                                
+                                {{-- CA2 Score --}}
+                                <td class="px-6 py-4 text-center">
+                                    <div class="flex justify-center">
+                                        <input wire:model.lazy="scores.{{ $student->id }}.ca2" 
+                                            type="number" min="0" max="{{ $maxMarks['ca2'] }}" step="1"
+                                            data-student-id="{{ $student->id }}" data-field="ca2"
+                                            class="w-20 rounded-xl border-2 {{ $ca2Error ? 'border-red-400 bg-red-50' : 'border-green-300 bg-green-50' }} px-3 py-2 text-center text-sm font-bold text-gray-900 shadow-sm transition-all focus:border-green-500 focus:bg-white focus:ring-4 focus:ring-green-500/20 hover:border-green-400" />
+                                    </div>
+                                </td>
+                                
+                                {{-- Exam Score --}}
+                                <td class="px-6 py-4 text-center">
+                                    <div class="flex justify-center">
+                                        <input wire:model.lazy="scores.{{ $student->id }}.exam" 
+                                            type="number" min="0" max="{{ $maxMarks['exam'] }}" step="1"
+                                            data-student-id="{{ $student->id }}" data-field="exam"
+                                            class="w-20 rounded-xl border-2 {{ $examError ? 'border-red-400 bg-red-50' : 'border-amber-300 bg-amber-50' }} px-3 py-2 text-center text-sm font-bold text-gray-900 shadow-sm transition-all focus:border-amber-500 focus:bg-white focus:ring-4 focus:ring-amber-500/20 hover:border-amber-400" />
+                                    </div>
+                                </td>
+                                
+                                {{-- Total Score --}}
+                                <td class="px-6 py-4 text-center">
+                                    <div class="inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-purple-100 to-indigo-100 px-4 py-2 text-lg font-black text-purple-900 shadow-sm">
+                                        {{ $total }}
+                                    </div>
+                                </td>
+                                
+                                {{-- Grade --}}
+                                <td class="px-6 py-4 text-center">
+                                    @php
+                                        $gradeConfig = match($grade) {
+                                            'A' => ['bg' => 'from-emerald-400 to-green-500', 'text' => 'text-white'],
+                                            'B' => ['bg' => 'from-blue-400 to-indigo-500', 'text' => 'text-white'],
+                                            'C' => ['bg' => 'from-amber-400 to-orange-500', 'text' => 'text-white'],
+                                            'D' => ['bg' => 'from-red-400 to-pink-500', 'text' => 'text-white'],
+                                            'F' => ['bg' => 'from-gray-400 to-slate-500', 'text' => 'text-white'],
+                                            default => ['bg' => 'from-gray-200 to-gray-300', 'text' => 'text-gray-700'],
+                                        };
+                                    @endphp
+                                    <div class="inline-flex items-center justify-center rounded-xl bg-gradient-to-r {{ $gradeConfig['bg'] }} px-3 py-2 text-sm font-black {{ $gradeConfig['text'] }} shadow-lg">
+                                        {{ $grade }}
+                                    </div>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="6" class="px-6 py-16 text-center">
+                                    <div class="flex flex-col items-center gap-4">
+                                        <div class="flex h-16 w-16 items-center justify-center rounded-2xl bg-gray-100">
+                                            <svg class="h-8 w-8 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <path d="M16 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                                                <circle cx="12" cy="7" r="4"/>
+                                            </svg>
+                                        </div>
+                                        <div>
+                                            <h3 class="text-lg font-bold text-gray-900">No students found</h3>
+                                            <p class="mt-1 text-sm text-gray-500">No students are enrolled in this class</p>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        {{-- Keyboard Shortcuts Card --}}
+        <div class="rounded-3xl bg-gradient-to-r from-blue-50 to-indigo-50 p-6 shadow-lg ring-1 ring-blue-200">
+            <div class="flex items-center gap-3 mb-4">
+                <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-100">
+                    <svg class="h-5 w-5 text-blue-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
+                        <line x1="8" y1="21" x2="16" y2="21"/>
+                        <line x1="12" y1="17" x2="12" y2="21"/>
+                    </svg>
+                </div>
+                <div>
+                    <h3 class="text-lg font-black text-blue-900">⌨️ Keyboard Shortcuts</h3>
+                    <p class="text-sm text-blue-700">Navigate quickly through the scoresheet</p>
+                </div>
+            </div>
+            <div class="grid grid-cols-2 gap-4 lg:grid-cols-4">
+                <div class="flex items-center gap-2">
+                    <kbd class="inline-flex items-center rounded-lg bg-white px-3 py-2 text-xs font-bold text-gray-700 shadow-sm ring-1 ring-gray-300">Enter</kbd>
+                    <span class="text-sm font-medium text-blue-700">Move down</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <kbd class="inline-flex items-center rounded-lg bg-white px-3 py-2 text-xs font-bold text-gray-700 shadow-sm ring-1 ring-gray-300">Tab</kbd>
+                    <span class="text-sm font-medium text-blue-700">Move right</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <kbd class="inline-flex items-center rounded-lg bg-white px-3 py-2 text-xs font-bold text-gray-700 shadow-sm ring-1 ring-gray-300">↑↓←→</kbd>
+                    <span class="text-sm font-medium text-blue-700">Arrow keys</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <kbd class="inline-flex items-center rounded-lg bg-white px-3 py-2 text-xs font-bold text-gray-700 shadow-sm ring-1 ring-gray-300">Shift+Tab</kbd>
+                    <span class="text-sm font-medium text-blue-700">Move left</span>
+                </div>
+            </div>
+        </div>
 
             <script>
                 // Add shake animation styles
