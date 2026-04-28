@@ -4,6 +4,22 @@
 
 MyAcademy is a cloud-based School Management System. This guide covers production deployment on Linux servers.
 
+## Local Multi-School (Recommended Dev Setup)
+Use a main host + wildcard subdomains locally so multi-tenant routing matches production.
+
+1) Pick a local main host (example `myacademy.test`) and add these to your Windows hosts file:
+   - `127.0.0.1 myacademy.test`
+   - `127.0.0.1 demo.myacademy.test`
+2) Set `.env`:
+   - `APP_URL=http://myacademy.test`
+   - `SESSION_SECURE_COOKIE=false`
+   - Optional: `SESSION_DOMAIN=.myacademy.test`
+3) Bootstrap superadmin + demo tenant + tenant admin:
+   - `php artisan myacademy:bootstrap-local --main-host=myacademy.test --tenant-slug=demo --tenant-name="Demo School"`
+4) Login:
+   - Superadmin: `http://myacademy.test/login` then `http://myacademy.test/superadmin`
+   - School admin: `http://demo.myacademy.test/login`
+
 ## Server Requirements
 
 ### Minimum Specifications
@@ -15,6 +31,7 @@ MyAcademy is a cloud-based School Management System. This guide covers productio
 - **MySQL**: 8.0+ or MariaDB 10.6+
 - **Node.js**: 18+
 - **Web Server**: Nginx or Apache
+- **Headless Chrome**: Chromium / Google Chrome (required for certificate PDF generation via Browsershot)
 
 ### Required PHP Extensions
 - GD (for certificates)
@@ -91,6 +108,8 @@ sudo chown -R www-data:www-data /var/www/myacademy
 # Install dependencies
 composer install --no-dev --optimize-autoloader
 npm install
+# Ensure Vite dev marker isn't deployed
+rm -f public/hot
 npm run build
 
 # Set permissions

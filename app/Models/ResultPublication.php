@@ -2,12 +2,16 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\BelongsToTenant;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class ResultPublication extends Model
 {
+    use BelongsToTenant;
+
     protected $fillable = [
+        'tenant_id',
         'class_id',
         'term',
         'session',
@@ -17,6 +21,7 @@ class ResultPublication extends Model
     ];
 
     protected $casts = [
+        'tenant_id' => 'integer',
         'class_id' => 'integer',
         'term' => 'integer',
         'published_at' => 'datetime',
@@ -33,4 +38,3 @@ class ResultPublication extends Model
         return $this->belongsTo(User::class, 'published_by');
     }
 }
-

@@ -2,13 +2,17 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\BelongsToTenant;
 use Illuminate\Database\Eloquent\Model;
 
 class Homework extends Model
 {
+    use BelongsToTenant;
+
     protected $table = 'homework';
     
     protected $fillable = [
+        'tenant_id',
         'teacher_id',
         'class_id',
         'section_id',
@@ -19,6 +23,7 @@ class Homework extends Model
     ];
 
     protected $casts = [
+        'tenant_id' => 'integer',
         'due_date' => 'date',
     ];
 

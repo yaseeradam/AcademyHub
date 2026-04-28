@@ -2,12 +2,14 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\BelongsToTenant;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class AcademicSession extends Model
 {
     protected $fillable = [
+        'tenant_id',
         'name',
         'starts_on',
         'ends_on',
@@ -15,10 +17,13 @@ class AcademicSession extends Model
     ];
 
     protected $casts = [
+        'tenant_id' => 'integer',
         'starts_on' => 'date',
         'ends_on' => 'date',
         'is_active' => 'boolean',
     ];
+
+    use BelongsToTenant;
 
     public function terms(): HasMany
     {

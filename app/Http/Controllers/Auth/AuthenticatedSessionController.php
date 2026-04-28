@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Models\Student;
 use App\Models\User;
+use App\Support\TenantSettings;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -56,6 +57,7 @@ class AuthenticatedSessionController extends Controller
 
             $loginType = $request->input('login_type', 'staff');
             $userRole = Auth::user()->role;
+            $tenantId = TenantSettings::tenantId();
             
             if ($loginType === 'parent') {
                 if ($userRole !== 'parent') {
@@ -79,6 +81,33 @@ class AuthenticatedSessionController extends Controller
                     
                     throw ValidationException::withMessages([
                         'email' => 'This account is not registered as staff. Please use the correct login portal.',
+                    ]);
+                }
+            }
+
+            // Tenant isolation:
+            // - On a tenant host, user must belong to that tenant (superadmins not allowed here).
+            // - On the main host, only superadmins may login.
+            $user = Auth::user();
+            if ($tenantId) {
+                if ($user->is_super_admin) {
+                    Auth::logout();
+                    throw ValidationException::withMessages([
+                        'email' => 'Super Admin accounts must login from the main domain.',
+                    ]);
+                }
+
+                if ((int) $user->tenant_id !== (int) $tenantId) {
+                    Auth::logout();
+                    throw ValidationException::withMessages([
+                        'email' => 'This account does not belong to this school instance.',
+                    ]);
+                }
+            } else {
+                if (! $user->is_super_admin) {
+                    Auth::logout();
+                    throw ValidationException::withMessages([
+                        'email' => 'Please login from your school domain/subdomain.',
                     ]);
                 }
             }
@@ -107,6 +136,10 @@ class AuthenticatedSessionController extends Controller
                 'login_type' => $loginType
             ]);
 
+            if ($user->is_super_admin) {
+                return redirect()->intended(route('superadmin.dashboard'));
+            }
+
             return redirect()->intended(route('dashboard'));
             
         } catch (ValidationException $e) {
@@ -126,6 +159,13 @@ class AuthenticatedSessionController extends Controller
     private function handleStudentLogin(Request $request): RedirectResponse
     {
         try {
+            $tenantId = TenantSettings::tenantId();
+            if (! $tenantId) {
+                throw ValidationException::withMessages([
+                    'admission_number' => 'Student login must be done from your school domain/subdomain.',
+                ]);
+            }
+
             $request->validate([
                 'admission_number' => ['required', 'string'],
                 'password' => ['required', 'string'],
@@ -175,6 +215,7 @@ class AuthenticatedSessionController extends Controller
             
             // Create a temporary session for student
             session([
+                'tenant_id' => $tenantId,
                 'student_id' => $student->id,
                 'student_name' => $student->full_name,
                 'student_admission' => $student->admission_number,

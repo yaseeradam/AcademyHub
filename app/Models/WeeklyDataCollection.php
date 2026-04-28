@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\BelongsToTenant;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -9,8 +10,10 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class WeeklyDataCollection extends Model
 {
     use HasFactory;
+    use BelongsToTenant;
 
     protected $fillable = [
+        'tenant_id',
         'class_id',
         'section_id',
         'teacher_id',
@@ -32,6 +35,7 @@ class WeeklyDataCollection extends Model
     ];
 
     protected $casts = [
+        'tenant_id' => 'integer',
         'class_id' => 'integer',
         'section_id' => 'integer',
         'teacher_id' => 'integer',
@@ -68,4 +72,3 @@ class WeeklyDataCollection extends Model
         return $this->belongsTo(User::class, 'reviewed_by');
     }
 }
-

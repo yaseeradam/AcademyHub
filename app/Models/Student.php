@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\BelongsToTenant;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -12,8 +13,10 @@ use App\Models\Homework;
 class Student extends Model
 {
     use HasFactory;
+    use BelongsToTenant;
 
     protected $fillable = [
+        'tenant_id',
         'user_id',
         'admission_number',
         'first_name',
@@ -36,6 +39,7 @@ class Student extends Model
     ];
 
     protected $casts = [
+        'tenant_id' => 'integer',
         'user_id' => 'integer',
         'class_id' => 'integer',
         'section_id' => 'integer',

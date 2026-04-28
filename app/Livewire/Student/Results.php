@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Student;
 
+use App\Models\AcademicTerm;
 use App\Models\ResultPublication;
 use App\Models\Score;
 use App\Models\Student;
@@ -22,8 +23,8 @@ class Results extends Component
             return;
         }
 
-        $this->selectedSession = config('myacademy.current_session', '');
-        $this->selectedTerm    = (int) config('myacademy.current_term', 1);
+        $this->selectedSession = AcademicTerm::activeSessionName() ?? config('myacademy.current_session', '');
+        $this->selectedTerm    = AcademicTerm::activeTermNumber();
     }
 
     private function getStudent(): ?Student

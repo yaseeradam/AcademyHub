@@ -20,24 +20,34 @@ class TenantDiscovery
         $mainDomain = config('app.url'); // e.g., http://frontalminds.com.ng
         $mainDomainHost = parse_url($mainDomain, PHP_URL_HOST);
 
-        // Check if we are on a subdomain
-        if ($host !== $mainDomainHost && str_ends_with($host, $mainDomainHost)) {
+        $tenant = null;
+
+        // The main domain (no tenant context) must never resolve to a tenant.
+        // Otherwise superadmin routes become inaccessible if a tenant is accidentally
+        // configured with the same domain as APP_URL.
+        if (! $mainDomainHost || $host !== $mainDomainHost) {
+            // 1) Custom domain mapping (exact host match)
+            $tenant = Tenant::query()->where('domain', $host)->first();
+        }
+
+        // 2) Subdomain mapping: {slug}.{mainDomainHost}
+        if (! $tenant && $mainDomainHost && $host !== $mainDomainHost && str_ends_with($host, $mainDomainHost)) {
             $subdomain = str_replace('.' . $mainDomainHost, '', $host);
+            $tenant = Tenant::query()->where('slug', $subdomain)->first();
 
-            // Try to find the school (tenant) by slug
-            $tenant = Tenant::where('slug', $subdomain)->first();
-
-            if (!$tenant) {
-                // If school not found, redirect to main site or show 404
-                abort(404, "School instance '$subdomain' not found.");
+            if (! $tenant && $subdomain !== '' && str_starts_with($subdomain, 'www.')) {
+                $tenant = Tenant::query()->where('slug', substr($subdomain, 4))->first();
             }
+        }
 
-            // Important: Bind the tenant to the application container
-            // This allows you to access it anywhere using app('currentTenant')
+        if ($tenant) {
             app()->instance('currentTenant', $tenant);
-
-            // You can also add it to the request for easy access
             $request->attributes->add(['tenant' => $tenant]);
+        } elseif ($mainDomainHost && $host !== $mainDomainHost) {
+            // Only skip 404 for bare localhost/127.0.0.1 — subdomain mismatches should still 404
+            if (!in_array($host, ['localhost', '127.0.0.1'])) {
+                abort(404, "School instance '{$host}' not found.");
+            }
         }
 
         return $next($request);

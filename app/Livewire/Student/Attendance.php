@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Student;
 
+use App\Models\AcademicTerm;
 use App\Models\AttendanceMark;
 use App\Models\Student;
 use Carbon\Carbon;
@@ -50,8 +51,8 @@ class Attendance extends Component
         $student = $this->getStudent();
         abort_unless((bool) $student, 403);
 
-        $currentSession = config('myacademy.current_session', '');
-        $currentTerm    = (int) config('myacademy.current_term', 1);
+        $currentSession = AcademicTerm::activeSessionName() ?? config('myacademy.current_session', '');
+        $currentTerm    = AcademicTerm::activeTermNumber();
 
         // ── Load ALL marks with sheets for this student ──────────────────
         $allMarksWithSheets = AttendanceMark::where('student_id', $student->id)

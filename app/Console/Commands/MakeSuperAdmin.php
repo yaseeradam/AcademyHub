@@ -39,8 +39,11 @@ class MakeSuperAdmin extends Command
             return 0;
         }
 
-        $user->update(['is_super_admin' => true]);
-        $this->info("✅ {$user->name} ({$email}) has been promoted to Super Admin.");
+        $user->update([
+            'is_super_admin' => true,
+            'tenant_id' => null,
+        ]);
+        $this->info("✅ {$user->name} ({$email}) has been promoted to Super Admin (tenant_id cleared).");
         $this->info("   They can now access /superadmin after logging in.");
 
         return 0;
@@ -85,6 +88,7 @@ class MakeSuperAdmin extends Command
             'role'           => 'admin',
             'is_active'      => true,
             'is_super_admin' => true,
+            'tenant_id'      => null,
         ]);
 
         $this->info("✅ Super admin account created for {$user->name} ({$email})");

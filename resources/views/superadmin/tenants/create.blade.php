@@ -117,6 +117,36 @@
         </div>
 
         {{-- ── Initial Admin Account ───────────────────────── --}}
+        {{-- Single-school upgrade adoption (first tenant only) --}}
+        @if(!empty($isFirstTenant) && !empty($legacyDataExists))
+            <div class="sa-panel" style="margin-bottom:20px;">
+                <div class="sa-panel-header">
+                    <span class="sa-panel-title">
+                        <svg style="display:inline;width:15px;height:15px;vertical-align:-2px;margin-right:6px;color:#ef4444;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        Existing Data Detected
+                    </span>
+                </div>
+                <div style="padding:20px 24px;">
+                    <p style="margin:0 0 12px; color:#64748b; font-size:13px; line-height:1.6;">
+                        This database already contains school data created before multi-school mode (records with no <span style="font-family:monospace;">tenant_id</span>).
+                        To keep your current data working, you can adopt it into this first school.
+                    </p>
+                    <label style="display:flex; align-items:flex-start; gap:10px; cursor:pointer;">
+                        <input type="hidden" name="adopt_existing_data" value="0">
+                        <input type="checkbox" name="adopt_existing_data" value="1" checked style="margin-top:3px;">
+                        <div>
+                            <div style="font-weight:700; color:#0f172a;">Adopt existing data into this school</div>
+                            <div style="color:#94a3b8; font-size:12px; line-height:1.5;">
+                                Recommended for upgrading a single-school install. Do not use if you already have multiple schools mixed in one database.
+                            </div>
+                        </div>
+                    </label>
+                </div>
+            </div>
+        @endif
+
         <div class="sa-panel" style="margin-bottom:24px;" x-data="{ createAdmin: {{ old('create_admin') ? 'true' : 'false' }} }">
             <div class="sa-panel-header" style="cursor:pointer;" @click="createAdmin = !createAdmin">
                 <span class="sa-panel-title">

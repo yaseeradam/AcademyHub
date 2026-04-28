@@ -2,15 +2,19 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\BelongsToTenant;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class InAppNotification extends Model
 {
+    use BelongsToTenant;
+
     protected $table = 'in_app_notifications';
 
     protected $fillable = [
+        'tenant_id',
         'user_id',
         'title',
         'body',
@@ -19,6 +23,7 @@ class InAppNotification extends Model
     ];
 
     protected $casts = [
+        'tenant_id' => 'integer',
         'user_id' => 'integer',
         'read_at' => 'datetime',
     ];
@@ -33,4 +38,3 @@ class InAppNotification extends Model
         return $query->whereNull('read_at');
     }
 }
-

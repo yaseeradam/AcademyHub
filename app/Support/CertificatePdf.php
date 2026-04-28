@@ -41,10 +41,39 @@ class CertificatePdf
             $html = str_replace('</head>', $fullPageCss . '</head>', $html);
         }
 
-        $browsershot = Browsershot::html($html)
-            ->setNodeBinary('C:\\Program Files\\nodejs\\node.exe')
-            ->setNpmBinary('C:\\Program Files\\nodejs\\npm.cmd')
-            ->setChromePath(self::findChromePath())
+        $browsershot = Browsershot::html($html);
+
+        $nodeBinary = env('BROWSERSHOT_NODE_BINARY');
+        $npmBinary = env('BROWSERSHOT_NPM_BINARY');
+        $chromePath = env('BROWSERSHOT_CHROME_PATH') ?: self::findChromePath();
+
+        if (! $nodeBinary && PHP_OS_FAMILY === 'Windows') {
+            $windowsNode = 'C:\\Program Files\\nodejs\\node.exe';
+            if (is_file($windowsNode)) {
+                $nodeBinary = $windowsNode;
+            }
+        }
+
+        if (! $npmBinary && PHP_OS_FAMILY === 'Windows') {
+            $windowsNpm = 'C:\\Program Files\\nodejs\\npm.cmd';
+            if (is_file($windowsNpm)) {
+                $npmBinary = $windowsNpm;
+            }
+        }
+
+        if ($nodeBinary) {
+            $browsershot->setNodeBinary($nodeBinary);
+        }
+
+        if ($npmBinary) {
+            $browsershot->setNpmBinary($npmBinary);
+        }
+
+        if ($chromePath !== '') {
+            $browsershot->setChromePath($chromePath);
+        }
+
+        $browsershot
             ->windowSize($width, $height)
             ->emulateMedia('screen')
             ->format('A4')
@@ -62,9 +91,15 @@ class CertificatePdf
      */
     private static function findChromePath(): string
     {
-        // First try Puppeteer's cache location
-        $cacheDir = getenv('USERPROFILE') ?: (getenv('HOME') ?: 'C:\\Users\\HP');
-        $puppeteerCacheDir = $cacheDir . '\\.cache\\puppeteer\\chrome';
+        $homeDir = getenv('HOME') ?: getenv('USERPROFILE');
+        if (! $homeDir) {
+            return '';
+        }
+
+        $puppeteerCacheDir = $homeDir
+            . DIRECTORY_SEPARATOR . '.cache'
+            . DIRECTORY_SEPARATOR . 'puppeteer'
+            . DIRECTORY_SEPARATOR . 'chrome';
 
         if (is_dir($puppeteerCacheDir)) {
             // Find the latest version directory
@@ -74,15 +109,58 @@ class CertificatePdf
                 rsort($versions); // Latest version first
 
                 foreach ($versions as $version) {
-                    $chromePath = $puppeteerCacheDir . '\\' . $version . '\\chrome-win64\\chrome.exe';
-                    if (file_exists($chromePath)) {
-                        return $chromePath;
+                    $versionDir = $puppeteerCacheDir . DIRECTORY_SEPARATOR . $version;
+                    foreach (self::puppeteerChromeCandidates($versionDir) as $chromePath) {
+                        if (is_file($chromePath)) {
+                            return $chromePath;
+                        }
                     }
                 }
             }
         }
 
-        // Fallback: let Browsershot find it
+        foreach (self::systemChromeCandidates() as $chromePath) {
+            if (is_file($chromePath)) {
+                return $chromePath;
+            }
+        }
+
         return '';
+    }
+
+    private static function puppeteerChromeCandidates(string $versionDir): array
+    {
+        return [
+            $versionDir . DIRECTORY_SEPARATOR . 'chrome-win64' . DIRECTORY_SEPARATOR . 'chrome.exe',
+            $versionDir . DIRECTORY_SEPARATOR . 'chrome-linux64' . DIRECTORY_SEPARATOR . 'chrome',
+            $versionDir . DIRECTORY_SEPARATOR . 'chrome-linux' . DIRECTORY_SEPARATOR . 'chrome',
+            $versionDir . DIRECTORY_SEPARATOR . 'chrome-mac' . DIRECTORY_SEPARATOR . 'Chromium.app' . DIRECTORY_SEPARATOR . 'Contents' . DIRECTORY_SEPARATOR . 'MacOS' . DIRECTORY_SEPARATOR . 'Chromium',
+            $versionDir . DIRECTORY_SEPARATOR . 'chrome-mac-x64' . DIRECTORY_SEPARATOR . 'Chromium.app' . DIRECTORY_SEPARATOR . 'Contents' . DIRECTORY_SEPARATOR . 'MacOS' . DIRECTORY_SEPARATOR . 'Chromium',
+            $versionDir . DIRECTORY_SEPARATOR . 'chrome-mac-arm64' . DIRECTORY_SEPARATOR . 'Chromium.app' . DIRECTORY_SEPARATOR . 'Contents' . DIRECTORY_SEPARATOR . 'MacOS' . DIRECTORY_SEPARATOR . 'Chromium',
+        ];
+    }
+
+    private static function systemChromeCandidates(): array
+    {
+        if (PHP_OS_FAMILY === 'Windows') {
+            return [
+                'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
+                'C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe',
+            ];
+        }
+
+        if (PHP_OS_FAMILY === 'Darwin') {
+            return [
+                '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
+                '/Applications/Chromium.app/Contents/MacOS/Chromium',
+            ];
+        }
+
+        return [
+            '/usr/bin/google-chrome',
+            '/usr/bin/google-chrome-stable',
+            '/usr/bin/chromium',
+            '/usr/bin/chromium-browser',
+        ];
     }
 }

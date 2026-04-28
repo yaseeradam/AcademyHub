@@ -2,12 +2,16 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\BelongsToTenant;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class TimetableEntry extends Model
 {
+    use BelongsToTenant;
+
     protected $fillable = [
+        'tenant_id',
         'class_id',
         'section_id',
         'day_of_week',
@@ -19,6 +23,7 @@ class TimetableEntry extends Model
     ];
 
     protected $casts = [
+        'tenant_id' => 'integer',
         'class_id' => 'integer',
         'section_id' => 'integer',
         'day_of_week' => 'integer',
@@ -47,4 +52,3 @@ class TimetableEntry extends Model
         return $this->belongsTo(User::class, 'teacher_id');
     }
 }
-

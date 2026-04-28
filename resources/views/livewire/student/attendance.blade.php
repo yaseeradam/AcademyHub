@@ -126,16 +126,16 @@
             </button>
         </div>
 
-        <div class="p-5">
+        <div class="p-4 sm:p-6">
             {{-- Day labels --}}
-            <div class="mb-2 grid grid-cols-7 text-center">
-                @foreach (['S','M','T','W','T','F','S'] as $d)
-                    <div class="text-xs font-bold text-gray-400 py-1">{{ $d }}</div>
+            <div class="mb-3 grid grid-cols-7 text-center">
+                @foreach (['Sun','Mon','Tue','Wed','Thu','Fri','Sat'] as $d)
+                    <div class="text-xs font-black uppercase tracking-wider text-gray-400 py-1">{{ $d }}</div>
                 @endforeach
             </div>
 
             {{-- Calendar grid --}}
-            <div class="grid grid-cols-7 gap-1">
+            <div class="grid grid-cols-7 gap-1.5">
                 {{-- Leading empty cells --}}
                 @for ($i = 0; $i < $startDayOfWeek; $i++)
                     <div></div>
@@ -148,25 +148,40 @@
                         $isToday = $dateKey === now()->format('Y-m-d');
                         $isWeekend = \Carbon\Carbon::create($selectedYear, $selectedMonth, $day)->isWeekend();
 
-                        $cellBg = match(true) {
-                            $mark?->status === 'Present'  => 'bg-emerald-500 text-white',
-                            $mark?->status === 'Absent'   => 'bg-red-500 text-white',
-                            $mark?->status === 'Late'     => 'bg-amber-400 text-white',
-                            $isWeekend                    => 'bg-gray-50 text-gray-300',
-                            default                       => 'bg-gray-100 text-gray-500',
-                        };
-                        $icon = match($mark?->status) {
-                            'Present' => '✓',
-                            'Absent'  => '✗',
-                            'Late'    => '~',
-                            default   => '',
-                        };
+                        $status = $mark?->status;
                     @endphp
-                    <div class="aspect-square p-0.5">
-                        <div class="relative flex h-full flex-col items-center justify-center rounded-xl text-xs font-bold {{ $cellBg }} {{ $isToday ? 'ring-2 ring-offset-1 ring-violet-500' : '' }} transition">
-                            <span>{{ $day }}</span>
-                            @if ($icon)
-                                <span class="text-[9px] leading-none opacity-90">{{ $icon }}</span>
+                    <div class="group relative">
+                        <div class="flex flex-col items-center justify-center rounded-2xl py-2 sm:py-3 transition-all
+                            {{ $isToday ? 'ring-2 ring-violet-500 ring-offset-2' : '' }}
+                            @if($status === 'Present') bg-emerald-500 shadow-md shadow-emerald-200
+                            @elseif($status === 'Absent') bg-red-500 shadow-md shadow-red-200
+                            @elseif($status === 'Late') bg-amber-400 shadow-md shadow-amber-200
+                            @elseif($isWeekend) bg-gray-50
+                            @else bg-gray-100
+                            @endif">
+
+                            {{-- Day number --}}
+                            <span class="text-sm font-black leading-none
+                                @if($status) text-white
+                                @elseif($isWeekend) text-gray-300
+                                @else text-gray-600
+                                @endif">{{ $day }}</span>
+
+                            {{-- Status icon --}}
+                            @if($status === 'Present')
+                                <svg class="mt-1 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+                                </svg>
+                            @elseif($status === 'Absent')
+                                <svg class="mt-1 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                                </svg>
+                            @elseif($status === 'Late')
+                                <svg class="mt-1 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                            @else
+                                <div class="mt-1 h-4"></div>
                             @endif
                         </div>
                     </div>
@@ -174,12 +189,33 @@
             </div>
 
             {{-- Legend --}}
-            <div class="mt-4 flex flex-wrap justify-center gap-4 text-xs font-semibold text-gray-600">
-                <span class="flex items-center gap-1.5"><span class="h-3.5 w-3.5 rounded-md bg-emerald-500"></span>Present</span>
-                <span class="flex items-center gap-1.5"><span class="h-3.5 w-3.5 rounded-md bg-red-500"></span>Absent</span>
-                <span class="flex items-center gap-1.5"><span class="h-3.5 w-3.5 rounded-md bg-amber-400"></span>Late</span>
-                <span class="flex items-center gap-1.5"><span class="h-3.5 w-3.5 rounded-md bg-gray-100 ring-1 ring-gray-200"></span>No Record</span>
-                <span class="flex items-center gap-1.5"><span class="h-3.5 w-3.5 rounded-md ring-2 ring-violet-500"></span>Today</span>
+            <div class="mt-5 flex flex-wrap justify-center gap-3 sm:gap-5">
+                <div class="flex items-center gap-2">
+                    <div class="flex h-8 w-8 items-center justify-center rounded-xl bg-emerald-500 shadow-sm shadow-emerald-200">
+                        <svg class="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                    </div>
+                    <span class="text-sm font-bold text-gray-700">Present</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <div class="flex h-8 w-8 items-center justify-center rounded-xl bg-red-500 shadow-sm shadow-red-200">
+                        <svg class="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </div>
+                    <span class="text-sm font-bold text-gray-700">Absent</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <div class="flex h-8 w-8 items-center justify-center rounded-xl bg-amber-400 shadow-sm shadow-amber-200">
+                        <svg class="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    </div>
+                    <span class="text-sm font-bold text-gray-700">Late</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <div class="h-8 w-8 rounded-xl bg-gray-100 ring-1 ring-gray-200"></div>
+                    <span class="text-sm font-bold text-gray-500">No Record</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <div class="h-8 w-8 rounded-xl bg-gray-100 ring-2 ring-violet-500 ring-offset-1"></div>
+                    <span class="text-sm font-bold text-gray-500">Today</span>
+                </div>
             </div>
         </div>
     </div>

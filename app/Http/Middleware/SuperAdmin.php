@@ -15,8 +15,14 @@ class SuperAdmin
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (!$request->user() || !$request->user()->is_super_admin) {
-            abort(403, 'Unauthorized. Super Admin access required.');
+        $user = $request->user();
+
+        if (! $user || ! $user->is_super_admin) {
+            return redirect()->route('superadmin.login');
+        }
+
+        if (! is_null($user->tenant_id)) {
+            return redirect()->route('superadmin.login');
         }
 
         return $next($request);

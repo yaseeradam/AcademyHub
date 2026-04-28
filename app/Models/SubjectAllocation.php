@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\BelongsToTenant;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -10,14 +11,17 @@ use Illuminate\Database\Eloquent\Model;
 class SubjectAllocation extends Model
 {
     use HasFactory;
+    use BelongsToTenant;
 
     protected $fillable = [
+        'tenant_id',
         'teacher_id',
         'subject_id',
         'class_id',
     ];
 
     protected $casts = [
+        'tenant_id' => 'integer',
         'teacher_id' => 'integer',
         'subject_id' => 'integer',
         'class_id' => 'integer',

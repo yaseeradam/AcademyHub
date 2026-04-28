@@ -511,7 +511,7 @@
                 </div>
                 <div class="sa-user-role">Super Admin</div>
             </div>
-            <form method="POST" action="{{ route('logout') }}" id="sa-logout-form">
+            <form method="POST" action="{{ route('superadmin.logout') }}" id="sa-logout-form">
                 @csrf
                 <button type="submit" class="sa-logout-btn" title="Logout">
                     <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">

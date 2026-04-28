@@ -4,6 +4,7 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
@@ -63,12 +64,51 @@ class User extends Authenticatable
         'password'           => 'hashed',
         'is_active'          => 'boolean',
         'is_super_admin'     => 'boolean',
+        'tenant_id'          => 'integer',
         'permissions'        => 'array',
         'custom_fields'      => 'array',
         'whatsapp_verified'   => 'boolean',
         'whatsapp_subscribed' => 'boolean',
         'is_class_teacher'    => 'boolean',
     ];
+
+    protected static function booted(): void
+    {
+        static::addGlobalScope('tenant', function (Builder $builder) {
+            if (! app()->bound('currentTenant')) {
+                return;
+            }
+
+            $tenant = app('currentTenant');
+            $tenantId = $tenant && isset($tenant->id) ? (int) $tenant->id : null;
+            if (! $tenantId) {
+                return;
+            }
+
+            $builder->where(function (Builder $q) use ($tenantId) {
+                $q->where('tenant_id', $tenantId)->orWhere('is_super_admin', true);
+            });
+        });
+
+        static::creating(function (self $user) {
+            if ($user->is_super_admin) {
+                return;
+            }
+
+            if (! empty($user->tenant_id)) {
+                return;
+            }
+
+            if (! app()->bound('currentTenant')) {
+                return;
+            }
+
+            $tenant = app('currentTenant');
+            if ($tenant && isset($tenant->id)) {
+                $user->tenant_id = (int) $tenant->id;
+            }
+        });
+    }
 
     public function hasPermission(string $permission): bool
     {

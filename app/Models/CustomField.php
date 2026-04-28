@@ -2,11 +2,15 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\BelongsToTenant;
 use Illuminate\Database\Eloquent\Model;
 
 class CustomField extends Model
 {
+    use BelongsToTenant;
+
     protected $fillable = [
+        'tenant_id',
         'name',
         'label',
         'type',
@@ -19,6 +23,7 @@ class CustomField extends Model
     ];
 
     protected $casts = [
+        'tenant_id' => 'integer',
         'required' => 'boolean',
         'options' => 'array',
         'order' => 'integer',
