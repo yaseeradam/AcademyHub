@@ -270,19 +270,7 @@ $activeShadow = "shadow-{$accent}-200";
             .finally(() => document.getElementById(formId).submit());
     }
 
-    // Mobile sidebar
-    const mobileSidebar = document.getElementById('mobileSidebar');
-    const mobileOverlay = document.getElementById('mobileSidebarOverlay');
-    document.getElementById('openMobileSidebar')?.addEventListener('click', () => {
-        mobileSidebar.classList.remove('-translate-x-full');
-        mobileOverlay.classList.remove('hidden');
-    });
-    const closeMobile = () => {
-        mobileSidebar.classList.add('-translate-x-full');
-        mobileOverlay.classList.add('hidden');
-    };
-    document.getElementById('closeMobileSidebar')?.addEventListener('click', closeMobile);
-    mobileOverlay?.addEventListener('click', closeMobile);
+    {{-- Mobile sidebar JS is handled in app.js --}}
 
     // Push notifications
     if ('serviceWorker' in navigator && 'PushManager' in window) {

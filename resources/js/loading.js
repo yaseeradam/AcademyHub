@@ -155,17 +155,6 @@ document.addEventListener('livewire:init', () => {
         });
     });
 
-    // Handle alert events from Livewire
-    Livewire.on('alert', (event) => {
-        const data = event[0] || event;
-        const message = data?.message || 'Action completed';
-        const type = data?.type || 'info';
-
-        if (window.showNotification) {
-            window.showNotification(message, type);
-        }
-    });
-
     // Safety net: hide loader on unhandled JS errors
     window.addEventListener('error', () => {
         activeUserRequests = 0;

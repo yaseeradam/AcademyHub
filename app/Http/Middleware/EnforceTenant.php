@@ -15,6 +15,11 @@ class EnforceTenant
      */
     public function handle(Request $request, Closure $next): Response
     {
+        // Super admin routes operate outside any tenant context — skip enforcement.
+        if ($request->is('superadmin', 'superadmin/*')) {
+            return $next($request);
+        }
+
         if (! Auth::check()) {
             return $next($request);
         }

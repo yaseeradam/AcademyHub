@@ -360,165 +360,112 @@
             </div>
         </div>
 
-            <script>
-                // Add shake animation styles
-                const shakeStyles = `
-                    <style id="shake-animation-styles">
-                        @keyframes shake {
-                            0%, 100% { transform: translateX(0); }
-                            10%, 30%, 50%, 70%, 90% { transform: translateX(-3px); }
-                            20%, 40%, 60%, 80% { transform: translateX(3px); }
-                        }
-                        
-                        .shake-row {
-                            animation: shake 0.6s ease-in-out;
-                            background-color: #fef2f2 !important;
-                        }
-                        
-                        .error-row {
-                            background-color: #fef2f2;
-                        }
-                        
-                        .error-row:hover {
-                            background-color: #fecaca !important;
-                        }
-                        
-                        .shake-input {
-                            animation: shake 0.6s ease-in-out;
-                            border-color: #ef4444 !important;
-                            background-color: #fef2f2 !important;
-                        }
-                    </style>
-                `;
-                
-                // Add styles to head if not already present
-                if (!document.getElementById('shake-animation-styles')) {
-                    document.head.insertAdjacentHTML('beforeend', shakeStyles);
-                }
-                
-                // Listen for shake-row events from Livewire
-                document.addEventListener('livewire:init', () => {
-                    Livewire.on('shake-row', (event) => {
+            @script
+                <script>
+                    // Inject shake animation styles once
+                    if (!document.getElementById('shake-animation-styles')) {
+                        const style = document.createElement('style');
+                        style.id = 'shake-animation-styles';
+                        style.textContent = `
+                            @keyframes shake {
+                                0%, 100% { transform: translateX(0); }
+                                10%, 30%, 50%, 70%, 90% { transform: translateX(-3px); }
+                                20%, 40%, 60%, 80% { transform: translateX(3px); }
+                            }
+                            .shake-row { animation: shake 0.6s ease-in-out; background-color: #fef2f2 !important; }
+                            .shake-input { animation: shake 0.6s ease-in-out; border-color: #ef4444 !important; background-color: #fef2f2 !important; }
+                        `;
+                        document.head.appendChild(style);
+                    }
+
+                    // shake-row event — $wire is available inside @script
+                    $wire.on('shake-row', (event) => {
                         const data = event[0] || event;
-                        const studentId = data.studentId;
-                        const field = data.field;
-                        
-                        // Find the row and input field
-                        const row = document.querySelector(`tr[data-student-id="${studentId}"]`);
-                        const input = document.querySelector(`input[data-student-id="${studentId}"][data-field="${field}"]`);
-                        
+                        const row   = document.querySelector(`tr[data-student-id="${data.studentId}"]`);
+                        const input = document.querySelector(`input[data-student-id="${data.studentId}"][data-field="${data.field}"]`);
                         if (row && input) {
-                            // Add shake classes
                             row.classList.add('shake-row');
                             input.classList.add('shake-input');
-                            
-                            // Remove shake classes after animation completes
                             setTimeout(() => {
                                 row.classList.remove('shake-row');
                                 input.classList.remove('shake-input');
                             }, 600);
-                            
-                            // Focus the input field to draw attention
                             input.focus();
                             input.select();
                         }
                     });
-                });
-                
-                document.addEventListener('DOMContentLoaded', function () {
-                    const table = document.querySelector('tbody');
-                    if (!table) return;
 
-                    table.addEventListener('keydown', function (e) {
+                    // Keyboard navigation — attach to the table body directly.
+                    // Using event delegation on document so it survives Livewire re-renders.
+                    function handleScoresheetKeydown(e) {
                         const input = e.target;
                         if (input.tagName !== 'INPUT' || input.type !== 'number') return;
+                        const table = input.closest('tbody');
+                        if (!table) return;
 
-                        const cell = input.closest('td');
-                        const row = cell.closest('tr');
+                        const cell  = input.closest('td');
+                        const row   = cell.closest('tr');
                         const cells = Array.from(row.querySelectorAll('td input[type="number"]'));
-                        const rows = Array.from(table.querySelectorAll('tr:has(input)'));
-                        const currentCellIndex = cells.indexOf(input);
-                        const currentRowIndex = rows.indexOf(row);
+                        const rows  = Array.from(table.querySelectorAll('tr:has(input)'));
+                        const ci    = cells.indexOf(input);
+                        const ri    = rows.indexOf(row);
 
-                        let nextInput = null;
-                        let shouldPrevent = false;
+                        let next = null;
+                        let prevent = false;
 
                         if (e.key === 'Enter') {
-                            shouldPrevent = true;
-                            if (currentRowIndex < rows.length - 1) {
-                                const nextRow = rows[currentRowIndex + 1];
-                                const nextRowInputs = nextRow.querySelectorAll('td input[type="number"]');
-                                nextInput = nextRowInputs[currentCellIndex];
-                            }
+                            prevent = true;
+                            if (ri < rows.length - 1) next = rows[ri + 1].querySelectorAll('td input[type="number"]')[ci];
                         } else if (e.key === 'Tab' && !e.shiftKey) {
-                            shouldPrevent = true;
-                            if (currentCellIndex < cells.length - 1) {
-                                nextInput = cells[currentCellIndex + 1];
-                            } else if (currentRowIndex < rows.length - 1) {
-                                nextInput = rows[currentRowIndex + 1].querySelector('td input[type="number"]');
-                            }
+                            prevent = true;
+                            next = ci < cells.length - 1 ? cells[ci + 1] : (ri < rows.length - 1 ? rows[ri + 1].querySelector('td input[type="number"]') : null);
                         } else if (e.key === 'Tab' && e.shiftKey) {
-                            shouldPrevent = true;
-                            if (currentCellIndex > 0) {
-                                nextInput = cells[currentCellIndex - 1];
-                            } else if (currentRowIndex > 0) {
-                                const prevRow = rows[currentRowIndex - 1];
-                                const prevCells = prevRow.querySelectorAll('td input[type="number"]');
-                                nextInput = prevCells[prevCells.length - 1];
-                            }
+                            prevent = true;
+                            if (ci > 0) { next = cells[ci - 1]; }
+                            else if (ri > 0) { const pc = rows[ri - 1].querySelectorAll('td input[type="number"]'); next = pc[pc.length - 1]; }
                         } else if (e.key === 'ArrowDown') {
-                            shouldPrevent = true;
-                            if (currentRowIndex < rows.length - 1) {
-                                const nextRow = rows[currentRowIndex + 1];
-                                const nextRowInputs = nextRow.querySelectorAll('td input[type="number"]');
-                                nextInput = nextRowInputs[currentCellIndex];
-                            }
+                            prevent = true;
+                            if (ri < rows.length - 1) next = rows[ri + 1].querySelectorAll('td input[type="number"]')[ci];
                         } else if (e.key === 'ArrowUp') {
-                            shouldPrevent = true;
-                            if (currentRowIndex > 0) {
-                                const prevRow = rows[currentRowIndex - 1];
-                                const prevRowInputs = prevRow.querySelectorAll('td input[type="number"]');
-                                nextInput = prevRowInputs[currentCellIndex];
-                            }
-                        } else if (e.key === 'ArrowRight') {
-                            if (input.selectionStart === input.value.length) {
-                                shouldPrevent = true;
-                                if (currentCellIndex < cells.length - 1) {
-                                    nextInput = cells[currentCellIndex + 1];
-                                }
-                            }
-                        } else if (e.key === 'ArrowLeft') {
-                            if (input.selectionStart === 0) {
-                                shouldPrevent = true;
-                                if (currentCellIndex > 0) {
-                                    nextInput = cells[currentCellIndex - 1];
-                                }
-                            }
+                            prevent = true;
+                            if (ri > 0) next = rows[ri - 1].querySelectorAll('td input[type="number"]')[ci];
+                        } else if (e.key === 'ArrowRight' && input.selectionStart === input.value.length) {
+                            prevent = true;
+                            if (ci < cells.length - 1) next = cells[ci + 1];
+                        } else if (e.key === 'ArrowLeft' && input.selectionStart === 0) {
+                            prevent = true;
+                            if (ci > 0) next = cells[ci - 1];
                         }
 
-                        if (shouldPrevent && nextInput) {
-                            e.preventDefault();
-                            nextInput.focus();
-                            nextInput.select();
-                        }
-                    });
+                        if (prevent && next) { e.preventDefault(); next.focus(); next.select(); }
+                    }
 
-                    table.addEventListener('focusin', function (e) {
-                        if (e.target.tagName === 'INPUT') {
-                            e.target.closest('td').style.boxShadow = '0 0 0 3px rgba(59, 130, 246, 0.5)';
-                            e.target.closest('td').style.position = 'relative';
-                            e.target.closest('td').style.zIndex = '10';
+                    function handleScoresheetFocusin(e) {
+                        if (e.target.tagName === 'INPUT' && e.target.closest('tbody')) {
+                            const td = e.target.closest('td');
+                            td.style.boxShadow = '0 0 0 3px rgba(59,130,246,0.5)';
+                            td.style.position  = 'relative';
+                            td.style.zIndex    = '10';
                         }
-                    });
+                    }
 
-                    table.addEventListener('focusout', function (e) {
-                        if (e.target.tagName === 'INPUT') {
-                            e.target.closest('td').style.boxShadow = '';
-                            e.target.closest('td').style.zIndex = '';
+                    function handleScoresheetFocusout(e) {
+                        if (e.target.tagName === 'INPUT' && e.target.closest('tbody')) {
+                            const td = e.target.closest('td');
+                            td.style.boxShadow = '';
+                            td.style.zIndex    = '';
                         }
-                    });
-                });
-            </script>
+                    }
+
+                    // Attach once at document level — survives all Livewire re-renders
+                    if (!document.__scoresheetKeydownAttached) {
+                        document.addEventListener('keydown',  handleScoresheetKeydown);
+                        document.addEventListener('focusin',  handleScoresheetFocusin);
+                        document.addEventListener('focusout', handleScoresheetFocusout);
+                        document.__scoresheetKeydownAttached = true;
+                    }
+                </script>
+            @endscript
 
 
     @endif

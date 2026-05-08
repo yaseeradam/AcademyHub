@@ -16,6 +16,11 @@ class CheckSubscriptionStatus
      */
     public function handle(Request $request, Closure $next): Response
     {
+        // Super admin routes don't belong to any tenant — skip subscription checks entirely.
+        if ($request->is('superadmin', 'superadmin/*')) {
+            return $next($request);
+        }
+
         $settingsPath = TenantSettings::settingsPath();
         $settings = file_exists($settingsPath) ? json_decode(file_get_contents($settingsPath), true) : [];
         // Fallback to exactly 1 year if not set

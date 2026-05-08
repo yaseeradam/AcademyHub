@@ -268,39 +268,18 @@ class Index extends Component
     private function tryGeminiAPI($prompt)
     {
         try {
-            $apiKey = env('GEMINI_API_KEY');
-            if (empty($apiKey)) {
-                \Illuminate\Support\Facades\Log::warning('Gemini API key not configured');
-                return null;
-            }
-            
+            $apiKey = config('services.gemini.key') ?: env('GEMINI_API_KEY');
+            if (empty($apiKey)) return null;
+
             $response = \Illuminate\Support\Facades\Http::withOptions(['verify' => false])
-                ->timeout(30)
+                ->timeout(60)
                 ->post("https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={$apiKey}", [
-                    'contents' => [
-                        [
-                            'parts' => [
-                                ['text' => $prompt]
-                            ]
-                        ]
-                    ]
+                    'contents' => [['parts' => [['text' => $prompt]]]]
                 ]);
 
-            if ($response->successful()) {
-                $data = $response->json();
-                $content = $data['candidates'][0]['content']['parts'][0]['text'] ?? null;
-                
-                if ($content) {
-                    \Illuminate\Support\Facades\Log::info('Gemini API success');
-                    return $content;
-                }
-            }
-            
-            \Illuminate\Support\Facades\Log::warning('Gemini API failed', [
-                'status' => $response->status(),
-                'body' => $response->body()
-            ]);
-            return null;
+            return $response->successful()
+                ? ($response->json()['candidates'][0]['content']['parts'][0]['text'] ?? null)
+                : null;
         } catch (\Exception $e) {
             \Illuminate\Support\Facades\Log::warning('Gemini API error', ['error' => $e->getMessage()]);
             return null;
@@ -310,48 +289,31 @@ class Index extends Component
     private function tryGroqAPI($prompt)
     {
         try {
-            $apiKey = env('GROQ_API_KEY');
-            if (empty($apiKey)) {
-                \Illuminate\Support\Facades\Log::warning('Groq API key not configured');
-                return null;
-            }
-            
+            $raw = config('services.groq.key') ?: env('GROQ_API_KEY');
+            if (empty($raw)) return null;
+
+            // Support comma-separated keys — rotate through them
+            $keys = array_filter(array_map('trim', explode(',', $raw)));
+            $apiKey = $keys[array_rand($keys)];
+
             $response = \Illuminate\Support\Facades\Http::withOptions(['verify' => false])
-                ->timeout(30)
+                ->timeout(60)
                 ->withHeaders([
                     'Authorization' => 'Bearer ' . $apiKey,
-                    'Content-Type' => 'application/json',
+                    'Content-Type'  => 'application/json',
                 ])->post('https://api.groq.com/openai/v1/chat/completions', [
-                    'model' => 'llama-3.3-70b-versatile',
-                    'messages' => [
-                        [
-                            'role' => 'system',
-                            'content' => 'You are an experienced teacher creating homework assignments. Generate a complete, well-structured homework assignment with clear objectives, instructions, questions/tasks, and submission guidelines. Make it age-appropriate, engaging, and educational. Use proper formatting with headings, bullet points, and numbered lists.'
-                        ],
-                        [
-                            'role' => 'user',
-                            'content' => $prompt
-                        ]
+                    'model'       => 'llama-3.3-70b-versatile',
+                    'messages'    => [
+                        ['role' => 'system', 'content' => 'You are an experienced teacher creating homework assignments. Generate complete, well-structured assignments with clear objectives, instructions, tasks, and submission guidelines. Use plain text without markdown symbols.'],
+                        ['role' => 'user',   'content' => $prompt],
                     ],
                     'temperature' => 0.7,
-                    'max_tokens' => 2000
+                    'max_tokens'  => 2000,
                 ]);
 
-            if ($response->successful()) {
-                $data = $response->json();
-                $content = $data['choices'][0]['message']['content'] ?? null;
-                
-                if ($content) {
-                    \Illuminate\Support\Facades\Log::info('Groq API success (fallback)');
-                    return $content;
-                }
-            }
-            
-            \Illuminate\Support\Facades\Log::error('Groq API failed', [
-                'status' => $response->status(),
-                'body' => $response->body()
-            ]);
-            return null;
+            return $response->successful()
+                ? ($response->json()['choices'][0]['message']['content'] ?? null)
+                : null;
         } catch (\Exception $e) {
             \Illuminate\Support\Facades\Log::error('Groq API error', ['error' => $e->getMessage()]);
             return null;

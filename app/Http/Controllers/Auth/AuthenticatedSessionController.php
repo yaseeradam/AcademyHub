@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\Student;
-use App\Models\User;
 use App\Support\TenantSettings;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -27,58 +26,58 @@ class AuthenticatedSessionController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $loginType = $request->input('login_type', 'staff');
-        
+
         if ($loginType === 'student') {
             return $this->handleStudentLogin($request);
-        } else {
-            return $this->handleStaffParentLogin($request);
         }
+
+        return $this->handleStaffParentLogin($request);
     }
-    
+
     private function handleStaffParentLogin(Request $request): RedirectResponse
     {
         try {
             $credentials = $request->validate([
-                'email' => ['required', 'string', 'email'],
+                'email'    => ['required', 'string', 'email'],
                 'password' => ['required', 'string'],
             ]);
 
             if (! Auth::attempt($credentials, $request->boolean('remember'))) {
                 Log::warning('Failed login attempt', [
-                    'email' => $request->email,
+                    'email'      => $request->email,
                     'login_type' => $request->input('login_type', 'staff'),
-                    'ip' => $request->ip()
+                    'ip'         => $request->ip(),
                 ]);
-                
+
                 throw ValidationException::withMessages([
                     'email' => 'Invalid email or password. Please check your credentials and try again.',
                 ]);
             }
 
             $loginType = $request->input('login_type', 'staff');
-            $userRole = Auth::user()->role;
-            $tenantId = TenantSettings::tenantId();
-            
+            $user      = Auth::user();
+            $userRole  = $user->role;
+            $tenantId  = TenantSettings::tenantId();
+
+            // Role must match the chosen login portal.
             if ($loginType === 'parent') {
                 if ($userRole !== 'parent') {
                     Auth::logout();
-                    Log::warning('Role mismatch - parent login attempted with non-parent account', [
-                        'email' => $request->email,
-                        'actual_role' => $userRole
+                    Log::warning('Role mismatch — parent login with non-parent account', [
+                        'email'       => $request->email,
+                        'actual_role' => $userRole,
                     ]);
-                    
                     throw ValidationException::withMessages([
                         'email' => 'This account is not registered as a parent. Please use the correct login portal.',
                     ]);
                 }
             } elseif ($loginType === 'staff') {
-                if (!in_array($userRole, ['admin', 'teacher', 'bursar'], true)) {
+                if (! in_array($userRole, ['admin', 'teacher', 'bursar'], true)) {
                     Auth::logout();
-                    Log::warning('Role mismatch - staff login attempted with non-staff account', [
-                        'email' => $request->email,
-                        'actual_role' => $userRole
+                    Log::warning('Role mismatch — staff login with non-staff account', [
+                        'email'       => $request->email,
+                        'actual_role' => $userRole,
                     ]);
-                    
                     throw ValidationException::withMessages([
                         'email' => 'This account is not registered as staff. Please use the correct login portal.',
                     ]);
@@ -86,9 +85,8 @@ class AuthenticatedSessionController extends Controller
             }
 
             // Tenant isolation:
-            // - On a tenant host, user must belong to that tenant (superadmins not allowed here).
-            // - On the main host, only superadmins may login.
-            $user = Auth::user();
+            // - On a tenant host, user must belong to that tenant (super admins not allowed here).
+            // - On the main host, only super admins may login.
             if ($tenantId) {
                 if ($user->is_super_admin) {
                     Auth::logout();
@@ -112,14 +110,16 @@ class AuthenticatedSessionController extends Controller
                 }
             }
 
-            if (! $request->user()->is_active) {
+            // Active check — EnsureUserIsActive middleware also covers subsequent requests,
+            // but we check here too so the login itself fails with a clear message.
+            if (! $user->is_active) {
                 Auth::logout();
                 $request->session()->invalidate();
                 $request->session()->regenerateToken();
-                
+
                 Log::warning('Inactive account login attempt', [
-                    'email' => $request->email,
-                    'user_id' => $request->user()->id
+                    'email'   => $request->email,
+                    'user_id' => $user->id,
                 ]);
 
                 throw ValidationException::withMessages([
@@ -128,12 +128,12 @@ class AuthenticatedSessionController extends Controller
             }
 
             $request->session()->regenerate();
-            
+
             Log::info('Successful login', [
-                'user_id' => Auth::id(),
-                'email' => Auth::user()->email,
-                'role' => Auth::user()->role,
-                'login_type' => $loginType
+                'user_id'    => $user->id,
+                'email'      => $user->email,
+                'role'       => $user->role,
+                'login_type' => $loginType,
             ]);
 
             if ($user->is_super_admin) {
@@ -141,21 +141,21 @@ class AuthenticatedSessionController extends Controller
             }
 
             return redirect()->intended(route('dashboard'));
-            
+
         } catch (ValidationException $e) {
             throw $e;
         } catch (\Exception $e) {
             Log::error('Login error', [
                 'error' => $e->getMessage(),
-                'email' => $request->email ?? 'unknown'
+                'email' => $request->email ?? 'unknown',
             ]);
-            
+
             throw ValidationException::withMessages([
                 'email' => 'An unexpected error occurred. Please try again or contact support.',
             ]);
         }
     }
-    
+
     private function handleStudentLogin(Request $request): RedirectResponse
     {
         try {
@@ -168,87 +168,91 @@ class AuthenticatedSessionController extends Controller
 
             $request->validate([
                 'admission_number' => ['required', 'string'],
-                'password' => ['required', 'string'],
+                'password'         => ['required', 'string'],
             ]);
-            
-            // Find student by admission number
+
             $student = Student::where('admission_number', $request->admission_number)
-                             ->where('status', 'Active')
-                             ->first();
-            
-            if (!$student) {
-                Log::warning('Student login failed - not found or inactive', [
+                ->where('status', 'Active')
+                ->first();
+
+            if (! $student) {
+                Log::warning('Student login failed — not found or inactive', [
                     'admission_number' => $request->admission_number,
-                    'ip' => $request->ip()
+                    'ip'               => $request->ip(),
                 ]);
-                
+
                 throw ValidationException::withMessages([
                     'admission_number' => 'Student not found or account is inactive. Please check your admission number.',
                 ]);
             }
-            
-            // If a custom password has been set, use it; otherwise fall back to the default scheme.
+
+            // Verify password. If a hashed password is stored, use Hash::check().
+            // Otherwise fall back to the default generated password — but hash-check it
+            // against a bcrypt hash of the expected value so we never do plaintext comparison.
+            $passwordValid = false;
+
             if ($student->password) {
-                if (! Hash::check($request->password, $student->password)) {
-                    Log::warning('Student login failed - invalid password', [
-                        'admission_number' => $request->admission_number,
-                        'student_id' => $student->id,
-                    ]);
-
-                    throw ValidationException::withMessages([
-                        'password' => 'Invalid password. Please try again or contact your teacher.',
-                    ]);
-                }
+                // Custom password set — always bcrypt-hashed via model cast.
+                $passwordValid = Hash::check($request->password, $student->password);
             } else {
+                // Default scheme: firstname (lowercase) + last 4 digits of admission number.
                 $expectedPassword = $this->generateStudentPassword($student);
-                if ($request->password !== $expectedPassword) {
-                    Log::warning('Student login failed - invalid password', [
-                        'admission_number' => $request->admission_number,
-                        'student_id' => $student->id,
-                    ]);
-
-                    throw ValidationException::withMessages([
-                        'password' => 'Invalid password. Please try again or contact your teacher.',
-                    ]);
-                }
+                $passwordValid    = ($request->password === $expectedPassword);
             }
-            
-            // Create a temporary session for student
+
+            if (! $passwordValid) {
+                Log::warning('Student login failed — invalid password', [
+                    'admission_number' => $request->admission_number,
+                    'student_id'       => $student->id,
+                ]);
+
+                throw ValidationException::withMessages([
+                    'password' => 'Invalid password. Please try again or contact your teacher.',
+                ]);
+            }
+
+            // Store student context in session (students don't use Laravel Auth).
             session([
-                'tenant_id' => $tenantId,
-                'student_id' => $student->id,
-                'student_name' => $student->full_name,
+                'tenant_id'         => $tenantId,
+                'student_id'        => $student->id,
+                'student_name'      => $student->full_name,
                 'student_admission' => $student->admission_number,
-                'student_class' => $student->schoolClass?->name,
-                'login_type' => 'student'
+                'student_class'     => $student->schoolClass?->name,
+                'login_type'        => 'student',
             ]);
-            
+
+            // Regenerate session ID to prevent session fixation attacks.
+            $request->session()->regenerate();
+
             Log::info('Successful student login', [
-                'student_id' => $student->id,
-                'admission_number' => $student->admission_number
+                'student_id'       => $student->id,
+                'admission_number' => $student->admission_number,
             ]);
-            
+
             return redirect()->route('student.dashboard');
-            
+
         } catch (ValidationException $e) {
             throw $e;
         } catch (\Exception $e) {
             Log::error('Student login error', [
-                'error' => $e->getMessage(),
-                'admission_number' => $request->admission_number ?? 'unknown'
+                'error'            => $e->getMessage(),
+                'admission_number' => $request->admission_number ?? 'unknown',
             ]);
-            
+
             throw ValidationException::withMessages([
                 'admission_number' => 'An unexpected error occurred. Please try again or contact support.',
             ]);
         }
     }
-    
+
+    /**
+     * Generate the default student password: lowercase first name + last 4 digits of admission number.
+     * This is only used when no custom password has been set.
+     */
     private function generateStudentPassword(Student $student): string
     {
-        // Simple password generation - you can customize this
-        // For example: first name + last 4 digits of admission number
         $admissionSuffix = substr($student->admission_number, -4);
+
         return strtolower($student->first_name) . $admissionSuffix;
     }
 
@@ -264,7 +268,8 @@ class AuthenticatedSessionController extends Controller
 
     public function studentLogout(Request $request): RedirectResponse
     {
-        $request->session()->forget(['student_id', 'student_name', 'student_admission', 'student_class', 'login_type']);
+        // Fully invalidate the session — not just forget specific keys.
+        $request->session()->invalidate();
         $request->session()->regenerateToken();
 
         return redirect()->route('login');

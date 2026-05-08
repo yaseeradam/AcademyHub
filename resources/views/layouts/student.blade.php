@@ -254,21 +254,7 @@ $pageLabel = 'Student Portal';
 @livewireScripts
 @stack('scripts')
 
-<script>
-    const mobileSidebar = document.getElementById('mobileSidebar');
-    const mobileOverlay = document.getElementById('mobileSidebarOverlay');
-
-    document.getElementById('openMobileSidebar')?.addEventListener('click', () => {
-        mobileSidebar.classList.remove('-translate-x-full');
-        mobileOverlay.classList.remove('hidden');
-    });
-    const closeMobile = () => {
-        mobileSidebar.classList.add('-translate-x-full');
-        mobileOverlay.classList.add('hidden');
-    };
-    document.getElementById('closeMobileSidebar')?.addEventListener('click', closeMobile);
-    mobileOverlay?.addEventListener('click', closeMobile);
-</script>
+{{-- Mobile sidebar JS is handled in app.js --}}
 
 {{-- Livewire navigation loading spinner --}}
 <div x-data="{ loading: false }"

@@ -131,17 +131,9 @@
 
         {{-- ── Actions ─────────────────────────────────────── --}}
         <div style="display:flex; align-items:center; justify-content:space-between; gap:12px;">
-            <form action="{{ route('superadmin.tenants.destroy', $tenant) }}" method="POST"
-                  onsubmit="return confirm('Permanently delete {{ addslashes($tenant->name) }}? This cannot be undone.')">
-                @csrf
-                @method('DELETE')
-                <button type="submit" class="sa-btn sa-btn-danger">
-                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="width:15px;height:15px;">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                    </svg>
-                    Delete School
-                </button>
-            </form>
+            <div>
+                {{-- Delete form is OUTSIDE the update form to avoid nested form bug --}}
+            </div>
             <div style="display:flex; gap:12px;">
                 <a href="{{ route('superadmin.tenants.index') }}" class="sa-btn sa-btn-ghost">Cancel</a>
                 <button type="submit" class="sa-btn sa-btn-primary" style="padding:10px 24px;">
@@ -154,5 +146,21 @@
         </div>
 
     </form>
+
+    {{-- Delete form outside the update form --}}
+    <div style="margin-top:12px; padding-top:20px; border-top:1px solid #f1f5f9;">
+        <div style="font-size:12px; color:#94a3b8; margin-bottom:10px; font-weight:600; text-transform:uppercase; letter-spacing:.05em;">Danger Zone</div>
+        <form action="{{ route('superadmin.tenants.destroy', $tenant) }}" method="POST"
+              onsubmit="return confirm('Type the school name to confirm deletion.\n\nYou are about to permanently delete:\n{{ addslashes($tenant->name) }}\n\nThis CANNOT be undone. All data will be lost.\n\nClick OK only if you are absolutely sure.')">
+            @csrf
+            @method('DELETE')
+            <button type="submit" class="sa-btn sa-btn-danger">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="width:15px;height:15px;">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                </svg>
+                Delete This School Permanently
+            </button>
+        </form>
+    </div>
 </div>
 @endsection

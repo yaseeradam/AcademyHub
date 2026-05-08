@@ -85,9 +85,9 @@ class User extends Authenticatable
                 return;
             }
 
-            $builder->where(function (Builder $q) use ($tenantId) {
-                $q->where('tenant_id', $tenantId)->orWhere('is_super_admin', true);
-            });
+            // Strict tenant isolation — super admins are intentionally excluded from tenant queries.
+            // They should never appear in tenant user listings or be queryable from tenant context.
+            $builder->where('tenant_id', $tenantId);
         });
 
         static::creating(function (self $user) {

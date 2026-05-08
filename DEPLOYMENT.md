@@ -189,7 +189,12 @@ sudo nano /etc/nginx/sites-available/myacademy
 ```nginx
 server {
     listen 80;
-    server_name yourdomain.com www.yourdomain.com;
+    # Multi-tenant hosts:
+    # - Main host for superadmin: yourdomain.com
+    # - Tenant hosts: {tenant}.yourdomain.com
+    # If you don't include the exact hostname you browse, Nginx will serve the
+    # default site and you'll see: "404 Not Found nginx/..."
+    server_name yourdomain.com www.yourdomain.com *.yourdomain.com;
     root /var/www/myacademy/public;
 
     add_header X-Frame-Options "SAMEORIGIN";
@@ -221,6 +226,11 @@ server {
     client_max_body_size 100M;
 }
 ```
+
+**If you still see the Nginx 404 page (not Laravel's 404):**
+- Verify the hostname in your browser matches `server_name` above (including subdomain).
+- Verify `root` points to `.../public` (Laravel's front controller is `public/index.php`).
+- Run: `sudo nginx -T | grep -n "server_name"` to confirm the loaded config.
 
 ```bash
 # Enable site
