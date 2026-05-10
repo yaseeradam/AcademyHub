@@ -94,32 +94,8 @@
             Session {{ $session }} • Term {{ $term }} • {{ now()->format('F d, Y') }}
         </div>
         
-        <div class="info-cards">
-            
-                @php($siBorderColor = '#10b981')
-                @php($siBgColor = '#ecfdf5')
-                @php($siLabelColor = '#065f46')
-                @php($siValueColor = '#1f2937')
-                @php($siDotColor = '#6ee7b7')
-                @include('pdf.partials.rc-student-info')
-
-            <div class="info-card">
-                <div class="info-inner">
-                    <div class="info-item">
-                        <div class="info-label">Gender</div>
-                        <div class="info-value">{{ $student->gender ?? 'N/A' }}</div>
-                    </div>
-                    <div class="info-item">
-                        <div class="info-label">Age</div>
-                        <div class="info-value">{{ $student->dob ? \Carbon\Carbon::parse($student->dob)->age . ' years' : 'N/A' }}</div>
-                    </div>
-                    <div class="info-item">
-                        <div class="info-label">Class Size</div>
-                        <div class="info-value">{{ $totalStudents ?? 'N/A' }} Students</div>
-                    </div>
-                </div>
-            </div>
-        </div>
+        @php($siBorderColor = '#10b981') @php($siBgColor = '#ecfdf5') @php($siLabelColor = '#065f46') @php($siValueColor = '#1f2937') @php($siDotColor = '#6ee7b7')
+        @include('pdf.partials.rc-student-info')
         
         <div class="stats-fresh">
             <div class="stat-fresh">
@@ -197,12 +173,23 @@
         </div>
         @endif
         
+        @if($showTeacherRemarks)
+        <div class="remarks-fresh">
+            <div class="remarks-title">Class Teacher's Remarks</div>
+            <div class="remarks-text">{{ $teacherRemarks ?? 'No remarks provided.' }}</div>
+        </div>
+        @endif
+        
         @if($showPrincipalRemarks)
         <div class="remarks-fresh">
             <div class="remarks-title">Principal's Remarks</div>
             <div class="remarks-text">{{ $principalRemarks ?? 'No remarks provided.' }}</div>
         </div>
         @endif
+        
+        @php($rcBorderColor='#059669') @php($rcBgLight='#f0fdf4') @php($rcTitleColor='#047857') @php($rcLabelColor='#064e3b')
+        @include('pdf.partials.rc-psychomotor')
+        @include('pdf.partials.rc-school-fees')
         
         @if($showNextTermDate)
         <div class="next-fresh">🌿 Next Term Begins: {{ $nextTermDate ?? 'To be announced' }}</div>

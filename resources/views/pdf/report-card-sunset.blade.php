@@ -176,12 +176,23 @@
         </div>
         @endif
         
+        @if($showTeacherRemarks)
+        <div class="remarks-sunset">
+            <div class="remarks-title">Class Teacher's Remarks</div>
+            <div class="remarks-text">{{ $teacherRemarks ?? 'No remarks provided.' }}</div>
+        </div>
+        @endif
+        
         @if($showPrincipalRemarks)
         <div class="remarks-sunset">
             <div class="remarks-title">Principal's Remarks</div>
             <div class="remarks-text">{{ $principalRemarks ?? 'No remarks provided.' }}</div>
         </div>
         @endif
+        
+        @php($rcBorderColor='#f97316') @php($rcBgLight='#fff7ed') @php($rcTitleColor='#c2410c') @php($rcLabelColor='#7c2d12')
+        @include('pdf.partials.rc-psychomotor')
+        @include('pdf.partials.rc-school-fees')
         
         @if($showNextTermDate)
         <div class="next-sunset">☀ Next Term Begins: {{ $nextTermDate ?? 'To be announced' }}</div>

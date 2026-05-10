@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\BelongsToTenant;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Model;
@@ -9,8 +10,10 @@ use Illuminate\Database\Eloquent\Model;
 class FeeStructure extends Model
 {
     use HasFactory;
+    use BelongsToTenant;
 
     protected $fillable = [
+        'tenant_id',
         'class_id',
         'category',
         'term',
@@ -19,6 +22,7 @@ class FeeStructure extends Model
     ];
 
     protected $casts = [
+        'tenant_id' => 'integer',
         'class_id' => 'integer',
         'term' => 'integer',
         'amount_due' => 'decimal:2',

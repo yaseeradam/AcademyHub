@@ -40,11 +40,14 @@ class ParentSeeder extends Seeder
         ];
 
         foreach ($parents as $parentData) {
-            $parent = User::create($parentData);
+            $parent = User::query()->updateOrCreate(
+                ['email' => $parentData['email']],
+                $parentData
+            );
             
             // Link random students to each parent (1-3 children per parent)
             $studentCount = rand(1, 3);
-            $availableStudents = Student::inRandomOrder()->limit($studentCount)->get();
+            $availableStudents = Student::query()->inRandomOrder()->limit($studentCount)->get();
             
             foreach ($availableStudents as $student) {
                 // Check if student is not already linked to another parent

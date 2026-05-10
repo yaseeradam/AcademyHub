@@ -177,12 +177,23 @@
         </div>
         @endif
         
+        @if($showTeacherRemarks)
+        <div class="remarks-royal">
+            <div class="remarks-title">Class Teacher's Remarks</div>
+            <div class="remarks-text">{{ $teacherRemarks ?? 'No remarks provided.' }}</div>
+        </div>
+        @endif
+        
         @if($showPrincipalRemarks)
         <div class="remarks-royal">
             <div class="remarks-title">Principal's Remarks</div>
             <div class="remarks-text">{{ $principalRemarks ?? 'No remarks provided.' }}</div>
         </div>
         @endif
+        
+        @php($rcBorderColor='#7c3aed') @php($rcBgLight='#faf5ff') @php($rcTitleColor='#6b21a8') @php($rcLabelColor='#4c1d95')
+        @include('pdf.partials.rc-psychomotor')
+        @include('pdf.partials.rc-school-fees')
         
         @if($showNextTermDate)
         <div class="next-royal">♔ Next Term Begins: {{ $nextTermDate ?? 'To be announced' }} ♔</div>

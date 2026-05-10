@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <title>Report Card - {{ $student->admission_number }}</title>
     <style>
-        @page { margin: 0; }
+        @page { margin: 10mm; }
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: DejaVu Sans, Arial, sans-serif; font-size: 9px; color: #1e293b; }
 
@@ -205,12 +205,23 @@
             </div>
             @endif
             
+            @if($showTeacherRemarks)
+            <div class="remarks">
+                <div class="remarks-label">Class Teacher's Remarks</div>
+                <div class="remarks-text">{{ $teacherRemarks ?? 'No remarks provided.' }}</div>
+            </div>
+            @endif
+            
             @if($showPrincipalRemarks)
             <div class="remarks">
                 <div class="remarks-label">Principal's Remarks</div>
                 <div class="remarks-text">{{ $principalRemarks ?? 'No remarks provided.' }}</div>
             </div>
             @endif
+            
+            @php($rcBorderColor='#1e40af') @php($rcBgLight='#eff6ff') @php($rcTitleColor='#1e40af') @php($rcLabelColor='#1e3a8a')
+            @include('pdf.partials.rc-psychomotor')
+            @include('pdf.partials.rc-school-fees')
             
             @if($showNextTermDate)
             <div class="next-bar">Next Term Begins: {{ $nextTermDate ?? 'To be announced' }}</div>

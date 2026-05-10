@@ -1,11 +1,13 @@
-<div class="inline-block">
-    <a
-        href="{{ route('notifications') }}"
-        class="relative rounded-xl border border-gray-200/70 bg-white p-2 text-slate-500 shadow-sm hover:bg-slate-50 hover:shadow-md transition-all duration-200 group inline-block"
+<div class="relative" x-data="{ open: false }" x-on:click.outside="open = false" wire:poll.15s x-on:notifications-updated.window="$wire.$refresh()">
+
+    {{-- Bell button --}}
+    <button
+        x-on:click="open = !open"
+        class="relative rounded-xl border border-gray-200/70 bg-white p-2 text-slate-500 shadow-sm hover:bg-slate-50 hover:shadow-md transition-all duration-200 group"
         aria-label="Notifications"
-        wire:poll.15s
     >
-        <svg class="h-6 w-6 transition-transform duration-200 group-hover:scale-110 {{ $this->unreadCount > 0 ? 'animate-[wiggle_1s_ease-in-out_infinite]' : '' }}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <svg class="h-6 w-6 transition-transform duration-200 group-hover:scale-110 {{ $this->unreadCount > 0 ? 'animate-[wiggle_1s_ease-in-out_infinite]' : '' }}"
+             viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9" />
             <path d="M13.73 21a2 2 0 0 1-3.46 0" />
         </svg>
@@ -14,7 +16,85 @@
                 {{ $this->unreadCount > 99 ? '99+' : $this->unreadCount }}
             </span>
         @endif
-    </a>
+    </button>
+
+    {{-- Dropdown panel --}}
+    <div
+        x-show="open"
+        x-transition:enter="transition ease-out duration-150"
+        x-transition:enter-start="opacity-0 scale-95 -translate-y-1"
+        x-transition:enter-end="opacity-100 scale-100 translate-y-0"
+        x-transition:leave="transition ease-in duration-100"
+        x-transition:leave-start="opacity-100 scale-100 translate-y-0"
+        x-transition:leave-end="opacity-0 scale-95 -translate-y-1"
+        x-cloak
+        class="absolute right-0 top-full z-50 mt-2 w-80 sm:w-96 rounded-2xl bg-white shadow-2xl ring-1 ring-black/5 overflow-hidden"
+        style="display:none;"
+    >
+        {{-- Header --}}
+        <div class="flex items-center justify-between border-b border-slate-100 px-4 py-3 bg-gradient-to-r from-indigo-50 to-purple-50">
+            <div class="flex items-center gap-2">
+                <span class="text-sm font-bold text-slate-900">Notifications</span>
+                @if ($this->unreadCount > 0)
+                    <span class="rounded-full bg-indigo-600 px-2 py-0.5 text-[10px] font-black text-white">{{ $this->unreadCount }}</span>
+                @endif
+            </div>
+            <div class="flex items-center gap-2">
+                @if ($this->unreadCount > 0)
+                    <button wire:click="markAllRead" class="text-xs font-semibold text-indigo-600 hover:text-indigo-800">
+                        Mark all read
+                    </button>
+                @endif
+                <button x-on:click="open = false" class="rounded-lg p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600">
+                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                        <path d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        {{-- List --}}
+        <div class="max-h-[420px] overflow-y-auto divide-y divide-slate-50">
+            @forelse ($this->notifications as $n)
+                <div class="flex items-start gap-3 px-4 py-3 {{ !$n->read_at ? 'bg-indigo-50/40' : 'hover:bg-slate-50' }} transition-colors">
+                    <div class="mt-0.5 flex-shrink-0 grid h-8 w-8 place-items-center rounded-xl {{ !$n->read_at ? 'bg-indigo-600' : 'bg-slate-200' }}">
+                        <svg class="h-4 w-4 {{ !$n->read_at ? 'text-white' : 'text-slate-500' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+                        </svg>
+                    </div>
+                    <div class="min-w-0 flex-1">
+                        <div class="flex items-start justify-between gap-2">
+                            <p class="text-xs font-bold text-slate-900 leading-snug">{{ $n->title }}</p>
+                            @if (!$n->read_at)
+                                <button wire:click="markRead({{ $n->id }})" class="flex-shrink-0 text-[10px] text-indigo-500 hover:text-indigo-700 font-semibold whitespace-nowrap">
+                                    Mark read
+                                </button>
+                            @endif
+                        </div>
+                        @if ($n->body)
+                            <p class="mt-0.5 text-xs text-slate-500 leading-snug line-clamp-2">{{ $n->body }}</p>
+                        @endif
+                        <div class="mt-1 flex items-center justify-between gap-2">
+                            <span class="text-[10px] text-slate-400">{{ $n->created_at?->diffForHumans() }}</span>
+                            @if ($n->link)
+                                <a href="{{ $n->link }}" wire:click="markRead({{ $n->id }})" x-on:click="open = false"
+                                   class="text-[10px] font-semibold text-indigo-600 hover:text-indigo-800">
+                                    Open →
+                                </a>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+            @empty
+                <div class="px-4 py-10 text-center">
+                    <svg class="mx-auto h-10 w-10 text-slate-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                        <path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+                    </svg>
+                    <p class="mt-2 text-xs font-semibold text-slate-500">No notifications</p>
+                </div>
+            @endforelse
+        </div>
+    </div>
 
     <style>
     @keyframes wiggle {

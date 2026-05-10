@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\BelongsToTenant;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Model;
@@ -9,8 +10,10 @@ use Illuminate\Database\Eloquent\Model;
 class Score extends Model
 {
     use HasFactory;
+    use BelongsToTenant;
 
     protected $fillable = [
+        'tenant_id',
         'student_id',
         'subject_id',
         'class_id',
@@ -25,6 +28,7 @@ class Score extends Model
     ];
 
     protected $casts = [
+        'tenant_id' => 'integer',
         'student_id' => 'integer',
         'subject_id' => 'integer',
         'class_id' => 'integer',

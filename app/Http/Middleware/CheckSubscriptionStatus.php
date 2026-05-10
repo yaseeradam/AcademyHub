@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use Closure;
+use App\Support\TenantSettings;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -15,7 +16,12 @@ class CheckSubscriptionStatus
      */
     public function handle(Request $request, Closure $next): Response
     {
-        $settingsPath = storage_path('app/myacademy/settings.json');
+        // Super admin routes don't belong to any tenant — skip subscription checks entirely.
+        if ($request->is('superadmin', 'superadmin/*')) {
+            return $next($request);
+        }
+
+        $settingsPath = TenantSettings::settingsPath();
         $settings = file_exists($settingsPath) ? json_decode(file_get_contents($settingsPath), true) : [];
         // Fallback to exactly 1 year if not set
         $dueDate = !empty($settings['subscription_due_date'])

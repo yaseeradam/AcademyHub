@@ -77,6 +77,7 @@ Route::prefix('whatsapp')->group(function () {
     Route::post('subscribe/{userId}',   [\App\Http\Controllers\Api\WhatsAppController::class, 'subscribe']);
     Route::post('unsubscribe/{userId}', [\App\Http\Controllers\Api\WhatsAppController::class, 'unsubscribe']);
     Route::post('ai/ask',               [\App\Http\Controllers\Api\WhatsAppController::class, 'askAi']);
+    Route::post('login',               [\App\Http\Controllers\Api\WhatsAppController::class, 'login']);
     Route::post('register',             [\App\Http\Controllers\Api\WhatsAppController::class, 'registerUser']);
     Route::post('verify',               [\App\Http\Controllers\Api\WhatsAppController::class, 'verifyOTP']);
     Route::post('staff/homework',       [\App\Http\Controllers\Api\WhatsAppController::class, 'staffHomework']);

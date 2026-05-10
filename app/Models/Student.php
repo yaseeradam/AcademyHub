@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\BelongsToTenant;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -12,8 +13,11 @@ use App\Models\Homework;
 class Student extends Model
 {
     use HasFactory;
+    use BelongsToTenant;
 
     protected $fillable = [
+        'tenant_id',
+        'user_id',
         'admission_number',
         'first_name',
         'last_name',
@@ -30,12 +34,24 @@ class Student extends Model
         'custom_fields',
     ];
 
+    protected $hidden = [
+        'password',
+    ];
+
     protected $casts = [
+        'tenant_id' => 'integer',
+        'user_id' => 'integer',
         'class_id' => 'integer',
         'section_id' => 'integer',
         'dob' => 'date',
+        'password' => 'hashed',
         'custom_fields' => 'array',
     ];
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
 
     public function schoolClass(): BelongsTo
     {

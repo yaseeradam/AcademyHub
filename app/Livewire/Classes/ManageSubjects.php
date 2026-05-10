@@ -18,13 +18,14 @@ class ManageSubjects extends Component
     public function mount(SchoolClass $class)
     {
         $this->class = $class;
-        $this->selectedSubjects = $class->defaultSubjects->pluck('id')->toArray();
+        // Store as strings so Livewire checkbox wire:model comparison works correctly
+        $this->selectedSubjects = $class->defaultSubjects->pluck('id')->map(fn($id) => (string) $id)->toArray();
     }
 
     public function save()
     {
-        $this->class->defaultSubjects()->sync($this->selectedSubjects);
-        
+        // Cast back to integers for sync
+        $this->class->defaultSubjects()->sync(array_map('intval', $this->selectedSubjects));
         $this->dispatch('alert', message: 'Class subjects updated successfully.', type: 'success');
     }
 

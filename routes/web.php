@@ -6,7 +6,8 @@ use App\Http\Controllers\BillingExportController;
 use App\Http\Controllers\CbtExportController;
 use App\Http\Controllers\AdmissionFormController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
-use App\Http\Controllers\BackupController;
+use App\Http\Controllers\UtilityController;
+
 use App\Http\Controllers\BulkReportCardsController;
 use App\Http\Controllers\CertificateController;
 use App\Http\Controllers\ReportCardController;
@@ -66,25 +67,9 @@ use App\Livewire\Settings\CustomFields;
 |
 */
 
-Route::get('/', function () {
-    if (config('myacademy.mode') === 'cbt') {
-        return redirect()->route('cbt.student');
-    }
+Route::get('/', [UtilityController::class, 'welcome']);
 
-    return auth()->check()
-        ? redirect()->route('dashboard')
-        : redirect()->route('login');
-});
-
-Route::get('/home', function () {
-    if (config('myacademy.mode') === 'cbt') {
-        return redirect()->route('cbt.student');
-    }
-
-    return auth()->check()
-        ? redirect()->route('dashboard')
-        : redirect()->route('login');
-});
+Route::get('/home', [UtilityController::class, 'home']);
 
 // CBT Portal Routes (No restrictions)
 Route::get('/cbt/portal', CbtPortalStart::class)->name('cbt.portal');
@@ -94,14 +79,15 @@ Route::get('/cbt/student', CbtPortalStart::class)->name('cbt.student');
 Route::get('/cbt/student/{attempt}', CbtPortalTake::class)->name('cbt.student.take');
 
 // Fresh CSRF token endpoint — used by JS logout to prevent 419 Page Expired
-Route::get('/csrf-token', function () {
-    return response()->json(['token' => csrf_token()]);
-});
+Route::get('/csrf-token', [UtilityController::class, 'csrfToken']);
 
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthenticatedSessionController::class, 'create'])->name('login');
-    Route::post('/login', [AuthenticatedSessionController::class, 'store'])->name('login.store');
+    Route::post('/login', [AuthenticatedSessionController::class, 'store'])
+        ->middleware('throttle:5,1')  // 5 attempts per 1 minute per IP
+        ->name('login.store');
 });
+
 
 Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])
     ->middleware('auth')
@@ -127,6 +113,10 @@ Route::get('/student/results', \App\Livewire\Student\Results::class)
     ->middleware('student.session')
     ->name('student.results');
 
+Route::get('/student/report-card', [UtilityController::class, 'studentReportCard'])
+    ->middleware('student.session')
+    ->name('student.report-card');
+
 Route::get('/student/attendance', \App\Livewire\Student\Attendance::class)
     ->middleware('student.session')
     ->name('student.attendance');
@@ -144,23 +134,7 @@ Route::get('/student/profile', \App\Livewire\Student\Profile::class)
     ->name('student.profile');
 
 Route::middleware(['auth', 'active'])->group(function () {
-    Route::get('/dashboard', function () {
-        $user = auth()->user();
-        if ($user?->role === 'admin') {
-            return view('pages.dashboard');
-        }
-        if ($user?->role === 'teacher') {
-            return view('pages.dashboard-teacher');
-        }
-        if ($user?->role === 'parent') {
-            return redirect()->route('parents.dashboard');
-        }
-        if ($user?->role === 'bursar') {
-            return view('pages.dashboard-bursar');
-        }
-
-        return view('pages.dashboard');
-    })->name('dashboard');
+    Route::get('/dashboard', [UtilityController::class, 'dashboard'])->name('dashboard');
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile');
     Route::post('/profile/details', [ProfileController::class, 'updateDetails'])->name('profile.details');
@@ -261,13 +235,8 @@ Route::middleware(['auth', 'active'])->group(function () {
             ->name('cbt.exams.edit');
         Route::get('/cbt/exams/{exam}/pdf', [CbtExportController::class, 'examPdf'])
             ->name('cbt.exams.pdf');
-        Route::get('/cbt/sample-download', function () {
-            $content = "1. What is the powerhouse of the cell?\nA. Nucleus\nB. Mitochondria\nC. Ribosome\nD. Golgi body\nANS: B\nMARKS: 2\n\n2. Which planet is closest to the sun?\nA. Earth\nB. Venus\nC. Mercury\nD. Mars\nANS: C\nMARKS: 1\n\n3. What is the chemical symbol for water?\nA. CO2\nB. H2O\nC. NaCl\nD. O2\nANS: B\nMARKS: 1\n\n4. Define photosynthesis and explain its importance to plants.\nTYPE: theory\nMARKS: 5\n\n5. Describe the water cycle.\nTYPE: theory\nMARKS: 4\n";
-            return response($content, 200, [
-                'Content-Type'        => 'text/plain',
-                'Content-Disposition' => 'attachment; filename="sample_questions.txt"',
-            ]);
-        })->name('cbt.sample-download');
+        Route::get('/cbt/sample-download', [UtilityController::class, 'cbtSampleDownload'])
+            ->name('cbt.sample-download');
 
         Route::get('/analytics', \App\Livewire\Analytics\Dashboard::class)
             ->middleware('permission:analytics.view')
@@ -299,25 +268,13 @@ Route::middleware(['auth', 'active'])->group(function () {
         Route::get('/homework/{id}/submissions', \App\Livewire\Homework\Submissions::class)->name('homework.submissions');
 
         
-        Route::get('/settings/debug', function() {
-            return response()->json([
-                'config_values' => [
-                    'rc_show_position' => config('myacademy.rc_show_position'),
-                    'rc_show_attendance' => config('myacademy.rc_show_attendance'),
-                    'rc_show_next_term_date' => config('myacademy.rc_show_next_term_date'),
-                    'rc_show_teacher_remarks' => config('myacademy.rc_show_teacher_remarks'),
-                    'rc_show_principal_remarks' => config('myacademy.rc_show_principal_remarks'),
-                ],
-                'cache_key_exists' => \Illuminate\Support\Facades\Cache::has('myacademy_settings_cache'),
-                'settings_file_exists' => file_exists(storage_path('app/myacademy/settings.json')),
-                'settings_file_content' => file_exists(storage_path('app/myacademy/settings.json')) 
-                    ? json_decode(file_get_contents(storage_path('app/myacademy/settings.json')), true) 
-                    : null,
-            ]);
-        })->name('settings.debug');
+        if (config('app.debug')) {
+            Route::get('/settings/debug', [UtilityController::class, 'settingsDebug'])
+                ->middleware('role:admin')
+                ->name('settings.debug');
+        }
         Route::get('/results/broadsheet', ResultsBroadsheet::class)->middleware('permission:results.broadsheet')->name('results.broadsheet');
         Route::get('/results/submissions', ResultsSubmissions::class)->middleware('role:admin')->name('results.submissions');
-        Route::get('/results/report-card/{student}', [ReportCardController::class, 'download'])->name('results.report-card');
 
         Route::get('/events', EventsIndex::class)->name('events');
         Route::get('/timetable', TimetableIndex::class)->name('timetable');
@@ -325,6 +282,11 @@ Route::middleware(['auth', 'active'])->group(function () {
         Route::get('/certificates', CertificatesManager::class)->name('certificates');
         Route::get('/certificates/{certificate}/download', [CertificateController::class, 'download'])->name('certificates.download');
     });
+
+    // Results (Shared between Admin, Teacher, and Parent)
+    Route::get('/results/report-card/{student}', [ReportCardController::class, 'download'])
+        ->middleware('role:admin,teacher,parent')
+        ->name('results.report-card');
 
     Route::middleware('role:bursar')->group(function () {
         Route::view('/accounts', 'pages.accounts.index')->middleware('permission:billing.transactions')->name('accounts');
@@ -344,9 +306,7 @@ Route::middleware(['auth', 'active'])->group(function () {
         Route::get('/settings/templates', [SettingsController::class, 'showTemplates'])->name('settings.templates');
         Route::post('/settings/templates', [SettingsController::class, 'updateTemplates'])->name('settings.update-templates');
         Route::get('/settings/templates/preview/{type}/{template}', [SettingsController::class, 'previewTemplate'])->name('settings.templates.preview');
-        Route::get('/settings/backup', [BackupController::class, 'index'])->middleware('permission:backup.manage')->name('settings.backup');
-        Route::post('/settings/backup', [BackupController::class, 'create'])->middleware('permission:backup.manage')->name('settings.backup.create');
-        Route::post('/settings/restore', [BackupController::class, 'restore'])->middleware('permission:backup.manage')->name('settings.restore');
+
         Route::get('/settings/audit-logs', AuditLogsIndex::class)->middleware('permission:audit.view')->name('settings.audit-logs');
         Route::get('/settings/custom-fields', CustomFields::class)->name('settings.custom-fields');
         Route::get('/settings/subscription', \App\Livewire\Admin\SubscriptionBilling::class)->name('settings.subscription');
@@ -366,7 +326,13 @@ Route::middleware(['auth', 'active'])->group(function () {
 // ══════════════════════════════════════════════════════════════════════
 // SUPER ADMIN ROUTES (Multi-Tenant Management)
 // ══════════════════════════════════════════════════════════════════════
-Route::middleware(['auth', 'superadmin'])->prefix('superadmin')->name('superadmin.')->group(function() {
-    Route::get('/', \App\Http\Controllers\SuperAdmin\DashboardController::class)->name('dashboard');
-    Route::resource('tenants', \App\Http\Controllers\SuperAdmin\TenantController::class)->except(['show']);
+Route::prefix('superadmin')->name('superadmin.')->group(function () {
+    Route::get('/login', [\App\Http\Controllers\SuperAdmin\LoginController::class, 'create'])->name('login');
+    Route::post('/login', [\App\Http\Controllers\SuperAdmin\LoginController::class, 'store'])->name('login.store');
+    Route::post('/logout', [\App\Http\Controllers\SuperAdmin\LoginController::class, 'destroy'])->name('logout');
+
+    Route::middleware(['auth', 'superadmin'])->group(function () {
+        Route::get('/', \App\Http\Controllers\SuperAdmin\DashboardController::class)->name('dashboard');
+        Route::resource('tenants', \App\Http\Controllers\SuperAdmin\TenantController::class)->except(['show']);
+    });
 });

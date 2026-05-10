@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\BelongsToTenant;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -10,8 +11,10 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class CbtExam extends Model
 {
     use HasFactory;
+    use BelongsToTenant;
 
     protected $fillable = [
+        'tenant_id',
         'title',
         'description',
         'class_id',
@@ -42,6 +45,7 @@ class CbtExam extends Model
     ];
 
     protected $casts = [
+        'tenant_id' => 'integer',
         'class_id' => 'integer',
         'subject_id' => 'integer',
         'term' => 'integer',

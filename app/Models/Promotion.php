@@ -2,12 +2,16 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\BelongsToTenant;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Promotion extends Model
 {
+    use BelongsToTenant;
+
     protected $fillable = [
+        'tenant_id',
         'student_id',
         'from_class_id',
         'from_section_id',
@@ -19,6 +23,7 @@ class Promotion extends Model
     ];
 
     protected $casts = [
+        'tenant_id' => 'integer',
         'student_id' => 'integer',
         'from_class_id' => 'integer',
         'from_section_id' => 'integer',
@@ -43,4 +48,3 @@ class Promotion extends Model
         return $this->belongsTo(SchoolClass::class, 'to_class_id');
     }
 }
-

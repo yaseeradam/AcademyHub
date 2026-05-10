@@ -2,12 +2,16 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\BelongsToTenant;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class AcademicTerm extends Model
 {
+    use BelongsToTenant;
+
     protected $fillable = [
+        'tenant_id',
         'academic_session_id',
         'name',
         'term_number',
@@ -17,6 +21,7 @@ class AcademicTerm extends Model
     ];
 
     protected $casts = [
+        'tenant_id' => 'integer',
         'academic_session_id' => 'integer',
         'term_number' => 'integer',
         'starts_on' => 'date',

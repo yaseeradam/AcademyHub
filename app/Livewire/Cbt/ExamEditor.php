@@ -10,6 +10,7 @@ use App\Models\CbtAttempt;
 use App\Models\InAppNotification;
 use App\Models\SchoolClass;
 use App\Models\Student;
+use App\Models\StudentNotification;
 use App\Models\Subject;
 use App\Models\SubjectAllocation;
 use App\Models\User;
@@ -1140,6 +1141,19 @@ class ExamEditor extends Component
 
         Audit::log('cbt.exam_live', $exam, ['user_id' => $user->id]);
 
+        // Notify all active students in the exam's class
+        $subject = $exam->subject?->name ?? 'Unknown Subject';
+        Student::where('class_id', $exam->class_id)
+            ->where('status', 'Active')
+            ->pluck('id')
+            ->each(fn ($studentId) => StudentNotification::send(
+                $studentId,
+                'Exam Available: ' . $exam->title,
+                "Your {$subject} exam is now live. Access code: {$code}",
+                'exam',
+                route('student.exams')
+            ));
+
         $this->dispatch('refresh');
         $this->dispatch('alert', message: 'Exam is now live. Students can take it.', type: 'success');
     }
@@ -1173,7 +1187,46 @@ class ExamEditor extends Component
             return;
         }
 
+        // Block if any active student hasn't finished
+        $totalStudents = Student::where('class_id', $exam->class_id)->where('status', 'Active')->count();
+        $finishedCount = CbtAttempt::where('exam_id', $exam->id)
+            ->where(function ($q) {
+                $q->whereNotNull('submitted_at')->orWhereNotNull('terminated_at');
+            })->count();
+
+        if ($finishedCount < $totalStudents) {
+            $remaining = $totalStudents - $finishedCount;
+            $this->dispatch('alert', message: "{$remaining} student(s) have not finished the exam yet. End the exam first or wait for all to submit.", type: 'warning');
+            return;
+        }
+
+        // Block if exam has theory and not all attempts are marked
+        $hasTheory = $exam->questions->contains('type', 'theory');
+        if ($hasTheory) {
+            $unmarked = CbtAttempt::where('exam_id', $exam->id)
+                ->whereNotNull('submitted_at')
+                ->where(fn ($q) => $q->whereNull('theory_status')->orWhere('theory_status', '!=', 'marked'))
+                ->count();
+
+            if ($unmarked > 0) {
+                $this->dispatch('alert', message: "{$unmarked} attempt(s) still have unmarked theory questions. Mark all theory answers before releasing results.", type: 'warning');
+                return;
+            }
+        }
+
         $exam->forceFill(['results_released_at' => now()])->save();
+
+        // Notify all students in the class
+        Student::where('class_id', $exam->class_id)
+            ->where('status', 'Active')
+            ->pluck('id')
+            ->each(fn ($studentId) => StudentNotification::send(
+                $studentId,
+                'Results Released: ' . $exam->title,
+                'Your results for ' . $exam->title . ' are now available. Check your Exams page to view your score.',
+                'exam',
+                route('student.exams')
+            ));
 
         Audit::log('cbt.results_released', $exam, ['released_by' => $user->id]);
 

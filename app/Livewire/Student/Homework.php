@@ -4,6 +4,7 @@ namespace App\Livewire\Student;
 
 use App\Models\Student;
 use App\Models\HomeworkSubmission;
+use App\Models\InAppNotification;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 
@@ -13,7 +14,7 @@ class Homework extends Component
 
     public $student;
     public $homework;
-    public $selectedHomework;
+    public $selectedHomeworkId = null;
     public $submission = '';
     public $attachment;
     public $filter = 'pending';
@@ -49,10 +50,26 @@ class Homework extends Component
 
     public function selectHomework($homeworkId)
     {
-        $this->selectedHomework = $this->student->getHomeworkForStudent()
-            ->firstWhere('id', $homeworkId);
+        $this->selectedHomeworkId = $homeworkId;
         $this->submission = '';
         $this->attachment = null;
+    }
+
+    public function closePanel(): void
+    {
+        $this->selectedHomeworkId = null;
+        $this->submission = '';
+        $this->attachment = null;
+        $this->loadHomework();
+    }
+    public function getSelectedHomeworkProperty()
+    {
+        if (! $this->selectedHomeworkId) return null;
+
+        return \App\Models\Homework::where('id', $this->selectedHomeworkId)
+            ->where('class_id', $this->student->class_id)
+            ->with(['subject', 'teacher', 'submissions' => fn($q) => $q->where('student_id', $this->student->id)])
+            ->first();
     }
 
     public function submitHomework()
@@ -67,16 +84,25 @@ class Homework extends Component
             $attachmentPath = $this->attachment->store('homework-submissions', 'public');
         }
 
+        $hw = $this->selectedHomework;
+
         HomeworkSubmission::create([
-            'homework_id' => $this->selectedHomework->id,
-            'student_id' => $this->student->id,
-            'submission' => $this->submission,
-            'attachment' => $attachmentPath,
+            'homework_id' => $hw->id,
+            'student_id'  => $this->student->id,
+            'submission'  => $this->submission,
+            'attachment'  => $attachmentPath,
             'submitted_at' => now(),
         ]);
 
+        InAppNotification::create([
+            'user_id' => $hw->teacher_id,
+            'title'   => 'Homework Submission',
+            'body'    => $this->student->full_name . ' submitted "' . $hw->title . '" (' . $hw->subject->name . ')',
+            'link'    => route('homework.index'),
+        ]);
+
         session()->flash('success', 'Homework submitted successfully!');
-        $this->selectedHomework = null;
+        $this->closePanel();
         $this->submission = '';
         $this->attachment = null;
         $this->loadHomework();

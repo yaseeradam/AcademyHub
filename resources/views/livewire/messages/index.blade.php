@@ -1,214 +1,312 @@
 @php($user = auth()->user())
 
 @php($activeConversation = $conversationId ? $this->conversations->firstWhere('id', $conversationId) : null)
-@php($activeOtherId = data_get($activeConversation, 'other_user_id'))
 @php($activeTitle = data_get($activeConversation, 'title', 'Chat'))
 @php($activePhotoUrl = data_get($activeConversation, 'other_user_photo_url'))
 
 <div class="-mx-6 -my-6 overflow-hidden">
-<div class="bg-gradient-to-br from-slate-100 via-gray-50 to-blue-50 flex h-[calc(100vh-4rem)]">
-    <!-- Sidebar - User List -->
-    <div class="w-full lg:w-96 bg-white border-r border-gray-200 flex flex-col shadow-xl">
-        <!-- Header -->
-        <div class="bg-gradient-to-r from-emerald-600 to-teal-600 p-4 shadow-lg">
-            <div class="flex items-center justify-between">
-                <div class="flex items-center gap-3">
-                    <div class="h-10 w-10 rounded-full bg-white/20 backdrop-blur-sm grid place-items-center">
-                        <svg class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                            <path d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                        </svg>
+<div class="flex h-[calc(100vh-4rem)] bg-slate-100">
+
+    {{-- ===================== SIDEBAR ===================== --}}
+    {{--
+        Mobile: full width, hidden when a conversation is open
+        Desktop: fixed width, always visible
+    --}}
+    <div class="flex flex-col bg-white border-r border-slate-100 shadow-sm
+                {{ $conversationId ? 'hidden lg:flex' : 'flex w-full' }}
+                lg:flex lg:w-80 xl:w-96">
+
+        {{-- Header --}}
+        <div class="relative overflow-hidden px-5 py-5 flex-shrink-0" style="background-color: #1a2e4a;">
+            <div class="absolute inset-0" style="background: radial-gradient(ellipse at top left, #1e3a5f 0%, transparent 70%);"></div>
+            <div class="relative flex items-center justify-between">
+                <div>
+                    <div class="flex items-center gap-2 mb-0.5">
+                        <span class="h-2 w-2 rounded-full bg-emerald-400"></span>
+                        <span class="text-xs font-semibold uppercase tracking-widest" style="color:#93c5fd;">Messaging</span>
                     </div>
-                    <div>
-                        <h1 class="text-lg font-bold text-white">Messages</h1>
-                        <p class="text-xs text-white/80">{{ $user->name }}</p>
-                    </div>
+                    <h1 class="text-lg font-bold text-white">Messages</h1>
+                    <p class="text-xs mt-0.5" style="color:#93c5fd;">{{ $user->name }}</p>
                 </div>
-                <a href="{{ route('more-features') }}" class="rounded-lg bg-white/20 backdrop-blur-sm px-3 py-1.5 text-xs font-semibold text-white hover:bg-white/30 transition">
-                    Back
-                </a>
+                <div class="flex items-center gap-2">
+                    <button wire:click="openNewChat"
+                            class="grid h-9 w-9 place-items-center rounded-xl text-white transition-all"
+                            style="background:rgba(255,255,255,0.15);"
+                            title="New message">
+                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                            <path d="M12 5v14M5 12h14"/>
+                        </svg>
+                    </button>
+                    <a href="{{ route('more-features') }}"
+                       class="rounded-xl px-3 py-1.5 text-xs font-semibold text-white transition-all"
+                       style="background:rgba(255,255,255,0.12);">
+                        ← Back
+                    </a>
+                </div>
             </div>
         </div>
 
-        <!-- Search -->
-        <div class="p-3 border-b border-gray-200 bg-gray-50">
-            <div class="relative">
-                <input wire:model.live.debounce.250ms="userSearch" class="w-full rounded-xl border-0 bg-white pl-10 pr-4 py-2.5 text-sm shadow-sm ring-1 ring-gray-200 focus:ring-2 focus:ring-emerald-500" placeholder="Search users..." />
-                <svg class="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
-            </div>
-        </div>
-
-        <!-- User List -->
+        {{-- Conversation list --}}
         <div class="flex-1 overflow-y-auto">
-            @foreach($this->recipientOptions as $u)
-                @php($unread = (int) ($this->unreadByUser[$u->id] ?? 0))
-                <button
-                    type="button"
-                    wire:click="startConversation({{ $u->id }})"
-                    class="w-full flex items-center gap-3 p-4 border-b transition group {{ (int) $activeOtherId === (int) $u->id ? 'bg-emerald-50 border-emerald-100' : 'hover:bg-gray-50 border-gray-100' }}"
-                >
-                    @if ($u->profile_photo_url)
-                        <img
-                            src="{{ $u->profile_photo_url }}"
-                            alt="{{ $u->name }}"
-                            class="h-12 w-12 rounded-full object-cover ring-1 ring-inset ring-gray-200 shadow-sm"
-                        />
-                    @else
-                        <div class="h-12 w-12 rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 grid place-items-center text-white font-bold shadow-lg transition">
-                            {{ strtoupper(substr($u->name, 0, 1)) }}
-                        </div>
-                    @endif
-                    <div class="flex-1 text-left min-w-0">
-                        <div class="font-semibold text-gray-900 truncate">{{ $u->name }}</div>
-                        <div class="text-xs text-gray-500 capitalize">{{ $u->role }}</div>
+            @forelse($this->conversations as $conv)
+                @php($isActive = (int) $conversationId === (int) $conv['id'])
+                @php($unread = (int) ($conv['unread_count'] ?? 0))
+                <button type="button"
+                        wire:click="openConversation({{ $conv['id'] }})"
+                        class="group flex w-full items-center gap-3 border-b border-slate-50 px-4 py-3.5 text-left transition-colors {{ $isActive ? 'bg-amber-50' : 'hover:bg-slate-50' }}">
+                    <div class="relative flex-shrink-0">
+                        @if(!empty($conv['other_user_photo_url']))
+                            <img src="{{ $conv['other_user_photo_url'] }}" alt="{{ $conv['title'] }}"
+                                 class="h-11 w-11 rounded-full object-cover ring-2 {{ $isActive ? 'ring-amber-400' : 'ring-slate-100' }}"/>
+                        @else
+                            <div class="grid h-11 w-11 place-items-center rounded-full text-sm font-bold text-white {{ $isActive ? 'bg-amber-500' : 'bg-slate-700' }}">
+                                {{ strtoupper(substr($conv['title'], 0, 1)) }}
+                            </div>
+                        @endif
+                        @if($unread > 0)
+                            <span class="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-amber-500 text-[9px] font-black text-white ring-2 ring-white">
+                                {{ $unread > 9 ? '9+' : $unread }}
+                            </span>
+                        @endif
                     </div>
-                    @if($unread > 0)
-                        <div class="inline-flex min-w-[1.25rem] items-center justify-center rounded-full bg-red-600 px-2 py-0.5 text-[10px] font-black leading-none text-white shadow-sm">
-                            {{ $unread > 99 ? '99+' : $unread }}
+                    <div class="min-w-0 flex-1">
+                        <div class="flex items-center justify-between gap-1">
+                            <div class="truncate text-sm font-semibold {{ $isActive ? 'text-amber-700' : 'text-slate-800' }}">
+                                {{ $conv['title'] }}
+                            </div>
+                            @if($conv['last_message_at'])
+                                <div class="flex-shrink-0 text-[10px] text-slate-400">
+                                    {{ $conv['last_message_at']->diffForHumans(short: true) }}
+                                </div>
+                            @endif
                         </div>
-                    @endif
-                    @if((int) $activeOtherId === (int) $u->id)
-                        <div class="h-2.5 w-2.5 rounded-full bg-emerald-500 shadow-sm"></div>
-                    @endif
-                    <svg class="h-5 w-5 text-gray-400 group-hover:text-emerald-600 transition" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                        <path d="M9 5l7 7-7 7" />
+                        @if($conv['last_message'])
+                            <div class="mt-0.5 truncate text-xs {{ $unread > 0 ? 'font-semibold text-slate-700' : 'text-slate-400' }}">
+                                {{ $conv['last_message'] }}
+                            </div>
+                        @else
+                            <div class="mt-0.5 text-xs text-slate-400 italic">No messages yet</div>
+                        @endif
+                    </div>
+                    <svg class="h-4 w-4 flex-shrink-0 text-slate-200 lg:hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path d="M9 5l7 7-7 7"/>
                     </svg>
                 </button>
-            @endforeach
-
-            @if($this->recipientOptions->isEmpty())
-                <div class="p-8 text-center text-sm text-gray-500">
-                    <svg class="mx-auto h-12 w-12 text-gray-300 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                        <path d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                    </svg>
-                    No users found
-                </div>
-            @endif
-        </div>
-
-
-    </div>
-
-    <!-- Chat Window -->
-    <div class="flex-1 flex flex-col bg-[#e5ddd5]" style="background-image: url('data:image/svg+xml,%3Csvg width=&quot;100&quot; height=&quot;100&quot; xmlns=&quot;http://www.w3.org/2000/svg&quot;%3E%3Cpath d=&quot;M0 0h100v100H0z&quot; fill=&quot;%23e5ddd5&quot;/%3E%3Cpath d=&quot;M20 20h60v60H20z&quot; fill=&quot;%23d9d0c7&quot; opacity=&quot;.05&quot;/%3E%3C/svg%3E');">
-        @if(!$conversationId)
-            <div class="flex-1 flex items-center justify-center">
-                <div class="text-center">
-                    <div class="mx-auto h-32 w-32 rounded-full bg-white/80 backdrop-blur-sm grid place-items-center shadow-2xl mb-6">
-                        <svg class="h-16 w-16 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-                            <path d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+            @empty
+                <div class="px-6 py-12 text-center">
+                    <div class="mx-auto mb-3 grid h-12 w-12 place-items-center rounded-2xl bg-slate-100 text-slate-400">
+                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
                         </svg>
                     </div>
-                    <h2 class="text-2xl font-bold text-gray-700 mb-2">{{ config('myacademy.school_name', config('app.name', 'MyAcademy')) }} Messages</h2>
-                    <p class="text-gray-600">Select a user from the sidebar to start chatting</p>
+                    <div class="text-sm font-semibold text-slate-700">No conversations yet</div>
+                    <div class="mt-1 text-xs text-slate-400">Tap + to start a new message</div>
+                </div>
+            @endforelse
+        </div>
+    </div>
+
+    {{-- ===================== CHAT PANEL ===================== --}}
+    {{--
+        Mobile: full width, hidden when no conversation is open
+        Desktop: flex-1, always visible
+    --}}
+    <div class="flex flex-col bg-slate-50
+                {{ $conversationId ? 'flex w-full' : 'hidden lg:flex' }}
+                lg:flex lg:flex-1">
+
+        @if(!$conversationId)
+            {{-- Desktop empty state --}}
+            <div class="flex flex-1 items-center justify-center">
+                <div class="text-center">
+                    <div class="mx-auto mb-5 grid h-20 w-20 place-items-center rounded-3xl bg-white shadow-sm ring-1 ring-slate-100 text-slate-300">
+                        <svg class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                            <path d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+                        </svg>
+                    </div>
+                    <div class="text-base font-bold text-slate-700">No conversation selected</div>
+                    <div class="mt-1 text-sm text-slate-400">Pick a conversation or start a new one</div>
+                    <button wire:click="openNewChat"
+                            class="mt-4 inline-flex items-center gap-2 rounded-xl bg-amber-500 px-4 py-2 text-sm font-semibold text-white hover:bg-amber-600 transition-colors">
+                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                            <path d="M12 5v14M5 12h14"/>
+                        </svg>
+                        New Message
+                    </button>
                 </div>
             </div>
         @else
-             <!-- Chat Header -->
-             <div class="bg-white border-b border-gray-200 p-4 shadow-sm">
-                 <div class="flex items-center gap-3">
-                     <div class="h-10 w-10 rounded-full overflow-hidden ring-1 ring-inset ring-gray-200 bg-white">
-                         @if ($activePhotoUrl)
-                             <img
-                                 src="{{ $activePhotoUrl }}"
-                                 alt="{{ $activeTitle }}"
-                                 class="h-10 w-10 object-cover"
-                             />
-                         @else
-                             <div class="h-10 w-10 rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 grid place-items-center text-white font-bold">
-                                 {{ strtoupper(substr($activeTitle !== '' ? $activeTitle : 'C', 0, 1)) }}
-                             </div>
-                         @endif
-                     </div>
-                     <div>
-                         <div class="font-semibold text-gray-900">{{ $activeTitle }}</div>
-                         <div class="text-xs text-gray-500">Online</div>
-                     </div>
-                 </div>
-             </div>
+            {{-- Chat header --}}
+            <div class="flex items-center gap-3 border-b border-slate-100 bg-white px-4 py-3.5 shadow-sm flex-shrink-0">
+                {{-- Back button — mobile only --}}
+                <button wire:click="$set('conversationId', null)"
+                        class="grid h-9 w-9 flex-shrink-0 place-items-center rounded-xl text-slate-500 hover:bg-slate-100 transition-colors lg:hidden">
+                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                        <path d="M15 19l-7-7 7-7"/>
+                    </svg>
+                </button>
+                <div class="relative flex-shrink-0">
+                    @if ($activePhotoUrl)
+                        <img src="{{ $activePhotoUrl }}" alt="{{ $activeTitle }}"
+                             class="h-10 w-10 rounded-full object-cover ring-2 ring-amber-100"/>
+                    @else
+                        <div class="grid h-10 w-10 place-items-center rounded-full bg-slate-700 text-sm font-bold text-white">
+                            {{ strtoupper(substr($activeTitle !== '' ? $activeTitle : 'C', 0, 1)) }}
+                        </div>
+                    @endif
+                    <span class="absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full border-2 border-white bg-emerald-400"></span>
+                </div>
+                <div class="min-w-0 flex-1">
+                    <div class="truncate text-sm font-bold text-slate-900">{{ $activeTitle }}</div>
+                    <div class="text-xs text-emerald-500 font-semibold">Online</div>
+                </div>
+            </div>
 
-            <!-- Messages -->
-             <div class="flex-1 overflow-y-auto p-4 space-y-3" wire:poll.5s>
-                 @foreach($this->chatMessages as $m)
-                     @php($isMe = (int) $m->sender_id === (int) $me->id)
-                     <div class="flex items-end gap-2 {{ $isMe ? 'justify-end' : 'justify-start' }}">
-                         @if(! $isMe)
-                             <div class="shrink-0">
-                                 @if ($m->sender?->profile_photo_url)
-                                     <img
-                                         src="{{ $m->sender?->profile_photo_url }}"
-                                         alt="{{ $m->sender?->name }}"
-                                         class="h-8 w-8 rounded-full object-cover ring-1 ring-inset ring-gray-200 shadow-sm"
-                                     />
-                                 @else
-                                     <x-avatar :name="$m->sender?->name ?? 'User'" size="32" class="ring-1 ring-inset ring-gray-200 shadow-sm" />
-                                 @endif
-                             </div>
-                         @endif
-                         <div class="max-w-[75%]">
-                             @if(!$isMe)
-                                 <div class="text-xs font-semibold text-gray-600 mb-1 ml-2">{{ $m->sender?->name }}</div>
-                             @endif
-                             <div class="rounded-lg {{ $isMe ? 'bg-[#dcf8c6] rounded-tr-none' : 'bg-white rounded-tl-none' }} px-4 py-2 shadow-sm">
-                                @if(trim((string) $m->body) !== '')
-                                    <p class="text-sm text-gray-900 whitespace-pre-wrap">{{ $m->body }}</p>
+            {{-- Messages --}}
+            <div class="flex-1 overflow-y-auto px-4 py-4 space-y-3" wire:poll.5s>
+                @foreach($this->chatMessages as $m)
+                    @php($isMe = (int) $m->sender_id === (int) $me->id)
+                    <div class="flex items-end gap-2 {{ $isMe ? 'justify-end' : 'justify-start' }}">
+                        @if(!$isMe)
+                            <div class="flex-shrink-0">
+                                @if ($m->sender?->profile_photo_url)
+                                    <img src="{{ $m->sender->profile_photo_url }}" alt="{{ $m->sender->name }}"
+                                         class="h-8 w-8 rounded-full object-cover ring-1 ring-slate-200"/>
+                                @else
+                                    <x-avatar :name="$m->sender?->name ?? 'User'" size="32" class="ring-1 ring-slate-200"/>
                                 @endif
-
+                            </div>
+                        @endif
+                        <div class="max-w-[80%] sm:max-w-[72%]">
+                            @if(!$isMe)
+                                <div class="mb-1 ml-1 text-xs font-semibold text-slate-500">{{ $m->sender?->name }}</div>
+                            @endif
+                            <div class="rounded-2xl px-4 py-2.5 shadow-sm {{ $isMe ? 'rounded-br-sm bg-amber-500 text-white' : 'rounded-bl-sm bg-white text-slate-800 ring-1 ring-slate-100' }}">
+                                @if(trim((string) $m->body) !== '')
+                                    <p class="text-sm whitespace-pre-wrap leading-relaxed">{{ $m->body }}</p>
+                                @endif
                                 @if($m->attachment_path)
                                     <div class="mt-2">
-                                        <a
-                                            class="inline-flex items-center gap-2 rounded-lg bg-black/5 px-3 py-2 text-xs font-bold text-gray-800 hover:bg-black/10"
-                                            href="{{ route('messages.attachments.download', $m) }}"
-                                            target="_blank"
-                                        >
-                                            <span>Download</span>
-                                            <span class="font-mono text-[10px] text-gray-600">{{ $m->attachment_name ?: 'attachment' }}</span>
+                                        <a href="{{ route('messages.attachments.download', $m) }}" target="_blank"
+                                           class="inline-flex items-center gap-2 rounded-lg px-3 py-1.5 text-xs font-semibold transition {{ $isMe ? 'bg-white/20 text-white hover:bg-white/30' : 'bg-slate-100 text-slate-700 hover:bg-slate-200' }}">
+                                            <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                <path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"/>
+                                            </svg>
+                                            {{ $m->attachment_name ?: 'attachment' }}
                                         </a>
                                         @if($m->attachment_size)
-                                            <div class="mt-1 text-[10px] text-gray-500">{{ number_format($m->attachment_size / 1024, 1) }} KB</div>
+                                            <div class="mt-0.5 text-[10px] {{ $isMe ? 'text-amber-100' : 'text-slate-400' }}">{{ number_format($m->attachment_size / 1024, 1) }} KB</div>
                                         @endif
                                     </div>
                                 @endif
-                                <div class="text-[10px] text-gray-500 mt-1 text-right">{{ $m->created_at?->format('g:i A') }}</div>
+                                <div class="mt-1 text-right text-[10px] {{ $isMe ? 'text-amber-100' : 'text-slate-400' }}">
+                                    {{ $m->created_at?->format('g:i A') }}
+                                </div>
                             </div>
                         </div>
                     </div>
                 @endforeach
             </div>
 
-            <!-- Input -->
-            <div class="bg-white border-t border-gray-200 p-4">
+            {{-- Input bar --}}
+            <div class="border-t border-slate-100 bg-white px-4 py-3 flex-shrink-0">
+                @if($attachment)
+                    <div class="mb-2 flex items-center justify-between gap-2 rounded-xl bg-amber-50 px-3 py-2 text-xs text-amber-800 ring-1 ring-amber-200">
+                        <div class="truncate font-semibold">📎 {{ $attachment->getClientOriginalName() }}</div>
+                        <button type="button" wire:click="$set('attachment', null)" class="font-bold text-red-500 hover:text-red-600">Remove</button>
+                    </div>
+                @endif
                 <div class="flex items-end gap-2">
-                    <label class="h-12 w-12 rounded-full bg-gray-100 grid place-items-center text-gray-600 shadow-sm hover:bg-gray-200 transition cursor-pointer" title="Attach file">
-                        <input type="file" wire:model="attachment" class="hidden" />
-                        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48" />
+                    <label class="grid h-10 w-10 flex-shrink-0 cursor-pointer place-items-center rounded-xl bg-slate-100 text-slate-500 transition hover:bg-slate-200" title="Attach file">
+                        <input type="file" wire:model="attachment" class="hidden"/>
+                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"/>
                         </svg>
                     </label>
-                    <textarea
-                        wire:model="body"
-                        rows="1"
-                        class="flex-1 rounded-2xl border-0 bg-gray-100 px-4 py-3 text-sm resize-none focus:ring-2 focus:ring-emerald-500"
-                        placeholder="Type a message..."
-                        wire:keydown.enter.prevent="send"
-                    ></textarea>
-                    <button type="button" wire:click="send" class="h-12 w-12 rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 grid place-items-center text-white shadow-lg hover:shadow-xl transition-shadow duration-200">
-                        <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                            <path d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                    <textarea wire:model="body" rows="1"
+                              class="flex-1 resize-none rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm text-slate-800 placeholder-slate-400 focus:border-amber-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-100"
+                              placeholder="Type a message..."
+                              wire:keydown.enter.prevent="send"></textarea>
+                    <button type="button" wire:click="send"
+                            class="grid h-10 w-10 flex-shrink-0 place-items-center rounded-xl bg-amber-500 text-white shadow-sm transition hover:bg-amber-600">
+                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
                         </svg>
                     </button>
                 </div>
-                @if($attachment)
-                    <div class="mt-2 flex items-center justify-between gap-2 rounded-xl bg-gray-50 px-3 py-2 text-xs text-gray-700 ring-1 ring-gray-200">
-                        <div class="truncate"><span class="font-bold">Attached:</span> {{ $attachment->getClientOriginalName() }}</div>
-                        <button type="button" class="text-red-600 font-bold" wire:click="$set('attachment', null)">Remove</button>
-                    </div>
-                @endif
-                @error('body') <div class="mt-2 text-xs text-red-600">{{ $message }}</div> @enderror
-                @error('attachment') <div class="mt-2 text-xs text-red-600">{{ $message }}</div> @enderror
+                @error('body') <div class="mt-1.5 text-xs text-red-500">{{ $message }}</div> @enderror
+                @error('attachment') <div class="mt-1.5 text-xs text-red-500">{{ $message }}</div> @enderror
             </div>
         @endif
     </div>
+
 </div>
+
+{{-- ===================== NEW MESSAGE MODAL ===================== --}}
+@if($showNewChat)
+    <div class="fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:p-4"
+         style="background:rgba(0,0,0,0.4);"
+         wire:click.self="closeNewChat">
+        {{-- Sheet on mobile, centered modal on sm+ --}}
+        <div class="w-full sm:max-w-md rounded-t-2xl sm:rounded-2xl bg-white shadow-2xl overflow-hidden">
+            {{-- Handle bar — mobile only --}}
+            <div class="flex justify-center pt-3 pb-1 sm:hidden">
+                <div class="h-1 w-10 rounded-full bg-slate-200"></div>
+            </div>
+            {{-- Header --}}
+            <div class="flex items-center justify-between border-b border-slate-100 px-5 py-4">
+                <div class="text-sm font-bold text-slate-900">New Message</div>
+                <button wire:click="closeNewChat" class="grid h-8 w-8 place-items-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-colors">
+                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                        <path d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+            {{-- Search --}}
+            <div class="px-5 py-3 border-b border-slate-100">
+                <div class="relative">
+                    <svg class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                    </svg>
+                    <input wire:model.live.debounce.250ms="userSearch"
+                           class="w-full rounded-xl border border-slate-200 bg-slate-50 py-2.5 pl-9 pr-4 text-sm text-slate-800 placeholder-slate-400 focus:border-amber-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-100"
+                           placeholder="Search by name or email..."
+                           autofocus />
+                </div>
+            </div>
+            {{-- User list --}}
+            <div class="max-h-64 sm:max-h-72 overflow-y-auto">
+                @foreach($this->recipientOptions as $u)
+                    <button type="button"
+                            wire:click="startConversation({{ $u->id }})"
+                            class="flex w-full items-center gap-3 px-5 py-3.5 text-left transition-colors hover:bg-amber-50 border-b border-slate-50 last:border-0">
+                        @if ($u->profile_photo_url)
+                            <img src="{{ $u->profile_photo_url }}" alt="{{ $u->name }}"
+                                 class="h-10 w-10 flex-shrink-0 rounded-full object-cover ring-2 ring-slate-100"/>
+                        @else
+                            <div class="grid h-10 w-10 flex-shrink-0 place-items-center rounded-full bg-slate-700 text-sm font-bold text-white">
+                                {{ strtoupper(substr($u->name, 0, 1)) }}
+                            </div>
+                        @endif
+                        <div class="min-w-0 flex-1">
+                            <div class="truncate text-sm font-semibold text-slate-800">{{ $u->name }}</div>
+                            <div class="text-xs capitalize text-slate-400">{{ $u->role }}</div>
+                        </div>
+                        <svg class="h-4 w-4 flex-shrink-0 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path d="M9 5l7 7-7 7"/>
+                        </svg>
+                    </button>
+                @endforeach
+                @if($this->recipientOptions->isEmpty())
+                    <div class="px-5 py-8 text-center">
+                        <div class="text-sm font-semibold text-slate-600">
+                            {{ trim($userSearch) ? 'No users match "' . $userSearch . '"' : 'No users available' }}
+                        </div>
+                    </div>
+                @endif
+            </div>
+        </div>
+    </div>
+@endif
+
 </div>

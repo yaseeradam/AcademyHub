@@ -24,15 +24,14 @@ class Profile extends Component
 
     public $photo = null;
 
-    public function mount(): void
+    public function mount()
     {
         $studentId = session('student_id');
         if (! $studentId) {
-            redirect()->route('login');
-            return;
+            return redirect()->route('login');
         }
 
-        $this->student = Student::findOrFail($studentId);
+        $this->student = Student::with(['schoolClass', 'section'])->findOrFail($studentId);
         $this->guardian_name    = $this->student->guardian_name    ?? '';
         $this->guardian_phone   = $this->student->guardian_phone   ?? '';
         $this->guardian_address = $this->student->guardian_address ?? '';
@@ -70,7 +69,8 @@ class Profile extends Component
             return;
         }
 
-        $this->student->update(['password' => Hash::make($this->new_password)]);
+        $this->student->password = $this->new_password;
+        $this->student->save();
 
         $this->reset('current_password', 'new_password', 'new_password_confirmation');
         session()->flash('password_success', 'Password updated successfully.');

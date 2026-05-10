@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Student;
 
+use App\Models\AcademicTerm;
 use App\Models\Student;
 use App\Models\AttendanceMark;
 use App\Models\Score;
@@ -31,8 +32,11 @@ class Dashboard extends Component
 
     public function loadStats()
     {
-        $currentSession = config('myacademy.current_session');
-        $currentTerm = config('myacademy.current_term');
+        $currentSession = AcademicTerm::activeSessionName() ?? config('myacademy.current_session', '');
+        $currentTerm = AcademicTerm::activeTermNumber();
+
+        $this->stats['current_session'] = $currentSession;
+        $this->stats['current_term'] = $currentTerm;
 
         // Attendance stats
         $totalAttendance = AttendanceMark::where('student_id', $this->student->id)

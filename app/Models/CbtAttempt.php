@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\BelongsToTenant;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -10,8 +11,10 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class CbtAttempt extends Model
 {
     use HasFactory;
+    use BelongsToTenant;
 
     protected $fillable = [
+        'tenant_id',
         'uuid',
         'exam_id',
         'student_id',
@@ -34,6 +37,7 @@ class CbtAttempt extends Model
     ];
 
     protected $casts = [
+        'tenant_id' => 'integer',
         'exam_id' => 'integer',
         'student_id' => 'integer',
         'started_at' => 'datetime',

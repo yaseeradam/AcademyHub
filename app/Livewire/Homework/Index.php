@@ -47,8 +47,23 @@ class Index extends Component
         $homework = $query->latest()
             ->paginate(10);
 
-        $classes = SchoolClass::orderBy('name')->get();
-        $subjects = Subject::orderBy('name')->get();
+        $user = auth()->user();
+
+        $classIds = $user->role === 'admin'
+            ? null
+            : \App\Models\SubjectAllocation::where('teacher_id', $user->id)->pluck('class_id')->unique();
+
+        $classes = $classIds === null
+            ? SchoolClass::orderBy('name')->get()
+            : SchoolClass::whereIn('id', $classIds)->orderBy('name')->get();
+
+        $subjects = $classIds === null
+            ? Subject::orderBy('name')->get()
+            : Subject::whereIn('id',
+                \App\Models\SubjectAllocation::where('teacher_id', $user->id)
+                    ->when($this->class_id, fn($q) => $q->where('class_id', $this->class_id))
+                    ->pluck('subject_id')->unique()
+              )->orderBy('name')->get();
 
         return view('livewire.homework.index', [
             'homework' => $homework,
@@ -105,12 +120,20 @@ class Index extends Component
     public function save()
     {
         $this->validate([
-            'class_id' => 'required|exists:classes,id',
+            'class_id'   => 'required|exists:classes,id',
             'subject_id' => 'required|exists:subjects,id',
-            'title' => 'required|string|max:255',
-            'content' => 'required|string',
-            'due_date' => 'required|date',
+            'title'      => 'required|string|max:255',
+            'content'    => 'required|string',
+            'due_date'   => 'required|date',
         ]);
+
+        $user = auth()->user();
+        if ($user->role !== 'admin') {
+            $allowed = \App\Models\SubjectAllocation::where('teacher_id', $user->id)
+                ->where('class_id', $this->class_id)
+                ->exists();
+            abort_unless($allowed, 403, 'You are not assigned to this class.');
+        }
 
         $data = [
             'teacher_id' => auth()->id(),
@@ -245,39 +268,18 @@ class Index extends Component
     private function tryGeminiAPI($prompt)
     {
         try {
-            $apiKey = env('GEMINI_API_KEY');
-            if (empty($apiKey)) {
-                \Illuminate\Support\Facades\Log::warning('Gemini API key not configured');
-                return null;
-            }
-            
+            $apiKey = config('services.gemini.key') ?: env('GEMINI_API_KEY');
+            if (empty($apiKey)) return null;
+
             $response = \Illuminate\Support\Facades\Http::withOptions(['verify' => false])
-                ->timeout(30)
+                ->timeout(60)
                 ->post("https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={$apiKey}", [
-                    'contents' => [
-                        [
-                            'parts' => [
-                                ['text' => $prompt]
-                            ]
-                        ]
-                    ]
+                    'contents' => [['parts' => [['text' => $prompt]]]]
                 ]);
 
-            if ($response->successful()) {
-                $data = $response->json();
-                $content = $data['candidates'][0]['content']['parts'][0]['text'] ?? null;
-                
-                if ($content) {
-                    \Illuminate\Support\Facades\Log::info('Gemini API success');
-                    return $content;
-                }
-            }
-            
-            \Illuminate\Support\Facades\Log::warning('Gemini API failed', [
-                'status' => $response->status(),
-                'body' => $response->body()
-            ]);
-            return null;
+            return $response->successful()
+                ? ($response->json()['candidates'][0]['content']['parts'][0]['text'] ?? null)
+                : null;
         } catch (\Exception $e) {
             \Illuminate\Support\Facades\Log::warning('Gemini API error', ['error' => $e->getMessage()]);
             return null;
@@ -287,48 +289,31 @@ class Index extends Component
     private function tryGroqAPI($prompt)
     {
         try {
-            $apiKey = env('GROQ_API_KEY');
-            if (empty($apiKey)) {
-                \Illuminate\Support\Facades\Log::warning('Groq API key not configured');
-                return null;
-            }
-            
+            $raw = config('services.groq.key') ?: env('GROQ_API_KEY');
+            if (empty($raw)) return null;
+
+            // Support comma-separated keys — rotate through them
+            $keys = array_filter(array_map('trim', explode(',', $raw)));
+            $apiKey = $keys[array_rand($keys)];
+
             $response = \Illuminate\Support\Facades\Http::withOptions(['verify' => false])
-                ->timeout(30)
+                ->timeout(60)
                 ->withHeaders([
                     'Authorization' => 'Bearer ' . $apiKey,
-                    'Content-Type' => 'application/json',
+                    'Content-Type'  => 'application/json',
                 ])->post('https://api.groq.com/openai/v1/chat/completions', [
-                    'model' => 'llama-3.3-70b-versatile',
-                    'messages' => [
-                        [
-                            'role' => 'system',
-                            'content' => 'You are an experienced teacher creating homework assignments. Generate a complete, well-structured homework assignment with clear objectives, instructions, questions/tasks, and submission guidelines. Make it age-appropriate, engaging, and educational. Use proper formatting with headings, bullet points, and numbered lists.'
-                        ],
-                        [
-                            'role' => 'user',
-                            'content' => $prompt
-                        ]
+                    'model'       => 'llama-3.3-70b-versatile',
+                    'messages'    => [
+                        ['role' => 'system', 'content' => 'You are an experienced teacher creating homework assignments. Generate complete, well-structured assignments with clear objectives, instructions, tasks, and submission guidelines. Use plain text without markdown symbols.'],
+                        ['role' => 'user',   'content' => $prompt],
                     ],
                     'temperature' => 0.7,
-                    'max_tokens' => 2000
+                    'max_tokens'  => 2000,
                 ]);
 
-            if ($response->successful()) {
-                $data = $response->json();
-                $content = $data['choices'][0]['message']['content'] ?? null;
-                
-                if ($content) {
-                    \Illuminate\Support\Facades\Log::info('Groq API success (fallback)');
-                    return $content;
-                }
-            }
-            
-            \Illuminate\Support\Facades\Log::error('Groq API failed', [
-                'status' => $response->status(),
-                'body' => $response->body()
-            ]);
-            return null;
+            return $response->successful()
+                ? ($response->json()['choices'][0]['message']['content'] ?? null)
+                : null;
         } catch (\Exception $e) {
             \Illuminate\Support\Facades\Log::error('Groq API error', ['error' => $e->getMessage()]);
             return null;

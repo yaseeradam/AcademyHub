@@ -10,7 +10,7 @@
     $hasTheory = $exam->questions->contains('type', 'theory');
 @endphp
 
-<div class="space-y-6" x-data="{ tab: '{{ $tab }}' }">
+<div class="space-y-6" x-data="{ tab: '{{ $tab }}', monitorSearch: '', monitorFilter: '' }">
     <div class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-violet-600 to-purple-600 p-6 shadow-xl">
         <div class="relative">
             <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
@@ -190,7 +190,7 @@
 
 
     <div x-show="tab === 'questions'" class="rounded-2xl bg-white p-6 shadow-lg border border-gray-200">
-        @if ($canEdit)
+        @if ($canEdit && $status === 'draft')
             {{-- Toolbar: AI + Import + Shuffle --}}
             <div class="mb-5 flex flex-wrap items-center gap-2">
                 <button wire:click="openAiPanel" class="flex items-center gap-2 rounded-lg bg-violet-600 px-4 py-2 text-sm font-semibold text-white hover:bg-violet-700">&#10024; Generate with AI</button>
@@ -408,6 +408,13 @@ ANS: C</pre>
             </div>
         @endif
 
+        @if (in_array($status, ['live', 'ended'], true))
+            <div class="mb-5 flex items-center gap-3 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-800">
+                <svg class="h-5 w-5 shrink-0 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>
+                This exam is <strong class="mx-1">{{ ucfirst($status) }}</strong> — questions are locked and cannot be added or modified.
+            </div>
+        @endif
+
         <div class="mt-6 space-y-4">
             @forelse ($exam->questions as $q)
                 <div class="rounded-lg border-2 p-4 shadow-sm transition-all {{ $editingQuestionId === $q->id ? 'border-blue-400 bg-blue-50' : 'border-gray-300 bg-gray-50' }}">
@@ -433,7 +440,7 @@ ANS: C</pre>
                             </div>
                             <div class="mt-3 text-sm font-bold text-gray-700">Marks: {{ (int) $q->marks }}</div>
                         </div>
-                        @if ($canEdit)
+                        @if ($canEdit && $status === 'draft')
                             <div class="flex gap-2 ml-4">
                                 <button wire:click="editQuestion({{ $q->id }})" class="px-4 py-2 bg-blue-500 text-white font-bold rounded-lg hover:bg-blue-600 text-sm">Edit</button>
                                 <button wire:click="deleteQuestion({{ $q->id }})" class="px-4 py-2 bg-red-600 text-white font-bold rounded-lg hover:bg-red-700 text-sm">Delete</button>
@@ -469,19 +476,23 @@ ANS: C</pre>
             @endphp
             
             <div class="grid gap-4 lg:grid-cols-4">
-                <div class="rounded-lg bg-emerald-50 p-4 ring-1 ring-emerald-200">
+                <div class="cursor-pointer rounded-lg bg-emerald-50 p-4 ring-1 ring-emerald-200 hover:ring-2 hover:ring-emerald-400"
+                     @click="monitorFilter = monitorFilter === 'submitted' ? '' : 'submitted'" :class="monitorFilter === 'submitted' ? 'ring-2 ring-emerald-500' : ''">
                     <div class="text-2xl font-bold text-emerald-900">{{ $submittedCount }}</div>
                     <div class="text-xs font-semibold text-emerald-700">Submitted</div>
                 </div>
-                <div class="rounded-lg bg-blue-50 p-4 ring-1 ring-blue-200">
+                <div class="cursor-pointer rounded-lg bg-blue-50 p-4 ring-1 ring-blue-200 hover:ring-2 hover:ring-blue-400"
+                     @click="monitorFilter = monitorFilter === 'in_progress' ? '' : 'in_progress'" :class="monitorFilter === 'in_progress' ? 'ring-2 ring-blue-500' : ''">
                     <div class="text-2xl font-bold text-blue-900">{{ $inProgressCount }}</div>
                     <div class="text-xs font-semibold text-blue-700">In Progress</div>
                 </div>
-                <div class="rounded-lg bg-orange-50 p-4 ring-1 ring-orange-200">
+                <div class="cursor-pointer rounded-lg bg-orange-50 p-4 ring-1 ring-orange-200 hover:ring-2 hover:ring-orange-400"
+                     @click="monitorFilter = monitorFilter === 'terminated' ? '' : 'terminated'" :class="monitorFilter === 'terminated' ? 'ring-2 ring-orange-500' : ''">
                     <div class="text-2xl font-bold text-orange-900">{{ $terminatedCount }}</div>
                     <div class="text-xs font-semibold text-orange-700">Terminated</div>
                 </div>
-                <div class="rounded-lg bg-gray-50 p-4 ring-1 ring-gray-200">
+                <div class="cursor-pointer rounded-lg bg-gray-50 p-4 ring-1 ring-gray-200 hover:ring-2 hover:ring-gray-400"
+                     @click="monitorFilter = monitorFilter === 'not_started' ? '' : 'not_started'" :class="monitorFilter === 'not_started' ? 'ring-2 ring-gray-500' : ''">
                     <div class="text-2xl font-bold text-gray-900">{{ $notStartedCount }}</div>
                     <div class="text-xs font-semibold text-gray-700">Not Started</div>
                 </div>
@@ -489,6 +500,27 @@ ANS: C</pre>
 
             <div class="rounded-2xl bg-white p-6 shadow-lg">
                 @if ($me?->role === 'admin')
+                    {{-- Search & Filter Bar --}}
+                    <div class="mb-4 flex flex-wrap gap-3">
+                        <div class="relative flex-1 min-w-[200px]">
+                            <svg class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35M17 11A6 6 0 115 11a6 6 0 0112 0z"/></svg>
+                            <input
+                                x-model="monitorSearch"
+                                type="text"
+                                placeholder="Search by name or admission no..."
+                                class="w-full rounded-lg border border-gray-300 py-2 pl-9 pr-4 text-sm focus:border-violet-400 focus:ring-2 focus:ring-violet-100"
+                            />
+                        </div>
+                        <select x-model="monitorFilter" class="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-violet-400 focus:ring-2 focus:ring-violet-100">
+                            <option value="">All Statuses</option>
+                            <option value="submitted">Submitted</option>
+                            <option value="in_progress">In Progress</option>
+                            <option value="not_started">Not Started</option>
+                            <option value="terminated">Terminated</option>
+                        </select>
+                        <button x-show="monitorSearch || monitorFilter" @click="monitorSearch = ''; monitorFilter = ''" class="rounded-lg border border-gray-200 px-3 py-2 text-xs font-semibold text-gray-500 hover:bg-gray-50">Clear</button>
+                    </div>
+
                     <div class="space-y-2">
                         @forelse ($roster as $row)
                             @php
@@ -498,7 +530,11 @@ ANS: C</pre>
                                 $answered = (int) ($row['answered'] ?? 0);
                                 $totalQuestions = (int) ($exam?->questions?->count() ?? 0);
                             @endphp
-                            <div class="flex items-center justify-between rounded-lg border bg-gray-50 p-3">
+                            <div class="flex items-center justify-between rounded-lg border bg-gray-50 p-3"
+                                 x-show="
+                                    (monitorFilter === '' || monitorFilter === '{{ $state }}') &&
+                                    (monitorSearch === '' || '{{ strtolower($student->full_name) }}'.includes(monitorSearch.toLowerCase()) || '{{ strtolower($student->admission_number) }}'.includes(monitorSearch.toLowerCase()))
+                                 ">
                                 <div class="flex items-center gap-3">
                                     @if ($student->passport_photo_url)
                                         <img src="{{ $student->passport_photo_url }}" class="h-10 w-10 rounded-lg object-cover" />
@@ -558,6 +594,10 @@ ANS: C</pre>
                         @empty
                             <div class="rounded-lg border-2 border-dashed bg-gray-50 p-6 text-center text-sm text-gray-600">No students</div>
                         @endforelse
+                        <div x-show="monitorSearch !== '' || monitorFilter !== ''" class="pt-1 text-center text-xs text-gray-400" x-cloak>
+                            <span x-text="document.querySelectorAll('[x-show]').length"></span>
+                            Tip: click a status card or use the dropdown to filter
+                        </div>
                     </div>
 
                     @if ($editingAttemptIpId)

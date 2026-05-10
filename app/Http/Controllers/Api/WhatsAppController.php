@@ -3,12 +3,108 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Support\TenantSettings;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
 class WhatsAppController extends Controller
 {
+    private function otpCacheKey(string $phone): string
+    {
+        $tenantId = TenantSettings::tenantId();
+
+        return ($tenantId ? 'tenant_'.$tenantId.'_' : '').'whatsapp_otp_'.$phone;
+    }
+
+    public function login(Request $request)
+    {
+        $request->validate([
+            'identifier' => 'required|string',
+            'password'   => 'required|string',
+            'phone'      => 'required|string',
+        ]);
+
+        $identifier = trim($request->identifier);
+        $password   = $request->password;
+        $phone      = preg_replace('/\D/', '', $request->phone);
+
+        // --- Try student login (admission number) ---
+        $student = \App\Models\Student::where('admission_number', strtoupper($identifier))
+            ->where('status', 'Active')
+            ->first();
+
+        if ($student) {
+            $valid = false;
+            if ($student->password) {
+                $valid = \Illuminate\Support\Facades\Hash::check($password, $student->password);
+            } else {
+                $suffix   = substr($student->admission_number, -4);
+                $expected = strtolower($student->first_name) . $suffix;
+                $valid    = $password === $expected;
+            }
+
+            if (! $valid) {
+                return response()->json(['success' => false, 'message' => 'Invalid password. Use the same password as the school website.'], 401);
+            }
+
+            // Link phone to student's user account if exists, else store on student
+            if ($student->user_id) {
+                $user = \App\Models\User::find($student->user_id);
+                if ($user) {
+                    $user->whatsapp_phone      = $phone;
+                    $user->whatsapp_verified   = true;
+                    $user->whatsapp_subscribed = true;
+                    $user->save();
+                }
+            }
+
+            return response()->json([
+                'success' => true,
+                'user' => [
+                    'id'         => $student->id,
+                    'name'       => $student->full_name,
+                    'first_name' => $student->first_name,
+                    'role'       => 'student',
+                    'admission'  => $student->admission_number,
+                    'class'      => $student->schoolClass?->name,
+                ],
+            ]);
+        }
+
+        // --- Try staff / parent / admin login (email) ---
+        $user = \App\Models\User::where('email', $identifier)
+            ->whereIn('role', ['admin', 'teacher', 'bursar', 'parent'])
+            ->first();
+
+        if (! $user) {
+            return response()->json(['success' => false, 'message' => 'Account not found. Use your admission number (students) or email address (staff/parents).'], 404);
+        }
+
+        if (! \Illuminate\Support\Facades\Hash::check($password, $user->password)) {
+            return response()->json(['success' => false, 'message' => 'Invalid password. Use the same password as the school website.'], 401);
+        }
+
+        if (! $user->is_active) {
+            return response()->json(['success' => false, 'message' => 'Your account is inactive. Contact the administrator.'], 403);
+        }
+
+        // Link WhatsApp phone
+        $user->whatsapp_phone      = $phone;
+        $user->whatsapp_verified   = true;
+        $user->whatsapp_subscribed = true;
+        $user->save();
+
+        return response()->json([
+            'success' => true,
+            'user'    => [
+                'id'   => $user->id,
+                'name' => $user->name,
+                'role' => $user->role,
+            ],
+        ]);
+    }
+
     public function getUser($phone)
     {
         $user = \App\Models\User::where('whatsapp_phone', $phone)
@@ -52,7 +148,7 @@ class WhatsAppController extends Controller
         }
 
         $otp = rand(100000, 999999);
-        \Illuminate\Support\Facades\Cache::put('whatsapp_otp_' . $request->phone, [
+        \Illuminate\Support\Facades\Cache::put($this->otpCacheKey($request->phone), [
             'user_id' => $user->id,
             'otp' => $otp
         ], now()->addMinutes(10));
@@ -67,7 +163,7 @@ class WhatsAppController extends Controller
             'otp' => 'required'
         ]);
 
-        $cached = \Illuminate\Support\Facades\Cache::get('whatsapp_otp_' . $request->phone);
+        $cached = \Illuminate\Support\Facades\Cache::get($this->otpCacheKey($request->phone));
         if (!$cached || $cached['otp'] != $request->otp) {
             return response()->json(['success' => false, 'message' => 'Invalid or expired OTP'], 400);
         }
@@ -78,7 +174,7 @@ class WhatsAppController extends Controller
         $user->whatsapp_subscribed = true;
         $user->save();
 
-        \Illuminate\Support\Facades\Cache::forget('whatsapp_otp_' . $request->phone);
+        \Illuminate\Support\Facades\Cache::forget($this->otpCacheKey($request->phone));
 
         if ($user->role === 'parent') {
             $user->load('students.schoolClass');
@@ -117,38 +213,6 @@ class WhatsAppController extends Controller
         return response()->json(['success' => true, 'data' => []]);
     }
 
-    public function askAi(Request $request)
-    {
-        $request->validate([
-            'parent_id' => 'required|integer',
-            'key' => 'nullable|string',
-            'question' => 'required|string|max:1000',
-        ]);
-
-        $user = \App\Models\User::whereKey($request->parent_id)->firstOrFail();
-
-        if (!empty($request->key) && !empty($user->whatsapp_ai_key_hash)) {
-            if (hash('sha256', $request->key) !== $user->whatsapp_ai_key_hash) {
-                return response()->json([
-                    'success' => false,
-                    'code' => 'key_invalid',
-                    'message' => 'Invalid AI key',
-                ], 403);
-            }
-        }
-
-        $agentPro = new \App\Services\AgentProService($user);
-        $answer = $agentPro->ask($request->question);
-
-        if (str_contains($answer, 'error occurred') || str_contains($answer, 'API key not configured')) {
-            return response()->json([
-                'success' => false,
-                'message' => $answer,
-            ], 502);
-        }
-
-        return response()->json(['success' => true, 'answer' => $answer]);
-    }
 
     private function buildParentContext(\App\Models\User $parent): array
     {

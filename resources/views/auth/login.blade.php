@@ -35,6 +35,16 @@
                         </div>
                     </div>
 
+                    <!-- Session expired / status notice -->
+                    @if(session('status'))
+                        <div class="mx-8 mt-4 flex items-center gap-3 rounded-xl bg-amber-500/20 border border-amber-400/30 px-4 py-3 backdrop-blur-sm">
+                            <svg class="h-5 w-5 flex-shrink-0 text-amber-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+                            </svg>
+                            <p class="text-sm font-semibold text-amber-200">{{ session('status') }}</p>
+                        </div>
+                    @endif
+
                     <!-- Login Type Tabs -->
                     <div class="px-8 pt-6">
                         <div class="flex rounded-xl bg-white/5 p-1 backdrop-blur-sm border border-white/10">

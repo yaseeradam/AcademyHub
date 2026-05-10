@@ -1,129 +1,612 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
-    <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="scroll-smooth">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{ config('app.name', 'MyAcademy') }} - A Joyful Place to Learn</title>
+    
+    <!-- Playful Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Scripts & Styles -->
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    
+    <style>
+        body {
+            font-family: 'Nunito', sans-serif;
+            background-color: #f8fafc; /* Very light slate */
+            color: #334155;
+            overflow-x: hidden;
+        }
+        h1, h2, h3, h4, .font-heading {
+            font-family: 'Fredoka', sans-serif;
+        }
 
-        <title>Laravel</title>
+        /* Playful Liquid Elements */
+        .blob-bg {
+            position: absolute;
+            filter: blur(60px);
+            z-index: -1;
+            border-radius: 50%;
+            animation: float 8s ease-in-out infinite;
+        }
+        .blob-bg-1 { top: -10%; left: -5%; width: 500px; height: 500px; background: rgba(139, 92, 246, 0.4); animation-delay: 0s; }
+        .blob-bg-2 { top: 20%; right: -5%; width: 600px; height: 600px; background: rgba(56, 189, 248, 0.3); animation-delay: 2s; }
+        .blob-bg-3 { bottom: -10%; left: 20%; width: 400px; height: 400px; background: rgba(251, 146, 60, 0.3); animation-delay: 4s; }
 
-        <!-- Styles -->
-        <style>
-            /* ! tailwindcss v3.2.4 | MIT License | https://tailwindcss.com */*,::after,::before{box-sizing:border-box;border-width:0;border-style:solid;border-color:#e5e7eb}::after,::before{--tw-content:''}html{line-height:1.5;-webkit-text-size-adjust:100%;-moz-tab-size:4;tab-size:4;font-family:Figtree, sans-serif;font-feature-settings:normal}body{margin:0;line-height:inherit}hr{height:0;color:inherit;border-top-width:1px}abbr:where([title]){-webkit-text-decoration:underline dotted;text-decoration:underline dotted}h1,h2,h3,h4,h5,h6{font-size:inherit;font-weight:inherit}a{color:inherit;text-decoration:inherit}b,strong{font-weight:bolder}code,kbd,pre,samp{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;font-size:1em}small{font-size:80%}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}sub{bottom:-.25em}sup{top:-.5em}table{text-indent:0;border-color:inherit;border-collapse:collapse}button,input,optgroup,select,textarea{font-family:inherit;font-size:100%;font-weight:inherit;line-height:inherit;color:inherit;margin:0;padding:0}button,select{text-transform:none}[type=button],[type=reset],[type=submit],button{-webkit-appearance:button;background-color:transparent;background-image:none}:-moz-focusring{outline:auto}:-moz-ui-invalid{box-shadow:none}progress{vertical-align:baseline}::-webkit-inner-spin-button,::-webkit-outer-spin-button{height:auto}[type=search]{-webkit-appearance:textfield;outline-offset:-2px}::-webkit-search-decoration{-webkit-appearance:none}::-webkit-file-upload-button{-webkit-appearance:button;font:inherit}summary{display:list-item}blockquote,dd,dl,figure,h1,h2,h3,h4,h5,h6,hr,p,pre{margin:0}fieldset{margin:0;padding:0}legend{padding:0}menu,ol,ul{list-style:none;margin:0;padding:0}textarea{resize:vertical}input::placeholder,textarea::placeholder{opacity:1;color:#9ca3af}[role=button],button{cursor:pointer}:disabled{cursor:default}audio,canvas,embed,iframe,img,object,svg,video{display:block;vertical-align:middle}img,video{max-width:100%;height:auto}[hidden]{display:none}*, ::before, ::after{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: }::-webkit-backdrop{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: }::backdrop{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: }.relative{position:relative}.mx-auto{margin-left:auto;margin-right:auto}.mx-6{margin-left:1.5rem;margin-right:1.5rem}.ml-4{margin-left:1rem}.mt-16{margin-top:4rem}.mt-6{margin-top:1.5rem}.mt-4{margin-top:1rem}.-mt-px{margin-top:-1px}.mr-1{margin-right:0.25rem}.flex{display:flex}.inline-flex{display:inline-flex}.grid{display:grid}.h-16{height:4rem}.h-7{height:1.75rem}.h-6{height:1.5rem}.h-5{height:1.25rem}.min-h-screen{min-height:100vh}.w-auto{width:auto}.w-16{width:4rem}.w-7{width:1.75rem}.w-6{width:1.5rem}.w-5{width:1.25rem}.max-w-7xl{max-width:80rem}.shrink-0{flex-shrink:0}.scale-100{--tw-scale-x:1;--tw-scale-y:1;transform:translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}.grid-cols-1{grid-template-columns:repeat(1, minmax(0, 1fr))}.items-center{align-items:center}.justify-center{justify-content:center}.gap-6{gap:1.5rem}.gap-4{gap:1rem}.self-center{align-self:center}.rounded-lg{border-radius:0.5rem}.rounded-full{border-radius:9999px}.bg-gray-100{--tw-bg-opacity:1;background-color:rgb(243 244 246 / var(--tw-bg-opacity))}.bg-white{--tw-bg-opacity:1;background-color:rgb(255 255 255 / var(--tw-bg-opacity))}.bg-red-50{--tw-bg-opacity:1;background-color:rgb(254 242 242 / var(--tw-bg-opacity))}.bg-dots-darker{background-image:url("data:image/svg+xml,%3Csvg width='30' height='30' viewBox='0 0 30 30' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1.22676 0C1.91374 0 2.45351 0.539773 2.45351 1.22676C2.45351 1.91374 1.91374 2.45351 1.22676 2.45351C0.539773 2.45351 0 1.91374 0 1.22676C0 0.539773 0.539773 0 1.22676 0Z' fill='rgba(0,0,0,0.07)'/%3E%3C/svg%3E")}.from-gray-700\/50{--tw-gradient-from:rgb(55 65 81 / 0.5);--tw-gradient-to:rgb(55 65 81 / 0);--tw-gradient-stops:var(--tw-gradient-from), var(--tw-gradient-to)}.via-transparent{--tw-gradient-to:rgb(0 0 0 / 0);--tw-gradient-stops:var(--tw-gradient-from), transparent, var(--tw-gradient-to)}.bg-center{background-position:center}.stroke-red-500{stroke:#ef4444}.stroke-gray-400{stroke:#9ca3af}.p-6{padding:1.5rem}.px-6{padding-left:1.5rem;padding-right:1.5rem}.text-center{text-align:center}.text-right{text-align:right}.text-xl{font-size:1.25rem;line-height:1.75rem}.text-sm{font-size:0.875rem;line-height:1.25rem}.font-semibold{font-weight:600}.leading-relaxed{line-height:1.625}.text-gray-600{--tw-text-opacity:1;color:rgb(75 85 99 / var(--tw-text-opacity))}.text-gray-900{--tw-text-opacity:1;color:rgb(17 24 39 / var(--tw-text-opacity))}.text-gray-500{--tw-text-opacity:1;color:rgb(107 114 128 / var(--tw-text-opacity))}.underline{-webkit-text-decoration-line:underline;text-decoration-line:underline}.antialiased{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}.shadow-2xl{--tw-shadow:0 25px 50px -12px rgb(0 0 0 / 0.25);--tw-shadow-colored:0 25px 50px -12px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-gray-500\/20{--tw-shadow-color:rgb(107 114 128 / 0.2);--tw-shadow:var(--tw-shadow-colored)}.transition-all{transition-property:all;transition-timing-function:cubic-bezier(0.4, 0, 0.2, 1);transition-duration:150ms}.selection\:bg-red-500 *::selection{--tw-bg-opacity:1;background-color:rgb(239 68 68 / var(--tw-bg-opacity))}.selection\:text-white *::selection{--tw-text-opacity:1;color:rgb(255 255 255 / var(--tw-text-opacity))}.selection\:bg-red-500::selection{--tw-bg-opacity:1;background-color:rgb(239 68 68 / var(--tw-bg-opacity))}.selection\:text-white::selection{--tw-text-opacity:1;color:rgb(255 255 255 / var(--tw-text-opacity))}.hover\:text-gray-900:hover{--tw-text-opacity:1;color:rgb(17 24 39 / var(--tw-text-opacity))}.hover\:text-gray-700:hover{--tw-text-opacity:1;color:rgb(55 65 81 / var(--tw-text-opacity))}.focus\:rounded-sm:focus{border-radius:0.125rem}.focus\:outline:focus{outline-style:solid}.focus\:outline-2:focus{outline-width:2px}.focus\:outline-red-500:focus{outline-color:#ef4444}.group:hover .group-hover\:stroke-gray-600{stroke:#4b5563}.z-10{z-index: 10}@media (prefers-reduced-motion: no-preference){.motion-safe\:hover\:scale-\[1\.01\]:hover{--tw-scale-x:1.01;--tw-scale-y:1.01;transform:translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}}@media (prefers-color-scheme: dark){.dark\:bg-gray-900{--tw-bg-opacity:1;background-color:rgb(17 24 39 / var(--tw-bg-opacity))}.dark\:bg-gray-800\/50{background-color:rgb(31 41 55 / 0.5)}.dark\:bg-red-800\/20{background-color:rgb(153 27 27 / 0.2)}.dark\:bg-dots-lighter{background-image:url("data:image/svg+xml,%3Csvg width='30' height='30' viewBox='0 0 30 30' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1.22676 0C1.91374 0 2.45351 0.539773 2.45351 1.22676C2.45351 1.91374 1.91374 2.45351 1.22676 2.45351C0.539773 2.45351 0 1.91374 0 1.22676C0 0.539773 0.539773 0 1.22676 0Z' fill='rgba(255,255,255,0.07)'/%3E%3C/svg%3E")}.dark\:bg-gradient-to-bl{background-image:linear-gradient(to bottom left, var(--tw-gradient-stops))}.dark\:stroke-gray-600{stroke:#4b5563}.dark\:text-gray-400{--tw-text-opacity:1;color:rgb(156 163 175 / var(--tw-text-opacity))}.dark\:text-white{--tw-text-opacity:1;color:rgb(255 255 255 / var(--tw-text-opacity))}.dark\:shadow-none{--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.dark\:ring-1{--tw-ring-offset-shadow:var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);--tw-ring-shadow:var(--tw-ring-inset) 0 0 0 calc(1px + var(--tw-ring-offset-width)) var(--tw-ring-color);box-shadow:var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow, 0 0 #0000)}.dark\:ring-inset{--tw-ring-inset:inset}.dark\:ring-white\/5{--tw-ring-color:rgb(255 255 255 / 0.05)}.dark\:hover\:text-white:hover{--tw-text-opacity:1;color:rgb(255 255 255 / var(--tw-text-opacity))}.group:hover .dark\:group-hover\:stroke-gray-400{stroke:#9ca3af}}@media (min-width: 640px){.sm\:fixed{position:fixed}.sm\:top-0{top:0px}.sm\:right-0{right:0px}.sm\:ml-0{margin-left:0px}.sm\:flex{display:flex}.sm\:items-center{align-items:center}.sm\:justify-center{justify-content:center}.sm\:justify-between{justify-content:space-between}.sm\:text-left{text-align:left}.sm\:text-right{text-align:right}}@media (min-width: 768px){.md\:grid-cols-2{grid-template-columns:repeat(2, minmax(0, 1fr))}}@media (min-width: 1024px){.lg\:gap-8{gap:2rem}.lg\:p-8{padding:2rem}}
-        </style>
-    </head>
-    <body class="antialiased">
-        <div class="relative sm:flex sm:justify-center sm:items-center min-h-screen bg-dots-darker bg-center bg-gray-100 dark:bg-dots-lighter dark:bg-gray-900 selection:bg-red-500 selection:text-white">
-            @if (Route::has('login'))
-                <div class="sm:fixed sm:top-0 sm:right-0 p-6 text-right z-10">
-                    @auth
-                        <a href="{{ url('/home') }}" class="font-semibold text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white focus:outline focus:outline-2 focus:rounded-sm focus:outline-red-500">Home</a>
-                    @else
-                        <a href="{{ route('login') }}" class="font-semibold text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white focus:outline focus:outline-2 focus:rounded-sm focus:outline-red-500">Log in</a>
+        @keyframes float {
+            0%, 100% { transform: translateY(0) scale(1); }
+            50% { transform: translateY(-30px) scale(1.05); }
+        }
+        
+        @keyframes sway {
+            0%, 100% { transform: rotate(-5deg); }
+            50% { transform: rotate(5deg); }
+        }
 
-                        @if (Route::has('register'))
-                            <a href="{{ route('register') }}" class="ml-4 font-semibold text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white focus:outline focus:outline-2 focus:rounded-sm focus:outline-red-500">Register</a>
-                        @endif
-                    @endauth
-                </div>
-            @endif
+        .animate-sway {
+            animation: sway 4s ease-in-out infinite;
+        }
 
-            <div class="max-w-7xl mx-auto p-6 lg:p-8">
-                <div class="flex justify-center">
-                    <svg viewBox="0 0 62 65" fill="none" xmlns="http://www.w3.org/2000/svg" class="h-16 w-auto bg-gray-100 dark:bg-gray-900">
-                        <path d="M61.8548 14.6253C61.8778 14.7102 61.8895 14.7978 61.8897 14.8858V28.5615C61.8898 28.737 61.8434 28.9095 61.7554 29.0614C61.6675 29.2132 61.5409 29.3392 61.3887 29.4265L49.9104 36.0351V49.1337C49.9104 49.4902 49.7209 49.8192 49.4118 49.9987L25.4519 63.7916C25.3971 63.8227 25.3372 63.8427 25.2774 63.8639C25.255 63.8714 25.2338 63.8851 25.2101 63.8913C25.0426 63.9354 24.8666 63.9354 24.6991 63.8913C24.6716 63.8838 24.6467 63.8689 24.6205 63.8589C24.5657 63.8389 24.5084 63.8215 24.456 63.7916L0.501061 49.9987C0.348882 49.9113 0.222437 49.7853 0.134469 49.6334C0.0465019 49.4816 0.000120578 49.3092 0 49.1337L0 8.10652C0 8.01678 0.0124642 7.92953 0.0348998 7.84477C0.0423783 7.8161 0.0598282 7.78993 0.0697995 7.76126C0.0884958 7.70891 0.105946 7.65531 0.133367 7.6067C0.152063 7.5743 0.179485 7.54812 0.20192 7.51821C0.230588 7.47832 0.256763 7.43719 0.290416 7.40229C0.319084 7.37362 0.356476 7.35243 0.388883 7.32751C0.425029 7.29759 0.457436 7.26518 0.498568 7.2415L12.4779 0.345059C12.6296 0.257786 12.8015 0.211853 12.9765 0.211853C13.1515 0.211853 13.3234 0.257786 13.475 0.345059L25.4531 7.2415H25.4556C25.4955 7.26643 25.5292 7.29759 25.5653 7.32626C25.5977 7.35119 25.6339 7.37362 25.6625 7.40104C25.6974 7.43719 25.7224 7.47832 25.7523 7.51821C25.7735 7.54812 25.8021 7.5743 25.8196 7.6067C25.8483 7.65656 25.8645 7.70891 25.8844 7.76126C25.8944 7.78993 25.9118 7.8161 25.9193 7.84602C25.9423 7.93096 25.954 8.01853 25.9542 8.10652V33.7317L35.9355 27.9844V14.8846C35.9355 14.7973 35.948 14.7088 35.9704 14.6253C35.9792 14.5954 35.9954 14.5692 36.0053 14.5405C36.0253 14.4882 36.0427 14.4346 36.0702 14.386C36.0888 14.3536 36.1163 14.3274 36.1375 14.2975C36.1674 14.2576 36.1923 14.2165 36.2272 14.1816C36.2559 14.1529 36.292 14.1317 36.3244 14.1068C36.3618 14.0769 36.3942 14.0445 36.4341 14.0208L48.4147 7.12434C48.5663 7.03694 48.7383 6.99094 48.9133 6.99094C49.0883 6.99094 49.2602 7.03694 49.4118 7.12434L61.3899 14.0208C61.4323 14.0457 61.4647 14.0769 61.5021 14.1055C61.5333 14.1305 61.5694 14.1529 61.5981 14.1803C61.633 14.2165 61.6579 14.2576 61.6878 14.2975C61.7103 14.3274 61.7377 14.3536 61.7551 14.386C61.7838 14.4346 61.8 14.4882 61.8199 14.5405C61.8312 14.5692 61.8474 14.5954 61.8548 14.6253ZM59.893 27.9844V16.6121L55.7013 19.0252L49.9104 22.3593V33.7317L59.8942 27.9844H59.893ZM47.9149 48.5566V37.1768L42.2187 40.4299L25.953 49.7133V61.2003L47.9149 48.5566ZM1.99677 9.83281V48.5566L23.9562 61.199V49.7145L12.4841 43.2219L12.4804 43.2194L12.4754 43.2169C12.4368 43.1945 12.4044 43.1621 12.3682 43.1347C12.3371 43.1097 12.3009 43.0898 12.2735 43.0624L12.271 43.0586C12.2386 43.0275 12.2162 42.9888 12.1887 42.9539C12.1638 42.9203 12.1339 42.8916 12.114 42.8567L12.1127 42.853C12.0903 42.8156 12.0766 42.7707 12.0604 42.7283C12.0442 42.6909 12.023 42.656 12.013 42.6161C12.0005 42.5688 11.998 42.5177 11.9931 42.4691C11.9881 42.4317 11.9781 42.3943 11.9781 42.3569V15.5801L6.18848 12.2446L1.99677 9.83281ZM12.9777 2.36177L2.99764 8.10652L12.9752 13.8513L22.9541 8.10527L12.9752 2.36177H12.9777ZM18.1678 38.2138L23.9574 34.8809V9.83281L19.7657 12.2459L13.9749 15.5801V40.6281L18.1678 38.2138ZM48.9133 9.14105L38.9344 14.8858L48.9133 20.6305L58.8909 14.8846L48.9133 9.14105ZM47.9149 22.3593L42.124 19.0252L37.9323 16.6121V27.9844L43.7219 31.3174L47.9149 33.7317V22.3593ZM24.9533 47.987L39.59 39.631L46.9065 35.4555L36.9352 29.7145L25.4544 36.3242L14.9907 42.3482L24.9533 47.987Z" fill="#FF2D20"/>
-                    </svg>
-                </div>
+        /* Nav Glass */
+        .nav-scrolled {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            border-bottom: 2px solid rgba(241, 245, 249, 1);
+        }
 
-                <div class="mt-16">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8">
-                        <a href="https://laravel.com/docs" class="scale-100 p-6 bg-white dark:bg-gray-800/50 dark:bg-gradient-to-bl from-gray-700/50 via-transparent dark:ring-1 dark:ring-inset dark:ring-white/5 rounded-lg shadow-2xl shadow-gray-500/20 dark:shadow-none flex motion-safe:hover:scale-[1.01] transition-all duration-250 focus:outline focus:outline-2 focus:outline-red-500">
-                            <div>
-                                <div class="h-16 w-16 bg-red-50 dark:bg-red-800/20 flex items-center justify-center rounded-full">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" class="w-7 h-7 stroke-red-500">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
-                                    </svg>
-                                </div>
+        /* Playful Buttons */
+        .btn-playful {
+            background: linear-gradient(135deg, #8b5cf6, #d946ef); /* Violet to Fuchsia */
+            color: white;
+            box-shadow: 0 10px 20px -5px rgba(139, 92, 246, 0.5);
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); /* Bouncy easing */
+        }
+        .btn-playful:hover {
+            transform: translateY(-4px) scale(1.03);
+            box-shadow: 0 15px 30px -5px rgba(139, 92, 246, 0.6);
+        }
+        
+        .btn-outline-playful {
+            background: white;
+            color: #8b5cf6;
+            border: 2px solid #e2e8f0;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .btn-outline-playful:hover {
+            border-color: #8b5cf6;
+            transform: translateY(-4px);
+            box-shadow: 0 10px 20px -5px rgba(139, 92, 246, 0.2);
+        }
 
-                                <h2 class="mt-6 text-xl font-semibold text-gray-900 dark:text-white">Documentation</h2>
+        /* Playful Cards */
+        .card-liquid {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(16px);
+            border: 2px solid rgba(255, 255, 255, 1);
+            border-radius: 32px;
+            box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.05), inset 0 0 0 2px rgba(255, 255, 255, 0.5);
+            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .card-liquid:hover {
+            transform: translateY(-8px) rotate(1deg);
+            box-shadow: 0 30px 50px -10px rgba(139, 92, 246, 0.15), inset 0 0 0 2px rgba(255, 255, 255, 0.8);
+        }
+        
+        .floating-element {
+            animation: float-small 6s ease-in-out infinite;
+        }
+        .floating-delayed {
+            animation: float-small 7s ease-in-out infinite;
+            animation-delay: 1.5s;
+        }
 
-                                <p class="mt-4 text-gray-500 dark:text-gray-400 text-sm leading-relaxed">
-                                    Laravel has wonderful documentation covering every aspect of the framework. Whether you are a newcomer or have prior experience with Laravel, we recommend reading our documentation from beginning to end.
-                                </p>
-                            </div>
+        @keyframes float-small {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-15px); }
+        }
 
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" class="self-center shrink-0 stroke-red-500 w-6 h-6 mx-6">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12h15m0 0l-6.75-6.75M19.5 12l-6.75 6.75" />
-                            </svg>
-                        </a>
+        .gradient-text {
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-image: linear-gradient(to right, #8b5cf6, #38bdf8);
+        }
 
-                        <a href="https://laracasts.com" class="scale-100 p-6 bg-white dark:bg-gray-800/50 dark:bg-gradient-to-bl from-gray-700/50 via-transparent dark:ring-1 dark:ring-inset dark:ring-white/5 rounded-lg shadow-2xl shadow-gray-500/20 dark:shadow-none flex motion-safe:hover:scale-[1.01] transition-all duration-250 focus:outline focus:outline-2 focus:outline-red-500">
-                            <div>
-                                <div class="h-16 w-16 bg-red-50 dark:bg-red-800/20 flex items-center justify-center rounded-full">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" class="w-7 h-7 stroke-red-500">
-                                        <path stroke-linecap="round" d="M15.75 10.5l4.72-4.72a.75.75 0 011.28.53v11.38a.75.75 0 01-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 002.25-2.25v-9a2.25 2.25 0 00-2.25-2.25h-9A2.25 2.25 0 002.25 7.5v9a2.25 2.25 0 002.25 2.25z" />
-                                    </svg>
-                                </div>
+        .icon-box {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 20px;
+            font-size: 2rem;
+            box-shadow: 0 8px 16px -4px rgba(0,0,0,0.1);
+        }
+        
+        /* Dashed connecting line for journey section */
+        .dashed-line {
+            background-image: linear-gradient(90deg, #cbd5e1 50%, transparent 50%);
+            background-size: 20px 2px;
+            background-repeat: repeat-x;
+            height: 2px;
+            opacity: 0.6;
+        }
+    </style>
+</head>
+<body class="antialiased" x-data="{ mobileMenuOpen: false, demoModalOpen: false, scrolled: false }" @scroll.window="scrolled = (window.pageYOffset > 20)">
 
-                                <h2 class="mt-6 text-xl font-semibold text-gray-900 dark:text-white">Laracasts</h2>
+    <!-- Background Blobs -->
+    <div class="blob-bg blob-bg-1"></div>
+    <div class="blob-bg blob-bg-2"></div>
+    <div class="blob-bg blob-bg-3"></div>
 
-                                <p class="mt-4 text-gray-500 dark:text-gray-400 text-sm leading-relaxed">
-                                    Laracasts offers thousands of video tutorials on Laravel, PHP, and JavaScript development. Check them out, see for yourself, and massively level up your development skills in the process.
-                                </p>
-                            </div>
-
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" class="self-center shrink-0 stroke-red-500 w-6 h-6 mx-6">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12h15m0 0l-6.75-6.75M19.5 12l-6.75 6.75" />
-                            </svg>
-                        </a>
-
-                        <a href="https://laravel-news.com" class="scale-100 p-6 bg-white dark:bg-gray-800/50 dark:bg-gradient-to-bl from-gray-700/50 via-transparent dark:ring-1 dark:ring-inset dark:ring-white/5 rounded-lg shadow-2xl shadow-gray-500/20 dark:shadow-none flex motion-safe:hover:scale-[1.01] transition-all duration-250 focus:outline focus:outline-2 focus:outline-red-500">
-                            <div>
-                                <div class="h-16 w-16 bg-red-50 dark:bg-red-800/20 flex items-center justify-center rounded-full">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" class="w-7 h-7 stroke-red-500">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 7.5h1.5m-1.5 3h1.5m-7.5 3h7.5m-7.5 3h7.5m3-9h3.375c.621 0 1.125.504 1.125 1.125V18a2.25 2.25 0 01-2.25 2.25M16.5 7.5V18a2.25 2.25 0 002.25 2.25M16.5 7.5V4.875c0-.621-.504-1.125-1.125-1.125H4.125C3.504 3.75 3 4.254 3 4.875V18a2.25 2.25 0 002.25 2.25h13.5M6 7.5h3v3H6v-3z" />
-                                    </svg>
-                                </div>
-
-                                <h2 class="mt-6 text-xl font-semibold text-gray-900 dark:text-white">Laravel News</h2>
-
-                                <p class="mt-4 text-gray-500 dark:text-gray-400 text-sm leading-relaxed">
-                                    Laravel News is a community driven portal and newsletter aggregating all of the latest and most important news in the Laravel ecosystem, including new package releases and tutorials.
-                                </p>
-                            </div>
-
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" class="self-center shrink-0 stroke-red-500 w-6 h-6 mx-6">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12h15m0 0l-6.75-6.75M19.5 12l-6.75 6.75" />
-                            </svg>
-                        </a>
-
-                        <div class="scale-100 p-6 bg-white dark:bg-gray-800/50 dark:bg-gradient-to-bl from-gray-700/50 via-transparent dark:ring-1 dark:ring-inset dark:ring-white/5 rounded-lg shadow-2xl shadow-gray-500/20 dark:shadow-none flex motion-safe:hover:scale-[1.01] transition-all duration-250 focus:outline focus:outline-2 focus:outline-red-500">
-                            <div>
-                                <div class="h-16 w-16 bg-red-50 dark:bg-red-800/20 flex items-center justify-center rounded-full">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" class="w-7 h-7 stroke-red-500">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M6.115 5.19l.319 1.913A6 6 0 008.11 10.36L9.75 12l-.387.775c-.217.433-.132.956.21 1.298l1.348 1.348c.21.21.329.497.329.795v1.089c0 .426.24.815.622 1.006l.153.076c.433.217.956.132 1.298-.21l.723-.723a8.7 8.7 0 002.288-4.042 1.087 1.087 0 00-.358-1.099l-1.33-1.108c-.251-.21-.582-.299-.905-.245l-1.17.195a1.125 1.125 0 01-.98-.314l-.295-.295a1.125 1.125 0 010-1.591l.13-.132a1.125 1.125 0 011.3-.21l.603.302a.809.809 0 001.086-1.086L14.25 7.5l1.256-.837a4.5 4.5 0 001.528-1.732l.146-.292M6.115 5.19A9 9 0 1017.18 4.64M6.115 5.19A8.965 8.965 0 0112 3c1.929 0 3.716.607 5.18 1.64" />
-                                    </svg>
-                                </div>
-
-                                <h2 class="mt-6 text-xl font-semibold text-gray-900 dark:text-white">Vibrant Ecosystem</h2>
-
-                                <p class="mt-4 text-gray-500 dark:text-gray-400 text-sm leading-relaxed">
-                                    Laravel's robust library of first-party tools and libraries, such as <a href="https://forge.laravel.com" class="underline hover:text-gray-700 dark:hover:text-white focus:outline focus:outline-2 focus:rounded-sm focus:outline-red-500">Forge</a>, <a href="https://vapor.laravel.com" class="underline hover:text-gray-700 dark:hover:text-white focus:outline focus:outline-2 focus:rounded-sm focus:outline-red-500">Vapor</a>, <a href="https://nova.laravel.com" class="underline hover:text-gray-700 dark:hover:text-white focus:outline focus:outline-2 focus:rounded-sm focus:outline-red-500">Nova</a>, and <a href="https://envoyer.io" class="underline hover:text-gray-700 dark:hover:text-white focus:outline focus:outline-2 focus:rounded-sm focus:outline-red-500">Envoyer</a> help you take your projects to the next level. Pair them with powerful open source libraries like <a href="https://laravel.com/docs/billing" class="underline hover:text-gray-700 dark:hover:text-white focus:outline focus:outline-2 focus:rounded-sm focus:outline-red-500">Cashier</a>, <a href="https://laravel.com/docs/dusk" class="underline hover:text-gray-700 dark:hover:text-white focus:outline focus:outline-2 focus:rounded-sm focus:outline-red-500">Dusk</a>, <a href="https://laravel.com/docs/broadcasting" class="underline hover:text-gray-700 dark:hover:text-white focus:outline focus:outline-2 focus:rounded-sm focus:outline-red-500">Echo</a>, <a href="https://laravel.com/docs/horizon" class="underline hover:text-gray-700 dark:hover:text-white focus:outline focus:outline-2 focus:rounded-sm focus:outline-red-500">Horizon</a>, <a href="https://laravel.com/docs/sanctum" class="underline hover:text-gray-700 dark:hover:text-white focus:outline focus:outline-2 focus:rounded-sm focus:outline-red-500">Sanctum</a>, <a href="https://laravel.com/docs/telescope" class="underline hover:text-gray-700 dark:hover:text-white focus:outline focus:outline-2 focus:rounded-sm focus:outline-red-500">Telescope</a>, and more.
-                                </p>
-                            </div>
+    <!-- Joyful Navbar -->
+    <nav :class="{ 'nav-scrolled py-3': scrolled, 'bg-transparent py-6': !scrolled }" class="fixed top-0 z-50 w-full transition-all duration-300">
+        <div class="mx-auto max-w-7xl px-6 lg:px-8">
+            <div class="flex items-center justify-between">
+                <!-- Logo -->
+                <div class="flex lg:flex-1">
+                    <a href="#" class="-m-1.5 p-1.5 flex items-center gap-3 group">
+                        <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-tr from-violet-500 to-fuchsia-500 shadow-lg text-white font-heading text-2xl group-hover:rotate-12 transition-transform duration-300">
+                            🎒
                         </div>
-                    </div>
+                        <span class="text-3xl font-heading font-extrabold text-slate-800 tracking-tight">MyAcademy</span>
+                    </a>
                 </div>
 
-                <div class="flex justify-center mt-16 px-0 sm:items-center sm:justify-between">
-                    <div class="text-center text-sm sm:text-left">
-                        &nbsp;
-                    </div>
+                <!-- Desktop Menu -->
+                <div class="hidden lg:flex lg:gap-x-10">
+                    <a href="#modules" class="text-base font-bold text-slate-600 hover:text-violet-500 transition-colors">Modules</a>
+                    <a href="#portals" class="text-base font-bold text-slate-600 hover:text-pink-500 transition-colors">Portals</a>
+                    <a href="#journey" class="text-base font-bold text-slate-600 hover:text-sky-500 transition-colors">How it Works</a>
+                </div>
 
-                    <div class="text-center text-sm text-gray-500 dark:text-gray-400 sm:text-right sm:ml-0">
-                        Laravel v{{ Illuminate\Foundation\Application::VERSION }} (PHP v{{ PHP_VERSION }})
+                <!-- Desktop Actions -->
+                <div class="hidden lg:flex lg:flex-1 lg:justify-end lg:items-center lg:gap-4">
+                    <button @click="demoModalOpen = true" class="btn-outline-playful rounded-full px-5 py-2.5 text-base font-bold flex items-center gap-2">
+                        ✨ Start Tour
+                    </button>
+                    <a href="{{ route('login') }}" class="btn-playful rounded-full px-6 py-2.5 text-base font-bold">
+                        Log In 🚀
+                    </a>
+                </div>
+
+                <!-- Mobile Menu Button -->
+                <div class="flex lg:hidden">
+                    <button @click="mobileMenuOpen = true" type="button" class="-m-2.5 inline-flex items-center justify-center rounded-xl p-2.5 text-slate-700 bg-white shadow-sm border border-slate-200">
+                        <span class="sr-only">Open main menu</span>
+                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12h15m-15 6h15m-15-12h15" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Menu -->
+        <div x-show="mobileMenuOpen" class="lg:hidden" role="dialog" aria-modal="true" style="display: none;">
+            <div x-show="mobileMenuOpen" x-transition.opacity class="fixed inset-0 z-50 bg-slate-800/40 backdrop-blur-sm"></div>
+            <div x-show="mobileMenuOpen" 
+                 x-transition:enter="transition ease-out duration-300" 
+                 x-transition:enter-start="translate-x-full" 
+                 x-transition:enter-end="translate-x-0" 
+                 x-transition:leave="transition ease-in duration-200" 
+                 x-transition:leave-start="translate-x-0" 
+                 x-transition:leave-end="translate-x-full" 
+                 class="fixed inset-y-0 right-0 z-50 w-full overflow-y-auto bg-white/95 backdrop-blur-xl px-6 py-6 sm:max-w-sm">
+                
+                <div class="flex items-center justify-between mb-8">
+                    <a href="#" class="flex items-center gap-3">
+                        <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-tr from-violet-500 to-fuchsia-500 text-white text-2xl">🎒</div>
+                        <span class="text-2xl font-heading font-extrabold text-slate-800">MyAcademy</span>
+                    </a>
+                    <button @click="mobileMenuOpen = false" type="button" class="-m-2.5 rounded-full p-2.5 text-slate-500 hover:bg-slate-100 transition">
+                        <span class="sr-only">Close menu</span>
+                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                    </button>
+                </div>
+                <div class="space-y-4">
+                    <a href="#modules" @click="mobileMenuOpen = false" class="block rounded-2xl px-4 py-3 text-lg font-bold text-slate-700 hover:bg-violet-50 hover:text-violet-600 transition">Modules 🧩</a>
+                    <a href="#portals" @click="mobileMenuOpen = false" class="block rounded-2xl px-4 py-3 text-lg font-bold text-slate-700 hover:bg-pink-50 hover:text-pink-600 transition">Portals 🏫</a>
+                    <a href="#journey" @click="mobileMenuOpen = false" class="block rounded-2xl px-4 py-3 text-lg font-bold text-slate-700 hover:bg-sky-50 hover:text-sky-600 transition">How it Works 🗺️</a>
+                    
+                    <div class="pt-6 mt-6 border-t border-slate-100 flex flex-col gap-3">
+                        <button @click="mobileMenuOpen = false; demoModalOpen = true" class="w-full text-center btn-outline-playful rounded-full px-6 py-3 text-lg font-bold">
+                            ✨ Take a Tour
+                        </button>
+                        <a href="{{ route('login') }}" class="w-full text-center btn-playful rounded-full px-6 py-3 text-lg font-bold">
+                            Log In 🚀
+                        </a>
                     </div>
                 </div>
             </div>
         </div>
-    </body>
+    </nav>
+
+    <main class="relative isolate pt-32 lg:pt-40 pb-20">
+        <!-- Hero Section -->
+        <div class="mx-auto max-w-7xl px-6 lg:px-8 relative">
+            <div class="flex flex-col lg:flex-row items-center gap-16">
+                <!-- Text Content -->
+                <div class="lg:w-1/2 text-center lg:text-left z-10">
+                    <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white border border-violet-100 shadow-sm mb-6 floating-element">
+                        <span class="flex h-3 w-3 rounded-full bg-emerald-400"></span>
+                        <span class="text-sm font-bold text-slate-600">The Ultimate School Management System 🎉</span>
+                    </div>
+                    <h1 class="text-5xl lg:text-7xl font-heading font-extrabold tracking-tight text-slate-800 leading-tight mb-6">
+                        Running a school <br class="hidden lg:block"/> has never been <span class="gradient-text">this fun!</span>
+                    </h1>
+                    <p class="text-xl text-slate-600 mb-10 leading-relaxed font-medium">
+                        Replace your boring spreadsheets with a magical digital playground. MyAcademy connects parents, excites students, empowers teachers, and gives admins total peace of mind.
+                    </p>
+                    <div class="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4">
+                        <a href="{{ route('login') }}" class="w-full sm:w-auto btn-playful rounded-full px-8 py-4 text-lg font-bold text-center">
+                            Start Free Trial 🎈
+                        </a>
+                        <button @click="demoModalOpen = true" class="w-full sm:w-auto btn-outline-playful rounded-full px-8 py-4 text-lg font-bold">
+                            View Demo 🔑
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Playful Hero Visual -->
+                <div class="lg:w-1/2 relative h-[500px] w-full mt-10 lg:mt-0">
+                    <!-- Main Dashboard Window -->
+                    <div class="absolute inset-0 bg-white/80 backdrop-blur-xl rounded-[40px] border-[3px] border-white shadow-[0_30px_60px_-15px_rgba(139,92,246,0.3)] overflow-hidden flex flex-col p-6 z-10 transform translate-y-4">
+                        <div class="flex justify-between items-center mb-6">
+                            <div class="flex gap-2">
+                                <div class="w-4 h-4 rounded-full bg-red-400"></div>
+                                <div class="w-4 h-4 rounded-full bg-amber-400"></div>
+                                <div class="w-4 h-4 rounded-full bg-emerald-400"></div>
+                            </div>
+                            <div class="px-4 py-1.5 bg-violet-100 text-violet-600 rounded-full text-sm font-bold animate-pulse">System Online ✅</div>
+                        </div>
+                        
+                        <div class="grid grid-cols-2 gap-4 mb-4">
+                            <!-- Mini Card -->
+                            <div class="bg-gradient-to-br from-orange-300 to-orange-400 p-4 rounded-3xl text-white shadow-sm">
+                                <div class="text-3xl mb-1">💸</div>
+                                <div class="text-sm font-bold opacity-90">Fees Collected</div>
+                                <div class="text-2xl font-heading font-bold">94%</div>
+                            </div>
+                            <!-- Mini Card -->
+                            <div class="bg-gradient-to-br from-emerald-300 to-emerald-400 p-4 rounded-3xl text-white shadow-sm">
+                                <div class="text-3xl mb-1">👩‍🎓</div>
+                                <div class="text-sm font-bold opacity-90">Attendance</div>
+                                <div class="text-2xl font-heading font-bold">1,204 Active</div>
+                            </div>
+                        </div>
+                        
+                        <div class="flex-1 bg-slate-50 rounded-3xl border border-slate-100 p-4 relative overflow-hidden flex flex-col gap-3">
+                            <div class="w-1/2 h-4 bg-slate-200 rounded-full"></div>
+                            <div class="w-full h-12 bg-white rounded-2xl shadow-sm border border-slate-100 flex items-center px-4 gap-3">
+                                <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-sm">📅</div>
+                                <div class="w-1/2 h-3 bg-slate-200 rounded-full"></div>
+                            </div>
+                             <div class="w-full h-12 bg-white rounded-2xl shadow-sm border border-slate-100 flex items-center px-4 gap-3">
+                                <div class="w-8 h-8 rounded-full bg-pink-100 flex items-center justify-center text-sm">📝</div>
+                                <div class="w-2/3 h-3 bg-slate-200 rounded-full"></div>
+                            </div>
+                            <div class="w-full h-12 bg-white rounded-2xl shadow-sm border border-slate-100 flex items-center px-4 gap-3">
+                                <div class="w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center text-sm">🚌</div>
+                                <div class="w-1/3 h-3 bg-slate-200 rounded-full"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Floating decorative bubbles -->
+                    <div class="absolute -top-10 -right-10 w-24 h-24 bg-yellow-300 rounded-3xl shadow-xl floating-element rotate-12 flex items-center justify-center text-4xl border-4 border-white z-20">✏️</div>
+                    
+                    <div class="absolute top-40 -left-12 w-20 h-20 bg-sky-400 rounded-full shadow-lg floating-delayed flex items-center justify-center text-3xl border-4 border-white z-20">🚌</div>
+                    
+                    <div class="absolute -bottom-8 right-10 w-28 h-28 bg-pink-400 rounded-[30px] shadow-xl floating-element flex items-center justify-center text-5xl border-4 border-white z-20 transform -rotate-12 animate-sway">🔔</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Trust / Stats Banner -->
+        <div class="mt-24 max-w-7xl mx-auto px-6 lg:px-8">
+            <div class="card-liquid p-6 md:p-8 rounded-[40px] flex flex-col md:flex-row items-center justify-around gap-6 text-center">
+                <div>
+                    <div class="text-4xl font-heading font-extrabold text-violet-500 mb-1">0</div>
+                    <div class="font-bold text-slate-600">Boring Spreadsheets</div>
+                </div>
+                <!-- Divider -->
+                <div class="h-12 w-1 bg-slate-200 rounded-full hidden md:block"></div>
+                <div>
+                    <div class="text-4xl font-heading font-extrabold text-orange-500 mb-1">100%</div>
+                    <div class="font-bold text-slate-600">Cloud Data Security</div>
+                </div>
+                <!-- Divider -->
+                <div class="h-12 w-1 bg-slate-200 rounded-full hidden md:block"></div>
+                <div>
+                    <div class="text-4xl font-heading font-extrabold text-emerald-500 mb-1">20+</div>
+                    <div class="font-bold text-slate-600">Powerful Modules</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Comprehensive Modules Section -->
+        <div id="modules" class="mt-32 max-w-7xl mx-auto px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <span class="text-sky-500 font-bold tracking-wider uppercase text-sm">Everything in one place</span>
+                <h2 class="text-4xl md:text-5xl font-heading font-bold text-slate-800 mt-2">All the tools you need 🧩</h2>
+                <p class="text-lg text-slate-600 mt-4 max-w-2xl mx-auto font-medium">MyAcademy is a unified School Management System. We've packed it with delightfully simple modules to manage every single aspect of your institution.</p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Fee Management -->
+                <div class="bg-white rounded-[32px] p-8 shadow-sm border-2 border-slate-100 hover:border-violet-300 transition-colors group">
+                    <div class="w-16 h-16 bg-violet-100 text-violet-500 rounded-2xl flex items-center justify-center text-3xl mb-6 group-hover:scale-110 transition-transform">💰</div>
+                    <h3 class="text-xl font-heading font-bold text-slate-800 mb-3">Fee Management</h3>
+                    <p class="text-slate-600 font-medium">Collect fees, generate PDF receipts, track outstanding balances, and let the bursar manage finances without touching a spreadsheet.</p>
+                </div>
+
+                <!-- CBT Exams -->
+                <div class="bg-white rounded-[32px] p-8 shadow-sm border-2 border-slate-100 hover:border-emerald-300 transition-colors group">
+                    <div class="w-16 h-16 bg-emerald-100 text-emerald-500 rounded-2xl flex items-center justify-center text-3xl mb-6 group-hover:scale-110 transition-transform">🖥️</div>
+                    <h3 class="text-xl font-heading font-bold text-slate-800 mb-3">Computer Based Testing</h3>
+                    <p class="text-slate-600 font-medium">Students sit timed online exams from their portal. Auto-graded instantly — no marking, no waiting, no bias.</p>
+                </div>
+
+                <!-- Report Cards & Certificates -->
+                <div class="bg-white rounded-[32px] p-8 shadow-sm border-2 border-slate-100 hover:border-pink-300 transition-colors group">
+                    <div class="w-16 h-16 bg-pink-100 text-pink-500 rounded-2xl flex items-center justify-center text-3xl mb-6 group-hover:scale-110 transition-transform">📄</div>
+                    <h3 class="text-xl font-heading font-bold text-slate-800 mb-3">Report Cards & Certificates</h3>
+                    <p class="text-slate-600 font-medium">One click generates beautiful PDF report cards with grades, remarks, and attendance. Award certificates with custom designs.</p>
+                </div>
+
+                <!-- Attendance Tracking -->
+                <div class="bg-white rounded-[32px] p-8 shadow-sm border-2 border-slate-100 hover:border-sky-300 transition-colors group">
+                    <div class="w-16 h-16 bg-sky-100 text-sky-500 rounded-2xl flex items-center justify-center text-3xl mb-6 group-hover:scale-110 transition-transform">✅</div>
+                    <h3 class="text-xl font-heading font-bold text-slate-800 mb-3">Attendance Tracking</h3>
+                    <p class="text-slate-600 font-medium">Teachers mark daily attendance in seconds. Parents get notified of absences and can view their child's attendance history anytime.</p>
+                </div>
+
+                <!-- Homework -->
+                <div class="bg-white rounded-[32px] p-8 shadow-sm border-2 border-slate-100 hover:border-orange-300 transition-colors group">
+                    <div class="w-16 h-16 bg-orange-100 text-orange-500 rounded-2xl flex items-center justify-center text-3xl mb-6 group-hover:scale-110 transition-transform">📚</div>
+                    <h3 class="text-xl font-heading font-bold text-slate-800 mb-3">Homework & Submissions</h3>
+                    <p class="text-slate-600 font-medium">Teachers assign homework with deadlines. Students submit directly from their portal. Track completion rates and grade on the spot.</p>
+                </div>
+
+                <!-- Performance Analytics -->
+                <div class="bg-white rounded-[32px] p-8 shadow-sm border-2 border-slate-100 hover:border-indigo-300 transition-colors group">
+                    <div class="w-16 h-16 bg-indigo-100 text-indigo-500 rounded-2xl flex items-center justify-center text-3xl mb-6 group-hover:scale-110 transition-transform">📈</div>
+                    <h3 class="text-xl font-heading font-bold text-slate-800 mb-3">Performance Analytics</h3>
+                    <p class="text-slate-600 font-medium">Deep-dive dashboards show strengths, weaknesses, and trends per student. Spot struggling pupils early and intervene before it's too late.</p>
+                </div>
+
+                <!-- WhatsApp Bot -->
+                <div class="bg-white rounded-[32px] p-8 shadow-sm border-2 border-slate-100 hover:border-green-300 transition-colors group">
+                    <div class="w-16 h-16 bg-green-100 text-green-500 rounded-2xl flex items-center justify-center text-3xl mb-6 group-hover:scale-110 transition-transform">💬</div>
+                    <h3 class="text-xl font-heading font-bold text-slate-800 mb-3">WhatsApp Bot Integration</h3>
+                    <p class="text-slate-600 font-medium">Parents query results, fees, and attendance directly on WhatsApp. No app download needed — it just works where they already are.</p>
+                </div>
+
+                <!-- Student & Staff Management -->
+                <div class="bg-white rounded-[32px] p-8 shadow-sm border-2 border-slate-100 hover:border-amber-300 transition-colors group">
+                    <div class="w-16 h-16 bg-amber-100 text-amber-500 rounded-2xl flex items-center justify-center text-3xl mb-6 group-hover:scale-110 transition-transform">🏫</div>
+                    <h3 class="text-xl font-heading font-bold text-slate-800 mb-3">Student & Staff Records</h3>
+                    <p class="text-slate-600 font-medium">Centralised profiles for every student and staff member — admission forms, class assignments, subjects, and documents all in one place.</p>
+                </div>
+
+                <!-- Backup & Restore -->
+                <div class="bg-white rounded-[32px] p-8 shadow-sm border-2 border-slate-100 hover:border-rose-300 transition-colors group">
+                    <div class="w-16 h-16 bg-rose-100 text-rose-500 rounded-2xl flex items-center justify-center text-3xl mb-6 group-hover:scale-110 transition-transform">🛡️</div>
+                    <h3 class="text-xl font-heading font-bold text-slate-800 mb-3">Backup & Restore</h3>
+                    <p class="text-slate-600 font-medium">One-click full backup zips your database and all uploads. Restore in minutes — your school's data is always safe and recoverable.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- The Journey (How it Works) -->
+        <div id="journey" class="mt-32 max-w-7xl mx-auto px-6 lg:px-8 py-16">
+             <div class="text-center mb-16">
+                <h2 class="text-4xl md:text-5xl font-heading font-bold text-slate-800">The Ultimate Learning Journey 🗺️</h2>
+                <p class="text-lg text-slate-600 mt-4 max-w-2xl mx-auto font-medium">See how seamlessly everything connects to make life easier for everyone involved.</p>
+            </div>
+
+            <!-- Timeline Diagram -->
+            <div class="relative flex flex-col md:flex-row justify-between items-center md:items-start gap-8 md:gap-4 px-4 w-full max-w-5xl mx-auto">
+                <!-- Line -->
+                <div class="absolute top-1/2 left-0 right-0 hidden md:block dashed-line -z-10 translate-y-[-120%]"></div>
+                
+                <!-- Step 1 Admin -->
+                <div class="flex flex-col items-center text-center max-w-[200px] z-10 bg-slate-50">
+                    <div class="w-24 h-24 rounded-full bg-white border-4 border-violet-200 shadow-md flex items-center justify-center text-5xl mb-4 floating-element hover:rotate-12 transition">👑</div>
+                    <h4 class="font-heading font-bold text-slate-800 text-lg">1. Admins set up</h4>
+                    <p class="text-sm text-slate-500 mt-2">Admins create the session, add fees, and register pupils.</p>
+                </div>
+                
+                <!-- Step 2 Teacher -->
+                <div class="flex flex-col items-center text-center max-w-[200px] z-10 bg-slate-50">
+                    <div class="w-24 h-24 rounded-full bg-white border-4 border-emerald-200 shadow-md flex items-center justify-center text-5xl mb-4 floating-delayed hover:-rotate-12 transition">👩‍🏫</div>
+                    <h4 class="font-heading font-bold text-slate-800 text-lg">2. Teachers grade</h4>
+                    <p class="text-sm text-slate-500 mt-2">Teachers log in to assign homework, take attendance, and input marks.</p>
+                </div>
+
+                <!-- Step 3 Student -->
+                <div class="flex flex-col items-center text-center max-w-[200px] z-10 bg-slate-50">
+                    <div class="w-24 h-24 rounded-full bg-white border-4 border-sky-200 shadow-md flex items-center justify-center text-5xl mb-4 floating-element hover:rotate-12 transition">🎒</div>
+                    <h4 class="font-heading font-bold text-slate-800 text-lg">3. Students learn</h4>
+                    <p class="text-sm text-slate-500 mt-2">Students view their progress, read announcements, and take CBTs.</p>
+                </div>
+
+                <!-- Step 4 Parent -->
+                <div class="flex flex-col items-center text-center max-w-[200px] z-10 bg-slate-50">
+                    <div class="w-24 h-24 rounded-full bg-white border-4 border-pink-200 shadow-md flex items-center justify-center text-5xl mb-4 floating-delayed hover:-rotate-12 transition">👨‍👩‍👦</div>
+                    <h4 class="font-heading font-bold text-slate-800 text-lg">4. Parents smile</h4>
+                    <p class="text-sm text-slate-500 mt-2">Parents automatically get notified, view receipts, and download reports.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Portals Section (Learning Zones) -->
+        <div id="portals" class="mt-24 max-w-7xl mx-auto px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <span class="text-violet-500 font-bold tracking-wider uppercase text-sm">Everyone Belongs Here</span>
+                <h2 class="text-4xl md:text-5xl font-heading font-bold text-slate-800 mt-2">Dedicated Spaces 🏘️</h2>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <!-- Admin Card -->
+                <div class="card-liquid p-8 flex flex-col items-center text-center group">
+                    <div class="w-20 h-20 rounded-full bg-violet-100 text-violet-500 flex items-center justify-center text-4xl mb-6 shadow-inner group-hover:scale-110 transition-transform">
+                        👑
+                    </div>
+                    <h3 class="text-2xl font-heading font-bold text-slate-800 mb-2">Administrators</h3>
+                    <p class="text-slate-600 font-medium text-sm">Manage entire operations playfully.</p>
+                </div>
+                
+                <!-- Teacher Card -->
+                <div class="card-liquid p-8 flex flex-col items-center text-center group" style="animation-delay: 0.1s">
+                    <div class="w-20 h-20 rounded-full bg-emerald-100 text-emerald-500 flex items-center justify-center text-4xl mb-6 shadow-inner group-hover:scale-110 transition-transform">
+                        👩‍🏫
+                    </div>
+                    <h3 class="text-2xl font-heading font-bold text-slate-800 mb-2">Teachers</h3>
+                    <p class="text-slate-600 font-medium text-sm">Grade effectively with joy, not stress.</p>
+                </div>
+                
+                <!-- Student Card -->
+                <div class="card-liquid p-8 flex flex-col items-center text-center group" style="animation-delay: 0.2s">
+                    <div class="w-20 h-20 rounded-full bg-sky-100 text-sky-500 flex items-center justify-center text-4xl mb-6 shadow-inner group-hover:scale-110 transition-transform">
+                        🎒
+                    </div>
+                    <h3 class="text-2xl font-heading font-bold text-slate-800 mb-2">Students</h3>
+                    <p class="text-slate-600 font-medium text-sm">A fun dashboard connecting their world.</p>
+                </div>
+                
+                <!-- Parent Card -->
+                <div class="card-liquid p-8 flex flex-col items-center text-center group" style="animation-delay: 0.3s">
+                    <div class="w-20 h-20 rounded-full bg-pink-100 text-pink-500 flex items-center justify-center text-4xl mb-6 shadow-inner group-hover:scale-110 transition-transform">
+                        👨‍👩‍👦
+                    </div>
+                    <h3 class="text-2xl font-heading font-bold text-slate-800 mb-2">Parents</h3>
+                    <p class="text-slate-600 font-medium text-sm">Always in the loop, always happy.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- CTA Space -->
+        <div class="mt-40 max-w-5xl mx-auto px-6 pb-20">
+            <div class="card-liquid bg-gradient-to-tr from-violet-100 to-sky-100 border-none p-12 lg:p-20 text-center relative overflow-hidden">
+                <div class="absolute -top-10 -right-10 w-32 h-32 bg-white rounded-full opacity-60 blur-2xl"></div>
+                <div class="absolute top-10 left-10 text-6xl opacity-30 transform -rotate-12">🎈</div>
+                <div class="absolute bottom-10 right-10 text-6xl opacity-30 transform rotate-12">✨</div>
+                
+                <h2 class="text-5xl font-heading font-extrabold text-slate-800 mb-6 relative z-10">Ready to join the fun? 🚀</h2>
+                <p class="text-xl text-slate-600 mb-10 font-medium relative z-10">Start exploring our playful school management ecosystem today and give your institution the modern upgrade it deserves.</p>
+                <div class="flex flex-col sm:flex-row justify-center gap-4 relative z-10">
+                    <a href="{{ route('login') }}" class="btn-playful rounded-full px-12 py-5 text-xl font-bold">Go to Login 🚪</a>
+                    <button @click="demoModalOpen = true" class="btn-outline-playful rounded-full px-12 py-5 text-xl font-bold bg-white">View Demo Codes 🔑</button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-slate-100 pt-16 pb-8 text-center relative overflow-hidden">
+        <div class="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[800px] bg-slate-50 rounded-full blur-3xl -z-10 mt-20"></div>
+        <div class="flex items-center justify-center gap-3 mb-6">
+            <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-tr from-violet-500 to-fuchsia-500 text-white text-xl">🎒</div>
+            <span class="text-2xl font-heading font-extrabold text-slate-800 tracking-tight">MyAcademy</span>
+        </div>
+        <p class="text-slate-500 font-medium">Making school management a joyful breeze.</p>
+        <p class="text-slate-400 text-sm mt-8">&copy; {{ date('Y') }} MyAcademy Inc. All smiles reserved. 😊</p>
+    </footer>
+
+    <!-- Playful Demo Modal -->
+    <div x-show="demoModalOpen" style="display: none;" class="relative z-[100]" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+        <!-- Soft blurry backdrop -->
+        <div x-show="demoModalOpen" x-transition.opacity class="fixed inset-0 bg-slate-900/40 backdrop-blur-md transition-opacity"></div>
+        
+        <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
+            <div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
+                <div x-show="demoModalOpen" 
+                     x-transition:enter="cubic-bezier(0.34, 1.56, 0.64, 1) duration-500"
+                     x-transition:enter-start="opacity-0 translate-y-16 sm:scale-75"
+                     x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
+                     x-transition:leave="ease-in duration-200"
+                     x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
+                     x-transition:leave-end="opacity-0 translate-y-4 sm:scale-95"
+                     @click.away="demoModalOpen = false"
+                     class="relative transform overflow-hidden rounded-[40px] bg-white/95 backdrop-blur-xl border border-white text-left shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-4xl p-6 lg:p-10">
+                    
+                    <button @click="demoModalOpen = false" class="absolute top-6 right-6 text-slate-400 hover:text-slate-800 hover:rotate-90 transition-all bg-slate-100 hover:bg-slate-200 rounded-full p-3 shadow-inner">
+                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                    </button>
+                    
+                    <div class="text-center mb-10 mt-4">
+                        <div class="inline-flex h-20 w-20 items-center justify-center rounded-[24px] bg-gradient-to-tr from-sky-300 to-indigo-400 text-white text-4xl mb-4 shadow-lg transform rotate-3">
+                            🔑
+                        </div>
+                        <h3 class="text-4xl font-heading font-extrabold text-slate-800" id="modal-title">Magic Door Keys!</h3>
+                        <p class="mt-4 text-lg text-slate-600 font-medium max-w-2xl mx-auto">
+                            Pick a character to play as. The playground resets every 24 hours, so don't be afraid to click buttons and test features! 🛠️
+                        </p>
+                    </div>
+
+                    <!-- Joyful Credentials Grid -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                        <!-- Admin -->
+                        <div class="card-liquid p-6 bg-violet-50/50 border-2 border-violet-100 hover:border-violet-400 group">
+                            <div class="flex items-center gap-4 mb-4 pb-4 border-b-2 border-violet-100/50">
+                                <span class="text-4xl group-hover:scale-125 group-hover:rotate-12 transition-transform duration-300">👑</span>
+                                <h4 class="font-heading text-2xl font-bold text-violet-800">Admin</h4>
+                            </div>
+                            <div class="space-y-3 font-medium text-slate-700">
+                                <div><span class="text-violet-400 text-sm font-bold uppercase tracking-wide">ID</span> <br/><span class="bg-white px-3 py-1 rounded-xl shadow-sm text-base">admin@myacademy.local</span></div>
+                                <div><span class="text-violet-400 text-sm font-bold uppercase tracking-wide">Secret Pass</span> <br/><span class="bg-white px-3 py-1 rounded-xl shadow-sm tracking-widest text-base">password</span></div>
+                            </div>
+                            <a href="{{ route('login') }}" class="mt-6 block w-full text-center rounded-2xl bg-violet-500 py-3 font-bold text-white shadow-md hover:bg-violet-600 hover:-translate-y-1 transition">Play as Admin</a>
+                        </div>
+
+                        <!-- Teacher -->
+                        <div class="card-liquid p-6 bg-emerald-50/50 border-2 border-emerald-100 hover:border-emerald-400 group">
+                            <div class="flex items-center gap-4 mb-4 pb-4 border-b-2 border-emerald-100/50">
+                                <span class="text-4xl group-hover:scale-125 group-hover:-rotate-12 transition-transform duration-300">👩‍🏫</span>
+                                <h4 class="font-heading text-2xl font-bold text-emerald-800">Teacher</h4>
+                            </div>
+                            <div class="space-y-3 font-medium text-slate-700">
+                                <div><span class="text-emerald-400 text-sm font-bold uppercase tracking-wide">ID</span> <br/><span class="bg-white px-3 py-1 rounded-xl shadow-sm text-base">teacher@myacademy.local</span></div>
+                                <div><span class="text-emerald-400 text-sm font-bold uppercase tracking-wide">Secret Pass</span> <br/><span class="bg-white px-3 py-1 rounded-xl shadow-sm tracking-widest text-base">password</span></div>
+                            </div>
+                            <a href="{{ route('login') }}" class="mt-6 block w-full text-center rounded-2xl bg-emerald-500 py-3 font-bold text-white shadow-md hover:bg-emerald-600 hover:-translate-y-1 transition">Play as Teacher</a>
+                        </div>
+
+                        <!-- Student -->
+                        <div class="card-liquid p-6 bg-sky-50/50 border-2 border-sky-100 hover:border-sky-400 group">
+                            <div class="flex items-center gap-4 mb-4 pb-4 border-b-2 border-sky-100/50">
+                                <span class="text-4xl group-hover:scale-125 group-hover:rotate-12 transition-transform duration-300">🎒</span>
+                                <h4 class="font-heading text-2xl font-bold text-sky-800">Student</h4>
+                            </div>
+                            <div class="space-y-3 font-medium text-slate-700">
+                                <div><span class="text-sky-400 text-sm font-bold uppercase tracking-wide">Admission No.</span> <br/><span class="bg-white px-3 py-1 rounded-xl shadow-sm text-base">ADM-2026-0092</span></div>
+                                <div><span class="text-sky-400 text-sm font-bold uppercase tracking-wide">Secret Pass</span> <br/><span class="bg-white px-3 py-1 rounded-xl shadow-sm tracking-widest text-base">amina0092</span></div>
+                            </div>
+                            <a href="{{ route('login') }}" class="mt-6 block w-full text-center rounded-2xl bg-sky-500 py-3 font-bold text-white shadow-md hover:bg-sky-600 hover:-translate-y-1 transition">Play as Student</a>
+                        </div>
+
+                        <!-- Parent -->
+                        <div class="card-liquid p-6 bg-pink-50/50 border-2 border-pink-100 hover:border-pink-400 group">
+                            <div class="flex items-center gap-4 mb-4 pb-4 border-b-2 border-pink-100/50">
+                                <span class="text-4xl group-hover:scale-125 group-hover:-rotate-12 transition-transform duration-300">👨‍👩‍👦</span>
+                                <h4 class="font-heading text-2xl font-bold text-pink-800">Parent</h4>
+                            </div>
+                            <div class="space-y-3 font-medium text-slate-700">
+                                <div><span class="text-pink-400 text-sm font-bold uppercase tracking-wide">ID</span> <br/><span class="bg-white px-3 py-1 rounded-xl shadow-sm text-base">parent1@myacademy.local</span></div>
+                                <div><span class="text-pink-400 text-sm font-bold uppercase tracking-wide">Secret Pass</span> <br/><span class="bg-white px-3 py-1 rounded-xl shadow-sm tracking-widest text-base">password</span></div>
+                            </div>
+                            <a href="{{ route('login') }}" class="mt-6 block w-full text-center rounded-2xl bg-pink-500 py-3 font-bold text-white shadow-md hover:bg-pink-600 hover:-translate-y-1 transition">Play as Parent</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
 </html>

@@ -4,6 +4,7 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
@@ -23,9 +24,15 @@ class User extends Authenticatable
         'password',
         'role',
         'is_active',
+        'is_super_admin',
+        'tenant_id',
         'profile_photo',
         'permissions',
         'custom_fields',
+        'whatsapp_phone',
+        'whatsapp_verified',
+        'whatsapp_subscribed',
+        'is_class_teacher',
     ];
 
     /**
@@ -53,12 +60,55 @@ class User extends Authenticatable
      * @var array<string, string>
      */
     protected $casts = [
-        'email_verified_at' => 'datetime',
-        'password' => 'hashed',
-        'is_active' => 'boolean',
-        'permissions' => 'array',
-        'custom_fields' => 'array',
+        'email_verified_at'  => 'datetime',
+        'password'           => 'hashed',
+        'is_active'          => 'boolean',
+        'is_super_admin'     => 'boolean',
+        'tenant_id'          => 'integer',
+        'permissions'        => 'array',
+        'custom_fields'      => 'array',
+        'whatsapp_verified'   => 'boolean',
+        'whatsapp_subscribed' => 'boolean',
+        'is_class_teacher'    => 'boolean',
     ];
+
+    protected static function booted(): void
+    {
+        static::addGlobalScope('tenant', function (Builder $builder) {
+            if (! app()->bound('currentTenant')) {
+                return;
+            }
+
+            $tenant = app('currentTenant');
+            $tenantId = $tenant && isset($tenant->id) ? (int) $tenant->id : null;
+            if (! $tenantId) {
+                return;
+            }
+
+            // Strict tenant isolation — super admins are intentionally excluded from tenant queries.
+            // They should never appear in tenant user listings or be queryable from tenant context.
+            $builder->where('tenant_id', $tenantId);
+        });
+
+        static::creating(function (self $user) {
+            if ($user->is_super_admin) {
+                return;
+            }
+
+            if (! empty($user->tenant_id)) {
+                return;
+            }
+
+            if (! app()->bound('currentTenant')) {
+                return;
+            }
+
+            $tenant = app('currentTenant');
+            if ($tenant && isset($tenant->id)) {
+                $user->tenant_id = (int) $tenant->id;
+            }
+        });
+    }
 
     public function hasPermission(string $permission): bool
     {
@@ -116,6 +166,11 @@ class User extends Authenticatable
         return $this->role === 'admin';
     }
 
+    public function isSuperAdmin(): bool
+    {
+        return (bool) $this->is_super_admin;
+    }
+
     public function isBursar(): bool
     {
         return $this->role === 'bursar';
@@ -135,5 +190,10 @@ class User extends Authenticatable
     {
         return $this->belongsToMany(Student::class, 'parent_student', 'user_id', 'student_id')
             ->withTimestamps();
+    }
+
+    public function children()
+    {
+        return $this->students();
     }
 }

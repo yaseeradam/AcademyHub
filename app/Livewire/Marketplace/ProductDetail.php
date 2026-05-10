@@ -169,39 +169,40 @@ class ProductDetail extends Component
                     'Reduce manual paperwork'
                 ]
             ],
-            'agent-pro' => [
-                'name' => 'AgentPro AI',
-                'short_description' => 'Intelligent AI assistant platform integration',
-                'description' => 'AgentPro AI is a revolutionary contextual AI assistant built for schools. It directly connects with student datasets, tracking attendance, results, fees, and more to answer inquiries intelligently and warmly like a live school administrator.',
-                'icon' => 'robot',
-                'color' => 'pink',
+
+            'messages' => [
+                'name' => 'Internal Messaging',
+                'short_description' => 'Real-time staff & admin communication system',
+                'description' => 'A built-in messaging system that lets admins, teachers, and bursars communicate directly within MyAcademy. Send messages, share file attachments, and keep all school communication in one place — no external apps needed.',
+                'icon' => 'messages',
+                'color' => 'amber',
                 'price' => 'FREE',
-                'category' => 'AI',
-                'rating' => '5.0',
-                'downloads' => '4.1k',
+                'category' => 'Communication',
+                'rating' => '4.7',
+                'downloads' => '1.5k',
                 'features' => [
-                    'Natural language queries',
-                    'Student performance analysis',
-                    'Attendance tracking',
-                    'Fee payment status',
-                    'Warm human-like personality',
-                    'Real-time database integration'
+                    'Direct one-on-one messaging',
+                    'File & document attachments',
+                    'Unread message badge',
+                    'Real-time polling',
+                    'Role-based recipient filtering',
+                    'Message history'
                 ],
                 'screenshots' => [
-                    'agentpro-1.png',
-                    'agentpro-2.png',
-                    'agentpro-3.png'
+                    'messages-1.png',
+                    'messages-2.png',
+                    'messages-3.png'
                 ],
                 'requirements' => [
                     'MyAcademy system',
-                    'Internet connection',
-                    'API access configuration'
+                    'Admin, Teacher, or Bursar account',
+                    'Web browser'
                 ],
                 'benefits' => [
-                    'Instant answers 24/7',
-                    'Reduces administrative burden',
-                    'Highly accurate database reads',
-                    'Zero-learning curve chat interface'
+                    'Eliminate external messaging apps',
+                    'Keep all communication in-system',
+                    'Instant file sharing between staff',
+                    'Full message audit trail'
                 ]
             ],
             'homework' => [

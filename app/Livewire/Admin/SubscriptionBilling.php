@@ -3,6 +3,7 @@
 namespace App\Livewire\Admin;
 
 use App\Models\Student;
+use App\Support\TenantSettings;
 use Livewire\Component;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
@@ -56,7 +57,7 @@ class SubscriptionBilling extends Component
 
     private function settingsPath(): string
     {
-        return storage_path('app/myacademy/settings.json');
+        return TenantSettings::settingsPath();
     }
 
     private function readSettings(): array

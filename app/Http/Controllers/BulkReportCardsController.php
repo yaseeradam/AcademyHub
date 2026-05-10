@@ -110,8 +110,12 @@ class BulkReportCardsController extends Controller
 
                 $zip->addFile($path, $filename);
             }
-        } finally {
+
             $zip->close();
+        } catch (\Throwable $e) {
+            $zip->close();
+            throw $e;
+        } finally {
             File::deleteDirectory($tmpDir);
         }
 

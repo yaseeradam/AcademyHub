@@ -95,16 +95,18 @@
             </div>
 
             <div class="mt-6 flex flex-col gap-3 border-t border-gray-200/70 pt-6 sm:flex-row sm:items-center sm:justify-between">
-                <label class="inline-flex items-center gap-2 text-sm font-medium text-slate-700">
-                    <input
-                        type="checkbox"
-                        class="checkbox-custom"
-                        name="is_active"
-                        value="1"
-                        @checked(old('is_active', $teacher->is_active))
-                    />
-                    Active (can log in)
-                </label>
+                <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
+                    <label class="inline-flex items-center gap-2 text-sm font-medium text-slate-700">
+                        <input type="checkbox" class="checkbox-custom" name="is_active" value="1"
+                            @checked(old('is_active', $teacher->is_active)) />
+                        Active (can log in)
+                    </label>
+                    <label class="inline-flex items-center gap-2 text-sm font-medium text-amber-700">
+                        <input type="checkbox" class="checkbox-custom" name="is_class_teacher" value="1"
+                            @checked(old('is_class_teacher', $teacher->is_class_teacher)) />
+                        Class Teacher <span class="text-xs text-gray-500 font-normal">(gets Attendance menu)</span>
+                    </label>
+                </div>
 
                 <div class="flex items-center gap-2">
                     <a href="{{ route('teachers.show', $teacher) }}" class="btn-ghost">Cancel</a>

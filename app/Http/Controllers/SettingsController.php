@@ -4,10 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Models\SchoolClass;
 use App\Support\CertificatePdf;
+use App\Support\TenantSettings;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Fluent;
@@ -16,6 +18,38 @@ class SettingsController extends Controller
 {
     private const CERTIFICATE_TEMPLATES = ['modern', 'classic', 'elegant', 'vibrant', 'minimal', 'royal', 'obsidian', 'sahara', 'oceanic', 'crimson', 'ivory'];
     private const REPORT_CARD_TEMPLATES = ['standard', 'compact', 'elegant', 'modern', 'classic', 'vibrant', 'professional', 'royal', 'fresh', 'sunset'];
+
+    private function settingsPath(): string
+    {
+        return TenantSettings::settingsPath();
+    }
+
+    private function settingsCacheKey(): string
+    {
+        return TenantSettings::settingsCacheKey();
+    }
+
+    private function loadSettings(string $settingsPath): array
+    {
+        if (! File::exists($settingsPath)) {
+            return [];
+        }
+
+        $existing = json_decode(File::get($settingsPath), true);
+
+        return is_array($existing) ? $existing : [];
+    }
+
+    private function persistSettings(string $settingsPath, array $settings): void
+    {
+        File::ensureDirectoryExists(dirname($settingsPath));
+        File::put($settingsPath, json_encode($settings, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+    }
+
+    private function refreshSettingsCache(): void
+    {
+        Cache::forget($this->settingsCacheKey());
+    }
 
     public function updateSchool(Request $request)
     {
@@ -27,16 +61,8 @@ class SettingsController extends Controller
             'school_logo' => ['nullable', 'image', 'max:2048'],
         ]);
 
-        $settingsPath = storage_path('app/myacademy/settings.json');
-        File::ensureDirectoryExists(dirname($settingsPath));
-
-        $settings = [];
-        if (File::exists($settingsPath)) {
-            $existing = json_decode(File::get($settingsPath), true);
-            if (is_array($existing)) {
-                $settings = $existing;
-            }
-        }
+        $settingsPath = $this->settingsPath();
+        $settings = $this->loadSettings($settingsPath);
 
         $settings['school_name'] = $data['school_name'];
         $settings['school_address'] = $data['school_address'] ?? null;
@@ -47,7 +73,7 @@ class SettingsController extends Controller
             $file = $request->file('school_logo');
             $ext = $file->getClientOriginalExtension() ?: 'png';
             $filename = 'school-logo-' . now()->format('YmdHis') . '.' . $ext;
-            $path = $file->storeAs('school-assets', $filename, 'uploads');
+            $path = $file->storeAs(TenantSettings::uploadsSubdir('school-assets'), $filename, 'uploads');
             $path = str_replace('\\', '/', (string) $path);
 
             $old = $settings['school_logo'] ?? null;
@@ -58,11 +84,9 @@ class SettingsController extends Controller
             $settings['school_logo'] = $path;
         }
 
-        File::put($settingsPath, json_encode($settings, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+        $this->persistSettings($settingsPath, $settings);
         
-        // Clear cache and force reload
-        \Illuminate\Support\Facades\Cache::forget('myacademy_settings_cache');
-        \Illuminate\Support\Facades\Cache::flush(); // Clear all cache to be safe
+        $this->refreshSettingsCache();
         
         // Force config reload by clearing config cache
         if (function_exists('opcache_reset')) {
@@ -87,26 +111,16 @@ class SettingsController extends Controller
             ]);
         }
 
-        $settingsPath = storage_path('app/myacademy/settings.json');
-        File::ensureDirectoryExists(dirname($settingsPath));
-
-        $settings = [];
-        if (File::exists($settingsPath)) {
-            $existing = json_decode(File::get($settingsPath), true);
-            if (is_array($existing)) {
-                $settings = $existing;
-            }
-        }
+        $settingsPath = $this->settingsPath();
+        $settings = $this->loadSettings($settingsPath);
 
         $settings['results_ca1_max'] = (int) $data['results_ca1_max'];
         $settings['results_ca2_max'] = (int) $data['results_ca2_max'];
         $settings['results_exam_max'] = (int) $data['results_exam_max'];
 
-        File::put($settingsPath, json_encode($settings, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+        $this->persistSettings($settingsPath, $settings);
         
-        // Clear cache and force reload
-        \Illuminate\Support\Facades\Cache::forget('myacademy_settings_cache');
-        \Illuminate\Support\Facades\Cache::flush(); // Clear all cache to be safe
+        $this->refreshSettingsCache();
         
         // Force config reload by clearing config cache
         if (function_exists('opcache_reset')) {
@@ -143,16 +157,8 @@ class SettingsController extends Controller
             'certificate_template' => ['required', 'string', 'in:' . implode(',', self::CERTIFICATE_TEMPLATES)],
         ]);
 
-        $settingsPath = storage_path('app/myacademy/settings.json');
-        File::ensureDirectoryExists(dirname($settingsPath));
-
-        $settings = [];
-        if (File::exists($settingsPath)) {
-            $existing = json_decode(File::get($settingsPath), true);
-            if (is_array($existing)) {
-                $settings = $existing;
-            }
-        }
+        $settingsPath = $this->settingsPath();
+        $settings = $this->loadSettings($settingsPath);
 
         $settings['certificate_orientation'] = $data['certificate_orientation'];
         $settings['certificate_border_color'] = $data['certificate_border_color'];
@@ -175,7 +181,7 @@ class SettingsController extends Controller
             $file = $request->file('certificate_watermark_image');
             $ext = $file->getClientOriginalExtension() ?: 'png';
             $filename = 'certificate-watermark-' . now()->format('YmdHis') . '.' . $ext;
-            $path = $file->storeAs('school-assets', $filename, 'uploads');
+            $path = $file->storeAs(TenantSettings::uploadsSubdir('school-assets'), $filename, 'uploads');
             $path = str_replace('\\', '/', (string) $path);
 
             $old = $settings['certificate_watermark_image'] ?? null;
@@ -201,7 +207,7 @@ class SettingsController extends Controller
             $file = $request->file('certificate_signature_image');
             $ext = $file->getClientOriginalExtension() ?: 'png';
             $filename = 'certificate-signature-' . now()->format('YmdHis') . '.' . $ext;
-            $path = $file->storeAs('school-assets', $filename, 'uploads');
+            $path = $file->storeAs(TenantSettings::uploadsSubdir('school-assets'), $filename, 'uploads');
             $path = str_replace('\\', '/', (string) $path);
 
             $old = $settings['certificate_signature_image'] ?? null;
@@ -227,7 +233,7 @@ class SettingsController extends Controller
             $file = $request->file('certificate_signature2_image');
             $ext = $file->getClientOriginalExtension() ?: 'png';
             $filename = 'certificate-signature2-' . now()->format('YmdHis') . '.' . $ext;
-            $path = $file->storeAs('school-assets', $filename, 'uploads');
+            $path = $file->storeAs(TenantSettings::uploadsSubdir('school-assets'), $filename, 'uploads');
             $path = str_replace('\\', '/', (string) $path);
 
             $old = $settings['certificate_signature2_image'] ?? null;
@@ -242,11 +248,9 @@ class SettingsController extends Controller
         $settings['certificate_default_title'] = $data['certificate_default_title'] ?: null;
         $settings['certificate_default_body'] = $data['certificate_default_body'] ?: null;
 
-        File::put($settingsPath, json_encode($settings, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+        $this->persistSettings($settingsPath, $settings);
         
-        // Clear cache and force reload
-        \Illuminate\Support\Facades\Cache::forget('myacademy_settings_cache');
-        \Illuminate\Support\Facades\Cache::flush(); // Clear all cache to be safe
+        $this->refreshSettingsCache();
         
         // Force config reload by clearing config cache
         if (function_exists('opcache_reset')) {
@@ -290,16 +294,8 @@ class SettingsController extends Controller
                 'rc_teacher_signature_remove' => ['nullable', 'boolean'],
             ]);
 
-            $settingsPath = storage_path('app/myacademy/settings.json');
-            File::ensureDirectoryExists(dirname($settingsPath));
-
-            $settings = [];
-            if (File::exists($settingsPath)) {
-                $existing = json_decode(File::get($settingsPath), true);
-                if (is_array($existing)) {
-                    $settings = $existing;
-                }
-            }
+            $settingsPath = $this->settingsPath();
+            $settings = $this->loadSettings($settingsPath);
 
             // All templates are now free
             $settings['report_card_template'] = (string) $data['report_card_template'];
@@ -346,7 +342,7 @@ class SettingsController extends Controller
                 $file = $request->file('rc_principal_signature_image');
                 $ext = $file->getClientOriginalExtension() ?: 'png';
                 $filename = 'rc-principal-signature-' . now()->format('YmdHis') . '.' . $ext;
-                $path = $file->storeAs('school-assets', $filename, 'uploads');
+                $path = $file->storeAs(TenantSettings::uploadsSubdir('school-assets'), $filename, 'uploads');
                 $path = str_replace('\\', '/', (string) $path);
                 $old = $settings['rc_principal_signature_image'] ?? null;
                 if ($old && $old !== $path) {
@@ -367,7 +363,7 @@ class SettingsController extends Controller
                 $file = $request->file('rc_teacher_signature_image');
                 $ext = $file->getClientOriginalExtension() ?: 'png';
                 $filename = 'rc-teacher-signature-' . now()->format('YmdHis') . '.' . $ext;
-                $path = $file->storeAs('school-assets', $filename, 'uploads');
+                $path = $file->storeAs(TenantSettings::uploadsSubdir('school-assets'), $filename, 'uploads');
                 $path = str_replace('\\', '/', (string) $path);
                 $old = $settings['rc_teacher_signature_image'] ?? null;
                 if ($old && $old !== $path) {
@@ -376,10 +372,9 @@ class SettingsController extends Controller
                 $settings['rc_teacher_signature_image'] = $path;
             }
 
-            File::put($settingsPath, json_encode($settings, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+            $this->persistSettings($settingsPath, $settings);
 
-            // Bust the settings cache key so the next request picks up the new JSON.
-            \Illuminate\Support\Facades\Cache::forget('myacademy_settings_cache');
+            $this->refreshSettingsCache();
 
             return back()->with('status', 'Report card settings saved.');
             

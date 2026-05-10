@@ -50,50 +50,37 @@ async function handleStateFlow(msg, phone, text, stateObj) {
         return msg.reply('🚫 Process cancelled. You can ask me anything else!');
     }
 
-    // ---------------- REGISTER FLOW ----------------
-    if (stateObj.step === 'EMAIL') {
-        stateObj.data.email = text.trim();
-        stateObj.step = 'ADMISSION';
-        return msg.reply(
-            'Got it! ✅\n\n' +
-            'If you are a *Parent*, reply with your child\'s *Admission Number*.\n' +
-            'If you are *Staff/Admin*, just reply with the word *skip*.'
-        );
+    // ---------------- LOGIN FLOW ----------------
+    if (stateObj.step === 'LOGIN_IDENTIFIER') {
+        stateObj.data.identifier = text.trim();
+        stateObj.step = 'LOGIN_PASSWORD';
+        return msg.reply('🔑 Now enter your *password*:');
     }
-    
-    if (stateObj.step === 'ADMISSION') {
-        stateObj.data.admission_number = text.toLowerCase() === 'skip' ? null : text.trim();
+
+    if (stateObj.step === 'LOGIN_PASSWORD') {
+        stateObj.data.password = text.trim();
         try {
-            const res = await axios.post(`${API_URL}/register`, {
-                email: stateObj.data.email,
-                admission_number: stateObj.data.admission_number,
+            const res = await axios.post(`${API_URL}/login`, {
+                identifier: stateObj.data.identifier,
+                password: stateObj.data.password,
                 phone: phone
             });
+            userStates.delete(phone);
             if (res.data.success) {
-                stateObj.step = 'OTP';
-                return msg.reply(`📩 *Verification Required*\n\nWe found your account! Generated OTP Code: *${res.data.otp}*\n\nPlease reply with the OTP code to verify your WhatsApp.`);
+                const role = res.data.user.role;
+                const name = res.data.user.name || res.data.user.first_name || 'User';
+                if (role === 'parent') {
+                    return msg.reply(`✅ *Logged in successfully!*\n\nWelcome, ${name}! You can now ask me things like:\n• _"Did my child attend school today?"_\n• _"What are my child's latest results?"_\n\nType *menu* for all commands.`);
+                } else if (role === 'student') {
+                    return msg.reply(`✅ *Logged in successfully!*\n\nWelcome, ${name}! Type *menu* to see what I can help you with.`);
+                } else {
+                    return msg.reply(`✅ *Logged in successfully!*\n\nWelcome, ${name}! Type *menu* for available commands.`);
+                }
             }
         } catch(e) {
             userStates.delete(phone);
-            return msg.reply('❌ Registration failed: ' + (e.response?.data?.message || 'Unknown error') + '\n\nType *register* to try again.');
-        }
-    }
-    
-    if (stateObj.step === 'OTP') {
-        try {
-            const res = await axios.post(`${API_URL}/verify`, {
-                phone: phone,
-                otp: text.trim()
-            });
-            userStates.delete(phone);
-            if (res.data.user.role === 'parent') {
-                return msg.reply(`🎉 Registration Successful!\n\nWelcome! You can now ask me questions naturally like *"Did my child go to school yesterday?"* or *"What was their math score?"*. Give it a try!`);
-            } else {
-                return msg.reply(`🎉 Staff Registration Successful! Welcome, ${res.data.user.name}.\n\nYou can type *homework* to start assigning tasks to classes.`);
-            }
-        } catch (e) {
-            userStates.delete(phone);
-            return msg.reply('❌ Invalid OTP. Type *register* to restart process.');
+            const errMsg = e.response?.data?.message || 'Invalid credentials';
+            return msg.reply(`❌ *Login failed:* ${errMsg}\n\nType *login* to try again.`);
         }
     }
 
@@ -178,9 +165,16 @@ client.on('message', async msg => {
     }
 
     // 2. ENTRY COMMANDS (Strict match)
-    if (textLower === 'register') {
-        userStates.set(phone, { step: 'EMAIL', data: {} });
-        return msg.reply('👋 Welcome! Let\'s hook up your account.\n\nPlease reply with your *Email Address* (or type *cancel* anytime).');
+    if (textLower === 'login') {
+        userStates.set(phone, { step: 'LOGIN_IDENTIFIER', data: {} });
+        return msg.reply(
+            '👋 *Welcome to MyAcademy Bot!*\n\n' +
+            'Please enter your login identifier:\n\n' +
+            '• *Students:* Enter your Admission Number (e.g. STU20240001)\n' +
+            '• *Staff/Admin/Bursar:* Enter your Email Address\n' +
+            '• *Parents:* Enter your Email Address\n\n' +
+            '_(Type *cancel* anytime to stop)_'
+        );
     }
 
     // 3. FETCH USER CONTEXT
@@ -189,11 +183,15 @@ client.on('message', async msg => {
         const res = await axios.get(`${API_URL}/user/${phone}`);
         userInfo = res.data.user;
     } catch(e) {
-        // If not registered
-        if (['hi', 'hello', 'hey', 'menu', 'start'].includes(textLower)) {
-            return msg.reply('👋 Welcome to MyAcademy AI Bot!\n\nYou are not registered yet or I don\'t recognize your number.\n\nReply with *register* to begin the quick setup.');
+        // If not registered/logged in
+        if (['hi', 'hello', 'hey', 'menu', 'start', 'help'].includes(textLower)) {
+            return msg.reply(
+                '👋 *Welcome to MyAcademy Bot!*\n\n' +
+                'I don\'t recognize your number yet.\n\n' +
+                'Type *login* to connect your account using the same username and password you use on the school website.'
+            );
         }
-        return msg.reply('You are not registered. Reply with *register* to link your account.');
+        return msg.reply('You are not logged in. Type *login* to connect your account.');
     }
 
     const userId = userInfo.id;

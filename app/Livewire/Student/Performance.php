@@ -55,7 +55,7 @@ class Performance extends Component
         }
 
         if ($user?->role === 'parent') {
-            return $user->children()->first();
+            return $user->students()->first();
         }
 
         return null;
@@ -92,7 +92,8 @@ class Performance extends Component
 
     public function render()
     {
-        return view('livewire.student.performance')
-            ->layout('layouts.student');
+        $layout = session('student_id') ? 'layouts.student' : 'layouts.app';
+
+        return view('livewire.student.performance')->layout($layout);
     }
 }

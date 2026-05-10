@@ -1,12 +1,26 @@
 <div class="space-y-6">
-    <div class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-sky-500 via-blue-500 to-cyan-600 p-8 shadow-2xl">
-        <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSAxMCAwIEwgMCAwIDAgMTAiIGZpbGw9Im5vbmUiIHN0cm9rZT0id2hpdGUiIHN0cm9rZS1vcGFjaXR5PSIwLjEiIHN0cm9rZS13aWR0aD0iMSIvPjwvcGF0dGVybj48L2RlZnM+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0idXJsKCNncmlkKSIvPjwvc3ZnPg==')] opacity-30"></div>
-        <div class="relative flex items-center justify-between">
+    <div class="relative overflow-hidden rounded-2xl shadow-xl" style="background-color: #1a2e4a;">
+        <div class="absolute inset-0" style="background: radial-gradient(ellipse at top left, #1e3a5f 0%, transparent 60%);"></div>
+        <div class="absolute right-0 top-0 bottom-0 w-48 opacity-10">
+            <svg viewBox="0 0 200 200" fill="none" class="w-full h-full">
+                <circle cx="160" cy="100" r="130" stroke="white" stroke-width="0.5"/>
+                <circle cx="160" cy="100" r="90" stroke="white" stroke-width="0.5"/>
+                <circle cx="160" cy="100" r="50" stroke="white" stroke-width="0.5"/>
+            </svg>
+        </div>
+        <div class="relative flex items-center justify-between px-8 py-8">
             <div>
-                <h1 class="text-3xl font-black text-white">Timetable</h1>
-                <p class="mt-2 text-sky-100">Weekly class schedule management</p>
+                <div class="flex items-center gap-2 mb-3">
+                    <span class="h-2.5 w-2.5 rounded-full bg-cyan-400 animate-pulse"></span>
+                    <span class="text-sm font-semibold uppercase tracking-widest" style="color:#93c5fd;">Weekly Schedule</span>
+                </div>
+                <h2 class="text-4xl font-bold text-white tracking-tight">Timetable</h2>
+                <p class="mt-2 text-base font-medium" style="color:#93c5fd;">Manage class schedules and time slots</p>
             </div>
-            <a href="{{ route('more-features') }}" class="rounded-xl bg-white/20 px-4 py-2.5 text-sm font-semibold text-white backdrop-blur-sm transition-all hover:bg-white/30">
+            <a href="{{ route('more-features') }}"
+               class="inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold text-white transition hover:bg-white/10"
+               style="background:rgba(255,255,255,0.12);">
+                <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
                 Back
             </a>
         </div>
@@ -20,7 +34,7 @@
             </div>
             <div class="flex items-center gap-3">
                 <select wire:model.live="classId" class="rounded-lg border-2 border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-900 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20">
-                    <option value="">Select Class</option>
+                    <option value="">Select Class ({{ collect($this->classes)->count() }} available)</option>
                     @foreach($this->classes as $c)
                         <option value="{{ $c->id }}">{{ $c->name }}</option>
                     @endforeach
@@ -38,7 +52,7 @@
     </div>
 
     @if($classId)
-        <div class="rounded-2xl bg-white p-6 shadow-lg">
+        <div wire:key="timetable-grid-{{ $classId }}" class="rounded-2xl bg-white p-6 shadow-lg">
             <h3 class="text-lg font-black text-slate-900">Weekly Schedule</h3>
             <p class="mt-1 text-sm text-slate-600">Click a time slot to add or edit an entry</p>
 
@@ -180,7 +194,7 @@
             </div>
         @endif
     @else
-        <div class="rounded-2xl border-2 border-dashed border-slate-300 bg-slate-50 p-12 text-center">
+        <div wire:key="timetable-empty" class="rounded-2xl border-2 border-dashed border-slate-300 bg-slate-50 p-12 text-center">
             <svg class="mx-auto h-16 w-16 text-slate-400" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
                 <path d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5"/>
             </svg>

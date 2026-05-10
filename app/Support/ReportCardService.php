@@ -8,6 +8,7 @@ use App\Models\Score;
 use App\Models\Student;
 use App\Models\Subject;
 use App\Models\SubjectAllocation;
+use App\Support\TenantSettings;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\File;
 
@@ -362,7 +363,8 @@ class ReportCardService
         static $cache = null;
 
         if ($cache === null) {
-            $path = storage_path('app/myacademy/settings.json');
+            $path = TenantSettings::settingsPath();
+
             $cache = File::exists($path)
                 ? (json_decode(File::get($path), true) ?? [])
                 : [];

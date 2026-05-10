@@ -2,91 +2,124 @@
 
 namespace App\Livewire\Student;
 
-use App\Models\Student;
+use App\Models\AcademicTerm;
 use App\Models\AttendanceMark;
-use Livewire\Component;
+use App\Models\Student;
 use Carbon\Carbon;
+use Livewire\Component;
 
 class Attendance extends Component
 {
-    public $student;
-    public $selectedMonth;
-    public $selectedYear;
-    public $attendanceRecords;
-    public $stats;
+    public int $selectedMonth;
+    public int $selectedYear;
 
-    public function mount()
+    private ?Student $student = null;
+
+    public function mount(): void
     {
-        $studentId = session('student_id');
-        if (!$studentId) {
-            return redirect()->route('login');
+        if (! session('student_id')) {
+            redirect()->route('login');
+            return;
         }
-
-        $this->student = Student::find($studentId);
         $this->selectedMonth = now()->month;
-        $this->selectedYear = now()->year;
-        
-        $this->loadAttendance();
+        $this->selectedYear  = now()->year;
     }
 
-    public function loadAttendance()
+    private function getStudent(): ?Student
     {
-        $startDate = Carbon::create($this->selectedYear, $this->selectedMonth, 1)->startOfMonth();
-        $endDate = $startDate->copy()->endOfMonth();
-
-        $this->attendanceRecords = AttendanceMark::where('student_id', $this->student->id)
-            ->whereHas('sheet', function($query) use ($startDate, $endDate) {
-                $query->whereBetween('date', [$startDate, $endDate]);
-            })
-            ->with('sheet')
-            ->get()
-            ->keyBy(fn($mark) => $mark->sheet->date->format('Y-m-d'));
-
-        $this->calculateStats();
+        if ($this->student) return $this->student;
+        $this->student = Student::with('schoolClass')->find(session('student_id'));
+        return $this->student;
     }
 
-    public function calculateStats()
+    public function previousMonth(): void
     {
-        $currentSession = config('myacademy.current_session');
-        $currentTerm = config('myacademy.current_term');
-
-        $termRecords = AttendanceMark::where('student_id', $this->student->id)
-            ->whereHas('sheet', function($query) use ($currentSession, $currentTerm) {
-                $query->where('session', $currentSession)
-                      ->where('term', $currentTerm);
-            })
-            ->get();
-
-        $this->stats = [
-            'total' => $termRecords->count(),
-            'present' => $termRecords->where('status', 'Present')->count(),
-            'absent' => $termRecords->where('status', 'Absent')->count(),
-            'late' => $termRecords->where('status', 'Late')->count(),
-            'rate' => $termRecords->count() > 0 
-                ? round(($termRecords->where('status', 'Present')->count() / $termRecords->count()) * 100, 1)
-                : 0,
-        ];
+        $d = Carbon::create($this->selectedYear, $this->selectedMonth, 1)->subMonth();
+        $this->selectedMonth = $d->month;
+        $this->selectedYear  = $d->year;
     }
 
-    public function previousMonth()
+    public function nextMonth(): void
     {
-        $date = Carbon::create($this->selectedYear, $this->selectedMonth, 1)->subMonth();
-        $this->selectedMonth = $date->month;
-        $this->selectedYear = $date->year;
-        $this->loadAttendance();
-    }
-
-    public function nextMonth()
-    {
-        $date = Carbon::create($this->selectedYear, $this->selectedMonth, 1)->addMonth();
-        $this->selectedMonth = $date->month;
-        $this->selectedYear = $date->year;
-        $this->loadAttendance();
+        $d = Carbon::create($this->selectedYear, $this->selectedMonth, 1)->addMonth();
+        $this->selectedMonth = $d->month;
+        $this->selectedYear  = $d->year;
     }
 
     public function render()
     {
-        return view('livewire.student.attendance')
-            ->layout('layouts.student');
+        $student = $this->getStudent();
+        abort_unless((bool) $student, 403);
+
+        $currentSession = AcademicTerm::activeSessionName() ?? config('myacademy.current_session', '');
+        $currentTerm    = AcademicTerm::activeTermNumber();
+
+        // ── Load ALL marks with sheets for this student ──────────────────
+        $allMarksWithSheets = AttendanceMark::where('student_id', $student->id)
+            ->with('sheet')
+            ->get();
+
+        // ── Term-wide stats (filter by session/term) ─────────────────────
+        $termMarks = $allMarksWithSheets->filter(fn ($m) => 
+            $m->sheet && 
+            $m->sheet->session === $currentSession && 
+            (int) $m->sheet->term === $currentTerm
+        );
+
+        $total   = $termMarks->count();
+        $present = $termMarks->where('status', 'Present')->count();
+        $absent  = $termMarks->where('status', 'Absent')->count();
+        $late    = $termMarks->where('status', 'Late')->count();
+        $rate    = $total > 0 ? round(($present / $total) * 100, 1) : 0;
+
+        // ── Current streak (consecutive present days up to today) ────────
+        $sortedMarks = $allMarksWithSheets
+            ->filter(fn ($m) => $m->sheet)
+            ->sortByDesc(fn ($m) => $m->sheet->date);
+
+        $streak = 0;
+        foreach ($sortedMarks as $m) {
+            if ($m->status === 'Present') $streak++;
+            else break;
+        }
+
+        // ── Monthly calendar data ────────────────────────────────────────
+        $monthStart = Carbon::create($this->selectedYear, $this->selectedMonth, 1)->startOfDay();
+        $monthEnd   = $monthStart->copy()->endOfMonth()->endOfDay();
+
+        $monthMarks = $allMarksWithSheets
+            ->filter(fn ($m) => 
+                $m->sheet && 
+                $m->sheet->date >= $monthStart && 
+                $m->sheet->date <= $monthEnd
+            )
+            ->keyBy(fn ($m) => $m->sheet->date->format('Y-m-d'));
+
+        // Monthly mini-stats
+        $mPresent = $monthMarks->where('status', 'Present')->count();
+        $mAbsent  = $monthMarks->where('status', 'Absent')->count();
+        $mLate    = $monthMarks->where('status', 'Late')->count();
+        $mTotal   = $monthMarks->count();
+        $mRate    = $mTotal > 0 ? round(($mPresent / $mTotal) * 100, 1) : 0;
+
+        return view('livewire.student.attendance', [
+            'student'        => $student,
+            'total'          => $total,
+            'present'        => $present,
+            'absent'         => $absent,
+            'late'           => $late,
+            'rate'           => $rate,
+            'streak'         => $streak,
+            'monthMarks'     => $monthMarks,
+            'mPresent'       => $mPresent,
+            'mAbsent'        => $mAbsent,
+            'mLate'          => $mLate,
+            'mTotal'         => $mTotal,
+            'mRate'          => $mRate,
+            'currentSession' => $currentSession,
+            'currentTerm'    => $currentTerm,
+            'selectedMonth'  => $this->selectedMonth,
+            'selectedYear'   => $this->selectedYear,
+        ])->layout('layouts.student');
     }
 }
