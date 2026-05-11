@@ -33,6 +33,8 @@ class User extends Authenticatable
         'whatsapp_verified',
         'whatsapp_subscribed',
         'is_class_teacher',
+        'last_login_at',
+        'password_reset_required',
     ];
 
     /**
@@ -70,6 +72,8 @@ class User extends Authenticatable
         'whatsapp_verified'   => 'boolean',
         'whatsapp_subscribed' => 'boolean',
         'is_class_teacher'    => 'boolean',
+        'last_login_at'        => 'datetime',
+        'password_reset_required' => 'boolean',
     ];
 
     protected static function booted(): void

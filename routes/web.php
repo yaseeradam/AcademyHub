@@ -334,5 +334,39 @@ Route::prefix('superadmin')->name('superadmin.')->group(function () {
     Route::middleware(['auth', 'superadmin'])->group(function () {
         Route::get('/', \App\Http\Controllers\SuperAdmin\DashboardController::class)->name('dashboard');
         Route::resource('tenants', \App\Http\Controllers\SuperAdmin\TenantController::class)->except(['show']);
+
+        // Impersonation
+        Route::post('tenants/{tenant}/impersonate',  [\App\Http\Controllers\SuperAdmin\TenantController::class, 'impersonate'])->name('tenants.impersonate');
+        Route::post('stop-impersonating',            [\App\Http\Controllers\SuperAdmin\TenantController::class, 'stopImpersonating'])->name('stop-impersonating');
+
+        // Subscription
+        Route::post('tenants/{tenant}/subscription', [\App\Http\Controllers\SuperAdmin\TenantController::class, 'updateSubscription'])->name('tenants.subscription');
+
+        // Feature flags
+        Route::post('tenants/{tenant}/features',     [\App\Http\Controllers\SuperAdmin\TenantController::class, 'updateFeatureFlags'])->name('tenants.features');
+
+        // Broadcast
+        Route::post('broadcast',                     [\App\Http\Controllers\SuperAdmin\TenantController::class, 'broadcast'])->name('broadcast');
+
+        // Reset school data
+        Route::post('tenants/{tenant}/reset',        [\App\Http\Controllers\SuperAdmin\TenantController::class, 'resetData'])->name('tenants.reset');
+
+        // Health check
+        Route::get('tenants/{tenant}/health',        [\App\Http\Controllers\SuperAdmin\TenantController::class, 'health'])->name('tenants.health');
+
+        // Auto-suspend
+        Route::post('auto-suspend',                  [\App\Http\Controllers\SuperAdmin\TenantController::class, 'autoSuspend'])->name('auto-suspend');
+
+        // Force password reset
+        Route::post('tenants/{tenant}/force-reset',  [\App\Http\Controllers\SuperAdmin\TenantController::class, 'forcePasswordReset'])->name('tenants.force-reset');
+
+        // Backup
+        Route::post('tenants/{tenant}/backup',       [\App\Http\Controllers\SuperAdmin\TenantController::class, 'triggerBackup'])->name('tenants.backup');
+
+        // Clone
+        Route::post('tenants/{tenant}/clone',        [\App\Http\Controllers\SuperAdmin\TenantController::class, 'clone'])->name('tenants.clone');
+
+        // Global user search
+        Route::get('users/search',                   [\App\Http\Controllers\SuperAdmin\TenantController::class, 'searchUsers'])->name('users.search');
     });
 });

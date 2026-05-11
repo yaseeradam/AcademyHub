@@ -10,6 +10,98 @@
         </svg>
         New School
     </a>
+{{-- ── Upcoming Renewals + Storage ───────────────────────────── --}}
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px;">
+    <div class="sa-panel">
+        <div class="sa-panel-header"><span class="sa-panel-title">⏰ Upcoming Renewals (30 days)</span></div>
+        @if(empty($upcomingRenewals))
+            <div style="padding:24px;text-align:center;color:#94a3b8;font-size:13px;">No renewals due in the next 30 days.</div>
+        @else
+        <table class="sa-table">
+            <thead><tr><th>School</th><th>Due</th><th>Days Left</th></tr></thead>
+            <tbody>
+            @foreach($upcomingRenewals as $r)
+            <tr>
+                <td style="font-weight:700;color:#1e293b;font-size:13px;">{{ $r['name'] }}</td>
+                <td style="font-size:12px;color:#64748b;">{{ $r['due'] }}</td>
+                <td><span style="font-size:12px;font-weight:700;padding:2px 8px;border-radius:99px;background:{{ $r['days'] <= 7 ? '#fee2e2' : '#fef3c7' }};color:{{ $r['days'] <= 7 ? '#991b1b' : '#92400e' }};">{{ $r['days'] }}d</span></td>
+            </tr>
+            @endforeach
+            </tbody>
+        </table>
+        @endif
+    </div>
+    <div class="sa-panel">
+        <div class="sa-panel-header"><span class="sa-panel-title">💾 Storage Usage</span></div>
+        @if(empty($storageStats) || collect($storageStats)->sum('bytes') === 0)
+            <div style="padding:24px;text-align:center;color:#94a3b8;font-size:13px;">No uploads found.</div>
+        @else
+        <table class="sa-table">
+            <thead><tr><th>School</th><th style="text-align:right;">Size</th></tr></thead>
+            <tbody>
+            @foreach(array_slice($storageStats, 0, 8) as $s)
+            @if($s['bytes'] > 0)
+            <tr>
+                <td style="font-weight:600;color:#1e293b;font-size:13px;">{{ $s['name'] }}</td>
+                <td style="text-align:right;font-size:12px;color:#64748b;font-family:monospace;">
+                    @php $mb = round($s['bytes'] / 1048576, 1); @endphp
+                    {{ $mb >= 1 ? $mb . ' MB' : round($s['bytes'] / 1024) . ' KB' }}
+                </td>
+            </tr>
+            @endif
+            @endforeach
+            </tbody>
+        </table>
+        @endif
+    </div>
+</div>
+
+{{-- ── WhatsApp Activity + Error Monitor ─────────────────────── --}}
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px;">
+    <div class="sa-panel">
+        <div class="sa-panel-header">
+            <span class="sa-panel-title">📱 WhatsApp Bot Activity</span>
+        </div>
+        @if(empty($whatsappStats))
+            <div style="padding:24px;text-align:center;color:#94a3b8;font-size:13px;">No schools have WhatsApp linked yet.</div>
+        @else
+        <table class="sa-table">
+            <thead><tr><th>School</th><th style="text-align:right;">Linked Users</th></tr></thead>
+            <tbody>
+            @foreach($whatsappStats as $w)
+            <tr>
+                <td style="font-weight:600;color:#1e293b;font-size:13px;">{{ $w['name'] }}</td>
+                <td style="text-align:right;">
+                    <span style="font-size:12px;font-weight:700;padding:2px 8px;border-radius:99px;background:#dcfce7;color:#166534;">
+                        {{ $w['linked'] }} users
+                    </span>
+                </td>
+            </tr>
+            @endforeach
+            </tbody>
+        </table>
+        @endif
+    </div>
+    <div class="sa-panel">
+        <div class="sa-panel-header">
+            <span class="sa-panel-title">🚨 Recent Errors</span>
+            <span style="font-size:11px;color:#94a3b8;">Last 10 from laravel.log</span>
+        </div>
+        @if(empty($recentErrors))
+            <div style="padding:24px;text-align:center;color:#94a3b8;font-size:13px;">No recent errors. 🎉</div>
+        @else
+        <div style="padding:12px 16px;display:flex;flex-direction:column;gap:8px;">
+            @foreach($recentErrors as $err)
+            <div style="padding:10px 12px;background:#fef2f2;border-left:3px solid #ef4444;border-radius:6px;">
+                <div style="font-size:10px;color:#94a3b8;margin-bottom:3px;">{{ $err['time'] }}</div>
+                <div style="font-size:12px;color:#991b1b;font-family:monospace;word-break:break-all;">{{ $err['message'] }}</div>
+            </div>
+            @endforeach
+        </div>
+        @endif
+    </div>
+</div>
+
 @endsection
 
 @section('content')
@@ -95,6 +187,30 @@
         </div>
     </div>
 
+</div>
+
+{{-- ── Cross-Tenant Stats ─────────────────────────────────────── --}}
+<div class="sa-stats-grid" style="margin-bottom:20px;">
+    <div class="sa-stat-card teal">
+        <div class="sa-stat-icon"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M12 14l9-5-9-5-9 5 9 5z"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"/></svg></div>
+        <div class="sa-stat-info"><div class="sa-stat-label">Total Students</div><div class="sa-stat-value">{{ number_format($stats['total_students']) }}</div><div class="sa-stat-sub">Across all schools</div></div>
+    </div>
+    <div class="sa-stat-card indigo">
+        <div class="sa-stat-icon"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg></div>
+        <div class="sa-stat-info"><div class="sa-stat-label">Total Teachers</div><div class="sa-stat-value">{{ number_format($stats['total_teachers']) }}</div><div class="sa-stat-sub">Across all schools</div></div>
+    </div>
+    <div class="sa-stat-card orange">
+        <div class="sa-stat-icon"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg></div>
+        <div class="sa-stat-info"><div class="sa-stat-label">Total Exams</div><div class="sa-stat-value">{{ number_format($stats['total_exams']) }}</div><div class="sa-stat-sub">CBT exams created</div></div>
+    </div>
+    <div class="sa-stat-card emerald">
+        <div class="sa-stat-icon"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></div>
+        <div class="sa-stat-info"><div class="sa-stat-label">Total Revenue</div><div class="sa-stat-value">₦{{ number_format($stats['total_revenue']) }}</div><div class="sa-stat-sub">All transactions</div></div>
+    </div>
+    <div class="sa-stat-card rose">
+        <div class="sa-stat-icon"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></div>
+        <div class="sa-stat-info"><div class="sa-stat-label">Dormant Schools</div><div class="sa-stat-value">{{ $stats['dormant_tenants'] }}</div><div class="sa-stat-sub">No login in 30+ days</div></div>
+    </div>
 </div>
 
 {{-- ── Middle Row: Chart + Plan Breakdown ────────────────────── --}}
@@ -223,6 +339,98 @@
                 @endforelse
             </tbody>
         </table>
+    </div>
+</div>
+
+{{-- ── Upcoming Renewals + Storage ───────────────────────────── --}}
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px;">
+    <div class="sa-panel">
+        <div class="sa-panel-header"><span class="sa-panel-title">⏰ Upcoming Renewals (30 days)</span></div>
+        @if(empty($upcomingRenewals))
+            <div style="padding:24px;text-align:center;color:#94a3b8;font-size:13px;">No renewals due in the next 30 days.</div>
+        @else
+        <table class="sa-table">
+            <thead><tr><th>School</th><th>Due</th><th>Days Left</th></tr></thead>
+            <tbody>
+            @foreach($upcomingRenewals as $r)
+            <tr>
+                <td style="font-weight:700;color:#1e293b;font-size:13px;">{{ $r['name'] }}</td>
+                <td style="font-size:12px;color:#64748b;">{{ $r['due'] }}</td>
+                <td><span style="font-size:12px;font-weight:700;padding:2px 8px;border-radius:99px;background:{{ $r['days'] <= 7 ? '#fee2e2' : '#fef3c7' }};color:{{ $r['days'] <= 7 ? '#991b1b' : '#92400e' }};">{{ $r['days'] }}d</span></td>
+            </tr>
+            @endforeach
+            </tbody>
+        </table>
+        @endif
+    </div>
+    <div class="sa-panel">
+        <div class="sa-panel-header"><span class="sa-panel-title">💾 Storage Usage</span></div>
+        @if(empty($storageStats) || collect($storageStats)->sum('bytes') === 0)
+            <div style="padding:24px;text-align:center;color:#94a3b8;font-size:13px;">No uploads found.</div>
+        @else
+        <table class="sa-table">
+            <thead><tr><th>School</th><th style="text-align:right;">Size</th></tr></thead>
+            <tbody>
+            @foreach(array_slice($storageStats, 0, 8) as $s)
+            @if($s['bytes'] > 0)
+            <tr>
+                <td style="font-weight:600;color:#1e293b;font-size:13px;">{{ $s['name'] }}</td>
+                <td style="text-align:right;font-size:12px;color:#64748b;font-family:monospace;">
+                    @php $mb = round($s['bytes'] / 1048576, 1); @endphp
+                    {{ $mb >= 1 ? $mb . ' MB' : round($s['bytes'] / 1024) . ' KB' }}
+                </td>
+            </tr>
+            @endif
+            @endforeach
+            </tbody>
+        </table>
+        @endif
+    </div>
+</div>
+
+{{-- ── WhatsApp Activity + Error Monitor ─────────────────────── --}}
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px;">
+    <div class="sa-panel">
+        <div class="sa-panel-header">
+            <span class="sa-panel-title">📱 WhatsApp Bot Activity</span>
+        </div>
+        @if(empty($whatsappStats))
+            <div style="padding:24px;text-align:center;color:#94a3b8;font-size:13px;">No schools have WhatsApp linked yet.</div>
+        @else
+        <table class="sa-table">
+            <thead><tr><th>School</th><th style="text-align:right;">Linked Users</th></tr></thead>
+            <tbody>
+            @foreach($whatsappStats as $w)
+            <tr>
+                <td style="font-weight:600;color:#1e293b;font-size:13px;">{{ $w['name'] }}</td>
+                <td style="text-align:right;">
+                    <span style="font-size:12px;font-weight:700;padding:2px 8px;border-radius:99px;background:#dcfce7;color:#166534;">
+                        {{ $w['linked'] }} users
+                    </span>
+                </td>
+            </tr>
+            @endforeach
+            </tbody>
+        </table>
+        @endif
+    </div>
+    <div class="sa-panel">
+        <div class="sa-panel-header">
+            <span class="sa-panel-title">🚨 Recent Errors</span>
+            <span style="font-size:11px;color:#94a3b8;">Last 10 from laravel.log</span>
+        </div>
+        @if(empty($recentErrors))
+            <div style="padding:24px;text-align:center;color:#94a3b8;font-size:13px;">No recent errors. 🎉</div>
+        @else
+        <div style="padding:12px 16px;display:flex;flex-direction:column;gap:8px;">
+            @foreach($recentErrors as $err)
+            <div style="padding:10px 12px;background:#fef2f2;border-left:3px solid #ef4444;border-radius:6px;">
+                <div style="font-size:10px;color:#94a3b8;margin-bottom:3px;">{{ $err['time'] }}</div>
+                <div style="font-size:12px;color:#991b1b;font-family:monospace;word-break:break-all;">{{ $err['message'] }}</div>
+            </div>
+            @endforeach
+        </div>
+        @endif
     </div>
 </div>
 

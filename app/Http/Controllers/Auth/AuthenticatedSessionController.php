@@ -128,6 +128,8 @@ class AuthenticatedSessionController extends Controller
             }
 
             $request->session()->regenerate();
+            // Track last login time
+            Auth::user()->forceFill(['last_login_at' => now()])->save();
 
             Log::info('Successful login', [
                 'user_id'    => $user->id,

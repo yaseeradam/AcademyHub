@@ -73,6 +73,12 @@ class LoadTenantSettings
                 'rc_principal_signature_image',
                 'rc_teacher_signature_image',
                 'subscription_due_date',
+                'feature_cbt',
+                'feature_whatsapp',
+                'feature_parent_portal',
+                'feature_ai',
+                'feature_analytics',
+                'feature_billing',
             ];
 
             return Arr::only($data, $allowed);
