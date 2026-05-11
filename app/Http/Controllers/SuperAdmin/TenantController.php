@@ -122,7 +122,9 @@ class TenantController extends Controller
                 return;
             }
 
-            file_put_contents($hostsFile, $contents . PHP_EOL . "127.0.0.1      {$host} #laragon magic!" . PHP_EOL);
+            // Use \r\n for Windows hosts file compatibility
+            $entry = "\r\n127.0.0.1      {$host} #laragon magic!";
+            file_put_contents($hostsFile, rtrim($contents) . $entry . "\r\n");
         } catch (\Throwable) {
             // Silently fail
         }
