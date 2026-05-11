@@ -491,15 +491,7 @@
                 Create School
             </a>
 
-            <div class="sa-nav-label" style="margin-top:12px;">System</div>
 
-            <a href="{{ url('/dashboard') }}" target="_blank">
-                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
-                </svg>
-                Open Main App
-                <span style="margin-left:auto; font-size:10px; background:#eff6ff; color:#3b82f6; padding:1px 7px; border-radius:999px; font-weight:700;">↗</span>
-            </a>
         </nav>
 
         <!-- User Footer -->

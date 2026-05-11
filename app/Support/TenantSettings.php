@@ -29,9 +29,9 @@ class TenantSettings
             : storage_path('app/myacademy/settings.json');
     }
 
-    public static function settingsCacheKey(): string
+    public static function settingsCacheKey(?\App\Models\Tenant $tenant = null): string
     {
-        $tenantId = self::tenantId();
+        $tenantId = $tenant?->id ?? self::tenantId();
 
         return $tenantId
             ? 'myacademy_settings_cache_tenant_'.$tenantId

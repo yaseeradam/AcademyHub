@@ -9,6 +9,8 @@ use App\Models\SchoolClass;
 use App\Models\Section;
 use App\Models\Subject;
 use App\Models\Tenant;
+use App\Support\TenantSettings;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\File;
 
 class TenantProvisioner
@@ -26,19 +28,19 @@ class TenantProvisioner
     {
         $path = storage_path('app/myacademy/tenants/'.$tenant->id.'/settings.json');
 
-        if (File::exists($path)) {
-            return;
-        }
-
         File::ensureDirectoryExists(dirname($path));
 
         $settings = array_filter([
-            'school_name' => $tenant->name,
+            'school_name'  => $tenant->name,
             'school_email' => $tenant->contact_email ?: null,
             'school_phone' => $tenant->contact_phone ?: null,
         ], static fn ($v) => $v !== null && $v !== '');
 
+        // Always write (overwrite) so the name is always correct
         File::put($path, json_encode($settings, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+
+        // Bust the settings cache so the new name loads immediately
+        Cache::forget(TenantSettings::settingsCacheKey($tenant));
     }
 
     private function ensureAcademicCalendar(Tenant $tenant): void

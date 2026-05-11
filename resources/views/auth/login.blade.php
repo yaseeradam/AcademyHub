@@ -27,7 +27,7 @@
                     <!-- Header -->
                     <div class="p-8 text-center border-b border-white/10">
                         <h1 class="text-2xl font-black text-white mb-1">
-                            {{ config('myacademy.school_name', config('app.name', 'MyAcademy')) }}
+                            {{ (app()->bound('currentTenant') && app('currentTenant') !== null ? config('myacademy.school_name', config('app.name', 'MyAcademy')) : config('app.name', 'MyAcademy')) }}
                         </h1>
                         <p class="text-sm text-white/70">School Management System</p>
                         <div class="mt-3">

@@ -14,6 +14,19 @@
 
 @section('content')
 
+@if(session('status'))
+    @php preg_match('/Access it at: (\S+)/', session('status'), $m); $newHost = $m[1] ?? ''; @endphp
+    <div style="margin-bottom:20px;padding:14px 18px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:12px;">
+        <div style="color:#166534;font-size:13px;font-weight:600;">&#10003; {{ session('status') }}</div>
+        @if($newHost)
+        <div style="margin-top:10px;padding:10px 14px;background:#1e293b;border-radius:8px;">
+            <div style="font-size:11px;color:#94a3b8;margin-bottom:4px;">Add this line to <strong style="color:#e2e8f0;">C:\Windows\System32\drivers\etc\hosts</strong> (open Notepad as Administrator):</div>
+            <code style="font-family:monospace;font-size:13px;color:#86efac;">127.0.0.1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{ $newHost }}</code>
+        </div>
+        @endif
+    </div>
+@endif
+
 {{-- Summary quick-stats --}}
 <div class="sa-stats-grid" style="grid-template-columns:repeat(3,1fr); margin-bottom:20px;">
     <div class="sa-stat-card orange" style="padding:14px 18px;">
@@ -89,7 +102,11 @@
                                 </svg>
                             </a>
                         @else
-                            <span style="font-family:monospace;font-size:12px;background:#f1f5f9;padding:2px 8px;border-radius:6px;color:#475569;">{{ $tenant->slug }}</span>
+                            @php $mainHost = parse_url(config('app.url'), PHP_URL_HOST); $subHost = $tenant->slug.'.'.$mainHost; @endphp
+                            <a href="http://{{ $subHost }}" target="_blank"
+                               style="font-family:monospace;font-size:12px;background:#f1f5f9;padding:2px 8px;border-radius:6px;color:#4f46e5;text-decoration:none;">
+                                {{ $subHost }}
+                            </a>
                         @endif
                     </td>
                     <td>
