@@ -102,8 +102,30 @@ class TenantController extends Controller
         $accessHost = $tenant->domain ?: ($mainHost ? ($tenant->slug.'.'.$mainHost) : $tenant->slug);
         $message .= ' Access it at: ' . $accessHost;
 
+        // Auto-add to Windows hosts file for local development
+        if (app()->environment('local', 'development') || str_contains(config('app.url'), '.test')) {
+            $this->addToHostsFile($accessHost);
+            $message .= ' (Added to hosts file automatically)';
+        }
+
         return redirect()->route('superadmin.tenants.index')
             ->with('status', $message);
+    }
+
+    private function addToHostsFile(string $host): void
+    {
+        try {
+            $hostsFile = 'C:\Windows\System32\drivers\etc\hosts';
+            $contents  = file_get_contents($hostsFile);
+
+            if (str_contains($contents, $host)) {
+                return;
+            }
+
+            file_put_contents($hostsFile, $contents . PHP_EOL . "127.0.0.1      {$host} #laragon magic!" . PHP_EOL);
+        } catch (\Throwable) {
+            // Silently fail
+        }
     }
 
     private function hasLegacySingleSchoolData(): bool
@@ -151,9 +173,28 @@ class TenantController extends Controller
 
     public function destroy(Tenant $tenant)
     {
+        $mainHost   = parse_url(config('app.url'), PHP_URL_HOST);
+        $accessHost = $tenant->domain ?: ($mainHost ? ($tenant->slug.'.'.$mainHost) : $tenant->slug);
+
         $tenant->delete();
+
+        // Remove from hosts file
+        $this->removeFromHostsFile($accessHost);
 
         return redirect()->route('superadmin.tenants.index')
             ->with('status', 'School instance deleted.');
+    }
+
+    private function removeFromHostsFile(string $host): void
+    {
+        try {
+            $hostsFile = 'C:\Windows\System32\drivers\etc\hosts';
+            $contents  = file_get_contents($hostsFile);
+            $lines     = explode(PHP_EOL, $contents);
+            $filtered  = array_filter($lines, fn($line) => !str_contains($line, $host));
+            file_put_contents($hostsFile, implode(PHP_EOL, $filtered));
+        } catch (\Throwable) {
+            // Silently fail
+        }
     }
 }
