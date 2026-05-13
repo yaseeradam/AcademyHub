@@ -217,6 +217,17 @@
 
             <p class="px-3 pt-4 pb-1 text-[10px] font-black uppercase tracking-widest text-slate-400">System</p>
 
+            <a href="{{ route('superadmin.billing') }}"
+               class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold transition-all
+                      {{ request()->routeIs('superadmin.billing') ? 'bg-violet-500 text-white shadow-md shadow-violet-200' : 'text-slate-500 hover:bg-white hover:text-slate-800 hover:shadow-sm' }}">
+                <div class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg {{ request()->routeIs('superadmin.billing') ? 'bg-white/20' : 'bg-white shadow-sm' }}">
+                    <svg class="h-4 w-4 {{ request()->routeIs('superadmin.billing') ? 'text-white' : 'text-emerald-500' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                </div>
+                Billing
+            </a>
+
             <form id="autoSuspendForm" method="POST" action="{{ route('superadmin.auto-suspend') }}">
                 @csrf
             </form>
@@ -336,14 +347,21 @@
 
 @if(session('impersonating'))
 <div class="fixed bottom-0 inset-x-0 z-[9999] bg-gradient-to-r from-violet-600 to-indigo-600 px-5 py-3 flex items-center justify-between shadow-xl">
-    <div class="text-sm font-bold text-white">
-        👁 Impersonating: <strong>{{ session('impersonated_tenant') }}</strong>
-        <span class="opacity-70 font-normal ml-2">as {{ auth()->user()->name }}</span>
+    <div class="text-sm font-bold text-white flex items-center gap-2">
+        <svg class="h-4 w-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+            <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+        </svg>
+        Impersonating: <strong>{{ session('impersonated_tenant') }}</strong>
+        <span class="opacity-70 font-normal ml-1">as {{ auth()->user()->name }}</span>
     </div>
     <form method="POST" action="{{ route('superadmin.stop-impersonating') }}">
         @csrf
-        <button type="submit" class="bg-white text-violet-700 border-none px-4 py-1.5 rounded-lg text-xs font-extrabold cursor-pointer hover:bg-violet-50 transition-colors">
-            ✕ Stop Impersonating
+        <button type="submit" class="bg-white text-violet-700 border-none px-4 py-1.5 rounded-lg text-xs font-extrabold cursor-pointer hover:bg-violet-50 transition-colors flex items-center gap-1.5">
+            <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+            Stop Impersonating
         </button>
     </form>
 </div>
@@ -366,7 +384,7 @@ function closeSaModal() {
     const modal = document.getElementById('saPasswordModal');
     modal.classList.add('hidden');
     modal.classList.remove('flex');
-    _saTargetForm = null;
+    // NOTE: do NOT null out _saTargetForm here — confirmSaAction needs it after close
 }
 
 function confirmSaAction() {
@@ -385,8 +403,12 @@ function confirmSaAction() {
         _saTargetForm.appendChild(hidden);
     }
     hidden.value = pw;
+
+    // Close modal first, then grab reference before nulling
+    const formToSubmit = _saTargetForm;
+    _saTargetForm = null;
     closeSaModal();
-    _saTargetForm.submit();
+    formToSubmit.submit();
 }
 </script>
 

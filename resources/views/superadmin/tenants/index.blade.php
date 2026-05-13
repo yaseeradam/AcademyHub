@@ -302,8 +302,11 @@
                             @csrf
                             <button type="button"
                                     onclick="saConfirm('freset-{{ $tenant->id }}', 'Force all users of {{ addslashes($tenant->name) }} to reset passwords?')"
-                                    style="width:100%;padding:10px;background:#fefce8;border:1.5px solid #fde68a;border-radius:8px;color:#92400e;font-size:13px;font-weight:700;cursor:pointer;text-align:left;">
-                                🔑 Force Password Reset
+                                    style="width:100%;padding:10px;background:#fefce8;border:1.5px solid #fde68a;border-radius:8px;color:#92400e;font-size:13px;font-weight:700;cursor:pointer;text-align:left;display:flex;align-items:center;gap:8px;">
+                                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="width:15px;height:15px;flex-shrink:0;">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/>
+                                </svg>
+                                Force Password Reset
                             </button>
                         </form>
 
@@ -312,8 +315,11 @@
                             @csrf
                             <button type="button"
                                     onclick="saConfirm('backup-{{ $tenant->id }}', 'Request backup for {{ addslashes($tenant->name) }}?')"
-                                    style="width:100%;padding:10px;background:#eff6ff;border:1.5px solid #bfdbfe;border-radius:8px;color:#1e40af;font-size:13px;font-weight:700;cursor:pointer;text-align:left;">
-                                💾 Request Backup
+                                    style="width:100%;padding:10px;background:#eff6ff;border:1.5px solid #bfdbfe;border-radius:8px;color:#1e40af;font-size:13px;font-weight:700;cursor:pointer;text-align:left;display:flex;align-items:center;gap:8px;">
+                                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="width:15px;height:15px;flex-shrink:0;">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10"/>
+                                </svg>
+                                Request Backup
                             </button>
                         </form>
 
@@ -322,8 +328,11 @@
                             @csrf
                             <button type="button"
                                     onclick="saConfirm('clone-{{ $tenant->id }}', 'Clone {{ addslashes($tenant->name) }}? A new pending school will be created.')"
-                                    style="width:100%;padding:10px;background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:8px;color:#166534;font-size:13px;font-weight:700;cursor:pointer;text-align:left;">
-                                📋 Clone School
+                                    style="width:100%;padding:10px;background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:8px;color:#166534;font-size:13px;font-weight:700;cursor:pointer;text-align:left;display:flex;align-items:center;gap:8px;">
+                                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="width:15px;height:15px;flex-shrink:0;">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                                </svg>
+                                Clone School
                             </button>
                         </form>
                     </div>
@@ -331,13 +340,21 @@
 
                 {{-- Danger Zone --}}
                 <div style="border:1.5px solid #fecaca;border-radius:10px;padding:16px;">
-                    <div style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:#dc2626;margin-bottom:12px;">⚠ Danger Zone</div>
+                    <div style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:#dc2626;margin-bottom:12px;display:flex;align-items:center;gap:6px;">
+                        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="width:13px;height:13px;">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        Danger Zone
+                    </div>
                     <form id="reset-{{ $tenant->id }}" action="{{ route('superadmin.tenants.reset', $tenant) }}" method="POST">
                         @csrf
                         <button type="button"
-                                onclick="saConfirm('reset-{{ $tenant->id }}', '⚠ Reset ALL data for {{ addslashes($tenant->name) }}? This cannot be undone.')"
-                                style="width:100%;padding:10px;background:#fef2f2;border:1.5px solid #fecaca;border-radius:8px;color:#dc2626;font-size:13px;font-weight:700;cursor:pointer;">
-                            🗑 Reset School Data
+                                onclick="saConfirm('reset-{{ $tenant->id }}', 'Reset ALL data for {{ addslashes($tenant->name) }}? This cannot be undone.')"
+                                style="width:100%;padding:10px;background:#fef2f2;border:1.5px solid #fecaca;border-radius:8px;color:#dc2626;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:8px;">
+                            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="width:15px;height:15px;flex-shrink:0;">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                            </svg>
+                            Reset School Data
                         </button>
                     </form>
                 </div>
@@ -351,7 +368,12 @@
 {{-- ── Broadcast Modal ──────────────────────────────────────── --}}
 <div id="broadcastModal" style="display:none;position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,.45);align-items:center;justify-content:center;">
     <div style="background:#fff;border-radius:16px;padding:28px;width:480px;max-width:90vw;box-shadow:0 20px 60px rgba(0,0,0,.2);">
-        <div style="font-size:16px;font-weight:800;color:#1e293b;margin-bottom:4px;">📢 Broadcast Announcement</div>
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px;">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="width:18px;height:18px;color:#4f46e5;flex-shrink:0;">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"/>
+            </svg>
+            <div style="font-size:16px;font-weight:800;color:#1e293b;">Broadcast Announcement</div>
+        </div>
         <div style="font-size:12px;color:#94a3b8;margin-bottom:20px;">Send a notice to all school admins</div>
         <form id="broadcastForm" action="{{ route('superadmin.broadcast') }}" method="POST">
             @csrf
@@ -390,7 +412,9 @@ document.addEventListener('DOMContentLoaded', function () {
         .then(r => r.json())
         .then(h => {
             const el = document.getElementById('health-{{ $tenant->id }}');
-            const dot = (ok, label) => `<span title="${label}" style="display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:700;padding:2px 6px;border-radius:99px;background:${ok?'#dcfce7':'#fee2e2'};color:${ok?'#166534':'#991b1b'};">${ok?'✓':'✗'} ${label}</span>`;
+            const dot = (ok, label) => `<span title="${label}" style="display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:700;padding:2px 6px;border-radius:99px;background:${ok?'#dcfce7':'#fee2e2'};color:${ok?'#166534':'#991b1b'};">
+                <svg width="9" height="9" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">${ok?'<path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>':'<path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>'}</svg>
+                ${label}</span>`;
             el.innerHTML = dot(h.has_admin,'Admin') + dot(h.has_active_term,'Term') + dot(h.has_students,'Students');
         })
         .catch(() => {

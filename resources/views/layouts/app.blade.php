@@ -101,7 +101,7 @@ $activeShadow = "shadow-{$accent}-200";
                     </div>
                     <div>
                         <div class="text-sm font-extrabold text-white">Logout</div>
-                        <div class="text-[11px] font-medium text-slate-400">See you later 👋</div>
+                        <div class="text-[11px] font-medium text-slate-400">Sign out</div>
                     </div>
                 </button>
             </form>
@@ -149,7 +149,7 @@ $activeShadow = "shadow-{$accent}-200";
                     </div>
                     <div x-show="!sidebarCollapsed" x-transition.opacity class="text-left flex-1 whitespace-nowrap overflow-hidden">
                         <div class="text-sm font-extrabold text-white">Logout</div>
-                        <div class="text-[11px] font-medium text-slate-400">See you later 👋</div>
+                        <div class="text-[11px] font-medium text-slate-400">Sign out</div>
                     </div>
                 </button>
             </form>
@@ -254,6 +254,140 @@ $activeShadow = "shadow-{$accent}-200";
 @livewireScripts
 @stack('scripts')
 <x-notifications />
+
+{{-- ══════════════════════════════════════════════════════════════
+     SUBSCRIPTION WARNING MODAL
+     Shows when subscription is past due but within grace/restricted period.
+     Does NOT shut down the system — just warns and soft-disables features.
+═══════════════════════════════════════════════════════════════ --}}
+@if(isset($subscriptionIsPastDue) && $subscriptionIsPastDue)
+@php
+    $graceDays    = \App\Http\Middleware\CheckSubscriptionStatus::GRACE_DAYS;
+    $lockdownDays = \App\Http\Middleware\CheckSubscriptionStatus::LOCKDOWN_DAYS;
+@endphp
+<div id="subWarningModal"
+     style="display:none;position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,.55);align-items:center;justify-content:center;padding:16px;">
+    <div style="background:#fff;border-radius:20px;width:100%;max-width:440px;box-shadow:0 24px 64px rgba(0,0,0,.25);overflow:hidden;">
+
+        {{-- Header --}}
+        <div style="background:{{ isset($subscriptionFeaturesDisabled) && $subscriptionFeaturesDisabled ? 'linear-gradient(135deg,#dc2626,#b91c1c)' : 'linear-gradient(135deg,#d97706,#b45309)' }};padding:24px 24px 20px;">
+            <div style="margin-bottom:10px;">
+                @if(isset($subscriptionFeaturesDisabled) && $subscriptionFeaturesDisabled)
+                <div style="width:40px;height:40px;background:rgba(255,255,255,.15);border-radius:10px;display:flex;align-items:center;justify-content:center;">
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="width:22px;height:22px;color:#fff;">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                    </svg>
+                </div>
+                @else
+                <div style="width:40px;height:40px;background:rgba(255,255,255,.15);border-radius:10px;display:flex;align-items:center;justify-content:center;">
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="width:22px;height:22px;color:#fff;">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                </div>
+                @endif
+            </div>
+            <div style="font-size:18px;font-weight:800;color:#fff;margin-bottom:4px;">
+                {{ isset($subscriptionFeaturesDisabled) && $subscriptionFeaturesDisabled ? 'Features Restricted' : 'Subscription Expired' }}
+            </div>
+            <div style="font-size:13px;color:rgba(255,255,255,.8);">
+                @if(isset($subscriptionFeaturesDisabled) && $subscriptionFeaturesDisabled)
+                    Your subscription expired {{ $subscriptionDaysPastDue }} days ago. Some features are disabled.
+                @else
+                    Your subscription expired {{ $subscriptionDaysPastDue }} day{{ $subscriptionDaysPastDue !== 1 ? 's' : '' }} ago.
+                    You have {{ max(0, $graceDays - $subscriptionDaysPastDue) }} day{{ max(0, $graceDays - $subscriptionDaysPastDue) !== 1 ? 's' : '' }} of grace remaining.
+                @endif
+            </div>
+        </div>
+
+        {{-- Body --}}
+        <div style="padding:20px 24px;">
+
+            {{-- Grace period info --}}
+            @if(isset($subscriptionInGrace) && $subscriptionInGrace)
+            <div style="background:#fef3c7;border:1px solid #fde68a;border-radius:10px;padding:12px 14px;margin-bottom:16px;">
+                <div style="font-size:12.5px;font-weight:700;color:#92400e;margin-bottom:4px;display:flex;align-items:center;gap:6px;">
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;flex-shrink:0;">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    Grace Period Active
+                </div>
+                <div style="font-size:12px;color:#78350f;line-height:1.5;">
+                    All features are still working. Please renew within
+                    <strong>{{ max(0, $graceDays - $subscriptionDaysPastDue) }} day{{ max(0, $graceDays - $subscriptionDaysPastDue) !== 1 ? 's' : '' }}</strong>
+                    to avoid feature restrictions.
+                </div>
+            </div>
+            @endif
+
+            {{-- Features disabled info --}}
+            @if(isset($subscriptionFeaturesDisabled) && $subscriptionFeaturesDisabled)
+            <div style="background:#fee2e2;border:1px solid #fecaca;border-radius:10px;padding:12px 14px;margin-bottom:16px;">
+                <div style="font-size:12.5px;font-weight:700;color:#991b1b;margin-bottom:6px;display:flex;align-items:center;gap:6px;">
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;flex-shrink:0;">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                    </svg>
+                    Restricted Features
+                </div>
+                <div style="display:flex;flex-direction:column;gap:4px;">
+                    @foreach(['CBT Exams', 'Analytics', 'Reports & Certificates', 'Data Export', 'WhatsApp Bot'] as $feat)
+                    <div style="font-size:12px;color:#7f1d1d;display:flex;align-items:center;gap:6px;">
+                        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" style="width:11px;height:11px;color:#dc2626;flex-shrink:0;">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                        {{ $feat }}
+                    </div>
+                    @endforeach
+                </div>
+                <div style="font-size:11.5px;color:#991b1b;margin-top:8px;">
+                    Core functions (students, attendance, results entry) remain available.
+                    Renew to restore full access.
+                </div>
+            </div>
+            @endif
+
+            {{-- Expiry date --}}
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:#f8fafc;border-radius:8px;margin-bottom:16px;">
+                <span style="font-size:12px;font-weight:600;color:#64748b;">Expired on</span>
+                <span style="font-size:13px;font-weight:800;color:#dc2626;">{{ $subscriptionDueDate->format('M j, Y') }}</span>
+            </div>
+
+            {{-- Actions --}}
+            <div style="display:flex;gap:10px;">
+                <button onclick="document.getElementById('subWarningModal').style.display='none'"
+                        style="flex:1;padding:11px;background:#f1f5f9;border:none;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;color:#475569;">
+                    Dismiss
+                </button>
+                <a href="{{ route('billing.index') }}"
+                   style="flex:2;padding:11px;background:#4f46e5;border-radius:10px;font-size:13px;font-weight:700;color:#fff;text-align:center;text-decoration:none;display:flex;align-items:center;justify-content:center;gap:6px;">
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="width:15px;height:15px;">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
+                    </svg>
+                    Go to Billing
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+(function () {
+    // Show modal once per session (don't spam every page load)
+    const key = 'sub_warn_dismissed_{{ $subscriptionDueDate->format("Ymd") }}';
+    @if(isset($subscriptionFeaturesDisabled) && $subscriptionFeaturesDisabled)
+    // Always show when features are disabled (every page load)
+    document.getElementById('subWarningModal').style.display = 'flex';
+    @else
+    // Show once per session during grace period
+    if (!sessionStorage.getItem(key)) {
+        document.getElementById('subWarningModal').style.display = 'flex';
+    }
+    document.querySelector('#subWarningModal button').addEventListener('click', function () {
+        sessionStorage.setItem(key, '1');
+    });
+    @endif
+})();
+</script>
+@endif
 
 <script>
     // CSRF-safe logout

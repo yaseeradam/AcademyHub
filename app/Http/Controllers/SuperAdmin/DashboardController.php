@@ -33,10 +33,10 @@ class DashboardController extends Controller
         $dormantTenants = 0;
 
         try { $totalStudents = DB::table('students')->count(); } catch (\Throwable) {}
-        try { $totalTeachers = User::where('role', 'teacher')->count(); } catch (\Throwable) {}
+        try { $totalTeachers = User::withoutGlobalScopes()->where('role', 'teacher')->count(); } catch (\Throwable) {}
         try { $totalExams    = DB::table('cbt_exams')->count(); } catch (\Throwable) {}
         try { $totalHomework = DB::table('homework')->count(); } catch (\Throwable) {}
-        try { $totalRevenue  = DB::table('transactions')->where('type', 'Income')->sum('amount_paid'); } catch (\Throwable) {}
+        try { $totalRevenue  = DB::table('transactions')->where('type', 'Income')->where('is_void', false)->sum('amount_paid'); } catch (\Throwable) {}
 
         // Storage usage per tenant
         $storageStats = [];

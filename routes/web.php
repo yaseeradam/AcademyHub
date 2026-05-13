@@ -368,5 +368,9 @@ Route::prefix('superadmin')->name('superadmin.')->group(function () {
 
         // Global user search
         Route::get('users/search',                   [\App\Http\Controllers\SuperAdmin\TenantController::class, 'searchUsers'])->name('users.search');
+
+        // Billing overview
+        Route::get('billing',                        [\App\Http\Controllers\SuperAdmin\BillingController::class, 'index'])->name('billing');
+        Route::post('tenants/{tenant}/payment',      [\App\Http\Controllers\SuperAdmin\BillingController::class, 'recordPayment'])->name('tenants.payment');
     });
 });

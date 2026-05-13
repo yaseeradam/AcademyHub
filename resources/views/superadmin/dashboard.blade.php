@@ -291,12 +291,19 @@
 
     <div class="sa-panel">
         <div class="sa-panel-header">
-            <span class="sa-panel-title">⏰ Upcoming Renewals</span>
+            <span class="sa-panel-title">
+                <svg style="display:inline;width:15px;height:15px;vertical-align:-2px;margin-right:6px;color:#4f46e5;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                Upcoming Renewals
+            </span>
             <span style="font-size:11px;color:#94a3b8;">Next 30 days</span>
         </div>
         @if(empty($upcomingRenewals))
             <div style="padding:32px;text-align:center;color:#94a3b8;font-size:13px;">
-                <div style="font-size:28px;margin-bottom:8px;">✅</div>
+                <svg style="width:32px;height:32px;color:#d1fae5;margin:0 auto 10px;display:block;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
                 No renewals due in the next 30 days.
             </div>
         @else
@@ -323,12 +330,19 @@
 
     <div class="sa-panel">
         <div class="sa-panel-header">
-            <span class="sa-panel-title">💾 Storage Usage</span>
+            <span class="sa-panel-title">
+                <svg style="display:inline;width:15px;height:15px;vertical-align:-2px;margin-right:6px;color:#4f46e5;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4"/>
+                </svg>
+                Storage Usage
+            </span>
             <span style="font-size:11px;color:#94a3b8;">By school</span>
         </div>
         @if(empty($storageStats) || collect($storageStats)->sum('bytes') === 0)
             <div style="padding:32px;text-align:center;color:#94a3b8;font-size:13px;">
-                <div style="font-size:28px;margin-bottom:8px;">📂</div>
+                <svg style="width:32px;height:32px;color:#e2e8f0;margin:0 auto 10px;display:block;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/>
+                </svg>
                 No uploads found.
             </div>
         @else
@@ -360,11 +374,18 @@
 
     <div class="sa-panel">
         <div class="sa-panel-header">
-            <span class="sa-panel-title">📱 WhatsApp Bot Activity</span>
+            <span class="sa-panel-title">
+                <svg style="display:inline;width:15px;height:15px;vertical-align:-2px;margin-right:6px;color:#4f46e5;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+                </svg>
+                WhatsApp Bot Activity
+            </span>
         </div>
         @if(empty($whatsappStats))
             <div style="padding:32px;text-align:center;color:#94a3b8;font-size:13px;">
-                <div style="font-size:28px;margin-bottom:8px;">💬</div>
+                <svg style="width:32px;height:32px;color:#e2e8f0;margin:0 auto 10px;display:block;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+                </svg>
                 No schools have WhatsApp linked yet.
             </div>
         @else
@@ -388,12 +409,19 @@
 
     <div class="sa-panel">
         <div class="sa-panel-header">
-            <span class="sa-panel-title">🚨 Recent Errors</span>
+            <span class="sa-panel-title">
+                <svg style="display:inline;width:15px;height:15px;vertical-align:-2px;margin-right:6px;color:#ef4444;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                Recent Errors
+            </span>
             <span style="font-size:11px;color:#94a3b8;">Last 10 from laravel.log</span>
         </div>
         @if(empty($recentErrors))
             <div style="padding:32px;text-align:center;color:#94a3b8;font-size:13px;">
-                <div style="font-size:28px;margin-bottom:8px;">🎉</div>
+                <svg style="width:32px;height:32px;color:#d1fae5;margin:0 auto 10px;display:block;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
                 No recent errors.
             </div>
         @else

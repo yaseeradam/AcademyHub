@@ -29,7 +29,7 @@ class TenantController extends Controller
 
     private function denyPassword()
     {
-        return back()->with('error', '❌ Incorrect password. Action was not performed.');
+        return back()->with('error', 'Incorrect password. Action was not performed.');
     }
     public function index()
     {
