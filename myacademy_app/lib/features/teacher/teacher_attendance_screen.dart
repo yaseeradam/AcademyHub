@@ -136,7 +136,7 @@ class _TeacherAttendanceScreenState extends State<TeacherAttendanceScreen> {
               Expanded(
                 child: DropdownButtonFormField<int>(
                   decoration: _inputDecoration('Class'),
-                  value: _selectedClassId,
+                  initialValue: _selectedClassId,
                   items: _classes.map((c) => DropdownMenuItem<int>(value: c['id'] as int, child: Text(c['name'] as String))).toList(),
                   onChanged: (v) {
                     setState(() => _selectedClassId = v);
@@ -176,11 +176,10 @@ class _TeacherAttendanceScreenState extends State<TeacherAttendanceScreen> {
     return ListView.separated(
       padding: const EdgeInsets.all(16),
       itemCount: _students.length,
-      separatorBuilder: (_, __) => const SizedBox(height: 8),
+      separatorBuilder: (_, _) => const SizedBox(height: 8),
       itemBuilder: (context, i) {
         final s = _students[i];
         final id = s['id'] as int;
-        final status = _marks[id] ?? 'present';
         return Container(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           decoration: BoxDecoration(
@@ -192,7 +191,7 @@ class _TeacherAttendanceScreenState extends State<TeacherAttendanceScreen> {
             children: [
               CircleAvatar(
                 radius: 18,
-                backgroundColor: const Color(0xFF3B82F6).withOpacity(0.1),
+                backgroundColor: const Color(0xFF3B82F6).withValues(alpha: 0.1),
                 child: Text('${s['first_name']?[0] ?? '?'}', style: const TextStyle(color: Color(0xFF3B82F6), fontWeight: FontWeight.bold)),
               ),
               const SizedBox(width: 12),
@@ -225,7 +224,7 @@ class _TeacherAttendanceScreenState extends State<TeacherAttendanceScreen> {
         width: 32,
         height: 32,
         decoration: BoxDecoration(
-          color: selected ? color : color.withOpacity(0.1),
+          color: selected ? color : color.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(8),
         ),
         alignment: Alignment.center,

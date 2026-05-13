@@ -150,7 +150,7 @@ class _AdminHomeState extends State<AdminHome> with SingleTickerProviderStateMix
             child: Row(children: [
               CircleAvatar(
                 radius: 18,
-                backgroundColor: const Color(0xFF6366F1).withOpacity(0.1),
+                backgroundColor: const Color(0xFF6366F1).withValues(alpha: 0.1),
                 child: Text(name.isNotEmpty ? name[0] : '?',
                     style: const TextStyle(color: Color(0xFF6366F1), fontWeight: FontWeight.bold)),
               ),
@@ -179,7 +179,7 @@ class _AdminHomeState extends State<AdminHome> with SingleTickerProviderStateMix
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Container(
           padding: const EdgeInsets.all(7),
-          decoration: BoxDecoration(color: color.withOpacity(0.1), borderRadius: BorderRadius.circular(8)),
+          decoration: BoxDecoration(color: color.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(8)),
           child: Icon(icon, color: color, size: 18),
         ),
         const Spacer(),
@@ -210,7 +210,7 @@ class _AdminHomeState extends State<AdminHome> with SingleTickerProviderStateMix
         child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
           Container(
             padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(color: color.withOpacity(0.1), borderRadius: BorderRadius.circular(10)),
+            decoration: BoxDecoration(color: color.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(10)),
             child: Icon(icon, color: color, size: 22),
           ),
           const SizedBox(height: 10),
@@ -230,7 +230,7 @@ class _AdminHomeState extends State<AdminHome> with SingleTickerProviderStateMix
     return ListView.separated(
       padding: const EdgeInsets.all(16),
       itemCount: _homework.length,
-      separatorBuilder: (_, __) => const SizedBox(height: 8),
+      separatorBuilder: (_, _) => const SizedBox(height: 8),
       itemBuilder: (_, i) {
         final h       = _homework[i];
         final due     = h['due_date'] as String? ?? '';
@@ -246,7 +246,7 @@ class _AdminHomeState extends State<AdminHome> with SingleTickerProviderStateMix
           child: Row(children: [
             Container(
               padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(color: const Color(0xFF8B5CF6).withOpacity(0.1), borderRadius: BorderRadius.circular(10)),
+              decoration: BoxDecoration(color: const Color(0xFF8B5CF6).withValues(alpha: 0.1), borderRadius: BorderRadius.circular(10)),
               child: const Icon(Icons.assignment, color: Color(0xFF8B5CF6), size: 20),
             ),
             const SizedBox(width: 12),
@@ -272,7 +272,7 @@ class _AdminHomeState extends State<AdminHome> with SingleTickerProviderStateMix
     return ListView.separated(
       padding: const EdgeInsets.all(16),
       itemCount: _announcements.length,
-      separatorBuilder: (_, __) => const SizedBox(height: 8),
+      separatorBuilder: (_, _) => const SizedBox(height: 8),
       itemBuilder: (_, i) {
         final a    = _announcements[i];
         final date = (a['published_at'] as String?)?.substring(0, 10) ?? '';

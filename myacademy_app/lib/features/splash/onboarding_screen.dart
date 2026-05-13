@@ -5,7 +5,6 @@ import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../auth/login_screen_new.dart';
 
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
@@ -131,9 +130,9 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
                 colors: [
-                  _pages[_currentPage].color.withOpacity(0.8),
-                  _pages[_currentPage].color.withOpacity(0.6),
-                  _pages[_currentPage].color.withOpacity(0.4),
+                  _pages[_currentPage].color.withValues(alpha: 0.8),
+                  _pages[_currentPage].color.withValues(alpha: 0.6),
+                  _pages[_currentPage].color.withValues(alpha: 0.4),
                   Colors.white,
                 ],
                 stops: const [0.0, 0.3, 0.7, 1.0],
@@ -203,11 +202,11 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                             width: 140,
                             height: 140,
                             decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.2),
+                              color: Colors.white.withValues(alpha: 0.2),
                               shape: BoxShape.circle,
                               boxShadow: [
                                 BoxShadow(
-                                  color: page.color.withOpacity(0.3),
+                                  color: page.color.withValues(alpha: 0.3),
                                   blurRadius: 30,
                                   spreadRadius: 10,
                                 ),
@@ -238,7 +237,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                   textStyle: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w600,
-                    color: Colors.white.withOpacity(0.9),
+                    color: Colors.white.withValues(alpha: 0.9),
                     letterSpacing: 2,
                   ),
                   speed: const Duration(milliseconds: 100),
@@ -281,7 +280,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 18,
-                color: Colors.white.withOpacity(0.8),
+                color: Colors.white.withValues(alpha: 0.8),
                 fontWeight: FontWeight.w500,
                 height: 1.4,
               ),
@@ -315,10 +314,10 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                     padding: const EdgeInsets.all(24),
                     margin: const EdgeInsets.symmetric(horizontal: 20),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.15),
+                      color: Colors.white.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(20),
                       border: Border.all(
-                        color: Colors.white.withOpacity(0.3),
+                        color: Colors.white.withValues(alpha: 0.3),
                         width: 1,
                       ),
                     ),
@@ -327,7 +326,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: 16,
-                        color: Colors.white.withOpacity(0.9),
+                        color: Colors.white.withValues(alpha: 0.9),
                         fontWeight: FontWeight.w400,
                         height: 1.5,
                       ),
@@ -356,8 +355,8 @@ class _OnboardingScreenState extends State<OnboardingScreen>
           end: Alignment.bottomCenter,
           colors: [
             Colors.transparent,
-            Colors.black.withOpacity(0.1),
-            Colors.black.withOpacity(0.2),
+            Colors.black.withValues(alpha: 0.1),
+            Colors.black.withValues(alpha: 0.2),
           ],
         ),
       ),
@@ -375,7 +374,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                 expansionFactor: 3,
                 spacing: 8,
                 activeDotColor: Colors.white,
-                dotColor: Colors.white.withOpacity(0.4),
+                dotColor: Colors.white.withValues(alpha: 0.4),
               ),
             ),
             
@@ -399,7 +398,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                       child: Text(
                         'Previous',
                         style: TextStyle(
-                          color: Colors.white.withOpacity(0.8),
+                          color: Colors.white.withValues(alpha: 0.8),
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
                         ),
@@ -423,7 +422,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                         borderRadius: BorderRadius.circular(30),
                       ),
                       elevation: 8,
-                      shadowColor: Colors.black.withOpacity(0.3),
+                      shadowColor: Colors.black.withValues(alpha: 0.3),
                     ),
                     child: AnimatedSwitcher(
                       duration: const Duration(milliseconds: 300),
@@ -454,7 +453,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                     child: Text(
                       'Skip',
                       style: TextStyle(
-                        color: Colors.white.withOpacity(0.6),
+                        color: Colors.white.withValues(alpha: 0.6),
                         fontSize: 16,
                         fontWeight: FontWeight.w500,
                       ),
@@ -500,11 +499,11 @@ class _OnboardingScreenState extends State<OnboardingScreen>
               width: size,
               height: size,
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.4),
+                color: Colors.white.withValues(alpha: 0.4),
                 shape: BoxShape.circle,
                 boxShadow: [
                   BoxShadow(
-                    color: _pages[_currentPage].color.withOpacity(0.3),
+                    color: _pages[_currentPage].color.withValues(alpha: 0.3),
                     blurRadius: 10,
                     spreadRadius: 2,
                   ),

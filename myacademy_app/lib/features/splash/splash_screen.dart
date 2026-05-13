@@ -6,7 +6,6 @@ import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../core/auth_provider.dart';
-import 'onboarding_screen.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -185,12 +184,12 @@ class _SplashScreenState extends State<SplashScreen>
                               borderRadius: BorderRadius.circular(30),
                               boxShadow: [
                                 BoxShadow(
-                                  color: Colors.white.withOpacity(0.3),
+                                  color: Colors.white.withValues(alpha: 0.3),
                                   blurRadius: 20,
                                   spreadRadius: 5,
                                 ),
                                 BoxShadow(
-                                  color: const Color(0xFFF59E0B).withOpacity(0.4),
+                                  color: const Color(0xFFF59E0B).withValues(alpha: 0.4),
                                   blurRadius: 40,
                                   spreadRadius: 10,
                                 ),
@@ -250,7 +249,7 @@ class _SplashScreenState extends State<SplashScreen>
                           textStyle: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w500,
-                            color: Colors.white.withOpacity(0.9),
+                            color: Colors.white.withValues(alpha: 0.9),
                             letterSpacing: 0.5,
                           ),
                           duration: const Duration(milliseconds: 2000),
@@ -279,7 +278,7 @@ class _SplashScreenState extends State<SplashScreen>
                           child: CircularProgressIndicator(
                             strokeWidth: 3,
                             valueColor: AlwaysStoppedAnimation<Color>(
-                              Colors.white.withOpacity(0.8),
+                              Colors.white.withValues(alpha: 0.8),
                             ),
                           ),
                         ).animate(onPlay: (controller) => controller.repeat())
@@ -291,7 +290,7 @@ class _SplashScreenState extends State<SplashScreen>
                           'Preparing your experience...',
                           style: TextStyle(
                             fontSize: 14,
-                            color: Colors.white.withOpacity(0.7),
+                            color: Colors.white.withValues(alpha: 0.7),
                             fontWeight: FontWeight.w400,
                           ),
                         ).animate().fadeIn(
@@ -315,7 +314,7 @@ class _SplashScreenState extends State<SplashScreen>
                     'Powered by Emotional Intelligence',
                     style: TextStyle(
                       fontSize: 12,
-                      color: Colors.white.withOpacity(0.6),
+                      color: Colors.white.withValues(alpha: 0.6),
                       fontWeight: FontWeight.w500,
                       letterSpacing: 1,
                     ),
@@ -333,7 +332,7 @@ class _SplashScreenState extends State<SplashScreen>
                       gradient: LinearGradient(
                         colors: [
                           Colors.transparent,
-                          Colors.white.withOpacity(0.5),
+                          Colors.white.withValues(alpha: 0.5),
                           Colors.transparent,
                         ],
                       ),
@@ -366,7 +365,7 @@ class _SplashScreenState extends State<SplashScreen>
         width: size,
         height: size,
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.3),
+          color: Colors.white.withValues(alpha: 0.3),
           shape: BoxShape.circle,
         ),
       ).animate(onPlay: (controller) => controller.repeat(reverse: true))

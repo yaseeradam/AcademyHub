@@ -47,7 +47,9 @@ class _TeacherScoresScreenState extends State<TeacherScoresScreen> {
   @override
   void dispose() {
     for (final map in _controllers.values) {
-      map.values.forEach((c) => c.dispose());
+      for (var c in map.values) {
+        c.dispose();
+      }
     }
     super.dispose();
   }
@@ -73,7 +75,8 @@ class _TeacherScoresScreenState extends State<TeacherScoresScreen> {
       await _db.upsertSubjects(classId, list);
       setState(() => _subjects = list);
     } catch (_) {
-      setState(() => _subjects = await _db.getSubjectsByClass(classId));
+      final list = await _db.getSubjectsByClass(classId);
+      setState(() => _subjects = list);
     }
 
     // Load students
@@ -83,7 +86,8 @@ class _TeacherScoresScreenState extends State<TeacherScoresScreen> {
       await _db.upsertStudents(list);
       setState(() => _students = list);
     } catch (_) {
-      setState(() => _students = await _db.getStudentsByClass(classId));
+      final list = await _db.getStudentsByClass(classId);
+      setState(() => _students = list);
     }
   }
 
@@ -166,7 +170,7 @@ class _TeacherScoresScreenState extends State<TeacherScoresScreen> {
               Expanded(
                 child: DropdownButtonFormField<int>(
                   decoration: _inputDecoration('Class'),
-                  value: _selectedClassId,
+                  initialValue: _selectedClassId,
                   items: _classes.map((c) => DropdownMenuItem<int>(value: c['id'] as int, child: Text(c['name'] as String))).toList(),
                   onChanged: (v) { if (v != null) _onClassChanged(v); },
                 ),
@@ -175,7 +179,7 @@ class _TeacherScoresScreenState extends State<TeacherScoresScreen> {
               Expanded(
                 child: DropdownButtonFormField<int>(
                   decoration: _inputDecoration('Term'),
-                  value: _term,
+                  initialValue: _term,
                   items: const [
                     DropdownMenuItem(value: 1, child: Text('Term 1')),
                     DropdownMenuItem(value: 2, child: Text('Term 2')),
@@ -190,7 +194,7 @@ class _TeacherScoresScreenState extends State<TeacherScoresScreen> {
             const SizedBox(height: 12),
             DropdownButtonFormField<int>(
               decoration: _inputDecoration('Subject'),
-              value: _selectedSubjectId,
+              initialValue: _selectedSubjectId,
               items: _subjects.map((s) => DropdownMenuItem<int>(value: s['id'] as int, child: Text(s['name'] as String))).toList(),
               onChanged: (v) { if (v != null) _onSubjectChanged(v); },
             ),
@@ -208,7 +212,7 @@ class _TeacherScoresScreenState extends State<TeacherScoresScreen> {
     return ListView.separated(
       padding: const EdgeInsets.all(16),
       itemCount: _students.length,
-      separatorBuilder: (_, __) => const SizedBox(height: 8),
+      separatorBuilder: (_, _) => const SizedBox(height: 8),
       itemBuilder: (context, i) {
         final s = _students[i];
         final id = s['id'] as int;
@@ -239,11 +243,11 @@ class _TeacherScoresScreenState extends State<TeacherScoresScreen> {
                   // Live total
                   ValueListenableBuilder(
                     valueListenable: c['ca1']!,
-                    builder: (_, __, ___) => ValueListenableBuilder(
+                    builder: (_, _, _) => ValueListenableBuilder(
                       valueListenable: c['ca2']!,
-                      builder: (_, __, ___) => ValueListenableBuilder(
+                      builder: (_, _, _) => ValueListenableBuilder(
                         valueListenable: c['exam']!,
-                        builder: (_, __, ___) {
+                        builder: (_, _, _) {
                           final total = (int.tryParse(c['ca1']!.text) ?? 0) +
                               (int.tryParse(c['ca2']!.text) ?? 0) +
                               (int.tryParse(c['exam']!.text) ?? 0);
