@@ -29,9 +29,32 @@
 
                 <div>
                     <label class="sa-form-label">School Name <span style="color:#ef4444;">*</span></label>
-                    <input type="text" name="name" value="{{ old('name') }}" required
-                           class="sa-form-input" placeholder="e.g. Greenwood High School">
+                    <input type="text" name="name" id="schoolName" value="{{ old('name') }}" required
+                           class="sa-form-input" placeholder="e.g. Greenwood High School"
+                           oninput="previewSlug(this.value)">
                     @error('name')<div class="sa-form-error">{{ $message }}</div>@enderror
+                </div>
+
+                <div>
+                    <label class="sa-form-label">
+                        Subdomain Slug
+                        <span style="color:#94a3b8;font-weight:500;"> — how the school is accessed</span>
+                    </label>
+                    <div style="display:flex;align-items:center;border:1.5px solid #e2e8f0;border-radius:10px;overflow:hidden;background:#fff;">
+                        <span style="padding:0 10px;font-size:12px;color:#94a3b8;background:#f8fafc;border-right:1px solid #e2e8f0;white-space:nowrap;line-height:40px;">
+                            {{ parse_url(config('app.url'), PHP_URL_HOST) }}/
+                        </span>
+                        <input type="text" name="slug" id="slugInput" value="{{ old('slug') }}"
+                               class="sa-form-input" style="border:none;border-radius:0;flex:1;font-family:monospace;font-size:13px;"
+                               placeholder="e.g. yis  (leave blank to auto-generate)"
+                               pattern="[a-z0-9]+(-[a-z0-9]+)*"
+                               oninput="this.value=this.value.toLowerCase().replace(/[^a-z0-9-]/g,'')">
+                    </div>
+                    <div style="font-size:11.5px;color:#94a3b8;margin-top:4px;">
+                        Lowercase letters, numbers and hyphens only. Leave blank to auto-generate from the school name.
+                        Cannot be: <span style="font-family:monospace;color:#ef4444;">superadmin, api, students, teachers, uploads, storage</span> or other reserved names.
+                    </div>
+                    @error('slug')<div class="sa-form-error">{{ $message }}</div>@enderror
                 </div>
 
                 <div>
@@ -39,7 +62,7 @@
                     <input type="text" name="domain" value="{{ old('domain') }}"
                            class="sa-form-input" placeholder="e.g. portal.greenwood.edu">
                     @error('domain')<div class="sa-form-error">{{ $message }}</div>@enderror
-                    <div class="sa-form-hint">Leave blank — an automatic slug will be generated.</div>
+                    <div class="sa-form-hint">Full custom domain — overrides the subdomain slug for access.</div>
                 </div>
 
                 <div>
@@ -216,4 +239,25 @@
 
     </form>
 </div>
+
+@push('scripts')
+<script>
+function previewSlug(name) {
+    const slugInput = document.getElementById('slugInput');
+    // Only auto-fill if the user hasn't typed their own slug
+    if (slugInput.dataset.userEdited) return;
+    slugInput.placeholder = name
+        .toLowerCase()
+        .replace(/[^a-z0-9\s-]/g, '')
+        .trim()
+        .replace(/\s+/g, '-')
+        .replace(/-+/g, '-')
+        || 'auto-generated';
+}
+
+document.getElementById('slugInput').addEventListener('input', function () {
+    this.dataset.userEdited = this.value ? '1' : '';
+});
+</script>
+@endpush
 @endsection

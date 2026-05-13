@@ -39,6 +39,26 @@
                 </div>
 
                 <div>
+                    <label class="sa-form-label">
+                        Subdomain Slug
+                        <span style="color:#94a3b8;font-weight:500;"> — school access URL</span>
+                    </label>
+                    <div style="display:flex;align-items:center;border:1.5px solid #e2e8f0;border-radius:10px;overflow:hidden;background:#fff;">
+                        <span style="padding:0 10px;font-size:12px;color:#94a3b8;background:#f8fafc;border-right:1px solid #e2e8f0;white-space:nowrap;line-height:40px;">
+                            {{ parse_url(config('app.url'), PHP_URL_HOST) }}/
+                        </span>
+                        <input type="text" name="slug" value="{{ old('slug', $tenant->slug) }}" required
+                               class="sa-form-input" style="border:none;border-radius:0;flex:1;font-family:monospace;font-size:13px;"
+                               pattern="[a-z0-9]+(-[a-z0-9]+)*"
+                               oninput="this.value=this.value.toLowerCase().replace(/[^a-z0-9-]/g,'')">
+                    </div>
+                    <div style="font-size:11.5px;color:#94a3b8;margin-top:4px;">
+                        Changing this will break existing bookmarks. Cannot use reserved names.
+                    </div>
+                    @error('slug')<div class="sa-form-error">{{ $message }}</div>@enderror
+                </div>
+
+                <div>
                     <label class="sa-form-label">Custom Domain <span style="color:#94a3b8;">(optional)</span></label>
                     <input type="text" name="domain" value="{{ old('domain', $tenant->domain) }}"
                            class="sa-form-input" placeholder="portal.school.edu">

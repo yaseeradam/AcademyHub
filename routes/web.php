@@ -335,10 +335,6 @@ Route::prefix('superadmin')->name('superadmin.')->group(function () {
         Route::get('/', \App\Http\Controllers\SuperAdmin\DashboardController::class)->name('dashboard');
         Route::resource('tenants', \App\Http\Controllers\SuperAdmin\TenantController::class)->except(['show']);
 
-        // Impersonation
-        Route::post('tenants/{tenant}/impersonate',  [\App\Http\Controllers\SuperAdmin\TenantController::class, 'impersonate'])->name('tenants.impersonate');
-        Route::post('stop-impersonating',            [\App\Http\Controllers\SuperAdmin\TenantController::class, 'stopImpersonating'])->name('stop-impersonating');
-
         // Subscription
         Route::post('tenants/{tenant}/subscription', [\App\Http\Controllers\SuperAdmin\TenantController::class, 'updateSubscription'])->name('tenants.subscription');
 
@@ -357,8 +353,11 @@ Route::prefix('superadmin')->name('superadmin.')->group(function () {
         // Auto-suspend
         Route::post('auto-suspend',                  [\App\Http\Controllers\SuperAdmin\TenantController::class, 'autoSuspend'])->name('auto-suspend');
 
-        // Force password reset
+        // Force password reset for all users
         Route::post('tenants/{tenant}/force-reset',  [\App\Http\Controllers\SuperAdmin\TenantController::class, 'forcePasswordReset'])->name('tenants.force-reset');
+
+        // Reset admin password directly
+        Route::post('tenants/{tenant}/reset-admin-password', [\App\Http\Controllers\SuperAdmin\TenantController::class, 'resetAdminPassword'])->name('tenants.reset-admin-password');
 
         // Backup
         Route::post('tenants/{tenant}/backup',       [\App\Http\Controllers\SuperAdmin\TenantController::class, 'triggerBackup'])->name('tenants.backup');

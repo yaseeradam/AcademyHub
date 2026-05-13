@@ -51,6 +51,7 @@ class TenantController extends Controller
 
         $data = $request->validate([
             'name'          => ['required', 'string', 'max:255'],
+            'slug'          => ['nullable', 'string', 'max:80', 'regex:/^[a-z0-9]+(?:-[a-z0-9]+)*$/', 'unique:tenants,slug'],
             'domain'        => ['nullable', 'string', 'max:255', 'unique:tenants,domain'],
             'plan'          => ['required', 'string', 'in:free,pro,enterprise'],
             'status'        => ['required', 'string', 'in:active,suspended,pending'],
@@ -67,7 +68,32 @@ class TenantController extends Controller
             'admin_password'            => ['nullable', 'required_if:create_admin,1', 'confirmed', Password::min(8)],
         ]);
 
-        $data['slug'] = Str::slug($data['name']) . '-' . strtolower(Str::random(5));
+        // Reserved slugs — these match physical directories or system routes that would
+        // cause Apache/Nginx to serve the directory instead of routing to Laravel.
+        $reserved = [
+            'superadmin', 'api', 'login', 'logout', 'register', 'password',
+            'students', 'teachers', 'certificates', 'uploads', 'storage',
+            'build', 'images', 'bgs', 'public', 'admin', 'dashboard',
+        ];
+
+        $chosenSlug = trim($data['slug'] ?? '');
+
+        if ($chosenSlug !== '') {
+            if (in_array(strtolower($chosenSlug), $reserved, true)) {
+                return back()->withInput()
+                    ->withErrors(['slug' => "The slug '{$chosenSlug}' is reserved and cannot be used."]);
+            }
+            $data['slug'] = $chosenSlug;
+        } else {
+            // Auto-generate a slug from the name, appending a short random suffix for uniqueness
+            $base = Str::slug($data['name']);
+            $slug = $base;
+            // Keep trying until we get a unique, non-reserved slug
+            while (in_array($slug, $reserved, true) || \App\Models\Tenant::where('slug', $slug)->exists()) {
+                $slug = $base . '-' . strtolower(Str::random(5));
+            }
+            $data['slug'] = $slug;
+        }
 
         // Remove admin fields from tenant data
         $adminData   = null;
@@ -145,11 +171,16 @@ class TenantController extends Controller
         }
     }
 
-    // ── Impersonate ────────────────────────────────────────────────────────
+    // ── Reset Admin Password ───────────────────────────────────────────────
 
-    public function impersonate(Request $request, Tenant $tenant)
+    public function resetAdminPassword(Request $request, Tenant $tenant)
     {
         if (! $this->verifyPassword($request)) return $this->denyPassword();
+
+        $data = $request->validate([
+            'new_password' => ['required', 'string', 'min:8', 'confirmed'],
+        ]);
+
         $admin = User::where('tenant_id', $tenant->id)
             ->where('role', 'admin')
             ->where('is_active', true)
@@ -159,36 +190,12 @@ class TenantController extends Controller
             return back()->with('error', 'No active admin found for this school.');
         }
 
-        // Store superadmin identity to restore later
-        session([
-            'impersonating'          => true,
-            'impersonator_id'        => Auth::id(),
-            'impersonator_name'      => Auth::user()->name,
-            'impersonated_tenant'    => $tenant->name,
-        ]);
+        $admin->forceFill([
+            'password'                => Hash::make($data['new_password']),
+            'password_reset_required' => true,
+        ])->save();
 
-        Auth::login($admin);
-
-        $mainHost = parse_url(config('app.url'), PHP_URL_HOST);
-        $host     = $tenant->domain ?: ($tenant->slug . '.' . $mainHost);
-
-        return redirect('http://' . $host . '/dashboard');
-    }
-
-    public function stopImpersonating()
-    {
-        $impersonatorId = session('impersonator_id');
-
-        session()->forget(['impersonating', 'impersonator_id', 'impersonator_name', 'impersonated_tenant']);
-
-        if ($impersonatorId) {
-            $superAdmin = User::find($impersonatorId);
-            if ($superAdmin) {
-                Auth::login($superAdmin);
-            }
-        }
-
-        return redirect()->route('superadmin.tenants.index');
+        return back()->with('status', "Admin password for {$tenant->name} has been reset. They will be prompted to change it on next login.");
     }
 
     // ── Subscription ───────────────────────────────────────────────────────
@@ -481,8 +488,15 @@ class TenantController extends Controller
 
     public function update(Request $request, Tenant $tenant)
     {
+        $reserved = [
+            'superadmin', 'api', 'login', 'logout', 'register', 'password',
+            'students', 'teachers', 'certificates', 'uploads', 'storage',
+            'build', 'images', 'bgs', 'public', 'admin', 'dashboard',
+        ];
+
         $data = $request->validate([
             'name'          => ['required', 'string', 'max:255'],
+            'slug'          => ['required', 'string', 'max:80', 'regex:/^[a-z0-9]+(?:-[a-z0-9]+)*$/', 'unique:tenants,slug,' . $tenant->id],
             'domain'        => ['nullable', 'string', 'max:255', 'unique:tenants,domain,' . $tenant->id],
             'plan'          => ['required', 'string', 'in:free,pro,enterprise'],
             'status'        => ['required', 'string', 'in:active,suspended,pending'],
@@ -492,10 +506,26 @@ class TenantController extends Controller
             'contact_phone' => ['nullable', 'string', 'max:50'],
         ]);
 
+        if (in_array(strtolower($data['slug']), $reserved, true)) {
+            return back()->withInput()
+                ->withErrors(['slug' => "The slug '{$data['slug']}' is reserved and cannot be used."]);
+        }
+
+        // If slug changed, update hosts file entry
+        if ($data['slug'] !== $tenant->slug) {
+            $mainHost = parse_url(config('app.url'), PHP_URL_HOST);
+            $oldHost  = $tenant->domain ?: ($tenant->slug . '.' . $mainHost);
+            $newHost  = $tenant->domain ?: ($data['slug'] . '.' . $mainHost);
+            $this->removeFromHostsFile($oldHost);
+            if (app()->environment('local', 'development') || str_contains(config('app.url'), '.test')) {
+                $this->addToHostsFile($newHost);
+            }
+        }
+
         $tenant->update($data);
 
         return redirect()->route('superadmin.tenants.index')
-            ->with('status', 'School instance updated successfully.');
+            ->with('status', 'School updated successfully.');
     }
 
     public function destroy(Request $request, Tenant $tenant)

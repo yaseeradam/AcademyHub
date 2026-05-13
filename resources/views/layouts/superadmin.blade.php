@@ -345,28 +345,6 @@
 
 @stack('scripts')
 
-@if(session('impersonating'))
-<div class="fixed bottom-0 inset-x-0 z-[9999] bg-gradient-to-r from-violet-600 to-indigo-600 px-5 py-3 flex items-center justify-between shadow-xl">
-    <div class="text-sm font-bold text-white flex items-center gap-2">
-        <svg class="h-4 w-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-            <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-        </svg>
-        Impersonating: <strong>{{ session('impersonated_tenant') }}</strong>
-        <span class="opacity-70 font-normal ml-1">as {{ auth()->user()->name }}</span>
-    </div>
-    <form method="POST" action="{{ route('superadmin.stop-impersonating') }}">
-        @csrf
-        <button type="submit" class="bg-white text-violet-700 border-none px-4 py-1.5 rounded-lg text-xs font-extrabold cursor-pointer hover:bg-violet-50 transition-colors flex items-center gap-1.5">
-            <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
-            </svg>
-            Stop Impersonating
-        </button>
-    </form>
-</div>
-@endif
-
 <script>
 let _saTargetForm = null;
 
