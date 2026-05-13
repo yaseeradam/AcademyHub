@@ -94,7 +94,7 @@ class _TeacherHomeworkScreenState extends State<TeacherHomeworkScreen> {
             contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
             isDense: true,
           ),
-          value: _selectedClassId,
+          initialValue: _selectedClassId,
           items: _classes.map((c) => DropdownMenuItem<int>(value: c['id'] as int, child: Text(c['name'] as String))).toList(),
           onChanged: (v) { if (v != null) _loadForClass(v); },
         ),
@@ -103,7 +103,7 @@ class _TeacherHomeworkScreenState extends State<TeacherHomeworkScreen> {
   Widget _buildList() => ListView.separated(
         padding: const EdgeInsets.all(16),
         itemCount: _homework.length,
-        separatorBuilder: (_, __) => const SizedBox(height: 8),
+        separatorBuilder: (_, _) => const SizedBox(height: 8),
         itemBuilder: (context, i) {
           final h       = _homework[i];
           final isDirty = (h['is_dirty'] as int? ?? 0) == 1;
@@ -121,7 +121,7 @@ class _TeacherHomeworkScreenState extends State<TeacherHomeworkScreen> {
                 Container(
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF8B5CF6).withOpacity(0.1),
+                    color: const Color(0xFF8B5CF6).withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: const Icon(Icons.assignment, color: Color(0xFF8B5CF6), size: 20),
@@ -255,7 +255,7 @@ class _CreateHomeworkSheetState extends State<_CreateHomeworkSheet> {
             const SizedBox(height: 16),
             DropdownButtonFormField<int>(
               decoration: _dec('Subject'),
-              value: _subjectId,
+              initialValue: _subjectId,
               items: widget.subjects.map((s) => DropdownMenuItem<int>(value: s['id'] as int, child: Text(s['name'] as String))).toList(),
               onChanged: (v) => setState(() => _subjectId = v),
             ),
@@ -357,7 +357,7 @@ class _SubmissionsScreenState extends State<_SubmissionsScreen> {
               : ListView.separated(
                   padding: const EdgeInsets.all(16),
                   itemCount: _submissions.length,
-                  separatorBuilder: (_, __) => const SizedBox(height: 8),
+                  separatorBuilder: (_, _) => const SizedBox(height: 8),
                   itemBuilder: (context, i) {
                     final s    = _submissions[i];
                     final name = '${s['student']?['first_name'] ?? ''} ${s['student']?['last_name'] ?? ''}';
@@ -376,7 +376,7 @@ class _SubmissionsScreenState extends State<_SubmissionsScreen> {
                             if (s['grade'] != null)
                               Container(
                                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                decoration: BoxDecoration(color: const Color(0xFF10B981).withOpacity(0.1), borderRadius: BorderRadius.circular(6)),
+                                decoration: BoxDecoration(color: const Color(0xFF10B981).withValues(alpha: 0.1), borderRadius: BorderRadius.circular(6)),
                                 child: Text(s['grade'], style: const TextStyle(color: Color(0xFF10B981), fontWeight: FontWeight.bold, fontSize: 12)),
                               ),
                           ]),

@@ -123,7 +123,7 @@ class _StudentHomeState extends State<StudentHome> with SingleTickerProviderStat
             : ListView.separated(
                 padding: const EdgeInsets.all(16),
                 itemCount: subjects.length,
-                separatorBuilder: (_, __) => const SizedBox(height: 8),
+                separatorBuilder: (_, _) => const SizedBox(height: 8),
                 itemBuilder: (_, i) => _subjectCard(subjects[i]),
               ),
       ),
@@ -152,7 +152,7 @@ class _StudentHomeState extends State<StudentHome> with SingleTickerProviderStat
         Column(children: [
           Container(
             width: 40, height: 40,
-            decoration: BoxDecoration(color: color.withOpacity(0.1), shape: BoxShape.circle),
+            decoration: BoxDecoration(color: color.withValues(alpha: 0.1), shape: BoxShape.circle),
             alignment: Alignment.center,
             child: Text(grade, style: TextStyle(color: color, fontWeight: FontWeight.bold, fontSize: 16)),
           ),
@@ -170,7 +170,7 @@ class _StudentHomeState extends State<StudentHome> with SingleTickerProviderStat
     return ListView.separated(
       padding: const EdgeInsets.all(16),
       itemCount: _homework.length,
-      separatorBuilder: (_, __) => const SizedBox(height: 8),
+      separatorBuilder: (_, _) => const SizedBox(height: 8),
       itemBuilder: (context, i) {
         final h       = _homework[i];
         final due     = h['due_date'] as String? ?? '';
@@ -187,7 +187,7 @@ class _StudentHomeState extends State<StudentHome> with SingleTickerProviderStat
             child: Row(children: [
               Container(
                 padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(color: const Color(0xFF8B5CF6).withOpacity(0.1), borderRadius: BorderRadius.circular(10)),
+                decoration: BoxDecoration(color: const Color(0xFF8B5CF6).withValues(alpha: 0.1), borderRadius: BorderRadius.circular(10)),
                 child: const Icon(Icons.assignment, color: Color(0xFF8B5CF6), size: 20),
               ),
               const SizedBox(width: 12),
@@ -241,7 +241,7 @@ class _StudentHomeState extends State<StudentHome> with SingleTickerProviderStat
             child: Row(children: [
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                decoration: BoxDecoration(color: const Color(0xFF3B82F6).withOpacity(0.1), borderRadius: BorderRadius.circular(8)),
+                decoration: BoxDecoration(color: const Color(0xFF3B82F6).withValues(alpha: 0.1), borderRadius: BorderRadius.circular(8)),
                 child: Text('${e['starts_at']}', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Color(0xFF3B82F6))),
               ),
               const SizedBox(width: 12),
@@ -265,7 +265,7 @@ class _StudentHomeState extends State<StudentHome> with SingleTickerProviderStat
     return ListView.separated(
       padding: const EdgeInsets.all(16),
       itemCount: _announcements.length,
-      separatorBuilder: (_, __) => const SizedBox(height: 8),
+      separatorBuilder: (_, _) => const SizedBox(height: 8),
       itemBuilder: (_, i) {
         final a    = _announcements[i];
         final date = (a['published_at'] as String?)?.substring(0, 10) ?? '';

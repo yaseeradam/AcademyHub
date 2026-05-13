@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
-import 'constants.dart';
 import 'auth_provider.dart';
 import 'sync_status_widget.dart';
 
@@ -180,7 +179,7 @@ class MobileHeader extends StatelessWidget {
                           radius: 18,
                           backgroundColor: const Color(0xFF374151),
                           child: Text(
-                            user?.name?.substring(0, 1).toUpperCase() ?? 'U',
+                            user?.name.substring(0, 1).toUpperCase() ?? 'U',
                             style: const TextStyle(
                               color: Colors.white,
                               fontSize: 14,
@@ -486,7 +485,7 @@ class NavigationCard extends StatelessWidget {
               width: 48,
               height: 48,
               decoration: BoxDecoration(
-                color: color.withOpacity(0.1),
+                color: color.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Icon(

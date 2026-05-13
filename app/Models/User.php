@@ -86,8 +86,7 @@ class User extends Authenticatable
             }
 
             // Strict tenant isolation — super admins are intentionally excluded from tenant queries.
-            // They should never appear in tenant user listings or be queryable from tenant context.
-            $builder->where('tenant_id', $tenantId);
+            $builder->where($builder->getModel()->getTable() . '.tenant_id', $tenantId);
         });
 
         static::creating(function (self $user) {

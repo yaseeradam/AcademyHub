@@ -151,7 +151,7 @@ class SyncService {
 
     _emit('Downloading fee records...', 0.4);
     await _tryFetch(() async {
-      final r = await dio.get('/billing');
+      await dio.get('/billing');
       // Cache is saved by ApiService; billing is read-only so no local table needed
       // The raw response is already cached via cache_storage by getWithCache
     });

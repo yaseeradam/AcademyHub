@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../core/auth_provider.dart';
-import '../../core/sync_service.dart';
 
 class InitialSyncScreen extends StatefulWidget {
   const InitialSyncScreen({super.key});
@@ -69,13 +68,13 @@ class _InitialSyncScreenState extends State<InitialSyncScreen>
               // Animated logo
               AnimatedBuilder(
                 animation: _pulse,
-                builder: (_, __) => Transform.scale(
+                builder: (_, _) => Transform.scale(
                   scale: 0.95 + (_pulse.value * 0.05),
                   child: Container(
                     width: 96,
                     height: 96,
                     decoration: BoxDecoration(
-                      color: const Color(0xFF3B82F6).withOpacity(0.1),
+                      color: const Color(0xFF3B82F6).withValues(alpha: 0.1),
                       shape: BoxShape.circle,
                     ),
                     child: const Icon(Icons.school_rounded, size: 48, color: Color(0xFF3B82F6)),

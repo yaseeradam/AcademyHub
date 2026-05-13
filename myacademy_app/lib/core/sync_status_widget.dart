@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'auth_provider.dart';
-import 'sync_service.dart';
 
 class SyncDot extends StatefulWidget {
   const SyncDot({super.key});
@@ -62,7 +61,7 @@ class _SyncDotState extends State<SyncDot> with SingleTickerProviderStateMixin {
         decoration: BoxDecoration(
           color: color,
           shape: BoxShape.circle,
-          boxShadow: [BoxShadow(color: color.withOpacity(0.4), blurRadius: 4, spreadRadius: 1)],
+          boxShadow: [BoxShadow(color: color.withValues(alpha: 0.4), blurRadius: 4, spreadRadius: 1)],
         ),
       );
 }

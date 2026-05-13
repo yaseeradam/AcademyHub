@@ -36,11 +36,11 @@ class AppRouter {
       routes: [
         GoRoute(
           path: '/login',
-          builder: (_, __) => const login.LoginScreen(),
+          builder: (_, _) => const login.LoginScreen(),
         ),
         GoRoute(
           path: '/sync',
-          builder: (_, __) => const InitialSyncScreen(),
+          builder: (_, _) => const InitialSyncScreen(),
         ),
         GoRoute(
           path: '/',
@@ -60,25 +60,25 @@ class AppRouter {
         ),
         GoRoute(
           path: '/attendance',
-          builder: (_, __) => const TeacherAttendanceScreen(),
+          builder: (_, _) => const TeacherAttendanceScreen(),
         ),
         GoRoute(
           path: '/scores',
-          builder: (_, __) => const TeacherScoresScreen(),
+          builder: (_, _) => const TeacherScoresScreen(),
         ),
         GoRoute(
           path: '/homework',
-          builder: (_, __) => const TeacherHomeworkScreen(),
+          builder: (_, _) => const TeacherHomeworkScreen(),
         ),
         GoRoute(
           path: '/students',
-          builder: (_, __) => const Scaffold(
+          builder: (_, _) => const Scaffold(
             body: Center(child: Text('Students — coming soon')),
           ),
         ),
         GoRoute(
           path: '/cbt',
-          builder: (_, __) => const Scaffold(
+          builder: (_, _) => const Scaffold(
             body: Center(child: Text('CBT Exams — coming soon')),
           ),
         ),
