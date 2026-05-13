@@ -117,19 +117,28 @@ class Form extends Component
     private function generateAdmissionNumber(): string
     {
         $year = now()->format('Y');
-        $lastStudent = Student::query()
-            ->where('admission_number', 'like', "STU{$year}%")
+        $prefix = 'ADM-' . $year . '-';
+
+        $last = Student::query()
+            ->where('admission_number', 'like', $prefix . '%')
             ->orderByDesc('id')
-            ->first();
-        
-        if ($lastStudent) {
-            $lastNum = (int) substr($lastStudent->admission_number, -4);
-            $nextNum = str_pad($lastNum + 1, 4, '0', STR_PAD_LEFT);
+            ->value('admission_number');
+
+        if ($last) {
+            $num = (int) substr($last, strlen($prefix));
+            $next = str_pad($num + 1, 4, '0', STR_PAD_LEFT);
         } else {
-            $nextNum = '0001';
+            $next = '0001';
         }
-        
-        return "STU{$year}{$nextNum}";
+
+        // Ensure uniqueness in case of gaps/collisions
+        $candidate = $prefix . $next;
+        while (Student::where('admission_number', $candidate)->exists()) {
+            $next = str_pad((int)$next + 1, 4, '0', STR_PAD_LEFT);
+            $candidate = $prefix . $next;
+        }
+
+        return $candidate;
     }
 
     public function save()

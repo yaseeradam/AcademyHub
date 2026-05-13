@@ -17,11 +17,9 @@ class TenantProvisioner
 {
     public function provision(Tenant $tenant): void
     {
+        // Only create the settings file — schools set up their own classes,
+        // subjects, sessions and fee structures from scratch.
         $this->ensureSettingsFile($tenant);
-        $this->ensureAcademicCalendar($tenant);
-        $this->ensureDefaultClassesAndSections($tenant);
-        $this->ensureDefaultSubjects($tenant);
-        $this->ensureDefaultFeeStructures($tenant);
     }
 
     private function ensureSettingsFile(Tenant $tenant): void

@@ -79,7 +79,9 @@
                                     <td class="border-r-2 border-slate-200 p-2">
                                         @if($entry)
                                             @if($isAdmin)
-                                                <button type="button" wire:click="edit({{ $entry->id }})" x-data x-on:click="$dispatch('open-modal', 'timetable-form')" class="w-full rounded-lg border-2 border-blue-200 bg-blue-50 p-3 text-left hover:border-blue-400 hover:bg-blue-100">
+                                                <button type="button"
+                                                        wire:click="edit({{ $entry->id }})"
+                                                        class="w-full rounded-lg border-2 border-blue-200 bg-blue-50 p-3 text-left hover:border-blue-400 hover:bg-blue-100">
                                                     <div class="text-sm font-bold text-blue-900">{{ $entry->subject?->name }}</div>
                                                     <div class="mt-1 text-xs text-blue-700">{{ $entry->teacher?->name ?? 'No teacher' }}</div>
                                                     @if($entry->room)
@@ -97,7 +99,9 @@
                                             @endif
                                         @else
                                             @if($isAdmin)
-                                                <button type="button" wire:click="selectSlot({{ $d['day'] }}, @js($slot['start']), @js($slot['end']))" x-data x-on:click="$dispatch('open-modal', 'timetable-form')" class="w-full rounded-lg border-2 border-dashed border-slate-300 bg-slate-50 p-3 text-xs text-slate-400 hover:border-blue-400 hover:bg-blue-50 hover:text-blue-600">
+                                                <button type="button"
+                                                        wire:click="selectSlot({{ $d['day'] }}, @js($slot['start']), @js($slot['end']))"
+                                                        class="w-full rounded-lg border-2 border-dashed border-slate-300 bg-slate-50 p-3 text-xs text-slate-400 hover:border-blue-400 hover:bg-blue-50 hover:text-blue-600">
                                                     + Add
                                                 </button>
                                             @else
@@ -114,15 +118,32 @@
         </div>
 
         @if($isAdmin)
-            <div x-data="{ open: false }" x-on:open-modal.window="if ($event.detail === 'timetable-form') open = true" x-on:close.window="open = false" x-show="open" x-cloak class="fixed inset-0 z-50 overflow-y-auto" style="display: none;">
+            {{-- Timetable Modal — opened/closed by Livewire events, not Alpine dispatches --}}
+            <div x-data="{ open: false }"
+                 x-on:open-timetable-modal.window="open = true"
+                 x-on:close-timetable-modal.window="open = false"
+                 x-show="open"
+                 x-cloak
+                 class="fixed inset-0 z-50 overflow-y-auto"
+                 style="display:none;">
                 <div class="flex min-h-screen items-center justify-center px-4 py-6">
                     <div x-on:click="open = false" class="fixed inset-0 bg-black/50 transition-opacity"></div>
-                    
-                    <div x-on:click.stop class="relative w-full max-w-2xl rounded-2xl bg-white p-6 shadow-2xl">
-                        <h3 class="text-lg font-black text-slate-900">{{ $editingId ? 'Edit Entry' : 'Add Entry' }}</h3>
-                        <p class="mt-1 text-sm text-slate-600">Fill in the details below</p>
 
-                        <div class="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2">
+                    <div x-on:click.stop class="relative w-full max-w-2xl rounded-2xl bg-white p-6 shadow-2xl">
+                        <div class="flex items-center justify-between mb-4">
+                            <div>
+                                <h3 class="text-lg font-black text-slate-900">{{ $editingId ? 'Edit Entry' : 'Add Entry' }}</h3>
+                                <p class="mt-1 text-sm text-slate-600">Fill in the details below</p>
+                            </div>
+                            <button type="button" x-on:click="open = false"
+                                    class="rounded-lg p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-600">
+                                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                                </svg>
+                            </button>
+                        </div>
+
+                        <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
                             <div>
                                 <label class="text-xs font-bold uppercase text-slate-700">Day</label>
                                 <select wire:model.live="entryDay" class="mt-2 w-full rounded-lg border-2 border-slate-200 px-4 py-2.5 text-sm">
@@ -136,7 +157,7 @@
                             </div>
 
                             <div>
-                                <label class="text-xs font-bold uppercase text-slate-700">Subject</label>
+                                <label class="text-xs font-bold uppercase text-slate-700">Subject *</label>
                                 <select wire:model.live="subjectId" class="mt-2 w-full rounded-lg border-2 border-slate-200 px-4 py-2.5 text-sm">
                                     <option value="">Select Subject</option>
                                     @foreach($this->subjects as $s)
@@ -147,14 +168,16 @@
                             </div>
 
                             <div>
-                                <label class="text-xs font-bold uppercase text-slate-700">Start Time</label>
-                                <input wire:model="startsAt" type="time" class="mt-2 w-full rounded-lg border-2 border-slate-200 px-4 py-2.5 text-sm">
+                                <label class="text-xs font-bold uppercase text-slate-700">Start Time *</label>
+                                <input wire:model.live="startsAt" type="time"
+                                       class="mt-2 w-full rounded-lg border-2 border-slate-200 px-4 py-2.5 text-sm">
                                 @error('startsAt') <div class="mt-1 text-xs text-red-600">{{ $message }}</div> @enderror
                             </div>
 
                             <div>
-                                <label class="text-xs font-bold uppercase text-slate-700">End Time</label>
-                                <input wire:model="endsAt" type="time" class="mt-2 w-full rounded-lg border-2 border-slate-200 px-4 py-2.5 text-sm">
+                                <label class="text-xs font-bold uppercase text-slate-700">End Time *</label>
+                                <input wire:model.live="endsAt" type="time"
+                                       class="mt-2 w-full rounded-lg border-2 border-slate-200 px-4 py-2.5 text-sm">
                                 @error('endsAt') <div class="mt-1 text-xs text-red-600">{{ $message }}</div> @enderror
                             </div>
 
@@ -171,23 +194,37 @@
 
                             <div>
                                 <label class="text-xs font-bold uppercase text-slate-700">Room (Optional)</label>
-                                <input wire:model="room" class="mt-2 w-full rounded-lg border-2 border-slate-200 px-4 py-2.5 text-sm" placeholder="e.g. Lab 1">
+                                <input wire:model.live="room"
+                                       class="mt-2 w-full rounded-lg border-2 border-slate-200 px-4 py-2.5 text-sm"
+                                       placeholder="e.g. Lab 1">
                                 @error('room') <div class="mt-1 text-xs text-red-600">{{ $message }}</div> @enderror
                             </div>
                         </div>
 
-                        <div class="mt-6 flex items-center justify-end gap-3">
-                            @if($editingId)
-                                <button type="button" wire:click="delete({{ $editingId }})" x-on:click="open = false" onclick="return confirm('Delete this entry?')" class="rounded-lg bg-red-600 px-5 py-2.5 text-sm font-bold text-white hover:bg-red-700">
-                                    Delete
+                        <div class="mt-6 flex items-center justify-between">
+                            <div>
+                                @if($editingId)
+                                    <button type="button"
+                                            wire:click="delete({{ $editingId }})"
+                                            wire:confirm="Delete this timetable entry?"
+                                            class="rounded-lg bg-red-600 px-5 py-2.5 text-sm font-bold text-white hover:bg-red-700">
+                                        Delete Entry
+                                    </button>
+                                @endif
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <button type="button" x-on:click="open = false"
+                                        class="rounded-lg border-2 border-slate-200 bg-white px-5 py-2.5 text-sm font-bold text-slate-700 hover:bg-slate-50">
+                                    Cancel
                                 </button>
-                            @endif
-                            <button type="button" x-on:click="open = false" class="rounded-lg border-2 border-slate-200 bg-white px-5 py-2.5 text-sm font-bold text-slate-700 hover:bg-slate-50">
-                                Cancel
-                            </button>
-                            <button type="button" wire:click="save" x-on:click="open = false" class="rounded-lg bg-blue-600 px-6 py-2.5 text-sm font-bold text-white hover:bg-blue-700">
-                                {{ $editingId ? 'Update' : 'Save' }}
-                            </button>
+                                <button type="button"
+                                        wire:click="save"
+                                        wire:loading.attr="disabled"
+                                        class="rounded-lg bg-blue-600 px-6 py-2.5 text-sm font-bold text-white hover:bg-blue-700 disabled:opacity-60">
+                                    <span wire:loading.remove wire:target="save">{{ $editingId ? 'Update' : 'Save' }}</span>
+                                    <span wire:loading wire:target="save">Saving...</span>
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>

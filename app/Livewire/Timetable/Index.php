@@ -21,8 +21,6 @@ class Index extends Component
 {
     public $classId = null;
     public $sectionId = null;
-    public ?int $day = null;
-    public $debugPing = null;
 
     public ?int $editingId = null;
     public ?int $entryClassId = null;
@@ -101,7 +99,6 @@ class Index extends Component
 
     public function updatedClassId(): void
     {
-        \Log::info('Timetable: updatedClassId fired', ['classId' => $this->classId, 'type' => gettype($this->classId)]);
         $this->sectionId = null;
         $this->editingId = null;
         unset($this->sections);
@@ -136,6 +133,7 @@ class Index extends Component
         $this->entryDay = $day;
         $this->startsAt = $start;
         $this->endsAt = $end;
+        $this->dispatch('open-timetable-modal');
     }
 
     public function edit(int $id): void
@@ -152,6 +150,7 @@ class Index extends Component
         $this->subjectId = $e->subject_id;
         $this->teacherId = $e->teacher_id;
         $this->room = $e->room;
+        $this->dispatch('open-timetable-modal');
     }
 
     public function save(): void
@@ -203,6 +202,7 @@ class Index extends Component
             ]
         );
 
+        $this->dispatch('close-timetable-modal');
         $this->dispatch('alert', message: 'Timetable entry saved.', type: 'success');
         $this->clearForm();
     }
@@ -218,6 +218,7 @@ class Index extends Component
             $this->clearForm();
         }
 
+        $this->dispatch('close-timetable-modal');
         $this->dispatch('alert', message: 'Entry deleted.', type: 'success');
     }
 
