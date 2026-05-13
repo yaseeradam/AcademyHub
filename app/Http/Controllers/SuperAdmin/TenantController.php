@@ -293,7 +293,7 @@ class TenantController extends Controller
         if (! $this->verifyPassword($request)) return $this->denyPassword();
         $tables = [
             'students', 'classes', 'sections', 'subjects', 'scores',
-            'transactions', 'homeworks', 'homework_submissions',
+            'transactions', 'homework', 'homework_submissions',
             'attendance_sheets', 'attendance_marks', 'cbt_exams',
             'cbt_attempts', 'cbt_questions', 'cbt_answers',
             'academic_sessions', 'academic_terms', 'subject_allocations',

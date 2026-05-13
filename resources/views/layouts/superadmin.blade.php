@@ -8,11 +8,137 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
     <style>
+        /* ── Scrollbar ─────────────────────────────────────────── */
         [x-cloak] { display: none !important; }
-        .sidebar-scroll::-webkit-scrollbar { width: 6px; }
-        .sidebar-scroll::-webkit-scrollbar-track { background: rgba(148,163,184,.1); border-radius: 99px; }
+        .sidebar-scroll::-webkit-scrollbar { width: 5px; }
+        .sidebar-scroll::-webkit-scrollbar-track { background: transparent; }
         .sidebar-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 99px; }
-        .sidebar-scroll { scrollbar-width: thin; scrollbar-color: #cbd5e1 rgba(148,163,184,.1); }
+        .sidebar-scroll { scrollbar-width: thin; scrollbar-color: #cbd5e1 transparent; }
+
+        /* ── Stat Cards ────────────────────────────────────────── */
+        .sa-stats-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 16px;
+        }
+        @media (max-width: 1280px) { .sa-stats-grid { grid-template-columns: repeat(3, 1fr); } }
+        @media (max-width: 900px)  { .sa-stats-grid { grid-template-columns: repeat(2, 1fr); } }
+
+        .sa-stat-card {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            background: #fff;
+            border-radius: 16px;
+            padding: 18px 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
+            border: 1px solid rgba(0,0,0,.05);
+            transition: box-shadow .2s, transform .2s;
+        }
+        .sa-stat-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,.09); transform: translateY(-1px); }
+
+        .sa-stat-icon {
+            flex-shrink: 0;
+            width: 44px; height: 44px;
+            border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .sa-stat-icon svg { width: 22px; height: 22px; }
+
+        .sa-stat-card.orange  .sa-stat-icon { background: #fff7ed; color: #ea580c; }
+        .sa-stat-card.emerald .sa-stat-icon { background: #f0fdf4; color: #059669; }
+        .sa-stat-card.indigo  .sa-stat-icon { background: #eef2ff; color: #4f46e5; }
+        .sa-stat-card.teal    .sa-stat-icon { background: #f0fdfa; color: #0d9488; }
+        .sa-stat-card.rose    .sa-stat-icon { background: #fff1f2; color: #e11d48; }
+        .sa-stat-card.violet  .sa-stat-icon { background: #f5f3ff; color: #7c3aed; }
+
+        .sa-stat-info { min-width: 0; }
+        .sa-stat-label { font-size: 11.5px; font-weight: 600; color: #94a3b8; text-transform: uppercase; letter-spacing: .04em; margin-bottom: 3px; }
+        .sa-stat-value { font-size: 22px; font-weight: 800; color: #0f172a; line-height: 1.1; margin-bottom: 4px; }
+        .sa-stat-sub   { font-size: 11.5px; font-weight: 500; color: #94a3b8; display: flex; align-items: center; gap: 4px; }
+
+        .sa-stat-card.orange  .sa-stat-sub { color: #ea580c; }
+        .sa-stat-card.emerald .sa-stat-sub { color: #059669; }
+        .sa-stat-card.indigo  .sa-stat-sub { color: #6366f1; }
+        .sa-stat-card.teal    .sa-stat-sub { color: #0d9488; }
+        .sa-stat-card.rose    .sa-stat-sub { color: #e11d48; }
+
+        /* ── Panels ────────────────────────────────────────────── */
+        .sa-panel {
+            background: #fff;
+            border-radius: 16px;
+            border: 1px solid rgba(0,0,0,.06);
+            box-shadow: 0 1px 3px rgba(0,0,0,.05);
+            overflow: hidden;
+        }
+        .sa-panel-header {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 16px 20px;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        .sa-panel-title {
+            font-size: 13.5px; font-weight: 700; color: #1e293b;
+            display: flex; align-items: center; gap: 6px;
+        }
+        .sa-panel-link {
+            font-size: 12px; font-weight: 600; color: #6366f1;
+            text-decoration: none; transition: color .15s;
+        }
+        .sa-panel-link:hover { color: #4f46e5; }
+
+        /* ── Tables ────────────────────────────────────────────── */
+        .sa-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        .sa-table thead tr { background: #f8fafc; }
+        .sa-table th {
+            padding: 10px 16px; text-align: left;
+            font-size: 11px; font-weight: 700; color: #94a3b8;
+            text-transform: uppercase; letter-spacing: .05em;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        .sa-table td {
+            padding: 12px 16px;
+            border-bottom: 1px solid #f8fafc;
+            color: #475569;
+            vertical-align: middle;
+        }
+        .sa-table tbody tr:last-child td { border-bottom: none; }
+        .sa-table tbody tr:hover td { background: #fafbff; }
+
+        /* ── Badges ────────────────────────────────────────────── */
+        .sa-badge {
+            display: inline-flex; align-items: center; gap: 5px;
+            padding: 3px 10px; border-radius: 99px;
+            font-size: 11.5px; font-weight: 700;
+        }
+        .sa-badge-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; flex-shrink: 0; }
+
+        .sa-badge.active     { background: #dcfce7; color: #15803d; }
+        .sa-badge.pending    { background: #fef9c3; color: #a16207; }
+        .sa-badge.suspended  { background: #fee2e2; color: #b91c1c; }
+        .sa-badge.free       { background: #f1f5f9; color: #475569; }
+        .sa-badge.pro        { background: #dbeafe; color: #1d4ed8; }
+        .sa-badge.enterprise { background: #ede9fe; color: #6d28d9; }
+
+        /* ── Buttons ───────────────────────────────────────────── */
+        .sa-btn {
+            display: inline-flex; align-items: center; gap: 7px;
+            padding: 8px 16px; border-radius: 10px;
+            font-size: 13px; font-weight: 700;
+            text-decoration: none; cursor: pointer; border: none;
+            transition: all .15s;
+        }
+        .sa-btn-primary {
+            background: #4f46e5; color: #fff;
+            box-shadow: 0 2px 8px rgba(79,70,229,.3);
+        }
+        .sa-btn-primary:hover { background: #4338ca; box-shadow: 0 4px 12px rgba(79,70,229,.4); }
+        .sa-btn-danger  { background: #ef4444; color: #fff; }
+        .sa-btn-danger:hover  { background: #dc2626; }
+        .sa-btn-ghost   { background: #f1f5f9; color: #475569; }
+        .sa-btn-ghost:hover   { background: #e2e8f0; }
+
+        /* ── Chart wrap ────────────────────────────────────────── */
+        .sa-chart-wrap { position: relative; }
     </style>
 </head>
 <body class="h-full bg-[#f5f6fa] text-slate-900 font-sans">

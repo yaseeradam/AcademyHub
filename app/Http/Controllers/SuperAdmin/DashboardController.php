@@ -16,19 +16,27 @@ class DashboardController extends Controller
         $activeTenants    = Tenant::where('status', 'active')->count();
         $pendingTenants   = Tenant::where('status', 'pending')->count();
         $suspendedTenants = Tenant::where('status', 'suspended')->count();
-        $totalUsers       = User::where('is_super_admin', false)->orWhereNull('is_super_admin')->count();
+        $totalUsers       = 0;
+        try {
+            $totalUsers = User::where('is_super_admin', false)->orWhereNull('is_super_admin')->count();
+        } catch (\Throwable) {}
         $freeTenants      = Tenant::where('plan', 'free')->count();
         $proTenants       = Tenant::where('plan', 'pro')->count();
         $enterpriseTenants= Tenant::where('plan', 'enterprise')->count();
 
-        // Cross-tenant stats
-        $totalStudents = DB::table('students')->count();
-        $totalTeachers = User::where('role', 'teacher')->count();
-        $totalExams    = DB::table('cbt_exams')->count();
-        $totalHomework = DB::table('homework')->count();
+        // Cross-tenant stats — wrapped in try/catch so a missing column/table never crashes the dashboard
+        $totalStudents = 0;
+        $totalTeachers = 0;
+        $totalExams    = 0;
+        $totalHomework = 0;
+        $totalRevenue  = 0;
+        $dormantTenants = 0;
 
-        // Revenue (sum of all transactions across all tenants)
-        $totalRevenue = DB::table('transactions')->where('type', 'Income')->sum('amount_paid');
+        try { $totalStudents = DB::table('students')->count(); } catch (\Throwable) {}
+        try { $totalTeachers = User::where('role', 'teacher')->count(); } catch (\Throwable) {}
+        try { $totalExams    = DB::table('cbt_exams')->count(); } catch (\Throwable) {}
+        try { $totalHomework = DB::table('homework')->count(); } catch (\Throwable) {}
+        try { $totalRevenue  = DB::table('transactions')->where('type', 'Income')->sum('amount_paid'); } catch (\Throwable) {}
 
         // Storage usage per tenant
         $storageStats = [];
@@ -46,9 +54,11 @@ class DashboardController extends Controller
         usort($storageStats, fn($a, $b) => $b['bytes'] - $a['bytes']);
 
         // Dormant schools — no user login in 30+ days
-        $dormantTenants = Tenant::where('status', 'active')
-            ->whereDoesntHave('users', fn($q) => $q->where('last_login_at', '>=', now()->subDays(30)))
-            ->count();
+        try {
+            $dormantTenants = Tenant::where('status', 'active')
+                ->whereDoesntHave('users', fn($q) => $q->where('users.last_login_at', '>=', now()->subDays(30)))
+                ->count();
+        } catch (\Throwable) {}
 
         // Upcoming renewals (expiring in next 30 days)
         $upcomingRenewals = [];
