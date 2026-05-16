@@ -145,24 +145,47 @@
         </span>
     </a>
 
+    {{-- Marketplace Link for Admins --}}
+    @if ($user?->role === 'admin')
+        <a href="{{ route('marketplace') }}" wire:navigate
+            class="{{ request()->routeIs('marketplace') ? $activeClass : $inactiveClass }} {{ $baseClass }}">
+            <svg class="{{ $iconBase }} {{ request()->routeIs('marketplace') ? $iconActive : $iconInactive }}"
+                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
+            </svg>
+            <span class="sidebar-text">Marketplace</span>
+        </a>
+    @endif
+
+    {{-- Dynamic Marketplace Components --}}
     @php
-        $cbtLocked = false; // Add this definition properly if missing, or inherit it
-        $cbtHref = $cbtLocked ? route('more-features') : route('cbt.index');
-        $cbtIsActive = !$cbtLocked && request()->routeIs('cbt.*');
+        $tenantComponents = auth()->user()?->tenant?->marketplaceComponents()->wherePivotNotNull('installed_at')->get() ?? collect();
     @endphp
-    <a href="{{ $cbtHref }}" wire:navigate
-        class="{{ $cbtIsActive ? $activeClass : $inactiveClass }} {{ $cbtLocked ? 'opacity-60' : '' }} {{ $baseClass }}">
-        <svg class="{{ $iconBase }} {{ $cbtIsActive ? $iconActive : $iconInactive }}"
-            viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="3" y="4" width="18" height="12" rx="2" ry="2" />
-            <path d="M8 20h8" />
-            <path d="M10 10l2 2 4-4" />
-        </svg>
-        <span class="sidebar-text">CBT</span>
-        @if ($cbtLocked)
-            <span class="ml-auto rounded-full bg-slate-100 px-2 py-1 text-[10px] font-black uppercase tracking-wider text-slate-500">Locked</span>
-        @endif
-    </a>
+    
+    @if($tenantComponents->isNotEmpty())
+        <div class="px-3 py-2 text-xs font-semibold text-slate-400 uppercase tracking-wider mt-4">Plugins</div>
+        
+        @foreach($tenantComponents as $component)
+        @php
+            $routeExists = Route::has($component->slug . '.index');
+            $href = $routeExists ? route($component->slug . '.index') : '#';
+            $isActive = $routeExists && request()->routeIs($component->slug . '.*');
+        @endphp
+        
+        <a href="{{ $href }}" wire:navigate
+            class="{{ $isActive ? $activeClass : $inactiveClass }} {{ $baseClass }}">
+            <span class="flex items-center gap-3">
+                @if(str_starts_with($component->icon, '<svg'))
+                    <span class="{{ $iconBase }} {{ $isActive ? $iconActive : $iconInactive }}">
+                        {!! $component->icon !!}
+                    </span>
+                @else
+                    <span style="font-size:16px;">{{ $component->icon ?: '📦' }}</span>
+                @endif
+                <span class="sidebar-text">{{ $component->name }}</span>
+            </span>
+        </a>
+    @endforeach
 @endif
 
 @if (in_array($user?->role, ['admin', 'teacher', 'bursar'], true))

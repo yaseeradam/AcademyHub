@@ -151,7 +151,9 @@ class TenantController extends Controller
 
     public function edit(Tenant $tenant)
     {
-        return view('superadmin.tenants.edit', compact('tenant'));
+        $components = \App\Models\MarketplaceComponent::orderBy('name')->get();
+        $admins = \App\Models\User::where('tenant_id', $tenant->id)->where('role', 'admin')->get();
+        return view('superadmin.tenants.edit', compact('tenant', 'components', 'admins'));
     }
 
     public function update(Request $request, Tenant $tenant)
@@ -169,8 +171,37 @@ class TenantController extends Controller
 
         $tenant->update($data);
 
+        if ($request->has('components')) {
+            $tenant->marketplaceComponents()->sync($request->input('components'));
+        } else {
+            $tenant->marketplaceComponents()->detach();
+        }
+
         return redirect()->route('superadmin.tenants.index')
             ->with('status', 'School instance updated successfully.');
+    }
+
+    public function updateAdmin(Request $request, Tenant $tenant, User $admin)
+    {
+        $data = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'email', 'max:255', 'unique:users,email,' . $admin->id],
+            'password' => ['nullable', 'confirmed', Password::min(8)],
+        ]);
+
+        $updateData = [
+            'name' => $data['name'],
+            'email' => $data['email'],
+        ];
+
+        if ($request->filled('password')) {
+            $updateData['password'] = Hash::make($data['password']);
+        }
+
+        $admin->update($updateData);
+
+        return redirect()->route('superadmin.tenants.edit', $tenant)
+            ->with('status', 'Admin user updated successfully.');
     }
 
     public function destroy(Tenant $tenant)

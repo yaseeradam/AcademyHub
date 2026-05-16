@@ -186,9 +186,14 @@ Route::middleware(['auth', 'active'])->group(function () {
         Route::get('/results/bulk-report-cards', [BulkReportCardsController::class, 'index'])
             ->middleware('permission:results.publish')
             ->name('results.bulk-report-cards');
+        Route::get('/api/classes/{class}/students', [BulkReportCardsController::class, 'getStudents'])
+            ->name('api.classes.students');
         Route::post('/results/bulk-report-cards', [BulkReportCardsController::class, 'generate'])
             ->middleware('permission:results.publish')
             ->name('results.bulk-report-cards.generate');
+        Route::get('/results/bulk-report-cards/preview', [BulkReportCardsController::class, 'preview'])
+            ->middleware('permission:results.publish')
+            ->name('results.bulk-report-cards.preview');
 
         Route::post('/settings/school', [SettingsController::class, 'updateSchool'])->name('settings.update-school');
         Route::post('/settings/results', [SettingsController::class, 'updateResults'])->name('settings.update-results');
@@ -229,14 +234,17 @@ Route::middleware(['auth', 'active'])->group(function () {
         Route::get('/attendance/teachers', TeacherAttendance::class)->name('attendance.teachers');
         Route::get('/data-collection', DataCollectionWeekly::class)->middleware('permission:data_collection.submit')->name('data-collection');
         Route::view('/examination', 'pages.examination.index')->name('examination');
-        Route::get('/cbt', CbtIndex::class)
-            ->name('cbt.index');
-        Route::get('/cbt/exams/{exam}', CbtExamEditor::class)
-            ->name('cbt.exams.edit');
-        Route::get('/cbt/exams/{exam}/pdf', [CbtExportController::class, 'examPdf'])
-            ->name('cbt.exams.pdf');
-        Route::get('/cbt/sample-download', [UtilityController::class, 'cbtSampleDownload'])
-            ->name('cbt.sample-download');
+        // CBT — only accessible after purchasing/installing the CBT plugin
+        Route::middleware('plugin:cbt')->group(function () {
+            Route::get('/cbt', CbtIndex::class)
+                ->name('cbt.index');
+            Route::get('/cbt/exams/{exam}', CbtExamEditor::class)
+                ->name('cbt.exams.edit');
+            Route::get('/cbt/exams/{exam}/pdf', [CbtExportController::class, 'examPdf'])
+                ->name('cbt.exams.pdf');
+            Route::get('/cbt/sample-download', [UtilityController::class, 'cbtSampleDownload'])
+                ->name('cbt.sample-download');
+        });
 
         Route::get('/analytics', \App\Livewire\Analytics\Dashboard::class)
             ->middleware('permission:analytics.view')
@@ -334,5 +342,7 @@ Route::prefix('superadmin')->name('superadmin.')->group(function () {
     Route::middleware(['auth', 'superadmin'])->group(function () {
         Route::get('/', \App\Http\Controllers\SuperAdmin\DashboardController::class)->name('dashboard');
         Route::resource('tenants', \App\Http\Controllers\SuperAdmin\TenantController::class)->except(['show']);
+        Route::put('tenants/{tenant}/admins/{admin}', [\App\Http\Controllers\SuperAdmin\TenantController::class, 'updateAdmin'])->name('tenants.admins.update');
+        Route::resource('marketplace', \App\Http\Controllers\SuperAdmin\MarketplaceController::class)->except(['show']);
     });
 });

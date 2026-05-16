@@ -28,7 +28,7 @@ class ReportCardService
      *   classAverage:float
      * }
      */
-    public function build(Student $student, int $term, string $session): array
+    public function build(Student $student, int $term, string $session, array $optionsOverrides = []): array
     {
         $student->load(['schoolClass', 'section']);
 
@@ -45,6 +45,14 @@ class ReportCardService
             ->whereIn('subject_id', $subjectIds)
             ->get()
             ->keyBy('subject_id');
+
+        $psychomotor = \App\Models\PsychomotorScore::where('student_id', $student->id)
+            ->where('class_id', $student->class_id)
+            ->where('term', $term)
+            ->where('session', $session)
+            ->first();
+
+        $psychomotorTraits = $psychomotor ? $psychomotor->traits : [];
 
         // Per-subject class averages and positions
         $allClassScores = Score::query()
@@ -112,17 +120,17 @@ class ReportCardService
         // Report card display options — read directly from settings.json to avoid
         // stale in-process config cache (config() is populated once at boot).
         $rcOptions = [
-            'show_position'         => $this->settingBool('rc_show_position', true),
-            'show_attendance'       => $this->settingBool('rc_show_attendance', true),
-            'show_grading_key'      => $this->settingBool('rc_show_grading_key', true),
-            'show_class_average'    => $this->settingBool('rc_show_class_average', true),
-            'show_watermark'        => $this->settingBool('rc_show_watermark', true),
-            'show_next_term_date'   => $this->settingBool('rc_show_next_term_date', true),
-            'show_teacher_remarks'  => $this->settingBool('rc_show_teacher_remarks', true),
-            'show_principal_remarks'=> $this->settingBool('rc_show_principal_remarks', true),
-            'show_psychomotor'      => $this->settingBool('rc_show_psychomotor', false),
-            'show_school_fees'      => $this->settingBool('rc_show_school_fees', false),
-            'show_signatures'       => $this->settingBool('rc_show_signatures', false),
+            'show_position'         => isset($optionsOverrides['show_position']) ? (bool) $optionsOverrides['show_position'] : $this->settingBool('rc_show_position', true),
+            'show_attendance'       => isset($optionsOverrides['show_attendance']) ? (bool) $optionsOverrides['show_attendance'] : $this->settingBool('rc_show_attendance', true),
+            'show_grading_key'      => isset($optionsOverrides['show_grading_key']) ? (bool) $optionsOverrides['show_grading_key'] : $this->settingBool('rc_show_grading_key', true),
+            'show_class_average'    => isset($optionsOverrides['show_class_average']) ? (bool) $optionsOverrides['show_class_average'] : $this->settingBool('rc_show_class_average', true),
+            'show_watermark'        => isset($optionsOverrides['show_watermark']) ? (bool) $optionsOverrides['show_watermark'] : $this->settingBool('rc_show_watermark', true),
+            'show_next_term_date'   => isset($optionsOverrides['show_next_term_date']) ? (bool) $optionsOverrides['show_next_term_date'] : $this->settingBool('rc_show_next_term_date', true),
+            'show_teacher_remarks'  => isset($optionsOverrides['show_teacher_remarks']) ? (bool) $optionsOverrides['show_teacher_remarks'] : $this->settingBool('rc_show_teacher_remarks', true),
+            'show_principal_remarks'=> isset($optionsOverrides['show_principal_remarks']) ? (bool) $optionsOverrides['show_principal_remarks'] : $this->settingBool('rc_show_principal_remarks', true),
+            'show_psychomotor'      => isset($optionsOverrides['show_psychomotor']) ? (bool) $optionsOverrides['show_psychomotor'] : $this->settingBool('rc_show_psychomotor', false),
+            'show_school_fees'      => isset($optionsOverrides['show_school_fees']) ? (bool) $optionsOverrides['show_school_fees'] : $this->settingBool('rc_show_school_fees', false),
+            'show_signatures'       => isset($optionsOverrides['show_signatures']) ? (bool) $optionsOverrides['show_signatures'] : $this->settingBool('rc_show_signatures', false),
         ];
 
         // School fees data — also read from settings.json directly
@@ -168,6 +176,7 @@ class ReportCardService
             'grandTotal' => $grandTotal,
             'average' => $average,
             'position' => $position,
+            'psychomotorTraits' => $psychomotorTraits,
             'classAverage' => $classAverage,
             'timesOpened' => $timesOpened,
             'timesPresent' => $timesPresent,

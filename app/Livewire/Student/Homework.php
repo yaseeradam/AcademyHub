@@ -18,6 +18,12 @@ class Homework extends Component
     public $submission = '';
     public $attachment;
     public $filter = 'pending';
+    public $search = '';
+
+    protected $queryString = [
+        'search' => ['except' => ''],
+        'filter' => ['except' => 'pending']
+    ];
 
     public function mount()
     {
@@ -34,17 +40,30 @@ class Homework extends Component
     {
         $allHomework = $this->student->getHomeworkForStudent();
 
+        if ($this->search) {
+            $allHomework = $allHomework->filter(fn($hw) => 
+                str_contains(strtolower($hw->title), strtolower($this->search)) ||
+                str_contains(strtolower($hw->content), strtolower($this->search)) ||
+                str_contains(strtolower($hw->subject->name), strtolower($this->search))
+            );
+        }
+
         $this->homework = match($this->filter) {
-            'pending' => $allHomework->filter(fn($hw) => $hw->submissions->isEmpty() && $hw->due_date >= now()),
-            'overdue' => $allHomework->filter(fn($hw) => $hw->submissions->isEmpty() && $hw->due_date < now()),
+            'pending'   => $allHomework->filter(fn($hw) => $hw->submissions->isEmpty() && $hw->due_date >= now()),
+            'overdue'   => $allHomework->filter(fn($hw) => $hw->submissions->isEmpty() && $hw->due_date < now()),
             'submitted' => $allHomework->filter(fn($hw) => $hw->submissions->isNotEmpty()),
-            default => $allHomework,
+            default     => $allHomework,
         };
     }
 
     public function setFilter($filter)
     {
         $this->filter = $filter;
+        $this->loadHomework();
+    }
+
+    public function updatedSearch()
+    {
         $this->loadHomework();
     }
 

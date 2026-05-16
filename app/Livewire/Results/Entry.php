@@ -41,6 +41,19 @@ class Entry extends Component
      */
     public array $scores = [];
 
+    public string $activeTab = 'scores';
+    public array $bulkPsychomotorScores = [];
+    public array $psychomotorTraits = [
+        'Handwriting', 'Verbal Fluency', 'Games / Sports', 'Craft / Drawing',
+        'Musical Skills', 'Punctuality', 'Neatness', 'Politeness / Courtesy',
+        'Honesty', 'Self-Control', 'Attentiveness', 'Relationship with Others'
+    ];
+
+    public bool $showPsychomotorModal = false;
+    public ?int $selectedStudentId = null;
+    public string $selectedStudentName = '';
+    public array $psychomotorScores = [];
+
     /**
      * @return array{ca1:int, ca2:int, exam:int}
      */
@@ -212,6 +225,64 @@ class Entry extends Component
             ->first();
     }
 
+    public function openPsychomotor(int $studentId, string $studentName): void
+    {
+        $this->selectedStudentId = $studentId;
+        $this->selectedStudentName = $studentName;
+        
+        $existing = \App\Models\PsychomotorScore::where('student_id', $studentId)
+            ->where('class_id', $this->classId)
+            ->where('term', $this->term)
+            ->where('session', $this->session)
+            ->first();
+
+        if ($existing) {
+            $this->psychomotorScores = $existing->traits;
+        } else {
+            $this->psychomotorScores = [
+                'Handwriting' => 'Good',
+                'Verbal Fluency' => 'Good',
+                'Games / Sports' => 'Average',
+                'Craft / Drawing' => 'Good',
+                'Musical Skills' => 'Average',
+                'Punctuality' => 'Excellent',
+                'Neatness' => 'Good',
+                'Politeness / Courtesy' => 'Excellent',
+                'Honesty' => 'Excellent',
+                'Self-Control' => 'Good',
+                'Attentiveness' => 'Good',
+                'Relationship with Others' => 'Excellent',
+            ];
+        }
+
+        $this->showPsychomotorModal = true;
+    }
+
+    public function savePsychomotor(): void
+    {
+        if (!$this->selectedStudentId) return;
+
+        \App\Models\PsychomotorScore::updateOrCreate(
+            [
+                'student_id' => $this->selectedStudentId,
+                'class_id' => $this->classId,
+                'term' => $this->term,
+                'session' => $this->session,
+            ],
+            [
+                'traits' => $this->psychomotorScores,
+            ]
+        );
+
+        $this->showPsychomotorModal = false;
+        $this->dispatch('alert', message: 'Psychomotor scores saved successfully!', type: 'success');
+    }
+
+    public function closePsychomotor(): void
+    {
+        $this->showPsychomotorModal = false;
+    }
+
     #[Computed]
     public function submissions()
     {
@@ -261,6 +332,12 @@ class Entry extends Component
         $this->validationErrors = [];
         $this->loadExistingScores();
         unset($this->isPublished, $this->submission, $this->submissions);
+    }
+
+    public function setTab(string $tab): void
+    {
+        $this->activeTab = $tab;
+        $this->loadExistingScores();
     }
 
     public function updatedScores(mixed $value, ?string $name = null): void
@@ -590,27 +667,80 @@ class Entry extends Component
     private function loadExistingScores(): void
     {
         $this->scores = [];
+        $this->bulkPsychomotorScores = [];
 
-        if (! $this->classId || ! $this->subjectId || ! $this->session) {
+        if (! $this->classId || ! $this->session) {
             return;
         }
 
-        $existing = Score::query()
-            ->where('class_id', $this->classId)
-            ->where('subject_id', $this->subjectId)
-            ->where('term', $this->term)
-            ->where('session', $this->session)
-            ->get()
-            ->keyBy('student_id');
+        if ($this->activeTab === 'scores' && $this->subjectId) {
+            $existing = Score::query()
+                ->where('class_id', $this->classId)
+                ->where('subject_id', $this->subjectId)
+                ->where('term', $this->term)
+                ->where('session', $this->session)
+                ->get()
+                ->keyBy('student_id');
 
-        foreach ($this->students as $student) {
-            $score = $existing->get($student->id);
-            $this->scores[$student->id] = [
-                'ca1' => $score?->ca1 ?? 0,
-                'ca2' => $score?->ca2 ?? 0,
-                'exam' => $score?->exam ?? 0,
-            ];
+            foreach ($this->students as $student) {
+                $score = $existing->get($student->id);
+                $this->scores[$student->id] = [
+                    'ca1' => $score?->ca1 ?? 0,
+                    'ca2' => $score?->ca2 ?? 0,
+                    'exam' => $score?->exam ?? 0,
+                ];
+            }
         }
+
+        if ($this->activeTab === 'psychomotor') {
+            $existing = \App\Models\PsychomotorScore::where('class_id', $this->classId)
+                ->where('term', $this->term)
+                ->where('session', $this->session)
+                ->get()
+                ->keyBy('student_id');
+
+            foreach ($this->students as $student) {
+                $ps = $existing->get($student->id);
+                $traits = $ps?->traits ?? [];
+                
+                // Ensure all traits exist
+                foreach ($this->psychomotorTraits as $trait) {
+                    if (!isset($traits[$trait])) {
+                        $traits[$trait] = 'Good';
+                    }
+                }
+                $this->bulkPsychomotorScores[$student->id] = $traits;
+            }
+        }
+    }
+
+    public function saveBulkPsychomotor(): void
+    {
+        $user = auth()->user();
+        abort_unless($user && $user->hasPermission('results.entry'), 403);
+
+        if ($this->isPublished) {
+            $this->dispatch('alert', message: 'Results are published and locked.', type: 'error');
+            return;
+        }
+
+        DB::transaction(function () {
+            foreach ($this->bulkPsychomotorScores as $studentId => $traits) {
+                \App\Models\PsychomotorScore::updateOrCreate(
+                    [
+                        'student_id' => $studentId,
+                        'class_id' => $this->classId,
+                        'term' => $this->term,
+                        'session' => $this->session,
+                    ],
+                    [
+                        'traits' => $traits,
+                    ]
+                );
+            }
+        });
+
+        $this->dispatch('alert', message: 'All psychomotor scores saved!', type: 'success');
     }
 
     private function defaultSession(): string

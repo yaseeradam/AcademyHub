@@ -20,73 +20,125 @@
         </div>
     @endif
 
-    <div class="card-padded">
+    <div class="card-padded overflow-hidden">
         <div class="mb-6 flex items-center justify-between">
-            <h3 class="text-lg font-semibold text-gray-900">
+            <h3 class="text-lg font-black text-gray-900">
                 Submissions ({{ $submissions->count() }})
             </h3>
         </div>
 
-        <x-table>
-            <thead class="bg-gray-50 text-xs font-semibold uppercase tracking-wider text-gray-500">
-                <tr>
-                    <th class="px-5 py-3">Student</th>
-                    <th class="px-5 py-3">Submitted At</th>
-                    <th class="px-5 py-3">Grade</th>
-                    <th class="px-5 py-3">Status</th>
-                    <th class="px-5 py-3 text-right">Actions</th>
-                </tr>
-            </thead>
-            <tbody class="divide-y divide-gray-100">
+        {{-- Desktop View --}}
+        <div class="hidden md:block">
+            <div class="overflow-x-auto">
+                <x-table>
+                    <thead class="bg-gray-50 text-xs font-black uppercase tracking-wider text-gray-500">
+                        <tr>
+                            <th class="px-5 py-4 text-left">Student</th>
+                            <th class="px-5 py-4 text-left">Submitted At</th>
+                            <th class="px-5 py-4 text-center">Grade</th>
+                            <th class="px-5 py-4 text-center">Status</th>
+                            <th class="px-5 py-4 text-right">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100">
+                        @forelse ($submissions as $submission)
+                            <tr class="bg-white hover:bg-gray-50 transition-colors">
+                                <td class="px-5 py-4">
+                                    <div class="text-sm font-bold text-gray-900">
+                                        {{ $submission->student->full_name }}
+                                    </div>
+                                    <div class="text-xs font-medium text-gray-500">
+                                        {{ $submission->student->admission_number }}
+                                    </div>
+                                </td>
+                                <td class="px-5 py-4 text-sm font-medium text-gray-700">
+                                    {{ $submission->submitted_at->format('M j, Y g:i A') }}
+                                </td>
+                                <td class="px-5 py-4 text-center">
+                                    @if($submission->grade !== null)
+                                        <span class="text-sm font-black text-gray-900">{{ (int) $submission->grade }}%</span>
+                                    @else
+                                        <span class="text-xs font-bold text-gray-400 italic">Not graded</span>
+                                    @endif
+                                </td>
+                                <td class="px-5 py-4 text-center">
+                                    @if($submission->graded_at)
+                                        <x-status-badge variant="success">Graded</x-status-badge>
+                                    @else
+                                        <x-status-badge variant="warning">Pending</x-status-badge>
+                                    @endif
+                                </td>
+                                <td class="px-5 py-4 text-right">
+                                    @if($homework->due_date < now()->startOfDay())
+                                        <span class="text-sm font-bold text-gray-400 cursor-not-allowed opacity-50" title="Grading locked past due date">
+                                            Locked
+                                        </span>
+                                    @else
+                                        <button wire:click="gradeSubmission({{ $submission->id }})" class="text-sm font-bold text-indigo-600 hover:text-indigo-700">
+                                            {{ $submission->graded_at ? 'Edit Grade' : 'Grade' }}
+                                        </button>
+                                    @endif
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="5" class="px-5 py-12 text-center text-sm text-gray-500">
+                                    No submissions yet.
+                                </td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </x-table>
+            </div>
+        </div>
+
+        {{-- Mobile View --}}
+        <div class="block md:hidden">
+            <div class="divide-y divide-gray-100">
                 @forelse ($submissions as $submission)
-                    <tr class="bg-white hover:bg-gray-50">
-                        <td class="px-5 py-4">
-                            <div class="text-sm font-semibold text-gray-900">
-                                {{ $submission->student->full_name }}
+                    <div class="py-4 space-y-4">
+                        <div class="flex items-start justify-between">
+                            <div>
+                                <h4 class="text-sm font-bold text-gray-900">{{ $submission->student->full_name }}</h4>
+                                <p class="text-[10px] font-medium text-gray-500">{{ $submission->student->admission_number }}</p>
                             </div>
-                            <div class="text-xs text-gray-500">
-                                {{ $submission->student->admission_number }}
+                            <div class="text-right">
+                                @if($submission->graded_at)
+                                    <span class="text-[10px] font-black text-emerald-600 uppercase">Graded</span>
+                                @else
+                                    <span class="text-[10px] font-black text-amber-600 uppercase">Pending</span>
+                                @endif
                             </div>
-                        </td>
-                        <td class="px-5 py-4 text-sm text-gray-700">
-                            {{ $submission->submitted_at->format('M j, Y g:i A') }}
-                        </td>
-                        <td class="px-5 py-4">
-                            @if($submission->grade !== null)
-                                <span class="text-sm font-semibold text-gray-900">{{ $submission->grade }}%</span>
-                            @else
-                                <span class="text-sm text-gray-400">Not graded</span>
-                            @endif
-                        </td>
-                        <td class="px-5 py-4">
-                            @if($submission->graded_at)
-                                <x-status-badge variant="success">Graded</x-status-badge>
-                            @else
-                                <x-status-badge variant="warning">Pending</x-status-badge>
-                            @endif
-                        </td>
-                        <td class="px-5 py-4 text-right">
+                        </div>
+
+                        <div class="flex items-center justify-between text-xs">
+                            <div class="text-gray-500">
+                                {{ $submission->submitted_at->format('M j, g:i A') }}
+                            </div>
+                            <div class="font-black text-gray-900">
+                                @if($submission->grade !== null)
+                                    {{ (int) $submission->grade }}%
+                                @else
+                                    <span class="text-gray-400 italic">--</span>
+                                @endif
+                            </div>
+                        </div>
+
+                        <div class="flex justify-end pt-2">
                             @if($homework->due_date < now()->startOfDay())
-                                <span class="text-sm font-semibold text-gray-400 cursor-not-allowed" title="Grading locked past due date">
-                                    <svg class="h-4 w-4 inline mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg> 
-                                    Locked
-                                </span>
+                                <span class="text-xs font-bold text-gray-400 italic">Locked</span>
                             @else
-                                <button wire:click="gradeSubmission({{ $submission->id }})" class="text-sm font-semibold text-blue-600 hover:text-blue-700">
+                                <button wire:click="gradeSubmission({{ $submission->id }})" class="rounded-lg bg-indigo-50 px-3 py-2 text-xs font-bold text-indigo-600">
                                     {{ $submission->graded_at ? 'Edit Grade' : 'Grade' }}
                                 </button>
                             @endif
-                        </td>
-                    </tr>
+                        </div>
+                    </div>
                 @empty
-                    <tr>
-                        <td colspan="5" class="px-5 py-8 text-center text-sm text-gray-500">
-                            No submissions yet.
-                        </td>
-                    </tr>
+                    <div class="py-8 text-center text-sm text-gray-500">No submissions yet.</div>
                 @endforelse
-            </tbody>
-        </x-table>
+            </div>
+        </div>
     </div>
 
     @if($showGradeModal)

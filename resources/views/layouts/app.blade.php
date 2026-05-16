@@ -41,19 +41,39 @@ $activeBg  = "bg-{$accent}-500";
 $activeShadow = "shadow-{$accent}-200";
 @endphp
 
-<div id="app" class="flex h-screen overflow-hidden" x-data="{ sidebarCollapsed: localStorage.getItem('sidebarCollapsed') === 'true' }" x-init="$watch('sidebarCollapsed', val => localStorage.setItem('sidebarCollapsed', val))">
+<div id="app" class="flex h-screen overflow-hidden" 
+     x-data="{ 
+        sidebarCollapsed: localStorage.getItem('sidebarCollapsed') === 'true',
+        mobileSidebarOpen: false
+     }" 
+     x-init="$watch('sidebarCollapsed', val => localStorage.setItem('sidebarCollapsed', val))">
 
     {{-- Mobile overlay --}}
-    <div id="mobileSidebarOverlay" class="fixed inset-0 z-40 hidden bg-black/40 backdrop-blur-sm lg:hidden"></div>
+    <div x-show="mobileSidebarOpen" 
+         x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="transition ease-in duration-200"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0"
+         @click="mobileSidebarOpen = false"
+         class="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm lg:hidden"></div>
 
     {{-- ══════════════════════════════════════
          MOBILE SIDEBAR
     ══════════════════════════════════════ --}}
     <aside id="mobileSidebar"
-           class="fixed inset-y-0 left-0 z-50 flex w-72 -translate-x-full flex-col bg-[#f5f6fa] transition-transform duration-300 lg:hidden">
+           x-show="mobileSidebarOpen"
+           x-transition:enter="transition ease-out duration-300 transform"
+           x-transition:enter-start="-translate-x-full"
+           x-transition:enter-end="translate-x-0"
+           x-transition:leave="transition ease-in duration-200 transform"
+           x-transition:leave-start="translate-x-0"
+           x-transition:leave-end="-translate-x-full"
+           class="fixed inset-y-0 left-0 z-50 flex w-72 flex-col bg-[#f5f6fa] lg:hidden shadow-2xl">
 
         <div class="flex items-center justify-end px-4 pt-4">
-            <button id="closeMobileSidebar"
+            <button @click="mobileSidebarOpen = false"
                     class="rounded-xl bg-white p-2 text-slate-400 shadow-sm hover:text-slate-600">
                 <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
@@ -162,24 +182,24 @@ $activeShadow = "shadow-{$accent}-200";
     <div class="flex flex-1 min-w-0 flex-col">
 
         {{-- Header --}}
-        <header class="sticky top-0 z-10 flex h-[72px] items-center justify-between gap-4 border-b border-slate-200/60 bg-white px-6 shadow-sm">
+        <header class="sticky top-0 z-30 flex h-[72px] items-center justify-between gap-4 border-b border-slate-200/60 bg-white px-6 shadow-sm">
 
-            <div class="flex items-center gap-4">
-                <button id="openMobileSidebar"
-                        class="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 text-slate-500 hover:bg-slate-50 lg:hidden">
-                    <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <div class="flex items-center gap-3 overflow-hidden">
+                <button @click="mobileSidebarOpen = true"
+                        class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl border border-slate-200 text-slate-500 hover:bg-slate-50 lg:hidden transition-colors">
+                    <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/>
                     </svg>
                 </button>
                 <button @click="sidebarCollapsed = !sidebarCollapsed" title="Toggle Menu"
-                        class="hidden h-9 w-9 items-center justify-center rounded-xl border border-slate-200 text-slate-500 hover:bg-slate-50 lg:flex transition-colors">
+                        class="hidden h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl border border-slate-200 text-slate-500 hover:bg-slate-50 lg:flex transition-colors">
                     <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/>
                     </svg>
                 </button>
-                <div>
-                    <h1 class="text-lg font-extrabold tracking-tight text-slate-900">{{ $schoolName }}</h1>
-                    <p class="text-xs font-medium text-slate-400">{{ now()->format('l, F j, Y') }}</p>
+                <div class="min-w-0 overflow-hidden">
+                    <h1 class="truncate text-base font-extrabold tracking-tight text-slate-900 sm:text-lg">{{ $schoolName }}</h1>
+                    <p class="truncate text-[10px] font-medium text-slate-400 sm:text-xs">{{ now()->format('l, F j, Y') }}</p>
                 </div>
             </div>
 

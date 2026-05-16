@@ -491,6 +491,16 @@
                 Create School
             </a>
 
+            <div class="sa-nav-label" style="margin-top:12px;">Marketplace</div>
+
+            <a href="{{ route('superadmin.marketplace.index') }}"
+               class="{{ request()->routeIs('superadmin.marketplace.*') ? 'active' : '' }}">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
+                </svg>
+                Plugins
+            </a>
+
 
         </nav>
 

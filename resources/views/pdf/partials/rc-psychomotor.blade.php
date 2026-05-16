@@ -7,21 +7,28 @@
     </div>
     <div style="display: table; width: 100%;">
         @php
-            $psychomotorTraits = [
-                ['name' => 'Handwriting', 'rating' => 'Good'],
-                ['name' => 'Verbal Fluency', 'rating' => 'Good'],
-                ['name' => 'Games / Sports', 'rating' => 'Average'],
-                ['name' => 'Craft / Drawing', 'rating' => 'Good'],
-                ['name' => 'Musical Skills', 'rating' => 'Average'],
-                ['name' => 'Punctuality', 'rating' => 'Excellent'],
-                ['name' => 'Neatness', 'rating' => 'Good'],
-                ['name' => 'Politeness / Courtesy', 'rating' => 'Excellent'],
-                ['name' => 'Honesty', 'rating' => 'Excellent'],
-                ['name' => 'Self-Control', 'rating' => 'Good'],
-                ['name' => 'Attentiveness', 'rating' => 'Good'],
-                ['name' => 'Relationship with Others', 'rating' => 'Excellent'],
-            ];
-            $chunked = array_chunk($psychomotorTraits, 2);
+            $traits = [];
+            if (isset($psychomotorTraits) && !empty($psychomotorTraits)) {
+                foreach($psychomotorTraits as $name => $rating) {
+                    $traits[] = ['name' => $name, 'rating' => $rating];
+                }
+            } else {
+                $traits = [
+                    ['name' => 'Handwriting', 'rating' => 'Good'],
+                    ['name' => 'Verbal Fluency', 'rating' => 'Good'],
+                    ['name' => 'Games / Sports', 'rating' => 'Average'],
+                    ['name' => 'Craft / Drawing', 'rating' => 'Good'],
+                    ['name' => 'Musical Skills', 'rating' => 'Average'],
+                    ['name' => 'Punctuality', 'rating' => 'Excellent'],
+                    ['name' => 'Neatness', 'rating' => 'Good'],
+                    ['name' => 'Politeness / Courtesy', 'rating' => 'Excellent'],
+                    ['name' => 'Honesty', 'rating' => 'Excellent'],
+                    ['name' => 'Self-Control', 'rating' => 'Good'],
+                    ['name' => 'Attentiveness', 'rating' => 'Good'],
+                    ['name' => 'Relationship with Others', 'rating' => 'Excellent'],
+                ];
+            }
+            $chunked = array_chunk($traits, 2);
         @endphp
         @foreach($chunked as $pair)
         <div style="display: table-row;">

@@ -27,6 +27,16 @@ class BulkReportCardsController extends Controller
         return response()->view('pages.results.bulk-report-cards', compact('classes'));
     }
 
+    public function getStudents(SchoolClass $class): \Illuminate\Http\JsonResponse
+    {
+        $students = $class->students()
+            ->where('status', 'Active')
+            ->orderBy('last_name')
+            ->get(['id', 'first_name', 'last_name', 'admission_number']);
+
+        return response()->json($students);
+    }
+
     public function generate(Request $request, ReportCardService $service): BinaryFileResponse|RedirectResponse
     {
         $user = $request->user();
@@ -38,21 +48,30 @@ class BulkReportCardsController extends Controller
             'class_id' => ['required', 'integer', 'exists:classes,id'],
             'session' => ['required', 'string', 'max:9', 'regex:/^\\d{4}\\/\\d{4}$/'],
             'term' => ['required', 'integer', 'between:1,3'],
+            'template' => ['nullable', 'string'],
+            'options' => ['nullable', 'array'],
+            'student_ids' => ['nullable', 'array'],
+            'student_ids.*' => ['integer', 'exists:students,id'],
         ]);
 
         $classId = (int) $data['class_id'];
         $session = (string) $data['session'];
         $term = (int) $data['term'];
+        $studentIds = $data['student_ids'] ?? [];
         $safeSession = str_replace('/', '-', $session);
 
-        $students = Student::query()
+        $query = Student::query()
             ->where('class_id', $classId)
-            ->where('status', 'Active')
-            ->orderBy('last_name')
-            ->get();
+            ->where('status', 'Active');
+            
+        if (!empty($studentIds)) {
+            $query->whereIn('id', $studentIds);
+        }
+
+        $students = $query->orderBy('last_name')->get();
 
         if ($students->isEmpty()) {
-            return back()->withErrors(['class_id' => 'No active students found in the selected class.']);
+            return back()->withErrors(['class_id' => 'No students selected or found in the selected class.']);
         }
 
         $published = ResultPublication::query()
@@ -83,9 +102,17 @@ class BulkReportCardsController extends Controller
 
         try {
             foreach ($students as $student) {
-                $payload = $service->build($student, $term, $session);
+                $optionsOverrides = $request->input('options', []);
+                $optionsOverrides = [
+                    'show_psychomotor' => isset($optionsOverrides['show_psychomotor']),
+                    'show_attendance' => isset($optionsOverrides['show_attendance']),
+                    'show_position' => isset($optionsOverrides['show_position']),
+                    'show_class_average' => isset($optionsOverrides['show_class_average']),
+                ];
 
-                $template = (string) config('myacademy.report_card_template', 'standard');
+                $payload = $service->build($student, $term, $session, $optionsOverrides);
+
+                $template = $request->filled('template') ? $request->input('template') : (string) config('myacademy.report_card_template', 'standard');
                 $view = match ($template) {
                     'compact' => 'pdf.report-card-compact',
                     'elegant' => 'pdf.report-card-elegant',
@@ -130,5 +157,53 @@ class BulkReportCardsController extends Controller
             ->header('Cache-Control', 'no-cache, no-store, must-revalidate')
             ->header('Pragma', 'no-cache')
             ->header('Expires', '0');
+    }
+
+    public function preview(Request $request, ReportCardService $service): \Illuminate\Http\Response
+    {
+        $user = $request->user();
+        abort_unless($user?->hasPermission('results.publish'), 403);
+
+        $data = $request->validate([
+            'student_id' => ['required', 'integer', 'exists:students,id'],
+            'session' => ['required', 'string', 'max:9'],
+            'term' => ['required', 'integer', 'between:1,3'],
+            'template' => ['nullable', 'string'],
+            'options' => ['nullable', 'array'],
+        ]);
+
+        $student = Student::findOrFail($data['student_id']);
+        $session = $data['session'];
+        $term = (int) $data['term'];
+
+        $optionsOverrides = $request->input('options', []);
+        $optionsOverrides = [
+            'show_psychomotor' => isset($optionsOverrides['show_psychomotor']),
+            'show_attendance' => isset($optionsOverrides['show_attendance']),
+            'show_position' => isset($optionsOverrides['show_position']),
+            'show_class_average' => isset($optionsOverrides['show_class_average']),
+        ];
+
+        $payload = $service->build($student, $term, $session, $optionsOverrides);
+
+        $template = $request->filled('template') ? $request->input('template') : (string) config('myacademy.report_card_template', 'standard');
+        $view = match ($template) {
+            'compact' => 'pdf.report-card-compact',
+            'elegant' => 'pdf.report-card-elegant',
+            'modern' => 'pdf.report-card-modern',
+            'classic' => 'pdf.report-card-classic',
+            'vibrant' => 'pdf.report-card-vibrant',
+            'professional' => 'pdf.report-card-professional',
+            'royal' => 'pdf.report-card-royal',
+            'fresh' => 'pdf.report-card-fresh',
+            'sunset' => 'pdf.report-card-sunset',
+            default => 'pdf.report-card',
+        };
+
+        $pdf = Pdf::loadView($view, [
+            ...$payload,
+        ])->setPaper('a4');
+
+        return $pdf->stream("preview-report-card-{$student->id}.pdf");
     }
 }

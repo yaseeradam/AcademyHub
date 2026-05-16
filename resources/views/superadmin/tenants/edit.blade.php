@@ -119,6 +119,41 @@
             </div>
         </div>
 
+        {{-- ── Marketplace Components ─────────────────────────── --}}
+        <div class="sa-panel" style="margin-bottom:20px;">
+            <div class="sa-panel-header">
+                <span class="sa-panel-title">
+                    <svg style="display:inline;width:15px;height:15px;vertical-align:-2px;margin-right:6px;color:#10b981;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
+                    </svg>
+                    Marketplace Components
+                </span>
+            </div>
+            <div style="padding:24px;">
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                    @foreach($components as $component)
+                        <label class="relative flex cursor-pointer rounded-lg border bg-white p-4 shadow-sm focus:outline-none">
+                            <input type="checkbox" name="components[]" value="{{ $component->id }}" class="sr-only" aria-labelledby="component-{{ $component->id }}-label" aria-describedby="component-{{ $component->id }}-description-0 component-{{ $component->id }}-description-1" {{ $tenant->marketplaceComponents->contains($component->id) ? 'checked' : '' }}>
+                            <span class="flex flex-1">
+                                <span class="flex flex-col">
+                                    <span id="component-{{ $component->id }}-label" class="block text-sm font-medium text-gray-900">
+                                        @if($component->icon) <span class="mr-1">{!! $component->icon !!}</span> @endif
+                                        {{ $component->name }}
+                                    </span>
+                                    <span id="component-{{ $component->id }}-description-0" class="mt-1 flex items-center text-sm text-gray-500">{{ $component->description }}</span>
+                                    <span id="component-{{ $component->id }}-description-1" class="mt-6 text-sm font-medium text-gray-900">{{ config('myacademy.currency_symbol', '₦') }}{{ number_format($component->price, 2) }}</span>
+                                </span>
+                            </span>
+                            <svg class="h-5 w-5 text-indigo-600 {{ $tenant->marketplaceComponents->contains($component->id) ? 'block' : 'hidden' }}" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clip-rule="evenodd" />
+                            </svg>
+                            <span class="pointer-events-none absolute -inset-px rounded-lg border-2 {{ $tenant->marketplaceComponents->contains($component->id) ? 'border-indigo-600' : 'border-transparent' }}" aria-hidden="true"></span>
+                        </label>
+                    @endforeach
+                </div>
+            </div>
+        </div>
+
         {{-- ── Metadata ─────────────────────────────────────── --}}
         <div style="display:flex;align-items:center;gap:16px;margin-bottom:20px;padding:14px 18px;background:white;border-radius:12px;border:1px solid #f1f5f9;font-size:12px;color:#94a3b8;">
             <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="flex-shrink:0;">
@@ -146,6 +181,51 @@
         </div>
 
     </form>
+
+    {{-- ── School Admins ────────────────────────────────── --}}
+    <div class="sa-panel" style="margin-bottom:20px;">
+        <div class="sa-panel-header">
+            <span class="sa-panel-title">
+                <svg style="display:inline;width:15px;height:15px;vertical-align:-2px;margin-right:6px;color:#6366f1;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
+                </svg>
+                School Admins
+            </span>
+        </div>
+        <div style="padding:24px;">
+            @forelse($admins as $admin)
+                <form action="{{ route('superadmin.tenants.admins.update', [$tenant, $admin]) }}" method="POST" style="margin-bottom:20px; padding-bottom:20px; border-bottom:1px solid #f1f5f9;">
+                    @csrf
+                    @method('PUT')
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="sa-form-label">Name</label>
+                            <input type="text" name="name" value="{{ old('name', $admin->name) }}" required class="sa-form-input">
+                        </div>
+                        <div>
+                            <label class="sa-form-label">Email</label>
+                            <input type="email" name="email" value="{{ old('email', $admin->email) }}" required class="sa-form-input">
+                        </div>
+                        <div>
+                            <label class="sa-form-label">New Password (leave blank to keep current)</label>
+                            <input type="password" name="password" class="sa-form-input">
+                        </div>
+                        <div>
+                            <label class="sa-form-label">Confirm Password</label>
+                            <input type="password" name="password_confirmation" class="sa-form-input">
+                        </div>
+                        <div class="md:col-span-2" style="text-align:right;">
+                            <button type="submit" class="sa-btn sa-btn-primary" style="padding:6px 16px; font-size:12px;">
+                                Update Admin
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            @empty
+                <p style="color:#94a3b8; font-size:14px;">No admins found for this school.</p>
+            @endforelse
+        </div>
+    </div>
 
     {{-- Delete form outside the update form --}}
     <div style="margin-top:12px; padding-top:20px; border-top:1px solid #f1f5f9;">

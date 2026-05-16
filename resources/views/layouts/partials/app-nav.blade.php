@@ -123,11 +123,33 @@ HTML;
         '<path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>',
         request()->routeIs('messages')) !!}
 
-    @php $cbtHref = $cbtLocked ? route('more-features') : route('cbt.index'); @endphp
-    {!! $navLink($cbtHref, 'CBT Exams',
-        'bg-violet-100', 'text-violet-500',
-        '<path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>',
-        !$cbtLocked && request()->routeIs('cbt.*')) !!}
+    {{-- Dynamic Marketplace Components --}}
+    @php
+        $tenantComponents = auth()->user()?->tenant?->marketplaceComponents()->wherePivotNotNull('installed_at')->get() ?? collect();
+    @endphp
+
+    @if($tenantComponents->isNotEmpty())
+        {!! $sectionLabel('Plugins') !!}
+
+        @foreach($tenantComponents as $component)
+            @php
+                $routeName  = $component->route_name;                             // from DB
+                $hasRoute   = $routeName && Route::has($routeName);
+                $href       = $hasRoute ? route($routeName) : '#';
+                $isActive   = $hasRoute && request()->routeIs(rtrim($routeName, '.index') . '.*');
+
+                $iconPath = '<path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-14L4 7m8 4v10M4 7v10l8 4"/>';
+                if ($component->slug === 'cbt') {
+                    $iconPath = '<path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>';
+                }
+            @endphp
+
+            {!! $navLink($href, $component->name,
+                'bg-violet-100', 'text-violet-500',
+                $iconPath,
+                $isActive) !!}
+        @endforeach
+    @endif
 @endif
 
 {{-- ── Finance ── --}}

@@ -38,6 +38,13 @@ class Tenant extends Model
         return $this->hasMany(User::class);
     }
 
+    public function marketplaceComponents()
+    {
+        return $this->belongsToMany(MarketplaceComponent::class, 'tenant_marketplace_components')
+            ->withPivot('installed_at')
+            ->withTimestamps();
+    }
+
     public function scopeActive($query)
     {
         return $query->where('status', 'active');

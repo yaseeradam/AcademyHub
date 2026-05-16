@@ -28,7 +28,7 @@
         x-transition:leave-start="opacity-100 scale-100 translate-y-0"
         x-transition:leave-end="opacity-0 scale-95 -translate-y-1"
         x-cloak
-        class="absolute right-0 top-full z-50 mt-2 w-80 sm:w-96 rounded-2xl bg-white shadow-2xl ring-1 ring-black/5 overflow-hidden"
+        class="fixed inset-x-4 top-[72px] z-50 mt-2 rounded-2xl bg-white shadow-2xl ring-1 ring-black/5 overflow-hidden sm:absolute sm:inset-auto sm:right-0 sm:top-full sm:w-96"
         style="display:none;"
     >
         {{-- Header --}}
