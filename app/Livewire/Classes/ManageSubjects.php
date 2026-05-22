@@ -24,8 +24,13 @@ class ManageSubjects extends Component
 
     public function save()
     {
-        // Cast back to integers for sync
-        $this->class->defaultSubjects()->sync(array_map('intval', $this->selectedSubjects));
+        $tenantId = $this->class->tenant_id;
+        $syncData = [];
+        foreach ($this->selectedSubjects as $subjectId) {
+            $syncData[(int) $subjectId] = ['tenant_id' => $tenantId];
+        }
+
+        $this->class->defaultSubjects()->sync($syncData);
         $this->dispatch('alert', message: 'Class subjects updated successfully.', type: 'success');
     }
 

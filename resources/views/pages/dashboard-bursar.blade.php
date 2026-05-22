@@ -10,6 +10,14 @@
     $schoolName = config('myacademy.school_name', config('app.name', 'MyAcademy'));
     $currentTerm = AcademicTerm::active();
 
+    // Check if savings-loan plugin is installed for this tenant
+    $hasSavingsLoan = false;
+    if ($user->tenant) {
+        $hasSavingsLoan = $user->tenant->activeMarketplaceComponents()
+            ->where('slug', 'savings-loan')
+            ->exists();
+    }
+
     // Finance-specific metrics
     $feesCollectedToday = (float) Transaction::query()
         ->where('type', 'Income')
@@ -139,54 +147,52 @@
                 <div class="absolute right-0 top-0 h-96 w-96 -translate-y-32 translate-x-32 rounded-full bg-white/10"></div>
                 <div class="absolute left-0 bottom-0 h-64 w-64 -translate-x-24 translate-y-24 rounded-full bg-black/10"></div>
                 
-                <div class="relative h-48 w-full sm:h-56">
-                    <div class="absolute inset-0 flex flex-col justify-end p-8">
-                        <div class="max-w-3xl">
-                            <div class="inline-flex items-center gap-2 rounded-full bg-white/20 px-4 py-2 backdrop-blur-md">
-                                <div class="h-2 w-2 animate-pulse rounded-full bg-green-400"></div>
-                                <span class="text-sm font-bold text-white">Finance Dashboard</span>
+                <div class="relative w-full p-6 sm:p-8 flex flex-col justify-end">
+                    <div class="max-w-3xl">
+                        <div class="inline-flex items-center gap-2 rounded-full bg-white/20 px-4 py-2 backdrop-blur-md">
+                            <div class="h-2 w-2 animate-pulse rounded-full bg-green-400"></div>
+                            <span class="text-sm font-bold text-white">Finance Dashboard</span>
+                        </div>
+                        
+                        <div class="mt-4 text-4xl font-black tracking-tight text-white sm:text-5xl">
+                            {{ $schoolName }}
+                        </div>
+                        
+                        <div class="mt-3 flex flex-wrap items-center gap-3">
+                            <div class="inline-flex items-center gap-2 rounded-xl bg-white/20 px-4 py-2 backdrop-blur-md">
+                                <svg class="h-4 w-4 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                                    <line x1="16" y1="2" x2="16" y2="6"/>
+                                    <line x1="8" y1="2" x2="8" y2="6"/>
+                                    <line x1="3" y1="10" x2="21" y2="10"/>
+                                </svg>
+                                <span class="text-sm font-bold text-white">{{ $currentTerm ? $currentTerm->name : 'No Active Term' }}</span>
                             </div>
-                            
-                            <div class="mt-4 text-4xl font-black tracking-tight text-white sm:text-5xl">
-                                {{ $schoolName }}
+                            <div class="inline-flex items-center gap-2 rounded-xl bg-white/20 px-4 py-2 backdrop-blur-md">
+                                <svg class="h-4 w-4 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <line x1="12" y1="1" x2="12" y2="23"/>
+                                    <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+                                </svg>
+                                <span class="text-sm font-bold text-white">{{ config('myacademy.currency_symbol') }}{{ number_format($feesCollectedToday, 2) }} Today</span>
                             </div>
-                            
-                            <div class="mt-3 flex flex-wrap items-center gap-3">
-                                <div class="inline-flex items-center gap-2 rounded-xl bg-white/20 px-4 py-2 backdrop-blur-md">
-                                    <svg class="h-4 w-4 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
-                                        <line x1="16" y1="2" x2="16" y2="6"/>
-                                        <line x1="8" y1="2" x2="8" y2="6"/>
-                                        <line x1="3" y1="10" x2="21" y2="10"/>
-                                    </svg>
-                                    <span class="text-sm font-bold text-white">{{ $currentTerm ? $currentTerm->name : 'No Active Term' }}</span>
-                                </div>
-                                <div class="inline-flex items-center gap-2 rounded-xl bg-white/20 px-4 py-2 backdrop-blur-md">
-                                    <svg class="h-4 w-4 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                        <line x1="12" y1="1" x2="12" y2="23"/>
-                                        <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
-                                    </svg>
-                                    <span class="text-sm font-bold text-white">{{ config('myacademy.currency_symbol') }}{{ number_format($feesCollectedToday, 2) }} Today</span>
-                                </div>
-                            </div>
+                        </div>
 
-                            <div class="mt-6 flex flex-wrap gap-3">
-                                <a href="{{ route('billing.index') }}" class="group/btn inline-flex items-center gap-2 rounded-xl bg-white px-5 py-3 font-bold text-emerald-600 shadow-lg transition-shadow duration-200 hover:shadow-xl">
-                                    <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                        <line x1="12" y1="1" x2="12" y2="23"/>
-                                        <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
-                                    </svg>
-                                    Record Payment
-                                </a>
-                                <a href="{{ route('billing.export.transactions') }}" class="inline-flex items-center gap-2 rounded-xl bg-white/20 px-5 py-3 font-bold text-white backdrop-blur-md transition-all hover:bg-white/30">
-                                    <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                                        <polyline points="7 10 12 15 17 10"/>
-                                        <line x1="12" y1="15" x2="12" y2="3"/>
-                                    </svg>
-                                    Export Reports
-                                </a>
-                            </div>
+                        <div class="mt-6 flex flex-wrap gap-3">
+                            <a href="{{ route('billing.index') }}" class="group/btn inline-flex items-center gap-2 rounded-xl bg-white px-5 py-3 font-bold text-emerald-600 shadow-lg transition-shadow duration-200 hover:shadow-xl">
+                                <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <line x1="12" y1="1" x2="12" y2="23"/>
+                                    <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+                                </svg>
+                                Record Payment
+                            </a>
+                            <a href="{{ route('billing.export.transactions') }}" class="inline-flex items-center gap-2 rounded-xl bg-white/20 px-5 py-3 font-bold text-white backdrop-blur-md transition-all hover:bg-white/30">
+                                <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                    <polyline points="7 10 12 15 17 10"/>
+                                    <line x1="12" y1="15" x2="12" y2="3"/>
+                                </svg>
+                                Export Reports
+                            </a>
                         </div>
                     </div>
                 </div>
@@ -357,6 +363,92 @@
                     </x-table>
                 </div>
             </div>
+        </section>
+
+        {{-- Savings & Loan Section --}}
+        <section class="space-y-3">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <div class="h-5 w-5 rounded-md bg-emerald-100 flex items-center justify-center">
+                        <svg class="h-3 w-3 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                            <path d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                    </div>
+                    <div class="text-sm font-semibold text-slate-900">Savings & Loan</div>
+                </div>
+                @if($hasSavingsLoan)
+                    <a href="{{ route('savings-loan.index') }}" class="text-xs font-semibold text-emerald-600 hover:text-emerald-700">Open Module →</a>
+                @endif
+            </div>
+
+            @if($hasSavingsLoan)
+                {{-- Plugin Installed: show summary --}}
+                <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                    <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-teal-50 to-emerald-100/50 p-5 shadow-sm ring-1 ring-teal-200/50">
+                        <div class="flex items-start justify-between gap-3">
+                            <div>
+                                <div class="text-xs font-medium uppercase tracking-wide text-teal-700">Total Savings</div>
+                                <div class="mt-2 text-2xl font-bold text-slate-900">
+                                    @livewire('savings-loan.index', ['summaryOnly' => 'savings'], key('sl-savings'))
+                                </div>
+                                <div class="mt-1 text-xs text-slate-500">staff contributions</div>
+                            </div>
+                            <div class="h-12 w-12 rounded-xl bg-gradient-to-br from-teal-400 to-teal-600 flex items-center justify-center text-white shadow-lg shadow-teal-500/30">
+                                <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-blue-50 to-blue-100/50 p-5 shadow-sm ring-1 ring-blue-200/50">
+                        <div class="flex items-start justify-between gap-3">
+                            <div>
+                                <div class="text-xs font-medium uppercase tracking-wide text-blue-700">Active Loans</div>
+                                <div class="mt-2 text-2xl font-bold text-slate-900">—</div>
+                                <div class="mt-1 text-xs text-slate-500">outstanding balances</div>
+                            </div>
+                            <div class="h-12 w-12 rounded-xl bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white shadow-lg shadow-blue-500/30">
+                                <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2z"/></svg>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-amber-50 to-amber-100/50 p-5 shadow-sm ring-1 ring-amber-200/50">
+                        <div class="flex items-start justify-between gap-3">
+                            <div>
+                                <div class="text-xs font-medium uppercase tracking-wide text-amber-700">Pending Applications</div>
+                                <div class="mt-2 text-2xl font-bold text-slate-900">—</div>
+                                <div class="mt-1 text-xs text-slate-500">awaiting approval</div>
+                            </div>
+                            <div class="h-12 w-12 rounded-xl bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center text-white shadow-lg shadow-amber-500/30">
+                                <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <a href="{{ route('savings-loan.index') }}"
+                   class="flex items-center justify-center gap-2 w-full rounded-xl bg-emerald-600 px-4 py-3 text-sm font-bold text-white shadow hover:bg-emerald-700 transition">
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+                    Manage Savings & Loans
+                </a>
+            @else
+                {{-- Plugin Not Installed: upgrade card --}}
+                <div class="relative overflow-hidden rounded-2xl border-2 border-dashed border-emerald-200 bg-emerald-50/50 p-6">
+                    <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                        <div class="h-12 w-12 rounded-xl bg-emerald-100 flex items-center justify-center flex-shrink-0">
+                            <svg class="h-6 w-6 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                                <path d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                        </div>
+                        <div class="flex-1">
+                            <div class="text-sm font-bold text-slate-900">Savings & Loan Management</div>
+                            <div class="mt-1 text-xs text-slate-600">Track staff savings contributions, manage loan applications, and automate interest calculations. Install the plugin to unlock this module.</div>
+                        </div>
+                        <a href="{{ route('marketplace.show', 'savings-loan') }}"
+                           class="flex-shrink-0 inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-bold text-white hover:bg-emerald-700 transition w-full sm:w-auto">
+                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+                            Install Plugin
+                        </a>
+                    </div>
+                </div>
+            @endif
         </section>
     </div>
 @endsection

@@ -63,10 +63,12 @@
         @forelse($components as $component)
             <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden flex flex-col transition-all hover:shadow-md">
                 <div class="p-6 flex-1">
-                    <div class="w-12 h-12 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-2xl mb-4">
-                        {!! $component->icon ?: '📦' !!}
-                    </div>
-                    <h3 class="text-lg font-bold text-gray-900 mb-2">{{ $component->name }}</h3>
+                    <a href="{{ route('marketplace.show', $component->slug) }}" wire:navigate class="block group/title">
+                        <div class="w-12 h-12 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-2xl mb-4 group-hover/title:bg-indigo-100 transition-colors">
+                            {!! $component->icon ?: '📦' !!}
+                        </div>
+                        <h3 class="text-lg font-bold text-gray-900 mb-2 group-hover/title:text-indigo-600 transition-colors">{{ $component->name }}</h3>
+                    </a>
                     <p class="text-sm text-gray-500 line-clamp-3">{{ $component->description }}</p>
                     <div class="mt-4">
                         @if($component->price > 0)
@@ -78,9 +80,9 @@
                 </div>
                 <div class="px-6 py-4 bg-gray-50 border-t border-gray-100">
                     @if(in_array($component->id, $installed))
-                        <button disabled class="w-full py-2 px-4 rounded-lg text-sm font-medium text-green-700 bg-green-100 cursor-not-allowed">
-                            ✓ Installed
-                        </button>
+                        <a href="{{ route('marketplace.show', $component->slug) }}" wire:navigate class="w-full inline-flex items-center justify-center py-2 px-4 rounded-lg text-sm font-bold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 transition-colors">
+                            Manage Plugin →
+                        </a>
                     @else
                         {{-- Pure Alpine click — instant, no server call --}}
                         <button

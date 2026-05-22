@@ -1,17 +1,19 @@
-<div class="space-y-6">
-    <div class="flex items-center justify-between">
-        <div>
-            <h1 class="text-2xl font-bold text-gray-900">My Exams</h1>
-            <p class="text-sm text-gray-500">View and take your assigned exams.</p>
-        </div>
-        <div x-data="{ code: '' }" class="flex items-center gap-2">
-            <input x-model="code" type="text" placeholder="Access Code (e.g. CBT-123)" class="rounded-lg border px-4 py-2 text-sm font-mono uppercase w-56" @keydown.enter="$wire.enterExamCode(code)" />
-            <button @click="$wire.enterExamCode(code)" class="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700">Join</button>
+    {{-- Page Header --}}
+    <div class="rounded-xl bg-slate-900 px-4 py-3 shadow-sm">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div>
+                <h1 class="text-sm sm:text-base font-bold text-white">My Exams</h1>
+                <p class="mt-0.5 text-[11px] text-slate-400">View and take your assigned CBT exams</p>
+            </div>
+            <div x-data="{ code: '' }" class="flex items-center gap-1.5 self-end sm:self-auto">
+                <input x-model="code" type="text" placeholder="Access Code" class="rounded-lg border-0 bg-slate-800 px-2.5 py-1.5 text-xs text-white placeholder-slate-400 font-mono uppercase w-32 focus:ring-1 focus:ring-indigo-500" @keydown.enter="$wire.enterExamCode(code)" />
+                <button @click="$wire.enterExamCode(code)" class="rounded-lg bg-indigo-600 px-3 py-1.5 text-xs font-bold text-white hover:bg-indigo-700 transition shadow-sm">Join</button>
+            </div>
         </div>
     </div>
 
     @if (empty($exams))
-        <div class="rounded-xl border border-dashed border-gray-300 p-12 text-center text-gray-500">
+        <div class="rounded-xl border border-dashed border-slate-200 p-8 text-center text-xs text-slate-500 bg-slate-50">
             No exams currently available.
         </div>
     @else
@@ -23,33 +25,33 @@
                     $isTheoryPending = $exam['status'] === 'completed' && $exam['has_theory'] && $exam['theory_status'] !== 'marked';
                 @endphp
                 <div class="relative overflow-hidden rounded-xl border
-                    {{ $exam['status'] === 'in_progress' ? 'border-amber-400 bg-amber-50 shadow-md ring-2 ring-amber-400/20' : ($isMarked ? 'border-emerald-400 bg-emerald-50' : 'border-gray-200 bg-white') }}
-                    p-6 transition-all hover:shadow-md">
+                    {{ $exam['status'] === 'in_progress' ? 'border-amber-400 bg-amber-50/40 shadow-sm ring-2 ring-amber-400/20' : ($isMarked ? 'border-emerald-400 bg-emerald-50/40' : 'border-slate-100 bg-white') }}
+                    p-4 transition-all hover:shadow-md">
 
                     {{-- Status badge --}}
                     @if ($exam['status'] === 'in_progress')
-                        <div class="absolute right-0 top-0 rounded-bl-lg bg-amber-400 px-3 py-1 text-xs font-bold text-amber-900 shadow">IN PROGRESS</div>
+                        <div class="absolute right-0 top-0 rounded-bl-lg bg-amber-400 px-2.5 py-0.5 text-[9px] font-bold text-amber-900 shadow-sm">IN PROGRESS</div>
                     @elseif ($isMarked)
-                        <div class="absolute right-0 top-0 rounded-bl-lg bg-emerald-500 px-3 py-1 text-xs font-bold text-white shadow">MARKED ✓</div>
+                        <div class="absolute right-0 top-0 rounded-bl-lg bg-emerald-500 px-2.5 py-0.5 text-[9px] font-bold text-white shadow-sm">MARKED ✓</div>
                     @elseif ($exam['status'] === 'completed')
-                        <div class="absolute right-0 top-0 rounded-bl-lg bg-gray-200 px-3 py-1 text-xs font-bold text-gray-700">COMPLETED</div>
+                        <div class="absolute right-0 top-0 rounded-bl-lg bg-slate-200 px-2.5 py-0.5 text-[9px] font-bold text-slate-700">COMPLETED</div>
                     @elseif ($exam['ends_at'] && \Carbon\Carbon::parse($exam['ends_at'])->diffInHours(now()) <= 24)
-                        <div class="absolute right-0 top-0 rounded-bl-lg bg-red-100 px-3 py-1 text-xs font-bold text-red-800">ENDING SOON</div>
+                        <div class="absolute right-0 top-0 rounded-bl-lg bg-red-100 px-2.5 py-0.5 text-[9px] font-bold text-red-800">ENDING SOON</div>
                     @endif
 
-                    <div class="mb-4 mt-2">
-                        <div class="text-xs font-semibold text-violet-600 uppercase tracking-wider">{{ $exam['subject'] }}</div>
-                        <h3 class="mt-1 text-lg font-bold text-gray-900 line-clamp-2 leading-tight">{{ $exam['title'] }}</h3>
+                    <div class="mb-2.5 mt-1">
+                        <div class="text-[10px] font-bold text-indigo-600 uppercase tracking-wider">{{ $exam['subject'] }}</div>
+                        <h3 class="mt-0.5 text-sm font-bold text-slate-900 line-clamp-2 leading-tight">{{ $exam['title'] }}</h3>
                     </div>
 
-                    <div class="space-y-2 text-sm text-gray-600">
-                        <div class="flex items-center gap-2">
-                            <svg class="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    <div class="space-y-1 text-xs text-slate-600">
+                        <div class="flex items-center gap-1.5">
+                            <svg class="h-3.5 w-3.5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                             <span>{{ $exam['duration'] }} minutes</span>
                         </div>
                         @if ($exam['ends_at'])
-                            <div class="flex items-center gap-2">
-                                <svg class="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                            <div class="flex items-center gap-1.5">
+                                <svg class="h-3.5 w-3.5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
                                 <span>Due: {{ \Carbon\Carbon::parse($exam['ends_at'])->format('M d, Y h:i A') }}</span>
                             </div>
                         @endif
@@ -116,24 +118,15 @@
             $gradeColor = $pct >= 70 ? 'text-emerald-600' : ($pct >= 50 ? 'text-amber-600' : 'text-red-600');
         @endphp
         <div class="rounded-2xl border border-violet-200 bg-white shadow-lg overflow-hidden">
-            {{-- Header --}}
-            <div class="bg-gradient-to-r from-violet-600 to-purple-600 px-6 py-5">
-                <div class="flex flex-wrap items-center justify-between gap-3">
-                    <div>
-                        <div class="text-xs font-semibold uppercase tracking-wider text-violet-200">Result Breakdown</div>
-                        <h2 class="mt-1 text-xl font-bold text-white">{{ $vExam->title }}</h2>
-                    </div>
-                    <div class="flex items-center gap-4">
-                        <div class="text-center">
-                            <div class="text-3xl font-extrabold text-white">{{ $earnedMarks }}<span class="text-lg font-semibold text-violet-200">/{{ $totalMarks }}</span></div>
-                            <div class="text-xs font-semibold text-violet-200">{{ $pct }}% &bull; <span class="{{ $gradeColor }} text-white">{{ $grade }}</span></div>
-                        </div>
-                        <button wire:click="viewResult({{ $viewingAttempt->id }})" class="rounded-lg bg-white/20 px-3 py-1.5 text-xs font-semibold text-white hover:bg-white/30">Close ✕</button>
-                    </div>
-                </div>
-            </div>
+                {-- Page Header --}
+    <div class="rounded-xl bg-slate-900 px-5 py-4 shadow-sm">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+            <h1 class="text-base font-bold text-white">Exams</h1>
+            
+        </div>
+    </div>
 
-            {{-- Questions --}}
+    {{-- Questions --}}
             <div class="divide-y divide-gray-100">
                 @foreach ($vQuestions as $idx => $q)
                     @php

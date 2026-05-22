@@ -680,6 +680,11 @@
         $showPsychomotor = $opts['show_psychomotor'] ?? false;
         $showSchoolFees = $opts['show_school_fees'] ?? false;
         $showSignatures = $opts['show_signatures'] ?? false;
+
+        // Title-case formatting
+        $studentDisplayName  = ucwords(strtolower($student->full_name ?? ''));
+        $guardianDisplayName = ucwords(strtolower($student->guardian_name ?? ''));
+        $guardianDisplayAddr = ucwords(strtolower($student->guardian_address ?? ''));
     @endphp
 
     @if($logoExists && $showWatermark)
@@ -742,7 +747,7 @@
                     <div class="student-row-inline">
                         <div class="student-cell">
                             <span class="student-label">Student Name:</span>
-                            <span class="student-value"> {{ $student->full_name }}</span>
+                            <span class="student-value"> {{ $studentDisplayName }}</span>
                         </div>
                         <div class="student-cell">
                             <span class="student-label">Admission No:</span>
@@ -1015,6 +1020,40 @@
 
         <div class="footer">
             Generated on {{ now()->format('l, F j, Y \a\t g:i A') }} • {{ $schoolName }} • Powered by MyAcademy SMS
+        </div>
+    </div>
+
+    {{-- ── PAGE 2: Timestamp & Official Stamp ── --}}
+    <div style="page-break-before: always;"></div>
+
+    <div style="text-align: center; padding-top: 60px;">
+        <div style="font-size: 20px; font-weight: 900; color: #92400e; text-transform: uppercase; letter-spacing: 3px; margin-bottom: 6px;">{{ $schoolName }}</div>
+        <div style="font-size: 13px; font-weight: 700; color: #b45309; margin-bottom: 30px;">STUDENT REPORT CARD — OFFICIAL COPY</div>
+
+        <div style="display: inline-block; border: 2px solid #d97706; border-radius: 10px; padding: 24px 56px; background: #fffbeb; margin-bottom: 30px;">
+            <div style="font-size: 8px; color: #92400e; text-transform: uppercase; letter-spacing: 1px; font-weight: 800; margin-bottom: 8px;">Date &amp; Time Generated</div>
+            <div style="font-size: 15px; font-weight: 900; color: #1f2937;">{{ now()->format('l, F j, Y') }}</div>
+            <div style="font-size: 12px; font-weight: 700; color: #6b7280; margin-top: 4px;">{{ now()->format('g:i A') }}</div>
+        </div>
+
+        <div style="font-size: 10px; color: #4b5563; line-height: 1.9; margin-bottom: 16px;">
+            <strong>Student:</strong> {{ $studentDisplayName }} &nbsp;&bull;&nbsp;
+            <strong>Adm. No:</strong> {{ $student->admission_number }}<br>
+            <strong>Class:</strong> {{ $student->schoolClass?->name }} &nbsp;&bull;&nbsp;
+            <strong>Session:</strong> {{ $session }} &nbsp;&bull;&nbsp; <strong>Term:</strong> {{ $term }}
+        </div>
+
+        <div style="font-size: 8px; color: #9ca3af; font-style: italic; margin-bottom: 80px;">
+            This document was generated electronically &bull; {{ $schoolName }} &bull; Powered by MyAcademy SMS
+        </div>
+
+        <div style="display: inline-block; text-align: center; width: 280px;">
+            <div style="height: 90px; border: 2px dashed #d97706; border-radius: 8px; color: #d97706; font-size: 9px; font-weight: 700; line-height: 90px; letter-spacing: 2px; margin-bottom: 14px;">
+                OFFICIAL STAMP
+            </div>
+            <div style="border-top: 3px double #78350f; padding-top: 8px; font-size: 10px; font-weight: 900; color: #78350f;">
+                Principal's Signature
+            </div>
         </div>
     </div>
 </body>

@@ -17,116 +17,115 @@
 
 <div class="space-y-6">
 
-    {{-- ── Header ── --}}
-    <div>
-        <h1 class="text-2xl font-bold text-gray-900">My Attendance</h1>
-        <p class="text-sm text-gray-500">
-            {{ $student->full_name }} &bull; {{ $student->schoolClass?->name }}
-            &bull; {{ $termLabels[$currentTerm] ?? 'Term '.$currentTerm }} &bull; {{ $currentSession }}
-        </p>
+    {{-- Page Header --}}
+    <div class="rounded-xl bg-slate-900 px-4 py-3 shadow-sm">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2.5">
+            <div>
+                <h1 class="text-sm sm:text-base font-bold text-white">My Attendance</h1>
+                <p class="mt-0.5 text-[11px] text-slate-400">
+                    {{ $student->full_name }} &bull; {{ $student->schoolClass?->name }} &bull; {{ $termLabels[$currentTerm] ?? 'Term '.$currentTerm }} &bull; {{ $currentSession }}
+                </p>
+            </div>
+        </div>
     </div>
 
     {{-- ── Term Stats ── --}}
     <div class="grid grid-cols-2 gap-4 sm:grid-cols-4">
 
         {{-- Attendance Rate Ring --}}
-        <div class="col-span-2 sm:col-span-1 relative overflow-hidden rounded-2xl bg-gradient-to-br {{ $rateBg }} p-5 text-white shadow-lg flex flex-col items-center justify-center">
-            <div class="text-xs font-bold uppercase tracking-wider text-white/70 mb-3">Attendance Rate</div>
+        <div class="col-span-2 sm:col-span-1 relative overflow-hidden rounded-xl bg-white border border-slate-100 p-4 shadow-sm flex flex-col items-center justify-center">
+            <div class="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-2">Attendance Rate</div>
             <div class="relative">
-                <svg width="100" height="100" viewBox="0 0 100 100" class="-rotate-90">
-                    <circle cx="50" cy="50" r="40" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="8"/>
-                    <circle cx="50" cy="50" r="40" fill="none" stroke="white" stroke-width="8"
+                <svg width="70" height="70" viewBox="0 0 100 100" class="-rotate-90">
+                    <circle cx="50" cy="50" r="40" fill="none" stroke="#f1f5f9" stroke-width="8"/>
+                    <circle cx="50" cy="50" r="40" fill="none" stroke="#0f172a" stroke-width="8"
                             stroke-linecap="round"
                             stroke-dasharray="{{ $circ }}"
                             stroke-dashoffset="{{ $circ - $dash }}"
                             style="transition: stroke-dashoffset 1s ease"/>
                 </svg>
                 <div class="absolute inset-0 flex flex-col items-center justify-center">
-                    <span class="text-2xl font-extrabold text-white">{{ $rate }}%</span>
+                    <span class="text-sm font-bold text-slate-900">{{ $rate }}%</span>
                 </div>
             </div>
-            <div class="mt-2 text-sm font-bold text-white/90">{{ $rateLabel }}</div>
-            <div class="pointer-events-none absolute -right-4 -top-4 h-20 w-20 rounded-full bg-white/10"></div>
+            <div class="mt-1 text-[10px] font-semibold text-slate-500">{{ $rateLabel }}</div>
         </div>
 
         {{-- Present --}}
-        <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 p-5 text-white shadow-lg">
-            <div class="text-xs font-bold uppercase tracking-wider text-emerald-100">Present</div>
-            <div class="mt-2 text-4xl font-extrabold">{{ $present }}</div>
-            <div class="text-sm text-emerald-100">of {{ $total }} days</div>
-            <div class="pointer-events-none absolute -right-4 -top-4 h-20 w-20 rounded-full bg-white/10"></div>
+        <div class="relative overflow-hidden rounded-xl bg-white border border-slate-100 p-4 shadow-sm border-l-4 border-l-emerald-500">
+            <div class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Present</div>
+            <div class="mt-1 text-2xl font-black text-slate-800">{{ $present }}</div>
+            <div class="text-[10px] font-medium text-slate-400">of {{ $total }} days</div>
         </div>
 
         {{-- Absent --}}
-        <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-red-500 to-rose-600 p-5 text-white shadow-lg">
-            <div class="text-xs font-bold uppercase tracking-wider text-red-100">Absent</div>
-            <div class="mt-2 text-4xl font-extrabold">{{ $absent }}</div>
-            <div class="text-sm text-red-100">day{{ $absent !== 1 ? 's' : '' }} missed</div>
-            <div class="pointer-events-none absolute -right-4 -top-4 h-20 w-20 rounded-full bg-white/10"></div>
+        <div class="relative overflow-hidden rounded-xl bg-white border border-slate-100 p-4 shadow-sm border-l-4 border-l-rose-500">
+            <div class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Absent</div>
+            <div class="mt-1 text-2xl font-black text-slate-800">{{ $absent }}</div>
+            <div class="text-[10px] font-medium text-slate-400">day{{ $absent !== 1 ? 's' : '' }} missed</div>
         </div>
 
         {{-- Late + Streak --}}
-        <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-amber-500 to-orange-500 p-5 text-white shadow-lg">
-            <div class="text-xs font-bold uppercase tracking-wider text-amber-100">Late</div>
-            <div class="mt-2 text-4xl font-extrabold">{{ $late }}</div>
-            <div class="text-sm text-amber-100">arrival{{ $late !== 1 ? 's' : '' }}</div>
+        <div class="relative overflow-hidden rounded-xl bg-white border border-slate-100 p-4 shadow-sm border-l-4 border-l-amber-500">
+            <div class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Late</div>
+            <div class="mt-1 text-2xl font-black text-slate-800">{{ $late }}</div>
+            <div class="text-[10px] font-medium text-slate-400">arrival{{ $late !== 1 ? 's' : '' }}</div>
             @if ($streak > 0)
-                <div class="mt-2 inline-flex items-center gap-1 rounded-full bg-white/20 px-2 py-0.5 text-xs font-bold">
+                <div class="mt-1.5 inline-flex items-center gap-1 rounded bg-slate-100 px-1.5 py-0.5 text-[9px] font-bold text-slate-700">
                     🔥 {{ $streak }}-day streak
                 </div>
             @endif
-            <div class="pointer-events-none absolute -right-4 -top-4 h-20 w-20 rounded-full bg-white/10"></div>
         </div>
     </div>
 
     {{-- ── Term Progress Bar ── --}}
-    <div class="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-gray-100">
-        <div class="mb-3 flex items-center justify-between text-sm">
-            <span class="font-bold text-gray-700">Term Attendance Overview</span>
+    <div class="rounded-xl bg-white p-4 shadow-sm ring-1 ring-slate-100">
+        <div class="mb-2 flex items-center justify-between text-xs">
+            <span class="font-bold text-slate-700">Term Attendance Overview</span>
             <span class="font-semibold {{ $rateColor }}">{{ $rate }}%</span>
         </div>
-        <div class="flex h-4 w-full overflow-hidden rounded-full bg-gray-100">
+        <div class="flex h-2 w-full overflow-hidden rounded-full bg-slate-100">
             @if ($total > 0)
                 <div class="h-full bg-emerald-500 transition-all duration-700" style="width: {{ $total > 0 ? round($present/$total*100) : 0 }}%" title="Present"></div>
                 <div class="h-full bg-amber-400 transition-all duration-700" style="width: {{ $total > 0 ? round($late/$total*100) : 0 }}%" title="Late"></div>
                 <div class="h-full bg-red-400 transition-all duration-700" style="width: {{ $total > 0 ? round($absent/$total*100) : 0 }}%" title="Absent"></div>
             @endif
         </div>
-        <div class="mt-3 flex flex-wrap gap-4 text-xs font-semibold text-gray-600">
-            <span class="flex items-center gap-1.5"><span class="h-3 w-3 rounded-full bg-emerald-500"></span>Present ({{ $present }})</span>
-            <span class="flex items-center gap-1.5"><span class="h-3 w-3 rounded-full bg-amber-400"></span>Late ({{ $late }})</span>
-            <span class="flex items-center gap-1.5"><span class="h-3 w-3 rounded-full bg-red-400"></span>Absent ({{ $absent }})</span>
+        <div class="mt-2.5 flex flex-wrap gap-3.5 text-[10px] font-semibold text-slate-500">
+            <span class="flex items-center gap-1"><span class="h-2 w-2 rounded-full bg-emerald-500"></span>Present ({{ $present }})</span>
+            <span class="flex items-center gap-1"><span class="h-2 w-2 rounded-full bg-amber-400"></span>Late ({{ $late }})</span>
+            <span class="flex items-center gap-1"><span class="h-2 w-2 rounded-full bg-red-400"></span>Absent ({{ $absent }})</span>
         </div>
     </div>
 
     {{-- ── Calendar ── --}}
-    <div class="rounded-2xl bg-white shadow-sm ring-1 ring-gray-100 overflow-hidden">
+    <div class="rounded-xl bg-white shadow-sm ring-1 ring-slate-100 overflow-hidden">
 
         {{-- Calendar header --}}
-        <div class="flex items-center justify-between border-b border-gray-100 px-6 py-4">
+        <div class="flex items-center justify-between border-b border-slate-100 px-4 py-3">
             <button wire:click="previousMonth"
-                    class="flex h-9 w-9 items-center justify-center rounded-xl bg-gray-100 text-gray-600 hover:bg-gray-200 transition">
-                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
+                    class="flex h-7 w-7 items-center justify-center rounded-lg bg-slate-50 text-slate-600 hover:bg-slate-100 border border-slate-200 transition">
+                <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
                 </svg>
             </button>
             <div class="text-center">
-                <div class="text-base font-bold text-gray-900">{{ $monthName }}</div>
+                <div class="text-xs sm:text-sm font-bold text-slate-900 leading-tight">{{ $monthName }}</div>
                 @if ($mTotal > 0)
-                    <div class="text-xs text-gray-500">{{ $mPresent }} present &bull; {{ $mAbsent }} absent &bull; {{ $mLate }} late &bull; {{ $mRate }}% rate</div>
+                    <div class="text-[9px] sm:text-[10px] text-slate-400 mt-0.5">{{ $mPresent }} present &bull; {{ $mAbsent }} absent &bull; {{ $mLate }} late &bull; {{ $mRate }}% rate</div>
                 @else
-                    <div class="text-xs text-gray-400">No records this month</div>
+                    <div class="text-[9px] sm:text-[10px] text-slate-400 mt-0.5">No records this month</div>
                 @endif
             </div>
             <button wire:click="nextMonth"
-                    class="flex h-9 w-9 items-center justify-center rounded-xl bg-gray-100 text-gray-600 hover:bg-gray-200 transition">
-                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
+                    class="flex h-7 w-7 items-center justify-center rounded-lg bg-slate-50 text-slate-600 hover:bg-slate-100 border border-slate-200 transition">
+                <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
                 </svg>
             </button>
         </div>
 
-        <div class="p-4 sm:p-6">
+        <div class="p-3.5">
             {{-- Day labels --}}
             <div class="mb-3 grid grid-cols-7 text-center">
                 @foreach (['Sun','Mon','Tue','Wed','Thu','Fri','Sat'] as $d)

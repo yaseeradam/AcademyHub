@@ -140,7 +140,8 @@
                                 </svg>
                             </a>
                             <form action="{{ route('superadmin.tenants.destroy', $tenant) }}" method="POST" 
-                                  onsubmit="return confirm('Permanently delete {{ addslashes($tenant->name) }}? This cannot be undone.')">
+                                  onsubmit="return confirm('Permanently delete {{ addslashes($tenant->name) }}? This cannot be undone.')"
+                                  style="display: inline-block; margin: 0;">
                                 @csrf
                                 @method('DELETE')
                                 <button type="submit" class="sa-btn sa-btn-danger sa-btn-icon" title="Delete">

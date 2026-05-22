@@ -43,6 +43,10 @@ class Form extends Component
     public array $customFieldValues = [];
     public array $parent_ids = [];
 
+    // Student login password
+    public string $student_password = '';
+    public string $student_password_confirmation = '';
+
     // Parent registration fields
     public bool $create_parent_account = false;
     public string $parent_name = '';
@@ -147,11 +151,20 @@ class Form extends Component
             'guardian_name' => ['nullable', 'string', 'max:255'],
             'guardian_phone' => ['nullable', 'string', 'max:30'],
             'guardian_address' => ['nullable', 'string', 'max:255'],
-            'status' => ['required', Rule::in(['Active', 'Graduated', 'Expelled'])],
-            'parent_ids' => ['array'],
-            'parent_ids.*' => ['exists:users,id'],
-            'create_parent_account' => ['boolean'],
+            'status' =>  ['required', Rule::in(['Active', 'Graduated', 'Expelled'])],
+            'parent_ids' =>  ['array'],
+            'parent_ids.*' =>  ['exists:users,id'],
+            'create_parent_account' =>  ['boolean'],
         ];
+
+        // Student password: required on create, optional on edit
+        if (!$id) {
+            $rules['student_password'] = ['required', 'string', 'min:6', 'confirmed'];
+            $rules['student_password_confirmation'] = ['required', 'string'];
+        } elseif ($this->student_password !== '') {
+            $rules['student_password'] = ['string', 'min:6', 'confirmed'];
+            $rules['student_password_confirmation'] = ['string'];
+        }
 
         // Add parent account validation if creating parent
         if ($this->create_parent_account) {
@@ -242,11 +255,20 @@ class Form extends Component
         unset($data['parent_email']);
         unset($data['parent_phone']);
         unset($data['parent_password']);
+        unset($data['student_password']);
+        unset($data['student_password_confirmation']);
         $data['admission_number'] = $this->admission_number;
         $data['custom_fields'] = $this->customFieldValues;
 
         $student = $this->student ?? new Student();
         $student->fill($data);
+
+        // Set student password
+        if (!$id && $this->student_password !== '') {
+            $student->password = $this->student_password; // cast 'hashed' handles bcrypt
+        } elseif ($id && $this->student_password !== '') {
+            $student->password = $this->student_password;
+        }
 
         if ($this->passport) {
             try {

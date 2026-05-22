@@ -101,10 +101,10 @@
         <div class="rounded-2xl bg-white p-6 shadow-lg">
             <div class="flex items-center justify-between mb-4">
                 <h3 class="text-lg font-bold text-gray-900">Grade Distribution</h3>
-                <a href="{{ route('analytics.export.performance', ['class_id' => $selectedClass, 'session' => $this->currentSession?->name, 'term' => $this->currentTerm?->term_number]) }}" 
+                <a href="{{ route('analytics.export.performance', ['class_id' => $selectedClass, 'session' => $this->currentSession?->name, 'term' => $this->currentTerm?->term_number]) }}"
                    class="text-sm text-blue-600 hover:text-blue-800 font-medium">Export CSV</a>
             </div>
-            <div class="h-64">
+            <div class="h-64" wire:ignore>
                 <canvas id="gradeChart"></canvas>
             </div>
         </div>
@@ -113,10 +113,10 @@
         <div class="rounded-2xl bg-white p-6 shadow-lg">
             <div class="flex items-center justify-between mb-4">
                 <h3 class="text-lg font-bold text-gray-900">Attendance Trend (7 Days)</h3>
-                <a href="{{ route('analytics.export.attendance', ['class_id' => $selectedClass]) }}" 
+                <a href="{{ route('analytics.export.attendance', ['class_id' => $selectedClass]) }}"
                    class="text-sm text-blue-600 hover:text-blue-800 font-medium">Export CSV</a>
             </div>
-            <div class="h-64">
+            <div class="h-64" wire:ignore>
                 <canvas id="attendanceChart"></canvas>
             </div>
         </div>
@@ -124,7 +124,7 @@
         <!-- Subject Performance Chart -->
         <div class="rounded-2xl bg-white p-6 shadow-lg">
             <h3 class="text-lg font-bold text-gray-900 mb-4">Top Performing Subjects</h3>
-            <div class="h-64">
+            <div class="h-64" wire:ignore>
                 <canvas id="subjectChart"></canvas>
             </div>
         </div>
@@ -134,10 +134,10 @@
         <div class="rounded-2xl bg-white p-6 shadow-lg">
             <div class="flex items-center justify-between mb-4">
                 <h3 class="text-lg font-bold text-gray-900">Revenue Trend (6 Months)</h3>
-                <a href="{{ route('analytics.export.financial') }}" 
+                <a href="{{ route('analytics.export.financial') }}"
                    class="text-sm text-blue-600 hover:text-blue-800 font-medium">Export CSV</a>
             </div>
-            <div class="h-64">
+            <div class="h-64" wire:ignore>
                 <canvas id="revenueChart"></canvas>
             </div>
         </div>
@@ -231,124 +231,109 @@
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
-        function analyticsCharts() {
+        // Chart registry — keyed by canvas ID
+        window.__analyticsCharts = window.__analyticsCharts || {};
+
+        function buildAnalyticsChartData() {
             return {
-                init() {
-                    this.initCharts();
+                grade: {
+                    labels: @json(array_keys($this->academicPerformance['grade_distribution'])),
+                    data:   @json(array_values($this->academicPerformance['grade_distribution'])),
                 },
-                
-                initCharts() {
-                    // Grade Distribution Chart
-                    const gradeCtx = document.getElementById('gradeChart');
-                    if (gradeCtx) {
-                        new Chart(gradeCtx, {
-                            type: 'doughnut',
-                            data: {
-                                labels: @json(array_keys($this->academicPerformance['grade_distribution'])),
-                                datasets: [{
-                                    data: @json(array_values($this->academicPerformance['grade_distribution'])),
-                                    backgroundColor: ['#10B981', '#3B82F6', '#F59E0B', '#EF4444', '#8B5CF6'],
-                                    borderWidth: 0
-                                }]
-                            },
-                            options: {
-                                responsive: true,
-                                maintainAspectRatio: false,
-                                plugins: {
-                                    legend: {
-                                        position: 'bottom'
-                                    }
-                                }
-                            }
-                        });
-                    }
+                attendance: {
+                    labels: @json(array_column($this->attendanceStats['daily_trend'], 'date')),
+                    data:   @json(array_column($this->attendanceStats['daily_trend'], 'attendance_rate')),
+                },
+                subject: {
+                    labels: @json(array_column($this->academicPerformance['subject_performance']->toArray(), 'subject')),
+                    data:   @json(array_column($this->academicPerformance['subject_performance']->toArray(), 'average')),
+                },
+                @if(auth()->user()->role === 'admin' || auth()->user()->role === 'bursar')
+                revenue: {
+                    labels: @json(array_column($this->financialStats['monthly_trend'], 'month')),
+                    data:   @json(array_column($this->financialStats['monthly_trend'], 'revenue')),
+                },
+                @endif
+            };
+        }
 
-                    // Attendance Trend Chart
-                    const attendanceCtx = document.getElementById('attendanceChart');
-                    if (attendanceCtx) {
-                        new Chart(attendanceCtx, {
-                            type: 'line',
-                            data: {
-                                labels: @json(array_column($this->attendanceStats['daily_trend'], 'date')),
-                                datasets: [{
-                                    label: 'Attendance Rate (%)',
-                                    data: @json(array_column($this->attendanceStats['daily_trend'], 'attendance_rate')),
-                                    borderColor: '#3B82F6',
-                                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
-                                    fill: true,
-                                    tension: 0.4
-                                }]
-                            },
-                            options: {
-                                responsive: true,
-                                maintainAspectRatio: false,
-                                scales: {
-                                    y: {
-                                        beginAtZero: true,
-                                        max: 100
-                                    }
-                                }
-                            }
-                        });
-                    }
-
-                    // Subject Performance Chart
-                    const subjectCtx = document.getElementById('subjectChart');
-                    if (subjectCtx) {
-                        new Chart(subjectCtx, {
-                            type: 'bar',
-                            data: {
-                                labels: @json(array_column($this->academicPerformance['subject_performance'], 'subject')),
-                                datasets: [{
-                                    label: 'Average Score',
-                                    data: @json(array_column($this->academicPerformance['subject_performance'], 'average')),
-                                    backgroundColor: '#10B981',
-                                    borderRadius: 4
-                                }]
-                            },
-                            options: {
-                                responsive: true,
-                                maintainAspectRatio: false,
-                                scales: {
-                                    y: {
-                                        beginAtZero: true
-                                    }
-                                }
-                            }
-                        });
-                    }
-
-                    @if(auth()->user()->role === 'admin' || auth()->user()->role === 'bursar')
-                    // Revenue Trend Chart
-                    const revenueCtx = document.getElementById('revenueChart');
-                    if (revenueCtx) {
-                        new Chart(revenueCtx, {
-                            type: 'line',
-                            data: {
-                                labels: @json(array_column($this->financialStats['monthly_trend'], 'month')),
-                                datasets: [{
-                                    label: 'Revenue',
-                                    data: @json(array_column($this->financialStats['monthly_trend'], 'revenue')),
-                                    borderColor: '#8B5CF6',
-                                    backgroundColor: 'rgba(139, 92, 246, 0.1)',
-                                    fill: true,
-                                    tension: 0.4
-                                }]
-                            },
-                            options: {
-                                responsive: true,
-                                maintainAspectRatio: false,
-                                scales: {
-                                    y: {
-                                        beginAtZero: true
-                                    }
-                                }
-                            }
-                        });
-                    }
-                    @endif
-                }
+        function destroyChart(id) {
+            if (window.__analyticsCharts[id]) {
+                window.__analyticsCharts[id].destroy();
+                delete window.__analyticsCharts[id];
             }
         }
+
+        function initAnalyticsCharts() {
+            const cd = buildAnalyticsChartData();
+
+            // Grade Distribution
+            destroyChart('gradeChart');
+            const gradeCtx = document.getElementById('gradeChart');
+            if (gradeCtx && cd.grade.labels.length) {
+                window.__analyticsCharts['gradeChart'] = new Chart(gradeCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: cd.grade.labels,
+                        datasets: [{
+                            data: cd.grade.data,
+                            backgroundColor: ['#10B981','#3B82F6','#F59E0B','#EF4444','#8B5CF6'],
+                            borderWidth: 0
+                        }]
+                    },
+                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
+                });
+            }
+
+            // Attendance Trend
+            destroyChart('attendanceChart');
+            const attCtx = document.getElementById('attendanceChart');
+            if (attCtx) {
+                window.__analyticsCharts['attendanceChart'] = new Chart(attCtx, {
+                    type: 'line',
+                    data: {
+                        labels: cd.attendance.labels,
+                        datasets: [{ label: 'Attendance Rate (%)', data: cd.attendance.data, borderColor: '#3B82F6', backgroundColor: 'rgba(59,130,246,0.1)', fill: true, tension: 0.4 }]
+                    },
+                    options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, max: 100 } } }
+                });
+            }
+
+            // Subject Performance
+            destroyChart('subjectChart');
+            const subCtx = document.getElementById('subjectChart');
+            if (subCtx && cd.subject.labels.length) {
+                window.__analyticsCharts['subjectChart'] = new Chart(subCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: cd.subject.labels,
+                        datasets: [{ label: 'Average Score', data: cd.subject.data, backgroundColor: '#10B981', borderRadius: 4 }]
+                    },
+                    options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true } } }
+                });
+            }
+
+            @if(auth()->user()->role === 'admin' || auth()->user()->role === 'bursar')
+            // Revenue Trend
+            destroyChart('revenueChart');
+            const revCtx = document.getElementById('revenueChart');
+            if (revCtx && cd.revenue && cd.revenue.labels.length) {
+                window.__analyticsCharts['revenueChart'] = new Chart(revCtx, {
+                    type: 'line',
+                    data: {
+                        labels: cd.revenue.labels,
+                        datasets: [{ label: 'Revenue', data: cd.revenue.data, borderColor: '#8B5CF6', backgroundColor: 'rgba(139,92,246,0.1)', fill: true, tension: 0.4 }]
+                    },
+                    options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true } } }
+                });
+            }
+            @endif
+        }
+
+        // Run on initial load
+        document.addEventListener('DOMContentLoaded', initAnalyticsCharts);
+
+        // Re-run after every Livewire component update so charts reflect new filter data
+        document.addEventListener('livewire:updated', initAnalyticsCharts);
     </script>
 </div>

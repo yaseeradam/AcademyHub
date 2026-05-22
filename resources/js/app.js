@@ -192,7 +192,8 @@ window.showAlertModal = function(message, type = 'info', options = {}) {
 document.addEventListener('livewire:init', () => {
     if (typeof window.Livewire === 'undefined') return;
 
-    window.Livewire.on('alert', (payload = {}) => {
+    window.Livewire.on('alert', (eventData = {}) => {
+        const payload = Array.isArray(eventData) ? (eventData[0] || {}) : eventData;
         const message = typeof payload === 'string' ? payload : (payload.message || 'Done.');
         const type = typeof payload === 'object' && payload.type ? payload.type : 'info';
         const title = typeof payload === 'object' && payload.title ? payload.title : undefined;

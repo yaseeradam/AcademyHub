@@ -24,9 +24,9 @@ use Livewire\Component;
 #[Title('Score Entry')]
 class Entry extends Component
 {
-    public ?int $classId = null;
-    public ?int $subjectId = null;
-    public ?int $term = null;
+    public $classId = null;
+    public $subjectId = null;
+    public $term = null;
     public string $session = '';
     public ?int $rejectingId = null;
     public string $rejectNote = '';
@@ -63,6 +63,27 @@ class Entry extends Component
             'ca1' => max(0, (int) config('myacademy.results_ca1_max', 20)),
             'ca2' => max(0, (int) config('myacademy.results_ca2_max', 20)),
             'exam' => max(0, (int) config('myacademy.results_exam_max', 60)),
+        ];
+    }
+
+    /**
+     * @return array<string, string> Map of slugified trait keys to display/DB names
+     */
+    public function traitMap(): array
+    {
+        return [
+            'handwriting' => 'Handwriting',
+            'verbal_fluency' => 'Verbal Fluency',
+            'games_sports' => 'Games / Sports',
+            'craft_drawing' => 'Craft / Drawing',
+            'musical_skills' => 'Musical Skills',
+            'punctuality' => 'Punctuality',
+            'neatness' => 'Neatness',
+            'politeness_courtesy' => 'Politeness / Courtesy',
+            'honesty' => 'Honesty',
+            'self_control' => 'Self-Control',
+            'attentiveness' => 'Attentiveness',
+            'relationship_with_others' => 'Relationship with Others',
         ];
     }
 
@@ -236,23 +257,11 @@ class Entry extends Component
             ->where('session', $this->session)
             ->first();
 
-        if ($existing) {
-            $this->psychomotorScores = $existing->traits;
-        } else {
-            $this->psychomotorScores = [
-                'Handwriting' => 'Good',
-                'Verbal Fluency' => 'Good',
-                'Games / Sports' => 'Average',
-                'Craft / Drawing' => 'Good',
-                'Musical Skills' => 'Average',
-                'Punctuality' => 'Excellent',
-                'Neatness' => 'Good',
-                'Politeness / Courtesy' => 'Excellent',
-                'Honesty' => 'Excellent',
-                'Self-Control' => 'Good',
-                'Attentiveness' => 'Good',
-                'Relationship with Others' => 'Excellent',
-            ];
+        $traits = $existing?->traits ?? [];
+        $this->psychomotorScores = [];
+
+        foreach ($this->traitMap() as $slug => $label) {
+            $this->psychomotorScores[$slug] = $traits[$label] ?? $traits[$slug] ?? ($label === 'Games / Sports' || $label === 'Musical Skills' ? 'Average' : ($label === 'Punctuality' || $label === 'Politeness / Courtesy' || $label === 'Honesty' || $label === 'Relationship with Others' ? 'Excellent' : 'Good'));
         }
 
         $this->showPsychomotorModal = true;
@@ -262,6 +271,11 @@ class Entry extends Component
     {
         if (!$this->selectedStudentId) return;
 
+        $dbTraits = [];
+        foreach ($this->traitMap() as $slug => $label) {
+            $dbTraits[$label] = $this->psychomotorScores[$slug] ?? 'Good';
+        }
+
         \App\Models\PsychomotorScore::updateOrCreate(
             [
                 'student_id' => $this->selectedStudentId,
@@ -270,7 +284,7 @@ class Entry extends Component
                 'session' => $this->session,
             ],
             [
-                'traits' => $this->psychomotorScores,
+                'traits' => $dbTraits,
             ]
         );
 
@@ -303,8 +317,9 @@ class Entry extends Component
             ->get();
     }
 
-    public function updatedClassId(): void
+    public function updatedClassId($value): void
     {
+        $this->classId = $value !== '' && $value !== null ? (int) $value : null;
         $this->subjectId = null;
         $this->scores = [];
         $this->validationErrors = [];
@@ -312,16 +327,18 @@ class Entry extends Component
         unset($this->subjects, $this->students, $this->isPublished, $this->submission, $this->submissions);
     }
 
-    public function updatedSubjectId(): void
+    public function updatedSubjectId($value): void
     {
+        $this->subjectId = $value !== '' && $value !== null ? (int) $value : null;
         $this->validationErrors = [];
         $this->loadExistingScores();
         // Bust Livewire 3 computed property cache
         unset($this->students, $this->isPublished, $this->submission, $this->submissions);
     }
 
-    public function updatedTerm(): void
+    public function updatedTerm($value): void
     {
+        $this->term = $value !== '' && $value !== null ? (int) $value : null;
         $this->validationErrors = [];
         $this->loadExistingScores();
         unset($this->isPublished, $this->submission, $this->submissions);
@@ -336,8 +353,13 @@ class Entry extends Component
 
     public function setTab(string $tab): void
     {
-        $this->activeTab = $tab;
-        $this->loadExistingScores();
+        try {
+            $this->activeTab = $tab;
+            $this->loadExistingScores();
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('ScoreEntry::setTab failed', ['tab' => $tab, 'error' => $e->getMessage()]);
+            $this->dispatch('alert', message: 'Could not switch tab. Please try again.', type: 'error');
+        }
     }
 
     public function updatedScores(mixed $value, ?string $name = null): void
@@ -666,51 +688,54 @@ class Entry extends Component
 
     private function loadExistingScores(): void
     {
-        $this->scores = [];
-        $this->bulkPsychomotorScores = [];
+        try {
+            $this->scores = [];
+            $this->bulkPsychomotorScores = [];
 
-        if (! $this->classId || ! $this->session) {
-            return;
-        }
-
-        if ($this->activeTab === 'scores' && $this->subjectId) {
-            $existing = Score::query()
-                ->where('class_id', $this->classId)
-                ->where('subject_id', $this->subjectId)
-                ->where('term', $this->term)
-                ->where('session', $this->session)
-                ->get()
-                ->keyBy('student_id');
-
-            foreach ($this->students as $student) {
-                $score = $existing->get($student->id);
-                $this->scores[$student->id] = [
-                    'ca1' => $score?->ca1 ?? 0,
-                    'ca2' => $score?->ca2 ?? 0,
-                    'exam' => $score?->exam ?? 0,
-                ];
+            if (! $this->classId || ! $this->session) {
+                return;
             }
-        }
 
-        if ($this->activeTab === 'psychomotor') {
-            $existing = \App\Models\PsychomotorScore::where('class_id', $this->classId)
-                ->where('term', $this->term)
-                ->where('session', $this->session)
-                ->get()
-                ->keyBy('student_id');
+            if ($this->activeTab === 'scores' && $this->subjectId) {
+                $existing = Score::query()
+                    ->where('class_id', $this->classId)
+                    ->where('subject_id', $this->subjectId)
+                    ->where('term', $this->term)
+                    ->where('session', $this->session)
+                    ->get()
+                    ->keyBy('student_id');
 
-            foreach ($this->students as $student) {
-                $ps = $existing->get($student->id);
-                $traits = $ps?->traits ?? [];
-                
-                // Ensure all traits exist
-                foreach ($this->psychomotorTraits as $trait) {
-                    if (!isset($traits[$trait])) {
-                        $traits[$trait] = 'Good';
-                    }
+                foreach ($this->students as $student) {
+                    $score = $existing->get($student->id);
+                    $this->scores[$student->id] = [
+                        'ca1'  => $score?->ca1  ?? 0,
+                        'ca2'  => $score?->ca2  ?? 0,
+                        'exam' => $score?->exam ?? 0,
+                    ];
                 }
-                $this->bulkPsychomotorScores[$student->id] = $traits;
             }
+
+            if ($this->activeTab === 'psychomotor') {
+                $existing = \App\Models\PsychomotorScore::where('class_id', $this->classId)
+                    ->where('term', $this->term)
+                    ->where('session', $this->session)
+                    ->get()
+                    ->keyBy('student_id');
+
+                foreach ($this->students as $student) {
+                    $ps     = $existing->get($student->id);
+                    $traits = $ps?->traits ?? [];
+
+                    $mapped = [];
+                    foreach ($this->traitMap() as $slug => $label) {
+                        $mapped[$slug] = $traits[$label] ?? $traits[$slug] ?? ($label === 'Games / Sports' || $label === 'Musical Skills' ? 'Average' : ($label === 'Punctuality' || $label === 'Politeness / Courtesy' || $label === 'Honesty' || $label === 'Relationship with Others' ? 'Excellent' : 'Good'));
+                    }
+                    $this->bulkPsychomotorScores[$student->id] = $mapped;
+                }
+            }
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('ScoreEntry::loadExistingScores failed', ['error' => $e->getMessage()]);
+            $this->dispatch('alert', message: 'Could not load scores. Please refresh the page.', type: 'error');
         }
     }
 
@@ -725,7 +750,11 @@ class Entry extends Component
         }
 
         DB::transaction(function () {
-            foreach ($this->bulkPsychomotorScores as $studentId => $traits) {
+            foreach ($this->bulkPsychomotorScores as $studentId => $mappedTraits) {
+                $dbTraits = [];
+                foreach ($this->traitMap() as $slug => $label) {
+                    $dbTraits[$label] = $mappedTraits[$slug] ?? 'Good';
+                }
                 \App\Models\PsychomotorScore::updateOrCreate(
                     [
                         'student_id' => $studentId,
@@ -734,7 +763,7 @@ class Entry extends Component
                         'session' => $this->session,
                     ],
                     [
-                        'traits' => $traits,
+                        'traits' => $dbTraits,
                     ]
                 );
             }

@@ -49,10 +49,10 @@
     </div>
 
     <div class="rounded-3xl bg-white p-5 sm:p-8 shadow-xl ring-1 ring-gray-200">
-        <div class="grid grid-cols-1 gap-4 sm:gap-6 lg:grid-cols-6">
-            <div class="lg:col-span-2">
+        <div class="grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-6">
+            <div class="md:col-span-1 lg:col-span-2">
                 <label class="block text-sm font-black text-gray-900 mb-1.5 sm:mb-2">Class</label>
-                <select wire:key="class-dropdown-{{ $classId ?: 'empty' }}" wire:model.live="classId"
+                <select wire:key="class-select-dropdown" wire:model.live="classId"
                     class="w-full rounded-xl border-2 border-gray-300 bg-white px-3 py-2.5 sm:px-4 sm:py-3 text-sm font-medium text-gray-900 shadow-sm transition-all focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/20 hover:border-gray-400">
                     <option value="">Select class</option>
                     @foreach ($this->classes as $class)
@@ -61,9 +61,9 @@
                 </select>
             </div>
 
-            <div class="lg:col-span-2">
+            <div class="md:col-span-1 lg:col-span-2">
                 <label class="block text-sm font-black text-gray-900 mb-1.5 sm:mb-2">Subject</label>
-                <select wire:key="subject-dropdown-{{ $classId ?: 'empty' }}" wire:model.live="subjectId"
+                <select wire:key="subject-select-dropdown" wire:model.live="subjectId"
                     @disabled(!$classId) 
                     class="w-full rounded-xl border-2 border-gray-300 bg-white px-3 py-2.5 sm:px-4 sm:py-3 text-sm font-medium text-gray-900 shadow-sm transition-all focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/20 hover:border-gray-400 disabled:opacity-50 disabled:cursor-not-allowed">
                     <option value="">Select subject</option>
@@ -73,7 +73,7 @@
                 </select>
             </div>
 
-            <div class="grid grid-cols-2 gap-4 lg:contents">
+            <div class="grid grid-cols-2 gap-4 md:col-span-2 lg:contents">
                 <div>
                     <label class="block text-sm font-black text-gray-900 mb-1.5 sm:mb-2">Term</label>
                     <select wire:model.live="term" 
@@ -187,17 +187,17 @@
                             <h2 class="text-lg sm:text-xl font-black text-gray-900 leading-tight">Score Entry Sheet</h2>
                             <p class="text-xs sm:text-sm text-gray-600 mt-0.5">Enter scores for each assessment component</p>
                         </div>
-                        <div class="flex flex-wrap items-center gap-3 sm:gap-4 text-[10px] sm:text-sm font-bold text-gray-700">
-                            <div class="flex items-center gap-2 rounded-lg bg-blue-100/50 px-2.5 py-1.5 sm:bg-transparent sm:p-0">
-                                <div class="h-2 w-2 sm:h-3 sm:w-3 rounded-full bg-blue-500"></div>
+                        <div class="flex flex-wrap items-center gap-2 sm:gap-3 text-xs font-extrabold">
+                            <div class="inline-flex items-center gap-1.5 rounded-full bg-blue-50 px-3 py-1.5 text-blue-700 border border-blue-200/60 shadow-sm">
+                                <span class="h-2 w-2 rounded-full bg-blue-500"></span>
                                 <span>CA1 /{{ $maxMarks['ca1'] }}</span>
                             </div>
-                            <div class="flex items-center gap-2 rounded-lg bg-emerald-100/50 px-2.5 py-1.5 sm:bg-transparent sm:p-0">
-                                <div class="h-2 w-2 sm:h-3 sm:w-3 rounded-full bg-emerald-500"></div>
+                            <div class="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1.5 text-emerald-700 border border-emerald-200/60 shadow-sm">
+                                <span class="h-2 w-2 rounded-full bg-emerald-500"></span>
                                 <span>CA2 /{{ $maxMarks['ca2'] }}</span>
                             </div>
-                            <div class="flex items-center gap-2 rounded-lg bg-amber-100/50 px-2.5 py-1.5 sm:bg-transparent sm:p-0">
-                                <div class="h-2 w-2 sm:h-3 sm:w-3 rounded-full bg-amber-500"></div>
+                            <div class="inline-flex items-center gap-1.5 rounded-full bg-amber-50 px-3 py-1.5 text-amber-700 border border-amber-200/60 shadow-sm">
+                                <span class="h-2 w-2 rounded-full bg-amber-500"></span>
                                 <span>Exam /{{ $maxMarks['exam'] }}</span>
                             </div>
                         </div>
@@ -205,7 +205,7 @@
                 </div>
                 
                 {{-- Table Content --}}
-                <div class="hidden md:block">
+                <div class="hidden lg:block">
                     <div class="overflow-x-auto">
                         <table class="min-w-full">
                             <thead>
@@ -258,21 +258,21 @@
                                         
                                         {{-- CA1 Score --}}
                                         <td class="px-6 py-4 text-center">
-                                            <input wire:model.lazy="scores.{{ $student->id }}.ca1" 
+                                            <input wire:model.blur="scores.{{ $student->id }}.ca1" 
                                                 type="number" min="0" max="{{ $maxMarks['ca1'] }}" step="1"
                                                 class="w-20 rounded-xl border-2 {{ $ca1Error ? 'border-red-400 bg-red-50' : 'border-blue-300 bg-blue-50' }} px-3 py-2 text-center text-sm font-bold text-gray-900 shadow-sm transition-all focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/20 hover:border-blue-400" />
                                         </td>
                                         
                                         {{-- CA2 Score --}}
                                         <td class="px-6 py-4 text-center">
-                                            <input wire:model.lazy="scores.{{ $student->id }}.ca2" 
+                                            <input wire:model.blur="scores.{{ $student->id }}.ca2" 
                                                 type="number" min="0" max="{{ $maxMarks['ca2'] }}" step="1"
                                                 class="w-20 rounded-xl border-2 {{ $ca2Error ? 'border-red-400 bg-red-50' : 'border-green-300 bg-green-50' }} px-3 py-2 text-center text-sm font-bold text-gray-900 shadow-sm transition-all focus:border-green-500 focus:bg-white focus:ring-4 focus:ring-green-500/20 hover:border-green-400" />
                                         </td>
                                         
                                         {{-- Exam Score --}}
                                         <td class="px-6 py-4 text-center">
-                                            <input wire:model.lazy="scores.{{ $student->id }}.exam" 
+                                            <input wire:model.blur="scores.{{ $student->id }}.exam" 
                                                 type="number" min="0" max="{{ $maxMarks['exam'] }}" step="1"
                                                 class="w-20 rounded-xl border-2 {{ $examError ? 'border-red-400 bg-red-50' : 'border-amber-300 bg-amber-50' }} px-3 py-2 text-center text-sm font-bold text-gray-900 shadow-sm transition-all focus:border-amber-500 focus:bg-white focus:ring-4 focus:ring-amber-500/20 hover:border-amber-400" />
                                         </td>
@@ -311,14 +311,18 @@
                 </div>
 
                 {{-- Mobile Card Layout --}}
-                <div class="block md:hidden">
+                <div class="block lg:hidden">
                     <div class="divide-y divide-gray-100">
                         @forelse ($this->students as $student)
                             @php
                                 $row = $scores[$student->id] ?? ['ca1' => 0, 'ca2' => 0, 'exam' => 0];
                                 $total = (int) ($row['ca1'] ?? 0) + (int) ($row['ca2'] ?? 0) + (int) ($row['exam'] ?? 0);
                                 $grade = \App\Models\Score::gradeForTotal($total, $maxMarks['ca1'] + $maxMarks['ca2'] + $maxMarks['exam']);
-                                $hasError = isset($validationErrors["{$student->id}.ca1"]) || isset($validationErrors["{$student->id}.ca2"]) || isset($validationErrors["{$student->id}.exam"]);
+                                
+                                $ca1Error = isset($validationErrors["{$student->id}.ca1"]);
+                                $ca2Error = isset($validationErrors["{$student->id}.ca2"]);
+                                $examError = isset($validationErrors["{$student->id}.exam"]);
+                                $hasError = $ca1Error || $ca2Error || $examError;
                                 
                                 $gradeConfig = match($grade) {
                                     'A' => ['bg' => 'from-emerald-400 to-green-500', 'text' => 'text-white'],
@@ -329,7 +333,7 @@
                                     default => ['bg' => 'from-gray-200 to-gray-300', 'text' => 'text-gray-700'],
                                 };
                             @endphp
-                            <div class="p-4 {{ $hasError ? 'bg-red-50' : 'bg-white' }}">
+                            <div class="p-4 transition-all duration-200 {{ $hasError ? 'bg-red-50' : 'bg-white' }}" data-student-id="{{ $student->id }}">
                                 <div class="flex items-center justify-between mb-4">
                                     <div class="flex items-center gap-3">
                                         <div class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-gray-400 to-gray-500 text-white shadow-sm">
@@ -353,31 +357,34 @@
                                 <div class="grid grid-cols-3 gap-3">
                                     <div>
                                         <label class="block text-[10px] font-black text-blue-700 uppercase mb-1">CA1 ({{ $maxMarks['ca1'] }})</label>
-                                        <input wire:model.lazy="scores.{{ $student->id }}.ca1" type="number" min="0" max="{{ $maxMarks['ca1'] }}"
-                                            class="w-full rounded-xl border-2 border-blue-200 bg-blue-50 px-2 py-2 text-center text-sm font-bold text-gray-900 focus:border-blue-500 focus:bg-white focus:ring-0">
+                                        <input wire:model.blur="scores.{{ $student->id }}.ca1" type="number" min="0" max="{{ $maxMarks['ca1'] }}"
+                                            data-student-id="{{ $student->id }}" data-field="ca1"
+                                            class="w-full rounded-xl border-2 {{ $ca1Error ? 'border-red-400 bg-red-50 text-red-950 focus:border-red-500' : 'border-blue-200 bg-blue-50 text-gray-900 focus:border-blue-500' }} px-2 py-2 text-center text-sm font-bold focus:bg-white focus:ring-0">
                                     </div>
                                     <div>
                                         <label class="block text-[10px] font-black text-green-700 uppercase mb-1">CA2 ({{ $maxMarks['ca2'] }})</label>
-                                        <input wire:model.lazy="scores.{{ $student->id }}.ca2" type="number" min="0" max="{{ $maxMarks['ca2'] }}"
-                                            class="w-full rounded-xl border-2 border-green-200 bg-green-50 px-2 py-2 text-center text-sm font-bold text-gray-900 focus:border-green-500 focus:bg-white focus:ring-0">
+                                        <input wire:model.blur="scores.{{ $student->id }}.ca2" type="number" min="0" max="{{ $maxMarks['ca2'] }}"
+                                            data-student-id="{{ $student->id }}" data-field="ca2"
+                                            class="w-full rounded-xl border-2 {{ $ca2Error ? 'border-red-400 bg-red-50 text-red-950 focus:border-red-500' : 'border-green-200 bg-green-50 text-gray-900 focus:border-green-500' }} px-2 py-2 text-center text-sm font-bold focus:bg-white focus:ring-0">
                                     </div>
                                     <div>
                                         <label class="block text-[10px] font-black text-amber-700 uppercase mb-1">Exam ({{ $maxMarks['exam'] }})</label>
-                                        <input wire:model.lazy="scores.{{ $student->id }}.exam" type="number" min="0" max="{{ $maxMarks['exam'] }}"
-                                            class="w-full rounded-xl border-2 border-amber-200 bg-amber-50 px-2 py-2 text-center text-sm font-bold text-gray-900 focus:border-amber-500 focus:bg-white focus:ring-0">
+                                        <input wire:model.blur="scores.{{ $student->id }}.exam" type="number" min="0" max="{{ $maxMarks['exam'] }}"
+                                            data-student-id="{{ $student->id }}" data-field="exam"
+                                            class="w-full rounded-xl border-2 {{ $examError ? 'border-red-400 bg-red-50 text-red-950 focus:border-red-500' : 'border-amber-200 bg-amber-50 text-gray-900 focus:border-amber-500' }} px-2 py-2 text-center text-sm font-bold focus:bg-white focus:ring-0">
                                     </div>
                                 </div>
 
                                 <div class="mt-4 flex justify-end">
                                     <button type="button" wire:click="openPsychomotor({{ $student->id }}, '{{ addslashes($student->full_name) }}')"
-                                        class="flex items-center gap-2 rounded-xl bg-gray-100 px-4 py-2 text-xs font-bold text-gray-600">
+                                        class="flex items-center gap-2 rounded-xl bg-gray-100 px-4 py-2 text-xs font-bold text-gray-600 hover:bg-gray-200 transition-colors">
                                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                                         Assess Traits
                                     </button>
                                 </div>
                             </div>
                         @empty
-                            <div class="p-8 text-center text-gray-500">No students found</div>
+                            <div class="p-8 text-center text-gray-500 font-medium">No students found</div>
                         @endforelse
                     </div>
                 </div>
@@ -385,7 +392,7 @@
             </div>
 
             {{-- Keyboard Shortcuts Card --}}
-            <div class="rounded-3xl bg-gradient-to-r from-blue-50 to-indigo-50 p-6 shadow-lg ring-1 ring-blue-200 mt-8">
+            <div class="hidden lg:block rounded-3xl bg-gradient-to-r from-blue-50 to-indigo-50 p-6 shadow-lg ring-1 ring-blue-200 mt-8">
                 <div class="flex items-center gap-3 mb-4">
                     <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-100">
                         <svg class="h-5 w-5 text-blue-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -437,7 +444,7 @@
                                 <h2 class="text-2xl sm:text-3xl font-black tracking-tight leading-tight">Bulk Psychomotor Assessment</h2>
                                 <p class="text-indigo-200 font-medium mt-1.5 text-sm sm:text-base">Assess affective traits and psychomotor skills for all students at once.</p>
                             </div>
-                            <button wire:click="$set('activeTab', 'academic')" class="w-full sm:w-auto rounded-2xl bg-white/10 px-8 py-3.5 text-sm font-bold backdrop-blur-md border border-white/20 hover:bg-white/20 transition-all shadow-lg text-center">
+                            <button wire:click="setTab('scores')" class="w-full sm:w-auto rounded-2xl bg-white/10 px-8 py-3.5 text-sm font-bold backdrop-blur-md border border-white/20 hover:bg-white/20 transition-all shadow-lg text-center">
                                 Back to Scores
                             </button>
                         </div>
@@ -449,11 +456,11 @@
                             <thead>
                                 <tr class="border-b-2 border-gray-100 bg-gray-50/50">
                                     <th class="sticky left-0 z-20 bg-gray-50 px-8 py-5 text-left text-xs font-black uppercase tracking-widest text-gray-500 shadow-[2px_0_5px_rgba(0,0,0,0.02)]">Student</th>
-                                    @foreach($psychomotorTraits as $trait)
+                                    @foreach($this->traitMap() as $slug => $trait)
                                         <th class="px-4 py-5 text-center min-w-[160px]">
                                             <div class="space-y-3">
                                                 <span class="text-[10px] font-black uppercase tracking-widest text-indigo-900">{{ $trait }}</span>
-                                                <select @change="applyToAll('{{ $trait }}', $event.target.value)" 
+                                                <select @change="applyToAll('{{ $slug }}', $event.target.value)" 
                                                     class="w-full rounded-xl border-2 border-indigo-100 bg-indigo-50/50 px-3 py-1.5 text-[10px] font-bold text-indigo-700 focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-500/10 transition-all">
                                                     <option value="">Apply to all...</option>
                                                     <option value="Excellent">Excellent</option>
@@ -480,10 +487,10 @@
                                                 </div>
                                             </div>
                                         </td>
-                                        @foreach($psychomotorTraits as $trait)
+                                        @foreach($this->traitMap() as $slug => $trait)
                                             <td class="px-4 py-5 text-center">
-                                                <select wire:model.lazy="bulkPsychomotorScores.{{ $student->id }}.{{ $trait }}" 
-                                                    data-trait="{{ $trait }}" data-student-id="{{ $student->id }}"
+                                                <select wire:model.blur="bulkPsychomotorScores.{{ $student->id }}.{{ $slug }}" 
+                                                    data-trait="{{ $slug }}" data-student-id="{{ $student->id }}"
                                                     class="w-full rounded-2xl border-2 border-gray-100 bg-white px-4 py-2.5 text-center text-xs font-bold text-gray-900 shadow-sm transition-all focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 hover:border-indigo-300">
                                                     <option value="Excellent">Excellent</option>
                                                     <option value="Good">Good</option>
@@ -496,6 +503,39 @@
                                 @endforeach
                             </tbody>
                         </table>
+                    </div>
+
+                    {{-- Mobile Bulk Actions Panel --}}
+                    <div class="block lg:hidden bg-gradient-to-br from-indigo-50/50 to-purple-50/50 p-5 border-b border-indigo-100/50">
+                        <div x-data="{ open: false }">
+                            <button @click="open = !open" type="button" class="flex w-full items-center justify-between font-black text-indigo-900 text-xs sm:text-sm">
+                                <span class="flex items-center gap-2">
+                                    <svg class="w-4 h-4 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                                    Bulk Actions (Apply to All Students)
+                                </span>
+                                <svg class="h-5 w-5 text-indigo-500 transition-transform duration-200" :class="open ? 'rotate-180' : ''" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                    <polyline points="6 9 12 15 18 9"/>
+                                </svg>
+                            </button>
+                            <div x-show="open" x-transition class="mt-4 space-y-4" style="display: none;">
+                                <p class="text-xs text-indigo-700 font-medium">Select a trait rating to apply to all students at once:</p>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                    @foreach($this->traitMap() as $slug => $trait)
+                                        <div class="space-y-1">
+                                            <span class="text-[10px] font-black uppercase tracking-wider text-indigo-800">{{ $trait }}</span>
+                                            <select @change="applyToAll('{{ $slug }}', $event.target.value)"
+                                                class="w-full rounded-xl border-2 border-indigo-100 bg-white px-3 py-2 text-xs font-bold text-indigo-700 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10">
+                                                <option value="">Apply to all...</option>
+                                                <option value="Excellent">Excellent</option>
+                                                <option value="Good">Good</option>
+                                                <option value="Average">Average</option>
+                                                <option value="Poor">Poor</option>
+                                            </select>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                     {{-- Mobile Card View --}}
@@ -514,10 +554,11 @@
                                     </div>
 
                                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                        @foreach($psychomotorTraits as $trait)
+                                        @foreach($this->traitMap() as $slug => $trait)
                                             <div class="space-y-1.5">
                                                 <label class="text-[10px] font-black uppercase tracking-widest text-indigo-900 opacity-60">{{ $trait }}</label>
-                                                <select wire:model.lazy="bulkPsychomotorScores.{{ $student->id }}.{{ $trait }}"
+                                                <select wire:model.blur="bulkPsychomotorScores.{{ $student->id }}.{{ $slug }}"
+                                                    data-trait="{{ $slug }}" data-student-id="{{ $student->id }}"
                                                     class="w-full rounded-2xl border-2 border-gray-100 bg-gray-50 px-4 py-3 text-sm font-bold text-gray-900 focus:border-indigo-500 focus:bg-white transition-all">
                                                     <option value="Excellent">Excellent</option>
                                                     <option value="Good">Good</option>
@@ -534,120 +575,13 @@
                 </div>
 
                 <div class="flex justify-center py-10 px-4">
-                    <button wire:click="saveScores" class="w-full sm:w-auto rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 px-12 py-4.5 text-sm font-black text-white shadow-xl shadow-emerald-100 transition-all hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-3">
+                    <button wire:click="saveBulkPsychomotor" class="w-full sm:w-auto rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 px-12 py-4.5 text-sm font-black text-white shadow-xl shadow-emerald-100 transition-all hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-3">
                         <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg>
                         SAVE ALL ASSESSMENTS
                     </button>
                 </div>
             </div>
         @endif
-
-            @script
-                <script>
-                    // Inject shake animation styles once
-                    if (!document.getElementById('shake-animation-styles')) {
-                        const style = document.createElement('style');
-                        style.id = 'shake-animation-styles';
-                        style.textContent = `
-                            @keyframes shake {
-                                0%, 100% { transform: translateX(0); }
-                                10%, 30%, 50%, 70%, 90% { transform: translateX(-3px); }
-                                20%, 40%, 60%, 80% { transform: translateX(3px); }
-                            }
-                            .shake-row { animation: shake 0.6s ease-in-out; background-color: #fef2f2 !important; }
-                            .shake-input { animation: shake 0.6s ease-in-out; border-color: #ef4444 !important; background-color: #fef2f2 !important; }
-                        `;
-                        document.head.appendChild(style);
-                    }
-
-                    // shake-row event — $wire is available inside @script
-                    $wire.on('shake-row', (event) => {
-                        const data = event[0] || event;
-                        const row   = document.querySelector(`tr[data-student-id="${data.studentId}"]`);
-                        const input = document.querySelector(`input[data-student-id="${data.studentId}"][data-field="${data.field}"]`);
-                        if (row && input) {
-                            row.classList.add('shake-row');
-                            input.classList.add('shake-input');
-                            setTimeout(() => {
-                                row.classList.remove('shake-row');
-                                input.classList.remove('shake-input');
-                            }, 600);
-                            input.focus();
-                            input.select();
-                        }
-                    });
-
-                    // Keyboard navigation — attach to the table body directly.
-                    // Using event delegation on document so it survives Livewire re-renders.
-                    function handleScoresheetKeydown(e) {
-                        const input = e.target;
-                        if (input.tagName !== 'INPUT' || input.type !== 'number') return;
-                        const table = input.closest('tbody');
-                        if (!table) return;
-
-                        const cell  = input.closest('td');
-                        const row   = cell.closest('tr');
-                        const cells = Array.from(row.querySelectorAll('td input[type="number"]'));
-                        const rows  = Array.from(table.querySelectorAll('tr:has(input)'));
-                        const ci    = cells.indexOf(input);
-                        const ri    = rows.indexOf(row);
-
-                        let next = null;
-                        let prevent = false;
-
-                        if (e.key === 'Enter') {
-                            prevent = true;
-                            if (ri < rows.length - 1) next = rows[ri + 1].querySelectorAll('td input[type="number"]')[ci];
-                        } else if (e.key === 'Tab' && !e.shiftKey) {
-                            prevent = true;
-                            next = ci < cells.length - 1 ? cells[ci + 1] : (ri < rows.length - 1 ? rows[ri + 1].querySelector('td input[type="number"]') : null);
-                        } else if (e.key === 'Tab' && e.shiftKey) {
-                            prevent = true;
-                            if (ci > 0) { next = cells[ci - 1]; }
-                            else if (ri > 0) { const pc = rows[ri - 1].querySelectorAll('td input[type="number"]'); next = pc[pc.length - 1]; }
-                        } else if (e.key === 'ArrowDown') {
-                            prevent = true;
-                            if (ri < rows.length - 1) next = rows[ri + 1].querySelectorAll('td input[type="number"]')[ci];
-                        } else if (e.key === 'ArrowUp') {
-                            prevent = true;
-                            if (ri > 0) next = rows[ri - 1].querySelectorAll('td input[type="number"]')[ci];
-                        } else if (e.key === 'ArrowRight' && input.selectionStart === input.value.length) {
-                            prevent = true;
-                            if (ci < cells.length - 1) next = cells[ci + 1];
-                        } else if (e.key === 'ArrowLeft' && input.selectionStart === 0) {
-                            prevent = true;
-                            if (ci > 0) next = cells[ci - 1];
-                        }
-
-                        if (prevent && next) { e.preventDefault(); next.focus(); next.select(); }
-                    }
-
-                    function handleScoresheetFocusin(e) {
-                        if (e.target.tagName === 'INPUT' && e.target.closest('tbody')) {
-                            const td = e.target.closest('td');
-                            td.style.boxShadow = '0 0 0 3px rgba(59,130,246,0.5)';
-                            td.style.position  = 'relative';
-                            td.style.zIndex    = '10';
-                        }
-                    }
-
-                    function handleScoresheetFocusout(e) {
-                        if (e.target.tagName === 'INPUT' && e.target.closest('tbody')) {
-                            const td = e.target.closest('td');
-                            td.style.boxShadow = '';
-                            td.style.zIndex    = '';
-                        }
-                    }
-
-                    // Attach once at document level — survives all Livewire re-renders
-                    if (!document.__scoresheetKeydownAttached) {
-                        document.addEventListener('keydown',  handleScoresheetKeydown);
-                        document.addEventListener('focusin',  handleScoresheetFocusin);
-                        document.addEventListener('focusout', handleScoresheetFocusout);
-                        document.__scoresheetKeydownAttached = true;
-                    }
-                </script>
-            @endscript
 
 
     @endif
@@ -669,10 +603,10 @@
                     </div>
                     <div class="bg-white px-6 pt-5 pb-4 sm:p-6 sm:pb-4">
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
-                            @foreach($psychomotorScores as $trait => $rating)
-                                <div class="flex items-center justify-between gap-4 p-2 hover:bg-gray-50 rounded-lg">
-                                    <span class="text-sm font-medium text-gray-700">{{ $trait }}</span>
-                                    <select wire:model="psychomotorScores.{{ $trait }}" class="rounded-lg border-gray-300 text-sm focus:ring-indigo-500 focus:border-indigo-500 py-1.5">
+                            @foreach($this->traitMap() as $slug => $trait)
+                                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-4 p-2.5 sm:p-2 hover:bg-gray-50 rounded-xl">
+                                    <span class="text-sm font-bold text-gray-700 leading-tight">{{ $trait }}</span>
+                                    <select wire:model="psychomotorScores.{{ $slug }}" class="w-full sm:w-auto rounded-xl border-2 border-gray-200 text-sm font-bold text-gray-800 focus:ring-indigo-500 focus:border-indigo-500 py-2 px-3 bg-white">
                                         <option value="Excellent">Excellent</option>
                                         <option value="Good">Good</option>
                                         <option value="Average">Average</option>
@@ -694,4 +628,109 @@
             </div>
         </div>
     @endif
+
+    @script
+        // Inject shake animation styles once
+        if (!document.getElementById('shake-animation-styles')) {
+            const style = document.createElement('style');
+            style.id = 'shake-animation-styles';
+            style.textContent = `
+                @keyframes shake {
+                    0%, 100% { transform: translateX(0); }
+                    10%, 30%, 50%, 70%, 90% { transform: translateX(-3px); }
+                    20%, 40%, 60%, 80% { transform: translateX(3px); }
+                }
+                .shake-row { animation: shake 0.6s ease-in-out; background-color: #fef2f2 !important; }
+                .shake-input { animation: shake 0.6s ease-in-out; border-color: #ef4444 !important; background-color: #fef2f2 !important; }
+            `;
+            document.head.appendChild(style);
+        }
+
+        // shake-row event — $wire is available inside the script block
+        $wire.on('shake-row', (event) => {
+            const data = event[0] || event;
+            const row   = document.querySelector(`tr[data-student-id="${data.studentId}"]`);
+            const input = document.querySelector(`input[data-student-id="${data.studentId}"][data-field="${data.field}"]`);
+            if (row && input) {
+                row.classList.add('shake-row');
+                input.classList.add('shake-input');
+                setTimeout(() => {
+                    row.classList.remove('shake-row');
+                    input.classList.remove('shake-input');
+                }, 600);
+                input.focus();
+                input.select();
+            }
+        });
+
+        // Keyboard navigation — attach to the table body directly.
+        // Using event delegation on document so it survives Livewire re-renders.
+        function handleScoresheetKeydown(e) {
+            const input = e.target;
+            if (input.tagName !== 'INPUT' || input.type !== 'number') return;
+            const table = input.closest('tbody');
+            if (!table) return;
+
+            const cell  = input.closest('td');
+            const row   = cell.closest('tr');
+            const cells = Array.from(row.querySelectorAll('td input[type="number"]'));
+            const rows  = Array.from(table.querySelectorAll('tr:has(input)'));
+            const ci    = cells.indexOf(input);
+            const ri    = rows.indexOf(row);
+
+            let next = null;
+            let prevent = false;
+
+            if (e.key === 'Enter') {
+                prevent = true;
+                if (ri < rows.length - 1) next = rows[ri + 1].querySelectorAll('td input[type="number"]')[ci];
+            } else if (e.key === 'Tab' && !e.shiftKey) {
+                prevent = true;
+                next = ci < cells.length - 1 ? cells[ci + 1] : (ri < rows.length - 1 ? rows[ri + 1].querySelector('td input[type="number"]') : null);
+            } else if (e.key === 'Tab' && e.shiftKey) {
+                prevent = true;
+                if (ci > 0) { next = cells[ci - 1]; }
+                else if (ri > 0) { const pc = rows[ri - 1].querySelectorAll('td input[type="number"]'); next = pc[pc.length - 1]; }
+            } else if (e.key === 'ArrowDown') {
+                prevent = true;
+                if (ri < rows.length - 1) next = rows[ri + 1].querySelectorAll('td input[type="number"]')[ci];
+            } else if (e.key === 'ArrowUp') {
+                prevent = true;
+                if (ri > 0) next = rows[ri - 1].querySelectorAll('td input[type="number"]')[ci];
+            } else if (e.key === 'ArrowRight' && input.selectionStart === input.value.length) {
+                prevent = true;
+                if (ci < cells.length - 1) next = cells[ci + 1];
+            } else if (e.key === 'ArrowLeft' && input.selectionStart === 0) {
+                prevent = true;
+                if (ci > 0) next = cells[ci - 1];
+            }
+
+            if (prevent && next) { e.preventDefault(); next.focus(); next.select(); }
+        }
+
+        function handleScoresheetFocusin(e) {
+            if (e.target.tagName === 'INPUT' && e.target.closest('tbody')) {
+                const td = e.target.closest('td');
+                td.style.boxShadow = '0 0 0 3px rgba(59,130,246,0.5)';
+                td.style.position  = 'relative';
+                td.style.zIndex    = '10';
+            }
+        }
+
+        function handleScoresheetFocusout(e) {
+            if (e.target.tagName === 'INPUT' && e.target.closest('tbody')) {
+                const td = e.target.closest('td');
+                td.style.boxShadow = '';
+                td.style.zIndex    = '';
+            }
+        }
+
+        // Attach once at document level — survives all Livewire re-renders
+        if (!document.__scoresheetKeydownAttached) {
+            document.addEventListener('keydown',  handleScoresheetKeydown);
+            document.addEventListener('focusin',  handleScoresheetFocusin);
+            document.addEventListener('focusout', handleScoresheetFocusout);
+            document.__scoresheetKeydownAttached = true;
+        }
+    @endscript
 </div>

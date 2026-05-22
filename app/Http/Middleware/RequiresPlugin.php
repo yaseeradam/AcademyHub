@@ -25,8 +25,7 @@ class RequiresPlugin
         }
 
         $installed = $user->tenant
-            ->marketplaceComponents()
-            ->wherePivotNotNull('installed_at')
+            ->activeMarketplaceComponents()
             ->where('slug', $slug)
             ->exists();
 

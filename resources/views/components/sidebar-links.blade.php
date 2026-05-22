@@ -159,7 +159,7 @@
 
     {{-- Dynamic Marketplace Components --}}
     @php
-        $tenantComponents = auth()->user()?->tenant?->marketplaceComponents()->wherePivotNotNull('installed_at')->get() ?? collect();
+        $tenantComponents = auth()->user()?->tenant?->activeMarketplaceComponents()->get() ?? collect();
     @endphp
     
     @if($tenantComponents->isNotEmpty())

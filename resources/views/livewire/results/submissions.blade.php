@@ -31,13 +31,13 @@
                 };
             @endphp
             <div class="card-padded">
-                <div class="flex items-start justify-between gap-4">
-                    <div class="flex-1">
+                <div class="flex flex-col md:flex-row md:items-start justify-between gap-4">
+                    <div class="flex-1 w-full">
                         <div class="flex items-center gap-3 mb-2">
                             <h3 class="text-lg font-bold text-gray-900">{{ $submission->subject?->name }}</h3>
                             <x-status-badge variant="{{ $variant }}">{{ ucfirst($submission->status) }}</x-status-badge>
                         </div>
-                        <div class="grid grid-cols-2 gap-x-6 gap-y-2 text-sm text-gray-600">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2 text-sm text-gray-600">
                             <div><span class="font-semibold">Teacher:</span> {{ $submission->teacher?->name }}</div>
                             <div><span class="font-semibold">Class:</span> {{ $submission->schoolClass?->name }}</div>
                             <div><span class="font-semibold">Session:</span> {{ $submission->session }} - Term {{ $submission->term }}</div>
@@ -55,11 +55,11 @@
                         @endif
                     </div>
                     @if($submission->status === 'pending')
-                        <div class="flex gap-2">
-                            <button wire:click="approve({{ $submission->id }})" class="btn-primary">
+                        <div class="flex gap-2 w-full md:w-auto justify-end mt-2 md:mt-0">
+                            <button wire:click="approve({{ $submission->id }})" class="btn-primary w-full sm:w-auto justify-center">
                                 Approve
                             </button>
-                            <button wire:click="$dispatch('reject-modal', { id: {{ $submission->id }} })" class="btn-warning">
+                            <button wire:click="$dispatch('reject-modal', { id: {{ $submission->id }} })" class="btn-warning w-full sm:w-auto justify-center">
                                 Reject
                             </button>
                         </div>
@@ -75,7 +75,6 @@
 </div>
 
 @script
-<script>
     $wire.on('submission-approved', () => {
         showModal('success', 'Submission Approved', 'The score submission has been approved successfully.');
     });
@@ -125,9 +124,9 @@
         document.body.appendChild(modal);
         modal.onclick = (e) => { if (e.target === modal) modal.remove(); };
     }
-</script>
+@endscript
+
 <style>
     @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 </style>
-@endscript

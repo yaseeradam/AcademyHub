@@ -23,17 +23,22 @@ class MarketplaceController extends Controller
     public function store(Request $request)
     {
         $data = $request->validate([
-            'name'       => 'required|string|max:255',
-            'slug'       => 'required|string|max:255|unique:marketplace_components,slug',
-            'route_name' => 'nullable|string|max:255',
-            'price'      => 'required|numeric|min:0',
-            'description'=> 'nullable|string',
-            'icon'       => 'nullable|string|max:255',
-            'is_active'  => 'boolean',
+            'name'                  => 'required|string|max:255',
+            'slug'                  => 'required|string|max:255|unique:marketplace_components,slug',
+            'route_name'            => 'nullable|string|max:255',
+            'setup_fee'             => 'required|numeric|min:0',
+            'usage_fee_per_student' => 'required|numeric|min:0',
+            'description'           => 'nullable|string',
+            'icon'                  => 'nullable|string|max:255',
+            'is_active'             => 'boolean',
         ]);
 
         $data['is_active'] = $request->has('is_active');
-        $data['price']     = $request->input('pricing_type') === 'paid' ? $request->input('price', 0) : 0;
+        
+        $isPaid = $request->input('pricing_type') === 'paid';
+        $data['setup_fee']             = $isPaid ? (float) $request->input('setup_fee', 0) : 0.0;
+        $data['usage_fee_per_student'] = $isPaid ? (float) $request->input('usage_fee_per_student', 0) : 0.0;
+        $data['price']                 = $data['setup_fee'];
 
         MarketplaceComponent::create($data);
 
@@ -48,17 +53,22 @@ class MarketplaceController extends Controller
     public function update(Request $request, MarketplaceComponent $marketplace)
     {
         $data = $request->validate([
-            'name'       => 'required|string|max:255',
-            'slug'       => 'required|string|max:255|unique:marketplace_components,slug,' . $marketplace->id,
-            'route_name' => 'nullable|string|max:255',
-            'price'      => 'required|numeric|min:0',
-            'description'=> 'nullable|string',
-            'icon'       => 'nullable|string|max:255',
-            'is_active'  => 'boolean',
+            'name'                  => 'required|string|max:255',
+            'slug'                  => 'required|string|max:255|unique:marketplace_components,slug,' . $marketplace->id,
+            'route_name'            => 'nullable|string|max:255',
+            'setup_fee'             => 'required|numeric|min:0',
+            'usage_fee_per_student' => 'required|numeric|min:0',
+            'description'           => 'nullable|string',
+            'icon'                  => 'nullable|string|max:255',
+            'is_active'             => 'boolean',
         ]);
 
         $data['is_active'] = $request->has('is_active');
-        $data['price']     = $request->input('pricing_type') === 'paid' ? $request->input('price', 0) : 0;
+
+        $isPaid = $request->input('pricing_type') === 'paid';
+        $data['setup_fee']             = $isPaid ? (float) $request->input('setup_fee', 0) : 0.0;
+        $data['usage_fee_per_student'] = $isPaid ? (float) $request->input('usage_fee_per_student', 0) : 0.0;
+        $data['price']                 = $data['setup_fee'];
 
         $marketplace->update($data);
 

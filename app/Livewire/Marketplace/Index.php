@@ -27,9 +27,30 @@ class Index extends Component
         // Re-validate it really is free from DB — never trust frontend price
         abort_unless($component->price == 0, 403, 'This plugin requires payment.');
 
+        $setupFee = (float) $component->setup_fee;
+        $usageFee = (float) $component->usage_fee_per_student;
+
         $user->tenant->marketplaceComponents()->syncWithoutDetaching([
-            $component->id => ['installed_at' => now()]
+            $component->id => [
+                'installed_at'          => now(),
+                'uninstalled_at'        => null,
+                'status'                => 'active',
+                'setup_fee'             => $setupFee,
+                'usage_fee_per_student' => $usageFee,
+                'price_paid'            => $setupFee,
+            ]
         ]);
+
+        $user->tenant->marketplaceComponents()->updateExistingPivot($component->id, [
+            'installed_at'          => now(),
+            'uninstalled_at'        => null,
+            'status'                => 'active',
+            'setup_fee'             => $setupFee,
+            'usage_fee_per_student' => $usageFee,
+            'price_paid'            => $setupFee,
+        ]);
+
+        $component->increment('installs');
 
         $this->dispatch('alert', message: 'Plugin installed successfully!', type: 'success');
 
@@ -99,9 +120,46 @@ class Index extends Component
             return;
         }
 
+        $setupFee = (float) $component->setup_fee;
+        $usageFee = (float) $component->usage_fee_per_student;
+
         $user->tenant->marketplaceComponents()->syncWithoutDetaching([
-            $component->id => ['installed_at' => now()]
+            $component->id => [
+                'installed_at'          => now(),
+                'uninstalled_at'        => null,
+                'status'                => 'active',
+                'setup_fee'             => $setupFee,
+                'usage_fee_per_student' => $usageFee,
+                'price_paid'            => $setupFee,
+            ]
         ]);
+
+        $user->tenant->marketplaceComponents()->updateExistingPivot($component->id, [
+            'installed_at'          => now(),
+            'uninstalled_at'        => null,
+            'status'                => 'active',
+            'setup_fee'             => $setupFee,
+            'usage_fee_per_student' => $usageFee,
+            'price_paid'            => $setupFee,
+        ]);
+
+        $component->increment('installs');
+
+        if ($setupFee > 0) {
+            \App\Models\TenantPluginBill::create([
+                'tenant_id'                => $user->tenant->id,
+                'marketplace_component_id' => $component->id,
+                'bill_type'                => 'setup',
+                'term_name'                => null,
+                'session_name'             => null,
+                'student_count'            => null,
+                'setup_fee'                => $setupFee,
+                'usage_fee_per_student'    => 0,
+                'total_due'                => $setupFee,
+                'status'                   => 'paid',
+                'paid_at'                  => now(),
+            ]);
+        }
 
         $this->dispatch('alert', message: 'Payment successful! Plugin is now active in your sidebar.', type: 'success');
 
@@ -116,6 +174,7 @@ class Index extends Component
         $components = MarketplaceComponent::where('is_active', true)->get();
         $installed  = $user->tenant->marketplaceComponents()
             ->wherePivotNotNull('installed_at')
+            ->wherePivotNull('uninstalled_at')
             ->pluck('marketplace_components.id')
             ->toArray();
 

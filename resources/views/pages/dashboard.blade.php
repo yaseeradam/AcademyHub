@@ -412,4 +412,124 @@
     </div>
 
 </div>
+
+    {{-- System Health & Backup --}}
+    @php
+        $diskTotal = disk_total_space('/');
+        $diskFree  = disk_free_space('/');
+        $diskUsed  = $diskTotal - $diskFree;
+        $diskPct   = $diskTotal > 0 ? round($diskUsed / $diskTotal * 100) : 0;
+
+        $memUsed    = memory_get_usage(true);
+        $memPeakMb  = round(memory_get_peak_usage(true) / 1048576, 1);
+
+        $phpVersion = PHP_VERSION;
+        $cacheDriver = config('cache.default');
+        $queueDriver = config('queue.default');
+
+        $lastBackup = null;
+        $backupDir = storage_path('app/backups');
+        if (is_dir($backupDir)) {
+            $files = glob($backupDir . '/*.sql');
+            if ($files) {
+                usort($files, fn($a, $b) => filemtime($b) - filemtime($a));
+                $lastBackup = date('M j, Y H:i', filemtime($files[0]));
+            }
+        }
+
+        $mysqldumpAvailable = !empty(trim((string) shell_exec('which mysqldump')));
+    @endphp
+
+    <details class="rounded-3xl bg-white border border-slate-100 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07)] overflow-hidden group">
+        <summary class="flex items-center justify-between px-6 py-5 cursor-pointer select-none hover:bg-slate-50 transition-colors">
+            <div class="flex items-center gap-3">
+                <div class="h-9 w-9 rounded-xl bg-slate-100 flex items-center justify-center">
+                    <svg class="h-5 w-5 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                        <path d="M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v18m0 0h10a2 2 0 002-2V9M9 21H5a2 2 0 01-2-2V9m0 0h18"/>
+                    </svg>
+                </div>
+                <div>
+                    <div class="text-sm font-bold text-slate-900">System Health</div>
+                    <div class="text-xs text-slate-500">Server resources, PHP, cache, and database stats</div>
+                </div>
+            </div>
+            <div class="flex items-center gap-3">
+                <span class="inline-flex items-center gap-1.5 rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-bold text-emerald-700">
+                    <span class="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                    Operational
+                </span>
+                <svg class="h-4 w-4 text-slate-400 transition-transform group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path d="M19 9l-7 7-7-7"/></svg>
+            </div>
+        </summary>
+
+        <div class="px-6 pb-6 border-t border-slate-100 pt-5 space-y-5">
+            {{-- Metrics Grid --}}
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {{-- Disk --}}
+                <div class="rounded-2xl bg-slate-50 border border-slate-200 p-4">
+                    <div class="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">Disk Usage</div>
+                    <div class="text-xl font-black text-slate-900">{{ $diskPct }}%</div>
+                    <div class="text-xs text-slate-500 mt-0.5">
+                        {{ round($diskUsed / 1073741824, 1) }}GB / {{ round($diskTotal / 1073741824, 1) }}GB
+                    </div>
+                    <div class="mt-2 h-1.5 rounded-full bg-slate-200 overflow-hidden">
+                        <div class="h-full rounded-full {{ $diskPct > 80 ? 'bg-red-500' : ($diskPct > 60 ? 'bg-amber-400' : 'bg-emerald-500') }}"
+                             style="width: {{ $diskPct }}%"></div>
+                    </div>
+                </div>
+                {{-- Memory --}}
+                <div class="rounded-2xl bg-slate-50 border border-slate-200 p-4">
+                    <div class="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">PHP Memory (Peak)</div>
+                    <div class="text-xl font-black text-slate-900">{{ $memPeakMb }}MB</div>
+                    <div class="text-xs text-slate-500 mt-0.5">Limit: {{ ini_get('memory_limit') }}</div>
+                </div>
+                {{-- PHP & Cache --}}
+                <div class="rounded-2xl bg-slate-50 border border-slate-200 p-4">
+                    <div class="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">Environment</div>
+                    <div class="text-sm font-bold text-slate-800">PHP {{ $phpVersion }}</div>
+                    <div class="text-xs text-slate-500 mt-1">Cache: <span class="font-semibold">{{ strtoupper($cacheDriver) }}</span></div>
+                    <div class="text-xs text-slate-500">Queue: <span class="font-semibold">{{ strtoupper($queueDriver) }}</span></div>
+                </div>
+                {{-- DB Stats --}}
+                <div class="rounded-2xl bg-slate-50 border border-slate-200 p-4">
+                    <div class="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">Database</div>
+                    <div class="text-sm font-bold text-slate-800">{{ number_format($studentsTotal) }} students</div>
+                    <div class="text-xs text-slate-500 mt-1">{{ number_format($teachersTotal) }} teachers · {{ number_format($classesTotal) }} classes</div>
+                    <div class="text-xs text-slate-500 font-semibold mt-1 truncate">{{ config('database.connections.mysql.database') }}</div>
+                </div>
+            </div>
+
+            {{-- Backup Row --}}
+            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 rounded-2xl bg-slate-900 px-5 py-4">
+                <div>
+                    <div class="text-sm font-bold text-white">Database Backup</div>
+                    <div class="text-xs text-slate-400 mt-0.5">
+                        @if($lastBackup)
+                            Last backup: <span class="text-emerald-400 font-semibold">{{ $lastBackup }}</span>
+                        @else
+                            <span class="text-amber-400">No backups found on this server</span>
+                        @endif
+                    </div>
+                    @if(!$mysqldumpAvailable)
+                        <div class="mt-1 text-xs text-red-400 font-semibold">⚠ mysqldump not found — backup unavailable on this host</div>
+                    @endif
+                </div>
+                @if($mysqldumpAvailable)
+                    <a href="{{ route('backup.download') }}"
+                       class="flex-shrink-0 inline-flex items-center gap-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 px-5 py-2.5 text-sm font-bold text-white transition shadow-lg shadow-emerald-500/20">
+                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                            <path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                        </svg>
+                        Download Backup
+                    </a>
+                @else
+                    <span class="flex-shrink-0 inline-flex items-center gap-2 rounded-xl bg-slate-700 px-5 py-2.5 text-sm font-bold text-slate-500 cursor-not-allowed">
+                        Backup Unavailable
+                    </span>
+                @endif
+            </div>
+        </div>
+    </details>
+
+</div>
 @endsection

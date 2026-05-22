@@ -5,6 +5,7 @@ namespace App\Http\Controllers\SuperAdmin;
 use App\Http\Controllers\Controller;
 use App\Models\Tenant;
 use App\Models\User;
+use App\Models\Student;
 use App\Support\TenantDataAdopter;
 use App\Support\TenantProvisioner;
 use Illuminate\Http\Request;
@@ -152,8 +153,36 @@ class TenantController extends Controller
     public function edit(Tenant $tenant)
     {
         $components = \App\Models\MarketplaceComponent::orderBy('name')->get();
-        $admins = \App\Models\User::where('tenant_id', $tenant->id)->where('role', 'admin')->get();
-        return view('superadmin.tenants.edit', compact('tenant', 'components', 'admins'));
+        
+        // Eagerly resolve tenant admin users
+        $admins = \App\Models\User::withoutGlobalScopes()
+            ->where('tenant_id', $tenant->id)
+            ->where('role', 'admin')
+            ->get();
+            
+        // Tenant Stats counts
+        $studentCount = \App\Models\Student::withoutGlobalScopes()->where('tenant_id', $tenant->id)->count();
+        $teacherCount = \App\Models\User::withoutGlobalScopes()->where('tenant_id', $tenant->id)->where('role', 'teacher')->count();
+        $parentCount = \App\Models\User::withoutGlobalScopes()->where('tenant_id', $tenant->id)->where('role', 'parent')->count();
+        $adminCount = \App\Models\User::withoutGlobalScopes()->where('tenant_id', $tenant->id)->where('role', 'admin')->count();
+        
+        // Target school classes
+        $classes = \App\Models\SchoolClass::withoutGlobalScopes()
+            ->where('tenant_id', $tenant->id)
+            ->orderBy('level')
+            ->orderBy('name')
+            ->get();
+            
+        // Billing Ledger
+        $bills = \App\Models\TenantPluginBill::where('tenant_id', $tenant->id)
+            ->with('marketplaceComponent')
+            ->latest()
+            ->get();
+
+        return view('superadmin.tenants.edit', compact(
+            'tenant', 'components', 'admins', 'classes', 'bills',
+            'studentCount', 'teacherCount', 'parentCount', 'adminCount'
+        ));
     }
 
     public function update(Request $request, Tenant $tenant)
@@ -171,13 +200,7 @@ class TenantController extends Controller
 
         $tenant->update($data);
 
-        if ($request->has('components')) {
-            $tenant->marketplaceComponents()->sync($request->input('components'));
-        } else {
-            $tenant->marketplaceComponents()->detach();
-        }
-
-        return redirect()->route('superadmin.tenants.index')
+        return redirect()->route('superadmin.tenants.edit', $tenant)
             ->with('status', 'School instance updated successfully.');
     }
 
@@ -202,6 +225,209 @@ class TenantController extends Controller
 
         return redirect()->route('superadmin.tenants.edit', $tenant)
             ->with('status', 'Admin user updated successfully.');
+    }
+
+    // DNS diagnostics
+    public function checkDns(Tenant $tenant)
+    {
+        $mainHost = parse_url(config('app.url'), PHP_URL_HOST);
+        $domain = $tenant->domain ?: ($tenant->slug . '.' . ($mainHost ?: 'myacademy.local'));
+        
+        $dnsResults = [];
+        $pingResult = 'Offline / No connection';
+        $sslResult = 'Invalid / No SSL Certificate';
+        
+        // 1. DNS A record check
+        if (function_exists('dns_get_record')) {
+            $records = @dns_get_record($domain, DNS_A);
+            if (!empty($records)) {
+                foreach ($records as $r) {
+                    $dnsResults[] = $r['ip'];
+                }
+            }
+        }
+        if (empty($dnsResults)) {
+            $ip = @gethostbyname($domain);
+            if ($ip && $ip !== $domain) {
+                $dnsResults[] = $ip;
+            }
+        }
+        
+        // 2. Ping check
+        $startTime = microtime(true);
+        $context = stream_context_create([
+            'ssl' => ['verify_peer' => false, 'verify_peer_name' => false],
+            'http' => ['timeout' => 3.0, 'ignore_errors' => true]
+        ]);
+        
+        $url = 'https://' . $domain;
+        $response = @file_get_contents($url, false, $context);
+        if ($response !== false) {
+            $pingResult = 'Online (' . round((microtime(true) - $startTime) * 1000) . 'ms)';
+            $sslResult = 'Valid SSL Active';
+        } else {
+            // Check HTTP
+            $responseHttp = @file_get_contents('http://' . $domain, false, $context);
+            if ($responseHttp !== false) {
+                $pingResult = 'Online (HTTP Only)';
+                $sslResult = 'No SSL / Insecure';
+            }
+        }
+        
+        return response()->json([
+            'domain' => $domain,
+            'dns'    => !empty($dnsResults) ? implode(', ', $dnsResults) : 'No A Records Resolved',
+            'ping'   => $pingResult,
+            'ssl'    => $sslResult,
+        ]);
+    }
+
+    // Impersonate Tenant Admin
+    public function impersonate(Tenant $tenant)
+    {
+        $admin = User::withoutGlobalScopes()
+            ->where('tenant_id', $tenant->id)
+            ->where('role', 'admin')
+            ->first();
+            
+        if (!$admin) {
+            return redirect()->back()->with('error', 'No admin user found for this school.');
+        }
+        
+        // Store superadmin ID in session so they can stop impersonating later
+        $superadminId = auth()->id();
+        session(['impersonator_id' => $superadminId]);
+        
+        // Log in as the tenant admin
+        auth()->login($admin);
+        
+        // Set context
+        app()->instance('currentTenant', $tenant);
+        
+        // Redirect to school dashboard
+        return redirect()->route('dashboard')->with('status', 'Impersonating ' . $admin->name);
+    }
+
+    // Modular Feature Flags & resource quotas
+    public function saveFlags(Request $request, Tenant $tenant)
+    {
+        $data = $request->validate([
+            'feature_flags'     => 'nullable|array',
+            'max_disk_usage_mb' => 'required|integer|min:50|max:100000',
+        ]);
+        
+        $tenant->update([
+            'feature_flags'     => $request->input('feature_flags', []),
+            'max_disk_usage_mb' => $data['max_disk_usage_mb'],
+        ]);
+        
+        return redirect()->route('superadmin.tenants.edit', $tenant)
+            ->with('status', 'Superpower flags and resource quotas updated successfully.');
+    }
+
+    // Warning / Announcement banners
+    public function saveBroadcast(Request $request, Tenant $tenant)
+    {
+        $tenant->update([
+            'active_broadcast_banner' => $request->input('active_broadcast_banner'),
+        ]);
+        
+        return redirect()->route('superadmin.tenants.edit', $tenant)
+            ->with('status', 'Broadcast banner successfully saved.');
+    }
+
+    // Custom Plugin Configuration Pricing
+    public function updatePluginPricing(Request $request, Tenant $tenant, \App\Models\MarketplaceComponent $component)
+    {
+        $data = $request->validate([
+            'setup_fee'             => 'required|numeric|min:0',
+            'usage_fee_per_student' => 'required|numeric|min:0',
+            'status'                => 'required|string|in:active,suspended',
+        ]);
+        
+        $tenant->marketplaceComponents()->updateExistingPivot($component->id, [
+            'setup_fee'             => $data['setup_fee'],
+            'usage_fee_per_student' => $data['usage_fee_per_student'],
+            'status'                => $data['status'],
+        ]);
+        
+        return redirect()->route('superadmin.tenants.edit', $tenant)
+            ->with('status', 'Plugin configuration override updated successfully.');
+    }
+
+    // Generate Invoice
+    public function generateBill(Request $request, Tenant $tenant)
+    {
+        $data = $request->validate([
+            'component_id' => 'required|exists:marketplace_components,id',
+            'term_name'    => 'required|string|max:50',
+            'session_name' => 'required|string|max:50',
+        ]);
+        
+        $component = \App\Models\MarketplaceComponent::findOrFail($data['component_id']);
+        
+        // Find pivot fields
+        $pivot = $tenant->marketplaceComponents()
+            ->where('marketplace_component_id', $component->id)
+            ->first();
+            
+        $usageFee = $pivot && $pivot->pivot->usage_fee_per_student !== null 
+            ? (float) $pivot->pivot->usage_fee_per_student 
+            : (float) $component->usage_fee_per_student;
+            
+        $allowedClassIds = $pivot ? ($pivot->pivot->allowed_class_ids ?? []) : [];
+        
+        // Query target student count in those classes
+        if (!empty($allowedClassIds)) {
+            $studentCount = Student::withoutGlobalScopes()
+                ->where('tenant_id', $tenant->id)
+                ->whereIn('class_id', $allowedClassIds)
+                ->where('status', 'active')
+                ->count();
+        } else {
+            // Default to all active students
+            $studentCount = Student::withoutGlobalScopes()
+                ->where('tenant_id', $tenant->id)
+                ->where('status', 'active')
+                ->count();
+        }
+        
+        $totalDue = $studentCount * $usageFee;
+        
+        \App\Models\TenantPluginBill::create([
+            'tenant_id'                => $tenant->id,
+            'marketplace_component_id' => $component->id,
+            'bill_type'                => 'usage',
+            'term_name'                => $data['term_name'],
+            'session_name'             => $data['session_name'],
+            'student_count'            => $studentCount,
+            'setup_fee'                => 0,
+            'usage_fee_per_student'    => $usageFee,
+            'total_due'                => $totalDue,
+            'status'                   => 'unpaid',
+        ]);
+        
+        return redirect()->route('superadmin.tenants.edit', $tenant)
+            ->with('status', 'Termly usage bill successfully generated and added to ledger.');
+    }
+
+    public function payBill(Tenant $tenant, \App\Models\TenantPluginBill $bill)
+    {
+        $bill->update([
+            'status'  => 'paid',
+            'paid_at' => now(),
+        ]);
+        return redirect()->route('superadmin.tenants.edit', $tenant)
+            ->with('status', 'Bill marked as Paid successfully.');
+    }
+    
+    public function voidBill(Tenant $tenant, \App\Models\TenantPluginBill $bill)
+    {
+        $bill->update([
+            'status' => 'void',
+        ]);
+        return redirect()->route('superadmin.tenants.edit', $tenant)
+            ->with('status', 'Bill marked as Void successfully.');
     }
 
     public function destroy(Tenant $tenant)

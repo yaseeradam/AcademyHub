@@ -177,10 +177,12 @@
     </div>
 </div>
 
+@assets
+<script src="https://js.paystack.co/v1/inline.js" defer></script>
+@endassets
+
 @script
-<script src="https://js.paystack.co/v1/inline.js"></script>
-<script>
-    Livewire.on('initialize-paystack', (eventData) => {
+    $wire.on('initialize-paystack', (eventData) => {
         let data = Array.isArray(eventData) ? eventData[0] : eventData;
         let handler = PaystackPop.setup({
             key: '{{ env('PAYSTACK_PUBLIC_KEY', 'pk_test_') }}', // Handled by standard env
@@ -198,5 +200,4 @@
         });
         handler.openIframe();
     });
-</script>
 @endscript

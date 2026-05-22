@@ -20,6 +20,35 @@
 </head>
 <body class="h-full bg-[#f5f6fa] text-slate-900">
 
+@if(session()->has('original_superadmin_id'))
+    <div class="fixed top-4 left-1/2 -translate-x-1/2 z-[9999] w-[90%] max-w-xl">
+        <div class="bg-slate-900/95 backdrop-blur-md border border-violet-500/30 rounded-2xl px-5 py-3 shadow-2xl flex items-center justify-between gap-4 animate-bounce-subtle">
+            <div class="flex items-center gap-3 relative">
+                <span class="flex h-2.5 w-2.5 rounded-full bg-violet-400 animate-ping absolute"></span>
+                <span class="flex h-2.5 w-2.5 rounded-full bg-violet-500 relative"></span>
+                <div class="text-xs sm:text-sm font-medium text-white pl-2">
+                    Superpower Mode: Impersonating <span class="font-extrabold text-violet-300">{{ auth()->user()->name }}</span>
+                </div>
+            </div>
+            <a href="{{ route('impersonate.stop') }}" class="flex items-center gap-1.5 bg-violet-600 hover:bg-violet-700 text-white font-extrabold text-xs px-3.5 py-1.5 rounded-xl shadow-md transition-all whitespace-nowrap">
+                <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+                </svg>
+                Return to Superadmin
+            </a>
+        </div>
+    </div>
+    <style>
+        @keyframes bounce-subtle {
+            0%, 100% { transform: translate(-50%, 0); }
+            50% { transform: translate(-50%, -4px); }
+        }
+        .animate-bounce-subtle {
+            animation: bounce-subtle 3s ease-in-out infinite;
+        }
+    </style>
+@endif
+
 @php
 $hasCbt            = true;
 $appMode           = (string) config('myacademy.mode', 'full');
@@ -88,10 +117,7 @@ $activeShadow = "shadow-{$accent}-200";
                     @if($schoolLogo)
                         <img src="{{ asset('uploads/'.str_replace('\\','/',$schoolLogo)) }}" alt="Logo" class="h-full w-full object-contain p-1"/>
                     @else
-                        <svg class="h-7 w-7 text-violet-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 3L1 9l11 6 9-4.91V17a2 2 0 01-1.1 1.79l-7.4 3.7a2 2 0 01-1.8 0l-7.4-3.7A2 2 0 012 17V9"/>
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 21V9"/>
-                        </svg>
+                        <img src="{{ asset('images/myacademyhub-logo.png') }}" alt="MyAcademyHub" class="h-full w-full object-contain p-0.5"/>
                     @endif
                 </div>
                 <div class="min-w-0">
@@ -140,10 +166,7 @@ $activeShadow = "shadow-{$accent}-200";
                     @if($schoolLogo)
                         <img src="{{ asset('uploads/'.str_replace('\\','/',$schoolLogo)) }}" alt="Logo" class="h-full w-full object-contain p-1"/>
                     @else
-                        <svg class="text-violet-500 transition-all duration-300" x-bind:class="sidebarCollapsed ? 'h-5 w-5' : 'h-7 w-7'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 3L1 9l11 6 9-4.91V17a2 2 0 01-1.1 1.79l-7.4 3.7a2 2 0 01-1.8 0l-7.4-3.7A2 2 0 012 17V9"/>
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 21V9"/>
-                        </svg>
+                        <img src="{{ asset('images/myacademyhub-logo.png') }}" alt="MyAcademyHub" class="h-full w-full object-contain p-0.5"/>
                     @endif
                 </div>
                 <div class="min-w-0" x-show="!sidebarCollapsed" x-transition.opacity>
@@ -182,7 +205,7 @@ $activeShadow = "shadow-{$accent}-200";
     <div class="flex flex-1 min-w-0 flex-col">
 
         {{-- Header --}}
-        <header class="sticky top-0 z-30 flex h-[72px] items-center justify-between gap-4 border-b border-slate-200/60 bg-white px-6 shadow-sm">
+        <header class="sticky top-0 z-30 flex h-[72px] items-center justify-between gap-4 border-b border-slate-200/60 bg-white px-4 sm:px-6 shadow-sm">
 
             <div class="flex items-center gap-3 overflow-hidden">
                 <button @click="mobileSidebarOpen = true"
@@ -212,7 +235,7 @@ $activeShadow = "shadow-{$accent}-200";
 
                 {{-- User chip --}}
                 <a href="{{ route('profile') }}"
-                   class="flex items-center gap-2.5 rounded-full border border-slate-200 bg-white py-1 pl-1 pr-4 shadow-sm hover:shadow-md transition-all">
+                   class="flex items-center gap-1 sm:gap-2.5 rounded-full border border-slate-200 bg-white p-1 sm:py-1 sm:pl-1 sm:pr-4 shadow-sm hover:shadow-md transition-all">
                     @if($user?->profile_photo_url)
                         <img src="{{ $user->profile_photo_url }}" alt="{{ $user->name }}"
                              class="h-8 w-8 flex-shrink-0 rounded-full object-cover"/>
@@ -229,7 +252,7 @@ $activeShadow = "shadow-{$accent}-200";
 
                 {{-- Logout --}}
                 <button type="button" onclick="doLogout('logoutForm')"
-                        class="flex items-center gap-2 rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-bold text-white shadow-md hover:bg-slate-800 transition-all">
+                        class="hidden sm:flex items-center gap-2 rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-bold text-white shadow-md hover:bg-slate-800 transition-all">
                     <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
                     </svg>
@@ -261,7 +284,24 @@ $activeShadow = "shadow-{$accent}-200";
         @endif
 
         {{-- Page content --}}
-        <main class="flex-1 overflow-y-auto px-6 py-6">
+        <main class="flex-1 overflow-y-auto px-4 sm:px-6 py-6">
+            @php
+                $resolvedTenant = app()->bound('currentTenant') ? app('currentTenant') : null;
+            @endphp
+            @if($resolvedTenant && $resolvedTenant->active_broadcast_banner)
+                <div class="mb-6 rounded-2xl bg-gradient-to-r from-amber-500/10 to-orange-500/10 border border-amber-500/30 p-4 shadow-md backdrop-blur-md flex items-start gap-3.5 relative overflow-hidden group transition-all hover:shadow-lg">
+                    <div class="absolute -right-6 -bottom-6 w-24 h-24 rounded-full bg-amber-500/5 group-hover:scale-150 transition-all duration-700"></div>
+                    <div class="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl bg-amber-500/20 text-amber-600 shadow-inner">
+                        <svg class="h-5 w-5 animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                        </svg>
+                    </div>
+                    <div class="flex-1 min-w-0 pr-4">
+                        <div class="text-xs font-bold uppercase tracking-wider text-amber-600/90 mb-0.5">Global Announcement</div>
+                        <p class="text-sm font-semibold text-slate-800 leading-relaxed">{{ $resolvedTenant->active_broadcast_banner }}</p>
+                    </div>
+                </div>
+            @endif
             @yield('content')
             {{ $slot ?? '' }}
         </main>

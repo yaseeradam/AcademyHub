@@ -91,17 +91,17 @@
                 </div>
                 <div class="text-sm font-bold text-slate-800">Add New Subject</div>
             </div>
-            <form method="POST" action="{{ route('subjects.store') }}" class="flex flex-col sm:flex-row items-end gap-4">
+            <form method="POST" action="{{ route('subjects.store') }}" class="flex flex-col sm:flex-row items-stretch sm:items-end gap-4">
                 @csrf
                 <div class="flex-1">
                     <label class="text-xs font-semibold uppercase tracking-wider text-slate-500">Subject Name</label>
                     <input name="name" class="mt-2 input-compact w-full" value="{{ old('name') }}" placeholder="e.g., Mathematics" required />
                 </div>
-                <div class="w-32">
+                <div class="w-full sm:w-32">
                     <label class="text-xs font-semibold uppercase tracking-wider text-slate-500">Code</label>
                     <input name="code" class="mt-2 input-compact w-full uppercase" value="{{ old('code') }}" placeholder="MATH" required />
                 </div>
-                <button type="submit" class="inline-flex items-center gap-2 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 px-5 py-2.5 text-sm font-bold text-white shadow-sm transition hover:from-violet-600 hover:to-purple-700">
+                <button type="submit" class="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 px-5 py-2.5 text-sm font-bold text-white shadow-sm transition hover:from-violet-600 hover:to-purple-700 w-full sm:w-auto">
                     <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
                     Add Subject
                 </button>

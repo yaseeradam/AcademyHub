@@ -152,6 +152,13 @@ Route::middleware(['auth', 'active'])->group(function () {
 
         Route::get('/parents', \App\Livewire\Parents\Management::class)->name('parents.index');
 
+        // Parent Portal manage plugin route
+        Route::middleware('plugin:parent-portal')->group(function () {
+            Route::get('/parent-portal', \App\Livewire\Parents\Management::class)->name('parent-portal.index');
+            Route::get('/parent', \App\Livewire\Parents\Management::class); // Fallback matching DB route_name
+        });
+
+
         Route::get('/students/create', StudentsForm::class)->name('students.create');
         Route::get('/students/{student}/edit', StudentsForm::class)->name('students.edit');
         Route::delete('/students/{student}', [StudentController::class, 'destroy'])->name('students.destroy');
@@ -246,6 +253,12 @@ Route::middleware(['auth', 'active'])->group(function () {
                 ->name('cbt.sample-download');
         });
 
+        // E-Learning — only accessible after purchasing/installing the E-Learning plugin
+        Route::middleware('plugin:e-learning')->group(function () {
+            Route::get('/e-learning', \App\Livewire\ELearning\Index::class)->name('e-learning.index');
+        });
+
+
         Route::get('/analytics', \App\Livewire\Analytics\Dashboard::class)
             ->middleware('permission:analytics.view')
             ->name('analytics.dashboard');
@@ -328,7 +341,20 @@ Route::middleware(['auth', 'active'])->group(function () {
 
         Route::get('/cbt/exams/{exam}/export', [CbtExportController::class, 'examResults'])
             ->name('cbt.exams.export');
+
+        // System Backup
+        Route::get('/backup/download', [\App\Http\Controllers\Admin\BackupController::class, 'download'])
+            ->name('backup.download');
+
+        // School Admin friendly diagnostics
+        Route::get('/settings/health', [\App\Http\Controllers\Admin\HealthController::class, 'index'])->name('admin.health');
+        Route::post('/settings/health/diagnose', [\App\Http\Controllers\Admin\HealthController::class, 'diagnose'])->name('admin.health.diagnose');
     });
+
+    // Marketplace product detail alias (used by bursar upgrade link)
+    Route::get('/marketplace/product/{product}', \App\Livewire\Marketplace\ProductDetail::class)
+        ->name('marketplace.show')
+        ->middleware('role:admin');
 });
 
 // ══════════════════════════════════════════════════════════════════════
@@ -344,5 +370,37 @@ Route::prefix('superadmin')->name('superadmin.')->group(function () {
         Route::resource('tenants', \App\Http\Controllers\SuperAdmin\TenantController::class)->except(['show']);
         Route::put('tenants/{tenant}/admins/{admin}', [\App\Http\Controllers\SuperAdmin\TenantController::class, 'updateAdmin'])->name('tenants.admins.update');
         Route::resource('marketplace', \App\Http\Controllers\SuperAdmin\MarketplaceController::class)->except(['show']);
+
+        // Platform backup
+        Route::get('/backup/download', [\App\Http\Controllers\SuperAdmin\BackupController::class, 'download'])
+            ->name('backup.download');
+
+        // Platform Health & Console
+        Route::get('/health', [\App\Http\Controllers\SuperAdmin\HealthController::class, 'index'])->name('health');
+        Route::post('/health/clear-cache', [\App\Http\Controllers\SuperAdmin\HealthController::class, 'clearCache'])->name('health.clear-cache');
+        Route::post('/health/clear-logs', [\App\Http\Controllers\SuperAdmin\HealthController::class, 'clearLogs'])->name('health.clear-logs');
+        Route::post('/impersonate/{user}', [\App\Http\Controllers\SuperAdmin\ImpersonationController::class, 'start'])->name('impersonate.start');
+        
+        // Advanced Tenant Controls & Customization
+        Route::get('tenants/{tenant}/check-dns', [\App\Http\Controllers\SuperAdmin\TenantController::class, 'checkDns'])->name('tenants.check-dns');
+        Route::post('tenants/{tenant}/impersonate', [\App\Http\Controllers\SuperAdmin\TenantController::class, 'impersonate'])->name('tenants.impersonate');
+        Route::post('tenants/{tenant}/save-flags', [\App\Http\Controllers\SuperAdmin\TenantController::class, 'saveFlags'])->name('tenants.save-flags');
+        Route::post('tenants/{tenant}/save-broadcast', [\App\Http\Controllers\SuperAdmin\TenantController::class, 'saveBroadcast'])->name('tenants.save-broadcast');
+        Route::put('tenants/{tenant}/plugins/{component}', [\App\Http\Controllers\SuperAdmin\TenantController::class, 'updatePluginPricing'])->name('tenants.plugins.update');
+        
+        // Dynamic Invoicing Ledger
+        Route::post('tenants/{tenant}/bills/generate', [\App\Http\Controllers\SuperAdmin\TenantController::class, 'generateBill'])->name('tenants.bills.generate');
+        Route::post('tenants/{tenant}/bills/{bill}/pay', [\App\Http\Controllers\SuperAdmin\TenantController::class, 'payBill'])->name('tenants.bills.pay');
+        Route::post('tenants/{tenant}/bills/{bill}/void', [\App\Http\Controllers\SuperAdmin\TenantController::class, 'voidBill'])->name('tenants.bills.void');
+
+        // Real-Time Endpoint Monitor Health Suite
+        Route::get('/health/endpoints', [\App\Http\Controllers\SuperAdmin\HealthController::class, 'endpoints'])->name('health.endpoints');
+        Route::get('/health/ping-endpoint', [\App\Http\Controllers\SuperAdmin\HealthController::class, 'pingEndpoint'])->name('health.ping-endpoint');
+        Route::post('/health/start-background-ping', [\App\Http\Controllers\SuperAdmin\HealthController::class, 'startBackgroundPing'])->name('health.start-background-ping');
+        Route::get('/health/ping-status', [\App\Http\Controllers\SuperAdmin\HealthController::class, 'pingStatus'])->name('health.ping-status');
     });
 });
+
+// Impersonation entry/return routes (accessible globally on any subdomain)
+Route::get('/impersonate/login', [\App\Http\Controllers\SuperAdmin\ImpersonationController::class, 'login'])->name('impersonate.login');
+Route::get('/impersonate/return', [\App\Http\Controllers\SuperAdmin\ImpersonationController::class, 'stop'])->name('impersonate.stop');

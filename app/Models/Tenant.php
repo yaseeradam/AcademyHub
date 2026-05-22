@@ -19,6 +19,9 @@ class Tenant extends Model
         'contact_email',
         'contact_phone',
         'settings',
+        'feature_flags',
+        'max_disk_usage_mb',
+        'active_broadcast_banner',
         'logo',
         'primary_color',
         'max_students',
@@ -28,9 +31,10 @@ class Tenant extends Model
     ];
 
     protected $casts = [
-        'settings' => 'array',
-        'activated_at' => 'datetime',
-        'expires_at' => 'datetime',
+        'settings'      => 'array',
+        'feature_flags' => 'array',
+        'activated_at'  => 'datetime',
+        'expires_at'    => 'datetime',
     ];
 
     public function users(): HasMany
@@ -41,8 +45,22 @@ class Tenant extends Model
     public function marketplaceComponents()
     {
         return $this->belongsToMany(MarketplaceComponent::class, 'tenant_marketplace_components')
-            ->withPivot('installed_at')
+            ->using(TenantMarketplaceComponent::class)
+            ->withPivot('installed_at', 'price_paid', 'student_count_at_install', 'uninstalled_at', 'setup_fee', 'usage_fee_per_student', 'allowed_class_ids', 'status')
             ->withTimestamps();
+    }
+
+    public function activeMarketplaceComponents()
+    {
+        return $this->marketplaceComponents()
+            ->wherePivotNotNull('installed_at')
+            ->wherePivotNull('uninstalled_at')
+            ->wherePivot('status', 'active');
+    }
+
+    public function bills()
+    {
+        return $this->hasMany(TenantPluginBill::class);
     }
 
     public function scopeActive($query)

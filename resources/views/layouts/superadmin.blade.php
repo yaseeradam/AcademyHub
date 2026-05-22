@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Dev Console — {{ config('app.name') }}</title>
+    <title>Super Admin Console — MyAcademyHub</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     {{-- NOTE: Alpine is already bundled in app.js — DO NOT add a CDN Alpine script here, it causes double-init and breaks Livewire --}}
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
@@ -444,19 +444,69 @@
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+
+        /* ── Responsiveness ─────────────────────────── */
+        .lg-hidden { display: none !important; }
+
+        @media (max-width: 1023px) {
+            .lg-hidden { display: inline-flex !important; }
+            #sa-sidebar {
+                transform: translateX(-100%);
+                transition: transform .3s cubic-bezier(0.4, 0, 0.2, 1);
+            }
+            #sa-sidebar.open {
+                transform: translateX(0);
+            }
+            #sa-main {
+                margin-left: 0 !important;
+            }
+            #sa-topbar {
+                padding: 0 16px;
+            }
+            .sa-grid-2, .sa-grid-3 {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+            .sa-stats-grid {
+                grid-template-columns: 1fr;
+            }
+            .sa-page-title {
+                font-size: 16px;
+            }
+            .sa-page-sub {
+                display: none !important;
+            }
+        }
+        
+        @media (max-width: 639px) {
+            .hidden-xs {
+                display: none !important;
+            }
+        }
     </style>
 </head>
-<body>
+<body x-data="{ mobileSidebarOpen: false }">
+
+    <!-- Mobile Sidebar Backdrop Overlay -->
+    <div x-cloak x-show="mobileSidebarOpen" @click="mobileSidebarOpen = false" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15, 23, 42, 0.4); backdrop-filter: blur(4px); z-index: 45;" class="lg-hidden"></div>
 
     <!-- Sidebar -->
-    <aside id="sa-sidebar">
+    <aside id="sa-sidebar" :class="mobileSidebarOpen ? 'open' : ''">
         <!-- Brand -->
-        <div class="sa-brand">
-            <div class="sa-brand-icon">✦</div>
-            <div class="sa-brand-text">
-                <div class="sa-brand-title">DevConsole</div>
-                <div class="sa-brand-sub">Multi-Tenant Admin</div>
+        <div class="sa-brand" style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <img src="{{ asset('images/myacademyhub-logo.png') }}" alt="MyAcademyHub" style="height:40px;width:auto;flex-shrink:0;">
+                <div class="sa-brand-text">
+                    <div class="sa-brand-title">MyAcademyHub</div>
+                    <div class="sa-brand-sub">Super Admin Console</div>
+                </div>
             </div>
+            <!-- Close Button for Mobile -->
+            <button @click="mobileSidebarOpen = false" class="lg-hidden" aria-label="Close Sidebar" style="background: none; border: none; cursor: pointer; padding: 6px; border-radius: 8px; color: var(--sa-muted); display: inline-flex; align-items: center; justify-content: center;">
+                <svg style="width: 20px; height: 20px;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
         </div>
 
         <!-- Navigation -->
@@ -470,6 +520,14 @@
                     <rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/>
                 </svg>
                 Dashboard
+            </a>
+
+            <a href="{{ route('superadmin.health') }}"
+               class="{{ request()->routeIs('superadmin.health') ? 'active' : '' }}">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+                </svg>
+                System Health
             </a>
 
             <div class="sa-nav-label" style="margin-top:12px;">School Instances</div>
@@ -513,9 +571,9 @@
                 </div>
                 <div class="sa-user-role">Super Admin</div>
             </div>
-            <form method="POST" action="{{ route('superadmin.logout') }}" id="sa-logout-form">
+            <form method="POST" action="{{ route('superadmin.logout') }}" id="sa-logout-form" style="margin-left: auto; display: inline-flex; align-items: center; margin-bottom: 0;">
                 @csrf
-                <button type="submit" class="sa-logout-btn" title="Logout">
+                <button type="submit" class="sa-logout-btn" title="Logout" style="margin-left: 0;">
                     <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
                     </svg>
@@ -528,18 +586,29 @@
     <div id="sa-main">
         <!-- Topbar -->
         <header id="sa-topbar">
-            <div>
-                <div class="sa-page-title">@yield('header_title', 'Dashboard')</div>
-                <div class="sa-page-sub">@yield('header_subtitle', 'Manage your multi-tenant workspace')</div>
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <!-- Hamburger Menu Button -->
+                <button @click="mobileSidebarOpen = true" class="lg-hidden" aria-label="Open Sidebar" style="background: none; border: none; cursor: pointer; padding: 6px; border-radius: 8px; color: var(--sa-muted); display: inline-flex; align-items: center; justify-content: center;">
+                    <svg style="width: 24px; height: 24px;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+                    </svg>
+                </button>
+                <div>
+                    <div class="sa-page-title">@yield('header_title', 'Dashboard')</div>
+                    <div class="sa-page-sub">@yield('header_subtitle', 'Manage your multi-tenant workspace')</div>
+                </div>
             </div>
 
             <div style="display:flex; align-items:center; gap:12px;">
                 @hasSection('header_actions')
-                    @yield('header_actions')
+                    <div class="hidden-xs" style="display: flex; align-items: center; gap: 8px;">
+                        @yield('header_actions')
+                    </div>
                 @endif
                 <div class="sa-status-pill">
                     <span class="sa-status-dot"></span>
-                    System Online
+                    <span class="hidden-xs">System Online</span>
+                    <span class="lg-hidden">Online</span>
                 </div>
             </div>
         </header>

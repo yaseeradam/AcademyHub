@@ -96,17 +96,17 @@
                 </div>
                 <div class="text-sm font-bold text-slate-800">Add New Class</div>
             </div>
-            <form method="POST" action="{{ route('classes.store') }}" class="flex flex-col sm:flex-row items-end gap-4">
+            <form method="POST" action="{{ route('classes.store') }}" class="flex flex-col sm:flex-row items-stretch sm:items-end gap-4">
                 @csrf
                 <div class="flex-1">
                     <label class="text-xs font-semibold uppercase tracking-wider text-slate-500">Class Name</label>
                     <input name="name" class="mt-2 input-compact w-full" value="{{ old('name') }}" placeholder="e.g., JSS 1A" required />
                 </div>
-                <div class="w-32">
+                <div class="w-full sm:w-32">
                     <label class="text-xs font-semibold uppercase tracking-wider text-slate-500">Level</label>
                     <input name="level" type="number" class="mt-2 input-compact w-full" value="{{ old('level', 1) }}" min="1" max="30" required />
                 </div>
-                <button type="submit" class="inline-flex items-center gap-2 rounded-xl bg-gradient-to-br from-sky-400 to-blue-600 px-5 py-2.5 text-sm font-bold text-white shadow-sm transition hover:from-sky-500 hover:to-blue-700">
+                <button type="submit" class="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-br from-sky-400 to-blue-600 px-5 py-2.5 text-sm font-bold text-white shadow-sm transition hover:from-sky-500 hover:to-blue-700 w-full sm:w-auto">
                     <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
                     Add Class
                 </button>

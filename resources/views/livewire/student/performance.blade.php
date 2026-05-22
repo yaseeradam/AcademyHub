@@ -1,11 +1,11 @@
 @php
-    $avg        = $this->performanceData['overview']['average_score']  ?? 0;
-    $pct        = $this->performanceData['overview']['percentage']      ?? 0;
-    $grade      = $this->performanceData['overview']['grade']           ?? '-';
-    $passed     = $this->performanceData['overview']['subjects_passed'] ?? 0;
-    $totalSubs  = $this->performanceData['overview']['total_subjects']  ?? 0;
-    $attRate    = $this->performanceData['attendance_impact']['attendance_rate'] ?? 0;
-    $hwRate     = $this->performanceData['homework_performance']['completion_rate'] ?? 0;
+    $avg        = data_get($this, 'performanceData.overview.average_score', 0);
+    $pct        = data_get($this, 'performanceData.overview.percentage', 0);
+    $grade      = data_get($this, 'performanceData.overview.grade', '-');
+    $passed     = data_get($this, 'performanceData.overview.subjects_passed', 0);
+    $totalSubs  = data_get($this, 'performanceData.overview.total_subjects', 0);
+    $attRate    = data_get($this, 'performanceData.attendance_impact.attendance_rate', 0);
+    $hwRate     = data_get($this, 'performanceData.homework_performance.completion_rate', 0);
 
     $gradeBg = match(true) {
         $pct >= 70 => 'from-emerald-500 to-teal-600',
@@ -25,31 +25,19 @@
 
 <div class="space-y-6">
 
-    {{-- Header --}}
-    <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-            <h1 class="text-2xl font-bold text-gray-900">Performance Tracking</h1>
-            @if($this->student)
-                <p class="mt-1 text-sm text-gray-500">
-                    {{ $this->student->full_name }} &bull; {{ $this->student->schoolClass?->name }}
-                </p>
-            @endif
+        {-- Page Header --}
+    <div class="rounded-xl bg-slate-900 px-5 py-4 shadow-sm">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                <h1 class="text-xl font-bold text-white">Performance</h1>
+            
         </div>
-        <select wire:model.live="selectedTerm"
-                class="self-start rounded-xl border-gray-200 text-sm shadow-sm focus:border-violet-400 focus:ring-violet-400 sm:self-auto">
-            @foreach($this->availableTerms as $term)
-                <option value="{{ $term['value'] }}">{{ $term['label'] }}</option>
-            @endforeach
-        </select>
     </div>
 
-    @if($this->student && !empty($this->performanceData))
-
-        {{-- ── Stat Cards ── --}}
+    {{-- ── Stat Cards ── --}}
         <div class="grid grid-cols-2 gap-4 sm:grid-cols-4">
 
             {{-- Average Score Ring --}}
-            <div class="col-span-2 sm:col-span-1 relative overflow-hidden rounded-2xl bg-gradient-to-br {{ $gradeBg }} p-5 text-white shadow-lg flex flex-col items-center justify-center">
+            <div class="col-span-2 sm:col-span-1 relative overflow-hidden rounded-2xl bg-gradient-to-br {{ $gradeBg }} p-6 text-white shadow-lg flex flex-col items-center justify-center">
                 <div class="text-xs font-bold uppercase tracking-wider text-white/70 mb-3">Average Score</div>
                 <div class="relative">
                     <svg width="100" height="100" viewBox="0 0 100 100" class="-rotate-90">
@@ -70,33 +58,33 @@
             </div>
 
             {{-- Subjects Passed --}}
-            <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-violet-500 to-purple-600 p-5 text-white shadow-lg">
-                <div class="text-xs font-bold uppercase tracking-wider text-violet-100">Subjects</div>
-                <div class="mt-2 text-4xl font-extrabold">{{ $passed }}</div>
-                <div class="text-sm text-violet-100">of {{ $totalSubs }} passed</div>
-                <div class="mt-2 inline-flex items-center gap-1 rounded-full bg-white/20 px-2 py-0.5 text-xs font-bold">
-                    Grade {{ $grade }}
-                </div>
+                <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-violet-500 to-purple-600 p-6 text-white shadow-lg">
+                    <div class="text-xs font-bold uppercase tracking-wider text-violet-100">Subjects</div>
+                    <div class="mt-2 text-4xl font-extrabold">{{ $passed }}</div>
+                    <div class="text-sm text-violet-100">of {{ $totalSubs }} passed</div>
+                    <div class="mt-2 inline-flex items-center gap-1 rounded-full bg-white/20 px-2 py-0.5 text-xs font-bold">
+                        Grade {{ $grade }}
+                    </div>
                 <div class="pointer-events-none absolute -right-4 -top-4 h-20 w-20 rounded-full bg-white/10"></div>
             </div>
 
             {{-- Attendance Rate --}}
-            <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-cyan-500 to-blue-600 p-5 text-white shadow-lg">
-                <div class="text-xs font-bold uppercase tracking-wider text-cyan-100">Attendance</div>
-                <div class="mt-2 text-4xl font-extrabold">{{ $attRate }}%</div>
-                <div class="text-sm text-cyan-100">
-                    {{ $this->performanceData['attendance_impact']['present_days'] }}/{{ $this->performanceData['attendance_impact']['total_days'] }} days
-                </div>
+                <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-cyan-500 to-blue-600 p-6 text-white shadow-lg">
+                    <div class="text-xs font-bold uppercase tracking-wider text-cyan-100">Attendance</div>
+                    <div class="mt-2 text-4xl font-extrabold">{{ $attRate }}%</div>
+                    <div class="text-sm text-cyan-100">
+                        {{ data_get($this, 'performanceData.attendance_impact.present_days') }}/{{ data_get($this, 'performanceData.attendance_impact.total_days') }} days
+                    </div>
                 <div class="pointer-events-none absolute -right-4 -top-4 h-20 w-20 rounded-full bg-white/10"></div>
             </div>
 
             {{-- Homework Rate --}}
-            <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-amber-500 to-orange-500 p-5 text-white shadow-lg">
-                <div class="text-xs font-bold uppercase tracking-wider text-amber-100">Homework</div>
-                <div class="mt-2 text-4xl font-extrabold">{{ $hwRate }}%</div>
-                <div class="text-sm text-amber-100">
-                    {{ $this->performanceData['homework_performance']['submitted'] }}/{{ $this->performanceData['homework_performance']['total_assignments'] }} submitted
-                </div>
+                <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-amber-500 to-orange-500 p-6 text-white shadow-lg">
+                    <div class="text-xs font-bold uppercase tracking-wider text-amber-100">Homework</div>
+                    <div class="mt-2 text-4xl font-extrabold">{{ $hwRate }}%</div>
+                    <div class="text-sm text-amber-100">
+                        {{ data_get($this, 'performanceData.homework_performance.submitted') }}/{{ data_get($this, 'performanceData.homework_performance.total_assignments') }} submitted
+                    </div>
                 <div class="pointer-events-none absolute -right-4 -top-4 h-20 w-20 rounded-full bg-white/10"></div>
             </div>
         </div>
@@ -218,14 +206,14 @@
                         <table class="min-w-full">
                             <thead>
                                 <tr class="border-b border-gray-100 text-xs font-semibold uppercase tracking-wider text-gray-400">
-                                    <th class="pb-3 text-left">Subject</th>
-                                    <th class="pb-3 text-center">CA1</th>
-                                    <th class="pb-3 text-center">CA2</th>
-                                    <th class="pb-3 text-center">Exam</th>
-                                    <th class="pb-3 text-center">Total</th>
-                                    <th class="pb-3 text-center">Grade</th>
-                                    <th class="pb-3 text-center">%</th>
-                                    <th class="pb-3 text-center">Pos</th>
+                                    <th class="pb-3 text-left text-base font-medium">Subject</th>
+                                    <th class="pb-3 text-center text-base font-medium">CA1</th>
+                                    <th class="pb-3 text-center text-base font-medium">CA2</th>
+                                    <th class="pb-3 text-center text-base font-medium">Exam</th>
+                                    <th class="pb-3 text-center text-base font-medium">Total</th>
+                                    <th class="pb-3 text-center text-base font-medium">Grade</th>
+                                    <th class="pb-3 text-center text-base font-medium">%</th>
+                                    <th class="pb-3 text-center text-base font-medium">Pos</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-gray-50">
