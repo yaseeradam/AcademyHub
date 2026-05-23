@@ -58,7 +58,10 @@ php -v
 
 # 5. Install Node.js (v20 LTS)
 echo -e "${YELLOW}Step 4: Installing Node.js v20 (LTS)...${NC}"
-curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
+mkdir -p /etc/apt/keyrings
+curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg
+echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_20.x nodistro main" | tee /etc/apt/sources.list.d/nodesource.list
+apt-get update
 apt-get install -y nodejs
 
 # Verify Node.js and npm
