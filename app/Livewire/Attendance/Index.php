@@ -21,6 +21,8 @@ use Livewire\Component;
 #[Title('Attendance')]
 class Index extends Component
 {
+    use \App\Traits\DispatchesModals;
+
     public ?int $classId = null;
     public ?int $sectionId = null;
     public string $date = '';
@@ -252,6 +254,7 @@ class Index extends Component
         });
 
         $this->dispatch('alert', message: 'Attendance saved successfully.', type: 'success');
+        $this->dispatchSuccessModal('Attendance Saved', 'The attendance sheet has been updated and registered successfully.');
     }
 
     public function markAll(string $status): void
@@ -352,6 +355,14 @@ class Index extends Component
             ->first();
 
         if (!$sheet) {
+            // Pre-initialize empty marks for active students to ensure secure binding
+            $students = $this->getStudents();
+            foreach ($students as $student) {
+                $this->marks[$student->id] = [
+                    'status' => 'Present',
+                    'note'   => null,
+                ];
+            }
             return;
         }
 

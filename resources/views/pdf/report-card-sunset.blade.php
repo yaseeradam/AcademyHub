@@ -1,224 +1,230 @@
 <!doctype html>
-<html>
+<html lang="en">
 <head>
     <meta charset="utf-8" />
     <title>Report Card - {{ $student->admission_number }}</title>
     <style>
         @page { margin: 10mm; }
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: DejaVu Sans, Arial, sans-serif; font-size: 9px; color: #7c2d12; }
+        body { font-family: DejaVu Sans, Arial, sans-serif; font-size: 9px; color: #7c2d12; background: white; }
 
-        /* SUNSET: Warm orange/red, sun rays, energetic design */
-        .page { background: linear-gradient(180deg, #fff7ed 0%, #fed7aa 50%, #fdba74 100%); padding: 14px; position: relative; overflow: hidden; }
-        
-        .sun-rays { position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 200px; height: 100px; background: radial-gradient(circle, rgba(251,146,60,0.2) 0%, transparent 70%); }
-        
-        .header { text-align: center; margin-bottom: 10px; position: relative; z-index: 1; }
-        .sun-icon { width: 60px; height: 60px; background: linear-gradient(135deg, #f97316, #ea580c); border-radius: 50%; margin: 0 auto 6px; display: flex; align-items: center; justify-content: center; color: white; font-size: 28px; border: 4px solid #fed7aa; box-shadow: 0 0 20px rgba(249,115,22,0.4); }
-        .school-name { font-size: 18px; font-weight: 900; color: #c2410c; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 4px; text-shadow: 1px 1px 2px rgba(194,65,12,0.2); }
-        .sunset-badge { display: inline-block; background: linear-gradient(135deg, #f97316, #dc2626); color: white; padding: 5px 16px; border-radius: 20px; font-size: 9px; font-weight: 800; letter-spacing: 1px; box-shadow: 0 2px 8px rgba(249,115,22,0.3); }
-        
-        .horizon-bar { height: 3px; background: linear-gradient(90deg, transparent 0%, #f97316 50%, transparent 100%); margin: 8px 0; }
-        
-        .session-strip { background: white; border-left: 4px solid #f97316; border-right: 4px solid #dc2626; padding: 6px; text-align: center; margin-bottom: 10px; font-size: 8px; font-weight: 700; color: #c2410c; }
-        
-        .student-sunset { background: white; border-radius: 12px; padding: 10px; margin-bottom: 10px; border: 3px solid #fb923c; box-shadow: 0 4px 12px rgba(249,115,22,0.2); }
-        .student-grid { display: table; width: 100%; }
-        .student-col { display: table-cell; width: 50%; padding: 4px; }
-        .student-item { margin-bottom: 4px; padding-bottom: 3px; border-bottom: 1px dashed #fdba74; }
-        .student-label { font-size: 7px; color: #ea580c; font-weight: 800; text-transform: uppercase; }
-        .student-value { font-size: 9px; color: #7c2d12; font-weight: 700; }
-        
-        .stats-sunset { display: table; width: 100%; margin-bottom: 10px; }
-        .stat-sunset { display: table-cell; width: 16.66%; padding: 2px; }
-        .stat-glow { background: white; border: 2px solid #fb923c; border-radius: 10px; text-align: center; padding: 8px 4px; box-shadow: 0 2px 8px rgba(251,146,60,0.2); }
-        .stat-label { font-size: 6px; color: #ea580c; font-weight: 700; text-transform: uppercase; margin-bottom: 2px; }
-        .stat-value { font-size: 14px; color: #c2410c; font-weight: 900; }
-        
-        table { width: 100%; border-collapse: collapse; margin-bottom: 10px; background: white; border-radius: 10px; overflow: hidden; border: 2px solid #fb923c; }
-        th { background: linear-gradient(135deg, #f97316, #dc2626); color: white; padding: 6px 3px; font-size: 7px; font-weight: 800; text-transform: uppercase; }
-        td { padding: 5px 3px; font-size: 8px; border-bottom: 1px solid #fed7aa; text-align: center; }
-        tr:nth-child(even) td { background: #fff7ed; }
-        .subj { text-align: left; font-weight: 700; color: #c2410c; padding-left: 6px; }
-        
-        .grade-sunset { background: white; border: 2px solid #fb923c; border-radius: 8px; padding: 6px; margin-bottom: 10px; text-align: center; font-size: 7px; color: #6b7280; }
-        .grade-sunset strong { color: #ea580c; font-size: 9px; margin: 0 4px; }
-        
-        .remarks-sunset { background: white; border: 2px solid #fb923c; border-radius: 10px; padding: 8px; margin-bottom: 8px; box-shadow: 0 2px 6px rgba(251,146,60,0.15); }
-        .remarks-title { font-size: 8px; color: #ea580c; font-weight: 800; text-transform: uppercase; margin-bottom: 3px; }
-        .remarks-text { font-size: 8px; color: #4b5563; min-height: 20px; }
-        
-        .next-sunset { background: linear-gradient(135deg, #f97316, #dc2626); color: white; text-align: center; padding: 6px; border-radius: 10px; font-size: 9px; font-weight: 800; margin-bottom: 8px; box-shadow: 0 4px 12px rgba(249,115,22,0.3); }
-        
-        .sigs { display: table; width: 100%; }
-        .sig { display: table-cell; width: 33.33%; text-align: center; padding: 4px; }
-        .sig-line { border-top: 2px solid #f97316; margin-top: 25px; padding-top: 3px; font-size: 8px; font-weight: 700; color: #c2410c; }
-        
-        .footer { text-align: center; font-size: 6px; color: #9ca3af; margin-top: 6px; }
+        /* ─── SUNSET Warm Amber & Rose Premium Style ─── */
+        .page { border: 4px solid #f97316; padding: 4px; background: white; position: relative; }
+        .page-inner { border: 1.5px solid #dc2626; padding: 16px; background: linear-gradient(180deg, #fff7ed 0%, #ffffff 45%, #ffffff 100%); }
+
+        .header { text-align: center; border-bottom: 2px solid #f97316; padding-bottom: 10px; margin-bottom: 12px; }
+        .header-table { display: table; width: 100%; }
+        .header-cell { display: table-cell; vertical-align: middle; }
+        .logo-wrap { width: 75px; text-align: center; }
+        .logo { width: 58px; height: 58px; object-fit: contain; border: 2px solid #f97316; border-radius: 50%; padding: 4px; background: white; }
+        .school-name { font-size: 19px; font-weight: 900; color: #c2410c; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 2px; }
+        .school-motto { font-size: 8.5px; color: #f97316; font-style: italic; font-weight: 705; margin-bottom: 2px; }
+        .school-meta { font-size: 8px; color: #374151; margin-bottom: 1px; }
+        .badge { display: inline-block; background: linear-gradient(135deg, #f97316, #dc2626); color: white; padding: 5px 18px; border-radius: 20px; font-size: 8.5px; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase; margin-top: 6px; box-shadow: 0 2px 5px rgba(249,115,22,0.15); }
+        .meta-right { font-size: 8px; color: #c2410c; font-weight: 750; text-align: right; }
+
+        /* Stats Block */
+        .stats { display: table; width: 100%; margin-bottom: 12px; }
+        .stat { display: table-cell; padding: 2px; }
+        .stat-inner { background: white; border: 2px solid #fed7aa; border-radius: 10px; text-align: center; padding: 8px 4px; box-shadow: 0 2px 4px rgba(249,115,22,0.05); }
+        .stat-label { font-size: 6.5px; color: #ea580c; font-weight: 800; text-transform: uppercase; margin-bottom: 2px; }
+        .stat-value { font-size: 14.5px; font-weight: 900; color: #c2410c; }
+
+        /* Table */
+        table.scores { width: 100%; border-collapse: collapse; margin-bottom: 12px; border: 2px solid #fb923c; border-radius: 8px; overflow: hidden; }
+        table.scores th { background: linear-gradient(135deg, #f97316, #dc2626); color: white; padding: 6px 4px; font-size: 7.5px; font-weight: 800; text-transform: uppercase; border: 1px solid #fb923c; }
+        table.scores td { padding: 5px 4px; border: 1px solid #fed7aa; text-align: center; font-size: 8.5px; color: #111827; }
+        table.scores tr:nth-child(even) td { background: #fff7ed; }
+        .subj { text-align: left !important; font-weight: 700; color: #c2410c; padding-left: 8px !important; }
+        .bold { font-weight: 800; color: #7c2d12; }
+
+        /* Grading Key */
+        .grading { display: table; width: 100%; border: 2px solid #fed7aa; margin-bottom: 12px; border-radius: 8px; overflow: hidden; background: white; }
+        .gr-cell { display: table-cell; padding: 5px 4px; text-align: center; font-size: 7.5px; font-weight: 700; color: #c2410c; border-right: 1px solid #fed7aa; }
+        .gr-cell:last-child { border-right: none; }
+        .gr-cell strong { color: #ea580c; font-size: 9px; }
+
+        /* Attendance */
+        .att { display: table; width: 100%; margin-bottom: 12px; border: 2px solid #fed7aa; border-radius: 8px; overflow: hidden; background: white; }
+        .att-cell { display: table-cell; width: 33.33%; text-align: center; padding: 6px; border-right: 1px solid #fed7aa; }
+        .att-cell:last-child { border-right: none; }
+        .att-label { font-size: 7.5px; font-weight: 850; text-transform: uppercase; color: #ea580c; margin-bottom: 2px; }
+        .att-value { font-size: 14px; font-weight: 900; color: #7c2d12; }
+
+        /* Remarks */
+        .remarks { border: 2px solid #fb923c; border-radius: 8px; padding: 8px 10px; margin-bottom: 8px; background: white; }
+        .remarks-label { font-size: 7.5px; font-weight: 900; color: #ea580c; text-transform: uppercase; margin-bottom: 3px; }
+        .remarks-text { font-size: 8px; color: #374151; min-height: 20px; line-height: 1.3; }
+
+        /* Next Term */
+        .next-term { background: linear-gradient(135deg, #f97316, #dc2626); color: white; text-align: center; padding: 6px; font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; border-radius: 6px; }
+
+        /* Signatures */
+        .sigs { display: table; width: 100%; margin-top: 12px; }
+        .sig { display: table-cell; width: 33.33%; text-align: center; padding: 4px; vertical-align: bottom; }
+        .sig-img { max-height: 32px; max-width: 90px; object-fit: contain; margin-bottom: 3px; }
+        .sig-line { border-top: 2px solid #f97316; margin-top: 24px; padding-top: 3px; font-size: 8.5px; font-weight: 800; color: #c2410c; }
+        .sig-line.has-img { margin-top: 3px; }
+        .sig-sub { font-size: 6.5px; color: #f97316; font-style: italic; margin-top: 1px; opacity: 0.8; }
+
+        .footer { text-align: center; font-size: 7px; color: #9ca3af; margin-top: 6px; }
+        .watermark { position: fixed; top: 50%; left: 50%; transform: translate(-50%,-50%); z-index: -1; opacity: 0.02; width: 320px; height: 320px; }
     </style>
 </head>
 <body>
-    @php $schoolName = config('myacademy.school_name', 'MyAcademy'); @endphp
-        @php
+@php
+    $schoolName = config('myacademy.school_name', config('app.name', 'MyAcademy'));
+    $logo = config('myacademy.school_logo');
+    $logoPath = $logo ? public_path('uploads/'.str_replace('\\', '/', $logo)) : null;
+    $logoExists = $logoPath && file_exists($logoPath);
     $opts = $rcOptions ?? [];
-    $showPosition = $opts['show_position'] ?? true;
-    $showAttendance = $opts['show_attendance'] ?? true;
-    $showGradingKey = $opts['show_grading_key'] ?? true;
-    $showClassAverage = $opts['show_class_average'] ?? true;
-    $showWatermark = $opts['show_watermark'] ?? true;
-    $showNextTermDate = $opts['show_next_term_date'] ?? true;
+    $showPosition       = $opts['show_position'] ?? true;
+    $showAttendance     = $opts['show_attendance'] ?? true;
+    $showGradingKey     = $opts['show_grading_key'] ?? true;
+    $showClassAverage   = $opts['show_class_average'] ?? true;
+    $showWatermark      = $opts['show_watermark'] ?? true;
+    $showNextTermDate   = $opts['show_next_term_date'] ?? true;
     $showTeacherRemarks = $opts['show_teacher_remarks'] ?? true;
     $showPrincipalRemarks = $opts['show_principal_remarks'] ?? true;
-    $showPsychomotor = $opts['show_psychomotor'] ?? false;
-    $showSchoolFees = $opts['show_school_fees'] ?? false;
-    $showSignatures = $opts['show_signatures'] ?? false;
+    $showPsychomotor    = $opts['show_psychomotor'] ?? false;
+    $showSchoolFees     = $opts['show_school_fees'] ?? false;
+    $showSignatures     = $opts['show_signatures'] ?? false;
 @endphp
-    
-    <div class="page">
-        <div class="sun-rays"></div>
-        
-        <div class="header">
-            <div class="sun-icon">☀</div>
-            <div class="school-name">{{ $schoolName }}</div>
-            <div class="sunset-badge">STUDENT REPORT CARD</div>
-        </div>
-        
-        <div class="horizon-bar"></div>
-        
-        <div class="session-strip">
-            Academic Session {{ $session }} | Term {{ $term }} | Generated {{ now()->format('F d, Y') }}
-        </div>
-        
-        <div class="student-sunset">
-            
-                @php($siBorderColor = '#f97316')
-                @php($siBgColor = '#fff7ed')
-                @php($siLabelColor = '#c2410c')
-                @php($siValueColor = '#1f2937')
-                @php($siDotColor = '#fdba74')
-                @include('pdf.partials.rc-student-info')
 
+@if($logoExists && $showWatermark)
+    <div class="watermark"><img src="{{ $logoPath }}" alt="" style="width:100%;height:100%;object-fit:contain;" /></div>
+@endif
+
+<div class="page">
+    <div class="page-inner">
+        {{-- Header --}}
+        <div class="header">
+            <div class="header-table">
+                <div class="header-cell logo-wrap">
+                    @if($logoExists)<img class="logo" src="{{ $logoPath }}" alt="">@endif
+                </div>
+                <div class="header-cell">
+                    <div class="school-name">{{ $schoolName }}</div>
+                    @if(config('myacademy.school_motto'))<div class="school-motto">"{{ config('myacademy.school_motto') }}"</div>@endif
+                    @if(config('myacademy.school_address'))<div class="school-meta">{{ config('myacademy.school_address') }}</div>@endif
+                    @if(config('myacademy.school_phone') || config('myacademy.school_email'))
+                        <div class="school-meta">{{ config('myacademy.school_phone') }}@if(config('myacademy.school_phone') && config('myacademy.school_email')) • @endif{{ config('myacademy.school_email') }}</div>
+                    @endif
+                    <div class="badge">Student Report Card</div>
+                </div>
+                <div class="header-cell" style="width:145px;">
+                    <div class="meta-right">Session: <strong>{{ $session }}</strong></div>
+                    <div class="meta-right">Term: <strong>Term {{ $term }}</strong></div>
+                    <div class="meta-right">Issued: <strong>{{ now()->format('d M, Y') }}</strong></div>
+                </div>
+            </div>
         </div>
-        
-        <div class="stats-sunset">
-            <div class="stat-sunset">
-                <div class="stat-glow">
-                    <div class="stat-label">Total</div>
-                    <div class="stat-value">{{ $grandTotal }}</div>
-                </div>
-            </div>
-            <div class="stat-sunset">
-                <div class="stat-glow">
-                    <div class="stat-label">Average</div>
-                    <div class="stat-value">{{ number_format($average, 1) }}%</div>
-                </div>
-            </div>
-            @if($showPosition)
-            <div class="stat-sunset">
-                <div class="stat-glow">
-                    <div class="stat-label">Position</div>
-                    <div class="stat-value">{{ $position }}</div>
-                </div>
-            </div>
-            @endif
+
+        {{-- Student Info --}}
+        @php($siBorderColor = '#f97316') @php($siBgColor = '#fff7ed') @php($siLabelColor = '#c2410c') @php($siValueColor = '#1f2937') @php($siDotColor = '#fdba74')
+        @include('pdf.partials.rc-student-info')
+
+        {{-- Stats --}}
+        <div class="stats">
+            <div class="stat"><div class="stat-inner"><div class="stat-label">Total Score</div><div class="stat-value">{{ $grandTotal }}</div></div></div>
+            <div class="stat"><div class="stat-inner"><div class="stat-label">Average</div><div class="stat-value">{{ number_format($average,1) }}%</div></div></div>
+            @if($showPosition)<div class="stat"><div class="stat-inner"><div class="stat-label">Position</div><div class="stat-value">{{ $position }}</div></div></div>@endif
             @if($showClassAverage)
-            <div class="stat-sunset">
-                <div class="stat-glow">
-                    <div class="stat-label">Class Avg</div>
-                    <div class="stat-value">{{ number_format($classAverage, 1) }}%</div>
-                </div>
-            </div>
+            <div class="stat"><div class="stat-inner"><div class="stat-label">Class Avg</div><div class="stat-value">{{ number_format($classAverage,1) }}%</div></div></div>
+            <div class="stat"><div class="stat-inner"><div class="stat-label">Highest</div><div class="stat-value">{{ number_format($highestAverage??0,1) }}%</div></div></div>
+            <div class="stat"><div class="stat-inner"><div class="stat-label">Lowest</div><div class="stat-value">{{ number_format($lowestAverage??0,1) }}%</div></div></div>
             @endif
-            <div class="stat-sunset">
-                <div class="stat-glow">
-                    <div class="stat-label">Highest</div>
-                    <div class="stat-value">{{ number_format($highestAverage ?? 0, 1) }}%</div>
-                </div>
-            </div>
-            <div class="stat-sunset">
-                <div class="stat-glow">
-                    <div class="stat-label">Lowest</div>
-                    <div class="stat-value">{{ number_format($lowestAverage ?? 0, 1) }}%</div>
-                </div>
-            </div>
         </div>
-        
-        <table>
+
+        {{-- Scores Table --}}
+        <table class="scores">
             <thead>
                 <tr>
-                    <th style="width: 35%; text-align: left; padding-left: 6px;">Subject</th>
-                    <th style="width: 11%;">CA1</th>
-                    <th style="width: 11%;">CA2</th>
-                    <th style="width: 11%;">Exam</th>
-                    <th style="width: 11%;">Total</th>
-                    <th style="width: 10%;">Grade</th>
-                    <th style="width: 11%;">Avg</th>
+                    <th style="width:32%;text-align:left;padding-left:8px;">Subject</th>
+                    <th style="width:10%;">CA1 ({{ config('myacademy.results_ca1_max',20) }})</th>
+                    <th style="width:10%;">CA2 ({{ config('myacademy.results_ca2_max',20) }})</th>
+                    <th style="width:10%;">Exam ({{ config('myacademy.results_exam_max',60) }})</th>
+                    <th style="width:10%;">Total</th>
+                    <th style="width:9%;">Grade</th>
+                    @if($showClassAverage)<th style="width:9%;">Class Avg</th>@endif
+                    @if($showPosition)<th style="width:9%;">Position</th>@endif
                 </tr>
             </thead>
             <tbody>
-                @foreach ($rows as $row)
-                    <tr>
-                        <td class="subj">{{ $row['subject']->name }}</td>
-                        <td>{{ $row['ca1'] ?? '—' }}</td>
-                        <td>{{ $row['ca2'] ?? '—' }}</td>
-                        <td>{{ $row['exam'] ?? '—' }}</td>
-                        <td><strong>{{ $row['total'] ?? '—' }}</strong></td>
-                        <td><strong>{{ $row['grade'] ?? '—' }}</strong></td>
-                        <td>{{ $row['class_avg'] ?? '—' }}</td>
-                    </tr>
+                @foreach($rows as $r)
+                <tr>
+                    <td class="subj">{{ $r['subject']?->name ?? '-' }}</td>
+                    <td>{{ $r['ca1'] ?? '' }}</td>
+                    <td>{{ $r['ca2'] ?? '' }}</td>
+                    <td>{{ $r['exam'] ?? '' }}</td>
+                    <td class="bold">{{ $r['total'] ?? '' }}</td>
+                    <td class="bold">{{ $r['grade'] ?? '' }}</td>
+                    @if($showClassAverage)<td>{{ $r['class_avg'] ?? '—' }}</td>@endif
+                    @if($showPosition)<td>{{ $r['position'] ?? '—' }}</td>@endif
+                </tr>
                 @endforeach
             </tbody>
         </table>
-        
+
+        {{-- Grading Key --}}
         @if($showGradingKey)
-        <div class="grade-sunset">
-            <strong>A:</strong> 70-100 | <strong>B:</strong> 60-69 | <strong>C:</strong> 50-59 | <strong>D:</strong> 40-49 | <strong>F:</strong> 0-39
+        <div class="grading">
+            <div class="gr-cell"><strong>A:</strong> 70-100 (Excellent)</div>
+            <div class="gr-cell"><strong>B:</strong> 60-69 (Very Good)</div>
+            <div class="gr-cell"><strong>C:</strong> 50-59 (Good)</div>
+            <div class="gr-cell"><strong>D:</strong> 40-49 (Pass)</div>
+            <div class="gr-cell"><strong>F:</strong> 0-39 (Fail)</div>
         </div>
         @endif
-        
-        @if($showTeacherRemarks)
-        <div class="remarks-sunset">
-            <div class="remarks-title">Class Teacher's Remarks</div>
-            <div class="remarks-text">{{ $teacherRemarks ?? 'No remarks provided.' }}</div>
+
+        {{-- Attendance --}}
+        @if($showAttendance)
+        <div class="att">
+            <div class="att-cell"><div class="att-label">Times Opened</div><div class="att-value">{{ $timesOpened ?? '—' }}</div></div>
+            <div class="att-cell"><div class="att-label">Times Present</div><div class="att-value">{{ $timesPresent ?? '—' }}</div></div>
+            <div class="att-cell"><div class="att-label">Times Absent</div><div class="att-value">{{ $timesAbsent ?? '—' }}</div></div>
         </div>
         @endif
-        
-        @if($showPrincipalRemarks)
-        <div class="remarks-sunset">
-            <div class="remarks-title">Principal's Remarks</div>
-            <div class="remarks-text">{{ $principalRemarks ?? 'No remarks provided.' }}</div>
-        </div>
-        @endif
-        
-        @php($rcBorderColor='#f97316') @php($rcBgLight='#fff7ed') @php($rcTitleColor='#c2410c') @php($rcLabelColor='#7c2d12')
+
+        {{-- Psychomotor --}}
+        @php($rcBorderColor='#f97316') @php($rcBgLight='#fff7ed') @php($rcTitleColor='#c2410c') @php($rcLabelColor='#ea580c')
         @include('pdf.partials.rc-psychomotor')
-        @include('pdf.partials.rc-school-fees')
-        
-        @if($showNextTermDate)
-        <div class="next-sunset">☀ Next Term Begins: {{ $nextTermDate ?? 'To be announced' }}</div>
+
+        {{-- Remarks --}}
+        @if($showTeacherRemarks)
+        <div class="remarks"><div class="remarks-label">Class Teacher's Remarks</div><div class="remarks-text">{{ $teacherRemarks ?? 'No remarks provided.' }}</div></div>
         @endif
-        
+        @if($showPrincipalRemarks)
+        <div class="remarks"><div class="remarks-label">Principal's Remarks</div><div class="remarks-text">{{ $principalRemarks ?? 'No remarks provided.' }}</div></div>
+        @endif
+
+        {{-- School Fees --}}
+        @include('pdf.partials.rc-school-fees')
+
+        {{-- Next Term --}}
+        @if($showNextTermDate)
+        <div class="next-term">☀ Next Term Begins: {{ $nextTermDate ?? 'To be announced' }} ☀</div>
+        @endif
+
+        {{-- Signatures --}}
         @if($showSignatures)
         <div class="sigs">
             <div class="sig">
-                @if(($signatureImages['teacher'] ?? null) && file_exists($signatureImages['teacher']))
-                            <img src="{{ $signatureImages['teacher'] }}" alt="Teacher Signature" style="max-height: 40px; max-width: 100px; object-fit: contain; margin-bottom: 4px;" />
-                        @endif
-                        <div class="sig-line">Class Teacher</div>
+                @if(($signatureImages['teacher']??null) && file_exists($signatureImages['teacher']))<img src="{{ $signatureImages['teacher'] }}" class="sig-img" /><div class="sig-line has-img">Class Teacher</div>
+                @else<div class="sig-line">Class Teacher</div>@endif
+                <div class="sig-sub">Signature & Date</div>
             </div>
             <div class="sig">
-                @if(($signatureImages['principal'] ?? null) && file_exists($signatureImages['principal']))
-                            <img src="{{ $signatureImages['principal'] }}" alt="Principal Signature" style="max-height: 40px; max-width: 100px; object-fit: contain; margin-bottom: 4px;" />
-                        @endif
-                        <div class="sig-line">Principal</div>
+                @if(($signatureImages['principal']??null) && file_exists($signatureImages['principal']))<img src="{{ $signatureImages['principal'] }}" class="sig-img" /><div class="sig-line has-img">Principal</div>
+                @else<div class="sig-line">Principal</div>@endif
+                <div class="sig-sub">Signature & Stamp</div>
             </div>
-            <div class="sig">
-                <div class="sig-line">Parent/Guardian</div>
-            </div>
+            <div class="sig"><div class="sig-line">Parent/Guardian</div><div class="sig-sub">Signature & Date</div></div>
         </div>
         @endif
-        
+
         <div class="footer">{{ $schoolName }} • Shining Bright Together</div>
     </div>
+</div>
 </body>
 </html>
