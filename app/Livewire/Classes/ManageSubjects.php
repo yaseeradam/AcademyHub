@@ -4,6 +4,7 @@ namespace App\Livewire\Classes;
 
 use App\Models\SchoolClass;
 use App\Models\Subject;
+use App\Traits\DispatchesModals;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
@@ -12,6 +13,8 @@ use Livewire\Component;
 #[Title('Manage Class Subjects')]
 class ManageSubjects extends Component
 {
+    use DispatchesModals;
+
     public SchoolClass $class;
     public array $selectedSubjects = [];
 
@@ -31,7 +34,7 @@ class ManageSubjects extends Component
         }
 
         $this->class->defaultSubjects()->sync($syncData);
-        $this->dispatch('alert', message: 'Class subjects updated successfully.', type: 'success');
+        $this->dispatchSuccessModal('Allocation Complete', 'Class curriculum subjects have been successfully updated.');
     }
 
     public function render()

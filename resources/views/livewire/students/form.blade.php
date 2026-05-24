@@ -34,7 +34,7 @@
                             @endif
                         </div>
                         <input
-                            wire:model.live="admission_number"
+                            wire:model="admission_number"
                             type="text"
                             @if($auto_admission && !$student) readonly @endif
                             class="w-full rounded-lg border-2 border-gray-300 bg-white px-4 py-3 text-sm font-medium text-gray-900 shadow-sm transition-all focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 hover:border-gray-400 {{ $auto_admission && !$student ? 'bg-gray-50 border-gray-200 text-gray-500 cursor-not-allowed' : '' }}"
@@ -47,7 +47,7 @@
                     <div>
                         <label class="block text-sm font-bold text-gray-900 mb-2">First Name *</label>
                         <input
-                            wire:model.live="first_name"
+                            wire:model="first_name"
                             type="text"
                             placeholder="e.g., John"
                             class="w-full rounded-lg border-2 border-gray-300 bg-white px-4 py-3 text-sm font-medium text-gray-900 shadow-sm transition-all focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 hover:border-gray-400"
@@ -60,7 +60,7 @@
                     <div>
                         <label class="block text-sm font-bold text-gray-900 mb-2">Last Name *</label>
                         <input
-                            wire:model.live="last_name"
+                            wire:model="last_name"
                             type="text"
                             placeholder="e.g., Doe"
                             class="w-full rounded-lg border-2 border-gray-300 bg-white px-4 py-3 text-sm font-medium text-gray-900 shadow-sm transition-all focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 hover:border-gray-400"
@@ -87,7 +87,7 @@
                     <div>
                         <label class="block text-sm font-bold text-gray-900 mb-2">Date of Birth</label>
                         <input
-                            wire:model.live="dob"
+                            wire:model="dob"
                             type="date"
                             class="w-full rounded-lg border-2 border-gray-300 bg-white px-4 py-3 text-sm font-medium text-gray-900 shadow-sm transition-all focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 hover:border-gray-400"
                         />
@@ -134,7 +134,7 @@
                     <div>
                         <label class="block text-sm font-bold text-gray-900 mb-2">Blood Group</label>
                         <input
-                            wire:model.live="blood_group"
+                            wire:model="blood_group"
                             type="text"
                             placeholder="e.g., O+"
                             class="w-full rounded-lg border-2 border-gray-300 bg-white px-4 py-3 text-sm font-medium text-gray-900 shadow-sm transition-all focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 hover:border-gray-400"
@@ -156,27 +156,27 @@
                             
                             @if($field->type === 'text')
                                 <input
-                                    wire:model.live="customFieldValues.{{ $field->name }}"
+                                    wire:model="customFieldValues.{{ $field->name }}"
                                     type="text"
                                     placeholder="{{ $field->placeholder }}"
                                     class="w-full rounded-lg border-2 border-gray-300 bg-white px-4 py-3 text-sm font-medium text-gray-900 shadow-sm transition-all focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 hover:border-gray-400"
                                 />
                             @elseif($field->type === 'number')
                                 <input
-                                    wire:model.live="customFieldValues.{{ $field->name }}"
+                                    wire:model="customFieldValues.{{ $field->name }}"
                                     type="number"
                                     placeholder="{{ $field->placeholder }}"
                                     class="w-full rounded-lg border-2 border-gray-300 bg-white px-4 py-3 text-sm font-medium text-gray-900 shadow-sm transition-all focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 hover:border-gray-400"
                                 />
                             @elseif($field->type === 'date')
                                 <input
-                                    wire:model.live="customFieldValues.{{ $field->name }}"
+                                    wire:model="customFieldValues.{{ $field->name }}"
                                     type="date"
                                     class="w-full rounded-lg border-2 border-gray-300 bg-white px-4 py-3 text-sm font-medium text-gray-900 shadow-sm transition-all focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 hover:border-gray-400"
                                 />
                             @elseif($field->type === 'select')
                                 <select
-                                    wire:model.live="customFieldValues.{{ $field->name }}"
+                                    wire:model="customFieldValues.{{ $field->name }}"
                                     class="w-full rounded-lg border-2 border-gray-300 bg-white px-4 py-3 text-sm font-medium text-gray-900 shadow-sm transition-all focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 hover:border-gray-400"
                                 >
                                     <option value="">{{ $field->placeholder ?: 'Select option' }}</option>
@@ -188,7 +188,7 @@
                                 </select>
                             @elseif($field->type === 'textarea')
                                 <textarea
-                                    wire:model.live="customFieldValues.{{ $field->name }}"
+                                    wire:model="customFieldValues.{{ $field->name }}"
                                     rows="3"
                                     placeholder="{{ $field->placeholder }}"
                                     class="w-full rounded-lg border-2 border-gray-300 bg-white px-4 py-3 text-sm font-medium text-gray-900 shadow-sm transition-all focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 hover:border-gray-400"
@@ -197,7 +197,7 @@
                                 <div class="mt-2">
                                     <label class="flex items-center cursor-pointer">
                                         <input
-                                            wire:model.live="customFieldValues.{{ $field->name }}"
+                                            wire:model="customFieldValues.{{ $field->name }}"
                                             type="checkbox"
                                             class="rounded border-gray-300 text-brand-600 focus:ring-brand-500 h-5 w-5"
                                         />
@@ -236,7 +236,7 @@
                             <div>
                                 <label class="block text-sm font-bold text-gray-900 mb-2">Parent Name *</label>
                                 <input
-                                    wire:model.live="parent_name"
+                                    wire:model="parent_name"
                                     type="text"
                                     placeholder="e.g., John Doe Snr"
                                     class="w-full rounded-lg border-2 border-gray-300 bg-white px-4 py-3 text-sm font-medium text-gray-900 shadow-sm transition-all focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 hover:border-gray-400"
@@ -249,7 +249,7 @@
                             <div>
                                 <label class="block text-sm font-bold text-gray-900 mb-2">Email Address *</label>
                                 <input
-                                    wire:model.live="parent_email"
+                                    wire:model="parent_email"
                                     type="email"
                                     placeholder="e.g., parent@school.edu"
                                     class="w-full rounded-lg border-2 border-gray-300 bg-white px-4 py-3 text-sm font-medium text-gray-900 shadow-sm transition-all focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 hover:border-gray-400"
@@ -262,7 +262,7 @@
                             <div>
                                 <label class="block text-sm font-bold text-gray-900 mb-2">Phone Number</label>
                                 <input
-                                    wire:model.live="parent_phone"
+                                    wire:model="parent_phone"
                                     type="text"
                                     placeholder="e.g., +23480..."
                                     class="w-full rounded-lg border-2 border-gray-300 bg-white px-4 py-3 text-sm font-medium text-gray-900 shadow-sm transition-all focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 hover:border-gray-400"
@@ -275,7 +275,7 @@
                             <div>
                                 <label class="block text-sm font-bold text-gray-900 mb-2">Login Password *</label>
                                 <input
-                                    wire:model.live="parent_password"
+                                    wire:model="parent_password"
                                     type="password"
                                     placeholder="Minimum 6 characters"
                                     class="w-full rounded-lg border-2 border-gray-300 bg-white px-4 py-3 text-sm font-medium text-gray-900 shadow-sm transition-all focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 hover:border-gray-400"
@@ -329,7 +329,7 @@
                     <div>
                         <label class="block text-sm font-bold text-gray-900 mb-2">Guardian Name</label>
                         <input
-                            wire:model.live="guardian_name"
+                            wire:model="guardian_name"
                             type="text"
                             placeholder="e.g., Uncle Adams"
                             class="w-full rounded-lg border-2 border-gray-300 bg-white px-4 py-3 text-sm font-medium text-gray-900 shadow-sm transition-all focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 hover:border-gray-400"
@@ -342,7 +342,7 @@
                     <div>
                         <label class="block text-sm font-bold text-gray-900 mb-2">Guardian Phone</label>
                         <input
-                            wire:model.live="guardian_phone"
+                            wire:model="guardian_phone"
                             type="text"
                             placeholder="e.g., +234..."
                             class="w-full rounded-lg border-2 border-gray-300 bg-white px-4 py-3 text-sm font-medium text-gray-900 shadow-sm transition-all focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 hover:border-gray-400"
@@ -355,7 +355,7 @@
                     <div class="sm:col-span-2">
                         <label class="block text-sm font-bold text-gray-900 mb-2">Guardian Address</label>
                         <textarea
-                            wire:model.live="guardian_address"
+                            wire:model="guardian_address"
                             rows="3"
                             placeholder="Full home or office address"
                             class="w-full rounded-lg border-2 border-gray-300 bg-white px-4 py-3 text-sm font-medium text-gray-900 shadow-sm transition-all focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 hover:border-gray-400"

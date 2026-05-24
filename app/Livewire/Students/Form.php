@@ -118,6 +118,15 @@ class Form extends Component
         unset($this->sections);
     }
 
+    public function updatedAutoAdmission(bool $value): void
+    {
+        if ($value) {
+            $this->admission_number = $this->generateAdmissionNumber();
+        } else {
+            $this->admission_number = '';
+        }
+    }
+
     private function generateAdmissionNumber(): string
     {
         $year = now()->format('Y');

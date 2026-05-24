@@ -1,4 +1,4 @@
-<div class="space-y-6 font-sans">
+<div class="space-y-6 font-sans" x-data="{ selected: @entangle('selectedSubjects') }">
     
     {{-- Header --}}
     <x-page-header title="{{ $class->name }} - Subjects" subtitle="Configure and allocate default curriculum subjects for students in this class." accent="violet">
@@ -20,7 +20,7 @@
                 <p class="text-xs text-slate-400 mt-0.5">Check the subjects that apply to all students enrolled in {{ $class->name }}.</p>
             </div>
             <div class="inline-flex items-center rounded-xl bg-violet-50 border border-violet-100 px-3.5 py-1.5 text-xs font-black text-violet-700 shadow-sm shadow-violet-50/50">
-                <span class="font-extrabold mr-1" x-text="$wire.selectedSubjects.length"></span> subjects active
+                <span class="font-extrabold mr-1" x-text="selected.length"></span> subjects active
             </div>
         </div>
 
@@ -28,11 +28,11 @@
         <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             @foreach($allSubjects as $subject)
                 <label wire:key="subject-{{ $subject->id }}"
-                       :class="$wire.selectedSubjects.includes('{{ $subject->id }}') ? 'border-violet-600 bg-violet-50/20 shadow-md shadow-violet-100/50 text-violet-900 ring-4 ring-violet-600/5' : 'border-slate-200 bg-slate-50/50 text-slate-800 hover:border-slate-300 hover:bg-white hover:shadow-sm'"
+                       :class="selected.includes('{{ $subject->id }}') ? 'border-violet-600 bg-violet-50/20 shadow-md shadow-violet-100/50 text-violet-900 ring-4 ring-violet-600/5' : 'border-slate-200 bg-slate-50/50 text-slate-800 hover:border-slate-300 hover:bg-white hover:shadow-sm'"
                        class="flex cursor-pointer items-start gap-3 rounded-2xl border-2 p-4 transition-all duration-200 select-none">
                     <input 
                         type="checkbox" 
-                        wire:model="selectedSubjects" 
+                        x-model="selected" 
                         value="{{ $subject->id }}" 
                         class="mt-0.5 h-4.5 w-4.5 rounded border-slate-300 text-violet-600 focus:ring-violet-500/20 transition-all cursor-pointer"
                     >
@@ -47,7 +47,7 @@
         {{-- Action Bar --}}
         <div class="mt-8 flex flex-col sm:flex-row items-center justify-between gap-4 rounded-3xl bg-gradient-to-r from-violet-500/5 to-purple-500/5 border border-violet-100 p-5 shadow-inner">
             <div class="text-sm font-semibold text-violet-800 text-center sm:text-left">
-                <span class="font-black text-violet-900" x-text="$wire.selectedSubjects.length"></span> subject(s) selected for student enrollment inheritance.
+                <span class="font-black text-violet-900" x-text="selected.length"></span> subject(s) selected for student enrollment inheritance.
             </div>
             <button 
                 wire:click="save" 
