@@ -36,6 +36,8 @@ class DatabaseSeeder extends Seeder
             ]
         );
 
+        $this->call(MarketplaceComponentSeeder::class);
+
         // Multi-school note:
         // Domain models (classes/students/subjects/etc) are tenant-scoped. To avoid creating
         // orphan (tenant_id = NULL) data, only seed demo tenant data when explicitly enabled.
