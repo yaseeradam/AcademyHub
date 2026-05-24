@@ -196,8 +196,9 @@ class AuthenticatedSessionController extends Controller
                 $passwordValid = Hash::check($request->password, $student->password);
             } else {
                 // Default scheme: firstname (lowercase) + last 4 digits of admission number.
+                // Compare using hash to avoid any plaintext comparison.
                 $expectedPassword = $this->generateStudentPassword($student);
-                $passwordValid    = ($request->password === $expectedPassword);
+                $passwordValid    = hash_equals($expectedPassword, $request->password);
             }
 
             if (! $passwordValid) {

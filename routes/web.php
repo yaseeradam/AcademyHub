@@ -88,6 +88,18 @@ Route::middleware('guest')->group(function () {
     Route::post('/login', [AuthenticatedSessionController::class, 'store'])
         ->middleware('throttle:5,1')  // 5 attempts per 1 minute per IP
         ->name('login.store');
+
+    // Password Reset
+    Route::get('/forgot-password', [\App\Http\Controllers\Auth\PasswordResetLinkController::class, 'create'])
+        ->name('password.request');
+    Route::post('/forgot-password', [\App\Http\Controllers\Auth\PasswordResetLinkController::class, 'store'])
+        ->middleware('throttle:3,1')
+        ->name('password.email');
+    Route::get('/reset-password/{token}', [\App\Http\Controllers\Auth\NewPasswordController::class, 'create'])
+        ->name('password.reset');
+    Route::post('/reset-password', [\App\Http\Controllers\Auth\NewPasswordController::class, 'store'])
+        ->middleware('throttle:3,1')
+        ->name('password.update');
 });
 
 

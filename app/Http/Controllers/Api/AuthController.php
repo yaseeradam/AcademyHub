@@ -26,6 +26,30 @@ class AuthController extends Controller
             ]);
         }
 
+        // Tenant isolation: user must belong to the current tenant context.
+        $tenantId = \App\Support\TenantSettings::tenantId();
+        if ($tenantId) {
+            if ($user->is_super_admin || (int) $user->tenant_id !== (int) $tenantId) {
+                throw ValidationException::withMessages([
+                    'email' => ['This account does not belong to this school instance.'],
+                ]);
+            }
+        } else {
+            // Non-tenant context (main domain) — only super admins allowed.
+            if (! $user->is_super_admin) {
+                throw ValidationException::withMessages([
+                    'email' => ['Please login from your school domain.'],
+                ]);
+            }
+        }
+
+        // Active check
+        if (! $user->is_active) {
+            throw ValidationException::withMessages([
+                'email' => ['Your account has been deactivated. Contact the administrator.'],
+            ]);
+        }
+
         $deviceName = $request->device_name ?? 'mobile_app';
         $token = $user->createToken($deviceName)->plainTextToken;
 
@@ -37,6 +61,7 @@ class AuthController extends Controller
                 'email' => $user->email,
                 'role' => $user->role,
                 'is_super_admin' => $user->is_super_admin,
+                'tenant_id' => $user->tenant_id,
             ],
         ]);
     }

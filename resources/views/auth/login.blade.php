@@ -157,7 +157,7 @@
           <div class="form-group">
             <div class="form-label-row">
               <span class="form-label" style="margin:0">Password</span>
-              <a href="#" class="forgot" style="color:#E78B2C">Forgot password?</a>
+              <a href="{{ route('password.request') }}" class="forgot" style="color:#E78B2C">Forgot password?</a>
             </div>
             <div class="input-wrap">
               <input id="staff-password" name="password" type="password" required placeholder="••••••••">
@@ -187,7 +187,7 @@
           <div class="form-group">
             <div class="form-label-row">
               <span class="form-label" style="margin:0">Password</span>
-              <a href="#" class="forgot" style="color:#7C3AED">Forgot password?</a>
+              <a href="{{ route('password.request') }}" class="forgot" style="color:#7C3AED">Forgot password?</a>
             </div>
             <div class="input-wrap">
               <input id="parent-password" name="password" type="password" required placeholder="••••••••">
@@ -217,7 +217,7 @@
           <div class="form-group">
             <div class="form-label-row">
               <span class="form-label" style="margin:0">Password</span>
-              <a href="#" class="forgot" style="color:#1D4ED8">Forgot password?</a>
+              <a href="{{ route('password.request') }}" class="forgot" style="color:#1D4ED8">Forgot password?</a>
             </div>
             <div class="input-wrap">
               <input id="student-password" name="password" type="password" required placeholder="••••••••">

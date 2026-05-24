@@ -25,26 +25,24 @@ class LoginController extends Controller
             'password' => ['required'],
         ]);
 
-        if (! Auth::attempt($credentials, $request->boolean('remember'))) {
+        // Look up user and validate credentials WITHOUT creating a session first.
+        $user = \App\Models\User::where('email', $credentials['email'])->first();
+
+        if (! $user || ! \Illuminate\Support\Facades\Hash::check($credentials['password'], $user->password)) {
             throw ValidationException::withMessages([
                 'email' => 'Invalid credentials.',
             ]);
         }
 
-        if (! Auth::user()->is_super_admin) {
-            Auth::logout();
+        // Verify super admin status BEFORE creating a session.
+        if (! $user->is_super_admin || ! is_null($user->tenant_id)) {
             throw ValidationException::withMessages([
                 'email' => 'Access denied.',
             ]);
         }
 
-        if (! is_null(Auth::user()->tenant_id)) {
-            Auth::logout();
-            throw ValidationException::withMessages([
-                'email' => 'Access denied.',
-            ]);
-        }
-
+        // All checks passed — now create the session.
+        Auth::login($user, $request->boolean('remember'));
         $request->session()->regenerate();
 
         return redirect()->route('superadmin.dashboard');
