@@ -133,9 +133,9 @@
                     <p class="text-xs text-slate-400">Set up a new grade level and class structure</p>
                 </div>
             </div>
-            <form method="POST" action="{{ route('classes.store') }}" class="flex flex-col md:flex-row items-stretch md:items-end gap-5">
+            <form method="POST" action="{{ route('classes.store') }}" class="grid grid-cols-1 md:grid-cols-12 gap-5 items-end">
                 @csrf
-                <div class="flex-1">
+                <div class="col-span-1 md:col-span-7">
                     <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">Class Name *</label>
                     <input 
                         name="name" 
@@ -145,7 +145,7 @@
                         required 
                     />
                 </div>
-                <div class="w-full md:w-44">
+                <div class="col-span-1 md:col-span-2">
                     <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">Academic Level *</label>
                     <input 
                         name="level" 
@@ -157,7 +157,7 @@
                         required 
                     />
                 </div>
-                <button type="submit" class="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 px-6 py-3.5 text-sm font-bold text-white shadow-md shadow-indigo-100 transition-all hover:from-indigo-700 hover:to-violet-700 hover:shadow-lg active:scale-[0.98] w-full md:w-auto h-[48px] self-end">
+                <button type="submit" class="col-span-1 md:col-span-3 inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 px-6 py-3.5 text-sm font-bold text-white shadow-md shadow-indigo-100 transition-all hover:from-indigo-700 hover:to-violet-700 hover:shadow-lg active:scale-[0.98] h-[48px] self-end">
                     <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
                     </svg>

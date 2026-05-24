@@ -138,8 +138,8 @@
                     <form method="POST" action="{{ route('classes.update', $class) }}" class="mb-6">
                         @csrf
                         @method('PATCH')
-                        <div class="grid grid-cols-1 gap-4 sm:grid-cols-3 items-end">
-                            <div class="sm:col-span-2">
+                        <div class="grid grid-cols-1 gap-4 md:grid-cols-12 items-end">
+                            <div class="md:col-span-9">
                                 <label class="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-2">Class Name *</label>
                                 <input 
                                     name="name" 
@@ -148,7 +148,7 @@
                                     required 
                                 />
                             </div>
-                            <div>
+                            <div class="md:col-span-3">
                                 <label class="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-2">Level *</label>
                                 <input 
                                     name="level" 

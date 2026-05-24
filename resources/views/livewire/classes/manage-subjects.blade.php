@@ -1,4 +1,13 @@
-<div class="space-y-6 font-sans" x-data="{ selected: @entangle('selectedSubjects') }">
+<div class="space-y-6 font-sans" x-data="{ 
+    selected: @entangle('selectedSubjects'),
+    toggleSubject(id) {
+        if (this.selected.includes(id)) {
+            this.selected = this.selected.filter(i => i !== id);
+        } else {
+            this.selected = [...this.selected, id];
+        }
+    }
+}">
     
     {{-- Header --}}
     <x-page-header title="{{ $class->name }} - Subjects" subtitle="Configure and allocate default curriculum subjects for students in this class." accent="violet">
@@ -32,8 +41,8 @@
                        class="flex cursor-pointer items-start gap-3 rounded-2xl border-2 p-4 transition-all duration-200 select-none">
                     <input 
                         type="checkbox" 
-                        x-model="selected" 
-                        value="{{ $subject->id }}" 
+                        :checked="selected.includes('{{ $subject->id }}')"
+                        @change="toggleSubject('{{ $subject->id }}')"
                         class="mt-0.5 h-4.5 w-4.5 rounded border-slate-300 text-violet-600 focus:ring-violet-500/20 transition-all cursor-pointer"
                     >
                     <div class="flex-1 leading-snug">
