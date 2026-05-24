@@ -525,7 +525,6 @@
             </div>
         </div>
     </div>
-</div>
 
 @script
     let progressModal = null;
@@ -758,3 +757,4 @@
         animation: fadeIn 0.3s ease-out;
     }
 </style>
+</div>
