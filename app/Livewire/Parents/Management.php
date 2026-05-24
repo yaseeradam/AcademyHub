@@ -190,7 +190,7 @@ class Management extends Component
     {
         $this->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email',
+            'email' => ['required', 'email', \Illuminate\Validation\Rule::unique('users', 'email')->where('tenant_id', \App\Support\TenantSettings::tenantId())],
             'password' => 'required|string|min:6',
             'phone' => 'nullable|string|max:20',
         ]);

@@ -24,7 +24,7 @@ class TeacherController extends Controller
     {
         $data = $request->validate([
             'name'      => ['required', 'string', 'max:255'],
-            'email'     => ['required', 'string', 'email', 'max:255', Rule::unique('users', 'email')],
+            'email'     => ['required', 'string', 'email', 'max:255', Rule::unique('users', 'email')->where('tenant_id', \App\Support\TenantSettings::tenantId())],
             'password'  => ['required', 'string', 'min:8', 'confirmed'],
             'is_active' => ['nullable', 'boolean'],
             'is_class_teacher' => ['nullable', 'boolean'],
@@ -86,7 +86,7 @@ class TeacherController extends Controller
 
         $data = $request->validate([
             'name'             => ['required', 'string', 'max:255'],
-            'email'            => ['required', 'string', 'email', 'max:255', Rule::unique('users', 'email')->ignore($teacher->id)],
+            'email'            => ['required', 'string', 'email', 'max:255', Rule::unique('users', 'email')->where('tenant_id', \App\Support\TenantSettings::tenantId())->ignore($teacher->id)],
             'password'         => ['nullable', 'string', 'min:8', 'confirmed'],
             'is_active'        => ['nullable', 'boolean'],
             'is_class_teacher' => ['nullable', 'boolean'],

@@ -228,7 +228,7 @@
                     </div>
                 </a>
             @empty
-                <div class="sm:col-span-2 xl:col-span-3">
+                <div id="teachersEmptyState" class="sm:col-span-2 xl:col-span-3">
                     <div class="rounded-3xl bg-white p-12 text-center shadow-xl ring-1 ring-gray-200">
                         <div class="flex flex-col items-center gap-4">
                             <div class="flex h-16 w-16 items-center justify-center rounded-2xl bg-gray-100">
@@ -266,6 +266,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const searchInput = document.getElementById('teacherSearch');
     const statusFilter = document.getElementById('statusFilter');
     const teacherCards = document.querySelectorAll('.grid > a');
+    const emptyState = document.getElementById('teachersEmptyState');
 
     function filterTeachers() {
         const searchTerm = searchInput.value.toLowerCase();
@@ -285,11 +286,8 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Show/hide empty state
         const visibleCards = Array.from(teacherCards).filter(card => card.style.display !== 'none');
-        const emptyState = document.querySelector('.grid > div');
-        if (emptyState && visibleCards.length === 0 && teacherCards.length > 0) {
-            emptyState.style.display = '';
-        } else if (emptyState) {
-            emptyState.style.display = 'none';
+        if (emptyState) {
+            emptyState.style.display = (visibleCards.length === 0) ? '' : 'none';
         }
     }
 

@@ -178,7 +178,7 @@ class Form extends Component
         // Add parent account validation if creating parent
         if ($this->create_parent_account) {
             $rules['parent_name'] = ['required', 'string', 'max:255'];
-            $rules['parent_email'] = ['required', 'email', 'unique:users,email'];
+            $rules['parent_email'] = ['required', 'email', Rule::unique('users', 'email')->where('tenant_id', \App\Support\TenantSettings::tenantId())];
             $rules['parent_phone'] = ['nullable', 'string', 'max:20'];
             $rules['parent_password'] = ['required', 'string', 'min:6'];
         }

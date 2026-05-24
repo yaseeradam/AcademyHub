@@ -101,7 +101,7 @@ class Index extends Component
 
         $rules = [
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users', 'email')],
+            'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users', 'email')->where('tenant_id', \App\Support\TenantSettings::tenantId())],
             'role' => ['required', Rule::in(['admin', 'bursar', 'teacher', 'parent'])],
             'isActive' => ['required', 'in:0,1'],
             'password' => ['nullable', 'string', 'min:8'],
