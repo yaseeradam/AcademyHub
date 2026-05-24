@@ -5,13 +5,10 @@
 
     RewriteEngine On
 
-    # Route collisions: this app has a physical `public/certificates` folder for assets,
-    # but also a Laravel route at `/certificates`. Without this rule, Apache treats
-    # `/certificates` as a directory request and never reaches Laravel.
-    RewriteRule ^certificates/?$ index.php [L]
-    RewriteRule ^login/?$ index.php [L]
-    RewriteRule ^teachers/?$ index.php [L]
-    RewriteRule ^students/?$ index.php [L]
+    # Route collisions: this app has physical directories like `public/Students`, `public/teachers`, etc.
+    # We must rewrite directory-matching requests to index.php, unless they request an actual existing file.
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteRule ^(certificates|login|teachers|students)(/.*)?$ index.php [L,NC]
 
     # Handle Authorization Header
     RewriteCond %{HTTP:Authorization} .
