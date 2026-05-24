@@ -1,11 +1,20 @@
 <div class="space-y-6 font-sans" x-data="{ 
     selected: @entangle('selectedSubjects'),
+    selectedList: [],
+    init() {
+        this.selectedList = (this.selected ? Array.from(this.selected) : []).map(String);
+        this.$watch('selected', value => {
+            this.selectedList = (value ? Array.from(value) : []).map(String);
+        });
+    },
     toggleSubject(id) {
-        if (this.selected.includes(id)) {
-            this.selected = this.selected.filter(i => i !== id);
+        const idStr = String(id);
+        if (this.selectedList.includes(idStr)) {
+            this.selectedList = this.selectedList.filter(i => String(i) !== idStr);
         } else {
-            this.selected = [...this.selected, id];
+            this.selectedList = [...this.selectedList, idStr];
         }
+        this.selected = this.selectedList;
     }
 }">
     
@@ -20,7 +29,7 @@
             </a>
         </x-slot:actions>
     </x-page-header>
-
+ 
     {{-- Main Container Card --}}
     <div class="rounded-3xl border border-slate-100 bg-white p-6 shadow-sm">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 border-b border-slate-100 pb-5">
@@ -29,19 +38,19 @@
                 <p class="text-xs text-slate-400 mt-0.5">Check the subjects that apply to all students enrolled in {{ $class->name }}.</p>
             </div>
             <div class="inline-flex items-center rounded-xl bg-violet-50 border border-violet-100 px-3.5 py-1.5 text-xs font-black text-violet-700 shadow-sm shadow-violet-50/50">
-                <span class="font-extrabold mr-1" x-text="selected.length"></span> subjects active
+                <span class="font-extrabold mr-1" x-text="selectedList.length"></span> subjects active
             </div>
         </div>
-
+ 
         {{-- Checklist Grid --}}
         <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             @foreach($allSubjects as $subject)
                 <label wire:key="subject-{{ $subject->id }}"
-                       :class="selected.includes('{{ $subject->id }}') ? 'border-violet-600 bg-violet-50/20 shadow-md shadow-violet-100/50 text-violet-900 ring-4 ring-violet-600/5' : 'border-slate-200 bg-slate-50/50 text-slate-800 hover:border-slate-300 hover:bg-white hover:shadow-sm'"
+                       :class="selectedList.includes('{{ $subject->id }}') ? 'border-violet-600 bg-violet-50/20 shadow-md shadow-violet-100/50 text-violet-900 ring-4 ring-violet-600/5' : 'border-slate-200 bg-slate-50/50 text-slate-800 hover:border-slate-300 hover:bg-white hover:shadow-sm'"
                        class="flex cursor-pointer items-start gap-3 rounded-2xl border-2 p-4 transition-all duration-200 select-none">
                     <input 
                         type="checkbox" 
-                        :checked="selected.includes('{{ $subject->id }}')"
+                        :checked="selectedList.includes('{{ $subject->id }}')"
                         @change="toggleSubject('{{ $subject->id }}')"
                         class="mt-0.5 h-4.5 w-4.5 rounded border-slate-300 text-violet-600 focus:ring-violet-500/20 transition-all cursor-pointer"
                     >
@@ -52,11 +61,11 @@
                 </label>
             @endforeach
         </div>
-
+ 
         {{-- Action Bar --}}
         <div class="mt-8 flex flex-col sm:flex-row items-center justify-between gap-4 rounded-3xl bg-gradient-to-r from-violet-500/5 to-purple-500/5 border border-violet-100 p-5 shadow-inner">
             <div class="text-sm font-semibold text-violet-800 text-center sm:text-left">
-                <span class="font-black text-violet-900" x-text="selected.length"></span> subject(s) selected for student enrollment inheritance.
+                <span class="font-black text-violet-900" x-text="selectedList.length"></span> subject(s) selected for student enrollment inheritance.
             </div>
             <button 
                 wire:click="save" 
