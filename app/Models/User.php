@@ -24,7 +24,8 @@ class User extends Authenticatable
         'password',
         'role',
         'is_active',
-        'is_super_admin',
+        // 'is_super_admin' — intentionally excluded to prevent mass-assignment privilege escalation.
+        // Set explicitly via artisan commands or seeders only.
         'tenant_id',
         'profile_photo',
         'permissions',

@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\HomeworkController;
 use App\Http\Controllers\Api\TimetableController;
 use App\Http\Controllers\Api\SyncController;
 use App\Http\Controllers\Api\TeacherController;
+use App\Http\Controllers\Api\WhatsAppController;
 
 // Public
 Route::post('/login', [AuthController::class, 'login']);
@@ -67,19 +68,21 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/sync', [SyncController::class, 'handleSync']);
 });
 
-// WhatsApp Bot
-Route::prefix('whatsapp')->group(function () {
-    Route::get('user/{phone}',          [\App\Http\Controllers\Api\WhatsAppController::class, 'getUser']);
-    Route::get('attendance/{parentId}', [\App\Http\Controllers\Api\WhatsAppController::class, 'getAttendance']);
-    Route::get('results/{parentId}',    [\App\Http\Controllers\Api\WhatsAppController::class, 'getResults']);
-    Route::get('fees/{parentId}',       [\App\Http\Controllers\Api\WhatsAppController::class, 'getFees']);
-    Route::get('contact',               [\App\Http\Controllers\Api\WhatsAppController::class, 'getContact']);
-    Route::post('subscribe/{userId}',   [\App\Http\Controllers\Api\WhatsAppController::class, 'subscribe']);
-    Route::post('unsubscribe/{userId}', [\App\Http\Controllers\Api\WhatsAppController::class, 'unsubscribe']);
-    Route::post('ai/ask',               [\App\Http\Controllers\Api\WhatsAppController::class, 'askAi']);
-    Route::post('login',               [\App\Http\Controllers\Api\WhatsAppController::class, 'login']);
-    Route::post('register',             [\App\Http\Controllers\Api\WhatsAppController::class, 'registerUser']);
-    Route::post('verify',               [\App\Http\Controllers\Api\WhatsAppController::class, 'verifyOTP']);
-    Route::post('staff/homework',       [\App\Http\Controllers\Api\WhatsAppController::class, 'staffHomework']);
-    Route::post('admin/broadcast',      [\App\Http\Controllers\Api\WhatsAppController::class, 'adminBroadcast']);
-});
+// WhatsApp Bot — authenticated via shared API key
+Route::prefix('whatsapp')
+    ->middleware(\App\Http\Middleware\VerifyWhatsAppApiKey::class)
+    ->group(function () {
+        Route::get('user/{phone}',          [WhatsAppController::class, 'getUser']);
+        Route::get('attendance/{parentId}', [WhatsAppController::class, 'getAttendance']);
+        Route::get('results/{parentId}',    [WhatsAppController::class, 'getResults']);
+        Route::get('fees/{parentId}',       [WhatsAppController::class, 'getFees']);
+        Route::get('contact',               [WhatsAppController::class, 'getContact']);
+        Route::post('subscribe/{userId}',   [WhatsAppController::class, 'subscribe']);
+        Route::post('unsubscribe/{userId}', [WhatsAppController::class, 'unsubscribe']);
+        Route::post('ai/ask',               [WhatsAppController::class, 'askAi']);
+        Route::post('login',                [WhatsAppController::class, 'login']);
+        Route::post('register',             [WhatsAppController::class, 'registerUser']);
+        Route::post('verify',               [WhatsAppController::class, 'verifyOTP']);
+        Route::post('staff/homework',       [WhatsAppController::class, 'staffHomework']);
+        Route::post('admin/broadcast',      [WhatsAppController::class, 'adminBroadcast']);
+    });

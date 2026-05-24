@@ -9,7 +9,7 @@ class BackupController extends Controller
 {
     public function download(Request $request)
     {
-        abort_unless(auth()->user()?->role === 'superadmin', 403);
+        abort_unless(auth()->user()?->is_super_admin, 403);
 
         $mysqldump = shell_exec('which mysqldump');
         if (empty(trim((string)$mysqldump))) {

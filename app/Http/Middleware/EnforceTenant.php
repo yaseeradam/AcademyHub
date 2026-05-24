@@ -31,8 +31,10 @@ class EnforceTenant
         if ($user && $user->is_super_admin) {
             if ($tenantId) {
                 Auth::logout();
-                $request->session()->invalidate();
-                $request->session()->regenerateToken();
+                if ($request->hasSession()) {
+                    $request->session()->invalidate();
+                    $request->session()->regenerateToken();
+                }
 
                 abort(403, 'Super Admin accounts must use the main domain.');
             }
@@ -43,8 +45,10 @@ class EnforceTenant
         // Non-superadmin accounts must be in a tenant context and match it.
         if (! $tenantId || ! $user || (int) $user->tenant_id !== (int) $tenantId) {
             Auth::logout();
-            $request->session()->invalidate();
-            $request->session()->regenerateToken();
+            if ($request->hasSession()) {
+                $request->session()->invalidate();
+                $request->session()->regenerateToken();
+            }
 
             if ($request->expectsJson()) {
                 return response()->json(['message' => 'Unauthorized tenant context.'], 403);

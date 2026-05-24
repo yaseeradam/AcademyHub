@@ -153,7 +153,8 @@ class WhatsAppController extends Controller
             'otp' => $otp
         ], now()->addMinutes(10));
 
-        return response()->json(['success' => true, 'otp' => $otp]);
+        // OTP must be sent via WhatsApp/SMS by the bot, NOT returned in the response.
+        return response()->json(['success' => true, 'message' => 'OTP generated. Send it to the user via WhatsApp.']);
     }
 
     public function verifyOTP(Request $request)
@@ -164,7 +165,7 @@ class WhatsAppController extends Controller
         ]);
 
         $cached = \Illuminate\Support\Facades\Cache::get($this->otpCacheKey($request->phone));
-        if (!$cached || $cached['otp'] != $request->otp) {
+        if (!$cached || (string) $cached['otp'] !== (string) $request->otp) {
             return response()->json(['success' => false, 'message' => 'Invalid or expired OTP'], 400);
         }
 

@@ -9,6 +9,10 @@ return new class extends Migration
 {
     private function foreignKeyExists(string $table, string $constraintName): bool
     {
+        if (DB::connection()->getDriverName() === 'sqlite') {
+            return false;
+        }
+
         $database = DB::getDatabaseName();
 
         $row = DB::selectOne(
@@ -24,6 +28,10 @@ return new class extends Migration
 
     private function indexExists(string $table, string $indexName): bool
     {
+        if (DB::connection()->getDriverName() === 'sqlite') {
+            return false;
+        }
+
         $database = DB::getDatabaseName();
 
         $row = DB::selectOne(

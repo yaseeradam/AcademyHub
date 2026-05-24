@@ -56,22 +56,27 @@ class Transaction extends Model
 
     public static function nextReceiptNumber(): string
     {
-        $latest = self::query()
-            ->whereNotNull('receipt_number')
-            ->orderByDesc('id')
-            ->value('receipt_number');
+        // Use database-level locking to prevent duplicate receipt numbers
+        // under concurrent requests.
+        return \Illuminate\Support\Facades\DB::transaction(function () {
+            $latest = self::query()
+                ->whereNotNull('receipt_number')
+                ->orderByDesc('id')
+                ->lockForUpdate()
+                ->value('receipt_number');
 
-        if (! $latest) {
-            return 'REC-001';
-        }
+            if (! $latest) {
+                return 'REC-001';
+            }
 
-        if (preg_match('/REC-(\d+)/', $latest, $m) !== 1) {
-            return 'REC-001';
-        }
+            if (preg_match('/REC-(\d+)/', $latest, $m) !== 1) {
+                return 'REC-001';
+            }
 
-        $next = (int) $m[1] + 1;
+            $next = (int) $m[1] + 1;
 
-        return 'REC-'.str_pad((string) $next, 3, '0', STR_PAD_LEFT);
+            return 'REC-'.str_pad((string) $next, 3, '0', STR_PAD_LEFT);
+        });
     }
 
     public function getRouteKeyName(): string

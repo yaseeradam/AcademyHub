@@ -87,6 +87,20 @@ class SettingsController extends Controller
         $this->persistSettings($settingsPath, $settings);
         
         $this->refreshSettingsCache();
+
+        // Update database to keep in sync
+        $tenantId = TenantSettings::tenantId();
+        if ($tenantId) {
+            $tenant = \App\Models\Tenant::find($tenantId);
+            if ($tenant) {
+                $tenant->update([
+                    'name' => $data['school_name'],
+                    'contact_email' => $data['school_email'] ?? null,
+                    'contact_phone' => $data['school_phone'] ?? null,
+                    'logo' => $settings['school_logo'] ?? null,
+                ]);
+            }
+        }
         
         // Force config reload by clearing config cache
         if (function_exists('opcache_reset')) {

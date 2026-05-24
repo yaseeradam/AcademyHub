@@ -9,6 +9,9 @@
     # but also a Laravel route at `/certificates`. Without this rule, Apache treats
     # `/certificates` as a directory request and never reaches Laravel.
     RewriteRule ^certificates/?$ index.php [L]
+    RewriteRule ^login/?$ index.php [L]
+    RewriteRule ^teachers/?$ index.php [L]
+    RewriteRule ^students/?$ index.php [L]
 
     # Handle Authorization Header
     RewriteCond %{HTTP:Authorization} .

@@ -13,7 +13,6 @@
 .phpunit.result.cache
 compiled_*.php
 test_*.php
-dispatch('alert'
 Homestead.json
 Homestead.yaml
 auth.json

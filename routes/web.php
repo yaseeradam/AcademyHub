@@ -71,12 +71,14 @@ Route::get('/', [UtilityController::class, 'welcome']);
 
 Route::get('/home', [UtilityController::class, 'home']);
 
-// CBT Portal Routes (No restrictions)
-Route::get('/cbt/portal', CbtPortalStart::class)->name('cbt.portal');
-Route::get('/cbt/portal/{attempt}', CbtPortalTake::class)->name('cbt.portal.take');
+// CBT Portal Routes (student session required)
+Route::middleware('student.session')->group(function () {
+    Route::get('/cbt/portal', CbtPortalStart::class)->name('cbt.portal');
+    Route::get('/cbt/portal/{attempt}', CbtPortalTake::class)->name('cbt.portal.take');
 
-Route::get('/cbt/student', CbtPortalStart::class)->name('cbt.student');
-Route::get('/cbt/student/{attempt}', CbtPortalTake::class)->name('cbt.student.take');
+    Route::get('/cbt/student', CbtPortalStart::class)->name('cbt.student');
+    Route::get('/cbt/student/{attempt}', CbtPortalTake::class)->name('cbt.student.take');
+});
 
 // Fresh CSRF token endpoint — used by JS logout to prevent 419 Page Expired
 Route::get('/csrf-token', [UtilityController::class, 'csrfToken']);

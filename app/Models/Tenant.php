@@ -37,6 +37,37 @@ class Tenant extends Model
         'expires_at'    => 'datetime',
     ];
 
+    protected static function booted()
+    {
+        static::saved(function (Tenant $tenant) {
+            $path = storage_path('app/myacademy/tenants/' . $tenant->id . '/settings.json');
+            
+            if (\Illuminate\Support\Facades\File::exists($path)) {
+                $existing = json_decode(\Illuminate\Support\Facades\File::get($path), true);
+                if (!is_array($existing)) {
+                    $existing = [];
+                }
+                
+                $existing['school_name'] = $tenant->name;
+                $existing['school_email'] = $tenant->contact_email;
+                $existing['school_phone'] = $tenant->contact_phone;
+                
+                if ($tenant->logo !== null) {
+                    $existing['school_logo'] = $tenant->logo;
+                }
+                
+                if ($tenant->expires_at) {
+                    $existing['subscription_due_date'] = $tenant->expires_at->toDateString();
+                }
+                
+                \Illuminate\Support\Facades\File::put($path, json_encode($existing, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+            }
+            
+            // Flush the settings cache for this specific tenant
+            \Illuminate\Support\Facades\Cache::forget(\App\Support\TenantSettings::settingsCacheKey($tenant));
+        });
+    }
+
     public function users(): HasMany
     {
         return $this->hasMany(User::class);

@@ -83,10 +83,26 @@ class SubscriptionBilling extends Component
             ->get("https://api.paystack.co/transaction/verify/{$reference}");
 
         if ($response->successful() && $response->json('data.status') === 'success') {
+            $newExpiry = now()->addYear();
+
             // Extend subscription by 1 year and persist to JSON settings file
             $this->writeSettings([
-                'subscription_due_date' => now()->addYear()->toDateString(),
+                'subscription_due_date' => $newExpiry->toDateString(),
             ]);
+
+            // Update database to keep in sync
+            $tenantId = TenantSettings::tenantId();
+            if ($tenantId) {
+                $tenant = \App\Models\Tenant::find($tenantId);
+                if ($tenant) {
+                    $tenant->update([
+                        'expires_at' => $newExpiry,
+                    ]);
+                }
+            }
+
+            // Flush settings cache so renewal takes effect instantly
+            \Illuminate\Support\Facades\Cache::forget(TenantSettings::settingsCacheKey());
 
             session()->flash('success', 'Payment successful! Your subscription has been securely renewed.');
             $this->dispatch('payment-successful');

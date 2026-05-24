@@ -21,11 +21,12 @@ class CheckSubscriptionStatus
             return $next($request);
         }
 
-        $settingsPath = TenantSettings::settingsPath();
-        $settings = file_exists($settingsPath) ? json_decode(file_get_contents($settingsPath), true) : [];
+        // Use the config values already loaded and cached by LoadTenantSettings middleware
+        // instead of redundantly reading the JSON file from disk.
+        $dueDateRaw = config('myacademy.subscription_due_date');
         // Fallback to exactly 1 year if not set
-        $dueDate = !empty($settings['subscription_due_date'])
-            ? \Carbon\Carbon::parse($settings['subscription_due_date'])
+        $dueDate = !empty($dueDateRaw)
+            ? \Carbon\Carbon::parse($dueDateRaw)
             : now()->addYear();
         $now = now();
 
