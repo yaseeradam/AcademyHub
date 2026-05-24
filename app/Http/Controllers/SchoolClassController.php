@@ -38,6 +38,21 @@ class SchoolClassController extends Controller
         return view('pages.classes.index', compact('classes'));
     }
 
+    public function manage()
+    {
+        $user = auth()->user();
+        abort_unless($user?->role === 'admin', 403);
+
+        $classes = SchoolClass::query()
+            ->with('sections')
+            ->withCount(['sections', 'students'])
+            ->orderBy('level')
+            ->orderBy('name')
+            ->get();
+
+        return view('pages.classes.manage', compact('classes'));
+    }
+
     public function store(Request $request)
     {
         $data = $request->validate([
