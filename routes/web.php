@@ -117,7 +117,7 @@ Route::get('/student/dashboard', \App\Livewire\Student\Dashboard::class)
     ->name('student.dashboard');
 
 Route::get('/student/homework', \App\Livewire\Student\Homework::class)
-    ->middleware('student.session')
+    ->middleware(['student.session', 'plugin:homework'])
     ->name('student.homework');
 
 Route::get('/student/exams', \App\Livewire\Student\Exams::class)
@@ -301,8 +301,8 @@ Route::middleware(['auth', 'active'])->group(function () {
 
         Route::get('/results/entry', ResultsEntry::class)->middleware('permission:results.entry,results.review')->name('results.entry');
 
-        Route::get('/homework', HomeworkIndex::class)->name('homework.index');
-        Route::get('/homework/{id}/submissions', \App\Livewire\Homework\Submissions::class)->name('homework.submissions');
+        Route::get('/homework', HomeworkIndex::class)->middleware('plugin:homework')->name('homework.index');
+        Route::get('/homework/{id}/submissions', \App\Livewire\Homework\Submissions::class)->middleware('plugin:homework')->name('homework.submissions');
 
         
         if (config('app.debug')) {
