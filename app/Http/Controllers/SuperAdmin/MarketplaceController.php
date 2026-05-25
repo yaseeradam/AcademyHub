@@ -29,8 +29,9 @@ class MarketplaceController extends Controller
             'setup_fee'             => 'required|numeric|min:0',
             'usage_fee_per_student' => 'required|numeric|min:0',
             'description'           => 'nullable|string',
-            'icon'                  => 'nullable|string|max:255',
+            'icon'                  => 'nullable|string|max:10000',
             'is_active'             => 'boolean',
+            'screenshot_count'      => 'nullable|integer|min:1|max:5',
         ]);
 
         $data['is_active'] = $request->has('is_active');
@@ -39,6 +40,36 @@ class MarketplaceController extends Controller
         $data['setup_fee']             = $isPaid ? (float) $request->input('setup_fee', 0) : 0.0;
         $data['usage_fee_per_student'] = $isPaid ? (float) $request->input('usage_fee_per_student', 0) : 0.0;
         $data['price']                 = $data['setup_fee'];
+
+        // Process screenshots metadata
+        $screenshotsMetadata = [];
+        $screenshotCount = (int) $request->input('screenshot_count', 3);
+
+        for ($i = 0; $i < 5; $i++) {
+            $title = $request->input("screenshots.{$i}.title") ?: "Screenshot " . ($i + 1);
+            $filename = $request->input("screenshots.{$i}.filename") ?: "";
+
+            // Handle file upload if present
+            if ($request->hasFile("screenshot_files.{$i}")) {
+                $file = $request->file("screenshot_files.{$i}");
+                $extension = $file->getClientOriginalExtension();
+                $filename = $request->input('slug') . '-screenshot-' . ($i + 1) . '-' . time() . '.' . $extension;
+                
+                $destinationPath = public_path('images');
+                if (!file_exists($destinationPath)) {
+                    mkdir($destinationPath, 0777, true);
+                }
+                $file->move($destinationPath, $filename);
+            }
+
+            $screenshotsMetadata[$i] = [
+                'title' => $title,
+                'filename' => $filename,
+            ];
+        }
+
+        $data['screenshot_count'] = $screenshotCount;
+        $data['screenshots_metadata'] = $screenshotsMetadata;
 
         MarketplaceComponent::create($data);
 
@@ -59,8 +90,9 @@ class MarketplaceController extends Controller
             'setup_fee'             => 'required|numeric|min:0',
             'usage_fee_per_student' => 'required|numeric|min:0',
             'description'           => 'nullable|string',
-            'icon'                  => 'nullable|string|max:255',
+            'icon'                  => 'nullable|string|max:10000',
             'is_active'             => 'boolean',
+            'screenshot_count'      => 'nullable|integer|min:1|max:5',
         ]);
 
         $data['is_active'] = $request->has('is_active');
@@ -69,6 +101,47 @@ class MarketplaceController extends Controller
         $data['setup_fee']             = $isPaid ? (float) $request->input('setup_fee', 0) : 0.0;
         $data['usage_fee_per_student'] = $isPaid ? (float) $request->input('usage_fee_per_student', 0) : 0.0;
         $data['price']                 = $data['setup_fee'];
+
+        // Process screenshots metadata
+        $screenshotsMetadata = [];
+        $screenshotCount = (int) $request->input('screenshot_count', 3);
+        
+        $existingMetadata = $marketplace->screenshots_metadata;
+        if (is_string($existingMetadata)) {
+            $existingMetadata = json_decode($existingMetadata, true) ?: [];
+        }
+        $existingMetadata = is_array($existingMetadata) ? $existingMetadata : [];
+
+        for ($i = 0; $i < 5; $i++) {
+            $title = $request->input("screenshots.{$i}.title") ?: "Screenshot " . ($i + 1);
+            $filename = $request->input("screenshots.{$i}.filename") ?: "";
+
+            // Handle file upload if present
+            if ($request->hasFile("screenshot_files.{$i}")) {
+                $file = $request->file("screenshot_files.{$i}");
+                $extension = $file->getClientOriginalExtension();
+                $filename = $marketplace->slug . '-screenshot-' . ($i + 1) . '-' . time() . '.' . $extension;
+                
+                $destinationPath = public_path('images');
+                if (!file_exists($destinationPath)) {
+                    mkdir($destinationPath, 0777, true);
+                }
+                $file->move($destinationPath, $filename);
+            }
+
+            // Fallback to existing filename if none provided
+            if (empty($filename) && isset($existingMetadata[$i]['filename'])) {
+                $filename = $existingMetadata[$i]['filename'];
+            }
+
+            $screenshotsMetadata[$i] = [
+                'title' => $title,
+                'filename' => $filename,
+            ];
+        }
+
+        $data['screenshot_count'] = $screenshotCount;
+        $data['screenshots_metadata'] = $screenshotsMetadata;
 
         $marketplace->update($data);
 

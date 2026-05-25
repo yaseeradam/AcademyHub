@@ -78,6 +78,7 @@
                     <th>Domain / Slug</th>
                     <th>Plan</th>
                     <th>Status</th>
+                    <th>Subscription Due Date</th>
                     <th>Student / Teacher Cap</th>
                     <th>Created</th>
                     <th style="text-align:right;">Actions</th>
@@ -117,6 +118,22 @@
                             <span class="sa-badge-dot"></span>
                             {{ ucfirst($tenant->status) }}
                         </span>
+                    </td>
+                    <td>
+                        @if($tenant->expires_at)
+                            <div style="font-size:12.5px; font-weight:700; color: {{ $tenant->expires_at->isPast() ? '#e11d48' : '#1e293b' }};">
+                                {{ $tenant->expires_at->format('M j, Y') }}
+                            </div>
+                            <div style="font-size:10px; color:#94a3b8; font-weight: 600; text-transform: uppercase;">
+                                @if($tenant->expires_at->isPast())
+                                    <span style="color:#ef4444;">Expired {{ $tenant->expires_at->diffForHumans() }}</span>
+                                @else
+                                    <span>Expires {{ $tenant->expires_at->diffForHumans() }}</span>
+                                @endif
+                            </div>
+                        @else
+                            <span style="font-size:12.5px; color:#94a3b8; font-style:italic;">No Expiry Set</span>
+                        @endif
                     </td>
                     <td>
                         <div style="font-size:12.5px;">

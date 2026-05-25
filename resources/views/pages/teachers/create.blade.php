@@ -147,7 +147,7 @@
                 <div class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
                     <h2 class="text-base font-semibold text-gray-900 mb-4 border-b border-gray-100 pb-2">Profile Photo</h2>
                     <label for="photo" class="flex flex-col items-center justify-center w-full h-40 border-2 border-gray-300 border-dashed rounded-xl cursor-pointer bg-gray-50 hover:bg-gray-100 transition-colors group">
-                        <div class="flex flex-col items-center justify-center pt-5 pb-6">
+                        <div id="photo-preview-container" class="flex flex-col items-center justify-center pt-5 pb-6">
                             <svg class="mb-3 w-8 h-8 text-gray-400 group-hover:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
                             </svg>
@@ -207,13 +207,11 @@ document.getElementById('photo').addEventListener('change', function(e) {
     if (file) {
         const reader = new FileReader();
         reader.onload = function(e) {
-            const label = document.querySelector('label[for="photo"]');
-            label.innerHTML = `
-                <div class="flex flex-col items-center justify-center pt-5 pb-6">
-                    <img src="${e.target.result}" class="w-16 h-16 rounded-full object-cover mb-3 ring-2 ring-gray-100" />
-                    <p class="text-sm text-gray-700 font-semibold truncate px-4 max-w-full">${file.name}</p>
-                    <p class="text-xs text-gray-500 mt-1">Click to change photo</p>
-                </div>
+            const container = document.getElementById('photo-preview-container');
+            container.innerHTML = `
+                <img src="${e.target.result}" class="w-16 h-16 rounded-full object-cover mb-3 ring-2 ring-gray-100 animate-fadeIn" />
+                <p class="text-sm text-gray-700 font-semibold truncate px-4 max-w-full">${file.name}</p>
+                <p class="text-xs text-gray-500 mt-1">Click to change photo</p>
             `;
         };
         reader.readAsDataURL(file);

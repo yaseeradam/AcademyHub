@@ -42,11 +42,46 @@ class CheckSubscriptionStatus
             'subscriptionDueDate' => $dueDate,
         ]);
 
-        // If >= 14 days past due, complete lock down (only billing and authentication paths allowed)
-        if ($isPastDue && $daysPastDue >= 14) {
-            $allowedRoutes = ['billing.index', 'logout', 'login', 'login.store'];
-            if (!$request->routeIs($allowedRoutes) && !$request->is('livewire/update')) {
-                return redirect()->route('billing.index')->with('error', 'Your subscription expired over 14 days ago. System access is locked until payment is made.');
+        if ($isPastDue) {
+            // Block all standard mutating requests (CRUD stop)
+            if ($request->isMethod('POST') || $request->isMethod('PUT') || $request->isMethod('PATCH') || $request->isMethod('DELETE')) {
+                if ($request->is('livewire/update')) {
+                    $payload = $request->json()->all();
+                    $hasModifyingCalls = false;
+                    
+                    if (isset($payload['components']) && is_array($payload['components'])) {
+                        foreach ($payload['components'] as $comp) {
+                            $snapshot = isset($comp['snapshot']) ? json_decode($comp['snapshot'], true) : [];
+                            $memo = $snapshot['memo'] ?? [];
+                            $compName = $memo['name'] ?? '';
+                            
+                            // Allow the subscription billing page to execute operations (payment verification, etc.)
+                            if ($compName !== 'admin.subscription-billing' && !empty($comp['calls'])) {
+                                $hasModifyingCalls = true;
+                                break;
+                            }
+                        }
+                    }
+                    
+                    if ($hasModifyingCalls) {
+                        return response()->json([
+                            'message' => 'Your subscription has expired. Creating, updating, or deleting data is disabled in read-only mode.',
+                        ], 403);
+                    }
+                } else {
+                    $allowedRoutes = ['settings.subscription', 'logout', 'login', 'login.store'];
+                    if (!$request->routeIs($allowedRoutes)) {
+                        return back()->with('error', 'Your subscription has expired. Creating, updating, or deleting data is disabled in read-only mode.');
+                    }
+                }
+            }
+
+            // If >= 14 days past due, complete lock down (only billing and authentication paths allowed)
+            if ($daysPastDue >= 14) {
+                $allowedRoutes = ['settings.subscription', 'logout', 'login', 'login.store'];
+                if (!$request->routeIs($allowedRoutes) && !$request->is('livewire/update')) {
+                    return redirect()->route('settings.subscription')->with('error', 'Your subscription expired over 14 days ago. System access is locked until payment is made.');
+                }
             }
         }
 

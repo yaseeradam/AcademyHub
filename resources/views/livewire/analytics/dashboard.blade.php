@@ -1,4 +1,4 @@
-<div class="space-y-6" x-data="analyticsCharts()">
+<div class="space-y-6" x-data="{}">
     <!-- Header -->
     <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-600 p-8 shadow-xl">
         <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxwYXRoIGQ9Ik0zNiAxOGMzLjMxNCAwIDYgMi42ODYgNiA2cy0yLjY4NiA2LTYgNi02LTIuNjg2LTYtNiAyLjY4Ni02IDYtNiIgc3Ryb2tlPSIjZmZmIiBzdHJva2Utd2lkdGg9IjIiIG9wYWNpdHk9Ii4xIi8+PC9nPjwvc3ZnPg==')] opacity-30"></div>
@@ -245,8 +245,8 @@
                     data:   @json(array_column($this->attendanceStats['daily_trend'], 'attendance_rate')),
                 },
                 subject: {
-                    labels: @json(array_column($this->academicPerformance['subject_performance']->toArray(), 'subject')),
-                    data:   @json(array_column($this->academicPerformance['subject_performance']->toArray(), 'average')),
+                    labels: @json(array_column($this->academicPerformance['subject_performance'], 'subject')),
+                    data:   @json(array_column($this->academicPerformance['subject_performance'], 'average')),
                 },
                 @if(auth()->user()->role === 'admin' || auth()->user()->role === 'bursar')
                 revenue: {

@@ -56,9 +56,9 @@ class Tenant extends Model
                     $existing['school_logo'] = $tenant->logo;
                 }
                 
-                if ($tenant->expires_at) {
-                    $existing['subscription_due_date'] = $tenant->expires_at->toDateString();
-                }
+                $existing['subscription_due_date'] = $tenant->expires_at
+                    ? $tenant->expires_at->toDateString()
+                    : null;
                 
                 \Illuminate\Support\Facades\File::put($path, json_encode($existing, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
             }

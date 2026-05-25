@@ -62,7 +62,7 @@ body{font-family:'Inter',sans-serif;min-height:100vh;display:flex;background:#0a
     <div class="sa-grid"></div>
     <div class="sa-left-content">
       <div class="sa-logo">
-        <img src="{{ asset('images/myacademyhub-logo.png') }}" alt="MyAcademyHub">
+        <img src="{{ asset('images/myacademyhub-logo.png') }}" alt="AcademyHub">
       </div>
       <div class="sa-hero">
         <h2>Super<br><span>Admin</span><br>Portal</h2>
@@ -125,7 +125,7 @@ body{font-family:'Inter',sans-serif;min-height:100vh;display:flex;background:#0a
 
       <div class="sa-divider"></div>
       <div class="sa-tagline">Manage the platform, empower every school.</div>
-      <div class="sa-copyright">&copy; {{ date('Y') }} MyAcademyHub. All rights reserved.</div>
+      <div class="sa-copyright">&copy; {{ date('Y') }} AcademyHub. All rights reserved.</div>
     </div>
   </div>
 </div>

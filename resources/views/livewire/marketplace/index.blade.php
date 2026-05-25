@@ -1,122 +1,108 @@
 @php
-    $getIconSvg = function($icon, $slug) {
-        $icons = [
-            'whatsapp' => '
-                <svg class="h-7 w-7 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
-                </svg>',
-            'whatsapp-bot' => '
-                <svg class="h-7 w-7 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
-                </svg>',
-            'student' => '
-                <svg class="h-7 w-7 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M22 10v6M2 10l10-5 10 5-10 5z"/>
-                    <path d="M6 12v5c0 2 2 3 6 3s6-1 6-3v-5"/>
-                </svg>',
-            'student-dashboard' => '
-                <svg class="h-7 w-7 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M22 10v6M2 10l10-5 10 5-10 5z"/>
-                    <path d="M6 12v5c0 2 2 3 6 3s6-1 6-3v-5"/>
-                </svg>',
-            'parent-portal' => '
-                <svg class="h-7 w-7 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-                    <circle cx="9" cy="7" r="4"/>
-                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
-                    <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-                </svg>',
-            'exam' => '
-                <svg class="h-7 w-7 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                    <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
-                    <line x1="8" y1="21" x2="16" y2="21"/>
-                    <line x1="12" y1="17" x2="12" y2="21"/>
-                </svg>',
-            'cbt' => '
-                <svg class="h-7 w-7 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                    <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
-                    <line x1="8" y1="21" x2="16" y2="21"/>
-                    <line x1="12" y1="17" x2="12" y2="21"/>
-                </svg>',
-            'finance' => '
-                <svg class="h-7 w-7 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                    <line x1="12" y1="1" x2="12" y2="23"/>
-                    <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
-                </svg>',
-            'savings-loan' => '
-                <svg class="h-7 w-7 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                    <line x1="12" y1="1" x2="12" y2="23"/>
-                    <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
-                </svg>',
-            'messages' => '
-                <svg class="h-7 w-7 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-                </svg>',
-            'document' => '
-                <svg class="h-7 w-7 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                    <polyline points="14 2 14 8 20 8"/>
-                    <line x1="16" y1="13" x2="8" y2="13"/>
-                    <line x1="16" y1="17" x2="8" y2="17"/>
-                    <polyline points="10 9 9 9 8 9"/>
-                </svg>',
-            'homework' => '
-                <svg class="h-7 w-7 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                    <polyline points="14 2 14 8 20 8"/>
-                    <line x1="16" y1="13" x2="8" y2="13"/>
-                    <line x1="16" y1="17" x2="8" y2="17"/>
-                    <polyline points="10 9 9 9 8 9"/>
-                </svg>',
-            'e-learning' => '
-                <svg class="h-7 w-7 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
-                    <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
-                </svg>',
-        ];
-
-        $key = isset($icons[$icon]) ? $icon : (isset($icons[$slug]) ? $slug : 'default');
-        return $icons[$key] ?? '
+    $iconSvgs = [
+        'whatsapp' => '
             <svg class="h-7 w-7 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
-            </svg>';
-    };
+                <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
+            </svg>',
+        'whatsapp-bot' => '
+            <svg class="h-7 w-7 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
+            </svg>',
+        'student' => '
+            <svg class="h-7 w-7 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M22 10v6M2 10l10-5 10 5-10 5z"/>
+                <path d="M6 12v5c0 2 2 3 6 3s6-1 6-3v-5"/>
+            </svg>',
+        'student-dashboard' => '
+            <svg class="h-7 w-7 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M22 10v6M2 10l10-5 10 5-10 5z"/>
+                <path d="M6 12v5c0 2 2 3 6 3s6-1 6-3v-5"/>
+            </svg>',
+        'parent-portal' => '
+            <svg class="h-7 w-7 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                <circle cx="9" cy="7" r="4"/>
+                <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+            </svg>',
+        'exam' => '
+            <svg class="h-7 w-7 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
+                <line x1="8" y1="21" x2="16" y2="21"/>
+                <line x1="12" y1="17" x2="12" y2="21"/>
+            </svg>',
+        'cbt' => '
+            <svg class="h-7 w-7 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
+                <line x1="8" y1="21" x2="16" y2="21"/>
+                <line x1="12" y1="17" x2="12" y2="21"/>
+            </svg>',
+        'finance' => '
+            <svg class="h-7 w-7 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="12" y1="1" x2="12" y2="23"/>
+                <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+            </svg>',
+        'savings-loan' => '
+            <svg class="h-7 w-7 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="12" y1="1" x2="12" y2="23"/>
+                <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+            </svg>',
+        'messages' => '
+            <svg class="h-7 w-7 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+            </svg>',
+        'document' => '
+            <svg class="h-7 w-7 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                <polyline points="14 2 14 8 20 8"/>
+                <line x1="16" y1="13" x2="8" y2="13"/>
+                <line x1="16" y1="17" x2="8" y2="17"/>
+                <polyline points="10 9 9 9 8 9"/>
+            </svg>',
+        'homework' => '
+            <svg class="h-7 w-7 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                <polyline points="14 2 14 8 20 8"/>
+                <line x1="16" y1="13" x2="8" y2="13"/>
+                <line x1="16" y1="17" x2="8" y2="17"/>
+                <polyline points="10 9 9 9 8 9"/>
+            </svg>',
+        'e-learning' => '
+            <svg class="h-7 w-7 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+                <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+            </svg>',
+    ];
 
-    $getIconBackground = function($slug) {
-        $gradients = [
-            'whatsapp' => 'from-emerald-400 to-green-500',
-            'whatsapp-bot' => 'from-emerald-400 to-green-500',
-            'student' => 'from-indigo-500 to-indigo-600',
-            'student-dashboard' => 'from-indigo-500 to-indigo-600',
-            'messages' => 'from-amber-400 to-orange-500',
-            'homework' => 'from-sky-400 to-blue-500',
-            'document' => 'from-sky-400 to-blue-500',
-            'cbt' => 'from-purple-400 to-indigo-600',
-            'exam' => 'from-purple-400 to-indigo-600',
-            'savings-loan' => 'from-teal-400 to-emerald-500',
-            'finance' => 'from-teal-400 to-emerald-500',
-            'parent-portal' => 'from-pink-400 to-rose-500',
-        ];
-        return $gradients[$slug] ?? 'from-gray-400 to-slate-500';
-    };
+    $iconGradients = [
+        'whatsapp' => 'from-emerald-400 to-green-500',
+        'whatsapp-bot' => 'from-emerald-400 to-green-500',
+        'student' => 'from-indigo-500 to-indigo-600',
+        'student-dashboard' => 'from-indigo-500 to-indigo-600',
+        'messages' => 'from-amber-400 to-orange-500',
+        'homework' => 'from-sky-400 to-blue-500',
+        'document' => 'from-sky-400 to-blue-500',
+        'cbt' => 'from-purple-400 to-indigo-600',
+        'exam' => 'from-purple-400 to-indigo-600',
+        'savings-loan' => 'from-teal-400 to-emerald-500',
+        'finance' => 'from-teal-400 to-emerald-500',
+        'parent-portal' => 'from-pink-400 to-rose-500',
+    ];
 
-    $getBadgeColor = function($slug) {
-        $badges = [
-            'whatsapp' => 'bg-green-100 text-green-800',
-            'whatsapp-bot' => 'bg-green-100 text-green-800',
-            'student' => 'bg-blue-100 text-blue-800',
-            'student-dashboard' => 'bg-blue-100 text-blue-800',
-            'messages' => 'bg-amber-100 text-amber-800',
-            'homework' => 'bg-sky-100 text-sky-800',
-            'document' => 'bg-sky-100 text-sky-800',
-            'cbt' => 'bg-purple-100 text-purple-800',
-            'exam' => 'bg-purple-100 text-purple-800',
-            'savings-loan' => 'bg-emerald-100 text-emerald-800',
-            'finance' => 'bg-emerald-100 text-emerald-800',
-            'parent-portal' => 'bg-pink-100 text-pink-800',
-        ];
-        return $badges[$slug] ?? 'bg-gray-100 text-gray-800';
-    };
+    $badgeColors = [
+        'whatsapp' => 'bg-green-100 text-green-800',
+        'whatsapp-bot' => 'bg-green-100 text-green-800',
+        'student' => 'bg-blue-100 text-blue-800',
+        'student-dashboard' => 'bg-blue-100 text-blue-800',
+        'messages' => 'bg-amber-100 text-amber-800',
+        'homework' => 'bg-sky-100 text-sky-800',
+        'document' => 'bg-sky-100 text-sky-800',
+        'cbt' => 'bg-purple-100 text-purple-800',
+        'exam' => 'bg-purple-100 text-purple-800',
+        'savings-loan' => 'bg-emerald-100 text-emerald-800',
+        'finance' => 'bg-emerald-100 text-emerald-800',
+        'parent-portal' => 'bg-pink-100 text-pink-800',
+    ];
 @endphp
 
 <div
@@ -236,8 +222,8 @@
         @forelse($components as $component)
             @php
                 $isInstalled = in_array($component->id, $installed);
-                $gradientClass = $getIconBackground($component->slug);
-                $badgeStyle = $getBadgeColor($component->slug);
+                $gradientClass = $iconGradients[$component->slug] ?? 'from-gray-400 to-slate-500';
+                $badgeStyle = $badgeColors[$component->slug] ?? 'bg-gray-100 text-gray-800';
             @endphp
             <div
                 x-show="activeTab === 'all' || 
@@ -251,9 +237,14 @@
                 onclick="window.location.href='{{ route('marketplace.show', $component->slug) }}'"
             >
                 <div class="flex items-start gap-5 w-full">
-                    {{-- App Icon gradient --}}
-                    <div class="w-16 h-16 rounded-2xl bg-gradient-to-br {{ $gradientClass }} flex items-center justify-center flex-shrink-0 shadow-sm select-none">
-                        {!! $getIconSvg($component->icon, $component->slug) !!}
+                    <div class="w-16 h-16 rounded-2xl bg-gradient-to-br {{ $gradientClass }} flex items-center justify-center flex-shrink-0 shadow-sm select-none index-svg-container text-white">
+                        {!! (!empty($component->icon) && str_contains($component->icon, '<svg')) 
+                            ? $component->icon 
+                            : ($iconSvgs[$component->icon] ?? $iconSvgs[$component->slug] ?? '
+                                <svg class="h-7 w-7 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+                                </svg>
+                            ') !!}
                     </div>
 
                     {{-- Card Info Columns --}}
@@ -265,10 +256,14 @@
                             </h3>
                             
                             <div class="flex items-center text-amber-500 flex-shrink-0 gap-0.5">
-                                <svg class="h-3.5 w-3.5 fill-current" viewBox="0 0 20 20">
-                                    <path d="M9.049 2.927c.3-.9 1.603-.9 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.9-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
-                                </svg>
-                                <span class="text-xs font-black text-amber-500 leading-none">{{ number_format($component->rating_avg ?: 4.5, 1) }}</span>
+                                @if($component->real_rating_count > 0)
+                                    <svg class="h-3.5 w-3.5 fill-current" viewBox="0 0 20 20">
+                                        <path d="M9.049 2.927c.3-.9 1.603-.9 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.9-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                                    </svg>
+                                    <span class="text-xs font-black text-amber-500 leading-none">{{ number_format($component->real_rating_avg, 1) }}</span>
+                                @else
+                                    <span class="text-[10px] font-bold text-slate-400 leading-none bg-slate-50 border border-slate-100 rounded px-1.5 py-0.5">No reviews</span>
+                                @endif
                             </div>
                         </div>
 
@@ -300,7 +295,7 @@
                             </div>
 
                             <span class="text-[10px] font-semibold text-gray-400">
-                                {{ $component->installs ?: 0 }} Installs
+                                {{ $component->real_installs }} {{ Str::plural('Install', $component->real_installs) }}
                             </span>
                         </div>
                     </div>
@@ -527,4 +522,14 @@
             });
         </script>
     @endpush
+
+    <style>
+        .index-svg-container svg {
+            width: 1.75rem !important; /* h-7/w-7 (28px) */
+            height: 1.75rem !important; /* h-7/w-7 (28px) */
+            max-width: 100% !important;
+            max-height: 100% !important;
+            display: inline-block !important;
+        }
+    </style>
 </div>

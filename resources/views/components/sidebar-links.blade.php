@@ -149,17 +149,7 @@
         </a>
     @endif
 
-    {{-- Marketplace Link for Admins --}}
-    @if ($user?->role === 'admin')
-        <a href="{{ route('marketplace') }}" wire:navigate
-            class="{{ request()->routeIs('marketplace') ? $activeClass : $inactiveClass }} {{ $baseClass }}">
-            <svg class="{{ $iconBase }} {{ request()->routeIs('marketplace') ? $iconActive : $iconInactive }}"
-                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
-            </svg>
-            <span class="sidebar-text">Marketplace</span>
-        </a>
-    @endif
+
 
     {{-- Dynamic Marketplace Components --}}
     @php
@@ -179,8 +169,8 @@
         <a href="{{ $href }}" wire:navigate
             class="{{ $isActive ? $activeClass : $inactiveClass }} {{ $baseClass }}">
             <span class="flex items-center gap-3">
-                @if(str_starts_with($component->icon, '<svg'))
-                    <span class="{{ $iconBase }} {{ $isActive ? $iconActive : $iconInactive }}">
+                @if(str_contains($component->icon, '<svg'))
+                    <span class="{{ $iconBase }} {{ $isActive ? $iconActive : $iconInactive }} sidebar-svg-container">
                         {!! $component->icon !!}
                     </span>
                 @else
@@ -235,3 +225,15 @@
         <span class="sidebar-text">Dev Area</span>
     </a>
 @endif
+
+<style>
+    .sidebar-svg-container svg {
+        width: 1.25rem !important; /* w-5 (20px) */
+        height: 1.25rem !important; /* h-5 (20px) */
+        max-width: 100% !important;
+        max-height: 100% !important;
+        display: inline-block !important;
+        vertical-align: middle !important;
+    }
+</style>
+

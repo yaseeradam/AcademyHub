@@ -14,6 +14,169 @@
 
 @section('content')
 
+{{-- Premium CSS Styles for nanno banana financial stats cards --}}
+<style>
+    .sa-premium-stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+        gap: 16px;
+        margin-bottom: 24px;
+    }
+    .sa-premium-card {
+        border-radius: 16px;
+        padding: 16px;
+        color: white;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.02);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        display: flex;
+        align-items: center;
+        gap: 14px;
+    }
+    .sa-premium-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    }
+    .sa-premium-glass-icon {
+        width: 44px;
+        height: 44px;
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.2);
+        backdrop-filter: blur(8px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid rgba(255, 255, 255, 0.25);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        flex-shrink: 0;
+        margin-bottom: 0;
+    }
+    .sa-premium-glass-icon svg {
+        width: 22px;
+        height: 22px;
+        color: white;
+    }
+    .sa-premium-info {
+        flex: 1;
+        min-width: 0;
+    }
+    .sa-premium-label {
+        font-size: 10px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: rgba(255, 255, 255, 0.85);
+        margin-bottom: 2px;
+    }
+    .sa-premium-value {
+        font-size: 20px;
+        font-weight: 800;
+        letter-spacing: -0.01em;
+        line-height: 1.1;
+        margin-bottom: 2px;
+    }
+    .sa-premium-desc {
+        font-size: 10.5px;
+        color: rgba(255, 255, 255, 0.75);
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .sa-premium-glow {
+        position: absolute;
+        width: 100px;
+        height: 100px;
+        background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0) 70%);
+        top: -30px;
+        right: -30px;
+        border-radius: 50%;
+        pointer-events: none;
+    }
+</style>
+
+{{-- ── Executive Financial Overview (Stats Cards) ──────────────── --}}
+<div class="sa-premium-stats-grid">
+
+    {{-- Total Invoiced Revenue Card --}}
+    <div class="sa-premium-card" style="background: linear-gradient(135deg, #4f46e5, #3b82f6);">
+        <div class="sa-premium-glow"></div>
+        <div class="sa-premium-glass-icon">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+        </div>
+        <div class="sa-premium-info">
+            <div class="sa-premium-label">Total Platform Billings</div>
+            <div class="sa-premium-value">{{ config('myacademy.currency_symbol', '₦') }}{{ number_format($stats['total_invoiced'], 2) }}</div>
+            <div class="sa-premium-desc" title="Aggregate invoiced setup & student fees">
+                <span style="width:5px;height:5px;background:rgba(255,255,255,0.6);border-radius:50%;display:inline-block;"></span>
+                Invoiced setup &amp; student fees
+            </div>
+        </div>
+    </div>
+
+    {{-- Total Paid Revenue Card --}}
+    <div class="sa-premium-card" style="background: linear-gradient(135deg, #10b981, #059669);">
+        <div class="sa-premium-glow"></div>
+        <div class="sa-premium-glass-icon">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+        </div>
+        <div class="sa-premium-info">
+            <div class="sa-premium-label">Total Paid Revenue</div>
+            <div class="sa-premium-value" style="color: #ffffff;">{{ config('myacademy.currency_symbol', '₦') }}{{ number_format($stats['total_paid'], 2) }}</div>
+            <div class="sa-premium-desc" title="Processed via Paystack & cleared logs">
+                <span style="width:5px;height:5px;background:#ffffff;border-radius:50%;display:inline-block;"></span>
+                Paystack &amp; cleared logs
+            </div>
+        </div>
+    </div>
+
+    {{-- Total Outstanding Billings Card --}}
+    <div class="sa-premium-card" style="background: linear-gradient(135deg, #f43f5e, #be123c);">
+        <div class="sa-premium-glow"></div>
+        <div class="sa-premium-glass-icon">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+            </svg>
+        </div>
+        <div class="sa-premium-info">
+            <div class="sa-premium-label">Outstanding Balances</div>
+            <div class="sa-premium-value" style="color: #ffffff;">{{ config('myacademy.currency_symbol', '₦') }}{{ number_format($stats['total_outstanding'], 2) }}</div>
+            <div class="sa-premium-desc" title="Awaiting school bursar payments">
+                <span style="width:5px;height:5px;background:#ffffff;border-radius:50%;display:inline-block;"></span>
+                Awaiting school payments
+            </div>
+        </div>
+    </div>
+
+    {{-- Active App Installs Card --}}
+    <div class="sa-premium-card" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed);">
+        <div class="sa-premium-glow"></div>
+        <div class="sa-premium-glass-icon">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"/>
+            </svg>
+        </div>
+        <div class="sa-premium-info">
+            <div class="sa-premium-label">Extension Installations</div>
+            <div class="sa-premium-value">{{ number_format($stats['total_installs']) }}</div>
+            <div class="sa-premium-desc" title="Active school extensions installed">
+                <span style="width:5px;height:5px;background:rgba(255,255,255,0.6);border-radius:50%;display:inline-block;"></span>
+                Active extensions installed
+            </div>
+        </div>
+    </div>
+
+</div>
+
 {{-- ── Stat Cards ─────────────────────────────────────────── --}}
 <div class="sa-stats-grid">
 

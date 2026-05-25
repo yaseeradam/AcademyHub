@@ -1,8 +1,182 @@
-<div class="space-y-6">
+<div class="space-y-6" x-data="{ activeScreenshotUrl: null, activeScreenshotTitle: '' }">
 
     {{-- Flash --}}
     @if(session('review_success'))
         <div class="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-800">{{ session('review_success') }}</div>
+    @endif
+
+    {{-- Super Admin Control Console --}}
+    @if(auth()->user()?->is_super_admin)
+        <div class="rounded-3xl bg-slate-900 border border-slate-800 p-6 text-white shadow-xl space-y-6 relative overflow-hidden">
+            {{-- Executive Banner --}}
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b border-slate-800">
+                <div class="flex items-center gap-3">
+                    <div class="h-10 w-10 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white shadow-md flex-shrink-0">
+                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/></svg>
+                    </div>
+                    <div>
+                        <h2 class="text-base font-extrabold text-white tracking-tight">Superadmin Control Console</h2>
+                        <p class="text-xs text-indigo-300">You have executive overrides to modify, enable, or remove this marketplace app.</p>
+                    </div>
+                </div>
+                
+                <div class="flex items-center gap-2">
+                    <button wire:click="saveSuperAdminSettings" wire:loading.attr="disabled" class="px-4 py-2 rounded-xl bg-indigo-600 text-xs font-black text-white hover:bg-indigo-700 transition flex items-center gap-1.5 shadow-lg shadow-indigo-900/30">
+                        <svg wire:loading wire:target="saveSuperAdminSettings" class="h-3 w-3 animate-spin text-white" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                        <span wire:loading.remove wire:target="saveSuperAdminSettings">Save Config</span>
+                        <span wire:loading wire:target="saveSuperAdminSettings">Saving...</span>
+                    </button>
+                    
+                    @if(auth()->user()->tenant)
+                        <button wire:click="enableInstantlyForSchool" wire:loading.attr="disabled" class="px-4 py-2 rounded-xl bg-emerald-600 text-xs font-black text-white hover:bg-emerald-700 transition flex items-center gap-1.5 shadow-lg shadow-emerald-900/30">
+                            <svg wire:loading wire:target="enableInstantlyForSchool" class="h-3 w-3 animate-spin text-white" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                            <span wire:loading.remove wire:target="enableInstantlyForSchool">Enable Instantly</span>
+                            <span wire:loading wire:target="enableInstantlyForSchool">Enabling...</span>
+                        </button>
+                    @endif
+
+                    <button wire:click="startDeleteComponent" class="px-4 py-2 rounded-xl bg-rose-600 text-xs font-black text-white hover:bg-rose-700 transition flex items-center gap-1.5 shadow-lg shadow-rose-900/30">
+                        <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                        Remove App
+                    </button>
+                </div>
+            </div>
+
+            {{-- Flash messages inside console --}}
+            @if(session('superadmin_success'))
+                <div class="rounded-xl bg-emerald-950/80 border border-emerald-800 px-4 py-3 text-xs font-bold text-emerald-400">
+                    ✓ {{ session('superadmin_success') }}
+                </div>
+            @endif
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {{-- Pricing Configuration --}}
+                <div class="space-y-4">
+                    <h3 class="text-xs font-black text-indigo-400 uppercase tracking-wider">1. App Store Pricing ("Money")</h3>
+                    
+                    <div class="space-y-3 bg-slate-950 p-4 rounded-2xl border border-slate-800">
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Marketplace Basic Cost (₦)</label>
+                            <input type="number" step="0.01" wire:model="adminPrice" class="w-full rounded-xl bg-slate-900 border border-slate-800 px-3 py-2 text-sm text-white focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Superadmin One-Time Setup Fee (₦)</label>
+                            <input type="number" step="0.01" wire:model="adminSetupFee" class="w-full rounded-xl bg-slate-900 border border-slate-800 px-3 py-2 text-sm text-white focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Termly student license rate (₦)</label>
+                            <input type="number" step="0.01" wire:model="adminUsageFeePerStudent" class="w-full rounded-xl bg-slate-900 border border-slate-800 px-3 py-2 text-sm text-white focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Status & Visibility --}}
+                <div class="space-y-4">
+                    <h3 class="text-xs font-black text-indigo-400 uppercase tracking-wider">2. Store Status & Visibility</h3>
+                    
+                    <div class="space-y-4 bg-slate-950 p-4 rounded-2xl border border-slate-800">
+                        <div class="flex items-center justify-between p-2 rounded-xl bg-slate-900 border border-slate-800">
+                            <div>
+                                <div class="text-[10px] font-bold text-white uppercase tracking-wider">Marketplace Visibility</div>
+                                <div class="text-[9px] text-slate-400 mt-0.5">Toggle app visible in marketplace store.</div>
+                            </div>
+                            <label class="relative inline-flex items-center cursor-pointer select-none">
+                                <input type="checkbox" wire:model="adminIsActive" class="sr-only peer">
+                                <div class="w-9 h-5 bg-slate-855 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-indigo-600"></div>
+                            </label>
+                        </div>
+
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Amount of Screenshots (1 to 5)</label>
+                            <input type="number" min="1" max="5" wire:model.live="adminScreenshotCount" class="w-full rounded-xl bg-slate-900 border border-slate-800 px-3 py-2 text-sm text-white focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Screenshot Metadata --}}
+                <div class="space-y-4">
+                    <h3 class="text-xs font-black text-indigo-400 uppercase tracking-wider">3. Screenshots Metadata & Uploads</h3>
+                    
+                    <div class="space-y-4 bg-slate-950 p-4 rounded-2xl border border-slate-800 max-h-[280px] overflow-y-auto scrollbar-thin">
+                        @for($k = 0; $k < min(5, max(1, $adminScreenshotCount)); $k++)
+                            <div class="border-b border-slate-800 pb-3 last:border-0 last:pb-0 space-y-2">
+                                <div class="text-[10px] font-extrabold text-indigo-300">Screenshot {{ $k + 1 }}</div>
+                                
+                                <div>
+                                    <label class="block text-[8px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Display Title</label>
+                                    <input type="text" wire:model="adminScreenshotsMetadata.{{ $k }}.title" class="w-full rounded-xl bg-slate-900 border border-slate-800 px-3 py-1 text-xs text-white focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                                </div>
+                                
+                                <div>
+                                    <label class="block text-[8px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Asset Filename or URL</label>
+                                    <input type="text" wire:model="adminScreenshotsMetadata.{{ $k }}.filename" class="w-full rounded-xl bg-slate-900 border border-slate-800 px-3 py-1 text-xs text-white focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                                </div>
+                                
+                                <div>
+                                    <label class="block text-[8px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Upload File</label>
+                                    <input type="file" wire:model="screenshotFiles.{{ $k }}" class="w-full text-[9px] text-slate-400 file:mr-2 file:py-1 file:px-2 file:rounded-lg file:border-0 file:text-[9px] file:font-bold file:bg-indigo-950 file:text-indigo-300 hover:file:bg-indigo-900">
+                                    <div wire:loading wire:target="screenshotFiles.{{ $k }}" class="text-[9px] text-indigo-400 mt-1">Uploading...</div>
+                                </div>
+                            </div>
+                        @endfor
+                    </div>
+                </div>
+            </div>
+
+            {{-- Custom SVG Icon Configuration Row --}}
+            <div class="border-t border-slate-800 pt-6 mt-6">
+                <h3 class="text-xs font-black text-indigo-400 uppercase tracking-wider mb-3">4. Custom SVG Icon Configuration</h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 bg-slate-950 p-5 rounded-2xl border border-slate-800">
+                    <div class="md:col-span-2 space-y-2">
+                        <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Raw Inline SVG Code</label>
+                        <textarea wire:model="adminIcon" rows="5" class="w-full rounded-xl bg-slate-900 border border-slate-800 px-3 py-2 text-xs font-mono text-emerald-400 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500" placeholder="<svg ...> ... </svg>"></textarea>
+                        <p class="text-[9px] text-slate-500 mt-1">Paste raw inline SVG code. The application will render this SVG directly on the marketplace and sidebars.</p>
+                    </div>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Upload SVG File</label>
+                            <input type="file" wire:model="iconFile" accept=".svg" class="w-full text-xs text-slate-400 file:mr-3 file:py-2 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-indigo-950 file:text-indigo-300 hover:file:bg-indigo-900">
+                            <div wire:loading wire:target="iconFile" class="text-xs text-indigo-400 mt-1">Parsing SVG...</div>
+                            <p class="text-[9px] text-slate-500 mt-1">Or upload an .svg file directly; the console will parse and convert it to inline code.</p>
+                        </div>
+                        <div class="p-4 rounded-2xl bg-slate-900 border border-slate-850 flex flex-col items-center justify-center min-h-[100px] text-center">
+                            <div class="text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-2">Live Icon Preview</div>
+                            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white shadow-md">
+                                @if(!empty($adminIcon) && str_contains($adminIcon, '<svg'))
+                                    <div class="h-8 w-8 text-white flex items-center justify-center">{!! $adminIcon !!}</div>
+                                @else
+                                    <span class="text-2xl">🧩</span>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    @endif
+
+    {{-- Interactive Delete Component Confirmation Modal --}}
+    @if($confirmingDeleteComponent)
+        <div class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 backdrop-blur-md">
+            <div class="w-full max-w-md rounded-3xl bg-slate-900 border border-slate-800 p-6 text-white shadow-2xl space-y-4">
+                <div class="flex items-start gap-4">
+                    <div class="h-10 w-10 rounded-xl bg-rose-950 border border-rose-800 flex items-center justify-center flex-shrink-0 text-rose-400">
+                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                    </div>
+                    <div class="flex-1">
+                        <div class="text-base font-black text-rose-400">⚠ Delete App: {{ $productData['name'] }}</div>
+                        <p class="text-xs text-slate-400 mt-2">Are you absolutely sure you want to remove this plugin entirely from the MyAcademy marketplace? This action will destroy the record permanently and cannot be undone.</p>
+                    </div>
+                </div>
+                <div class="flex justify-end gap-2 pt-2">
+                    <button wire:click="cancelDeleteComponent" class="px-4 py-2 rounded-xl border border-slate-800 text-xs font-bold text-slate-300 hover:bg-slate-800 transition">Cancel</button>
+                    <button wire:click="deleteComponentEntirely" wire:loading.attr="disabled" class="px-4 py-2 rounded-xl bg-rose-600 text-xs font-black text-white hover:bg-rose-700 transition flex items-center gap-1.5 shadow-lg shadow-rose-950/30">
+                        <svg wire:loading wire:target="deleteComponentEntirely" class="h-3 w-3 animate-spin text-white" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                        Delete Permanently
+                    </button>
+                </div>
+            </div>
+        </div>
     @endif
 
     {{-- Header --}}
@@ -56,7 +230,13 @@
                     @elseif($productData['color']==='amber') from-amber-400 to-amber-600
                     @elseif($productData['color']==='cyan') from-cyan-500 to-sky-600
                     @endif flex items-center justify-center shadow-lg">
-                    @if(($productData['icon'] ?? '') === 'whatsapp')
+                    @if(isset($dbComponent) && !empty($dbComponent->icon))
+                        @if(str_contains($dbComponent->icon, '<svg'))
+                            <div class="h-12 w-12 text-white flex items-center justify-center detail-svg-container">{!! $dbComponent->icon !!}</div>
+                        @else
+                            <span class="text-4xl font-black">{!! $dbComponent->icon !!}</span>
+                        @endif
+                    @elseif(($productData['icon'] ?? '') === 'whatsapp')
                         <svg class="h-12 w-12 text-white" viewBox="0 0 24 24" fill="currentColor">
                             <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L0 24l6.335-1.662c1.746.953 3.71 1.457 5.709 1.458h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
                         </svg>
@@ -84,11 +264,9 @@
                         </svg>
                     @else
                         @if(isset($productData['icon']) && str_contains($productData['icon'], '<svg'))
-                            {!! $productData['icon'] !!}
-                        @elseif(isset($dbComponent) && $dbComponent->icon && str_contains($dbComponent->icon, '<svg'))
-                            {!! $dbComponent->icon !!}
+                            <div class="h-12 w-12 text-white flex items-center justify-center detail-svg-container">{!! $productData['icon'] !!}</div>
                         @else
-                            <span class="text-4xl">{!! ($productData['icon'] ?? '') ?: (($dbComponent->icon ?? '') ?: '🧩') !!}</span>
+                            <span class="text-4xl">🧩</span>
                         @endif
                     @endif
                 </div>
@@ -156,10 +334,9 @@
                                 Uninstall Plugin
                             </button>
                         @else
-                            <button wire:click="install" wire:loading.attr="disabled" class="w-full btn-primary py-3 flex items-center justify-center gap-2 shadow-md">
-                                <svg wire:loading wire:target="install" class="h-4 w-4 animate-spin text-white" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
-                                <span wire:loading.remove wire:target="install">Install Plugin</span>
-                                <span wire:loading wire:target="install">Installing...</span>
+                            <button wire:click="previewInstall" wire:loading.attr="disabled" class="w-full btn-primary py-3 flex items-center justify-center gap-2 shadow-md">
+                                <span wire:loading.remove wire:target="previewInstall">Install Plugin</span>
+                                <span wire:loading wire:target="previewInstall">Installing...</span>
                             </button>
                         @endif
                     </div>
@@ -199,9 +376,166 @@
     </div>
     @endif
 
+    {{-- High-Fidelity Install Cost & Details Preview Modal --}}
+    @if($showInstallPreviewModal)
+        <div class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 backdrop-blur-md p-4">
+            <div class="w-full max-w-lg rounded-3xl bg-white border border-slate-100 p-6 text-slate-800 shadow-2xl space-y-5 animate-scaleUp">
+                
+                {{-- Modal Header Banner --}}
+                <div class="flex items-start gap-4 pb-4 border-b border-slate-100">
+                    <div class="h-12 w-12 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white shadow-md flex-shrink-0">
+                        @if(isset($dbComponent) && !empty($dbComponent->icon) && str_contains($dbComponent->icon, '<svg'))
+                            <div class="h-6 w-6 text-white flex items-center justify-center [&>svg]:w-6 [&>svg]:h-6 [&>svg]:text-white [&>svg]:max-w-full [&>svg]:max-h-full">{!! $dbComponent->icon !!}</div>
+                        @else
+                            <span class="text-2xl font-black">🧩</span>
+                        @endif
+                    </div>
+                    <div>
+                        <span class="text-[10px] font-black uppercase tracking-wider text-indigo-600 leading-none">Plugin Installer</span>
+                        <h3 class="text-lg font-black text-slate-900 mt-1">Review Cost Details</h3>
+                        <p class="text-xs text-slate-500 mt-0.5">Please review the setup, licensing, and student audience breakdown for <strong>{{ $productData['name'] }}</strong>.</p>
+                    </div>
+                </div>
+
+                {{-- App Summary Details --}}
+                <div class="bg-slate-50 rounded-2xl p-4 border border-slate-100 space-y-3">
+                    <div class="flex justify-between items-center text-xs">
+                        <span class="font-bold text-slate-500 uppercase tracking-wider">Plugin Category</span>
+                        <span class="font-black text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded-md">{{ $productData['category'] }}</span>
+                    </div>
+                    <div class="flex justify-between items-start text-xs border-t border-slate-100 pt-3">
+                        <span class="font-bold text-slate-500 uppercase tracking-wider flex-shrink-0">Short Description</span>
+                        <span class="font-semibold text-slate-700 text-right max-w-[280px]">{{ $productData['short_description'] }}</span>
+                    </div>
+                </div>
+
+                {{-- Target Audience & Classes selected --}}
+                <div class="space-y-2">
+                    <div class="text-xs font-black text-slate-900 uppercase tracking-wider">1. Dynamic Class Target Audience</div>
+                    <div class="bg-slate-50 rounded-2xl p-4 border border-slate-100 space-y-3 max-h-[140px] overflow-y-auto scrollbar-thin">
+                        @php
+                            $selectedClassList = $classes->whereIn('id', $selectedClasses);
+                        @endphp
+                        @if($selectedClassList->isNotEmpty())
+                            <div class="flex flex-wrap gap-1.5">
+                                @foreach($selectedClassList as $cls)
+                                    <span class="inline-flex items-center rounded-lg bg-indigo-50 border border-indigo-100 px-2.5 py-1 text-xs font-bold text-indigo-700">
+                                        {{ $cls->name }} ({{ $cls->students_count }} students)
+                                    </span>
+                                @endforeach
+                            </div>
+                            <div class="text-xs font-bold text-slate-600 border-t border-slate-200/50 pt-2 flex justify-between">
+                                <span>Total Audited Target Students:</span>
+                                <span class="text-indigo-600 font-extrabold">{{ number_format($calculatedStudentCount) }} students</span>
+                            </div>
+                        @else
+                            <div class="rounded-xl border border-amber-200 bg-amber-50/50 p-3 flex items-start gap-2.5">
+                                <svg class="h-4.5 w-4.5 text-amber-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                                </svg>
+                                <div class="text-[11px] font-semibold text-amber-800">
+                                    No classes are currently selected as target audience. You can still install the plugin, but usage fee calculations will be ₦0.00 until classes are configured in target settings.
+                                </div>
+                            </div>
+                        @endif
+                    </div>
+                </div>
+
+                {{-- Cost Breakdowns --}}
+                <div class="space-y-2">
+                    <div class="text-xs font-black text-slate-900 uppercase tracking-wider">2. Financial Cost Breakdown</div>
+                    <div class="bg-gradient-to-br from-indigo-50/40 to-purple-50/40 rounded-2xl p-4 border border-indigo-100/60 space-y-3">
+                        {{-- Setup Fee --}}
+                        <div class="flex justify-between items-center text-xs">
+                            <span class="font-bold text-slate-600">Setup / Install Fee (One-Time Invoice)</span>
+                            <span class="font-extrabold text-slate-900">
+                                {{ config('myacademy.currency_symbol','₦') }}{{ number_format($setupFee, 2) }}
+                            </span>
+                        </div>
+
+                        {{-- Usage Fee Per Student --}}
+                        <div class="flex justify-between items-center text-xs border-t border-indigo-100/40 pt-2.5">
+                            <span class="font-bold text-slate-600">License Fee per Student (Termly)</span>
+                            <span class="font-extrabold text-slate-900">
+                                {{ config('myacademy.currency_symbol','₦') }}{{ number_format($usageFeePerStudent, 2) }} / student
+                            </span>
+                        </div>
+
+                        {{-- Total Termly Est --}}
+                        <div class="flex justify-between items-center border-t border-indigo-200 pt-3">
+                            <div>
+                                <div class="text-xs font-black text-indigo-950 uppercase tracking-wider">Total Est. Termly Bill</div>
+                                <div class="text-[9px] font-semibold text-slate-500 mt-0.5">Calculated using selected classes student counts.</div>
+                            </div>
+                            <span class="text-xl font-black text-indigo-700">
+                                {{ config('myacademy.currency_symbol','₦') }}{{ number_format($estimatedTermlyUsageFee, 2) }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Action controls --}}
+                <div class="flex justify-end gap-2 pt-2 border-t border-slate-100">
+                    <button wire:click="cancelInstallPreview" class="px-4 py-2.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-600 hover:bg-slate-50 transition">
+                        Cancel
+                    </button>
+                    <button wire:click="install" wire:loading.attr="disabled" class="px-5 py-2.5 rounded-xl bg-indigo-600 text-xs font-black text-white hover:bg-indigo-700 transition flex items-center gap-1.5 shadow-lg shadow-indigo-950/30">
+                        <svg wire:loading wire:target="install" class="h-3.5 w-3.5 animate-spin text-white" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                        <span wire:loading.remove wire:target="install">Confirm &amp; Install</span>
+                        <span wire:loading wire:target="install">Installing...</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    @endif
+
     {{-- Description & Features --}}
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div class="lg:col-span-2 space-y-6">
+            {{-- Google Play Store-style Screenshot Carousel --}}
+            <div class="card-padded bg-white border border-slate-100 shadow-sm rounded-3xl">
+
+                {{-- Horizontal Scroll Container --}}
+                <div class="flex overflow-x-auto gap-6 pb-4 scrollbar-thin scrollbar-thumb-indigo-200 scrollbar-track-transparent">
+                    @for($i = 0; $i < ($dbComponent->screenshot_count ?? 3); $i++)
+                        @php
+                            $metadataItem = $dbComponent->screenshots_metadata[$i] ?? null;
+                            $screenTitle = is_array($metadataItem) ? ($metadataItem['title'] ?? 'Screenshot ' . ($i + 1)) : (is_string($metadataItem) ? $metadataItem : 'Screenshot ' . ($i + 1));
+                            $screenFilename = is_array($metadataItem) ? ($metadataItem['filename'] ?? '') : '';
+                        @endphp
+                        <div class="flex-shrink-0 w-[280px] sm:w-[320px] space-y-3">
+                            {{-- Premium Screenshot Card Frame --}}
+                            <div class="aspect-[16/10] w-full rounded-2xl border border-slate-100 bg-white shadow-md relative overflow-hidden group">
+                                @if(!empty($screenFilename) && file_exists(public_path('images/' . $screenFilename)))
+                                    <img src="{{ asset('images/' . $screenFilename) }}" alt="{{ $screenTitle }}" class="w-full h-full object-cover rounded-2xl cursor-pointer hover:scale-105 transition-all duration-300" @click="activeScreenshotUrl = '{{ asset('images/' . $screenFilename) }}'; activeScreenshotTitle = '{{ addslashes($screenTitle) }}'">
+                                @elseif(!empty($screenFilename) && (str_starts_with($screenFilename, 'http://') || str_starts_with($screenFilename, 'https://') || str_starts_with($screenFilename, '/')))
+                                    <img src="{{ $screenFilename }}" alt="{{ $screenTitle }}" class="w-full h-full object-cover rounded-2xl cursor-pointer hover:scale-105 transition-all duration-300" @click="activeScreenshotUrl = '{{ $screenFilename }}'; activeScreenshotTitle = '{{ addslashes($screenTitle) }}'">
+                                @else
+                                    <div class="h-full w-full bg-slate-50 border-2 border-dashed border-slate-200 flex flex-col items-center justify-center p-6 text-center select-none">
+                                        <div class="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 mb-2 border border-slate-200/50 shadow-sm">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                            </svg>
+                                        </div>
+                                        <div class="text-[10px] font-bold text-slate-600 uppercase tracking-wider">{{ $screenTitle }}</div>
+                                        <p class="text-[8px] text-slate-400 mt-1 max-w-[200px]">No screenshot uploaded yet. Customize this slot under Superadmin settings.</p>
+                                    </div>
+                                @endif
+                                
+                                {{-- Subtle shine/overlay --}}
+                                <div class="absolute inset-0 bg-gradient-to-tr from-transparent via-white/5 to-white/10 opacity-30 pointer-events-none rounded-2xl"></div>
+                            </div>
+
+                            {{-- Image description title --}}
+                            <div class="text-center">
+                                <div class="text-xs font-bold text-slate-700 transition-colors">{{ $screenTitle }}</div>
+                                <p class="text-[9px] text-slate-400 mt-0.5">App screenshot {{ $i + 1 }}</p>
+                            </div>
+                        </div>
+                    @endfor
+                </div>
+            </div>
+
             {{-- Class Selection Glassmorphic Panel --}}
             <div class="rounded-2xl border border-indigo-100 bg-white/70 backdrop-blur-md p-6 shadow-sm space-y-4">
                 <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -382,10 +716,9 @@
                         </div>
                     @endif
 
-                    <button wire:click="install" wire:loading.attr="disabled" class="btn-primary w-full py-3 flex items-center justify-center gap-2 shadow-sm">
-                        <svg wire:loading wire:target="install" class="h-4 w-4 animate-spin text-white" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
-                        <span wire:loading.remove wire:target="install">Install Plugin</span>
-                        <span wire:loading wire:target="install">Installing...</span>
+                    <button wire:click="previewInstall" wire:loading.attr="disabled" class="btn-primary w-full py-3 flex items-center justify-center gap-2 shadow-sm">
+                        <span wire:loading.remove wire:target="previewInstall">Install Plugin</span>
+                        <span wire:loading wire:target="previewInstall">Installing...</span>
                     </button>
                     <p class="text-[10px] text-gray-400">Compatible with MyAcademy v2.0+</p>
                 </div>
@@ -421,4 +754,61 @@
             @endif
         </div>
     </div>
+
+    {{-- High-Fidelity Screenshot Preview Modal --}}
+    <div x-cloak 
+         x-show="activeScreenshotUrl" 
+         class="fixed inset-0 z-[99999] flex items-center justify-center p-4 sm:p-6"
+         @keydown.escape.window="activeScreenshotUrl = null">
+        <!-- Backdrop with high blur -->
+        <div x-show="activeScreenshotUrl"
+             x-transition:enter="transition ease-out duration-300"
+             x-transition:enter-start="opacity-0"
+             x-transition:enter-end="opacity-100"
+             x-transition:leave="transition ease-in duration-200"
+             x-transition:leave-start="opacity-100"
+             x-transition:leave-end="opacity-0"
+             @click="activeScreenshotUrl = null"
+             class="absolute inset-0 bg-slate-950/80 backdrop-blur-md"></div>
+
+        <!-- Modal Box -->
+        <div x-show="activeScreenshotUrl"
+             x-transition:enter="transition ease-out duration-300 transform"
+             x-transition:enter-start="opacity-0 translate-y-4 scale-95"
+             x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+             x-transition:leave="transition ease-in duration-200 transform"
+             x-transition:leave-start="opacity-100 translate-y-0 scale-100"
+             x-transition:leave-end="opacity-0 translate-y-4 scale-95"
+             class="relative max-w-5xl w-full bg-white rounded-3xl overflow-hidden shadow-2xl border border-slate-200/50 flex flex-col z-10 max-h-[90vh]">
+            
+            <!-- Header -->
+            <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+                <div>
+                    <h3 class="text-sm font-bold text-slate-800 uppercase tracking-wider">Screenshot Preview</h3>
+                    <p class="text-xs text-slate-500 font-semibold mt-0.5" x-text="activeScreenshotTitle"></p>
+                </div>
+                <button @click="activeScreenshotUrl = null" class="rounded-xl p-2 text-slate-400 hover:bg-slate-50 hover:text-slate-600 transition">
+                    <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Image View -->
+            <div class="p-6 bg-slate-50 overflow-y-auto flex items-center justify-center flex-1 min-h-0">
+                <img :src="activeScreenshotUrl" class="max-w-full max-h-[60vh] sm:max-h-[70vh] object-contain rounded-2xl shadow-md border border-slate-200/50">
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .detail-svg-container svg {
+            width: 3rem !important; /* h-12 (48px) */
+            height: 3rem !important; /* w-12 (48px) */
+            max-width: 100% !important;
+            max-height: 100% !important;
+            display: inline-block !important;
+        }
+    </style>
 </div>
+

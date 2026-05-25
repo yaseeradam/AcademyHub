@@ -36,82 +36,82 @@
     </div>
 
     @if ($creating)
-        <div class="rounded-2xl bg-white shadow-sm ring-1 ring-slate-200">
-            <div class="flex items-center gap-3 border-b border-slate-200 px-6 py-4">
+        <div class="rounded-2xl border-2 border-slate-300 bg-slate-100/70 shadow-md">
+            <div class="flex items-center gap-3 border-b-2 border-slate-300 px-6 py-4 bg-slate-200/50 rounded-t-2xl">
                 <div class="grid h-8 w-8 place-items-center rounded-lg bg-amber-100 text-amber-600">
-                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
                         <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                     </svg>
                 </div>
-                <div class="text-sm font-bold text-slate-900">New Exam</div>
+                <div class="text-sm font-black text-slate-900 uppercase tracking-wider">New Exam Creation</div>
             </div>
             <div class="p-6">
                 <div class="grid gap-4 lg:grid-cols-2">
                     <div class="lg:col-span-2">
-                        <label class="mb-2 block text-sm font-semibold text-slate-700">Title <span class="text-red-500">*</span></label>
+                        <label class="mb-1.5 block text-sm font-extrabold text-slate-900">Title <span class="text-red-500">*</span></label>
                         <input wire:model="title"
-                               class="w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-800 shadow-sm placeholder-slate-400 focus:border-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-100"
+                               class="w-full rounded-xl border-2 border-slate-400 bg-slate-50 px-4 py-2.5 text-sm font-extrabold text-slate-950 placeholder-slate-500 shadow-sm focus:bg-white focus:border-amber-500 focus:outline-none focus:ring-4 focus:ring-amber-100"
                                placeholder="e.g. Mathematics Quiz 1" autofocus />
-                        @error('title') <div class="mt-1 text-xs text-red-500">{{ $message }}</div> @enderror
+                        @error('title') <div class="mt-1 text-xs font-bold text-red-600">{{ $message }}</div> @enderror
                     </div>
                     <div>
-                        <label class="mb-2 block text-sm font-semibold text-slate-700">Class <span class="text-red-500">*</span></label>
+                        <label class="mb-1.5 block text-sm font-extrabold text-slate-900">Class <span class="text-red-500">*</span></label>
                         <select wire:model.live="classId"
-                                class="w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-800 shadow-sm focus:border-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-100">
+                                class="w-full rounded-xl border-2 border-slate-400 bg-slate-50 px-4 py-2.5 text-sm font-extrabold text-slate-950 shadow-sm focus:bg-white focus:border-amber-500 focus:outline-none focus:ring-4 focus:ring-amber-100 cursor-pointer">
                             <option value="">Select class</option>
                             @foreach ($this->classes as $class)
                                 <option value="{{ $class->id }}">{{ $class->name }}</option>
                             @endforeach
                         </select>
-                        @error('classId') <div class="mt-1 text-xs text-red-500">{{ $message }}</div> @enderror
+                        @error('classId') <div class="mt-1 text-xs font-bold text-red-600">{{ $message }}</div> @enderror
                     </div>
                     <div>
-                        <label class="mb-2 block text-sm font-semibold text-slate-700">Subject <span class="text-red-500">*</span></label>
+                        <label class="mb-1.5 block text-sm font-extrabold text-slate-900">Subject <span class="text-red-500">*</span></label>
                         <select wire:model.live="subjectId" @disabled(!$classId)
-                                class="w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-800 shadow-sm focus:border-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-100 disabled:opacity-50">
+                                class="w-full rounded-xl border-2 border-slate-400 bg-slate-50 px-4 py-2.5 text-sm font-extrabold text-slate-950 shadow-sm focus:bg-white focus:border-amber-500 focus:outline-none focus:ring-4 focus:ring-amber-100 disabled:opacity-50 cursor-pointer">
                             <option value="">Select subject</option>
                             @foreach ($this->subjects as $subject)
                                 <option value="{{ $subject->id }}">{{ $subject->name }}</option>
                             @endforeach
                         </select>
-                        @error('subjectId') <div class="mt-1 text-xs text-red-500">{{ $message }}</div> @enderror
+                        @error('subjectId') <div class="mt-1 text-xs font-bold text-red-600">{{ $message }}</div> @enderror
                     </div>
                     <div>
-                        <label class="mb-2 block text-sm font-semibold text-slate-700">Duration (minutes)</label>
+                        <label class="mb-1.5 block text-sm font-extrabold text-slate-900">Duration (minutes)</label>
                         <input wire:model="durationMinutes" type="number" min="1"
-                               class="w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-800 shadow-sm focus:border-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-100" />
-                        @error('durationMinutes') <div class="mt-1 text-xs text-red-500">{{ $message }}</div> @enderror
+                               class="w-full rounded-xl border-2 border-slate-400 bg-slate-50 px-4 py-2.5 text-sm font-extrabold text-slate-950 shadow-sm focus:bg-white focus:border-amber-500 focus:outline-none focus:ring-4 focus:ring-amber-100" />
+                        @error('durationMinutes') <div class="mt-1 text-xs font-bold text-red-600">{{ $message }}</div> @enderror
                     </div>
                     <div>
-                        <label class="mb-2 block text-sm font-semibold text-slate-700">Term</label>
+                        <label class="mb-1.5 block text-sm font-extrabold text-slate-900">Term</label>
                         <select wire:model.live="term"
-                                class="w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-800 shadow-sm focus:border-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-100">
+                                class="w-full rounded-xl border-2 border-slate-400 bg-slate-50 px-4 py-2.5 text-sm font-extrabold text-slate-950 shadow-sm focus:bg-white focus:border-amber-500 focus:outline-none focus:ring-4 focus:ring-amber-100 cursor-pointer">
                             <option value="1">Term 1</option>
                             <option value="2">Term 2</option>
                             <option value="3">Term 3</option>
                         </select>
                     </div>
                     <div class="lg:col-span-2">
-                        <label class="mb-2 block text-sm font-semibold text-slate-700">Session</label>
+                        <label class="mb-1.5 block text-sm font-extrabold text-slate-900">Session</label>
                         <input wire:model="session"
-                               class="w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-800 shadow-sm placeholder-slate-400 focus:border-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-100"
+                               class="w-full rounded-xl border-2 border-slate-400 bg-slate-50 px-4 py-2.5 text-sm font-extrabold text-slate-950 placeholder-slate-500 shadow-sm focus:bg-white focus:border-amber-500 focus:outline-none focus:ring-4 focus:ring-amber-100"
                                placeholder="2025/2026" />
-                        @error('session') <div class="mt-1 text-xs text-red-500">{{ $message }}</div> @enderror
+                        @error('session') <div class="mt-1 text-xs font-bold text-red-600">{{ $message }}</div> @enderror
                     </div>
                 </div>
-                <div class="mt-5 flex items-center justify-between border-t border-slate-200 pt-5">
+                <div class="mt-5 flex items-center justify-between border-t border-slate-300 pt-5">
                     <div>
                         @if ($isAdmin)
-                            <p class="text-xs text-slate-500">Admin exams go live immediately with an access code.</p>
+                            <p class="text-xs font-bold text-slate-600">Admin exams go live immediately with an access code.</p>
                         @endif
                     </div>
                     <div class="flex gap-3">
                         <button wire:click="cancelCreate"
-                                class="rounded-xl border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-50 transition-colors">
+                                class="rounded-xl border-2 border-slate-400 bg-white px-5 py-2.5 text-sm font-black text-slate-700 hover:bg-slate-50 transition-colors">
                             Cancel
                         </button>
                         <button wire:click="createExam"
-                                class="inline-flex items-center gap-2 rounded-xl bg-amber-500 px-5 py-2 text-sm font-bold text-white hover:bg-amber-600 transition-colors">
+                                class="inline-flex items-center gap-2 rounded-xl bg-amber-500 px-6 py-2.5 text-sm font-black text-white hover:bg-amber-600 transition-colors shadow">
                             Create & Add Questions
                             <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
                                 <path d="M9 5l7 7-7 7"/>
@@ -130,6 +130,7 @@
                 class="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 shadow-sm focus:border-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-100">
             <option value="">All Status</option>
             <option value="draft">Draft</option>
+            <option value="pending_approval">Pending Approval</option>
             <option value="live">Live</option>
             <option value="ended">Ended</option>
         </select>
@@ -141,18 +142,19 @@
             @php
                 $isLive  = $exam->status === 'live';
                 $isEnded = $exam->status === 'ended';
+                $isPending = $exam->status === 'pending_approval';
             @endphp
             <div class="flex overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-slate-200 hover:shadow-md transition-shadow">
 
                 {{-- Left accent bar --}}
-                <div class="w-1.5 flex-shrink-0 {{ $isLive ? 'bg-emerald-500' : ($isEnded ? 'bg-slate-300' : 'bg-amber-400') }}"></div>
+                <div class="w-1.5 flex-shrink-0 {{ $isLive ? 'bg-emerald-500' : ($isEnded ? 'bg-slate-300' : ($isPending ? 'bg-violet-500' : 'bg-amber-400')) }}"></div>
 
                 <div class="flex flex-1 flex-col p-5">
                     {{-- Header --}}
                     <div class="flex items-start justify-between gap-3">
                         <div class="flex items-start gap-3 min-w-0">
                             <div class="mt-0.5 grid h-10 w-10 flex-shrink-0 place-items-center rounded-xl
-                                {{ $isLive ? 'bg-emerald-50 text-emerald-600' : ($isEnded ? 'bg-slate-100 text-slate-500' : 'bg-amber-50 text-amber-600') }}">
+                                {{ $isLive ? 'bg-emerald-50 text-emerald-600' : ($isEnded ? 'bg-slate-100 text-slate-500' : ($isPending ? 'bg-violet-50 text-violet-600' : 'bg-amber-50 text-amber-600')) }}">
                                 <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
                                     <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                                 </svg>
@@ -173,6 +175,8 @@
                             </span>
                         @elseif($isEnded)
                             <span class="flex-shrink-0 rounded-full bg-slate-100 px-2.5 py-1 text-xs font-bold text-slate-500">Ended</span>
+                        @elseif($isPending)
+                            <span class="inline-flex flex-shrink-0 items-center gap-1.5 rounded-full bg-violet-100 px-2.5 py-1 text-xs font-bold text-violet-700 animate-pulse">Pending Approval</span>
                         @else
                             <span class="flex-shrink-0 rounded-full bg-amber-100 px-2.5 py-1 text-xs font-bold text-amber-700">Draft</span>
                         @endif

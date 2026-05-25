@@ -282,6 +282,12 @@
                         <input type="text" name="contact_phone" value="{{ old('contact_phone', $tenant->contact_phone) }}" class="sa-form-input">
                         @error('contact_phone')<div class="sa-form-error">{{ $message }}</div>@enderror
                     </div>
+
+                    <div>
+                        <label class="sa-form-label">Subscription Expiry / Due Date</label>
+                        <input type="date" name="expires_at" value="{{ old('expires_at', $tenant->expires_at ? $tenant->expires_at->format('Y-m-d') : '') }}" class="sa-form-input">
+                        @error('expires_at')<div class="sa-form-error">{{ $message }}</div>@enderror
+                    </div>
                 </div>
                 <div class="sa-panel-header" style="background: #f8fafc; border-top: 1px solid var(--sa-border); justify-content: flex-end; padding: 14px 24px;">
                     <button type="submit" class="sa-btn sa-btn-primary">
@@ -480,7 +486,13 @@
                             {{-- Header --}}
                             <div style="padding: 16px 20px; background:#f8fafc; display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid #e2e8f0;">
                                 <div style="display:flex; align-items:center; gap:10px;">
-                                    <span style="font-size: 20px;">{!! $component->icon ?: '🧩' !!}</span>
+                                    @if(!empty($component->icon) && str_contains($component->icon, '<svg'))
+                                        <span class="tenant-edit-svg-icon" style="display:inline-flex; width:24px; height:24px; align-items:center; justify-content:center; flex-shrink:0;">
+                                            {!! $component->icon !!}
+                                        </span>
+                                    @else
+                                        <span style="font-size: 20px;">{!! $component->icon ?: '🧩' !!}</span>
+                                    @endif
                                     <div>
                                         <div style="font-weight: 700; color: var(--sa-text); font-size:14.5px;">{{ $component->name }}</div>
                                         <div style="font-size:11.5px; color:var(--sa-muted);">{{ $component->description }}</div>
@@ -1093,6 +1105,14 @@
 
     .quota-slider::-webkit-slider-thumb:hover {
         background: #7c3aed;
+    }
+
+    .tenant-edit-svg-icon svg {
+        width: 24px !important;
+        height: 24px !important;
+        max-width: 100% !important;
+        max-height: 100% !important;
+        display: inline-block !important;
     }
 </style>
 @endsection

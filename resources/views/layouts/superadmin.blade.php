@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Super Admin Console — MyAcademyHub</title>
+    <title>Super Admin Console — AcademyHub</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     {{-- NOTE: Alpine is already bundled in app.js — DO NOT add a CDN Alpine script here, it causes double-init and breaks Livewire --}}
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
@@ -14,15 +14,15 @@
         [x-cloak] { display: none !important; }
 
         :root {
-            --sa-bg:       #f0f4f9;
-            --sa-sidebar:  #ffffff;
-            --sa-primary:  #4f46e5; /* indigo-600 */
-            --sa-accent:   #f59e0b; /* amber */
-            --sa-text:     #1e293b;
-            --sa-muted:    #64748b;
-            --sa-border:   #e2e8f0;
+            --sa-bg:       #f5f6fa;
+            --sa-sidebar:  #f5f6fa;
+            --sa-primary:  #7c3aed; /* school violet-600 */
+            --sa-accent:   #7c3aed;
+            --sa-text:     #0f172a; /* slate-900 */
+            --sa-muted:    #64748b; /* slate-500 */
+            --sa-border:   rgba(226, 232, 240, 0.8);
             --sa-card:     #ffffff;
-            --sa-shadow:   0 1px 3px rgba(0,0,0,.06), 0 4px 12px rgba(0,0,0,.06);
+            --sa-shadow:   0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.02);
         }
 
         body {
@@ -43,11 +43,11 @@
             display: flex;
             flex-direction: column;
             z-index: 50;
-            box-shadow: 2px 0 16px rgba(0,0,0,.04);
+            box-shadow: 2px 0 16px rgba(0,0,0,.02);
         }
 
         .sa-brand {
-            padding: 22px 20px 18px;
+            padding: 20px;
             display: flex;
             align-items: center;
             gap: 12px;
@@ -55,64 +55,72 @@
         }
 
         .sa-brand-icon {
-            width: 40px; height: 40px;
-            background: linear-gradient(135deg, #4f46e5, #7c3aed);
+            width: 44px; height: 44px;
+            background: #7c3aed;
             border-radius: 12px;
             display: flex; align-items: center; justify-content: center;
             color: white;
             font-weight: 900;
             font-size: 18px;
             flex-shrink: 0;
-            box-shadow: 0 4px 12px rgba(79,70,229,.35);
+            box-shadow: 0 4px 12px rgba(124,58,237,.25);
         }
 
         .sa-brand-text { line-height: 1.2; }
         .sa-brand-title { font-size: 15px; font-weight: 800; color: var(--sa-text); }
-        .sa-brand-sub   { font-size: 11px; font-weight: 600; color: var(--sa-muted); letter-spacing: .05em; text-transform: uppercase; }
+        .sa-brand-sub   { font-size: 10px; font-weight: 700; color: var(--sa-primary); letter-spacing: .05em; text-transform: uppercase; }
 
         .sa-nav { flex: 1; overflow-y: auto; padding: 16px 12px; }
 
         .sa-nav-label {
             font-size: 10px;
-            font-weight: 700;
+            font-weight: 800;
             letter-spacing: .08em;
             text-transform: uppercase;
             color: var(--sa-muted);
             padding: 8px 8px 6px;
-            margin-top: 4px;
+            margin-top: 10px;
         }
 
         .sa-nav a {
             display: flex;
             align-items: center;
             gap: 10px;
-            padding: 9px 12px;
-            border-radius: 10px;
+            padding: 10px 14px;
+            border-radius: 12px;
             text-decoration: none;
             font-size: 13.5px;
-            font-weight: 600;
-            color: var(--sa-muted);
-            transition: background .15s, color .15s;
-            margin-bottom: 2px;
+            font-weight: 700;
+            color: #475569; /* slate-600 */
+            transition: all .2s;
+            margin-bottom: 4px;
+            border: 1px solid transparent;
         }
 
-        .sa-nav a:hover { background: #f1f5f9; color: var(--sa-text); }
+        .sa-nav a:hover {
+            background: #ffffff;
+            color: var(--sa-text);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.03);
+            border-color: rgba(226, 232, 240, 0.5);
+        }
 
         .sa-nav a.active {
-            background: linear-gradient(135deg, rgba(79,70,229,.1), rgba(124,58,237,.06));
-            color: #4f46e5;
+            background: #7c3aed;
+            color: #ffffff;
+            box-shadow: 0 4px 12px rgba(124, 58, 237, 0.25);
+            border-color: #7c3aed;
         }
-        .sa-nav a.active svg { color: #4f46e5; }
+        .sa-nav a.active svg { color: #ffffff; }
 
-        .sa-nav a svg { width: 17px; height: 17px; flex-shrink: 0; transition: color .15s; }
+        .sa-nav a svg { width: 18px; height: 18px; flex-shrink: 0; transition: color .2s; color: #64748b; }
 
         .sa-nav-badge {
             margin-left: auto;
-            background: #4f46e5;
-            color: white;
+            background: #ffffff;
+            color: #7c3aed;
             font-size: 10px;
-            font-weight: 700;
-            padding: 1px 6px;
+            font-weight: 800;
+            padding: 2px 6px;
             border-radius: 999px;
             min-width: 18px;
             text-align: center;
@@ -120,36 +128,38 @@
 
         /* Sidebar user footer */
         .sa-user-footer {
-            padding: 14px 16px;
+            padding: 16px;
             border-top: 1px solid var(--sa-border);
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 12px;
+            background: #ffffff;
         }
         .sa-avatar {
             width: 36px; height: 36px;
             border-radius: 10px;
-            background: linear-gradient(135deg, #1e293b, #334155);
+            background: #7c3aed;
             color: white;
             display: flex; align-items: center; justify-content: center;
-            font-weight: 700;
+            font-weight: 800;
             font-size: 13px;
             flex-shrink: 0;
+            box-shadow: 0 2px 6px rgba(124, 58, 237, 0.2);
         }
-        .sa-user-name  { font-size: 13px; font-weight: 700; color: var(--sa-text); }
-        .sa-user-role  { font-size: 11px; font-weight: 500; color: var(--sa-muted); }
+        .sa-user-name  { font-size: 13px; font-weight: 800; color: var(--sa-text); }
+        .sa-user-role  { font-size: 11px; font-weight: 600; color: var(--sa-muted); }
         .sa-logout-btn {
             margin-left: auto;
-            width: 30px; height: 30px;
-            border-radius: 8px;
+            width: 32px; height: 32px;
+            border-radius: 10px;
             background: #fef2f2;
             color: #ef4444;
-            border: none;
+            border: 1px solid #fecdd3;
             cursor: pointer;
             display: flex; align-items: center; justify-content: center;
-            transition: background .15s;
+            transition: all .2s;
         }
-        .sa-logout-btn:hover { background: #fee2e2; }
+        .sa-logout-btn:hover { background: #fee2e2; color: #dc2626; transform: scale(1.05); }
         .sa-logout-btn svg { width: 14px; height: 14px; }
 
         /* ── Main ────────────────────────────────────── */
@@ -162,7 +172,7 @@
 
         /* Topbar */
         #sa-topbar {
-            height: 64px;
+            height: 72px;
             background: white;
             border-bottom: 1px solid var(--sa-border);
             display: flex;
@@ -172,21 +182,22 @@
             position: sticky;
             top: 0;
             z-index: 40;
-            box-shadow: 0 1px 4px rgba(0,0,0,.04);
+            box-shadow: 0 1px 4px rgba(0,0,0,.02);
         }
 
-        .sa-page-title { font-size: 20px; font-weight: 800; color: var(--sa-text); }
-        .sa-page-sub   { font-size: 12px; font-weight: 500; color: var(--sa-muted); }
+        .sa-page-title { font-size: 18px; font-weight: 900; color: var(--sa-text); letter-spacing: -0.02em; }
+        .sa-page-sub   { font-size: 12px; font-weight: 600; color: var(--sa-muted); }
 
         .sa-status-pill {
             display: flex; align-items: center; gap: 6px;
             background: #f0fdf4;
             border: 1px solid #bbf7d0;
             border-radius: 999px;
-            padding: 5px 12px;
+            padding: 6px 14px;
             font-size: 12px;
-            font-weight: 600;
+            font-weight: 700;
             color: #16a34a;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.02);
         }
         .sa-status-dot {
             width: 7px; height: 7px;
@@ -216,10 +227,11 @@
         .sa-stat-card {
             background: var(--sa-card);
             border-radius: 16px;
-            padding: 20px 22px;
+            padding: 16px;
             box-shadow: var(--sa-shadow);
+            border: 1px solid rgba(226, 232, 240, 0.8);
             display: flex;
-            align-items: flex-start;
+            align-items: center;
             gap: 14px;
             position: relative;
             overflow: hidden;
@@ -227,33 +239,33 @@
         }
         .sa-stat-card:hover {
             transform: translateY(-2px);
-            box-shadow: 0 8px 24px rgba(0,0,0,.10);
+            box-shadow: 0 8px 24px rgba(0,0,0,.06);
         }
 
         .sa-stat-icon {
-            width: 52px; height: 52px;
-            border-radius: 14px;
+            width: 44px; height: 44px;
+            border-radius: 12px;
             display: flex; align-items: center; justify-content: center;
             flex-shrink: 0;
         }
-        .sa-stat-icon svg { width: 26px; height: 26px; }
+        .sa-stat-icon svg { width: 22px; height: 22px; }
 
-        .sa-stat-info { flex: 1; }
+        .sa-stat-info { flex: 1; min-width: 0; }
         .sa-stat-value {
-            font-size: 30px; font-weight: 800;
-            line-height: 1;
-            margin-bottom: 4px;
+            font-size: 22px; font-weight: 800;
+            line-height: 1.1;
+            margin-bottom: 2px;
         }
         .sa-stat-label {
-            font-size: 12px; font-weight: 600;
+            font-size: 10.5px; font-weight: 600;
             color: var(--sa-muted);
             text-transform: uppercase;
             letter-spacing: .05em;
         }
         .sa-stat-sub {
             display: flex; align-items: center; gap: 4px;
-            margin-top: 8px;
-            font-size: 11px; font-weight: 600;
+            margin-top: 4px;
+            font-size: 10.5px; font-weight: 600;
         }
 
         /* Card color variants */
@@ -280,36 +292,38 @@
         /* ── Panel / Card ────────────────────────────── */
         .sa-panel {
             background: white;
-            border-radius: 16px;
-            box-shadow: var(--sa-shadow);
+            border-radius: 20px;
+            border: 1px solid var(--sa-border);
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.04), 0 2px 4px -1px rgba(0,0,0,0.01);
             overflow: hidden;
         }
 
         .sa-panel-header {
             display: flex; align-items: center; justify-content: space-between;
-            padding: 18px 22px;
+            padding: 18px 24px;
             border-bottom: 1px solid var(--sa-border);
+            background: #ffffff;
         }
-        .sa-panel-title { font-size: 15px; font-weight: 700; color: var(--sa-text); }
+        .sa-panel-title { font-size: 14.5px; font-weight: 800; color: var(--sa-text); }
 
         .sa-panel-link {
             font-size: 12px; font-weight: 700;
-            color: #4f46e5;
+            color: #7c3aed;
             text-decoration: none;
             padding: 5px 12px;
-            background: rgba(79,70,229,.08);
+            background: rgba(124,58,237,.08);
             border-radius: 8px;
             transition: background .15s;
         }
-        .sa-panel-link:hover { background: rgba(79,70,229,.14); }
+        .sa-panel-link:hover { background: rgba(124,58,237,.14); }
 
         /* ── Table ───────────────────────────────────── */
         .sa-table { width: 100%; border-collapse: collapse; }
         .sa-table thead th {
-            padding: 12px 18px;
+            padding: 14px 20px;
             text-align: left;
             font-size: 11px;
-            font-weight: 700;
+            font-weight: 800;
             text-transform: uppercase;
             letter-spacing: .06em;
             color: var(--sa-muted);
@@ -317,10 +331,10 @@
             border-bottom: 1px solid var(--sa-border);
         }
         .sa-table tbody td {
-            padding: 13px 18px;
+            padding: 14px 20px;
             font-size: 13.5px;
             border-bottom: 1px solid #f1f5f9;
-            color: var(--sa-text);
+            color: #334155;
         }
         .sa-table tbody tr:last-child td { border-bottom: none; }
         .sa-table tbody tr:hover td { background: #f8fafc; }
@@ -328,7 +342,7 @@
         /* Status + Plan badges */
         .sa-badge {
             display: inline-flex; align-items: center; gap: 5px;
-            padding: 3px 9px;
+            padding: 4px 10px;
             border-radius: 999px;
             font-size: 11px;
             font-weight: 700;
@@ -344,35 +358,46 @@
         /* ── Buttons ──────────────────────────────────── */
         .sa-btn {
             display: inline-flex; align-items: center; gap: 6px;
-            padding: 9px 18px;
-            border-radius: 10px;
+            padding: 10px 20px;
+            border-radius: 12px;
             font-size: 13px;
             font-weight: 700;
             text-decoration: none;
             cursor: pointer;
-            border: none;
+            border: 1px solid transparent;
             transition: all .2s;
         }
-        .sa-btn svg { width: 15px; height: 15px; }
+        .sa-btn svg { width: 16px; height: 16px; }
 
         .sa-btn-primary {
-            background: linear-gradient(135deg, #4f46e5, #7c3aed);
+            background: #7c3aed;
             color: white;
-            box-shadow: 0 4px 12px rgba(79,70,229,.3);
+            box-shadow: 0 4px 12px rgba(124, 58, 237, .2);
         }
-        .sa-btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(79,70,229,.4); }
+        .sa-btn-primary:hover {
+            background: #6d28d9;
+            transform: translateY(-1px);
+            box-shadow: 0 6px 18px rgba(124, 58, 237, .3);
+        }
 
         .sa-btn-ghost {
             background: #f1f5f9;
-            color: var(--sa-muted);
+            color: #475569;
+            border: 1px solid rgba(226, 232, 240, 0.5);
         }
         .sa-btn-ghost:hover { background: #e2e8f0; color: var(--sa-text); }
 
         .sa-btn-danger {
-            background: #fff1f2;
-            color: #be123c;
+            background: #fef2f2;
+            color: #ef4444;
+            border: 1px solid #fecdd3;
         }
-        .sa-btn-danger:hover { background: #ffe4e6; }
+        .sa-btn-danger:hover {
+            background: #fee2e2;
+            color: #dc2626;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.1);
+        }
 
         .sa-btn-icon {
             width: 32px; height: 32px; padding: 0;
@@ -384,25 +409,25 @@
         .sa-form-label {
             display: block;
             font-size: 12.5px;
-            font-weight: 600;
-            color: var(--sa-text);
+            font-weight: 700;
+            color: #334155;
             margin-bottom: 6px;
         }
         .sa-form-input {
             width: 100%;
             padding: 10px 14px;
             border: 1.5px solid var(--sa-border);
-            border-radius: 10px;
+            border-radius: 12px;
             font-size: 13.5px;
             font-family: inherit;
             color: var(--sa-text);
             background: white;
-            transition: border-color .15s, box-shadow .15s;
+            transition: all .15s;
             outline: none;
         }
         .sa-form-input:focus {
-            border-color: #4f46e5;
-            box-shadow: 0 0 0 3px rgba(79,70,229,.12);
+            border-color: #7c3aed;
+            box-shadow: 0 0 0 3px rgba(124, 58, 237, .12);
         }
         .sa-form-input::placeholder { color: #94a3b8; }
         .sa-form-error { font-size: 11.5px; color: #ef4444; font-weight: 600; margin-top: 4px; }
@@ -428,7 +453,7 @@
             margin-bottom: 20px;
         }
         .sa-alert.success { background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; }
-        .sa-alert.error   { background: #fff1f2; color: #be123c; border: 1px solid #fecdd3; }
+        .sa-alert.error   { background: #fef2f2; color: #ef4444; border: 1px solid #fecdd3; }
         .sa-alert svg { width: 18px; height: 18px; flex-shrink: 0; }
 
         /* Grid helpers */
@@ -495,9 +520,9 @@
         <!-- Brand -->
         <div class="sa-brand" style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
             <div style="display: flex; align-items: center; gap: 12px;">
-                <img src="{{ asset('images/myacademyhub-logo.png') }}" alt="MyAcademyHub" style="height:40px;width:auto;flex-shrink:0;">
+                <img src="{{ asset('images/myacademyhub-logo.png') }}" alt="AcademyHub" style="height:40px;width:auto;flex-shrink:0;">
                 <div class="sa-brand-text">
-                    <div class="sa-brand-title">MyAcademyHub</div>
+                    <div class="sa-brand-title">AcademyHub</div>
                     <div class="sa-brand-sub">Super Admin Console</div>
                 </div>
             </div>

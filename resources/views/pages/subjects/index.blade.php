@@ -189,74 +189,76 @@
                     @endphp
                     @forelse ($subjects as $subject)
                         @php $grad = $gradients[$subject->id % count($gradients)]; @endphp
-                        <tr class="group bg-white transition hover:bg-slate-50/40">
+                        <tr x-data="{ editing: false }" class="group bg-white transition hover:bg-slate-50/40">
                             @if ($user?->role === 'admin')
-                                <td class="px-6 py-4" colspan="3">
-                                    <div x-data="{ editing: false }" class="flex items-center justify-between w-full">
-                                        {{-- View State --}}
-                                        <div x-show="!editing" class="flex items-center justify-between w-full animate-fadeIn">
-                                            <div class="flex items-center gap-4">
-                                                <div class="grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-gradient-to-br {{ $grad }} text-white text-xs font-black shadow-md">
-                                                    {{ mb_substr($subject->name, 0, 1) }}
-                                                </div>
-                                                <div>
-                                                    <div class="font-bold text-slate-800 text-sm sm:text-base leading-snug">{{ $subject->name }}</div>
-                                                    <span class="mt-1.5 inline-flex items-center rounded-lg bg-slate-100 border border-slate-200/50 px-2 py-0.5 text-[9px] font-black text-slate-600 tracking-wide uppercase shadow-sm">
-                                                        {{ $subject->code }}
-                                                    </span>
-                                                </div>
-                                            </div>
-                                            <div class="flex items-center justify-end gap-2 opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                                                <button @click="editing = true" type="button" class="inline-flex items-center gap-1 rounded-xl bg-indigo-50 border border-indigo-100 px-3.5 py-2 text-xs font-bold text-indigo-700 hover:bg-indigo-100 hover:text-indigo-800 transition-all shadow-sm">
-                                                    <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
-                                                    </svg>
-                                                    Edit
-                                                </button>
-                                                <form method="POST" action="{{ route('subjects.destroy', $subject) }}" class="inline-block" onsubmit="return confirm('Delete this subject? This action cannot be undone.')">
-                                                    @csrf 
-                                                    @method('DELETE')
-                                                    <button type="submit" class="inline-flex items-center gap-1 rounded-xl bg-rose-50 border border-rose-100 px-3.5 py-2 text-xs font-bold text-rose-700 hover:bg-rose-100 hover:text-rose-800 transition-all shadow-sm">
-                                                        <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                                                        </svg>
-                                                        Delete
-                                                    </button>
-                                                </form>
-                                            </div>
+                                {{-- Subject Name Column --}}
+                                <td class="px-6 py-4">
+                                    <div x-show="!editing" class="flex items-center gap-4 animate-fadeIn">
+                                        <div class="grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-gradient-to-br {{ $grad }} text-white text-xs font-black shadow-md">
+                                            {{ mb_substr($subject->name, 0, 1) }}
                                         </div>
-                                        
-                                        {{-- Edit State Form --}}
-                                        <div x-show="editing" x-cloak class="w-full animate-slideUp" @keydown.escape.window="editing = false">
-                                            <form method="POST" action="{{ route('subjects.update', $subject) }}" class="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 w-full">
-                                                @csrf 
-                                                @method('PATCH')
-                                                <div class="flex-1">
-                                                    <input 
-                                                        name="name" 
-                                                        class="w-full rounded-xl border-2 border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-gray-900 shadow-sm transition-all focus:border-violet-500 focus:ring-4 focus:ring-violet-500/10 hover:border-slate-300" 
-                                                        value="{{ old('name', $subject->name) }}" 
-                                                        required 
-                                                    />
-                                                </div>
-                                                <div class="w-full sm:w-32">
-                                                    <input 
-                                                        name="code" 
-                                                        class="w-full rounded-xl border-2 border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-gray-900 shadow-sm transition-all focus:border-violet-500 focus:ring-4 focus:ring-violet-500/10 hover:border-slate-300 uppercase" 
-                                                        value="{{ old('code', $subject->code) }}" 
-                                                        required 
-                                                    />
-                                                </div>
-                                                <div class="flex items-center gap-2 self-stretch sm:self-auto justify-end">
-                                                    <button type="submit" class="inline-flex items-center justify-center gap-1 rounded-xl bg-gradient-to-r from-violet-600 to-purple-600 px-4 py-2.5 text-xs font-bold text-white shadow-md active:scale-[0.98]">
-                                                        Save
-                                                    </button>
-                                                    <button @click="editing = false" type="button" class="inline-flex items-center justify-center gap-1 rounded-xl bg-white border border-slate-200 px-4 py-2.5 text-xs font-bold text-slate-600 hover:bg-slate-50 transition-all">
-                                                        Cancel
-                                                    </button>
-                                                </div>
-                                            </form>
-                                        </div>
+                                        <div class="font-bold text-slate-800 text-sm sm:text-base leading-snug">{{ $subject->name }}</div>
+                                    </div>
+                                    <div x-show="editing" x-cloak class="animate-slideUp">
+                                        <input 
+                                            name="name" 
+                                            form="edit-form-{{ $subject->id }}"
+                                            class="w-full rounded-xl border-2 border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-gray-900 shadow-sm transition-all focus:border-violet-500 focus:ring-4 focus:ring-violet-500/10 hover:border-slate-300" 
+                                            value="{{ old('name', $subject->name) }}" 
+                                            required 
+                                        />
+                                    </div>
+                                </td>
+
+                                {{-- Subject Code Column --}}
+                                <td class="px-6 py-4">
+                                    <div x-show="!editing" class="animate-fadeIn">
+                                        <span class="inline-flex items-center rounded-lg bg-slate-100 border border-slate-200/50 px-2.5 py-1 text-xs font-bold text-slate-600 tracking-wide uppercase shadow-sm">
+                                            {{ $subject->code }}
+                                        </span>
+                                    </div>
+                                    <div x-show="editing" x-cloak class="animate-slideUp">
+                                        <input 
+                                            name="code" 
+                                            form="edit-form-{{ $subject->id }}"
+                                            class="w-full rounded-xl border-2 border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-gray-900 shadow-sm transition-all focus:border-violet-500 focus:ring-4 focus:ring-violet-500/10 hover:border-slate-300 uppercase" 
+                                            value="{{ old('code', $subject->code) }}" 
+                                            required 
+                                        />
+                                    </div>
+                                </td>
+
+                                {{-- Actions Column --}}
+                                <td class="px-6 py-4 text-right">
+                                    <div x-show="!editing" class="flex items-center justify-end gap-2 opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity duration-200 animate-fadeIn">
+                                        <button @click="editing = true" type="button" class="inline-flex items-center gap-1 rounded-xl bg-indigo-50 border border-indigo-100 px-3.5 py-2 text-xs font-bold text-indigo-700 hover:bg-indigo-100 hover:text-indigo-800 transition-all shadow-sm">
+                                            <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
+                                            </svg>
+                                            Edit
+                                        </button>
+                                        <form method="POST" action="{{ route('subjects.destroy', $subject) }}" class="inline-block" onsubmit="return confirm('Delete this subject? This action cannot be undone.')">
+                                            @csrf 
+                                            @method('DELETE')
+                                            <button type="submit" class="inline-flex items-center gap-1 rounded-xl bg-rose-50 border border-rose-100 px-3.5 py-2 text-xs font-bold text-rose-700 hover:bg-rose-100 hover:text-rose-800 transition-all shadow-sm">
+                                                <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                                </svg>
+                                                Delete
+                                            </button>
+                                        </form>
+                                    </div>
+                                    <div x-show="editing" x-cloak class="flex items-center gap-2 justify-end animate-slideUp">
+                                        <form id="edit-form-{{ $subject->id }}" method="POST" action="{{ route('subjects.update', $subject) }}" class="inline-block">
+                                            @csrf 
+                                            @method('PATCH')
+                                            <button type="submit" class="inline-flex items-center justify-center gap-1.5 rounded-xl bg-gradient-to-r from-violet-600 to-purple-600 px-4 py-2.5 text-xs font-bold text-white shadow-md active:scale-[0.98]">
+                                                Save
+                                            </button>
+                                        </form>
+                                        <button @click="editing = false" type="button" class="inline-flex items-center justify-center gap-1.5 rounded-xl bg-white border border-slate-200 px-4 py-2.5 text-xs font-bold text-slate-600 hover:bg-slate-50 transition-all">
+                                            Cancel
+                                        </button>
                                     </div>
                                 </td>
                             @else

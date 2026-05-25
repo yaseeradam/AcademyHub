@@ -9,8 +9,6 @@
 .carousel-slide{position:absolute;inset:0;opacity:0;transition:opacity 1.2s cubic-bezier(.4,0,.2,1)}
 .carousel-slide.active{opacity:1}
 .carousel-slide img{width:100%;height:100%;object-fit:cover}
-@keyframes kenburns{0%{transform:scale(1) translate(0,0)}50%{transform:scale(1.08) translate(-1.5%,-1%)}100%{transform:scale(1) translate(0,0)}}
-.carousel-slide.active img{animation:kenburns 16s ease-in-out infinite}
 .left-overlay{position:absolute;inset:0;background:linear-gradient(135deg,rgba(10,20,60,.45) 0%,rgba(0,0,0,.1) 50%,rgba(0,0,0,.5) 100%)}
 .left-content{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:space-between;padding:40px}
 .left-logo{display:flex;align-items:center;gap:14px}
@@ -26,9 +24,6 @@
 .left-quote .q-icon{font-size:28px;line-height:1;font-weight:900;margin-bottom:6px}
 .left-quote .q-text{font-size:15px;font-weight:700;color:#1e293b;line-height:1.4}
 .left-quote .q-bar{width:32px;height:3px;border-radius:2px;margin-top:10px}
-.carousel-dots{display:flex;gap:7px;margin-top:18px}
-.carousel-dots span{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.4);cursor:pointer;transition:all .3s}
-.carousel-dots span.active{background:#fff;width:22px;border-radius:4px}
 .login-right{flex:1;display:flex;align-items:center;justify-content:center;padding:24px;background:#f8fafc;overflow-y:auto}
 .login-card{width:100%;max-width:440px;background:#fff;border-radius:24px;box-shadow:0 8px 40px rgba(0,0,0,.10);padding:40px 36px 32px;position:relative}
 .role-tabs{display:flex;gap:6px;background:#f1f5f9;border-radius:12px;padding:5px;margin-bottom:28px}
@@ -65,18 +60,18 @@
 <div class="login-wrap">
   <!-- LEFT PANEL -->
   <div class="login-left">
-    <!-- Carousel -->
-    <div class="carousel-slide active" id="slide-0"><img src="{{ asset('login-assets/carousel1.jpg') }}" alt=""></div>
-    <div class="carousel-slide" id="slide-1"><img src="{{ asset('login-assets/carousel2.jpg') }}" alt=""></div>
-    <div class="carousel-slide" id="slide-2"><img src="{{ asset('login-assets/carousel3.jpg') }}" alt=""></div>
+    <!-- Role-based Background Images -->
+    <div class="carousel-slide active" id="slide-staff"><img src="{{ asset('login-assets/staff.jpg') }}" alt="Staff Background"></div>
+    <div class="carousel-slide" id="slide-parent"><img src="{{ asset('login-assets/parent.jpg') }}" alt="Parent Background"></div>
+    <div class="carousel-slide" id="slide-student"><img src="{{ asset('login-assets/student.jpg') }}" alt="Student Background"></div>
     <div class="left-overlay"></div>
 
     <div class="left-content">
       <!-- Logo -->
       <div class="left-logo">
-        <img src="{{ asset('images/myacademyhub-logo.png') }}" alt="MyAcademyHub Logo">
+        <img src="{{ asset('images/myacademyhub-logo.png') }}" alt="AcademyHub Logo">
         <div class="left-logo-text">
-          <div class="name">{{ config('myacademy.school_name', config('app.name', 'MyAcademy')) }}</div>
+          <div class="name">{{ config('myacademy.school_name', config('app.name', 'AcademyHub')) }}</div>
           <div class="sub">Smart Learning System</div>
         </div>
       </div>
@@ -88,17 +83,12 @@
         <div class="left-accent" id="left-accent" style="background:#E78B2C"></div>
       </div>
 
-      <!-- Quote + dots -->
+      <!-- Quote -->
       <div>
         <div class="left-quote">
           <div class="q-icon" id="left-q-icon" style="color:#E78B2C">&ldquo;</div>
           <div class="q-text" id="left-q-text">Lead with vision, manage with purpose.</div>
           <div class="q-bar" id="left-q-bar" style="background:#E78B2C"></div>
-        </div>
-        <div class="carousel-dots" id="carousel-dots">
-          <span class="active" onclick="goSlide(0)"></span>
-          <span onclick="goSlide(1)"></span>
-          <span onclick="goSlide(2)"></span>
         </div>
       </div>
     </div>
@@ -271,7 +261,7 @@
       </div>
       <div class="card-divider" id="card-divider" style="background:#E78B2C"></div>
       <div class="card-tagline" id="card-tagline">Lead with vision, manage with purpose.</div>
-      <div class="card-copyright">&copy; {{ date('Y') }} {{ config('myacademy.school_name', config('app.name', 'MyAcademy')) }}. All rights reserved.</div>
+      <div class="card-copyright">&copy; {{ date('Y') }} {{ config('myacademy.school_name', config('app.name', 'AcademyHub')) }}. All rights reserved.</div>
     </div>
   </div>
 </div>
@@ -329,20 +319,13 @@ function switchRole(role) {
   document.getElementById('left-q-icon').style.color = r.leftAccent;
   document.getElementById('left-q-text').textContent = r.quote;
   document.getElementById('left-q-bar').style.background = r.leftAccent;
+  // Dynamic Background Image Change
+  document.querySelectorAll('.carousel-slide').forEach(s => s.classList.remove('active'));
+  const targetSlide = document.getElementById('slide-' + role);
+  if (targetSlide) {
+    targetSlide.classList.add('active');
+  }
 }
-
-// Carousel
-let current = 0;
-const slides = document.querySelectorAll('.carousel-slide');
-const dots = document.querySelectorAll('#carousel-dots span');
-function goSlide(n) {
-  slides[current].classList.remove('active');
-  dots[current].classList.remove('active');
-  current = n;
-  slides[current].classList.add('active');
-  dots[current].classList.add('active');
-}
-setInterval(() => goSlide((current + 1) % slides.length), 5000);
 
 // Init
 const oldLoginType = "{{ old('login_type', 'staff') }}";

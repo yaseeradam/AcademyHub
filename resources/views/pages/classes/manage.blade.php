@@ -100,7 +100,7 @@
                     $scheme = $palette[$class->id % count($palette)];
                 @endphp
 
-                <div class="rounded-3xl border {{ $scheme['border'] }} bg-gradient-to-br {{ $scheme['bg'] }} p-6 shadow-sm shadow-slate-100 transition-all duration-300 hover:shadow-md">
+                <div id="class-card-{{ $class->id }}" class="rounded-3xl border {{ $scheme['border'] }} bg-gradient-to-br {{ $scheme['bg'] }} p-6 shadow-sm shadow-slate-100 transition-all duration-300 hover:shadow-md">
                     {{-- Card Header --}}
                     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 border-b border-white/50 pb-5">
                         <div class="flex items-center gap-3.5">

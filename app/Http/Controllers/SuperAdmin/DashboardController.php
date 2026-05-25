@@ -24,6 +24,15 @@ class DashboardController extends Controller
         $proTenants        = Tenant::where('plan', 'pro')->count();
         $enterpriseTenants = Tenant::where('plan', 'enterprise')->count();
 
+        // Financial Overview & App Installs Metrics
+        $totalInvoiced = (float) \App\Models\TenantPluginBill::where('status', '!=', 'void')->sum('total_due');
+        $totalPaid = (float) \App\Models\TenantPluginBill::where('status', 'paid')->sum('total_due');
+        $totalOutstanding = (float) \App\Models\TenantPluginBill::where('status', 'unpaid')->sum('total_due');
+        $totalInstalls = (int) DB::table('tenant_marketplace_components')
+            ->whereNotNull('installed_at')
+            ->whereNull('uninstalled_at')
+            ->count();
+
         $stats = [
             'total_tenants'     => $totalTenants,
             'active_tenants'    => $activeTenants,
@@ -34,6 +43,10 @@ class DashboardController extends Controller
             'free_tenants'      => $freeTenants,
             'pro_tenants'       => $proTenants,
             'enterprise_tenants'=> $enterpriseTenants,
+            'total_invoiced'    => $totalInvoiced,
+            'total_paid'        => $totalPaid,
+            'total_outstanding' => $totalOutstanding,
+            'total_installs'    => $totalInstalls,
         ];
 
         // Monthly tenant creation for last 6 months

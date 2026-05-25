@@ -297,6 +297,33 @@ class Entry extends Component
         $this->showPsychomotorModal = false;
     }
 
+    public function setAllTraitsForSelected(string $value): void
+    {
+        foreach ($this->traitMap() as $slug => $label) {
+            $this->psychomotorScores[$slug] = $value;
+        }
+        $this->dispatch('alert', message: "All traits set to {$value} for this student!", type: 'info');
+    }
+
+    public function setAllBulkTraits(string $value): void
+    {
+        foreach ($this->students as $student) {
+            foreach ($this->traitMap() as $slug => $label) {
+                $this->bulkPsychomotorScores[$student->id][$slug] = $value;
+            }
+        }
+        $this->dispatch('alert', message: "Set all traits for all students to {$value}!", type: 'info');
+    }
+
+    public function applyTraitToAll(string $slug, string $value): void
+    {
+        foreach ($this->students as $student) {
+            $this->bulkPsychomotorScores[$student->id][$slug] = $value;
+        }
+        $label = $this->traitMap()[$slug] ?? $slug;
+        $this->dispatch('alert', message: "Set {$label} to {$value} for all students!", type: 'info');
+    }
+
     #[Computed]
     public function submissions()
     {

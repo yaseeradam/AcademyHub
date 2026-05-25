@@ -3,6 +3,7 @@
     $variant = match ($status) {
         'live' => 'success',
         'ended' => 'info',
+        'pending_approval' => 'warning',
         default => 'neutral',
     };
     $canEdit = (bool) $this->canEdit;
@@ -33,7 +34,21 @@
                     @endif
 
                     @if ($status === 'draft')
-                        <button wire:click="goLive" class="rounded-lg bg-emerald-500 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-600">✓ Go Live</button>
+                        @if ($me?->role === 'admin')
+                            <button wire:click="goLive" class="rounded-lg bg-emerald-500 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-600">✓ Go Live</button>
+                        @else
+                            <button wire:click="requestApproval" class="rounded-lg bg-violet-500 px-4 py-2 text-sm font-semibold text-white hover:bg-violet-600">✉ Request Admin Approval</button>
+                        @endif
+                    @endif
+
+                    @if ($status === 'pending_approval')
+                        @if ($me?->role === 'admin')
+                            <button wire:click="goLive" class="rounded-lg bg-emerald-500 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-600">✓ Approve & Go Live</button>
+                        @else
+                            <span class="rounded-lg bg-white/20 px-4 py-2 text-sm font-semibold text-violet-200 backdrop-blur-sm">
+                                ⏳ Pending Admin Approval
+                            </span>
+                        @endif
                     @endif
 
                     @if ($status === 'live')
@@ -193,7 +208,10 @@
         @if ($canEdit && $status === 'draft')
             {{-- Toolbar: AI + Import + Shuffle --}}
             <div class="mb-5 flex flex-wrap items-center gap-2">
-                <button wire:click="openAiPanel" class="flex items-center gap-2 rounded-lg bg-violet-600 px-4 py-2 text-sm font-semibold text-white hover:bg-violet-700">&#10024; Generate with AI</button>
+                <button wire:click="openAiPanel" class="flex items-center gap-2 rounded-lg bg-violet-600 px-4 py-2 text-sm font-semibold text-white hover:bg-violet-700">
+                    <img src="{{ asset('ai.png') }}" class="h-5 w-5 object-contain" alt="AI" />
+                    Generate with AI
+                </button>
                 <button wire:click="openImportPanel" class="flex items-center gap-2 rounded-lg bg-sky-600 px-4 py-2 text-sm font-semibold text-white hover:bg-sky-700">&#128194; Import from File</button>
                 <a href="{{ route('cbt.sample-download') }}" class="flex items-center gap-2 rounded-lg border border-sky-300 bg-white px-4 py-2 text-sm font-semibold text-sky-700 hover:bg-sky-50">&#11015; Sample File</a>
                 <label class="ml-auto flex cursor-pointer items-center gap-2 rounded-lg border border-gray-200 bg-gray-50 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-100">

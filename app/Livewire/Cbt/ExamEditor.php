@@ -1115,16 +1115,48 @@ class ExamEditor extends Component
 
     // ── Lifecycle Management ───────────────────────────────────────────────
 
-    public function goLive(): void
+    public function requestApproval(): void
     {
         $user = auth()->user();
-        abort_unless($user && in_array($user->role, ['admin', 'teacher'], true), 403);
+        abort_unless($user && $user->role === 'teacher', 403);
+        abort_unless($this->canEdit, 403);
 
         $exam = $this->exam;
 
-        if ($user->role === 'teacher') {
-            abort_unless($this->canEdit, 403);
+        if ($exam->questions->isEmpty()) {
+            $this->dispatch('alert', message: 'Add at least one question before requesting approval.', type: 'warning');
+            return;
         }
+
+        $exam->forceFill([
+            'status' => 'pending_approval',
+            'requested_by' => $user->id,
+            'requested_at' => now(),
+        ])->save();
+
+        Audit::log('cbt.exam_approval_requested', $exam, ['user_id' => $user->id]);
+
+        // Notify all admin users
+        $admins = \App\Models\User::where('role', 'admin')->get();
+        foreach ($admins as $admin) {
+            \App\Models\InAppNotification::query()->create([
+                'user_id' => $admin->id,
+                'title' => 'CBT Approval Requested',
+                'body' => "Teacher {$user->name} requested approval for CBT exam: {$exam->title}.",
+                'link' => route('cbt.exams.edit', $exam),
+            ]);
+        }
+
+        $this->dispatch('refresh');
+        $this->dispatch('alert', message: 'Exam submitted for admin approval.', type: 'success');
+    }
+
+    public function goLive(): void
+    {
+        $user = auth()->user();
+        abort_unless($user && $user->role === 'admin', 403);
+
+        $exam = $this->exam;
 
         if ($exam->questions->isEmpty()) {
             $this->dispatch('alert', message: 'Add at least one question before going live.', type: 'warning');
@@ -1137,6 +1169,8 @@ class ExamEditor extends Component
             'status' => 'live',
             'access_code' => $code,
             'published_at' => now(),
+            'reviewed_by' => $user->id,
+            'reviewed_at' => now(),
         ])->save();
 
         Audit::log('cbt.exam_live', $exam, ['user_id' => $user->id]);

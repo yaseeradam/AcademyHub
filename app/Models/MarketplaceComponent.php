@@ -25,6 +25,8 @@ class MarketplaceComponent extends Model
         'rating_avg',
         'rating_count',
         'installs',
+        'screenshot_count',
+        'screenshots_metadata',
     ];
 
     protected $casts = [
@@ -35,6 +37,8 @@ class MarketplaceComponent extends Model
         'is_active'             => 'boolean',
         'rating_count'          => 'integer',
         'installs'              => 'integer',
+        'screenshot_count'      => 'integer',
+        'screenshots_metadata'  => 'array',
     ];
 
     public function tenants()
@@ -71,5 +75,20 @@ class MarketplaceComponent extends Model
     {
         if ((float) $this->price <= 0) return 'FREE';
         return config('myacademy.currency_symbol', '₦') . number_format($this->price, 2);
+    }
+
+    public function getRealRatingAvgAttribute(): float
+    {
+        return (float) ($this->reviews()->avg('rating') ?? 0.0);
+    }
+
+    public function getRealRatingCountAttribute(): int
+    {
+        return $this->reviews()->count();
+    }
+
+    public function getRealInstallsAttribute(): int
+    {
+        return $this->tenants()->wherePivotNull('uninstalled_at')->wherePivotNotNull('installed_at')->count();
     }
 }

@@ -4,71 +4,72 @@
     <meta charset="utf-8" />
     <title>Report Card - {{ $student->admission_number }}</title>
     <style>
-        @page { margin: 12mm; }
+        @page { margin: 10mm; }
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: DejaVu Sans, Arial, sans-serif; font-size: 9px; color: #064e3b; background: white; }
+        body { font-family: "DejaVu Sans", Arial, sans-serif; font-size: 8.5px; color: #334155; background: #fff; line-height: 1.3; }
 
-        /* ─── FRESH Nature-Inspired Premium Style ─── */
-        .page { border: 4px solid #059669; padding: 4px; background: white; }
-        .page-inner { border: 1px solid #10b981; padding: 18px; background: linear-gradient(185deg, #f0fdf4 0%, #ffffff 40%, #ffffff 100%); }
+        /* ─── Nordic Minimalist Slate Theme ─── */
+        .page { border: 2px solid #cbd5e1; padding: 12px; background: #fff; }
+        .page-inner { padding: 4px; }
 
-        .header { text-align: center; border-bottom: 2px solid #10b981; padding-bottom: 12px; margin-bottom: 12px; }
+        /* Nordic Stark Header */
+        .header { border-bottom: 1.5px solid #475569; padding-bottom: 8px; margin-bottom: 12px; }
         .header-table { display: table; width: 100%; }
         .header-cell { display: table-cell; vertical-align: middle; }
-        .logo-wrap { width: 75px; text-align: center; }
-        .logo { width: 60px; height: 60px; object-fit: contain; border: 2px solid #10b981; border-radius: 50%; padding: 4px; background: white; }
-        .school-name { font-size: 20px; font-weight: 900; color: #065f46; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 2px; }
-        .school-motto { font-size: 8px; color: #10b981; font-style: italic; font-weight: 700; margin-bottom: 2px; }
-        .school-meta { font-size: 8px; color: #374151; margin-bottom: 1px; }
-        .badge { display: inline-block; background: linear-gradient(135deg, #059669, #10b981); color: white; padding: 5px 18px; border-radius: 20px; font-size: 9px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; margin-top: 6px; }
-        .meta-right { font-size: 8px; color: #065f46; font-weight: 700; text-align: right; }
+        .logo-wrap { width: 60px; }
+        .logo { width: 48px; height: 48px; object-fit: contain; filter: grayscale(100%); opacity: 0.85; border: 1px solid #cbd5e1; border-radius: 4px; padding: 2px; }
+        .school-name { font-size: 15px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; color: #1e293b; }
+        .school-meta { margin-top: 2px; font-size: 7.5px; color: #64748b; font-weight: 500; }
+        .badge { display: inline-block; margin-top: 4px; background: #475569; color: #fff; padding: 2.5px 8px; border-radius: 3px; font-size: 7px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; }
+        .meta-right { font-size: 8px; color: #475569; font-weight: 500; text-align: right; line-height: 1.3; }
 
-        /* Stats Block */
-        .stats { display: table; width: 100%; margin-bottom: 12px; }
-        .stat { display: table-cell; padding: 2px; }
-        .stat-inner { background: white; border: 2px solid #a7f3d0; border-radius: 12px; text-align: center; padding: 8px 4px; box-shadow: 0 2px 4px rgba(5,150,105,0.05); }
-        .stat-label { font-size: 6.5px; color: #059669; font-weight: 800; text-transform: uppercase; margin-bottom: 2px; }
-        .stat-value { font-size: 15px; font-weight: 900; color: #065f46; }
+        /* Nordic Grid Stats */
+        .stats { display: table; width: 100%; margin-bottom: 12px; border-collapse: collapse; border: 1.5px solid #cbd5e1; border-radius: 4px; overflow: hidden; }
+        .stat { display: table-cell; text-align: center; border-right: 1.5px solid #cbd5e1; padding: 6px 4px; background: #f8fafc; }
+        .stat:last-child { border-right: none; }
+        .stat.highlight { background: #f1f5f9; }
+        .stat-label { font-size: 6.5px; color: #475569; font-weight: bold; text-transform: uppercase; letter-spacing: 0.3px; margin-bottom: 2px; }
+        .stat-value { font-size: 12px; font-weight: bold; color: #0f172a; }
 
         /* Table */
-        table.scores { width: 100%; border-collapse: collapse; margin-bottom: 12px; border: 2px solid #a7f3d0; border-radius: 8px; overflow: hidden; }
-        table.scores th { background: linear-gradient(135deg, #059669, #10b981); color: white; padding: 6px 4px; font-size: 7.5px; font-weight: 800; text-transform: uppercase; border: 1px solid #10b981; }
-        table.scores td { padding: 5px 4px; border: 1px solid #d1fae5; text-align: center; font-size: 8px; color: #111827; }
-        table.scores tr:nth-child(even) td { background: #f0fdf4; }
-        .subj { text-align: left !important; font-weight: 700; color: #065f46; padding-left: 8px !important; }
-        .bold { font-weight: 800; color: #064e3b; }
+        table.scores { width: 100%; border-collapse: collapse; margin-bottom: 12px; border: 1.5px solid #cbd5e1; }
+        table.scores th { background: #f1f5f9; color: #334155; padding: 5px 4px; font-size: 7.5px; font-weight: bold; text-transform: uppercase; text-align: center; border: 1.5px solid #cbd5e1; border-bottom: 2px solid #94a3b8; }
+        table.scores td { padding: 4.5px 4px; border: 1px solid #cbd5e1; text-align: center; font-size: 8px; color: #334155; }
+        table.scores tr:nth-child(even) td { background: #fafafb; }
+        .subj { text-align: left !important; font-weight: bold; color: #1e293b; padding-left: 8px !important; }
+        .bold { font-weight: bold; color: #0f172a; }
 
         /* Grading Key */
-        .grading { display: table; width: 100%; border: 2px solid #a7f3d0; margin-bottom: 12px; border-radius: 8px; overflow: hidden; background: white; }
-        .gr-cell { display: table-cell; padding: 5px 4px; text-align: center; font-size: 7.5px; font-weight: 700; color: #065f46; border-right: 1px solid #d1fae5; }
+        .grading { display: table; width: 100%; border: 1.5px solid #cbd5e1; margin-bottom: 12px; border-radius: 3px; overflow: hidden; }
+        .gr-cell { display: table-cell; padding: 4px; text-align: center; font-size: 7px; font-weight: bold; color: #475569; border-right: 1px solid #cbd5e1; background: #f8fafc; }
         .gr-cell:last-child { border-right: none; }
-        .gr-cell strong { color: #047857; font-size: 9px; }
+        .gr-cell strong { color: #1e293b; font-size: 8px; }
 
         /* Attendance */
-        .att { display: table; width: 100%; margin-bottom: 12px; border: 2px solid #a7f3d0; border-radius: 8px; overflow: hidden; background: white; }
-        .att-cell { display: table-cell; width: 33.33%; text-align: center; padding: 7px; border-right: 1px solid #d1fae5; }
+        .att { display: table; width: 100%; margin-bottom: 12px; border: 1.5px solid #cbd5e1; border-radius: 3px; overflow: hidden; }
+        .att-cell { display: table-cell; width: 33.33%; text-align: center; padding: 5px; border-right: 1px solid #cbd5e1; background: #f8fafc; }
         .att-cell:last-child { border-right: none; }
-        .att-label { font-size: 7.5px; font-weight: 850; text-transform: uppercase; color: #059669; margin-bottom: 2px; }
-        .att-value { font-size: 15px; font-weight: 900; color: #064e3b; }
+        .att-label { font-size: 7.5px; font-weight: bold; text-transform: uppercase; color: #475569; margin-bottom: 2px; }
+        .att-value { font-size: 12px; font-weight: bold; color: #0f172a; }
 
         /* Remarks */
-        .remarks { border: 2px solid #a7f3d0; border-radius: 8px; padding: 8px 10px; margin-bottom: 8px; background: white; position: relative; }
-        .remarks-label { font-size: 7.5px; font-weight: 900; color: #059669; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 3px; }
-        .remarks-text { font-size: 8px; color: #374151; min-height: 20px; line-height: 1.3; }
+        .remarks { border: 1.5px solid #cbd5e1; border-radius: 4px; padding: 6px 8px; margin-bottom: 6px; background: #f8fafc; }
+        .remarks-label { font-size: 7.5px; font-weight: bold; color: #1e293b; text-transform: uppercase; letter-spacing: 0.3px; margin-bottom: 2px; border-bottom: 1px solid #cbd5e1; padding-bottom: 2px; }
+        .remarks-text { font-size: 8px; color: #334155; min-height: 16px; line-height: 1.3; }
 
         /* Next Term */
-        .next-term { background: linear-gradient(135deg, #059669, #10b981); color: white; text-align: center; padding: 6px; font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; border-radius: 8px; }
+        .next-term { background: #475569; color: #fff; text-align: center; padding: 5px; font-size: 8px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px; border-radius: 3px; }
 
         /* Signatures */
-        .sigs { display: table; width: 100%; margin-top: 12px; }
+        .sigs { display: table; width: 100%; margin-top: 10px; }
         .sig { display: table-cell; width: 33.33%; text-align: center; padding: 4px; vertical-align: bottom; }
-        .sig-img { max-height: 32px; max-width: 90px; object-fit: contain; margin-bottom: 3px; }
-        .sig-line { border-top: 2px solid #059669; margin-top: 24px; padding-top: 3px; font-size: 8.5px; font-weight: 800; color: #065f46; }
-        .sig-line.has-img { margin-top: 3px; }
-        .sig-sub { font-size: 6.5px; color: #059669; font-style: italic; margin-top: 1px; opacity: 0.8; }
+        .sig-img { max-height: 26px; max-width: 70px; object-fit: contain; margin-bottom: 2px; }
+        .sig-line { border-top: 1.5px solid #475569; margin-top: 20px; padding-top: 3px; font-size: 8px; font-weight: bold; color: #1e293b; }
+        .sig-line.has-img { margin-top: 2px; }
+        .sig-sub { font-size: 6.5px; color: #64748b; font-style: italic; margin-top: 1px; }
 
-        .footer { margin-top: 10px; border-top: 1px solid #a7f3d0; padding-top: 6px; text-align: center; font-size: 7.5px; color: #9ca3af; }
-        .watermark { position: fixed; top: 50%; left: 50%; transform: translate(-50%,-50%); z-index: -1; opacity: 0.02; width: 320px; height: 320px; }
+        .footer { margin-top: 6px; border-top: 1px solid #cbd5e1; padding-top: 3px; text-align: center; font-size: 7px; color: #94a3b8; }
+        .watermark { position: fixed; top: 50%; left: 50%; transform: translate(-50%,-50%); z-index: -1; opacity: 0.02; width: 280px; height: 280px; }
     </style>
 </head>
 <body>
@@ -105,34 +106,33 @@
                 </div>
                 <div class="header-cell">
                     <div class="school-name">{{ $schoolName }}</div>
-                    @if(config('myacademy.school_motto'))<div class="school-motto">"{{ config('myacademy.school_motto') }}"</div>@endif
                     @if(config('myacademy.school_address'))<div class="school-meta">{{ config('myacademy.school_address') }}</div>@endif
                     @if(config('myacademy.school_phone') || config('myacademy.school_email'))
                         <div class="school-meta">{{ config('myacademy.school_phone') }}@if(config('myacademy.school_phone') && config('myacademy.school_email')) • @endif{{ config('myacademy.school_email') }}</div>
                     @endif
-                    <div class="badge">Student Report Card</div>
+                    <div class="badge">Student Roster Assessment</div>
                 </div>
-                <div class="header-cell" style="width:140px;">
+                <div class="header-cell" style="width:130px;">
                     <div class="meta-right">Session: <strong>{{ $session }}</strong></div>
                     <div class="meta-right">Term: <strong>Term {{ $term }}</strong></div>
-                    <div class="meta-right">Issued: <strong>{{ now()->format('d M, Y') }}</strong></div>
+                    <div class="meta-right">Date: <strong>{{ now()->format('d M, Y') }}</strong></div>
                 </div>
             </div>
         </div>
 
         {{-- Student Info --}}
-        @php($siBorderColor = '#10b981') @php($siBgColor = '#f0fdf4') @php($siLabelColor = '#065f46') @php($siValueColor = '#111827') @php($siDotColor = '#6ee7b7')
+        @php($siBorderColor = '#cbd5e1') @php($siBgColor = '#f8fafc') @php($siLabelColor = '#475569') @php($siValueColor = '#1e293b') @php($siDotColor = '#cbd5e1')
         @include('pdf.partials.rc-student-info')
 
         {{-- Stats --}}
         <div class="stats">
-            <div class="stat"><div class="stat-inner"><div class="stat-label">Total Score</div><div class="stat-value">{{ $grandTotal }}</div></div></div>
-            <div class="stat"><div class="stat-inner"><div class="stat-label">Average</div><div class="stat-value">{{ number_format($average,1) }}%</div></div></div>
-            @if($showPosition)<div class="stat"><div class="stat-inner"><div class="stat-label">Position</div><div class="stat-value">{{ $position }}</div></div></div>@endif
+            <div class="stat"><div class="stat-label">Total</div><div class="stat-value">{{ $grandTotal }}</div></div>
+            <div class="stat highlight"><div class="stat-label">Average</div><div class="stat-value">{{ number_format($average,1) }}%</div></div>
+            @if($showPosition)<div class="stat"><div class="stat-label">Position</div><div class="stat-value">{{ $position }}</div></div>@endif
             @if($showClassAverage)
-            <div class="stat"><div class="stat-inner"><div class="stat-label">Class Avg</div><div class="stat-value">{{ number_format($classAverage,1) }}%</div></div></div>
-            <div class="stat"><div class="stat-inner"><div class="stat-label">Highest</div><div class="stat-value">{{ number_format($highestAverage??0,1) }}%</div></div></div>
-            <div class="stat"><div class="stat-inner"><div class="stat-label">Lowest</div><div class="stat-value">{{ number_format($lowestAverage??0,1) }}%</div></div></div>
+            <div class="stat"><div class="stat-label">Class Avg</div><div class="stat-value">{{ number_format($classAverage,1) }}%</div></div>
+            <div class="stat"><div class="stat-label">Highest</div><div class="stat-value">{{ number_format($highestAverage??0,1) }}%</div></div>
+            <div class="stat"><div class="stat-label">Lowest</div><div class="stat-value">{{ number_format($lowestAverage??0,1) }}%</div></div>
             @endif
         </div>
 
@@ -146,8 +146,8 @@
                     <th style="width:10%;">Exam<br/>({{ config('myacademy.results_exam_max',60) }})</th>
                     <th style="width:10%;">Total</th>
                     <th style="width:9%;">Grade</th>
-                    @if($showClassAverage)<th style="width:9%;">Class Avg</th>@endif
-                    @if($showPosition)<th style="width:9%;">Position</th>@endif
+                    @if($showClassAverage)<th style="width:9%;">Avg</th>@endif
+                    @if($showPosition)<th style="width:9%;">Pos</th>@endif
                 </tr>
             </thead>
             <tbody>
@@ -187,7 +187,7 @@
         @endif
 
         {{-- Psychomotor --}}
-        @php($rcBorderColor='#059669') @php($rcBgLight='#f0fdf4') @php($rcTitleColor='#065f46') @php($rcLabelColor='#065f46')
+        @php($rcBorderColor='#cbd5e1') @php($rcBgLight='#f8fafc') @php($rcTitleColor='#475569') @php($rcLabelColor='#475569')
         @include('pdf.partials.rc-psychomotor')
 
         {{-- Remarks --}}
@@ -199,11 +199,12 @@
         @endif
 
         {{-- School Fees --}}
+        @php($rcBorderColor='#cbd5e1') @php($rcBgLight='#f8fafc') @php($rcTitleColor='#475569') @php($rcLabelColor='#475569')
         @include('pdf.partials.rc-school-fees')
 
         {{-- Next Term --}}
         @if($showNextTermDate)
-        <div class="next-term">🌿 Next Term Begins: {{ $nextTermDate ?? 'To be announced' }}</div>
+        <div class="next-term">Next Term Begins: {{ $nextTermDate ?? 'To be announced' }}</div>
         @endif
 
         {{-- Signatures --}}
@@ -223,7 +224,7 @@
         </div>
         @endif
 
-        <div class="footer">{{ $schoolName }} • Growing Excellence Together</div>
+        <div class="footer">Generated {{ now()->format('d M Y, g:i A') }} • {{ $schoolName }} • Powered by MyAcademy SMS</div>
     </div>
 </div>
 </body>

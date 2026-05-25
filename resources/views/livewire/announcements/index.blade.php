@@ -6,47 +6,54 @@
     </x-page-header>
 
     @if ($isAdmin)
-        <div class="card-padded">
-            <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-                <div class="min-w-0">
-                    <div class="text-sm font-semibold text-gray-900">Create / Edit</div>
-                    <div class="mt-1 text-sm text-gray-600">Draft announcements, then publish when ready.</div>
+        <div class="rounded-2xl border-2 border-slate-300 bg-slate-100/70 p-6 shadow-sm">
+            <div class="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
+                <div class="min-w-0 bg-slate-200/60 p-5 rounded-2xl border-2 border-slate-300 lg:max-w-xs w-full shadow-sm">
+                    <div class="text-base font-extrabold text-slate-950 flex items-center gap-2">
+                        <svg class="w-5 h-5 text-indigo-600 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"></path>
+                        </svg>
+                        Create / Edit Notice
+                    </div>
+                    <div class="mt-2.5 text-sm font-semibold text-slate-700 leading-relaxed">Draft announcements here, then publish them to your chosen target audience when they are ready.</div>
                 </div>
 
-                <div class="w-full lg:max-w-2xl">
-                    <div class="grid grid-cols-1 gap-4 lg:grid-cols-3">
+                <div class="w-full lg:max-w-2xl bg-white p-6 rounded-2xl border-2 border-slate-300 shadow-inner">
+                    <div class="grid grid-cols-1 gap-5 lg:grid-cols-3">
                         <div class="lg:col-span-2">
-                            <label class="text-xs font-semibold uppercase tracking-wider text-gray-500">Title</label>
-                            <input wire:model="title" class="mt-2 input w-full" placeholder="Announcement title" />
-                            @error('title') <div class="mt-1 text-xs text-orange-700">{{ $message }}</div> @enderror
+                            <label class="text-sm font-extrabold uppercase tracking-wide text-slate-900 block mb-1">Announcement Title</label>
+                            <input wire:model="title" class="mt-1 w-full rounded-xl border-2 border-slate-400 bg-slate-50 px-4 py-3 text-sm text-slate-950 font-bold shadow-sm transition-all focus:bg-white focus:border-indigo-600 focus:ring-4 focus:ring-indigo-100 placeholder-slate-400" placeholder="e.g. End of Term Examination Notice" />
+                            @error('title') <div class="mt-1.5 text-xs font-bold text-rose-700 flex items-center gap-1">⚠ {{ $message }}</div> @enderror
                         </div>
                         <div>
-                            <label class="text-xs font-semibold uppercase tracking-wider text-gray-500">Audience</label>
-                            <select wire:model="audience" class="mt-2 select w-full">
-                                <option value="all">All</option>
-                                <option value="staff">Staff</option>
-                                <option value="admin">Admins</option>
-                                <option value="teacher">Teachers</option>
-                                <option value="bursar">Bursars</option>
+                            <label class="text-sm font-extrabold uppercase tracking-wide text-slate-900 block mb-1">Target Audience</label>
+                            <select wire:model="audience" class="mt-1 w-full rounded-xl border-2 border-slate-400 bg-slate-50 px-3 py-3 text-sm text-slate-950 font-bold shadow-sm transition-all focus:bg-white focus:border-indigo-600 focus:ring-4 focus:ring-indigo-100">
+                                <option value="all">Everyone (All)</option>
+                                <option value="staff">Staff Only</option>
+                                <option value="admin">Admins Only</option>
+                                <option value="teacher">Teachers Only</option>
+                                <option value="bursar">Bursars Only</option>
                             </select>
-                            @error('audience') <div class="mt-1 text-xs text-orange-700">{{ $message }}</div> @enderror
+                            @error('audience') <div class="mt-1.5 text-xs font-bold text-rose-700 flex items-center gap-1">⚠ {{ $message }}</div> @enderror
                         </div>
                     </div>
 
-                    <div class="mt-4">
-                        <label class="text-xs font-semibold uppercase tracking-wider text-gray-500">Body</label>
-                        <textarea wire:model="body" rows="5" class="mt-2 w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-700 shadow-sm focus:border-brand-500 focus:ring-brand-500" placeholder="Write the announcement..."></textarea>
-                        @error('body') <div class="mt-1 text-xs text-orange-700">{{ $message }}</div> @enderror
+                    <div class="mt-5">
+                        <label class="text-sm font-extrabold uppercase tracking-wide text-slate-900 block mb-1">Announcement Body / Content</label>
+                        <textarea wire:model="body" rows="5" class="mt-1 w-full rounded-xl border-2 border-slate-400 bg-slate-50 px-4 py-3 text-sm text-slate-950 font-semibold shadow-sm transition-all focus:bg-white focus:border-indigo-600 focus:ring-4 focus:ring-indigo-100 placeholder-slate-400" placeholder="Write the announcement description and details here..."></textarea>
+                        @error('body') <div class="mt-1.5 text-xs font-bold text-rose-700 flex items-center gap-1">⚠ {{ $message }}</div> @enderror
                     </div>
 
-                    <div class="mt-4 flex flex-wrap items-center gap-2">
-                        <button type="button" wire:click="save" class="btn-primary">
+                    <div class="mt-6 flex flex-wrap items-center gap-3">
+                        <button type="button" wire:click="save" class="inline-flex items-center justify-center gap-2 rounded-xl bg-amber-500 px-5 py-2.5 text-sm font-black text-white hover:bg-amber-600 shadow-md transition-all">
                             {{ $editingId ? 'Update Draft' : 'Save Draft' }}
                         </button>
-                        <button type="button" wire:click="clearForm" class="inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold bg-white text-indigo-600 border-2 border-indigo-200 hover:bg-indigo-50">Clear</button>
+                        <button type="button" wire:click="clearForm" class="inline-flex items-center justify-center gap-2 rounded-xl px-5 py-2.5 text-sm font-bold bg-slate-100 text-slate-700 border-2 border-slate-400 hover:bg-slate-200 transition-all shadow-sm">
+                            Clear Form
+                        </button>
                         @if ($editingId)
-                            <button type="button" wire:click="publish({{ $editingId }})" class="inline-flex items-center justify-center rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700">
-                                Publish
+                            <button type="button" wire:click="publish({{ $editingId }})" class="inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-5 py-2.5 text-sm font-black text-white hover:bg-emerald-700 shadow-md transition-all">
+                                Publish Notice
                             </button>
                         @endif
                     </div>
@@ -57,7 +64,7 @@
 
     <div class="grid gap-5 lg:grid-cols-2">
         @forelse($announcements as $a)
-            <div class="group relative overflow-hidden rounded-2xl border-2 border-gray-100 bg-gradient-to-br from-white to-gray-50 shadow-sm transition-all duration-300 hover:shadow-xl hover:border-indigo-200">
+            <div class="group relative overflow-hidden rounded-2xl border-2 border-slate-300 bg-gradient-to-br from-white to-slate-50 shadow-sm transition-all duration-300 hover:shadow-xl hover:border-indigo-400">
                 <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-indigo-100/40 to-purple-100/40 rounded-bl-full transform translate-x-12 -translate-y-12"></div>
                 
                 <div class="relative p-6">
@@ -70,26 +77,26 @@
                                     </svg>
                                 </div>
                                 <div class="flex-1 min-w-0">
-                                    <h3 class="text-lg font-bold text-gray-900 leading-tight mb-1">{{ $a->title }}</h3>
+                                    <h3 class="text-lg font-extrabold text-slate-950 leading-tight mb-1">{{ $a->title }}</h3>
                                     <div class="flex items-center gap-2 text-xs">
                                         @php
                                             $audienceColors = [
-                                                'all' => 'bg-blue-100 text-blue-700',
-                                                'staff' => 'bg-purple-100 text-purple-700',
-                                                'admin' => 'bg-red-100 text-red-700',
-                                                'teacher' => 'bg-green-100 text-green-700',
-                                                'bursar' => 'bg-orange-100 text-orange-700',
+                                                'all' => 'bg-blue-100 text-blue-800 border border-blue-300',
+                                                'staff' => 'bg-purple-100 text-purple-800 border border-purple-300',
+                                                'admin' => 'bg-red-100 text-red-800 border border-red-300',
+                                                'teacher' => 'bg-green-100 text-green-800 border border-green-300',
+                                                'bursar' => 'bg-orange-100 text-orange-800 border border-orange-300',
                                             ];
                                         @endphp
-                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full font-semibold {{ $audienceColors[$a->audience] ?? 'bg-gray-100 text-gray-700' }}">
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full font-bold {{ $audienceColors[$a->audience] ?? 'bg-slate-100 text-slate-800 border border-slate-300' }}">
                                             {{ ucfirst($a->audience) }}
                                         </span>
-                                        <span class="text-gray-400">•</span>
-                                        <span class="text-gray-600 font-medium">
+                                        <span class="text-slate-400">•</span>
+                                        <span class="text-slate-800 font-extrabold">
                                             @if($a->published_at)
                                                 {{ $a->published_at->diffForHumans() }}
                                             @else
-                                                <span class="text-amber-600">Draft</span>
+                                                <span class="text-amber-700">Draft</span>
                                             @endif
                                         </span>
                                     </div>
@@ -98,9 +105,9 @@
                         </div>
                     </div>
 
-                    <div class="mt-4 pl-0">
+                    <div class="mt-4 pl-0 border-t border-slate-200/80 pt-3">
                         <div class="prose prose-sm max-w-none">
-                            <p class="text-gray-700 leading-relaxed whitespace-pre-wrap">{{ $a->body }}</p>
+                            <p class="text-slate-900 font-semibold leading-relaxed whitespace-pre-wrap text-sm">{{ $a->body }}</p>
                         </div>
                     </div>
 

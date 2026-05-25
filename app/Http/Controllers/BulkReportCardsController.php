@@ -112,18 +112,18 @@ class BulkReportCardsController extends Controller
 
                 $payload = $service->build($student, $term, $session, $optionsOverrides);
 
-                $template = $request->filled('template') ? $request->input('template') : (string) config('myacademy.report_card_template', 'standard');
+                $template = $request->filled('template') ? $request->input('template') : (string) config('myacademy.report_card_template', 'compact');
                 $view = match ($template) {
                     'compact' => 'pdf.report-card-compact',
                     'elegant' => 'pdf.report-card-elegant',
                     'modern' => 'pdf.report-card-modern',
                     'classic' => 'pdf.report-card-classic',
-                    'vibrant' => 'pdf.report-card-vibrant',
-                    'professional' => 'pdf.report-card-professional',
-                    'royal' => 'pdf.report-card-royal',
-                    'fresh' => 'pdf.report-card-fresh',
-                    'sunset' => 'pdf.report-card-sunset',
-                    default => 'pdf.report-card',
+                    'aurora' => 'pdf.report-card-aurora',
+                    'heritage' => 'pdf.report-card-heritage',
+                    'nordic' => 'pdf.report-card-nordic',
+                    'vanguard' => 'pdf.report-card-vanguard',
+                    'signature' => 'pdf.report-card-signature',
+                    default => 'pdf.report-card-compact',
                 };
 
                 $pdf = Pdf::loadView($view, [
@@ -186,18 +186,18 @@ class BulkReportCardsController extends Controller
 
         $payload = $service->build($student, $term, $session, $optionsOverrides);
 
-        $template = $request->filled('template') ? $request->input('template') : (string) config('myacademy.report_card_template', 'standard');
+        $template = $request->filled('template') ? $request->input('template') : (string) config('myacademy.report_card_template', 'compact');
         $view = match ($template) {
             'compact' => 'pdf.report-card-compact',
             'elegant' => 'pdf.report-card-elegant',
             'modern' => 'pdf.report-card-modern',
             'classic' => 'pdf.report-card-classic',
-            'vibrant' => 'pdf.report-card-vibrant',
-            'professional' => 'pdf.report-card-professional',
-            'royal' => 'pdf.report-card-royal',
-            'fresh' => 'pdf.report-card-fresh',
-            'sunset' => 'pdf.report-card-sunset',
-            default => 'pdf.report-card',
+            'aurora' => 'pdf.report-card-aurora',
+            'heritage' => 'pdf.report-card-heritage',
+            'nordic' => 'pdf.report-card-nordic',
+            'vanguard' => 'pdf.report-card-vanguard',
+            'signature' => 'pdf.report-card-signature',
+            default => 'pdf.report-card-compact',
         };
 
         $pdf = Pdf::loadView($view, [

@@ -5,7 +5,7 @@
         $hasPremium = true;
 
         $certificateTemplate = old('certificate_template', config('myacademy.certificate_template', 'modern'));
-        $reportCardTemplate = old('report_card_template', config('myacademy.report_card_template', 'standard'));
+        $reportCardTemplate = old('report_card_template', config('myacademy.report_card_template', 'compact'));
 
         // Report card options
         $rcShowPosition = old('rc_show_position', config('myacademy.rc_show_position', true));
@@ -91,13 +91,6 @@
                     @php
                         $reportTemplates = [
                             [
-                                'key' => 'standard',
-                                'title' => 'Standard',
-                                'desc' => 'Warm amber brand with gradient stats, color-coded grades, and double border frame.',
-                                'preview' => route('settings.templates.preview', ['type' => 'report-card', 'template' => 'standard']),
-                                'free' => true,
-                            ],
-                            [
                                 'key' => 'compact',
                                 'title' => 'Compact',
                                 'desc' => 'Clean, minimal layout focused on scores and summary.',
@@ -123,41 +116,6 @@
                                 'title' => 'Classic',
                                 'desc' => 'Traditional black and white formal layout with maximum readability.',
                                 'preview' => route('settings.templates.preview', ['type' => 'report-card', 'template' => 'classic']),
-                                'free' => true,
-                            ],
-                            [
-                                'key' => 'vibrant',
-                                'title' => 'Vibrant',
-                                'desc' => 'Colorful purple and pink gradients with playful modern design.',
-                                'preview' => route('settings.templates.preview', ['type' => 'report-card', 'template' => 'vibrant']),
-                                'free' => true,
-                            ],
-                            [
-                                'key' => 'professional',
-                                'title' => 'Professional',
-                                'desc' => 'Corporate blue theme with clean lines and business-like presentation.',
-                                'preview' => route('settings.templates.preview', ['type' => 'report-card', 'template' => 'professional']),
-                                'free' => true,
-                            ],
-                            [
-                                'key' => 'royal',
-                                'title' => 'Royal',
-                                'desc' => 'Luxurious purple and gold with ornate decorative elements.',
-                                'preview' => route('settings.templates.preview', ['type' => 'report-card', 'template' => 'royal']),
-                                'free' => true,
-                            ],
-                            [
-                                'key' => 'fresh',
-                                'title' => 'Fresh',
-                                'desc' => 'Bright green and teal with nature-inspired clean aesthetics.',
-                                'preview' => route('settings.templates.preview', ['type' => 'report-card', 'template' => 'fresh']),
-                                'free' => true,
-                            ],
-                            [
-                                'key' => 'sunset',
-                                'title' => 'Sunset',
-                                'desc' => 'Warm orange and red gradients with energetic modern vibe.',
-                                'preview' => route('settings.templates.preview', ['type' => 'report-card', 'template' => 'sunset']),
                                 'free' => true,
                             ],
                         ];

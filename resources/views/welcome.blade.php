@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{{ config('app.name', 'MyAcademy') }} - A Joyful Place to Learn</title>
+    <title>{{ config('app.name', 'AcademyHub') }} - A Joyful Place to Learn</title>
     
     <!-- Playful Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -152,7 +152,7 @@
                         <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-tr from-violet-500 to-fuchsia-500 shadow-lg text-white font-heading text-2xl group-hover:rotate-12 transition-transform duration-300">
                             🎒
                         </div>
-                        <span class="text-3xl font-heading font-extrabold text-slate-800 tracking-tight">MyAcademy</span>
+                        <span class="text-3xl font-heading font-extrabold text-slate-800 tracking-tight">AcademyHub</span>
                     </a>
                 </div>
 
@@ -200,7 +200,7 @@
                 <div class="flex items-center justify-between mb-8">
                     <a href="#" class="flex items-center gap-3">
                         <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-tr from-violet-500 to-fuchsia-500 text-white text-2xl">🎒</div>
-                        <span class="text-2xl font-heading font-extrabold text-slate-800">MyAcademy</span>
+                        <span class="text-2xl font-heading font-extrabold text-slate-800">AcademyHub</span>
                     </a>
                     <button @click="mobileMenuOpen = false" type="button" class="-m-2.5 rounded-full p-2.5 text-slate-500 hover:bg-slate-100 transition">
                         <span class="sr-only">Close menu</span>
@@ -239,7 +239,7 @@
                         Running a school <br class="hidden lg:block"/> has never been <span class="gradient-text">this fun!</span>
                     </h1>
                     <p class="text-xl text-slate-600 mb-10 leading-relaxed font-medium">
-                        Replace your boring spreadsheets with a magical digital playground. MyAcademy connects parents, excites students, empowers teachers, and gives admins total peace of mind.
+                        Replace your boring spreadsheets with a magical digital playground. AcademyHub connects parents, excites students, empowers teachers, and gives admins total peace of mind.
                     </p>
                     <div class="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4">
                         <a href="{{ route('login') }}" class="w-full sm:w-auto btn-playful rounded-full px-8 py-4 text-lg font-bold text-center">
@@ -333,7 +333,7 @@
             <div class="text-center mb-16">
                 <span class="text-sky-500 font-bold tracking-wider uppercase text-sm">Everything in one place</span>
                 <h2 class="text-4xl md:text-5xl font-heading font-bold text-slate-800 mt-2">All the tools you need 🧩</h2>
-                <p class="text-lg text-slate-600 mt-4 max-w-2xl mx-auto font-medium">MyAcademy is a unified School Management System. We've packed it with delightfully simple modules to manage every single aspect of your institution.</p>
+                <p class="text-lg text-slate-600 mt-4 max-w-2xl mx-auto font-medium">AcademyHub is a unified School Management System. We've packed it with delightfully simple modules to manage every single aspect of your institution.</p>
             </div>
             
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -512,10 +512,10 @@
         <div class="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[800px] bg-slate-50 rounded-full blur-3xl -z-10 mt-20"></div>
         <div class="flex items-center justify-center gap-3 mb-6">
             <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-tr from-violet-500 to-fuchsia-500 text-white text-xl">🎒</div>
-            <span class="text-2xl font-heading font-extrabold text-slate-800 tracking-tight">MyAcademy</span>
+            <span class="text-2xl font-heading font-extrabold text-slate-800 tracking-tight">AcademyHub</span>
         </div>
         <p class="text-slate-500 font-medium">Making school management a joyful breeze.</p>
-        <p class="text-slate-400 text-sm mt-8">&copy; {{ date('Y') }} MyAcademy Inc. All smiles reserved. 😊</p>
+        <p class="text-slate-400 text-sm mt-8">&copy; {{ date('Y') }} AcademyHub Inc. All smiles reserved. 😊</p>
     </footer>
 
     <!-- Playful Demo Modal -->

@@ -130,7 +130,7 @@ class Dashboard extends Component
             'lowest_score' => $totals->min(),
             'total_assessments' => $scores->count(),
             'grade_distribution' => $gradeDistribution,
-            'subject_performance' => $subjectPerformance->values(),
+            'subject_performance' => $subjectPerformance->values()->toArray(),
         ];
     }
 

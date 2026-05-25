@@ -6,6 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Models\Tenant;
 use App\Models\User;
 use App\Models\Student;
+use App\Models\MarketplaceComponent;
+use App\Models\TenantPluginBill;
+use App\Models\AuditLog;
 use App\Support\TenantDataAdopter;
 use App\Support\TenantProvisioner;
 use Illuminate\Http\Request;
@@ -92,6 +95,9 @@ class TenantController extends Controller
 
             // Ensure the new tenant has baseline data & a settings file so it can log in immediately.
             $provisioner->provision($tenant);
+
+            // Dynamically sync plugins based on selected plan
+            $this->syncTenantPluginsByPlan($tenant, $tenant->plan);
         });
 
         $message = 'School instance created successfully.';
@@ -196,9 +202,13 @@ class TenantController extends Controller
             'max_teachers'  => ['required', 'integer', 'min:1'],
             'contact_email' => ['nullable', 'email', 'max:255'],
             'contact_phone' => ['nullable', 'string', 'max:50'],
+            'expires_at'    => ['nullable', 'date'],
         ]);
 
         $tenant->update($data);
+
+        // Keep plugins synced with the plan on update
+        $this->syncTenantPluginsByPlan($tenant, $tenant->plan);
 
         return redirect()->route('superadmin.tenants.edit', $tenant)
             ->with('status', 'School instance updated successfully.');
@@ -599,6 +609,137 @@ class TenantController extends Controller
             DB::statement('SET FOREIGN_KEY_CHECKS=1;');
             return redirect()->route('superadmin.tenants.edit', $tenant)
                 ->withErrors(['backup_file' => 'Restore failed: ' . $e->getMessage()]);
+        }
+    }
+
+    /**
+     * Keep the tenant's installed plugins in sync with their selected pricing plan.
+     */
+    private function syncTenantPluginsByPlan(Tenant $tenant, string $plan): void
+    {
+        // 1. Identify which components should be installed based on the selected plan
+        $allowedSlugs = [];
+        if ($plan === 'pro') {
+            $allowedSlugs = ['cbt', 'homework', 'e-learning', 'whatsapp-bot', 'student-dashboard'];
+        } elseif ($plan === 'enterprise') {
+            // Enterprise gets all active marketplace components
+            $allowedSlugs = MarketplaceComponent::where('is_active', true)->pluck('slug')->toArray();
+        }
+
+        // 2. Resolve target components in the database
+        $componentsToInstall = MarketplaceComponent::whereIn('slug', $allowedSlugs)
+            ->where('is_active', true)
+            ->get();
+
+        $installedIds = [];
+
+        // 3. Activate and install missing allowed components
+        foreach ($componentsToInstall as $component) {
+            $setupFee = (float) $component->setup_fee;
+            $usageFee = (float) $component->usage_fee_per_student;
+
+            // Check if already installed (and not uninstalled)
+            $pivot = $tenant->marketplaceComponents()
+                ->where('marketplace_component_id', $component->id)
+                ->wherePivotNull('uninstalled_at')
+                ->first();
+
+            if (!$pivot) {
+                // Attach or update existing pivot
+                $tenant->marketplaceComponents()->syncWithoutDetaching([
+                    $component->id => [
+                        'installed_at'             => now(),
+                        'uninstalled_at'           => null,
+                        'status'                   => 'active',
+                        'setup_fee'                => $setupFee,
+                        'usage_fee_per_student'    => $usageFee,
+                        'price_paid'               => $setupFee,
+                        'student_count_at_install' => 0,
+                        'allowed_class_ids'        => [],
+                    ]
+                ]);
+
+                $tenant->marketplaceComponents()->updateExistingPivot($component->id, [
+                    'installed_at'             => now(),
+                    'uninstalled_at'           => null,
+                    'status'                   => 'active',
+                    'setup_fee'                => $setupFee,
+                    'usage_fee_per_student'    => $usageFee,
+                    'price_paid'               => $setupFee,
+                    'student_count_at_install' => 0,
+                ]);
+
+                // Increment installs count
+                $component->increment('installs');
+
+                // Create paid Setup Fee bill in the ledger
+                if ($setupFee > 0) {
+                    TenantPluginBill::create([
+                        'tenant_id'                => $tenant->id,
+                        'marketplace_component_id' => $component->id,
+                        'bill_type'                => 'setup',
+                        'term_name'                => null,
+                        'session_name'             => null,
+                        'student_count'            => null,
+                        'setup_fee'                => $setupFee,
+                        'usage_fee_per_student'    => 0,
+                        'total_due'                => $setupFee,
+                        'status'                   => 'paid',
+                        'paid_at'                  => now(),
+                    ]);
+                }
+
+                // Write Audit Log
+                AuditLog::create([
+                    'user_id' => auth()->id() ?? 1, // Superadmin or system
+                    'action'  => 'plugin_installed_via_plan',
+                    'model'   => 'MarketplaceComponent',
+                    'model_id'=> $component->id,
+                    'changes' => json_encode([
+                        'slug'      => $component->slug,
+                        'plan'      => $plan,
+                        'setup_fee' => $setupFee,
+                        'usage_fee' => $usageFee,
+                    ]),
+                ]);
+            }
+
+            $installedIds[] = $component->id;
+        }
+
+        // 4. Soft-uninstall active components that are NOT allowed under this plan
+        $activeComponents = $tenant->marketplaceComponents()
+            ->wherePivotNotNull('installed_at')
+            ->wherePivotNull('uninstalled_at')
+            ->get();
+
+        foreach ($activeComponents as $activeComp) {
+            if (!in_array($activeComp->id, $installedIds)) {
+                // Soft-uninstall
+                $tenant->marketplaceComponents()
+                    ->wherePivot('marketplace_component_id', $activeComp->id)
+                    ->updateExistingPivot($activeComp->id, [
+                        'uninstalled_at' => now(),
+                    ]);
+
+                // Decrement install count if greater than 0
+                if ($activeComp->installs > 0) {
+                    $activeComp->decrement('installs');
+                }
+
+                // Write Audit Log
+                AuditLog::create([
+                    'user_id' => auth()->id() ?? 1,
+                    'action'  => 'plugin_uninstalled_via_plan',
+                    'model'   => 'MarketplaceComponent',
+                    'model_id'=> $activeComp->id,
+                    'changes' => json_encode([
+                        'slug'           => $activeComp->slug,
+                        'plan'           => $plan,
+                        'uninstalled_at' => now()
+                    ]),
+                ]);
+            }
         }
     }
 }

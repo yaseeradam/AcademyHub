@@ -20,7 +20,7 @@ class Index extends Component
     public function confirmInstall(int $componentId): void
     {
         $user = auth()->user();
-        abort_unless($user?->role === 'admin', 403);
+        abort_unless($user?->role === 'admin' || $user?->is_super_admin, 403);
 
         $component = MarketplaceComponent::findOrFail($componentId);
 
@@ -64,7 +64,7 @@ class Index extends Component
     public function startPayment(int $componentId): void
     {
         $user = auth()->user();
-        abort_unless($user?->role === 'admin', 403);
+        abort_unless($user?->role === 'admin' || $user?->is_super_admin, 403);
 
         $component = MarketplaceComponent::findOrFail($componentId);
         abort_unless($component->price > 0, 403, 'This plugin is free, use confirmInstall.');
@@ -86,7 +86,7 @@ class Index extends Component
     public function verifyPayment(string $reference): void
     {
         $user = auth()->user();
-        abort_unless($user?->role === 'admin', 403);
+        abort_unless($user?->role === 'admin' || $user?->is_super_admin, 403);
 
         $response = Http::withToken(config('paystack.secret_key', env('PAYSTACK_SECRET_KEY')))
             ->get("https://api.paystack.co/transaction/verify/{$reference}");
@@ -169,14 +169,22 @@ class Index extends Component
     public function render()
     {
         $user = auth()->user();
-        abort_unless($user?->role === 'admin', 403);
+        abort_unless($user?->role === 'admin' || $user?->is_super_admin, 403);
 
-        $components = MarketplaceComponent::where('is_active', true)->get();
-        $installed  = $user->tenant->marketplaceComponents()
-            ->wherePivotNotNull('installed_at')
-            ->wherePivotNull('uninstalled_at')
-            ->pluck('marketplace_components.id')
-            ->toArray();
+        $query = MarketplaceComponent::query();
+        if (!$user->is_super_admin) {
+            $query->where('is_active', true);
+        }
+        $components = $query->get();
+
+        $installed = [];
+        if ($user->tenant) {
+            $installed  = $user->tenant->marketplaceComponents()
+                ->wherePivotNotNull('installed_at')
+                ->wherePivotNull('uninstalled_at')
+                ->pluck('marketplace_components.id')
+                ->toArray();
+        }
 
         return view('livewire.marketplace.index', compact('components', 'installed'));
     }

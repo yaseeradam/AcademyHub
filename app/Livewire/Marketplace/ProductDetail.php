@@ -7,10 +7,13 @@ use App\Models\PluginReview;
 use App\Models\Student;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
+use Livewire\WithFileUploads;
 
 #[Layout('layouts.app')]
 class ProductDetail extends Component
 {
+    use WithFileUploads;
+
     public string $product;
     public array $productData;
 
@@ -29,6 +32,23 @@ class ProductDetail extends Component
     // Uninstall
     public bool $confirmingUninstall = false;
 
+    // Install Preview Modal
+    public bool $showInstallPreviewModal = false;
+
+    // Super Admin Control Properties
+    public float $adminPrice = 0.00;
+    public float $adminSetupFee = 0.00;
+    public float $adminUsageFeePerStudent = 0.00;
+    public bool $adminIsActive = true;
+    public int $adminScreenshotCount = 3;
+    public array $adminScreenshotsMetadata = [];
+    public string $adminIcon = '';
+    public bool $confirmingDeleteComponent = false;
+
+    // Temporary upload files
+    public $screenshotFiles = [];
+    public $iconFile;
+
     public function mount(string $product)
     {
         $this->product = $product;
@@ -39,6 +59,40 @@ class ProductDetail extends Component
 
         $dbComponent = $this->getDbComponent();
         if ($dbComponent) {
+            $this->adminPrice = (float) $dbComponent->price;
+            $this->adminSetupFee = (float) $dbComponent->setup_fee;
+            $this->adminUsageFeePerStudent = (float) $dbComponent->usage_fee_per_student;
+            $this->adminIsActive = (bool) $dbComponent->is_active;
+            $this->adminScreenshotCount = (int) ($dbComponent->screenshot_count ?? 3);
+            $this->adminIcon = $dbComponent->icon ?? '';
+            
+            $metadata = $dbComponent->screenshots_metadata;
+            if (is_string($metadata)) {
+                $metadata = json_decode($metadata, true) ?: [];
+            }
+            $this->adminScreenshotsMetadata = is_array($metadata) ? $metadata : [];
+
+            // Populate metadata arrays with structured data containing filename and title
+            for ($i = 0; $i < 5; $i++) {
+                if (!isset($this->adminScreenshotsMetadata[$i]) || !is_array($this->adminScreenshotsMetadata[$i])) {
+                    $oldTitle = is_string($this->adminScreenshotsMetadata[$i] ?? null) 
+                        ? $this->adminScreenshotsMetadata[$i] 
+                        : ('Screenshot ' . ($i + 1));
+                        
+                    $defaultFilename = '';
+                    if (isset($this->productData['screenshots'][$i])) {
+                        $defaultFilename = $this->productData['screenshots'][$i];
+                    } else {
+                        $defaultFilename = $this->product . '-' . ($i + 1) . '.png';
+                    }
+
+                    $this->adminScreenshotsMetadata[$i] = [
+                        'filename' => $defaultFilename,
+                        'title' => $oldTitle,
+                    ];
+                }
+            }
+
             $user = auth()->user();
             if ($user && $user->tenant) {
                 $pivot = $user->tenant->marketplaceComponents()
@@ -209,7 +263,7 @@ class ProductDetail extends Component
     public function uninstall(): void
     {
         $user = auth()->user();
-        abort_unless($user?->role === 'admin', 403);
+        abort_unless($user?->role === 'admin' || $user?->is_super_admin, 403);
 
         $tenant = $user->tenant;
         if (!$tenant) return;
@@ -241,10 +295,21 @@ class ProductDetail extends Component
         $this->redirect(route('marketplace'), navigate: false);
     }
 
+    public function previewInstall(): void
+    {
+        $this->showInstallPreviewModal = true;
+    }
+
+    public function cancelInstallPreview(): void
+    {
+        $this->showInstallPreviewModal = false;
+    }
+
     public function install(): void
     {
+        $this->showInstallPreviewModal = false;
         $user = auth()->user();
-        abort_unless($user?->role === 'admin', 403);
+        abort_unless($user?->role === 'admin' || $user?->is_super_admin, 403);
 
         $tenant = $user->tenant;
         abort_unless($tenant, 404);
@@ -321,7 +386,7 @@ class ProductDetail extends Component
     public function updateClasses(): void
     {
         $user = auth()->user();
-        abort_unless($user?->role === 'admin', 403);
+        abort_unless($user?->role === 'admin' || $user?->is_super_admin, 403);
 
         $tenant = $user->tenant;
         abort_unless($tenant, 404);
@@ -353,7 +418,7 @@ class ProductDetail extends Component
     public function render()
     {
         $user = auth()->user();
-        abort_unless($user?->role === 'admin', 403);
+        abort_unless($user?->role === 'admin' || $user?->is_super_admin, 403);
 
         $tenant  = $user->tenant;
         $isInstalled = false;
@@ -400,8 +465,8 @@ class ProductDetail extends Component
 
         $this->estimatedTermlyUsageFee = $this->usageFeePerStudent * $this->calculatedStudentCount;
 
-        $ratingAvg  = $dbComponent?->rating_avg ?? 0;
-        $ratingCount = $dbComponent?->rating_count ?? 0;
+        $ratingAvg  = $dbComponent?->real_rating_avg ?? 0;
+        $ratingCount = $dbComponent?->real_rating_count ?? 0;
         $reviews      = PluginReview::where('component_slug', $this->product)
             ->with('user')
             ->latest()
@@ -421,5 +486,150 @@ class ProductDetail extends Component
             'reviews'       => $reviews,
             'userReview'    => $userReview
         ])->title($this->getTitle());
+    }
+
+    public function updatedScreenshotFiles($value, $key)
+    {
+        abort_unless(auth()->user()?->is_super_admin, 403);
+        $index = (int) $key;
+        $file = $this->screenshotFiles[$index] ?? null;
+        if ($file) {
+            $extension = $file->getClientOriginalExtension();
+            $filename = $this->product . '-screenshot-' . ($index + 1) . '-' . time() . '.' . $extension;
+            
+            // Move directly to public/images
+            $destinationPath = public_path('images');
+            if (!file_exists($destinationPath)) {
+                mkdir($destinationPath, 0777, true);
+            }
+            
+            $file->move($destinationPath, $filename);
+            
+            // Ensure metadata array has the correct structure for the index
+            if (!isset($this->adminScreenshotsMetadata[$index]) || !is_array($this->adminScreenshotsMetadata[$index])) {
+                $this->adminScreenshotsMetadata[$index] = [
+                    'filename' => $filename,
+                    'title' => 'Screenshot ' . ($index + 1),
+                ];
+            } else {
+                $this->adminScreenshotsMetadata[$index]['filename'] = $filename;
+            }
+            
+            session()->flash('superadmin_success', 'Screenshot ' . ($index + 1) . ' uploaded successfully!');
+        }
+    }
+
+    public function updatedIconFile()
+    {
+        abort_unless(auth()->user()?->is_super_admin, 403);
+        if ($this->iconFile) {
+            $extension = $this->iconFile->getClientOriginalExtension();
+            if (strtolower($extension) === 'svg') {
+                $content = file_get_contents($this->iconFile->getRealPath());
+                $this->adminIcon = $content;
+                session()->flash('superadmin_success', 'SVG Icon parsed successfully! Click Save Config to persist.');
+            } else {
+                session()->flash('superadmin_error', 'Only SVG files are supported for icon uploads.');
+            }
+        }
+    }
+
+    public function saveSuperAdminSettings(): void
+    {
+        abort_unless(auth()->user()?->is_super_admin, 403);
+
+        $dbComponent = $this->getDbComponent();
+        abort_unless($dbComponent, 404);
+
+        $dbComponent->update([
+            'price'                 => $this->adminPrice,
+            'setup_fee'             => $this->adminSetupFee,
+            'usage_fee_per_student' => $this->adminUsageFeePerStudent,
+            'is_active'             => $this->adminIsActive,
+            'screenshot_count'      => $this->adminScreenshotCount,
+            'screenshots_metadata'  => $this->adminScreenshotsMetadata,
+            'icon'                  => $this->adminIcon,
+        ]);
+
+        session()->flash('superadmin_success', 'Component settings saved successfully!');
+    }
+
+    public function startDeleteComponent(): void
+    {
+        abort_unless(auth()->user()?->is_super_admin, 403);
+        $this->confirmingDeleteComponent = true;
+    }
+
+    public function cancelDeleteComponent(): void
+    {
+        $this->confirmingDeleteComponent = false;
+    }
+
+    public function deleteComponentEntirely(): void
+    {
+        abort_unless(auth()->user()?->is_super_admin, 403);
+
+        $dbComponent = $this->getDbComponent();
+        if ($dbComponent) {
+            $dbComponent->delete();
+        }
+
+        session()->flash('message', 'Component removed entirely from the marketplace.');
+        $this->redirect(route('marketplace'), navigate: false);
+    }
+
+    public function enableInstantlyForSchool(): void
+    {
+        abort_unless(auth()->user()?->is_super_admin, 403);
+
+        $user = auth()->user();
+        $tenant = $user->tenant;
+        abort_unless($tenant, 404);
+
+        $dbComponent = $this->getDbComponent();
+        abort_unless($dbComponent, 404);
+
+        $setupFee = 0.00; 
+        $usageFee = 0.00; 
+
+        $tenant->marketplaceComponents()->syncWithoutDetaching([
+            $dbComponent->id => [
+                'installed_at'             => now(),
+                'uninstalled_at'           => null,
+                'status'                   => 'active',
+                'setup_fee'                => $setupFee,
+                'usage_fee_per_student'    => $usageFee,
+                'price_paid'               => 0.00,
+                'student_count_at_install' => 0,
+                'allowed_class_ids'        => [],
+            ]
+        ]);
+
+        $tenant->marketplaceComponents()->updateExistingPivot($dbComponent->id, [
+            'installed_at'             => now(),
+            'uninstalled_at'           => null,
+            'status'                   => 'active',
+            'setup_fee'                => $setupFee,
+            'usage_fee_per_student'    => $usageFee,
+            'price_paid'               => 0.00,
+            'student_count_at_install' => 0,
+        ]);
+
+        $dbComponent->increment('installs');
+
+        \App\Models\AuditLog::create([
+            'user_id' => auth()->id(),
+            'action'  => 'plugin_installed_instantly_by_superadmin',
+            'model'   => 'MarketplaceComponent',
+            'model_id'=> $dbComponent->id,
+            'changes' => json_encode([
+                'slug'              => $this->product,
+                'setup_fee'         => 0,
+                'usage_fee'         => 0,
+            ]),
+        ]);
+
+        session()->flash('message', 'Plugin enabled instantly for this school by Super Admin!');
+        $this->redirect(route('marketplace'), navigate: false);
     }
 }

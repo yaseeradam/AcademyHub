@@ -8,7 +8,7 @@ return [
     // Recommended: set a unique value (UUID) per client deployment and issue licenses for that school_id.
     'school_id' => env('MYACADEMY_SCHOOL_ID', ''),
 
-    'school_name' => env('MYACADEMY_SCHOOL_NAME', env('APP_NAME', 'MyAcademy')),
+    'school_name' => env('MYACADEMY_SCHOOL_NAME', env('APP_NAME', 'AcademyHub')),
     'tagline' => env('MYACADEMY_SCHOOL_TAGLINE', "Here's what's happening in your school today."),
     'current_week' => env('MYACADEMY_CURRENT_WEEK', 'Week 1'),
     'currency_symbol' => env('MYACADEMY_CURRENCY_SYMBOL', '₦'),

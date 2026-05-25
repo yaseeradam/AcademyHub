@@ -17,7 +17,7 @@ use Illuminate\Support\Fluent;
 class SettingsController extends Controller
 {
     private const CERTIFICATE_TEMPLATES = ['modern', 'classic', 'elegant', 'vibrant', 'minimal', 'royal', 'obsidian', 'sahara', 'oceanic', 'crimson', 'ivory'];
-    private const REPORT_CARD_TEMPLATES = ['standard', 'compact', 'elegant', 'modern', 'classic', 'vibrant', 'professional', 'royal', 'fresh', 'sunset'];
+    private const REPORT_CARD_TEMPLATES = ['compact', 'elegant', 'modern', 'classic', 'aurora', 'heritage', 'nordic', 'vanguard', 'signature'];
 
     private function settingsPath(): string
     {
@@ -467,12 +467,12 @@ class SettingsController extends Controller
                 'elegant' => 'pdf.report-card-elegant',
                 'modern' => 'pdf.report-card-modern',
                 'classic' => 'pdf.report-card-classic',
-                'vibrant' => 'pdf.report-card-vibrant',
-                'professional' => 'pdf.report-card-professional',
-                'royal' => 'pdf.report-card-royal',
-                'fresh' => 'pdf.report-card-fresh',
-                'sunset' => 'pdf.report-card-sunset',
-                default => 'pdf.report-card',
+                'aurora' => 'pdf.report-card-aurora',
+                'heritage' => 'pdf.report-card-heritage',
+                'nordic' => 'pdf.report-card-nordic',
+                'vanguard' => 'pdf.report-card-vanguard',
+                'signature' => 'pdf.report-card-signature',
+                default => 'pdf.report-card-compact',
             };
 
             $student = new Fluent([

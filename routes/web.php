@@ -175,8 +175,8 @@ Route::middleware(['auth', 'active'])->group(function () {
 
 
         Route::get('/students/create', StudentsForm::class)->name('students.create');
-        Route::get('/students/{student}/edit', StudentsForm::class)->name('students.edit');
-        Route::delete('/students/{student}', [StudentController::class, 'destroy'])->name('students.destroy');
+        Route::get('/students/{student}/edit', StudentsForm::class)->name('students.edit')->where('student', '[A-Za-z0-9\/\-\.]+');
+        Route::delete('/students/{student}', [StudentController::class, 'destroy'])->name('students.destroy')->where('student', '[A-Za-z0-9\/\-\.]+');
 
         Route::get('/teachers/create', [TeacherController::class, 'create'])->name('teachers.create');
         Route::get('/teachers/{teacher}/edit', [TeacherController::class, 'edit'])->name('teachers.edit');
@@ -225,8 +225,8 @@ Route::middleware(['auth', 'active'])->group(function () {
 
     Route::get('/students', StudentsIndex::class)->name('students.index');
     Route::get('/students/export', [StudentsExportController::class, 'export'])->name('students.export');
-    Route::get('/students/{student}', [StudentController::class, 'show'])->name('students.show');
-    Route::get('/students/{student}/admission-form', [AdmissionFormController::class, 'download'])->name('students.admission-form');
+    Route::get('/students/{student}', [StudentController::class, 'show'])->name('students.show')->where('student', '[A-Za-z0-9\/\-\.]+');
+    Route::get('/students/{student}/admission-form', [AdmissionFormController::class, 'download'])->name('students.admission-form')->where('student', '[A-Za-z0-9\/\-\.]+');
 
     Route::middleware('role:admin,bursar')->group(function () {
         Route::get('/billing', BillingIndex::class)->middleware('permission:billing.transactions,fees.manage')->name('billing.index');
@@ -323,7 +323,8 @@ Route::middleware(['auth', 'active'])->group(function () {
     // Results (Shared between Admin, Teacher, and Parent)
     Route::get('/results/report-card/{student}', [ReportCardController::class, 'download'])
         ->middleware('role:admin,teacher,parent')
-        ->name('results.report-card');
+        ->name('results.report-card')
+        ->where('student', '[A-Za-z0-9\/\-\.]+');
 
     Route::middleware('role:bursar')->group(function () {
         Route::view('/accounts', 'pages.accounts.index')->middleware('permission:billing.transactions')->name('accounts');

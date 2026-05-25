@@ -197,7 +197,7 @@ class Index extends Component
                 'assignedTeacher:id,name',
             ])
             ->withCount(['questions', 'attempts'])
-            ->orderByRaw("CASE status WHEN 'live' THEN 0 WHEN 'draft' THEN 1 WHEN 'ended' THEN 2 ELSE 3 END")
+            ->orderByRaw("CASE status WHEN 'live' THEN 0 WHEN 'pending_approval' THEN 1 WHEN 'draft' THEN 2 WHEN 'ended' THEN 3 ELSE 4 END")
             ->orderByDesc('id');
 
         if ($user->role === 'teacher') {

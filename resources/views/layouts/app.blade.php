@@ -37,7 +37,7 @@
             }).catch(function() {});
         });
     </script>
-    <title>{{ config('myacademy.school_name', config('app.name', 'MyAcademy')) }}</title>
+    <title>{{ config('myacademy.school_name', config('app.name', 'AcademyHub')) }}</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @livewireStyles
     <style>
@@ -87,7 +87,7 @@ $appMode           = (string) config('myacademy.mode', 'full');
 $cbtLocked         = false;
 $user              = auth()->user();
 $schoolLogo        = config('myacademy.school_logo');
-$schoolName        = config('myacademy.school_name', config('app.name', 'MyAcademy'));
+$schoolName        = config('myacademy.school_name', config('app.name', 'AcademyHub'));
 $userInitial       = mb_strtoupper(mb_substr($user?->name ?? 'U', 0, 1));
 
 // Role-aware accent colour (used for active state)
@@ -149,7 +149,7 @@ $activeShadow = "shadow-{$accent}-200";
                     @if($schoolLogo)
                         <img src="{{ asset('uploads/'.str_replace('\\','/',$schoolLogo)) }}" alt="Logo" class="h-full w-full object-contain p-1"/>
                     @else
-                        <img src="{{ asset('images/myacademyhub-logo.png') }}" alt="MyAcademyHub" class="h-full w-full object-contain p-0.5"/>
+                        <img src="{{ asset('images/myacademyhub-logo.png') }}" alt="AcademyHub" class="h-full w-full object-contain p-0.5"/>
                     @endif
                 </div>
                 <div class="min-w-0">
@@ -198,7 +198,7 @@ $activeShadow = "shadow-{$accent}-200";
                     @if($schoolLogo)
                         <img src="{{ asset('uploads/'.str_replace('\\','/',$schoolLogo)) }}" alt="Logo" class="h-full w-full object-contain p-1"/>
                     @else
-                        <img src="{{ asset('images/myacademyhub-logo.png') }}" alt="MyAcademyHub" class="h-full w-full object-contain p-0.5"/>
+                        <img src="{{ asset('images/myacademyhub-logo.png') }}" alt="AcademyHub" class="h-full w-full object-contain p-0.5"/>
                     @endif
                 </div>
                 <div class="min-w-0" x-show="!sidebarCollapsed" x-transition.opacity>
@@ -295,18 +295,26 @@ $activeShadow = "shadow-{$accent}-200";
         </header>
 
         {{-- Subscription banners --}}
-        @if(isset($subscriptionDueDate) && $user?->role === 'admin')
-            @if($subscriptionIsPastDue && $subscriptionDaysPastDue <= 14)
+        @if(isset($subscriptionDueDate) && $user && !$user->is_super_admin && $user->tenant_id)
+            @if($subscriptionIsPastDue)
                 <div class="fixed inset-x-0 bottom-0 z-50 p-3">
                     <div class="mx-auto max-w-4xl rounded-2xl bg-red-600 px-5 py-3 shadow-xl flex items-center justify-between gap-4">
-                        <p class="text-sm font-bold text-white">Subscription expired — edit features are locked. <a href="{{ route('billing.index') }}" class="underline">Renew now</a></p>
+                        @if($user->role === 'admin')
+                            <p class="text-sm font-bold text-white">Subscription expired — edit features (CRUD) are locked. <a href="{{ route('settings.subscription') }}" class="underline">Renew now</a></p>
+                        @else
+                            <p class="text-sm font-bold text-white">Subscription expired — school portal is in read-only mode. Please contact your school administrator to renew.</p>
+                        @endif
                     </div>
                 </div>
                 <style>#mainContent main input,#mainContent main select,#mainContent main textarea,#mainContent main button:not(.allow-billing){pointer-events:none!important;opacity:.6!important}</style>
             @elseif(!$subscriptionIsPastDue && $subscriptionDaysUntilDue <= 7)
                 <div class="fixed inset-x-0 bottom-0 z-50 p-3">
                     <div class="mx-auto max-w-4xl rounded-2xl bg-amber-500 px-5 py-3 shadow-xl flex items-center justify-between gap-4">
-                        <p class="text-sm font-bold text-white">Subscription expires in {{ $subscriptionDaysUntilDue }} days. <a href="{{ route('billing.index') }}" class="underline">Renew now</a></p>
+                        @if($user->role === 'admin')
+                            <p class="text-sm font-bold text-white">Subscription expires in {{ $subscriptionDaysUntilDue }} days. <a href="{{ route('settings.subscription') }}" class="underline">Renew now</a></p>
+                        @else
+                            <p class="text-sm font-bold text-white">Subscription expires in {{ $subscriptionDaysUntilDue }} days. Please inform your school administrator to renew.</p>
+                        @endif
                         <button onclick="this.closest('.fixed').remove()" class="text-white/80 hover:text-white">
                             <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
                         </button>
@@ -382,7 +390,7 @@ $activeShadow = "shadow-{$accent}-200";
     document.addEventListener('livewire:init', () => {
         Livewire.on('browser-notification', (event) => {
             const d = event[0] || event;
-            sendBrowserNotification(d.title || 'MyAcademy', d.message || 'New notification', d.url || '/');
+            sendBrowserNotification(d.title || 'AcademyHub', d.message || 'New notification', d.url || '/');
         });
     });
 </script>
