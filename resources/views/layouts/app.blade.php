@@ -5,6 +5,38 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="csrf-token" content="{{ csrf_token() }}" />
+    <script>
+        window.onerror = function(message, source, line, col, error) {
+            fetch('/log-error', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+                body: JSON.stringify({
+                    message: message,
+                    source: source,
+                    line: line,
+                    col: col,
+                    stack: error ? error.stack : '',
+                    url: window.location.href
+                })
+            }).catch(function() {});
+            return false;
+        };
+        window.addEventListener('unhandledrejection', function(event) {
+            var reason = event.reason;
+            fetch('/log-error', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+                body: JSON.stringify({
+                    message: reason ? reason.message || String(reason) : 'Unhandled Rejection',
+                    source: '',
+                    line: '',
+                    col: '',
+                    stack: reason ? reason.stack : '',
+                    url: window.location.href
+                })
+            }).catch(function() {});
+        });
+    </script>
     <title>{{ config('myacademy.school_name', config('app.name', 'MyAcademy')) }}</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @livewireStyles

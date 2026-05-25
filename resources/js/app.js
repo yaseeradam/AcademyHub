@@ -1,11 +1,5 @@
 import './bootstrap';
 import './loading';
-import Alpine from 'alpinejs';
-
-// Alpine MUST be started immediately (before DOMContentLoaded) for Livewire v3 to work correctly.
-// Starting it inside DOMContentLoaded causes Livewire components to not initialize on first visit.
-window.Alpine = Alpine;
-Alpine.start();
 
 // Mobile Sidebar — wrapped in a function so it can be re-called after wire:navigate
 function initMobileSidebar() {

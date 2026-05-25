@@ -37,7 +37,7 @@ client.on('qr', (qr) => {
 });
 
 client.on('ready', async () => {
-    console.log('\n✅ MyAcademy WhatsApp Bot is ready and listening!');
+    console.log('\n✅ Bolt WhatsApp Bot is ready and listening!');
     const info = await client.info;
     console.log('\n📱 BOT WHATSAPP NUMBER:', info.wid.user);
     setupScheduledJobs();
@@ -168,7 +168,7 @@ client.on('message', async msg => {
     if (textLower === 'login') {
         userStates.set(phone, { step: 'LOGIN_IDENTIFIER', data: {} });
         return msg.reply(
-            '👋 *Welcome to MyAcademy Bot!*\n\n' +
+            '👋 *Welcome to Bolt Bot!*\n\n' +
             'Please enter your login identifier:\n\n' +
             '• *Students:* Enter your Admission Number (e.g. STU20240001)\n' +
             '• *Staff/Admin/Bursar:* Enter your Email Address\n' +
@@ -186,7 +186,7 @@ client.on('message', async msg => {
         // If not registered/logged in
         if (['hi', 'hello', 'hey', 'menu', 'start', 'help'].includes(textLower)) {
             return msg.reply(
-                '👋 *Welcome to MyAcademy Bot!*\n\n' +
+                '👋 *Welcome to Bolt Bot!*\n\n' +
                 'I don\'t recognize your number yet.\n\n' +
                 'Type *login* to connect your account using the same username and password you use on the school website.'
             );
@@ -210,11 +210,11 @@ client.on('message', async msg => {
 
     if (textLower === 'menu' || textLower === 'help') {
         if (userRole === 'parent') {
-            return msg.reply('🤖 *MyAcademy Assistant*\n\nYou can talk to me naturally! E.g. *"Did my son go to school?"*, *"What are the fees?"*\n\nOr use commands:\n- attendance\n- results\n- contact\n- subscribe');
+            return msg.reply('🤖 *Bolt Assistant*\n\nYou can talk to me naturally! E.g. *"Did my son go to school?"*, *"What are the fees?"*\n\nOr use commands:\n- attendance\n- results\n- contact\n- subscribe');
         } else if (userRole === 'admin' || userRole === 'superadmin') {
-            return msg.reply('👑 *Admin Assistant*\n\nCommands:\n- broadcast (Mass message)\n- homework (Interactive Assign)\n- subscribe\n- unsubscribe\n\nOr just chat with me naturally!');
+            return msg.reply('👑 *Bolt Admin Assistant*\n\nCommands:\n- broadcast (Mass message)\n- homework (Interactive Assign)\n- subscribe\n- unsubscribe\n\nOr just chat with me naturally!');
         } else {
-            return msg.reply('👨‍🏫 *Staff Assistant*\n\nCommands:\n- homework (Interactive Assign)\n- subscribe\n- unsubscribe\n\nOr just chat with me naturally!');
+            return msg.reply('👨‍🏫 *Bolt Staff Assistant*\n\nCommands:\n- homework (Interactive Assign)\n- subscribe\n- unsubscribe\n\nOr just chat with me naturally!');
         }
     }
 

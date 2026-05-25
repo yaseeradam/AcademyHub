@@ -2,13 +2,16 @@
     <IfModule mod_negotiation.c>
         Options -MultiViews -Indexes
     </IfModule>
+    <IfModule mod_dir.c>
+        DirectorySlash Off
+    </IfModule>
 
     RewriteEngine On
 
     # Route collisions: this app has physical directories like `public/Students`, `public/teachers`, etc.
     # We must rewrite directory-matching requests to index.php, unless they request an actual existing file.
     RewriteCond %{REQUEST_FILENAME} !-f
-    RewriteRule ^(certificates|login|teachers|students)(/.*)?$ index.php [L,NC]
+    RewriteRule ^(certificates|teachers|students)(/.*)?$ index.php [L,NC]
 
     # Handle Authorization Header
     RewriteCond %{HTTP:Authorization} .

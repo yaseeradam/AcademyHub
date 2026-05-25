@@ -82,6 +82,7 @@ Route::middleware('student.session')->group(function () {
 
 // Fresh CSRF token endpoint — used by JS logout to prevent 419 Page Expired
 Route::get('/csrf-token', [UtilityController::class, 'csrfToken']);
+Route::post('/log-error', [UtilityController::class, 'logClientError']);
 
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthenticatedSessionController::class, 'create'])->name('login');
@@ -382,6 +383,7 @@ Route::prefix('superadmin')->name('superadmin.')->group(function () {
 
     Route::middleware(['auth', 'superadmin'])->group(function () {
         Route::get('/', \App\Http\Controllers\SuperAdmin\DashboardController::class)->name('dashboard');
+        Route::post('/verify-password', [\App\Http\Controllers\SuperAdmin\PasswordConfirmationController::class, 'verify'])->name('verify-password');
         Route::resource('tenants', \App\Http\Controllers\SuperAdmin\TenantController::class)->except(['show']);
         Route::put('tenants/{tenant}/admins/{admin}', [\App\Http\Controllers\SuperAdmin\TenantController::class, 'updateAdmin'])->name('tenants.admins.update');
         Route::resource('marketplace', \App\Http\Controllers\SuperAdmin\MarketplaceController::class)->except(['show']);

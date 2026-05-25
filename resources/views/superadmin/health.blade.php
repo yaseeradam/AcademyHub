@@ -187,7 +187,7 @@
         Superpower Control Center
     </h2>
     <div class="action-panel">
-        <form action="{{ route('superadmin.health.clear-cache') }}" method="POST" style="margin:0;">
+        <form action="{{ route('superadmin.health.clear-cache') }}" method="POST" style="margin:0;" data-confirm-password="Flush all compiled application cache, routing configurations, and view templates">
             @csrf
             <button type="submit" class="action-btn">
                 <svg style="width:18px; height:18px;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
@@ -380,7 +380,7 @@
                                 </td>
                                 <td style="padding:14px 16px; text-align:right;">
                                     @if($tenant->admin_user)
-                                        <form action="{{ route('superadmin.impersonate.start', $tenant->admin_user) }}" method="POST" style="margin:0; display:inline-block;" target="_blank">
+                                        <form action="{{ route('superadmin.impersonate.start', $tenant->admin_user) }}" method="POST" style="margin:0; display:inline-block;" target="_blank" data-confirm-password="Impersonate the administrator account of '{{ $tenant->name }}'">
                                             @csrf
                                             <button type="submit" class="sa-btn sa-btn-primary" style="padding:6px 14px; font-size:12px; font-weight:700; display:inline-flex; align-items:center; gap:4px;">
                                                 <svg style="width:14px; height:14px;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">

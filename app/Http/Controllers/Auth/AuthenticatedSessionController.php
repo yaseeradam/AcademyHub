@@ -37,12 +37,28 @@ class AuthenticatedSessionController extends Controller
     private function handleStaffParentLogin(Request $request): RedirectResponse
     {
         try {
+            $email = $request->input('email');
+            $loginType = $request->input('login_type', 'staff');
+            $tenantId  = TenantSettings::tenantId();
+
+            Log::debug('LoginController: Submission received', [
+                'email' => $email,
+                'login_type' => $loginType,
+                'tenant_id' => $tenantId,
+                'session_id' => $request->hasSession() ? $request->session()->getId() : 'NO_SESSION',
+            ]);
+
             $credentials = $request->validate([
                 'email'    => ['required', 'string', 'email'],
                 'password' => ['required', 'string'],
             ]);
 
-            if (! Auth::attempt($credentials, $request->boolean('remember'))) {
+            $attempt = Auth::attempt($credentials, $request->boolean('remember'));
+            Log::debug('LoginController: Auth::attempt result', [
+                'success' => $attempt,
+            ]);
+
+            if (! $attempt) {
                 Log::warning('Failed login attempt', [
                     'email'      => $request->email,
                     'login_type' => $request->input('login_type', 'staff'),
@@ -54,10 +70,16 @@ class AuthenticatedSessionController extends Controller
                 ]);
             }
 
-            $loginType = $request->input('login_type', 'staff');
             $user      = Auth::user();
             $userRole  = $user->role;
-            $tenantId  = TenantSettings::tenantId();
+
+            Log::debug('LoginController: Authenticated user details', [
+                'user_id' => $user->id,
+                'email' => $user->email,
+                'role' => $userRole,
+                'is_super_admin' => $user->is_super_admin,
+                'tenant_id' => $user->tenant_id,
+            ]);
 
             // Role must match the chosen login portal.
             if ($loginType === 'parent') {
@@ -128,19 +150,23 @@ class AuthenticatedSessionController extends Controller
             }
 
             $request->session()->regenerate();
+            $newSessionId = $request->session()->getId();
 
             Log::info('Successful login', [
                 'user_id'    => $user->id,
                 'email'      => $user->email,
                 'role'       => $user->role,
                 'login_type' => $loginType,
+                'new_session_id' => $newSessionId,
             ]);
 
             if ($user->is_super_admin) {
-                return redirect()->intended(route('superadmin.dashboard'));
+                Log::debug('LoginController: Redirecting to /superadmin');
+                return redirect()->intended('/superadmin');
             }
 
-            return redirect()->intended(route('dashboard'));
+            Log::debug('LoginController: Redirecting to /dashboard');
+            return redirect()->intended('/dashboard');
 
         } catch (ValidationException $e) {
             throw $e;
@@ -230,7 +256,7 @@ class AuthenticatedSessionController extends Controller
                 'admission_number' => $student->admission_number,
             ]);
 
-            return redirect()->route('student.dashboard');
+            return redirect('/student/dashboard');
 
         } catch (ValidationException $e) {
             throw $e;

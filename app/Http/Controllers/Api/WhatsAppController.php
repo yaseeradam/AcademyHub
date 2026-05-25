@@ -48,9 +48,16 @@ class WhatsAppController extends Controller
                 return response()->json(['success' => false, 'message' => 'Invalid password. Use the same password as the school website.'], 401);
             }
 
-            // Link phone to student's user account if exists, else store on student
+            // If already linked to another WhatsApp phone number, reject
             if ($student->user_id) {
                 $user = \App\Models\User::find($student->user_id);
+                if ($user && $user->whatsapp_phone && $user->whatsapp_phone !== $phone) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'This student account is already linked to another WhatsApp number. Please contact your school administrator to unlink it.'
+                    ], 400);
+                }
+
                 if ($user) {
                     $user->whatsapp_phone      = $phone;
                     $user->whatsapp_verified   = true;
@@ -89,6 +96,14 @@ class WhatsAppController extends Controller
             return response()->json(['success' => false, 'message' => 'Your account is inactive. Contact the administrator.'], 403);
         }
 
+        // If already linked to another WhatsApp phone number, reject
+        if ($user->whatsapp_phone && $user->whatsapp_phone !== $phone) {
+            return response()->json([
+                'success' => false,
+                'message' => 'This account is already linked to another WhatsApp number. Please contact your school administrator to unlink it.'
+            ], 400);
+        }
+
         // Link WhatsApp phone
         $user->whatsapp_phone      = $phone;
         $user->whatsapp_verified   = true;
@@ -108,7 +123,7 @@ class WhatsAppController extends Controller
     public function getUser($phone)
     {
         $user = \App\Models\User::where('whatsapp_phone', $phone)
-            ->whereIn('role', ['parent', 'teacher', 'admin', 'superadmin', 'bursar'])
+            ->whereIn('role', ['parent', 'teacher', 'admin', 'superadmin', 'bursar', 'student'])
             ->first();
 
         if (!$user) {

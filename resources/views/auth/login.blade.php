@@ -66,9 +66,9 @@
   <!-- LEFT PANEL -->
   <div class="login-left">
     <!-- Carousel -->
-    <div class="carousel-slide active" id="slide-0"><img src="{{ asset('login/carousel1.jpg') }}" alt=""></div>
-    <div class="carousel-slide" id="slide-1"><img src="{{ asset('login/carousel2.jpg') }}" alt=""></div>
-    <div class="carousel-slide" id="slide-2"><img src="{{ asset('login/carousel3.jpg') }}" alt=""></div>
+    <div class="carousel-slide active" id="slide-0"><img src="{{ asset('login-assets/carousel1.jpg') }}" alt=""></div>
+    <div class="carousel-slide" id="slide-1"><img src="{{ asset('login-assets/carousel2.jpg') }}" alt=""></div>
+    <div class="carousel-slide" id="slide-2"><img src="{{ asset('login-assets/carousel3.jpg') }}" alt=""></div>
     <div class="left-overlay"></div>
 
     <div class="left-content">
@@ -124,17 +124,15 @@
         </button>
       </div>
 
-      <!-- Role icon -->
-      <div class="role-icon-wrap" id="role-icon-wrap" style="background:#FFF7ED;border-color:#FDDCB0">
-        <svg id="role-icon" width="28" height="28" fill="none" stroke="#E78B2C" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
-      </div>
+      <!-- Role icon removed -->
 
       <h1 class="card-title" id="card-title">Staff Login</h1>
       <p class="card-sub">Welcome back! Please sign in to your account.</p>
 
       @if ($errors->any())
-      <div class="error-banner">
-        <ul>@foreach ($errors->all() as $e)<li>{{ $e }}</li>@endforeach</ul>
+      <div class="error-banner" style="background:#fef2f2;border:1.5px solid #f87171;border-radius:12px;padding:14px 16px;margin-bottom:20px;font-size:13px;color:#b91c1c;display:flex;align-items:flex-start;gap:10px;">
+        <svg style="width:20px;height:20px;flex-shrink:0;margin-top:1px;color:#ef4444;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+        <div><ul style="margin:0;padding-left:16px;line-height:1.6;">@foreach ($errors->all() as $e)<li style="font-weight:600;">{{ $e }}</li>@endforeach</ul></div>
       </div>
       @endif
 
@@ -144,7 +142,7 @@
 
       <!-- STAFF FORM -->
       <div id="form-staff" class="login-form-section active">
-        <form method="POST" action="{{ route('login.store') }}">
+        <form method="POST" action="/login">
           @csrf
           <input type="hidden" name="login_type" value="staff">
           <div class="form-group">
@@ -153,6 +151,12 @@
               <input id="staff-email" name="email" type="email" value="{{ old('email') }}" required placeholder="admin@school.com">
               <svg class="input-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
             </div>
+            @error('email')
+              <div style="color:#ef4444; font-size:12px; margin-top:6px; font-weight:600; display:flex; align-items:center; gap:4px;">
+                <svg style="width:14px; height:14px;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                {{ $message }}
+              </div>
+            @enderror
           </div>
           <div class="form-group">
             <div class="form-label-row">
@@ -163,6 +167,12 @@
               <input id="staff-password" name="password" type="password" required placeholder="••••••••">
               <svg class="input-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
             </div>
+            @error('password')
+              <div style="color:#ef4444; font-size:12px; margin-top:6px; font-weight:600; display:flex; align-items:center; gap:4px;">
+                <svg style="width:14px; height:14px;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                {{ $message }}
+              </div>
+            @enderror
           </div>
           <label class="remember"><input type="checkbox" name="remember"> Remember me</label>
           <button type="submit" class="btn-login" style="background:#E78B2C">
@@ -174,7 +184,7 @@
 
       <!-- PARENT FORM -->
       <div id="form-parent" class="login-form-section">
-        <form method="POST" action="{{ route('login.store') }}">
+        <form method="POST" action="/login">
           @csrf
           <input type="hidden" name="login_type" value="parent">
           <div class="form-group">
@@ -183,6 +193,12 @@
               <input id="parent-email" name="email" type="email" value="{{ old('email') }}" required placeholder="parent@email.com">
               <svg class="input-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
             </div>
+            @error('email')
+              <div style="color:#ef4444; font-size:12px; margin-top:6px; font-weight:600; display:flex; align-items:center; gap:4px;">
+                <svg style="width:14px; height:14px;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                {{ $message }}
+              </div>
+            @enderror
           </div>
           <div class="form-group">
             <div class="form-label-row">
@@ -193,6 +209,12 @@
               <input id="parent-password" name="password" type="password" required placeholder="••••••••">
               <svg class="input-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
             </div>
+            @error('password')
+              <div style="color:#ef4444; font-size:12px; margin-top:6px; font-weight:600; display:flex; align-items:center; gap:4px;">
+                <svg style="width:14px; height:14px;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                {{ $message }}
+              </div>
+            @enderror
           </div>
           <label class="remember"><input type="checkbox" name="remember"> Remember me</label>
           <button type="submit" class="btn-login" style="background:#7C3AED">
@@ -204,7 +226,7 @@
 
       <!-- STUDENT FORM -->
       <div id="form-student" class="login-form-section">
-        <form method="POST" action="{{ route('login.store') }}">
+        <form method="POST" action="/login">
           @csrf
           <input type="hidden" name="login_type" value="student">
           <div class="form-group">
@@ -213,6 +235,12 @@
               <input id="student-admission" name="admission_number" type="text" value="{{ old('admission_number') }}" required placeholder="STU20240001">
               <svg class="input-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 9h3.75M15 12h3.75M15 15h3.75M4.5 19.5h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z"/></svg>
             </div>
+            @error('admission_number')
+              <div style="color:#ef4444; font-size:12px; margin-top:6px; font-weight:600; display:flex; align-items:center; gap:4px;">
+                <svg style="width:14px; height:14px;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                {{ $message }}
+              </div>
+            @enderror
           </div>
           <div class="form-group">
             <div class="form-label-row">
@@ -223,6 +251,12 @@
               <input id="student-password" name="password" type="password" required placeholder="••••••••">
               <svg class="input-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
             </div>
+            @error('password')
+              <div style="color:#ef4444; font-size:12px; margin-top:6px; font-weight:600; display:flex; align-items:center; gap:4px;">
+                <svg style="width:14px; height:14px;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                {{ $message }}
+              </div>
+            @enderror
           </div>
           <label class="remember"><input type="checkbox" name="remember"> Remember me</label>
           <button type="submit" class="btn-login" style="background:#1D4ED8">
@@ -282,12 +316,7 @@ function switchRole(role) {
   const card = document.querySelector('.login-card');
   card.style.setProperty('--accent', r.accent);
   card.style.setProperty('--accent-light', r.accentLight);
-  // Icon
-  const wrap = document.getElementById('role-icon-wrap');
-  wrap.style.background = r.iconBg; wrap.style.borderColor = r.iconBorder;
-  const icon = document.getElementById('role-icon');
-  icon.setAttribute('stroke', r.iconStroke);
-  icon.querySelector('path').setAttribute('d', r.iconPath);
+  // Icon logic removed
   // Title
   document.getElementById('card-title').textContent = r.title;
   // Footer
@@ -316,6 +345,7 @@ function goSlide(n) {
 setInterval(() => goSlide((current + 1) % slides.length), 5000);
 
 // Init
-switchRole('staff');
+const oldLoginType = "{{ old('login_type', 'staff') }}";
+switchRole(oldLoginType);
 </script>
 </x-layouts.guest>

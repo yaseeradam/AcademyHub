@@ -485,7 +485,7 @@
         }
     </style>
 </head>
-<body x-data="{ mobileSidebarOpen: false }">
+<body x-data="superAdminGlobal()" @submit="handleFormSubmit($event)">
 
     <!-- Mobile Sidebar Backdrop Overlay -->
     <div x-cloak x-show="mobileSidebarOpen" @click="mobileSidebarOpen = false" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15, 23, 42, 0.4); backdrop-filter: blur(4px); z-index: 45;" class="lg-hidden"></div>
@@ -636,6 +636,169 @@
             @yield('content')
         </div>
     </div>
+
+    <!-- Global Password Confirmation Modal -->
+    <div x-cloak x-show="passwordConfirmOpen" 
+         class="global-modal-container"
+         style="position: fixed; inset: 0; z-index: 9999; display: flex; align-items: center; justify-content: center; padding: 16px;">
+        <!-- Backdrop with soft blur -->
+        <div x-show="passwordConfirmOpen"
+             x-transition:enter="transition ease-out duration-300"
+             x-transition:enter-start="opacity-0"
+             x-transition:enter-end="opacity-100"
+             x-transition:leave="transition ease-in duration-200"
+             x-transition:leave-start="opacity-100"
+             x-transition:leave-end="opacity-0"
+             @click="passwordConfirmOpen = false"
+             style="position: absolute; inset: 0; background: rgba(15, 23, 42, 0.4); backdrop-filter: blur(8px);"></div>
+
+        <!-- Modal Box -->
+        <div x-show="passwordConfirmOpen"
+             x-transition:enter="transition ease-out duration-300"
+             x-transition:enter-start="opacity-0 translate-y-4 scale-95"
+             x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+             x-transition:leave="transition ease-in duration-200"
+             x-transition:leave-start="opacity-100 translate-y-0 scale-100"
+             x-transition:leave-end="opacity-0 translate-y-4 scale-95"
+             style="position: relative; width: 100%; max-width: 480px; background: #ffffff; border-radius: 20px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04); border: 1px solid #e2e8f0; overflow: hidden; z-index: 10;">
+            
+            <!-- Visual Accent (Shield / Security Icon with warm gradient) -->
+            <div style="background: linear-gradient(135deg, #fef2f2, #fee2e2); padding: 24px; display: flex; flex-direction: column; align-items: center; border-bottom: 1px solid #f1f5f9; text-align: center;">
+                <div style="width: 56px; height: 56px; border-radius: 16px; background: #ef4444; display: flex; align-items: center; justify-content: center; color: white; margin-bottom: 14px; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.25);">
+                    <svg style="width: 28px; height: 28px;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                    </svg>
+                </div>
+                <h3 style="font-size: 18px; font-weight: 800; color: #1e293b; margin: 0 0 6px 0;">Verify Security Credentials</h3>
+                <p style="font-size: 13px; color: #64748b; line-height: 1.5; margin: 0; max-width: 360px;" x-text="passwordConfirmMessage"></p>
+            </div>
+
+            <!-- Form Fields -->
+            <form @submit.prevent="verifyAndSubmit()" style="margin: 0; padding: 24px;">
+                <!-- Error Display -->
+                <div x-cloak x-show="passwordError" 
+                     class="sa-alert error"
+                     style="margin-bottom: 16px; font-size: 12.5px; border-radius: 10px; display: flex; align-items: center; gap: 8px;"
+                     x-transition:enter="transition ease-out duration-200">
+                    <svg style="width: 16px; height: 16px; flex-shrink: 0;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                    </svg>
+                    <span x-text="passwordError"></span>
+                </div>
+
+                <div style="margin-bottom: 20px;">
+                    <label for="sa-confirm-password-input" style="display: block; font-size: 12px; font-weight: 700; color: #475569; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px;">Super Admin Password</label>
+                    <input type="password" 
+                           id="sa-confirm-password-input" 
+                           x-model="passwordInput" 
+                           :disabled="passwordSubmitting"
+                           class="sa-form-input" 
+                           placeholder="••••••••" 
+                           style="width: 100%; height: 42px; font-size: 15px; text-align: center; font-family: monospace; letter-spacing: 0.1em; border-radius: 10px; border: 1px solid #cbd5e1; outline: none; transition: border-color 0.15s;"
+                           required>
+                </div>
+
+                <div style="display: flex; gap: 12px;">
+                    <button type="button" 
+                            @click="passwordConfirmOpen = false" 
+                            :disabled="passwordSubmitting"
+                            class="sa-btn sa-btn-ghost" 
+                            style="flex: 1; justify-content: center; height: 42px; border-radius: 10px; font-size: 13.5px; font-weight: 700;">
+                        Cancel
+                    </button>
+                    <button type="submit" 
+                            :disabled="passwordSubmitting"
+                            class="sa-btn sa-btn-danger" 
+                            style="flex: 1; justify-content: center; height: 42px; border-radius: 10px; font-size: 13.5px; font-weight: 700; display: inline-flex; align-items: center; gap: 8px;">
+                        <span x-show="passwordSubmitting" class="spinner" style="width: 16px; height: 16px; border: 2.5px solid transparent; border-top-color: white; border-radius: 50%; animation: spin 0.8s linear infinite;"></span>
+                        <span x-text="passwordSubmitting ? 'Verifying...' : 'Verify Security'"></span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Spinner Custom Rotation Style -->
+    <style>
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+    </style>
+
+    <script>
+        function superAdminGlobal() {
+            return {
+                mobileSidebarOpen: false,
+                passwordConfirmOpen: false,
+                passwordConfirmMessage: 'Please enter your password to confirm this action.',
+                passwordInput: '',
+                passwordError: '',
+                passwordSubmitting: false,
+                activeForm: null,
+
+                handleFormSubmit(e) {
+                    const form = e.target;
+                    const confirmMsg = form.getAttribute('data-confirm-password');
+                    if (confirmMsg) {
+                        e.preventDefault();
+                        this.activeForm = form;
+                        this.passwordConfirmMessage = confirmMsg;
+                        this.passwordInput = '';
+                        this.passwordError = '';
+                        this.passwordConfirmOpen = true;
+
+                        // Focus input field on next tick
+                        this.$nextTick(() => {
+                            const input = document.getElementById('sa-confirm-password-input');
+                            if (input) input.focus();
+                        });
+                    }
+                },
+
+                async verifyAndSubmit() {
+                    if (!this.passwordInput) {
+                        this.passwordError = 'Password is required.';
+                        return;
+                    }
+
+                    this.passwordSubmitting = true;
+                    this.passwordError = '';
+
+                    try {
+                        const response = await fetch('{{ route('superadmin.verify-password') }}', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Accept': 'application/json',
+                                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                            },
+                            body: JSON.stringify({
+                                password: this.passwordInput
+                            })
+                        });
+
+                        const data = await response.json();
+
+                        if (response.ok && data.verified) {
+                            this.passwordConfirmOpen = false;
+                            if (this.activeForm) {
+                                // Safe native submit method invocation
+                                HTMLFormElement.prototype.submit.call(this.activeForm);
+                            }
+                        } else {
+                            this.passwordError = data.message || 'The provided password does not match our records.';
+                        }
+                    } catch (err) {
+                        this.passwordError = 'An error occurred. Please try again.';
+                        console.error(err);
+                    } finally {
+                        this.passwordSubmitting = false;
+                    }
+                }
+            }
+        }
+    </script>
 
 @stack('scripts')
 </body>

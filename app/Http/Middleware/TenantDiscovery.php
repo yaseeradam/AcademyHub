@@ -41,13 +41,27 @@ class TenantDiscovery
         }
 
         if ($tenant) {
+            \Illuminate\Support\Facades\Log::debug('TenantDiscovery: Resolved tenant', [
+                'host' => $host,
+                'tenant_id' => $tenant->id,
+                'tenant_slug' => $tenant->slug,
+            ]);
             app()->instance('currentTenant', $tenant);
             $request->attributes->add(['tenant' => $tenant]);
         } elseif ($mainDomainHost && $host !== $mainDomainHost) {
+            \Illuminate\Support\Facades\Log::debug('TenantDiscovery: Mismatch subdomain', [
+                'host' => $host,
+                'mainDomainHost' => $mainDomainHost,
+            ]);
             // Only skip 404 for bare localhost/127.0.0.1 — subdomain mismatches should still 404
             if (!in_array($host, ['localhost', '127.0.0.1'])) {
                 abort(404, "School instance '{$host}' not found.");
             }
+        } else {
+            \Illuminate\Support\Facades\Log::debug('TenantDiscovery: Main domain or fallback', [
+                'host' => $host,
+                'mainDomainHost' => $mainDomainHost,
+            ]);
         }
 
         return $next($request);

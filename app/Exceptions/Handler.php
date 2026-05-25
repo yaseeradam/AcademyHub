@@ -25,6 +25,13 @@ class Handler extends ExceptionHandler
     {
         // Redirect to login instead of showing 419 Page Expired
         if ($e instanceof TokenMismatchException) {
+            \Illuminate\Support\Facades\Log::warning('Handler: CSRF token mismatch detected', [
+                'host' => $request->getHost(),
+                'url' => $request->fullUrl(),
+                'has_session' => $request->hasSession(),
+                'session_id' => $request->hasSession() ? $request->session()->getId() : 'NO_SESSION',
+            ]);
+
             if ($request->expectsJson()) {
                 return response()->json(['message' => 'Session expired. Please refresh and try again.'], 419);
             }
@@ -34,9 +41,11 @@ class Handler extends ExceptionHandler
                 session()->forget(['student_id', 'student_name', 'student_admission', 'student_class', 'login_type']);
             }
 
+            // Use back() so we stay on the current tenant domain.
             return redirect()
-                ->route('login')
-                ->with('status', 'Your session expired. Please log in again.');
+                ->back()
+                ->withInput($request->only('email', 'login_type', 'admission_number'))
+                ->withErrors(['email' => 'Your session expired. Please try again.']);
         }
 
         return parent::render($request, $e);

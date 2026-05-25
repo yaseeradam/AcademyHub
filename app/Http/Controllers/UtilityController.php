@@ -41,6 +41,15 @@ class UtilityController extends Controller
     public function dashboard()
     {
         $user = auth()->user();
+        \Illuminate\Support\Facades\Log::debug('UtilityController: Dashboard hit', [
+            'auth_check' => auth()->check(),
+            'user_id' => $user?->id,
+            'email' => $user?->email,
+            'role' => $user?->role,
+            'tenant_id' => $user?->tenant_id,
+            'resolved_tenant_id' => \App\Support\TenantSettings::tenantId(),
+        ]);
+
         if ($user?->role === 'admin') {
             return view('pages.dashboard');
         }
@@ -127,5 +136,21 @@ class UtilityController extends Controller
                 ? json_decode(file_get_contents($settingsPath), true)
                 : null,
         ]);
+    }
+
+    public function logClientError(Request $request)
+    {
+        \Illuminate\Support\Facades\Log::error('CLIENT JS ERROR DETECTED', [
+            'message' => $request->input('message'),
+            'source' => $request->input('source'),
+            'line' => $request->input('line'),
+            'col' => $request->input('col'),
+            'stack' => $request->input('stack'),
+            'url' => $request->input('url'),
+            'user_agent' => $request->header('User-Agent'),
+            'user' => auth()->check() ? auth()->user()->email : 'guest',
+        ]);
+
+        return response()->json(['success' => true]);
     }
 }

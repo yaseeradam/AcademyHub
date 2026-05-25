@@ -184,7 +184,7 @@
                     </p>
 
                     @if($admins->isNotEmpty())
-                        <form action="{{ route('superadmin.tenants.impersonate', $tenant) }}" method="POST">
+                        <form action="{{ route('superadmin.tenants.impersonate', $tenant) }}" method="POST" data-confirm-password="Log in and impersonate the school administrator of '{{ $tenant->name }}'">
                             @csrf
                             <button type="submit" class="sa-btn sa-btn-primary" style="width: 100%; justify-content: center; padding: 11px;">
                                 <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
@@ -293,7 +293,8 @@
                 Permanently delete all databases, student records, grades, billing, configuration files, and assets of this school. This action is absolute and cannot be undone under any circumstances.
             </p>
             <form action="{{ route('superadmin.tenants.destroy', $tenant) }}" method="POST"
-                  onsubmit="return confirm('Type the school name to confirm deletion.\n\nYou are about to permanently delete:\n{{ addslashes($tenant->name) }}\n\nThis CANNOT be undone. All data will be lost.\n\nClick OK only if you are absolutely sure.')">
+                  onsubmit="return confirm('Type the school name to confirm deletion.\n\nYou are about to permanently delete:\n{{ addslashes($tenant->name) }}\n\nThis CANNOT be undone. All data will be lost.\n\nClick OK only if you are absolutely sure.')"
+                  data-confirm-password="Permanently terminate the school '{{ $tenant->name }}' and delete all databases, records, and uploaded assets">
                 @csrf
                 @method('DELETE')
                 <button type="submit" class="sa-btn sa-btn-danger">
@@ -358,7 +359,7 @@
             
             {{-- Flags & Disk --}}
             <div class="sa-panel md:col-span-2">
-                <form action="{{ route('superadmin.tenants.save-flags', $tenant) }}" method="POST">
+                <form action="{{ route('superadmin.tenants.save-flags', $tenant) }}" method="POST" data-confirm-password="Modify resource limits, disk space quota, and premium feature access for '{{ $tenant->name }}'">
                     @csrf
                     <div class="sa-panel-header">
                         <span class="sa-panel-title">Feature Toggles &amp; Storage Quotas</span>
@@ -644,11 +645,11 @@
                                     <td>
                                         @if($bill->status === 'unpaid')
                                             <div style="display:flex; gap:6px;">
-                                                <form action="{{ route('superadmin.tenants.bills.pay', [$tenant, $bill]) }}" method="POST">
+                                                <form action="{{ route('superadmin.tenants.bills.pay', [$tenant, $bill]) }}" method="POST" data-confirm-password="Mark term bill for {{ $bill->term_name }} ({{ config('myacademy.currency_symbol', '₦') }}{{ number_format($bill->total_due, 2) }}) as fully paid">
                                                     @csrf
                                                     <button type="submit" class="sa-btn sa-btn-primary" style="padding: 4px 8px; font-size: 11px;">Mark Paid</button>
                                                 </form>
-                                                <form action="{{ route('superadmin.tenants.bills.void', [$tenant, $bill]) }}" method="POST">
+                                                <form action="{{ route('superadmin.tenants.bills.void', [$tenant, $bill]) }}" method="POST" data-confirm-password="Void term bill for {{ $bill->term_name }} ({{ config('myacademy.currency_symbol', '₦') }}{{ number_format($bill->total_due, 2) }})">
                                                     @csrf
                                                     <button type="submit" class="sa-btn sa-btn-ghost" style="padding: 4px 8px; font-size: 11px;">Void</button>
                                                 </form>
