@@ -135,17 +135,19 @@
         </a>
     @endif
 
-    <a href="{{ route('messages') }}" wire:navigate
-        class="{{ request()->routeIs('messages') ? $activeClass : $inactiveClass }} {{ $baseClass }}">
-        <svg class="{{ $iconBase }} {{ request()->routeIs('messages') ? $iconActive : $iconInactive }}"
-            viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-        </svg>
-        <span class="sidebar-text">Messages</span>
-        <span class="ml-auto flex items-center">
-            <livewire:messages.unread-badge />
-        </span>
-    </a>
+    @if(auth()->user()?->tenant?->activeMarketplaceComponents()->where('slug', 'messages')->exists())
+        <a href="{{ route('messages') }}" wire:navigate
+            class="{{ request()->routeIs('messages') ? $activeClass : $inactiveClass }} {{ $baseClass }}">
+            <svg class="{{ $iconBase }} {{ request()->routeIs('messages') ? $iconActive : $iconInactive }}"
+                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+            </svg>
+            <span class="sidebar-text">Messages</span>
+            <span class="ml-auto flex items-center">
+                <livewire:messages.unread-badge />
+            </span>
+        </a>
+    @endif
 
     {{-- Marketplace Link for Admins --}}
     @if ($user?->role === 'admin')

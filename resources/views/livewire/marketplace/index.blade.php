@@ -117,23 +117,6 @@
         ];
         return $badges[$slug] ?? 'bg-gray-100 text-gray-800';
     };
-
-    $getMockStats = function($slug) {
-        $stats = [
-            'whatsapp' => ['downloads' => '1.2k', 'rating' => 4.8],
-            'whatsapp-bot' => ['downloads' => '1.2k', 'rating' => 4.8],
-            'student' => ['downloads' => '890', 'rating' => 4.6],
-            'student-dashboard' => ['downloads' => '890', 'rating' => 4.6],
-            'messages' => ['downloads' => '1.5k', 'rating' => 4.7],
-            'homework' => ['downloads' => '2.8k', 'rating' => 4.8],
-            'document' => ['downloads' => '2.8k', 'rating' => 4.8],
-            'cbt' => ['downloads' => '1.4k', 'rating' => 4.7],
-            'exam' => ['downloads' => '1.4k', 'rating' => 4.7],
-            'savings-loan' => ['downloads' => '750', 'rating' => 4.5],
-            'finance' => ['downloads' => '750', 'rating' => 4.5],
-        ];
-        return $stats[$slug] ?? ['downloads' => '500', 'rating' => 4.5];
-    };
 @endphp
 
 <div
@@ -255,7 +238,6 @@
                 $isInstalled = in_array($component->id, $installed);
                 $gradientClass = $getIconBackground($component->slug);
                 $badgeStyle = $getBadgeColor($component->slug);
-                $stats = $getMockStats($component->slug);
             @endphp
             <div
                 x-show="activeTab === 'all' || 
@@ -296,7 +278,7 @@
                                 <svg class="h-3.5 w-3.5 fill-current" viewBox="0 0 20 20">
                                     <path d="M9.049 2.927c.3-.9 1.603-.9 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.9-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
                                 </svg>
-                                <span class="text-xs font-black text-amber-500 leading-none">{{ number_format($stats['rating'], 1) }}</span>
+                                <span class="text-xs font-black text-amber-500 leading-none">{{ number_format($component->rating_avg ?: 4.5, 1) }}</span>
                             </div>
                         </div>
 
@@ -328,7 +310,7 @@
                             </div>
 
                             <span class="text-[10px] font-semibold text-gray-400">
-                                {{ $stats['downloads'] }} downloads
+                                {{ $component->installs ?: 0 }} Installs
                             </span>
                         </div>
                     </div>
@@ -345,21 +327,27 @@
         @endforelse
     </div>
 
-    {{-- Processing Modal (Light theme) --}}
+    {{-- Premium Glassmorphic Configuration Spinner Overlay --}}
     <template x-teleport="body">
         <div
             x-show="processing"
-            class="fixed inset-0 w-screen h-screen bg-slate-900/30 backdrop-blur-sm flex items-center justify-center z-[9998]"
+            x-transition:enter="transition ease-out duration-300"
+            x-transition:enter-start="opacity-0"
+            x-transition:enter-end="opacity-100"
+            class="fixed inset-0 w-screen h-screen bg-slate-950/45 backdrop-blur-sm flex items-center justify-center z-[9998]"
             style="display:none"
         >
-            <div class="bg-white rounded-3xl px-8 py-6 shadow-2xl flex items-center gap-4 border border-gray-100">
-                <svg class="animate-spin h-6 w-6 text-blue-600 flex-shrink-0" fill="none" viewBox="0 0 24 24">
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
-                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
-                </svg>
-                <div>
-                    <p class="font-extrabold text-gray-900 leading-snug">Installing Plugin</p>
-                    <p class="text-xs font-semibold text-gray-500">Please wait, configuring your school context...</p>
+            <div class="bg-white/90 rounded-[2rem] px-10 py-8 shadow-2xl flex flex-col items-center text-center gap-4 border border-white/60 max-w-sm w-full mx-4 backdrop-blur-md">
+                <div class="relative flex items-center justify-center h-16 w-16">
+                     <div class="absolute inset-0 rounded-full border-4 border-slate-100"></div>
+                     <div class="absolute inset-0 rounded-full border-4 border-blue-600 border-t-transparent animate-spin"></div>
+                     <svg class="h-6 w-6 text-blue-600 animate-pulse" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 16.5V9.75m0 0l3 3m-3-3l-3 3M6.75 19.5h10.5" />
+                     </svg>
+                </div>
+                <div class="space-y-1">
+                    <p class="text-lg font-black text-slate-900 leading-tight">Configuring Plugin</p>
+                    <p class="text-xs font-bold text-slate-500 max-w-[240px] leading-relaxed">Setting up components, routing gates, and resources for your school...</p>
                 </div>
             </div>
         </div>
@@ -369,83 +357,82 @@
     <template x-teleport="body">
         <div
             x-show="show"
-            x-transition:enter="transition ease-out duration-200"
+            x-transition:enter="transition ease-out duration-300"
             x-transition:enter-start="opacity-0"
             x-transition:enter-end="opacity-100"
-            x-transition:leave="transition ease-in duration-150"
+            x-transition:leave="transition ease-in duration-200"
             x-transition:leave-start="opacity-100"
             x-transition:leave-end="opacity-0"
-            class="fixed inset-0 w-screen h-screen bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-[9999]"
+            class="fixed inset-0 w-screen h-screen bg-slate-950/40 backdrop-blur-sm flex items-center justify-center z-[9999]"
             @click.self="close()"
             style="display:none"
         >
             <div
                 x-show="show"
-                x-transition:enter="transition ease-out duration-200"
-                x-transition:enter-start="opacity-0 translate-y-4 scale-95"
+                x-transition:enter="transition ease-out duration-300"
+                x-transition:enter-start="opacity-0 translate-y-8 scale-95"
                 x-transition:enter-end="opacity-100 translate-y-0 scale-100"
-                x-transition:leave="transition ease-in duration-150"
+                x-transition:leave="transition ease-in duration-200"
                 x-transition:leave-start="opacity-100 translate-y-0 scale-100"
-                x-transition:leave-end="opacity-0 translate-y-4 scale-95"
-                class="bg-white rounded-[1.5rem] p-6 max-w-md w-full mx-4 shadow-2xl border border-gray-100 text-left"
+                x-transition:leave-end="opacity-0 translate-y-8 scale-95"
+                class="bg-white rounded-[2rem] overflow-hidden max-w-md w-full mx-4 shadow-2xl border border-gray-100 text-left"
                 @click.stop
             >
-                <div class="flex items-center gap-4 mb-4">
-                    <div class="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center text-2xl font-bold border border-blue-100" x-text="component?.icon"></div>
-                    <div>
-                        <div class="text-[9px] font-bold text-gray-400 uppercase tracking-widest">Confirm Acquisition</div>
-                        <h3 class="text-base font-extrabold text-gray-900 leading-tight" x-text="component?.name"></h3>
+                {{-- Modal Header Banner --}}
+                <div class="bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-8 text-white relative">
+                    <div class="absolute right-0 top-0 bottom-0 w-32 bg-white/5 skew-x-[-20deg] translate-x-16"></div>
+                    <div class="relative z-10 flex items-center gap-4">
+                        <div class="w-14 h-14 rounded-2xl bg-white/10 text-white flex items-center justify-center text-3xl font-bold border border-white/20 backdrop-blur-md" x-text="component?.icon"></div>
+                        <div>
+                            <span class="text-[10px] font-black uppercase tracking-wider text-blue-200/90 leading-none">Confirm Acquisition</span>
+                            <h3 class="text-xl font-black leading-tight mt-1" x-text="component?.name"></h3>
+                        </div>
                     </div>
                 </div>
 
-                <p class="text-xs text-gray-500 font-semibold leading-relaxed mb-6">
-                    <template x-if="component?.price > 0">
-                        <span>
-                            This is a premium plugin costing
-                            <strong class="text-blue-600 font-extrabold" x-text="component?.priceFormatted"></strong>.
-                            Proceeding will open a secure Paystack checkout gateway to finalize payment.
-                        </span>
-                    </template>
-                    <template x-if="!component?.price">
-                        <span>This is a free plugin. Installing it will instantly register and mount its components in your school portal's dashboard.</span>
-                    </template>
-                </p>
+                {{-- Modal Content --}}
+                <div class="p-6">
+                    <p class="text-sm text-gray-500 font-semibold leading-relaxed mb-6">
+                        <template x-if="component?.price > 0">
+                            <span>
+                                This is a premium plugin costing
+                                <strong class="text-blue-600 font-black" x-text="component?.priceFormatted"></strong>.
+                                Proceeding will securely open a Paystack checkout gateway to finalize your payment transaction.
+                            </span>
+                        </template>
+                        <template x-if="!component?.price">
+                            <span>This is a free plugin. Installing it will instantly register and mount its components into your school portal's dashboard navigation.</span>
+                        </template>
+                    </p>
 
-                <div class="flex justify-end gap-2.5">
-                    <button
-                        @click="close()"
-                        class="px-5 py-2.5 bg-gray-100 hover:bg-gray-250 rounded-xl text-xs font-bold text-gray-600 transition-colors focus:outline-none"
-                    >
-                        Cancel
-                    </button>
+                    <div class="flex items-center justify-end gap-3 border-t border-gray-100 pt-5">
+                         <button
+                             @click="close()"
+                             class="px-5 py-2.5 bg-gray-100 hover:bg-gray-250 rounded-xl text-xs font-bold text-gray-650 transition-colors focus:outline-none"
+                         >
+                             Cancel
+                         </button>
 
-                    {{-- Free install button --}}
-                    <button
-                        x-show="!component?.price"
-                        @click="handleInstall()"
-                        :disabled="processing"
-                        class="relative inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-extrabold text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-60 transition-colors focus:outline-none shadow-sm shadow-blue-500/20"
-                    >
-                        <svg class="animate-spin h-3.5 w-3.5 text-white" fill="none" viewBox="0 0 24 24" x-show="processing">
-                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
-                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
-                        </svg>
-                        <span x-text="processing ? 'Installing…' : 'Install Now'"></span>
-                    </button>
+                         {{-- Free install button --}}
+                         <button
+                             x-show="!component?.price"
+                             @click="handleInstall()"
+                             :disabled="processing"
+                             class="relative inline-flex items-center gap-2 px-6 py-2.5 rounded-xl text-xs font-black text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-60 transition-all focus:outline-none shadow-md shadow-blue-500/20 active:scale-95"
+                         >
+                             <span x-text="processing ? 'Installing…' : 'Install Now'"></span>
+                         </button>
 
-                    {{-- Paid payment button --}}
-                    <button
-                        x-show="component?.price > 0"
-                        @click="handlePayment()"
-                        :disabled="processing"
-                        class="relative inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-extrabold text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-60 transition-colors focus:outline-none shadow-sm shadow-blue-500/20"
-                    >
-                        <svg class="animate-spin h-3.5 w-3.5 text-white" fill="none" viewBox="0 0 24 24" x-show="processing">
-                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
-                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
-                        </svg>
-                        <span x-text="processing ? 'Connecting…' : 'Proceed to Checkout'"></span>
-                    </button>
+                         {{-- Paid payment button --}}
+                         <button
+                             x-show="component?.price > 0"
+                             @click="handlePayment()"
+                             :disabled="processing"
+                             class="relative inline-flex items-center gap-2 px-6 py-2.5 rounded-xl text-xs font-black text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-60 transition-all focus:outline-none shadow-md shadow-blue-500/20 active:scale-95"
+                         >
+                             <span x-text="processing ? 'Connecting…' : 'Proceed to Checkout'"></span>
+                         </button>
+                    </div>
                 </div>
             </div>
         </div>
