@@ -456,4 +456,151 @@ class TenantController extends Controller
             // Silently fail
         }
     }
+
+    public function exportBackup(Tenant $tenant)
+    {
+        try {
+            $backup = [
+                'version' => '1.0',
+                'tenant_id' => $tenant->id,
+                'school_slug' => $tenant->slug,
+                'exported_at' => now()->toDateTimeString(),
+                'tenant' => DB::table('tenants')->where('id', $tenant->id)->first(),
+                'tables' => [],
+                'pivots' => []
+            ];
+
+            // Get all tables dynamically that have a 'tenant_id' column
+            $tables = [];
+            foreach (DB::select('SHOW TABLES') as $tableInfo) {
+                $tableName = array_values((array)$tableInfo)[0];
+                if (Schema::hasColumn($tableName, 'tenant_id') && $tableName !== 'tenants') {
+                    $tables[] = $tableName;
+                }
+            }
+
+            foreach ($tables as $table) {
+                $backup['tables'][$table] = DB::table($table)->where('tenant_id', $tenant->id)->get()->toArray();
+            }
+
+            // Pivot tables
+            $studentIds = DB::table('students')->where('tenant_id', $tenant->id)->pluck('id')->toArray();
+            
+            if (!empty($studentIds)) {
+                $backup['pivots']['parent_student'] = DB::table('parent_student')
+                    ->whereIn('student_id', $studentIds)
+                    ->get()
+                    ->toArray();
+                    
+                $backup['pivots']['student_subject_overrides'] = DB::table('student_subject_overrides')
+                    ->whereIn('student_id', $studentIds)
+                    ->get()
+                    ->toArray();
+            } else {
+                $backup['pivots']['parent_student'] = [];
+                $backup['pivots']['student_subject_overrides'] = [];
+            }
+
+            $json = json_encode($backup, JSON_PRETTY_PRINT);
+            $fileName = 'school-backup-' . $tenant->slug . '-' . now()->format('Y-m-d-His') . '.json';
+
+            return response($json, 200, [
+                'Content-Type' => 'application/json',
+                'Content-Disposition' => 'attachment; filename="' . $fileName . '"'
+            ]);
+        } catch (\Throwable $e) {
+            return redirect()->route('superadmin.tenants.edit', $tenant)
+                ->withErrors(['error' => 'Backup failed: ' . $e->getMessage()]);
+        }
+    }
+
+    public function importBackup(Tenant $tenant, Request $request)
+    {
+        $request->validate([
+            'backup_file' => ['required', 'file', 'mimetypes:application/json,text/plain']
+        ]);
+
+        try {
+            $file = $request->file('backup_file');
+            $backup = json_decode(file_get_contents($file->getRealPath()), true);
+
+            if (!$backup || !isset($backup['version']) || !isset($backup['tenant_id'])) {
+                return redirect()->route('superadmin.tenants.edit', $tenant)
+                    ->withErrors(['backup_file' => 'Invalid backup file structure.']);
+            }
+
+            // Start transaction
+            DB::transaction(function() use ($tenant, $backup) {
+                // Disable foreign key checks temporarily
+                DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+
+                // 1. Delete existing rows for this tenant
+                $tables = [];
+                foreach (DB::select('SHOW TABLES') as $tableInfo) {
+                    $tableName = array_values((array)$tableInfo)[0];
+                    if (Schema::hasColumn($tableName, 'tenant_id') && $tableName !== 'tenants') {
+                        $tables[] = $tableName;
+                    }
+                }
+
+                foreach ($tables as $table) {
+                    DB::table($table)->where('tenant_id', $tenant->id)->delete();
+                }
+
+                // Delete pivot tables associated with our students
+                $studentIds = DB::table('students')->where('tenant_id', $tenant->id)->pluck('id')->toArray();
+                if (!empty($studentIds)) {
+                    DB::table('parent_student')->whereIn('student_id', $studentIds)->delete();
+                    DB::table('student_subject_overrides')->whereIn('student_id', $studentIds)->delete();
+                }
+
+                // 2. Restore school metadata
+                if (isset($backup['tenant'])) {
+                    $meta = $backup['tenant'];
+                    unset($meta['id']);
+                    unset($meta['slug']); // Keep the original slug to preserve custom domain setup
+                    DB::table('tenants')->where('id', $tenant->id)->update($meta);
+                }
+
+                // 3. Restore tenant tables
+                if (isset($backup['tables'])) {
+                    foreach ($backup['tables'] as $table => $rows) {
+                        if (Schema::hasTable($table) && !empty($rows)) {
+                            // Ensure rows are formatted as arrays
+                            $formattedRows = array_map(fn($row) => (array)$row, $rows);
+                            
+                            // Map all tenant_id values to the current school ID
+                            foreach ($formattedRows as &$row) {
+                                $row['tenant_id'] = $tenant->id;
+                            }
+                            
+                            DB::table($table)->insert($formattedRows);
+                        }
+                    }
+                }
+
+                // 4. Restore pivot tables
+                if (isset($backup['pivots'])) {
+                    foreach ($backup['pivots'] as $table => $rows) {
+                        if (Schema::hasTable($table) && !empty($rows)) {
+                            $formattedRows = array_map(fn($row) => (array)$row, $rows);
+                            DB::table($table)->insert($formattedRows);
+                        }
+                    }
+                }
+
+                // Re-enable foreign key checks
+                DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+            });
+
+            return redirect()->route('superadmin.tenants.edit', $tenant)
+                ->with('status', 'School database backup restored successfully. All school records have been updated.');
+        } catch (\Throwable $e) {
+            DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+            return redirect()->route('superadmin.tenants.edit', $tenant)
+                ->withErrors(['backup_file' => 'Restore failed: ' . $e->getMessage()]);
+        }
+    }
 }
+
+

@@ -404,6 +404,8 @@ Route::prefix('superadmin')->name('superadmin.')->group(function () {
         Route::post('tenants/{tenant}/save-flags', [\App\Http\Controllers\SuperAdmin\TenantController::class, 'saveFlags'])->name('tenants.save-flags');
         Route::post('tenants/{tenant}/save-broadcast', [\App\Http\Controllers\SuperAdmin\TenantController::class, 'saveBroadcast'])->name('tenants.save-broadcast');
         Route::put('tenants/{tenant}/plugins/{component}', [\App\Http\Controllers\SuperAdmin\TenantController::class, 'updatePluginPricing'])->name('tenants.plugins.update');
+        Route::post('tenants/{tenant}/backup', [\App\Http\Controllers\SuperAdmin\TenantController::class, 'exportBackup'])->name('tenants.backup');
+        Route::post('tenants/{tenant}/restore', [\App\Http\Controllers\SuperAdmin\TenantController::class, 'importBackup'])->name('tenants.restore');
         
         // Dynamic Invoicing Ledger
         Route::post('tenants/{tenant}/bills/generate', [\App\Http\Controllers\SuperAdmin\TenantController::class, 'generateBill'])->name('tenants.bills.generate');

@@ -57,7 +57,7 @@
                     <p class="mt-2 text-sm text-slate-600">Automated results, attendance updates, and AI chat for parents.</p>
                     <div class="mt-4 font-bold text-slate-900">₦300 <span class="text-sm font-normal text-slate-500">/ student / yr</span></div>
                 </div>
-                <a href="{{ route('marketplace.product', 'whatsapp-bot') }}" class="mt-6 block text-center w-full rounded-xl py-2.5 text-sm font-bold transition-all bg-slate-900 text-white hover:bg-slate-800">
+                <a href="{{ route('marketplace.show', 'whatsapp-bot') }}" class="mt-6 block text-center w-full rounded-xl py-2.5 text-sm font-bold transition-all bg-slate-900 text-white hover:bg-slate-800">
                     View in Marketplace
                 </a>
             </div>
@@ -74,7 +74,7 @@
                     <p class="mt-2 text-sm text-slate-600">Conduct computerized exams with AI grading and analytics.</p>
                     <div class="mt-4 font-bold text-slate-900">₦200 <span class="text-sm font-normal text-slate-500">/ student / yr</span></div>
                 </div>
-                <a href="{{ route('marketplace.product', 'cbt') }}" class="mt-6 block text-center w-full rounded-xl py-2.5 text-sm font-bold transition-all bg-slate-900 text-white hover:bg-slate-800">
+                <a href="{{ route('marketplace.show', 'cbt') }}" class="mt-6 block text-center w-full rounded-xl py-2.5 text-sm font-bold transition-all bg-slate-900 text-white hover:bg-slate-800">
                     View in Marketplace
                 </a>
             </div>
@@ -92,7 +92,7 @@
                     <p class="mt-2 text-sm text-slate-600">Dedicated mobile portal for parents to track their wards.</p>
                     <div class="mt-4 font-bold text-slate-900">₦150 <span class="text-sm font-normal text-slate-500">/ student / yr</span></div>
                 </div>
-                <a href="{{ route('marketplace.product', 'student-dashboard') }}" class="mt-6 block text-center w-full rounded-xl py-2.5 text-sm font-bold transition-all bg-slate-900 text-white hover:bg-slate-800">
+                <a href="{{ route('marketplace.show', 'student-dashboard') }}" class="mt-6 block text-center w-full rounded-xl py-2.5 text-sm font-bold transition-all bg-slate-900 text-white hover:bg-slate-800">
                     View in Marketplace
                 </a>
             </div>
@@ -126,7 +126,7 @@
                             <button type="button" class="mt-1 text-sm font-semibold text-green-700 hover:text-green-800">Configure Device</button>
                         @else
                             <div class="font-bold text-slate-500">Requires WA Bot Pro</div>
-                            <a href="{{ route('marketplace.product', 'whatsapp-bot') }}" class="mt-1 inline-block text-sm font-semibold text-slate-600 hover:text-slate-900">View in Marketplace</a>
+                            <a href="{{ route('marketplace.show', 'whatsapp-bot') }}" class="mt-1 inline-block text-sm font-semibold text-slate-600 hover:text-slate-900">View in Marketplace</a>
                         @endif
                     </div>
                 </div>

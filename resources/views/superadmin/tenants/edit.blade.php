@@ -63,6 +63,10 @@
             <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
             Billing Ledger
         </button>
+        <button @click="activeTab = 'backup'" :class="activeTab === 'backup' ? 'active' : ''" class="cc-tab-btn">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"/></svg>
+            Backup & Restore
+        </button>
     </div>
 
     {{-- ── Tab Contents ─────────────────────────────────── --}}
@@ -713,6 +717,93 @@
                         </button>
                     </div>
                 </form>
+            </div>
+
+        </div>
+    </div>
+
+    {{-- G. BACKUP & RESTORE TAB --}}
+    <div x-show="activeTab === 'backup'" x-transition:enter="transition ease-out duration-200" class="cc-tab-content">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            
+            {{-- Backup school data panel --}}
+            <div class="sa-panel">
+                <div class="sa-panel-header">
+                    <span class="sa-panel-title">Export School Database Backup</span>
+                </div>
+                <div style="padding: 24px;">
+                    <div style="text-align: center; margin-bottom: 20px;">
+                        <span style="font-size: 48px; display: block; margin-bottom: 12px;">📥</span>
+                        <h4 style="font-weight: 700; color: var(--sa-text); margin: 0 0 6px;">School Data Export</h4>
+                        <p style="font-size: 12.5px; color: var(--sa-muted); line-height: 1.5; max-width: 320px; margin: 0 auto;">
+                            Export every record associated with this school, including classes, sections, students, teachers, grades, billing, and plugin configurations.
+                        </p>
+                    </div>
+
+                    <div style="background: #f8fafc; border: 1.5px solid var(--sa-border); border-radius: 12px; padding: 14px 18px; margin-bottom: 24px; font-size: 12px; color: var(--sa-text); line-height: 1.5;">
+                        <strong>Backup Includes:</strong>
+                        <ul style="margin: 6px 0 0 16px; padding: 0; list-style-type: disc;">
+                            <li>Core School Profile Details</li>
+                            <li>Active Students, Parents, and Teachers Credentials</li>
+                            <li>Academic Sessions, Terms, Classes, and Sections</li>
+                            <li>Scores, Broadsheets, and Grade Books</li>
+                            <li>Dynamic Homework and CBT Exams Configurations</li>
+                            <li>Active Marketplace Plugin Setup Fees &amp; Billing Ledger</li>
+                        </ul>
+                    </div>
+
+                    <form action="{{ route('superadmin.tenants.backup', $tenant) }}" method="POST">
+                        @csrf
+                        <button type="submit" class="sa-btn sa-btn-primary" style="width: 100%; justify-content: center; padding: 12px; font-weight: 700;">
+                            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" style="width: 16px; height: 16px; margin-right: 6px;"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                            Generate &amp; Download Backup JSON
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            {{-- Import school data panel --}}
+            <div class="sa-panel">
+                <div class="sa-panel-header">
+                    <span class="sa-panel-title">Import &amp; Restore School Backup</span>
+                </div>
+                <div style="padding: 24px;">
+                    <div style="text-align: center; margin-bottom: 20px;">
+                        <span style="font-size: 48px; display: block; margin-bottom: 12px;">📤</span>
+                        <h4 style="font-weight: 700; color: var(--sa-text); margin: 0 0 6px;">School Data Import</h4>
+                        <p style="font-size: 12.5px; color: var(--sa-muted); line-height: 1.5; max-width: 320px; margin: 0 auto;">
+                            Upload a previously generated `.json` backup file to completely restore the school's historical databases, students, and grade configurations.
+                        </p>
+                    </div>
+
+                    <div style="background: #fff1f2; border: 1.5px solid #fecdd3; border-radius: 12px; padding: 14px 18px; margin-bottom: 24px; font-size: 12px; color: #991b1b; line-height: 1.5; display: flex; gap: 10px; align-items: flex-start; text-align: left;">
+                        <span style="font-size: 16px; line-height: 1;">⚠️</span>
+                        <div>
+                            <strong>Critical Warning:</strong>
+                            <p style="margin: 2px 0 0; color: #b91c1c;">
+                                Restoring a backup will **permanently overwrite and replace** all current academic sessions, students, teachers, grades, and configuration data of this school. This action is absolute and cannot be rolled back.
+                            </p>
+                        </div>
+                    </div>
+
+                    <form action="{{ route('superadmin.tenants.restore', $tenant) }}" method="POST" enctype="multipart/form-data" 
+                          data-confirm-password="Restore backup for '{{ $tenant->name }}'. This will permanently overwrite all current academic sessions, students, teachers, grades, and configuration data.">
+                        @csrf
+                        
+                        <div style="margin-bottom: 20px; text-align: left;">
+                            <label class="sa-form-label">Select Backup JSON File (.json)</label>
+                            <input type="file" name="backup_file" accept=".json,application/json" required class="sa-form-input" style="padding: 8px;">
+                            @error('backup_file')
+                                <div class="sa-form-error" style="margin-top: 6px;">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <button type="submit" class="sa-btn sa-btn-danger" style="width: 100%; justify-content: center; padding: 12px; font-weight: 700;">
+                            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" style="width: 16px; height: 16px; margin-right: 6px;"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+                            Restore School Records from File
+                        </button>
+                    </form>
+                </div>
             </div>
 
         </div>
