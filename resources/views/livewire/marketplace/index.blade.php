@@ -248,17 +248,7 @@
                 x-transition:enter-start="opacity-0 translate-y-4"
                 x-transition:enter-end="opacity-100 translate-y-0"
                 class="group bg-white rounded-[1.5rem] border border-gray-100 shadow-sm hover:border-blue-400 hover:ring-2 hover:ring-blue-500/10 hover:shadow-md transition-all duration-300 flex p-5 cursor-pointer"
-                @if($isInstalled)
-                    onclick="window.location.href='{{ route('marketplace.show', $component->slug) }}'"
-                @else
-                    @click="open({
-                        id: {{ $component->id }},
-                        name: @js($component->name),
-                        icon: @js($component->icon ?: '📦'),
-                        price: {{ $component->price }},
-                        priceFormatted: @js(config('myacademy.currency_symbol', '₦') . number_format($component->price, 2))
-                    })"
-                @endif
+                onclick="window.location.href='{{ route('marketplace.show', $component->slug) }}'"
             >
                 <div class="flex items-start gap-5 w-full">
                     {{-- App Icon gradient --}}
