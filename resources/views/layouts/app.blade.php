@@ -167,23 +167,6 @@ $activeShadow = "shadow-{$accent}-200";
             @include('layouts.partials.app-nav', ['mobile' => true])
         </nav>
 
-        <div class="p-3">
-            <form method="POST" action="{{ route('logout') }}" id="mobileLogoutForm">
-                @csrf
-                <button type="button" onclick="doLogout('mobileLogoutForm')"
-                        class="w-full flex items-center gap-3 rounded-2xl bg-slate-800 px-4 py-3.5 hover:bg-slate-900 transition-all">
-                    <div class="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl bg-red-500 shadow-md">
-                        <svg class="h-5 w-5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
-                        </svg>
-                    </div>
-                    <div>
-                        <div class="text-sm font-extrabold text-white">Logout</div>
-                        <div class="text-[11px] font-medium text-slate-400">See you later 👋</div>
-                    </div>
-                </button>
-            </form>
-        </div>
     </aside>
 
     {{-- ══════════════════════════════════════
@@ -212,23 +195,6 @@ $activeShadow = "shadow-{$accent}-200";
             @include('layouts.partials.app-nav', ['mobile' => false])
         </nav>
 
-        <div class="p-3 transition-all duration-300" x-bind:class="sidebarCollapsed ? 'px-2' : 'p-3'">
-            <form method="POST" action="{{ route('logout') }}" id="logoutForm">
-                @csrf
-                <button type="button" onclick="doLogout('logoutForm')" title="Logout"
-                        class="w-full flex items-center rounded-2xl bg-slate-800 hover:bg-slate-900 transition-all duration-300 shadow-sm" x-bind:class="sidebarCollapsed ? 'p-2 justify-center' : 'px-4 py-3.5 gap-3'">
-                    <div class="flex flex-shrink-0 items-center justify-center rounded-xl bg-red-500 shadow-md transition-all duration-300" x-bind:class="sidebarCollapsed ? 'h-10 w-10' : 'h-9 w-9'">
-                        <svg class="h-5 w-5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
-                        </svg>
-                    </div>
-                    <div x-show="!sidebarCollapsed" x-transition.opacity class="text-left flex-1 whitespace-nowrap overflow-hidden">
-                        <div class="text-sm font-extrabold text-white">Logout</div>
-                        <div class="text-[11px] font-medium text-slate-400">See you later 👋</div>
-                    </div>
-                </button>
-            </form>
-        </div>
     </aside>
 
     {{-- ══════════════════════════════════════
@@ -276,20 +242,21 @@ $activeShadow = "shadow-{$accent}-200";
                             <span class="text-sm font-extrabold leading-none">{{ $userInitial }}</span>
                         </div>
                     @endif
-                    <div class="hidden leading-tight sm:block">
+                    <div class="hidden leading-tight sm:block text-left">
                         <div class="text-sm font-bold text-slate-800">{{ $user?->name ?? 'User' }}</div>
                         <div class="text-[11px] font-semibold text-slate-400">{{ ucfirst($user?->role ?? 'user') }}</div>
                     </div>
                 </a>
 
-                {{-- Logout --}}
-                <button type="button" onclick="doLogout('logoutForm')"
-                        class="hidden sm:flex items-center gap-2 rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-bold text-white shadow-md hover:bg-slate-800 transition-all">
-                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                {{-- Header Logout Button --}}
+                <button type="button" onclick="doLogout('logoutForm')" title="Logout"
+                        class="flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500 hover:bg-red-50 hover:text-red-600 transition-colors shadow-sm flex-shrink-0">
+                    <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
                     </svg>
-                    <span class="hidden sm:inline">Logout</span>
                 </button>
+
+
 
             </div>
         </header>
@@ -351,6 +318,7 @@ $activeShadow = "shadow-{$accent}-200";
 
 </div>
 
+<form method="POST" action="{{ route('logout') }}" id="logoutForm" class="hidden">@csrf</form>
 @livewireScripts
 @stack('scripts')
 <x-notifications />

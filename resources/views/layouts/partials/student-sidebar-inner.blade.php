@@ -109,23 +109,3 @@ HTML;
         request()->routeIs('student.profile')) !!}
 </nav>
 
-{{-- Student info badge + logout (unified like admin) --}}
-<div class="p-3 transition-all duration-300" x-bind:class="sidebarCollapsed && !{{ $isMobile ? 'true' : 'false' }} ? 'px-2' : 'p-3'">
-    <form method="POST" action="{{ route('student.logout') }}" id="logoutForm">
-        @csrf
-        <button type="submit" title="Logout"
-                class="w-full flex items-center rounded-2xl bg-slate-800 hover:bg-slate-900 transition-all duration-300 shadow-sm text-left" 
-                x-bind:class="sidebarCollapsed && !{{ $isMobile ? 'true' : 'false' }} ? 'p-2 justify-center' : 'px-4 py-3.5 gap-3'">
-            <div class="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl bg-red-500 shadow-md transition-all duration-300" 
-                 x-bind:class="sidebarCollapsed && !{{ $isMobile ? 'true' : 'false' }} ? 'h-10 w-10' : 'h-9 w-9'">
-                <svg class="h-5 w-5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
-                </svg>
-            </div>
-            <div x-show="!sidebarCollapsed || {{ $isMobile ? 'true' : 'false' }}" x-transition.opacity class="text-left flex-1 whitespace-nowrap overflow-hidden">
-                <div class="text-xs font-extrabold text-white truncate">{{ $studentName }}</div>
-                <div class="text-[10px] font-semibold text-red-400">Logout 👋</div>
-            </div>
-        </button>
-    </form>
-</div>

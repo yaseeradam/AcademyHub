@@ -595,15 +595,6 @@
                     {{ auth()->user()->name ?? 'Super Admin' }}
                 </div>
                 <div class="sa-user-role">Super Admin</div>
-            </div>
-            <form method="POST" action="{{ route('superadmin.logout') }}" id="sa-logout-form" style="margin-left: auto; display: inline-flex; align-items: center; margin-bottom: 0;">
-                @csrf
-                <button type="submit" class="sa-logout-btn" title="Logout" style="margin-left: 0;">
-                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
-                    </svg>
-                </button>
-            </form>
         </div>
     </aside>
 
@@ -635,6 +626,15 @@
                     <span class="hidden-xs">System Online</span>
                     <span class="lg-hidden">Online</span>
                 </div>
+                <form method="POST" action="{{ route('superadmin.logout') }}" style="margin: 0; display: inline-flex;">
+                    @csrf
+                    <button type="submit" class="sa-logout-btn" title="Logout" style="display: inline-flex; align-items: center; justify-content: center; background: none; border: 1px solid var(--sa-border); padding: 8px 12px; border-radius: 8px; font-weight: bold; color: var(--sa-muted); cursor: pointer; transition: all 0.2s; font-size: 13px; gap: 6px;">
+                        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="width: 14px; height: 14px;">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+                        </svg>
+                        <span class="hidden-xs">Logout</span>
+                    </button>
+                </form>
             </div>
         </header>
 

@@ -1,20 +1,23 @@
 <div class="space-y-6">
     {{-- Header Section --}}
-    <div class="relative overflow-hidden rounded-3xl bg-gradient-to-r from-violet-600 via-indigo-600 to-purple-600 p-6 sm:p-8 text-white shadow-xl shadow-indigo-100/50">
-        {{-- Decorative vector/shapes --}}
-        <div class="absolute right-0 top-0 -mr-16 -mt-16 h-64 w-64 rounded-full bg-white/5 blur-3xl"></div>
-        <div class="absolute left-1/3 bottom-0 -mb-16 h-48 w-48 rounded-full bg-indigo-500/10 blur-2xl"></div>
-
-        <div class="relative flex flex-col md:flex-row md:items-center justify-between gap-6">
-            <div>
-                <span class="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-wider backdrop-blur-md">
-                    📚 My Learning Materials
-                </span>
-                <h1 class="mt-3 text-2xl sm:text-3xl font-black tracking-tight">E-Learning Portal</h1>
-                <p class="mt-2 text-sm sm:text-base text-indigo-100/90 font-medium max-w-2xl leading-relaxed">
-                    Access worksheets, lecture notes, textbook chapters, and digital resources uploaded by your subject teachers for <strong>{{ $student->schoolClass->name ?? 'your class' }}</strong>.
-                </p>
+    <div class="relative overflow-hidden rounded-2xl shadow-xl" style="background-color: #1a2e4a;">
+        <div class="absolute inset-0" style="background: radial-gradient(ellipse at top left, #1e3a5f 0%, transparent 60%);"></div>
+        <div class="absolute right-0 top-0 bottom-0 w-48 opacity-10">
+            <svg viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full">
+                <circle cx="160" cy="100" r="130" stroke="white" stroke-width="0.5"/>
+                <circle cx="160" cy="100" r="90" stroke="white" stroke-width="0.5"/>
+                <circle cx="160" cy="100" r="50" stroke="white" stroke-width="0.5"/>
+            </svg>
+        </div>
+        <div class="relative px-8 py-8">
+            <div class="flex items-center gap-2 mb-3">
+                <span class="h-2.5 w-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                <span class="text-sm font-semibold uppercase tracking-widest" style="color: #93c5fd;">E-Learning</span>
             </div>
+            <h1 class="text-3xl font-bold text-white tracking-tight">My Learning Materials</h1>
+            <p class="mt-2 text-base font-medium max-w-2xl leading-relaxed" style="color: #93c5fd;">
+                Access worksheets, lecture notes, and digital resources uploaded by your teachers for <strong class="text-white">{{ $student->schoolClass->name ?? 'your class' }}</strong>.
+            </p>
         </div>
     </div>
 
