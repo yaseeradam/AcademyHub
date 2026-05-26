@@ -18,6 +18,19 @@ class StudentSession
         }
 
         $tenantId = TenantSettings::tenantId();
+
+        if (! $tenantId && (app()->environment('local') || in_array($request->getHost(), ['localhost', '127.0.0.1']))) {
+            $sessionTenantId = session('tenant_id');
+            if ($sessionTenantId) {
+                $tenant = \App\Models\Tenant::find($sessionTenantId);
+                if ($tenant) {
+                    app()->instance('currentTenant', $tenant);
+                    $request->attributes->add(['tenant' => $tenant]);
+                    $tenantId = $tenant->id;
+                }
+            }
+        }
+
         if (! $tenantId || (int) session('tenant_id') !== (int) $tenantId) {
             $request->session()->forget(['tenant_id', 'student_id', 'student_name', 'student_admission', 'student_class', 'login_type']);
             $request->session()->regenerateToken();

@@ -18,13 +18,19 @@ class RequiresPlugin
      */
     public function handle(Request $request, Closure $next, string $slug): Response
     {
-        $user = $request->user();
+        $tenant = null;
 
-        if (! $user || ! $user->tenant) {
+        if ($user = $request->user()) {
+            $tenant = $user->tenant;
+        } elseif (session()->has('student_id')) {
+            $tenant = app()->bound('currentTenant') ? app('currentTenant') : null;
+        }
+
+        if (! $tenant) {
             abort(403, 'No tenant context.');
         }
 
-        $installed = $user->tenant
+        $installed = $tenant
             ->activeMarketplaceComponents()
             ->where('slug', $slug)
             ->exists();
@@ -35,6 +41,13 @@ class RequiresPlugin
                 return response()->json([
                     'message' => 'This plugin is not installed for your school.',
                 ], 403);
+            }
+
+            // Student session redirection fallback
+            if (session()->has('student_id')) {
+                return redirect()
+                    ->route('student.dashboard')
+                    ->with('warning', 'This feature is not active for your school.');
             }
 
             // Otherwise redirect to marketplace with a flash message

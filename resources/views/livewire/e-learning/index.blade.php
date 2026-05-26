@@ -1,29 +1,33 @@
 <div class="space-y-6">
     {{-- Header Section --}}
-    <div class="relative overflow-hidden rounded-3xl bg-gradient-to-r from-violet-600 via-indigo-600 to-purple-600 p-6 sm:p-8 text-white shadow-xl shadow-indigo-100/50">
-        {{-- Decorative vector/shapes --}}
-        <div class="absolute right-0 top-0 -mr-16 -mt-16 h-64 w-64 rounded-full bg-white/5 blur-3xl"></div>
-        <div class="absolute left-1/3 bottom-0 -mb-16 h-48 w-48 rounded-full bg-indigo-500/10 blur-2xl"></div>
-
-        <div class="relative flex flex-col md:flex-row md:items-center justify-between gap-6">
-            <div>
-                <span class="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-wider backdrop-blur-md">
-                    ⚡ E-Learning Plugin Active
-                </span>
-                <h1 class="mt-3 text-2xl sm:text-3xl font-black tracking-tight">Class Notes Hub</h1>
-                <p class="mt-2 text-sm sm:text-base text-indigo-100/90 font-medium max-w-2xl leading-relaxed">
-                    Organize, access, and distribute digital course materials and lecture resources across subjects, classes, and terms.
-                </p>
+    <div class="relative overflow-hidden rounded-2xl shadow-xl" style="background-color: #1a2e4a;">
+        <div class="absolute inset-0" style="background: radial-gradient(ellipse at top left, #1e3a5f 0%, transparent 60%);"></div>
+        <div class="absolute right-0 top-0 bottom-0 w-48 opacity-10">
+            <svg viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full">
+                <circle cx="160" cy="100" r="130" stroke="white" stroke-width="0.5"/>
+                <circle cx="160" cy="100" r="90" stroke="white" stroke-width="0.5"/>
+                <circle cx="160" cy="100" r="50" stroke="white" stroke-width="0.5"/>
+            </svg>
+        </div>
+        <div class="relative px-8 py-8">
+            <div class="flex items-center gap-2 mb-3">
+                <span class="h-2.5 w-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                <span class="text-sm font-semibold uppercase tracking-widest" style="color: #93c5fd;">E-Learning</span>
             </div>
-            
+            <h1 class="text-3xl font-bold text-white tracking-tight">Class Notes Hub</h1>
+            <p class="mt-2 text-base font-medium max-w-2xl leading-relaxed" style="color: #93c5fd;">
+                Organize, access, and distribute digital course materials and lecture resources across subjects, classes, and terms.
+            </p>
             @if(in_array(auth()->user()->role, ['admin', 'teacher']))
-                <button type="button" wire:click="$set('showCreateModal', true)"
-                        class="flex items-center justify-center gap-2 rounded-2xl bg-white px-5 py-3.5 text-sm font-bold text-indigo-600 shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all whitespace-nowrap self-start md:self-center">
-                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
-                    </svg>
-                    Upload Class Note
-                </button>
+                <div class="mt-5">
+                    <button type="button" wire:click="$set('showCreateModal', true)"
+                            class="inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-bold text-white transition-all" style="background:rgba(255,255,255,0.12);">
+                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
+                        </svg>
+                        Upload Class Note
+                    </button>
+                </div>
             @endif
         </div>
     </div>

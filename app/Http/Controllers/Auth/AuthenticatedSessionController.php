@@ -199,6 +199,17 @@ class AuthenticatedSessionController extends Controller
         try {
             $tenantId = TenantSettings::tenantId();
             if (! $tenantId) {
+                // Fallback for local development if host is localhost/127.0.0.1 or we are in local env
+                if (app()->environment('local') || in_array($request->getHost(), ['localhost', '127.0.0.1'])) {
+                    $fallbackTenant = \App\Models\Tenant::first();
+                    if ($fallbackTenant) {
+                        app()->instance('currentTenant', $fallbackTenant);
+                        $tenantId = $fallbackTenant->id;
+                    }
+                }
+            }
+
+            if (! $tenantId) {
                 throw ValidationException::withMessages([
                     'admission_number' => 'Student login must be done from your school domain/subdomain.',
                 ]);
