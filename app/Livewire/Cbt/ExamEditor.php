@@ -524,7 +524,7 @@ class ExamEditor extends Component
     public function roster()
     {
         $user = auth()->user();
-        if (! $user || $user->role !== 'admin') {
+        if (! $user || ! in_array($user->role, ['admin', 'teacher'], true)) {
             return collect();
         }
 

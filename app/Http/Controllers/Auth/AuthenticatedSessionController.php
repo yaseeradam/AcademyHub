@@ -93,6 +93,18 @@ class AuthenticatedSessionController extends Controller
                         'email' => 'This account is not registered as a parent. Please use the correct login portal.',
                     ]);
                 }
+
+                // Check if Parent Portal plugin is active/installed for this school
+                if (! $user->tenant || ! $user->tenant->activeMarketplaceComponents()->where('slug', 'parent-portal')->exists()) {
+                    Auth::logout();
+                    Log::warning('Parent portal plugin not installed for school', [
+                        'email'     => $request->email,
+                        'tenant_id' => $user->tenant_id,
+                    ]);
+                    throw ValidationException::withMessages([
+                        'email' => 'Parent Portal is not enabled for this school. Please contact school administration.',
+                    ]);
+                }
             } elseif ($loginType === 'staff') {
                 if (! in_array($userRole, ['admin', 'teacher', 'bursar'], true)) {
                     Auth::logout();

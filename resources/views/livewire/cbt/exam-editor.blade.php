@@ -484,7 +484,7 @@ ANS: C</pre>
                 $notStartedCount = 0;
                 $terminatedCount = 0;
 
-                if ($me?->role === 'admin') {
+                if (in_array($me?->role, ['admin', 'teacher'], true)) {
                     $roster = $this->roster;
                     $submittedCount = (int) $roster->where('state', 'submitted')->count();
                     $inProgressCount = (int) $roster->where('state', 'in_progress')->count();
@@ -517,7 +517,7 @@ ANS: C</pre>
             </div>
 
             <div class="rounded-2xl bg-white p-6 shadow-lg">
-                @if ($me?->role === 'admin')
+                @if (in_array($me?->role, ['admin', 'teacher'], true))
                     {{-- Search & Filter Bar --}}
                     <div class="mb-4 flex flex-wrap gap-3">
                         <div class="relative flex-1 min-w-[200px]">
@@ -591,7 +591,7 @@ ANS: C</pre>
                                         </button>
                                     @endif
                                     
-                                    @if ($attempt)
+                                    @if ($attempt && $me?->role === 'admin')
                                         <div class="relative">
                                             <button onclick="this.nextElementSibling.classList.toggle('hidden')" class="rounded bg-gray-200 px-3 py-1 text-xs font-semibold hover:bg-gray-300">•••</button>
                                             <div class="absolute right-0 z-10 mt-1 hidden w-40 rounded-lg bg-white shadow-xl ring-1 ring-black/5">

@@ -167,10 +167,87 @@
                             <input type="radio" name="report_card_template" value="{{ $t['key'] }}" class="sr-only" x-model="selectedReportTemplate"
                                 @checked($reportCardTemplate === $t['key']) @disabled($isLocked) />
 
-                            <!-- Thumbnail Preview -->
-                            <div class="relative w-full overflow-hidden rounded-xl border border-gray-200 bg-white pointer-events-none select-none mb-4" style="aspect-ratio: 1 / 1.414;">
-                                <div class="absolute inset-0" style="width: 200%; height: 200%; transform: scale(0.5); transform-origin: top left;">
-                                    <iframe src="{{ $t['preview'] }}?html=1" class="w-full h-full border-0 bg-transparent" scrolling="no" tabindex="-1"></iframe>
+                            <!-- Dynamic CSS Skeleton Preview -->
+                            <div class="relative w-full overflow-hidden rounded-xl border border-gray-200 bg-slate-50 p-3 pointer-events-none select-none mb-4 flex flex-col justify-between" style="aspect-ratio: 1 / 1.414;">
+                                {{-- Header block --}}
+                                @if($t['key'] === 'aurora')
+                                    <div class="h-8 rounded-lg bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500 flex items-center justify-between px-2 text-[6px] text-white font-bold">
+                                        <span>AURORA REPORT</span> <div class="w-3.5 h-3.5 rounded-full bg-white/20"></div>
+                                    </div>
+                                @elseif($t['key'] === 'elegant')
+                                    <div class="h-8 rounded-md bg-indigo-950 border-b-2 border-amber-400 flex items-center justify-between px-2 text-[6px] text-amber-400 font-serif">
+                                        <span>ELEGANT ACADEMY</span> <div class="w-3.5 h-3.5 rounded-full border border-amber-400/40"></div>
+                                    </div>
+                                @elseif($t['key'] === 'modern')
+                                    <div class="h-8 rounded-md bg-slate-900 flex items-center justify-between px-2 text-[6px] text-cyan-400 font-sans font-bold">
+                                        <span>MODERN PROFILE</span> <div class="w-3.5 h-3.5 rounded-full bg-cyan-450"></div>
+                                    </div>
+                                @elseif($t['key'] === 'classic')
+                                    <div class="h-8 border-2 border-slate-950 flex items-center justify-between px-2 text-[6px] text-slate-950 font-mono font-bold">
+                                        <span>CLASSIC SHEET</span> <div class="w-3.5 h-3.5 border border-slate-950"></div>
+                                    </div>
+                                @elseif($t['key'] === 'heritage')
+                                    <div class="h-8 rounded-md bg-blue-900 border-2 border-yellow-500 flex items-center justify-between px-2 text-[6px] text-yellow-500 font-serif">
+                                        <span>HERITAGE HALL</span> <div class="w-3.5 h-3.5 rounded-sm bg-yellow-500/30"></div>
+                                    </div>
+                                @elseif($t['key'] === 'nordic')
+                                    <div class="h-8 rounded-md bg-slate-250 flex items-center justify-between px-2 text-[6px] text-slate-700 font-mono">
+                                        <span>NORDIC GRADES</span> <div class="w-3.5 h-3.5 bg-slate-400/30"></div>
+                                    </div>
+                                @elseif($t['key'] === 'vanguard')
+                                    <div class="h-8 rounded-md bg-zinc-900 border border-teal-500/50 flex items-center justify-between px-2 text-[6px] text-teal-400 font-mono">
+                                        <span>[VANGUARD_CORE]</span> <div class="w-3.5 h-3.5 bg-teal-400/80"></div>
+                                    </div>
+                                @elseif($t['key'] === 'signature')
+                                    <div class="h-8 rounded-md bg-red-950 border-b-2 border-amber-600 flex items-center justify-between px-2 text-[6px] text-amber-500 font-serif">
+                                        <span>SIGNATURE PORTAL</span> <div class="w-3.5 h-3.5 rounded-full bg-amber-500/20 border border-amber-500/40"></div>
+                                    </div>
+                                @else {{-- compact --}}
+                                    <div class="h-8 rounded-md bg-slate-800 flex items-center justify-between px-2 text-[6px] text-slate-100 font-bold">
+                                        <span>COMPACT PORTAL</span> <div class="w-3.5 h-3.5 rounded-full bg-slate-600"></div>
+                                    </div>
+                                @endif
+
+                                {{-- Student Info Mock --}}
+                                <div class="space-y-1 mt-2">
+                                    <div class="h-1.5 w-1/2 bg-slate-200 rounded"></div>
+                                    <div class="h-1 w-1/3 bg-slate-150 rounded"></div>
+                                </div>
+
+                                {{-- Grid/Table Mock --}}
+                                <div class="flex-1 mt-3 space-y-1">
+                                    {{-- Table Header --}}
+                                    <div class="h-3.5 bg-slate-350 rounded flex items-center justify-between px-1">
+                                        <div class="h-1 w-1/4 bg-slate-450 rounded"></div>
+                                        <div class="flex gap-1 w-1/3 justify-end">
+                                            <div class="h-1 w-2.5 bg-slate-450 rounded"></div>
+                                            <div class="h-1 w-2.5 bg-slate-450 rounded"></div>
+                                            <div class="h-1 w-2.5 bg-slate-450 rounded"></div>
+                                        </div>
+                                    </div>
+                                    {{-- Table Rows --}}
+                                    @for($r = 0; $r < 4; $r++)
+                                        <div class="h-3 bg-white border border-slate-100 rounded flex items-center justify-between px-1">
+                                            <div class="h-1 w-1/3 bg-slate-200 rounded"></div>
+                                            <div class="flex gap-1 w-1/3 justify-end">
+                                                <div class="h-1 w-2 bg-slate-100 rounded"></div>
+                                                <div class="h-1 w-2 bg-slate-150 rounded"></div>
+                                                <div class="h-1 w-2 bg-indigo-100 rounded"></div>
+                                            </div>
+                                        </div>
+                                    @endfor
+                                </div>
+
+                                {{-- Footer Mock --}}
+                                <div class="border-t border-dashed border-slate-200 pt-2 mt-2 flex justify-between items-center">
+                                    <div class="space-y-0.5 w-1/3">
+                                        <div class="h-1 bg-slate-200 rounded"></div>
+                                        <div class="h-0.5 bg-slate-150 rounded w-2/3"></div>
+                                    </div>
+                                    <div class="space-y-0.5 w-1/3 flex flex-col items-end">
+                                        <div class="h-1 bg-slate-200 rounded w-full"></div>
+                                        <div class="h-0.5 bg-slate-150 rounded w-2/3"></div>
+                                    </div>
                                 </div>
                             </div>
 

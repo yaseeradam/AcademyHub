@@ -120,6 +120,10 @@ Route::get('/student/homework', \App\Livewire\Student\Homework::class)
     ->middleware(['student.session', 'plugin:homework'])
     ->name('student.homework');
 
+Route::get('/student/e-learning', \App\Livewire\Student\ELearning::class)
+    ->middleware(['student.session', 'plugin:e-learning'])
+    ->name('student.e-learning');
+
 Route::get('/student/exams', \App\Livewire\Student\Exams::class)
     ->middleware('student.session')
     ->name('student.exams');

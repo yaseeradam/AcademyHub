@@ -154,16 +154,17 @@
     {{-- Dynamic Marketplace Components --}}
     @php
         $tenantComponents = auth()->user()?->tenant?->activeMarketplaceComponents()->get() ?? collect();
+        $sidebarPlugins = $tenantComponents->whereNotIn('slug', ['whatsapp-bot', 'homework', 'messages'])
+            ->filter(fn($c) => $c->route_name && \Illuminate\Support\Facades\Route::has($c->route_name));
     @endphp
     
-    @if($tenantComponents->isNotEmpty())
+    @if($sidebarPlugins->isNotEmpty())
         <div class="px-3 py-2 text-xs font-semibold text-slate-400 uppercase tracking-wider mt-4">Plugins</div>
         
-        @foreach($tenantComponents as $component)
+        @foreach($sidebarPlugins as $component)
         @php
-            $routeExists = Route::has($component->slug . '.index');
-            $href = $routeExists ? route($component->slug . '.index') : '#';
-            $isActive = $routeExists && request()->routeIs($component->slug . '.*');
+            $href = route($component->route_name);
+            $isActive = request()->routeIs(explode('.', $component->route_name)[0] . '.*');
         @endphp
         
         <a href="{{ $href }}" wire:navigate

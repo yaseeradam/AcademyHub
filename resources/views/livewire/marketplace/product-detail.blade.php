@@ -1,8 +1,91 @@
+@php
+    $iconSvgs = [
+        'whatsapp' => '
+            <svg class="h-12 w-12 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
+            </svg>',
+        'whatsapp-bot' => '
+            <svg class="h-12 w-12 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
+            </svg>',
+        'student' => '
+            <svg class="h-12 w-12 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M22 10v6M2 10l10-5 10 5-10 5z"/>
+                <path d="M6 12v5c0 2 2 3 6 3s6-1 6-3v-5"/>
+            </svg>',
+        'student-dashboard' => '
+            <svg class="h-12 w-12 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M22 10v6M2 10l10-5 10 5-10 5z"/>
+                <path d="M6 12v5c0 2 2 3 6 3s6-1 6-3v-5"/>
+            </svg>',
+        'parent-portal' => '
+            <svg class="h-12 w-12 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                <circle cx="9" cy="7" r="4"/>
+                <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+            </svg>',
+        'exam' => '
+            <svg class="h-12 w-12 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
+                <line x1="8" y1="21" x2="16" y2="21"/>
+                <line x1="12" y1="17" x2="12" y2="21"/>
+            </svg>',
+        'cbt' => '
+            <svg class="h-12 w-12 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
+                <line x1="8" y1="21" x2="16" y2="21"/>
+                <line x1="12" y1="17" x2="12" y2="21"/>
+            </svg>',
+        'finance' => '
+            <svg class="h-12 w-12 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="12" y1="1" x2="12" y2="23"/>
+                <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+            </svg>',
+        'savings-loan' => '
+            <svg class="h-12 w-12 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="12" y1="1" x2="12" y2="23"/>
+                <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+            </svg>',
+        'messages' => '
+            <svg class="h-12 w-12 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+            </svg>',
+        'document' => '
+            <svg class="h-12 w-12 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                <polyline points="14 2 14 8 20 8"/>
+                <line x1="16" y1="13" x2="8" y2="13"/>
+                <line x1="16" y1="17" x2="8" y2="17"/>
+                <polyline points="10 9 9 9 8 9"/>
+            </svg>',
+        'homework' => '
+            <svg class="h-12 w-12 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                <polyline points="14 2 14 8 20 8"/>
+                <line x1="16" y1="13" x2="8" y2="13"/>
+                <line x1="16" y1="17" x2="8" y2="17"/>
+                <polyline points="10 9 9 9 8 9"/>
+            </svg>',
+        'e-learning' => '
+            <svg class="h-12 w-12 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+                <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+            </svg>',
+    ];
+
+    $slug = $productData['icon'] ?? $productData['slug'] ?? '';
+    $renderIcon = $iconSvgs[$slug] ?? null;
+@endphp
+
 <div class="space-y-6" x-data="{ activeScreenshotUrl: null, activeScreenshotTitle: '' }">
 
     {{-- Flash --}}
     @if(session('review_success'))
         <div class="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-800">{{ session('review_success') }}</div>
+    @endif
+    @if(session('message_error'))
+        <div class="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-bold text-rose-800">{{ session('message_error') }}</div>
     @endif
 
     {{-- Super Admin Control Console --}}
@@ -230,44 +313,16 @@
                     @elseif($productData['color']==='amber') from-amber-400 to-amber-600
                     @elseif($productData['color']==='cyan') from-cyan-500 to-sky-600
                     @endif flex items-center justify-center shadow-lg">
-                    @if(isset($dbComponent) && !empty($dbComponent->icon))
+                    @if($renderIcon)
+                        <div class="h-12 w-12 text-white flex items-center justify-center detail-svg-container">{!! $renderIcon !!}</div>
+                    @elseif(isset($dbComponent) && !empty($dbComponent->icon))
                         @if(str_contains($dbComponent->icon, '<svg'))
                             <div class="h-12 w-12 text-white flex items-center justify-center detail-svg-container">{!! $dbComponent->icon !!}</div>
                         @else
                             <span class="text-4xl font-black">{!! $dbComponent->icon !!}</span>
                         @endif
-                    @elseif(($productData['icon'] ?? '') === 'whatsapp')
-                        <svg class="h-12 w-12 text-white" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L0 24l6.335-1.662c1.746.953 3.71 1.457 5.709 1.458h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
-                        </svg>
-                    @elseif(($productData['icon'] ?? '') === 'student')
-                        <svg class="h-12 w-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 14l9-5-9-5-9 5 9 5z"/>
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"/>
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 21h6"/>
-                        </svg>
-                    @elseif(($productData['icon'] ?? '') === 'exam')
-                        <svg class="h-12 w-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
-                        </svg>
-                    @elseif(($productData['icon'] ?? '') === 'finance')
-                        <svg class="h-12 w-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                        </svg>
-                    @elseif(($productData['icon'] ?? '') === 'messages')
-                        <svg class="h-12 w-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
-                        </svg>
-                    @elseif(($productData['icon'] ?? '') === 'document')
-                        <svg class="h-12 w-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                        </svg>
                     @else
-                        @if(isset($productData['icon']) && str_contains($productData['icon'], '<svg'))
-                            <div class="h-12 w-12 text-white flex items-center justify-center detail-svg-container">{!! $productData['icon'] !!}</div>
-                        @else
-                            <span class="text-4xl">🧩</span>
-                        @endif
+                        <span class="text-4xl font-black">🧩</span>
                     @endif
                 </div>
             </div>
@@ -334,10 +389,16 @@
                                 Uninstall Plugin
                             </button>
                         @else
-                            <button wire:click="previewInstall" wire:loading.attr="disabled" class="w-full btn-primary py-3 flex items-center justify-center gap-2 shadow-md">
+                            <button wire:click="previewInstall" wire:loading.attr="disabled" @disabled(empty($selectedClasses)) class="w-full btn-primary py-3 flex items-center justify-center gap-2 shadow-md disabled:opacity-50 disabled:cursor-not-allowed">
                                 <span wire:loading.remove wire:target="previewInstall">Install Plugin</span>
                                 <span wire:loading wire:target="previewInstall">Installing...</span>
                             </button>
+                            @if(empty($selectedClasses))
+                                <p class="text-xs text-rose-500 text-center font-bold mt-2 flex items-center justify-center gap-1 animate-pulse">
+                                    <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                                    Please select target classes below before installing.
+                                </p>
+                            @endif
                         @endif
                     </div>
                 </div>
@@ -376,98 +437,68 @@
     </div>
     @endif
 
-    {{-- High-Fidelity Install Cost & Details Preview Modal --}}
+    {{-- Redesigned Compact Install Preview Modal --}}
     @if($showInstallPreviewModal)
-        <div class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 backdrop-blur-md p-4">
-            <div class="w-full max-w-lg rounded-3xl bg-white border border-slate-100 p-6 text-slate-800 shadow-2xl space-y-5 animate-scaleUp">
+        <div class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 backdrop-blur-md p-4 animate-fadeIn">
+            <div class="w-full max-w-md rounded-3xl bg-white border border-slate-100 p-5 text-slate-800 shadow-2xl space-y-4 animate-scaleUp">
                 
                 {{-- Modal Header Banner --}}
-                <div class="flex items-start gap-4 pb-4 border-b border-slate-100">
-                    <div class="h-12 w-12 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white shadow-md flex-shrink-0">
-                        @if(isset($dbComponent) && !empty($dbComponent->icon) && str_contains($dbComponent->icon, '<svg'))
-                            <div class="h-6 w-6 text-white flex items-center justify-center [&>svg]:w-6 [&>svg]:h-6 [&>svg]:text-white [&>svg]:max-w-full [&>svg]:max-h-full">{!! $dbComponent->icon !!}</div>
+                <div class="flex items-center gap-3 pb-3 border-b border-slate-100">
+                    <div class="h-10 w-10 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white shadow-md flex-shrink-0">
+                        @if($renderIcon)
+                            <div class="h-5 w-5 text-white flex items-center justify-center [&>svg]:w-5 [&>svg]:h-5 [&>svg]:text-white [&>svg]:max-w-full [&>svg]:max-h-full">{!! $renderIcon !!}</div>
+                        @elseif(isset($dbComponent) && !empty($dbComponent->icon) && str_contains($dbComponent->icon, '<svg'))
+                            <div class="h-5 w-5 text-white flex items-center justify-center [&>svg]:w-5 [&>svg]:h-5 [&>svg]:text-white [&>svg]:max-w-full [&>svg]:max-h-full">{!! $dbComponent->icon !!}</div>
                         @else
-                            <span class="text-2xl font-black">🧩</span>
+                            <span class="text-xl font-black">🧩</span>
                         @endif
                     </div>
                     <div>
-                        <span class="text-[10px] font-black uppercase tracking-wider text-indigo-600 leading-none">Plugin Installer</span>
-                        <h3 class="text-lg font-black text-slate-900 mt-1">Review Cost Details</h3>
-                        <p class="text-xs text-slate-500 mt-0.5">Please review the setup, licensing, and student audience breakdown for <strong>{{ $productData['name'] }}</strong>.</p>
+                        <span class="text-[9px] font-black uppercase tracking-wider text-indigo-600 leading-none block">Plugin Installer</span>
+                        <h3 class="text-base font-black text-slate-900 leading-tight">Review Installation</h3>
                     </div>
                 </div>
 
-                {{-- App Summary Details --}}
-                <div class="bg-slate-50 rounded-2xl p-4 border border-slate-100 space-y-3">
-                    <div class="flex justify-between items-center text-xs">
-                        <span class="font-bold text-slate-500 uppercase tracking-wider">Plugin Category</span>
-                        <span class="font-black text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded-md">{{ $productData['category'] }}</span>
+                {{-- Combined Info Card --}}
+                <div class="bg-slate-50/80 rounded-2xl p-3.5 border border-slate-100/80 space-y-2.5 text-xs">
+                    <div class="flex justify-between items-center">
+                        <span class="font-bold text-slate-400 uppercase tracking-wider text-[10px]">App Name</span>
+                        <span class="font-black text-slate-800">{{ $productData['name'] }}</span>
                     </div>
-                    <div class="flex justify-between items-start text-xs border-t border-slate-100 pt-3">
-                        <span class="font-bold text-slate-500 uppercase tracking-wider flex-shrink-0">Short Description</span>
-                        <span class="font-semibold text-slate-700 text-right max-w-[280px]">{{ $productData['short_description'] }}</span>
-                    </div>
-                </div>
-
-                {{-- Target Audience & Classes selected --}}
-                <div class="space-y-2">
-                    <div class="text-xs font-black text-slate-900 uppercase tracking-wider">1. Dynamic Class Target Audience</div>
-                    <div class="bg-slate-50 rounded-2xl p-4 border border-slate-100 space-y-3 max-h-[140px] overflow-y-auto scrollbar-thin">
-                        @php
-                            $selectedClassList = $classes->whereIn('id', $selectedClasses);
-                        @endphp
-                        @if($selectedClassList->isNotEmpty())
-                            <div class="flex flex-wrap gap-1.5">
-                                @foreach($selectedClassList as $cls)
-                                    <span class="inline-flex items-center rounded-lg bg-indigo-50 border border-indigo-100 px-2.5 py-1 text-xs font-bold text-indigo-700">
-                                        {{ $cls->name }} ({{ $cls->students_count }} students)
-                                    </span>
-                                @endforeach
-                            </div>
-                            <div class="text-xs font-bold text-slate-600 border-t border-slate-200/50 pt-2 flex justify-between">
-                                <span>Total Audited Target Students:</span>
-                                <span class="text-indigo-600 font-extrabold">{{ number_format($calculatedStudentCount) }} students</span>
-                            </div>
-                        @else
-                            <div class="rounded-xl border border-amber-200 bg-amber-50/50 p-3 flex items-start gap-2.5">
-                                <svg class="h-4.5 w-4.5 text-amber-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
-                                </svg>
-                                <div class="text-[11px] font-semibold text-amber-800">
-                                    No classes are currently selected as target audience. You can still install the plugin, but usage fee calculations will be ₦0.00 until classes are configured in target settings.
-                                </div>
-                            </div>
-                        @endif
+                    <div class="flex justify-between items-center border-t border-slate-200/40 pt-2">
+                        <span class="font-bold text-slate-400 uppercase tracking-wider text-[10px]">Target Audience</span>
+                        <span class="font-bold text-indigo-700 bg-white px-2.5 py-0.5 rounded-md border border-indigo-100/50">
+                            {{ count($selectedClasses) }} {{ Str::plural('class', count($selectedClasses)) }} ({{ number_format($calculatedStudentCount) }} students)
+                        </span>
                     </div>
                 </div>
 
                 {{-- Cost Breakdowns --}}
                 <div class="space-y-2">
-                    <div class="text-xs font-black text-slate-900 uppercase tracking-wider">2. Financial Cost Breakdown</div>
-                    <div class="bg-gradient-to-br from-indigo-50/40 to-purple-50/40 rounded-2xl p-4 border border-indigo-100/60 space-y-3">
+                    <div class="text-[10px] font-black text-slate-400 uppercase tracking-wider">Financial Breakdown</div>
+                    <div class="bg-gradient-to-br from-indigo-50/30 to-purple-50/30 rounded-2xl p-3.5 border border-indigo-100/40 space-y-2 text-xs">
                         {{-- Setup Fee --}}
-                        <div class="flex justify-between items-center text-xs">
-                            <span class="font-bold text-slate-600">Setup / Install Fee (One-Time Invoice)</span>
-                            <span class="font-extrabold text-slate-900">
+                        <div class="flex justify-between items-center">
+                            <span class="font-semibold text-slate-600">Setup / Install Fee (One-Time)</span>
+                            <span class="font-black text-slate-900">
                                 {{ config('myacademy.currency_symbol','₦') }}{{ number_format($setupFee, 2) }}
                             </span>
                         </div>
 
                         {{-- Usage Fee Per Student --}}
-                        <div class="flex justify-between items-center text-xs border-t border-indigo-100/40 pt-2.5">
-                            <span class="font-bold text-slate-600">License Fee per Student (Termly)</span>
-                            <span class="font-extrabold text-slate-900">
-                                {{ config('myacademy.currency_symbol','₦') }}{{ number_format($usageFeePerStudent, 2) }} / student
+                        <div class="flex justify-between items-center border-t border-indigo-100/20 pt-2">
+                            <span class="font-semibold text-slate-600">License per Student (Termly)</span>
+                            <span class="font-black text-slate-900">
+                                {{ config('myacademy.currency_symbol','₦') }}{{ number_format($usageFeePerStudent, 2) }} / std
                             </span>
                         </div>
 
                         {{-- Total Termly Est --}}
-                        <div class="flex justify-between items-center border-t border-indigo-200 pt-3">
+                        <div class="flex justify-between items-center border-t border-indigo-200/50 pt-2.5">
                             <div>
-                                <div class="text-xs font-black text-indigo-950 uppercase tracking-wider">Total Est. Termly Bill</div>
-                                <div class="text-[9px] font-semibold text-slate-500 mt-0.5">Calculated using selected classes student counts.</div>
+                                <div class="text-xs font-black text-indigo-955 uppercase tracking-wider">Est. Termly Usage Fee</div>
                             </div>
-                            <span class="text-xl font-black text-indigo-700">
+                            <span class="text-base font-black text-indigo-700">
                                 {{ config('myacademy.currency_symbol','₦') }}{{ number_format($estimatedTermlyUsageFee, 2) }}
                             </span>
                         </div>
@@ -475,12 +506,12 @@
                 </div>
 
                 {{-- Action controls --}}
-                <div class="flex justify-end gap-2 pt-2 border-t border-slate-100">
-                    <button wire:click="cancelInstallPreview" class="px-4 py-2.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-600 hover:bg-slate-50 transition">
+                <div class="flex justify-end gap-2 pt-2.5 border-t border-slate-100">
+                    <button wire:click="cancelInstallPreview" class="px-4 py-2 rounded-xl border border-slate-200 text-xs font-bold text-slate-600 hover:bg-slate-50 transition">
                         Cancel
                     </button>
-                    <button wire:click="install" wire:loading.attr="disabled" class="px-5 py-2.5 rounded-xl bg-indigo-600 text-xs font-black text-white hover:bg-indigo-700 transition flex items-center gap-1.5 shadow-lg shadow-indigo-950/30">
-                        <svg wire:loading wire:target="install" class="h-3.5 w-3.5 animate-spin text-white" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                    <button wire:click="install" wire:loading.attr="disabled" class="px-5 py-2 rounded-xl bg-indigo-600 text-xs font-black text-white hover:bg-indigo-700 transition flex items-center gap-1.5 shadow-lg shadow-indigo-950/20">
+                        <svg wire:loading wire:target="install" class="h-3 w-3 animate-spin text-white" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
                         <span wire:loading.remove wire:target="install">Confirm &amp; Install</span>
                         <span wire:loading wire:target="install">Installing...</span>
                     </button>

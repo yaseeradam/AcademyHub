@@ -297,6 +297,10 @@ class ProductDetail extends Component
 
     public function previewInstall(): void
     {
+        if (empty($this->selectedClasses)) {
+            session()->flash('message_error', 'Please select at least one class before installing.');
+            return;
+        }
         $this->showInstallPreviewModal = true;
     }
 
@@ -361,6 +365,27 @@ class ProductDetail extends Component
                 'setup_fee'                => $setupFee,
                 'usage_fee_per_student'    => 0,
                 'total_due'                => $setupFee,
+                'status'                   => 'unpaid',
+            ]);
+        }
+
+        // Automatically create unpaid Termly Usage bill in the ledger if usage fee is configured
+        if ($usageFee > 0 && $this->calculatedStudentCount > 0) {
+            $activeTerm = \App\Models\AcademicTerm::active();
+            $termName = $activeTerm?->name ?? 'First Term';
+            $sessionName = \App\Models\AcademicTerm::activeSessionName() ?? '2026/2027';
+            $totalUsageDue = $usageFee * $this->calculatedStudentCount;
+
+            \App\Models\TenantPluginBill::create([
+                'tenant_id'                => $tenant->id,
+                'marketplace_component_id' => $dbComponent->id,
+                'bill_type'                => 'usage',
+                'term_name'                => $termName,
+                'session_name'             => $sessionName,
+                'student_count'            => $this->calculatedStudentCount,
+                'setup_fee'                => 0,
+                'usage_fee_per_student'    => $usageFee,
+                'total_due'                => $totalUsageDue,
                 'status'                   => 'unpaid',
             ]);
         }

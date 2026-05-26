@@ -53,13 +53,26 @@ class Index extends Component
     {
         $this->validate();
 
+        $user = auth()->user();
+        if ($user->role === 'teacher') {
+            $isAllocated = \App\Models\SubjectAllocation::where('teacher_id', $user->id)
+                ->where('class_id', $this->class_id)
+                ->where('subject_id', $this->subject_id)
+                ->exists();
+            
+            if (!$isAllocated) {
+                $this->dispatch('alert', message: 'You are not allocated to teach this class or subject.', type: 'error');
+                return;
+            }
+        }
+
         $originalName = $this->file->getClientOriginalName();
         $fileSize = $this->formatBytes($this->file->getSize());
         
         // Save file in private/secure disk or public
         $path = $this->file->store('class-notes', 'public');
 
-        ClassNote::create([
+        $note = ClassNote::create([
             'class_id' => $this->class_id,
             'subject_id' => $this->subject_id,
             'user_id' => auth()->id(),
@@ -71,6 +84,22 @@ class Index extends Component
             'file_size' => $fileSize,
             'downloads' => 0,
         ]);
+
+        // Dispatch notifications to all students in the class
+        $subjectName = Subject::find($this->subject_id)?->name ?? 'Course';
+        $students = \App\Models\Student::where('class_id', $this->class_id)
+            ->where('status', 'Active')
+            ->get();
+        
+        foreach ($students as $student) {
+            \App\Models\StudentNotification::send(
+                $student->id,
+                'New E-Learning Resource uploaded!',
+                "A new note titled \"{$this->title}\" has been shared for {$subjectName}.",
+                'e-learning',
+                route('student.e-learning')
+            );
+        }
 
         $this->reset(['title', 'description', 'class_id', 'subject_id', 'file']);
         $this->showCreateModal = false;
@@ -124,6 +153,29 @@ class Index extends Component
     {
         $query = ClassNote::with(['schoolClass', 'subject', 'user']);
 
+        $user = auth()->user();
+        if ($user->role === 'teacher') {
+            // Teacher can only filter by classes and subjects they are allocated to
+            $allocatedClassIds = \App\Models\SubjectAllocation::where('teacher_id', $user->id)->pluck('class_id')->unique();
+            $allocatedSubjectIds = \App\Models\SubjectAllocation::where('teacher_id', $user->id)->pluck('subject_id')->unique();
+
+            $classes = SchoolClass::whereIn('id', $allocatedClassIds)->orderBy('level')->orderBy('name')->get();
+            $subjects = Subject::whereIn('id', $allocatedSubjectIds)->orderBy('name')->get();
+
+            // Restrict notes list to their allocated classes/subjects OR their own uploads
+            $query->where(function($q) use ($user, $allocatedClassIds, $allocatedSubjectIds) {
+                $q->where('user_id', $user->id)
+                  ->orWhere(function($subQ) use ($allocatedClassIds, $allocatedSubjectIds) {
+                      $subQ->whereIn('class_id', $allocatedClassIds)
+                           ->whereIn('subject_id', $allocatedSubjectIds);
+                  });
+            });
+        } else {
+            // Admin can see everything
+            $classes = SchoolClass::orderBy('level')->orderBy('name')->get();
+            $subjects = Subject::orderBy('name')->get();
+        }
+
         if (!empty($this->search)) {
             $query->where(function($q) {
                 $q->where('title', 'like', '%' . $this->search . '%')
@@ -144,10 +196,6 @@ class Index extends Component
         }
 
         $notes = $query->latest()->get();
-
-        // Get filter options
-        $classes = SchoolClass::orderBy('level')->orderBy('name')->get();
-        $subjects = Subject::orderBy('name')->get();
 
         return view('livewire.e-learning.index', [
             'notes' => $notes,
