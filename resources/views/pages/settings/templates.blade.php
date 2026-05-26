@@ -118,6 +118,41 @@
                                 'preview' => route('settings.templates.preview', ['type' => 'report-card', 'template' => 'classic']),
                                 'free' => true,
                             ],
+                            [
+                                'key' => 'aurora',
+                                'title' => 'Aurora',
+                                'desc' => 'Vibrant, neon pink/violet/indigo gradient header cards, rounded elements, clean spacing, and modern progress rating bars.',
+                                'preview' => route('settings.templates.preview', ['type' => 'report-card', 'template' => 'aurora']),
+                                'free' => true,
+                            ],
+                            [
+                                'key' => 'heritage',
+                                'title' => 'Heritage',
+                                'desc' => 'Sophisticated traditional academic layout with royal navy/gold borders, ornate dividers, and refined serif typography.',
+                                'preview' => route('settings.templates.preview', ['type' => 'report-card', 'template' => 'heritage']),
+                                'free' => true,
+                            ],
+                            [
+                                'key' => 'nordic',
+                                'title' => 'Nordic',
+                                'desc' => 'Scandinavian minimalist design using clean slate borders, spacious margins, stark high-contrast typography, and light gray stats panels.',
+                                'preview' => route('settings.templates.preview', ['type' => 'report-card', 'template' => 'nordic']),
+                                'free' => true,
+                            ],
+                            [
+                                'key' => 'vanguard',
+                                'title' => 'Vanguard',
+                                'desc' => 'Futuristic panel-based tech layout with dark graphite aesthetics, cyber cyan/teal accents, and precise monospace data structures.',
+                                'preview' => route('settings.templates.preview', ['type' => 'report-card', 'template' => 'vanguard']),
+                                'free' => true,
+                            ],
+                            [
+                                'key' => 'signature',
+                                'title' => 'Signature',
+                                'desc' => 'Prestigious imperial watermark crest backdrop, elegant crimson/burgundy headings, gold divider styling, and premium script fonts.',
+                                'preview' => route('settings.templates.preview', ['type' => 'report-card', 'template' => 'signature']),
+                                'free' => true,
+                            ],
                         ];
                     @endphp
 
