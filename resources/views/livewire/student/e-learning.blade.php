@@ -1,4 +1,50 @@
-<div class="space-y-6">
+<div class="space-y-6" x-data="{ viewNote: null }">
+
+    {{-- Note Detail Modal --}}
+    <template x-teleport="body">
+        <div x-show="viewNote" x-transition.opacity
+             class="fixed inset-0 z-[999] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4"
+             @click.self="viewNote = null" @keydown.escape.window="viewNote = null"
+             style="display:none">
+            <div x-show="viewNote" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100"
+                 class="w-full max-w-lg rounded-3xl bg-white shadow-2xl border border-slate-100 overflow-hidden">
+                <div class="relative px-6 py-8" style="background-color:#1a2e4a;">
+                    <div class="absolute inset-0" style="background:radial-gradient(ellipse at top left,#1e3a5f 0%,transparent 60%);"></div>
+                    <button @click="viewNote = null" class="absolute top-4 right-4 text-white/60 hover:text-white">
+                        <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
+                    <div class="relative">
+                        <div class="flex flex-wrap gap-1.5 mb-3">
+                            <span class="inline-flex items-center rounded-xl bg-white/10 px-2.5 py-1 text-[10px] font-bold text-blue-200 uppercase tracking-wider" x-text="viewNote?.term"></span>
+                            <span class="inline-flex items-center rounded-xl bg-white/10 px-2.5 py-1 text-[10px] font-bold text-amber-300" x-text="viewNote?.subject"></span>
+                        </div>
+                        <h2 class="text-xl font-bold text-white" x-text="viewNote?.title"></h2>
+                        <p class="mt-1 text-sm" style="color:#93c5fd;" x-text="viewNote?.description || 'No description provided.'"></p>
+                    </div>
+                </div>
+                <div class="p-6 space-y-4">
+                    <div class="flex items-center gap-3 rounded-2xl border border-slate-100 bg-slate-50 p-4">
+                        <div class="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-indigo-50 text-indigo-500 border border-slate-100">
+                            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                        </div>
+                        <div class="min-w-0 flex-1">
+                            <p class="text-sm font-bold text-slate-700 truncate" x-text="viewNote?.fileName"></p>
+                            <p class="text-xs text-slate-400 mt-0.5" x-text="viewNote?.fileSize"></p>
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-between text-xs text-slate-400">
+                        <span>Uploaded by <strong class="text-slate-600" x-text="viewNote?.teacher"></strong></span>
+                        <span x-text="viewNote?.downloads + ' downloads'"></span>
+                    </div>
+                    <button @click="$wire.downloadNote(viewNote.id); viewNote = null"
+                            class="w-full flex items-center justify-center gap-2 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold px-5 py-3 shadow-md transition-colors">
+                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                        Download File
+                    </button>
+                </div>
+            </div>
+        </div>
+    </template>
     {{-- Header Section --}}
     <div class="relative overflow-hidden rounded-2xl shadow-xl" style="background-color: #1a2e4a;">
         <div class="absolute inset-0" style="background: radial-gradient(ellipse at top left, #1e3a5f 0%, transparent 60%);"></div>
@@ -80,7 +126,8 @@
     @else
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             @foreach($notes as $note)
-                <div class="group relative rounded-3xl border border-slate-200/60 bg-white p-6 shadow-sm hover:shadow-md hover:border-indigo-100 transition-all duration-300 flex flex-col justify-between overflow-hidden">
+                <div class="group relative rounded-3xl border border-slate-200/60 bg-white p-6 shadow-sm hover:shadow-md hover:border-indigo-100 transition-all duration-300 flex flex-col justify-between overflow-hidden cursor-pointer"
+                     @click="viewNote = { id: {{ $note->id }}, title: {{ Js::from($note->title) }}, description: {{ Js::from($note->description) }}, term: {{ Js::from($note->term_name) }}, subject: {{ Js::from($note->subject->name ?? '') }}, fileName: {{ Js::from($note->file_name) }}, fileSize: {{ Js::from($note->file_size ?? '') }}, teacher: {{ Js::from($note->user->name ?? 'Teacher') }}, downloads: {{ $note->downloads }} }">
                     {{-- Decorative interactive glow --}}
                     <div class="absolute right-0 top-0 -mr-6 -mt-6 h-20 w-20 rounded-full bg-indigo-500/5 group-hover:scale-[2] transition-transform duration-700"></div>
 
@@ -134,7 +181,7 @@
                             </span>
                         </div>
 
-                        <button type="button" wire:click="downloadNote({{ $note->id }})"
+                        <button type="button" wire:click="downloadNote({{ $note->id }})" @click.stop
                                 class="flex items-center gap-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-[11px] font-bold px-4.5 py-2 shadow-sm transition-colors">
                             <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>

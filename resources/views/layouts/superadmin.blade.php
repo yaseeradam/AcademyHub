@@ -387,17 +387,8 @@
         }
         .sa-btn-ghost:hover { background: #e2e8f0; color: var(--sa-text); }
 
-        .sa-btn-danger {
-            background: #fef2f2;
-            color: #ef4444;
-            border: 1px solid #fecdd3;
-        }
-        .sa-btn-danger:hover {
-            background: #fee2e2;
-            color: #dc2626;
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.1);
-        }
+        .sa-btn-danger { background: #ef4444; color: #ffffff; border: 1px solid #dc2626; }
+        .sa-btn-danger:hover { background: #dc2626; color: #ffffff; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(239,68,68,0.3); }
 
         .sa-btn-icon {
             width: 32px; height: 32px; padding: 0;
@@ -595,6 +586,7 @@
                     {{ auth()->user()->name ?? 'Super Admin' }}
                 </div>
                 <div class="sa-user-role">Super Admin</div>
+            </div>
         </div>
     </aside>
 
@@ -828,3 +820,5 @@
 @stack('scripts')
 </body>
 </html>
+
+

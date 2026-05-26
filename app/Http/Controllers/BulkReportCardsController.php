@@ -61,6 +61,7 @@ class BulkReportCardsController extends Controller
         $safeSession = str_replace('/', '-', $session);
 
         $query = Student::query()
+            ->with(['schoolClass', 'section'])
             ->where('class_id', $classId)
             ->where('status', 'Active');
             

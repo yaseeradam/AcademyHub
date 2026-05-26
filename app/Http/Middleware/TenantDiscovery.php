@@ -22,10 +22,16 @@ class TenantDiscovery
 
         $tenant = null;
 
+        // Check for X-Tenant-Slug header (useful for mobile apps)
+        $slugFromHeader = $request->header('X-Tenant-Slug');
+        if ($slugFromHeader) {
+            $tenant = Tenant::query()->where('slug', $slugFromHeader)->first();
+        }
+
         // The main domain (no tenant context) must never resolve to a tenant.
         // Otherwise superadmin routes become inaccessible if a tenant is accidentally
         // configured with the same domain as APP_URL.
-        if (! $mainDomainHost || $host !== $mainDomainHost) {
+        if (! $tenant && (! $mainDomainHost || $host !== $mainDomainHost)) {
             // 1) Custom domain mapping (exact host match)
             $tenant = Tenant::query()->where('domain', $host)->first();
         }

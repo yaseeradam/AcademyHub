@@ -9,9 +9,11 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Homework;
+use Laravel\Sanctum\HasApiTokens;
 
 class Student extends Model
 {
+    use HasApiTokens;
     use HasFactory;
     use BelongsToTenant;
 

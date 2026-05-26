@@ -10,9 +10,20 @@ use App\Http\Controllers\Api\TimetableController;
 use App\Http\Controllers\Api\SyncController;
 use App\Http\Controllers\Api\TeacherController;
 use App\Http\Controllers\Api\WhatsAppController;
+use App\Http\Controllers\Api\TenantDiscoveryController;
+use App\Http\Controllers\Api\StudentAuthController;
+use App\Http\Controllers\Api\StudentDashboardController;
+use App\Http\Controllers\Api\StudentResultsController;
+use App\Http\Controllers\Api\StudentAttendanceController;
+use App\Http\Controllers\Api\StudentCbtController;
+use App\Http\Controllers\Api\StudentELearningController;
+use App\Http\Controllers\Api\StudentNotificationController;
+use App\Http\Controllers\Api\MediaUploadController;
 
 // Public
 Route::post('/login', [AuthController::class, 'login']);
+Route::post('/student/login', [StudentAuthController::class, 'login']);
+Route::get('/tenant/{slug}', [TenantDiscoveryController::class, 'show']);
 
 // Protected
 Route::middleware('auth:sanctum')->group(function () {
@@ -66,6 +77,25 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Offline batch sync
     Route::post('/sync', [SyncController::class, 'handleSync']);
+
+    // Media upload (teachers/admins/students)
+    Route::post('/media/upload', [MediaUploadController::class, 'upload']);
+
+    // Student portal API group
+    Route::prefix('student')->group(function () {
+        Route::post('/logout',                  [StudentAuthController::class, 'logout']);
+        Route::get('/dashboard',                [StudentDashboardController::class, 'dashboard']);
+        Route::get('/results',                  [StudentResultsController::class, 'results']);
+        Route::get('/attendance',               [StudentAttendanceController::class, 'attendance']);
+        Route::get('/exams',                    [StudentCbtController::class, 'exams']);
+        Route::post('/exams/{exam}/start',      [StudentCbtController::class, 'startExam']);
+        Route::post('/exams/{attempt}/submit',  [StudentCbtController::class, 'submitExam']);
+        Route::get('/notes',                    [StudentELearningController::class, 'notes']);
+        Route::get('/notes/{id}/download',      [StudentELearningController::class, 'download'])->name('api.student.notes.download');
+        Route::get('/notifications',            [StudentNotificationController::class, 'index']);
+        Route::post('/notifications/{id}/read',  [StudentNotificationController::class, 'markAsRead']);
+        Route::post('/notifications/read-all',   [StudentNotificationController::class, 'markAllAsRead']);
+    });
 });
 
 // WhatsApp Bot — authenticated via shared API key

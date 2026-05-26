@@ -14,6 +14,25 @@ use Illuminate\Support\Facades\File;
 
 class ReportCardService
 {
+    protected array $classScoresCache = [];
+    protected array $subjectsCache = [];
+    protected array $studentCountCache = [];
+
+    protected function getClassScores(int $classId, int $term, string $session, Collection $subjectIds): Collection
+    {
+        $cacheKey = "{$classId}-{$term}-{$session}";
+        if (isset($this->classScoresCache[$cacheKey])) {
+            return $this->classScoresCache[$cacheKey];
+        }
+
+        return $this->classScoresCache[$cacheKey] = Score::query()
+            ->where('class_id', $cacheId)
+            ->where('term', $term)
+            ->where('session', $session)
+            ->whereIn('subject_id', $subjectIds)
+            ->get(['subject_id', 'student_id', 'total']);
+    }
+
     /**
      * Build all data needed for the `pdf.report-card` view.
      *
@@ -55,12 +74,7 @@ class ReportCardService
         $psychomotorTraits = $psychomotor ? $psychomotor->traits : [];
 
         // Per-subject class averages and positions
-        $allClassScores = Score::query()
-            ->where('class_id', $student->class_id)
-            ->where('term', $term)
-            ->where('session', $session)
-            ->whereIn('subject_id', $subjectIds)
-            ->get(['subject_id', 'student_id', 'total']);
+        $allClassScores = $this->getClassScores($student->class_id, $term, $session, $subjectIds);
 
         $subjectClassAvgs = $allClassScores
             ->groupBy('subject_id')
@@ -108,10 +122,15 @@ class ReportCardService
 
         [$timesOpened, $timesPresent, $timesAbsent] = $this->attendanceSummary($student, $term, $session);
 
-        $totalStudents = Student::query()
-            ->where('class_id', $student->class_id)
-            ->where('status', 'Active')
-            ->count();
+        if (isset($this->studentCountCache[$student->class_id])) {
+            $totalStudents = $this->studentCountCache[$student->class_id];
+        } else {
+            $totalStudents = Student::query()
+                ->where('class_id', $student->class_id)
+                ->where('status', 'Active')
+                ->count();
+            $this->studentCountCache[$student->class_id] = $totalStudents;
+        }
 
         [$highestAverage, $lowestAverage] = $this->highestLowestAverage($student->class_id, $subjectIds, $term, $session);
 
@@ -238,16 +257,20 @@ class ReportCardService
 
     private function subjectsForClass(int $classId): Collection
     {
+        if (isset($this->subjectsCache[$classId])) {
+            return $this->subjectsCache[$classId];
+        }
+
         $ids = SubjectAllocation::query()
             ->where('class_id', $classId)
             ->pluck('subject_id')
             ->unique();
 
-        if ($ids->isEmpty()) {
-            return Subject::query()->orderBy('name')->get();
-        }
+        $subjects = $ids->isEmpty()
+            ? Subject::query()->orderBy('name')->get()
+            : Subject::query()->whereIn('id', $ids)->orderBy('name')->get();
 
-        return Subject::query()->whereIn('id', $ids)->orderBy('name')->get();
+        return $this->subjectsCache[$classId] = $subjects;
     }
 
     /**
@@ -260,12 +283,7 @@ class ReportCardService
         int $term,
         string $session
     ): array {
-        $scores = Score::query()
-            ->where('class_id', $classId)
-            ->where('term', $term)
-            ->where('session', $session)
-            ->whereIn('subject_id', $subjectIds)
-            ->get(['student_id', 'total']);
+        $scores = $this->getClassScores($classId, $term, $session, $subjectIds);
 
         if ($scores->isEmpty()) {
             return [1, 0.0];
@@ -307,12 +325,7 @@ class ReportCardService
         int $term,
         string $session
     ): array {
-        $scores = Score::query()
-            ->where('class_id', $classId)
-            ->where('term', $term)
-            ->where('session', $session)
-            ->whereIn('subject_id', $subjectIds)
-            ->get(['student_id', 'total']);
+        $scores = $this->getClassScores($classId, $term, $session, $subjectIds);
 
         if ($scores->isEmpty()) {
             return [0.0, 0.0];
