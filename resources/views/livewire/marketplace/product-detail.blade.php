@@ -832,6 +832,81 @@
         </div>
     </div>
 
+    {{-- High-Fidelity Installation Success Modal --}}
+    @if($showSuccessModal)
+        <div class="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/80 backdrop-blur-lg p-4 animate-fadeIn">
+            <div class="w-full max-w-md rounded-3xl bg-white border border-slate-100 p-6 text-slate-800 shadow-2xl space-y-5 animate-scaleUp text-center relative overflow-hidden">
+                <div class="absolute top-0 inset-x-0 h-1.5 bg-gradient-to-r from-emerald-400 to-green-500"></div>
+                
+                {{-- Radiant Success Circle --}}
+                <div class="mx-auto h-16 w-16 rounded-2xl bg-emerald-50 flex items-center justify-center text-emerald-600 shadow-inner relative">
+                    <span class="absolute inset-0 rounded-2xl bg-emerald-400 opacity-20 animate-ping"></span>
+                    <svg class="h-8 w-8 text-emerald-600 relative z-10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                    </svg>
+                </div>
+                
+                <div>
+                    <h3 class="text-xl font-black text-slate-900 tracking-tight">Installation Complete!</h3>
+                    <p class="mt-2 text-sm text-slate-500 font-medium leading-relaxed">{{ $modalMessage }}</p>
+                </div>
+                
+                {{-- Dynamic Ledger & License Costs Card --}}
+                <div class="bg-emerald-50/50 rounded-2xl p-4 border border-emerald-100/50 text-xs text-left space-y-2.5">
+                    <div class="flex items-center justify-between font-bold text-emerald-800">
+                        <span class="flex items-center gap-1.5">
+                            <span class="inline-block h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                            Ledger Billing Active
+                        </span>
+                        <span class="bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded text-[10px]">AUTO-BILLED</span>
+                    </div>
+                    <p class="text-slate-600 leading-relaxed text-[11px]">
+                        The system setup and student usage licenses have been dynamically calculated and added as active debit lines in your school subscription dashboard.
+                    </p>
+                </div>
+
+                <div class="pt-2">
+                    <button wire:click="closeSuccessModal" class="w-full py-3 rounded-xl bg-slate-900 text-xs font-black text-white hover:bg-slate-800 hover:shadow-lg hover:shadow-slate-900/10 active:scale-95 transition-all duration-150">
+                        Continue to Marketplace
+                    </button>
+                </div>
+            </div>
+        </div>
+    @endif
+
+    {{-- High-Fidelity Installation Failure Modal --}}
+    @if($showErrorModal)
+        <div class="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/80 backdrop-blur-lg p-4 animate-fadeIn">
+            <div class="w-full max-w-md rounded-3xl bg-white border border-slate-100 p-6 text-slate-800 shadow-2xl space-y-5 animate-scaleUp text-center relative overflow-hidden">
+                <div class="absolute top-0 inset-x-0 h-1.5 bg-gradient-to-r from-red-400 to-rose-500"></div>
+                
+                {{-- Radiant Warning Circle --}}
+                <div class="mx-auto h-16 w-16 rounded-2xl bg-rose-50 flex items-center justify-center text-rose-600 shadow-inner relative">
+                    <span class="absolute inset-0 rounded-2xl bg-rose-400 opacity-20 animate-ping"></span>
+                    <svg class="h-8 w-8 text-rose-600 relative z-10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                </div>
+                
+                <div>
+                    <h3 class="text-xl font-black text-rose-600 tracking-tight font-sans">Setup Interrupted</h3>
+                    <p class="mt-2 text-sm text-slate-500 font-medium">We encountered a system conflict while initializing the plugin.</p>
+                </div>
+                
+                {{-- Error Details --}}
+                <div class="bg-rose-50/50 rounded-2xl p-4 border border-rose-100/50 text-[11px] text-left max-h-36 overflow-y-auto font-mono text-rose-800 break-words leading-relaxed whitespace-pre-wrap">
+                    {{ $modalMessage }}
+                </div>
+
+                <div class="pt-2">
+                    <button wire:click="closeErrorModal" class="w-full py-3 rounded-xl bg-slate-900 text-xs font-black text-white hover:bg-slate-800 hover:shadow-lg active:scale-95 transition-all duration-150">
+                        Dismiss &amp; Retry
+                    </button>
+                </div>
+            </div>
+        </div>
+    @endif
+
     <style>
         .detail-svg-container svg {
             width: 3rem !important; /* h-12 (48px) */
@@ -839,6 +914,20 @@
             max-width: 100% !important;
             max-height: 100% !important;
             display: inline-block !important;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @keyframes scaleUp {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        .animate-fadeIn {
+            animation: fadeIn 0.2s ease-out forwards;
+        }
+        .animate-scaleUp {
+            animation: scaleUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
         }
     </style>
 </div>

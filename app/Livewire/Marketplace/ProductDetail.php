@@ -35,6 +35,11 @@ class ProductDetail extends Component
     // Install Preview Modal
     public bool $showInstallPreviewModal = false;
 
+    // Install Success & Error Modals
+    public bool $showSuccessModal = false;
+    public bool $showErrorModal = false;
+    public string $modalMessage = '';
+
     // Super Admin Control Properties
     public float $adminPrice = 0.00;
     public float $adminSetupFee = 0.00;
@@ -321,12 +326,28 @@ class ProductDetail extends Component
         $dbComponent = $this->getDbComponent();
         abort_unless($dbComponent, 404);
 
-        $setupFee = (float) $dbComponent->setup_fee;
-        $usageFee = (float) $dbComponent->usage_fee_per_student;
+        try {
+            \Illuminate\Support\Facades\DB::beginTransaction();
 
-        // Soft install or sync
-        $tenant->marketplaceComponents()->syncWithoutDetaching([
-            $dbComponent->id => [
+            $setupFee = (float) $dbComponent->setup_fee;
+            $usageFee = (float) $dbComponent->usage_fee_per_student;
+
+            // Soft install or sync
+            $tenant->marketplaceComponents()->syncWithoutDetaching([
+                $dbComponent->id => [
+                    'installed_at'             => now(),
+                    'uninstalled_at'           => null,
+                    'status'                   => 'active',
+                    'setup_fee'                => $setupFee,
+                    'usage_fee_per_student'    => $usageFee,
+                    'price_paid'               => $setupFee,
+                    'student_count_at_install' => $this->calculatedStudentCount,
+                    'allowed_class_ids'        => $this->selectedClasses,
+                ]
+            ]);
+
+            // If it was already in pivot, update existing pivot fields directly to make sure uninstalled_at is reset
+            $tenant->marketplaceComponents()->updateExistingPivot($dbComponent->id, [
                 'installed_at'             => now(),
                 'uninstalled_at'           => null,
                 'status'                   => 'active',
@@ -335,77 +356,82 @@ class ProductDetail extends Component
                 'price_paid'               => $setupFee,
                 'student_count_at_install' => $this->calculatedStudentCount,
                 'allowed_class_ids'        => $this->selectedClasses,
-            ]
-        ]);
-
-        // If it was already in pivot, update existing pivot fields directly to make sure uninstalled_at is reset
-        $tenant->marketplaceComponents()->updateExistingPivot($dbComponent->id, [
-            'installed_at'             => now(),
-            'uninstalled_at'           => null,
-            'status'                   => 'active',
-            'setup_fee'                => $setupFee,
-            'usage_fee_per_student'    => $usageFee,
-            'price_paid'               => $setupFee,
-            'student_count_at_install' => $this->calculatedStudentCount,
-            'allowed_class_ids'        => $this->selectedClasses,
-        ]);
-
-        // Increment install count on component
-        $dbComponent->increment('installs');
-
-        // Automatically create unpaid Setup Fee bill in the ledger
-        if ($setupFee > 0) {
-            \App\Models\TenantPluginBill::create([
-                'tenant_id'                => $tenant->id,
-                'marketplace_component_id' => $dbComponent->id,
-                'bill_type'                => 'setup',
-                'term_name'                => null,
-                'session_name'             => null,
-                'student_count'            => null,
-                'setup_fee'                => $setupFee,
-                'usage_fee_per_student'    => 0,
-                'total_due'                => $setupFee,
-                'status'                   => 'unpaid',
             ]);
-        }
 
-        // Automatically create unpaid Termly Usage bill in the ledger if usage fee is configured
-        if ($usageFee > 0 && $this->calculatedStudentCount > 0) {
-            $activeTerm = \App\Models\AcademicTerm::active();
-            $termName = $activeTerm?->name ?? 'First Term';
-            $sessionName = \App\Models\AcademicTerm::activeSessionName() ?? '2026/2027';
-            $totalUsageDue = $usageFee * $this->calculatedStudentCount;
+            // Increment install count on component
+            $dbComponent->increment('installs');
 
-            \App\Models\TenantPluginBill::create([
-                'tenant_id'                => $tenant->id,
-                'marketplace_component_id' => $dbComponent->id,
-                'bill_type'                => 'usage',
-                'term_name'                => $termName,
-                'session_name'             => $sessionName,
-                'student_count'            => $this->calculatedStudentCount,
-                'setup_fee'                => 0,
-                'usage_fee_per_student'    => $usageFee,
-                'total_due'                => $totalUsageDue,
-                'status'                   => 'unpaid',
+            // Automatically create unpaid Setup Fee bill in the ledger
+            if ($setupFee > 0) {
+                \App\Models\TenantPluginBill::create([
+                    'tenant_id'                => $tenant->id,
+                    'marketplace_component_id' => $dbComponent->id,
+                    'bill_type'                => 'setup',
+                    'term_name'                => null,
+                    'session_name'             => null,
+                    'student_count'            => null,
+                    'setup_fee'                => $setupFee,
+                    'usage_fee_per_student'    => 0,
+                    'total_due'                => $setupFee,
+                    'status'                   => 'unpaid',
+                ]);
+            }
+
+            // Automatically create unpaid Termly Usage bill in the ledger if usage fee is configured
+            if ($usageFee > 0 && $this->calculatedStudentCount > 0) {
+                $activeTerm = \App\Models\AcademicTerm::active();
+                $termName = $activeTerm?->name ?? 'First Term';
+                $sessionName = \App\Models\AcademicTerm::activeSessionName() ?? '2026/2027';
+                $totalUsageDue = $usageFee * $this->calculatedStudentCount;
+
+                \App\Models\TenantPluginBill::create([
+                    'tenant_id'                => $tenant->id,
+                    'marketplace_component_id' => $dbComponent->id,
+                    'bill_type'                => 'usage',
+                    'term_name'                => $termName,
+                    'session_name'             => $sessionName,
+                    'student_count'            => $this->calculatedStudentCount,
+                    'setup_fee'                => 0,
+                    'usage_fee_per_student'    => $usageFee,
+                    'total_due'                => $totalUsageDue,
+                    'status'                   => 'unpaid',
+                ]);
+            }
+
+            // Audit log
+            \App\Models\AuditLog::create([
+                'user_id' => auth()->id(),
+                'action'  => 'plugin_installed',
+                'model'   => 'MarketplaceComponent',
+                'model_id'=> $dbComponent->id,
+                'changes' => json_encode([
+                    'slug'              => $this->product,
+                    'allowed_class_ids' => $this->selectedClasses,
+                    'setup_fee'         => $setupFee,
+                    'usage_fee'         => $usageFee,
+                ]),
             ]);
+
+            \Illuminate\Support\Facades\DB::commit();
+
+            $this->showSuccessModal = true;
+            $this->modalMessage = "The plugin '{$dbComponent->name}' has been successfully installed and activated for your selected classes!";
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\DB::rollBack();
+            $this->showErrorModal = true;
+            $this->modalMessage = $e->getMessage();
         }
+    }
 
-        // Audit log
-        \App\Models\AuditLog::create([
-            'user_id' => auth()->id(),
-            'action'  => 'plugin_installed',
-            'model'   => 'MarketplaceComponent',
-            'model_id'=> $dbComponent->id,
-            'changes' => json_encode([
-                'slug'              => $this->product,
-                'allowed_class_ids' => $this->selectedClasses,
-                'setup_fee'         => $setupFee,
-                'usage_fee'         => $usageFee,
-            ]),
-        ]);
-
-        session()->flash('message', 'Plugin installed successfully!');
+    public function closeSuccessModal(): void
+    {
+        $this->showSuccessModal = false;
         $this->redirect(route('marketplace'), navigate: false);
+    }
+
+    public function closeErrorModal(): void
+    {
+        $this->showErrorModal = false;
     }
 
     public function updateClasses(): void

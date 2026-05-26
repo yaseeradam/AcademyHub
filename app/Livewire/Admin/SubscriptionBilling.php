@@ -36,12 +36,45 @@ class SubscriptionBilling extends Component
         return $this->studentCount * 1000;
     }
 
+    public function getActivePluginsProperty()
+    {
+        $tenant = auth()->user()?->tenant;
+        if (!$tenant) {
+            return collect();
+        }
+        return $tenant->activeMarketplaceComponents()->get();
+    }
+
+    public function getPluginYearlyCost($plugin)
+    {
+        // Get allowed classes from pivot
+        $rawClasses = $plugin->pivot->allowed_class_ids ?? [];
+        $classes = is_string($rawClasses)
+            ? (json_decode($rawClasses, true) ?: [])
+            : (is_array($rawClasses) ? $rawClasses : []);
+
+        // Calculate student count for these classes
+        if (!empty($classes)) {
+            $studentCount = Student::whereIn('class_id', $classes)
+                ->where('status', 'active')
+                ->count();
+        } else {
+            // Fallback to studentCount at install or total if empty
+            $studentCount = $plugin->pivot->student_count_at_install ?? 0;
+        }
+
+        $usageFee = (float) ($plugin->pivot->usage_fee_per_student ?? $plugin->usage_fee_per_student ?? 0);
+        
+        // Termly usage fee * 3 terms
+        return $usageFee * $studentCount * 3;
+    }
+
     public function getAddonsCostProperty()
     {
         $cost = 0;
-        if ($this->whatsapp) $cost += $this->studentCount * 300;
-        if ($this->cbt) $cost += $this->studentCount * 200;
-        if ($this->parent_app) $cost += $this->studentCount * 150;
+        foreach ($this->activePlugins as $plugin) {
+            $cost += $this->getPluginYearlyCost($plugin);
+        }
         return $cost;
     }
 

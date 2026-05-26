@@ -349,15 +349,14 @@
             </div>
         </div>
     @endif
-</div>
 
-{{-- Tailwind Animations --}}
-<style>
-    @keyframes fadeIn {
-        from { opacity: 0; }
-        to { opacity: 1; }
-    }
-    .animate-fade-in {
-        animation: fadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-    }
-</style>
+    <style>
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        .animate-fade-in {
+            animation: fadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+    </style>
+</div>
