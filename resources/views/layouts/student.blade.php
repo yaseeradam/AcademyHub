@@ -9,19 +9,15 @@
     @livewireStyles
     <style>
         body { font-family: 'Inter', 'Space Grotesk', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif; }
-        .sidebar-scroll::-webkit-scrollbar { width:3px; }
-        .sidebar-scroll::-webkit-scrollbar-track { background:transparent; }
-        .sidebar-scroll::-webkit-scrollbar-thumb { background:#334155; border-radius:99px; }
-        /* Fixed sidebar layout */
-        #student-sidebar { position: fixed; top: 0; left: 0; height: 100vh; z-index: 40; }
-        #student-main   { margin-left: 220px; }
-        @media (max-width: 1023px) {
-            #student-sidebar { display: none !important; }
-            #student-main   { margin-left: 0; }
-        }
+        .nav-icon-box { width:36px; height:36px; border-radius:10px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+        .sidebar-scroll::-webkit-scrollbar { width:6px; }
+        .sidebar-scroll::-webkit-scrollbar-track { background:rgba(148, 163, 184, 0.1); border-radius:99px; }
+        .sidebar-scroll::-webkit-scrollbar-thumb { background:#cbd5e1; border-radius:99px; }
+        .sidebar-scroll::-webkit-scrollbar-thumb:hover { background:#94a3b8; }
+        .sidebar-scroll { scrollbar-width: thin; scrollbar-color: #cbd5e1 rgba(148, 163, 184, 0.1); }
     </style>
 </head>
-<body class="h-full bg-slate-100 text-slate-900 antialiased">
+<body class="h-full bg-[#f5f6fa] text-slate-900">
 
 @php
     $schoolLogo       = config('myacademy.school_logo');
@@ -53,66 +49,88 @@
     }
 @endphp
 
-<div id="app" x-data="{ mobileSidebarOpen: false }">
+<div id="app" class="flex h-screen overflow-hidden" 
+     x-data="{ 
+        sidebarCollapsed: localStorage.getItem('sidebarCollapsed') === 'true',
+        mobileSidebarOpen: false
+     }" 
+     x-init="$watch('sidebarCollapsed', val => localStorage.setItem('sidebarCollapsed', val))">
 
     {{-- Mobile overlay --}}
     <div x-show="mobileSidebarOpen"
-         x-transition:enter="transition ease-out duration-200"
+         x-transition:enter="transition ease-out duration-300"
          x-transition:enter-start="opacity-0"
          x-transition:enter-end="opacity-100"
-         x-transition:leave="transition ease-in duration-150"
+         x-transition:leave="transition ease-in duration-200"
          x-transition:leave-start="opacity-100"
          x-transition:leave-end="opacity-0"
          @click="mobileSidebarOpen = false"
-         class="fixed inset-0 z-50 bg-black/50 lg:hidden" style="display:none;"></div>
+         class="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm lg:hidden" style="display:none;"></div>
 
     {{-- Mobile Sidebar (drawer) --}}
-    <aside x-show="mobileSidebarOpen"
-           x-transition:enter="transition ease-out duration-250 transform"
+    <aside id="mobileSidebar"
+           x-show="mobileSidebarOpen"
+           x-transition:enter="transition ease-out duration-300 transform"
            x-transition:enter-start="-translate-x-full"
            x-transition:enter-end="translate-x-0"
            x-transition:leave="transition ease-in duration-200 transform"
            x-transition:leave-start="translate-x-0"
            x-transition:leave-end="-translate-x-full"
-           class="fixed inset-y-0 left-0 z-[60] flex w-[220px] flex-col bg-slate-900 lg:hidden shadow-2xl"
+           class="fixed inset-y-0 left-0 z-50 flex w-72 flex-col bg-[#f5f6fa] lg:hidden shadow-2xl"
            style="display:none;">
-        @include('layouts.partials.student-sidebar-inner')
+        <div class="flex items-center justify-end px-4 pt-4">
+            <button @click="mobileSidebarOpen = false"
+                    class="rounded-xl bg-white p-2 text-slate-400 shadow-sm hover:text-slate-600">
+                <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            </button>
+        </div>
+        @include('layouts.partials.student-sidebar-inner', ['mobile' => true])
     </aside>
 
     {{-- Desktop Fixed Sidebar --}}
-    <aside id="student-sidebar" class="hidden lg:flex w-[220px] flex-col bg-slate-900 shadow-xl">
-        @include('layouts.partials.student-sidebar-inner')
+    <aside x-bind:class="sidebarCollapsed ? 'w-20' : 'w-72'" 
+           class="hidden flex-shrink-0 flex-col bg-[#f5f6fa] lg:flex transition-[width] duration-300 ease-in-out border-r border-slate-200/50">
+        @include('layouts.partials.student-sidebar-inner', ['mobile' => false])
     </aside>
 
     {{-- Main Area --}}
-    <div id="student-main" class="flex min-h-screen flex-col">
+    <div class="flex flex-1 min-w-0 flex-col">
 
         {{-- Top Header --}}
-        <header class="sticky top-0 z-30 flex h-14 items-center justify-between gap-3 border-b border-slate-200 bg-white px-4 shadow-sm">
+        <header class="sticky top-0 z-30 flex h-[72px] items-center justify-between gap-4 border-b border-slate-200/60 bg-white px-4 sm:px-6 shadow-sm">
 
             {{-- Left: hamburger + page label --}}
-            <div class="flex items-center gap-3 min-w-0">
+            <div class="flex items-center gap-3 overflow-hidden">
                 <button @click="mobileSidebarOpen = true"
-                        class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-50 lg:hidden">
-                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl border border-slate-200 text-slate-500 hover:bg-slate-50 lg:hidden transition-colors">
+                    <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/>
                     </svg>
                 </button>
-                <div class="min-w-0">
-                    <p class="truncate text-[10px] font-medium text-slate-400">{{ now()->format('l, F j, Y') }}</p>
+                <button @click="sidebarCollapsed = !sidebarCollapsed" title="Toggle Menu"
+                        class="hidden h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl border border-slate-200 text-slate-500 hover:bg-slate-50 lg:flex transition-colors">
+                    <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/>
+                    </svg>
+                </button>
+                <div class="min-w-0 overflow-hidden text-left">
+                    <h1 class="truncate text-base font-extrabold tracking-tight text-slate-900 sm:text-lg">{{ $schoolName }}</h1>
+                    <p class="truncate text-[10px] font-medium text-slate-400 sm:text-xs">{{ now()->format('l, F j, Y') }}</p>
                 </div>
             </div>
 
             {{-- Right: bell + student chip + logout --}}
-            <div class="flex items-center gap-2">
-                <div class="relative flex h-8 w-8 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500 hover:bg-slate-50">
+            <div class="flex items-center gap-3">
+                <div class="relative flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500 hover:bg-slate-50 transition-colors">
                     <livewire:student.notification-bell />
                 </div>
-                <div class="flex items-center gap-2 rounded-full border border-slate-200 bg-white py-0.5 pl-0.5 pr-3 shadow-sm">
-                    <div class="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-slate-800 text-white">
-                        <span class="text-xs font-bold leading-none">{{ $studentInitial }}</span>
+                <div class="flex items-center gap-1 sm:gap-2.5 rounded-full border border-slate-200 bg-white p-1 sm:py-1 sm:pl-1 sm:pr-4 shadow-sm hover:shadow-md transition-all">
+                    <div class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-green-600 text-white shadow-sm font-extrabold">
+                        <span class="text-sm font-bold leading-none">{{ $studentInitial }}</span>
                     </div>
-                    <div class="hidden leading-tight sm:block">
+                    <div class="hidden leading-tight sm:block text-left">
                         <div class="text-xs font-bold text-slate-800">{{ $studentName }}</div>
                         <div class="text-[10px] font-semibold text-slate-400">{{ $studentAdmission }}</div>
                     </div>
@@ -120,7 +138,7 @@
                 <form method="POST" action="{{ route('student.logout') }}">
                     @csrf
                     <button type="submit"
-                            class="flex items-center gap-1.5 rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-bold text-white hover:bg-slate-700 transition-all">
+                            class="flex items-center gap-1.5 rounded-lg bg-slate-900 px-3.5 py-2 text-xs font-bold text-white hover:bg-slate-700 transition-all shadow-sm">
                         <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
                         </svg>
@@ -131,7 +149,7 @@
         </header>
 
         {{-- Page content --}}
-        <main class="flex-1 px-4 py-4 sm:px-6 sm:py-5">
+        <main class="flex-1 overflow-y-auto px-4 py-4 sm:px-6 sm:py-5 min-h-0">
             @if(session('success'))
                 <div class="mb-4 flex items-center gap-3 rounded-xl border border-green-200 bg-green-50 px-4 py-3">
                     <svg class="h-4 w-4 flex-shrink-0 text-green-500" fill="currentColor" viewBox="0 0 20 20">
