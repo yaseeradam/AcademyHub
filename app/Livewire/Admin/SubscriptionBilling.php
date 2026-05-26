@@ -21,6 +21,14 @@ class SubscriptionBilling extends Component
     public function mount()
     {
         $this->studentCount = Student::count();
+
+        $tenant = auth()->user()?->tenant;
+        if ($tenant) {
+            $activeSlugs = $tenant->activeMarketplaceComponents()->pluck('slug')->toArray();
+            $this->whatsapp = in_array('whatsapp-bot', $activeSlugs, true);
+            $this->cbt = in_array('cbt', $activeSlugs, true);
+            $this->parent_app = in_array('parent-portal', $activeSlugs, true);
+        }
     }
 
     public function getCoreCostProperty()
