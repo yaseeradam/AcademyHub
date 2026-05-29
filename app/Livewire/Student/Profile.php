@@ -61,16 +61,27 @@ class Profile extends Component
             'new_password'              => ['required', 'min:6', 'confirmed'],
         ]);
 
-        // Student password is firstname + last4digits of admission number
-        $expected = strtolower($this->student->first_name) . substr($this->student->admission_number, -4);
+        $passwordValid = false;
+        if ($this->student->password) {
+            $passwordValid = Hash::check($this->current_password, $this->student->password);
+        }
 
-        if (strtolower($this->current_password) !== $expected && ! Hash::check($this->current_password, $this->student->password ?? '')) {
+        // Fallback for default unhashed comparison
+        if (!$passwordValid) {
+            $expected = strtolower($this->student->first_name) . substr($this->student->admission_number, -4);
+            $passwordValid = hash_equals($expected, $this->current_password);
+        }
+
+        if (!$passwordValid) {
             $this->addError('current_password', 'Current password is incorrect.');
             return;
         }
 
         $this->student->password = $this->new_password;
         $this->student->save();
+
+        // Clear default password warning
+        session()->forget('student_must_reset_password');
 
         $this->reset('current_password', 'new_password', 'new_password_confirmation');
         session()->flash('password_success', 'Password updated successfully.');

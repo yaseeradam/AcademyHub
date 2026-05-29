@@ -18,6 +18,7 @@ class ScoreObserver
         $student = $score->student;
         if ($student) {
             \App\Support\StudentPerformanceService::clearCache($student->id);
+            \App\Support\StudentPerformanceService::clearReportCardCache($student);
         }
 
         $subject = $score->subject;
@@ -53,6 +54,10 @@ class ScoreObserver
     {
         if ($score->student_id) {
             \App\Support\StudentPerformanceService::clearCache($score->student_id);
+            $student = $score->student;
+            if ($student) {
+                \App\Support\StudentPerformanceService::clearReportCardCache($student);
+            }
         }
     }
 }

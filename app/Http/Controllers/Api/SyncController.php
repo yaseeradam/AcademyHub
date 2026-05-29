@@ -72,6 +72,15 @@ class SyncController extends Controller
         );
 
         foreach ($payload['marks'] ?? [] as $mark) {
+            $existing = AttendanceMark::where(['sheet_id' => $sheet->id, 'student_id' => $mark['student_id']])->first();
+            
+            if ($existing && isset($mark['last_known_updated_at'])) {
+                $clientTime = \Carbon\Carbon::parse($mark['last_known_updated_at']);
+                if ($existing->updated_at->gt($clientTime->addSeconds(1))) { // 1 sec tolerance
+                    throw new \Exception("Attendance update conflict for student ID {$mark['student_id']}. Server has a newer record.");
+                }
+            }
+
             AttendanceMark::updateOrCreate(
                 ['sheet_id' => $sheet->id, 'student_id' => $mark['student_id']],
                 ['status' => $mark['status'], 'note' => $mark['note'] ?? null]
@@ -83,6 +92,21 @@ class SyncController extends Controller
     {
         foreach ($payload['scores'] ?? [] as $s) {
             abort_unless($this->teacherOwnsClass($user, $s['class_id']), 403);
+
+            $existing = Score::where([
+                'student_id' => $s['student_id'],
+                'subject_id' => $s['subject_id'],
+                'class_id'   => $s['class_id'],
+                'term'       => $s['term'],
+                'session'    => $s['session'],
+            ])->first();
+
+            if ($existing && isset($s['last_known_updated_at'])) {
+                $clientTime = \Carbon\Carbon::parse($s['last_known_updated_at']);
+                if ($existing->updated_at->gt($clientTime->addSeconds(1))) {
+                    throw new \Exception("Score update conflict for student ID {$s['student_id']}. Server has a newer record.");
+                }
+            }
 
             Score::updateOrCreate(
                 [

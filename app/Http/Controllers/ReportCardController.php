@@ -52,6 +52,24 @@ class ReportCardController extends Controller
 
         $student->load(['schoolClass', 'section']);
 
+        $sessionSlug = str_replace('/', '-', $session);
+        $storageDir = storage_path("app/public/report-cards/{$sessionSlug}/T{$term}");
+        $filename = 'report-card-' . $student->admission_number . '-' . $sessionSlug . '-T' . $term . '.pdf';
+        $fullPath = "{$storageDir}/{$filename}";
+
+        if (file_exists($fullPath)) {
+            Audit::log('results.report_card_downloaded_from_cache', $student, [
+                'term' => $term,
+                'session' => $session,
+            ]);
+
+            return response()->file($fullPath, [
+                'Content-Type' => 'application/pdf',
+                'Content-Disposition' => "attachment; filename=\"{$filename}\"",
+                'Cache-Control' => 'no-cache, no-store, must-revalidate',
+            ]);
+        }
+
         $data = app(ReportCardService::class)->build($student, $term, $session);
 
         $template = (string) config('myacademy.report_card_template', 'compact');
@@ -72,14 +90,18 @@ class ReportCardController extends Controller
             ...$data,
         ])->setPaper('a4');
 
-        $filename = 'report-card-' . $student->admission_number . '-' . $session . '-T' . $term . '.pdf';
+        $output = $pdf->output();
+
+        // Write the PDF cache file for subsequent millisecond serving
+        \Illuminate\Support\Facades\File::ensureDirectoryExists($storageDir);
+        @file_put_contents($fullPath, $output);
 
         Audit::log('results.report_card_downloaded', $student, [
             'term' => $term,
             'session' => $session,
         ]);
 
-        return response($pdf->output(), 200, [
+        return response($output, 200, [
             'Content-Type' => 'application/pdf',
             'Content-Disposition' => "attachment; filename=\"{$filename}\"",
             'Cache-Control' => 'no-cache, no-store, must-revalidate',

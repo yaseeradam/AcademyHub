@@ -354,4 +354,30 @@ class StudentPerformanceService
         }
         return $session;
     }
+
+    /**
+     * Delete any cached report card PDFs for a specific student when grades change.
+     */
+    public static function clearReportCardCache(Student $student): void
+    {
+        $baseDir = storage_path("app/public/report-cards");
+        if (!is_dir($baseDir)) {
+            return;
+        }
+
+        try {
+            $files = new \RecursiveIteratorIterator(
+                new \RecursiveDirectoryIterator($baseDir),
+                \RecursiveIteratorIterator::LEAVES_ONLY
+            );
+
+            foreach ($files as $file) {
+                if ($file->isFile() && str_contains($file->getFilename(), 'report-card-' . $student->admission_number)) {
+                    @unlink($file->getPathname());
+                }
+            }
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::warning("Could not clear PDF cache: " . $e->getMessage());
+        }
+    }
 }

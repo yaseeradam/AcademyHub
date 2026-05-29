@@ -221,6 +221,23 @@ class StudentCbtController extends Controller
             ]);
         }
 
+        // Hard server-side time limit check (duration_minutes + 2 minutes network grace time)
+        $duration = (int) $attempt->exam->duration_minutes;
+        $maxTime = $attempt->started_at->copy()->addMinutes($duration)->addSeconds(120);
+
+        if (now()->gt($maxTime)) {
+            $attempt->forceFill([
+                'submitted_at' => $maxTime,
+            ])->save();
+
+            return response()->json([
+                'message' => 'This exam session has expired and was automatically submitted.',
+                'score' => $attempt->exam->show_score ? $attempt->score : null,
+                'max_score' => $attempt->exam->show_score ? $attempt->max_score : null,
+                'percent' => $attempt->exam->show_score ? $attempt->percent : null,
+            ], 403);
+        }
+
         $request->validate([
             'answers' => 'nullable|array', // question_id => option_id
             'theory_answers' => 'nullable|array', // question_id => text

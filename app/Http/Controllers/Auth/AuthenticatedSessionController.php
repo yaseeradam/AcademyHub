@@ -283,6 +283,13 @@ class AuthenticatedSessionController extends Controller
                 'login_type'        => 'student',
             ]);
 
+            // Check if student is using the default password
+            $admissionSuffix = substr($student->admission_number, -4);
+            $defaultPassword = strtolower($student->first_name) . $admissionSuffix;
+            if (Hash::check($defaultPassword, $student->password)) {
+                session(['student_must_reset_password' => true]);
+            }
+
             // Regenerate session ID to prevent session fixation attacks.
             $request->session()->regenerate();
 
