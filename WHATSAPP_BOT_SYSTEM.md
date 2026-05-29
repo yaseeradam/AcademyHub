@@ -1,8 +1,8 @@
-# MyAcademy WhatsApp Bot System
+# AcademyHub HubGenie System
 
 ## 📋 Overview
 
-The MyAcademy WhatsApp Bot is a comprehensive automated messaging system that allows parents to receive real-time notifications about their children's school activities and interact with the school through WhatsApp. This system is included with your MyAcademy subscription.
+The AcademyHub HubGenie is a comprehensive automated messaging system that allows parents to receive real-time notifications about their children's school activities and interact with the school through WhatsApp. This system is included with your AcademyHub subscription.
 
 ## 🎯 Key Features
 
@@ -46,7 +46,7 @@ The MyAcademy WhatsApp Bot is a comprehensive automated messaging system that al
 
 ## 💰 Cost Analysis
 
-### MyAcademy WhatsApp Bot (Included)
+### AcademyHub HubGenie (Included)
 - **Setup Cost**: Included in subscription
 - **Monthly Cost**: Included in subscription
 - **Per Message**: ₦0
@@ -60,7 +60,7 @@ The MyAcademy WhatsApp Bot is a comprehensive automated messaging system that al
 **Example Monthly Savings**:
 - 100 parents × 30 messages = 3,000 messages
 - Twilio cost: ₦210,000/month
-- MyAcademy WhatsApp Bot: Included
+- AcademyHub HubGenie: Included
 - **Savings: ₦210,000/month**
 
 ## 🛠️ Technical Stack
@@ -90,7 +90,7 @@ The MyAcademy WhatsApp Bot is a comprehensive automated messaging system that al
 ### Registration Flow
 ```
 Parent: Hi
-Bot: 👋 Welcome to MyAcademy Bot!
+Bot: 👋 Welcome to HubGenie!
      To register: register parent@email.com STU20240001
 
 Parent: register john@email.com STU20240001
@@ -125,11 +125,11 @@ Bot: 📊 Latest Results
 Bot: ❌ Attendance Alert
      John Doe is ABSENT today
      📅 January 15, 2024
-     🏫 MyAcademy School
+     🏫 AcademyHub School
 
 Bot: 📊 Report Card Ready!
      John Doe's results are out!
-     🔗 Download: https://myacademy.com/report/123
+     🔗 Download: https://academyhub.com/report/123
 ```
 
 ## 🔧 Implementation Components
@@ -152,7 +152,7 @@ Route::prefix('api/whatsapp')->group(function () {
 const { Client, LocalAuth } = require('whatsapp-web.js');
 const cron = require('node-cron');
 
-class MyAcademyBot {
+class HubGenie {
     constructor() {
         this.client = new Client({
             authStrategy: new LocalAuth()
@@ -196,11 +196,11 @@ CREATE TABLE whatsapp_logs (
 ## 🚀 Deployment Strategy
 
 ### Managed Deployment
-MyAcademy handles all deployment and infrastructure management as part of the subscription service.
+AcademyHub handles all deployment and infrastructure management as part of the subscription service.
 
-### WhatsApp Bot Setup
+### HubGenie Setup
 1. Provide dedicated WhatsApp business number
-2. MyAcademy team configures bot service
+2. AcademyHub team configures HubGenie service
 3. Test with school admin WhatsApp number
 4. Verify basic commands (attendance, results)
 
@@ -281,15 +281,15 @@ MyAcademy handles all deployment and infrastructure management as part of the su
 ## 📞 Support Structure
 
 ### Technical Support
-- **Level 1**: MyAcademy support team (24/7)
+- **Level 1**: AcademyHub support team (24/7)
 - **Level 2**: School IT staff training
 - **Level 3**: Infrastructure team
 - **Emergency**: Dedicated hotline
 
 ### Parent Support
-- **Registration Help**: MyAcademy support + School admin
+- **Registration Help**: AcademyHub support + School admin
 - **Usage Training**: Online tutorials & parent orientation
-- **Technical Issues**: MyAcademy support hotline
+- **Technical Issues**: AcademyHub support hotline
 - **Feedback**: In-app feedback system
 
 ## 🎯 Future Enhancements
@@ -315,11 +315,11 @@ MyAcademy handles all deployment and infrastructure management as part of the su
 ## 📋 Implementation Checklist
 
 ### Prerequisites
-- [ ] MyAcademy subscription active
+- [ ] AcademyHub subscription active
 - [ ] Dedicated WhatsApp business number
 - [ ] School admin contact for coordination
 
-### Setup Phase (Managed by MyAcademy)
+### Setup Phase (Managed by AcademyHub)
 - [ ] Bot service configuration
 - [ ] API endpoint integration
 - [ ] Parent registration system

@@ -3,7 +3,11 @@
 
 const axios = require('axios');
 
-const API_URL = 'http://127.0.0.1:8000/api/whatsapp';
+// Set up Axios default headers for Multi-Tenant discovery and API Key authentication
+axios.defaults.headers.common['X-WhatsApp-Api-Key'] = 'dev-local-whatsapp-key-change-in-production';
+axios.defaults.headers.common['X-Tenant-Slug'] = 'demo';
+
+const API_URL = 'http://myacademy-laravel.test/api/whatsapp';
 const TEST_PHONE = '2348012345678'; // Test phone number
 
 async function testBotAPI() {

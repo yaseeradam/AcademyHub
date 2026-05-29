@@ -22,7 +22,7 @@ class VerifyWhatsAppApiKey
             abort(503, 'WhatsApp API key is not configured on this server.');
         }
 
-        $provided = $request->header('X-WhatsApp-Api-Key');
+        $provided = $request->header('X-WhatsApp-Api-Key') ?: $request->query('key');
 
         if (! $provided || ! hash_equals($expected, $provided)) {
             return response()->json([

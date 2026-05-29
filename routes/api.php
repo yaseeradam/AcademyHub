@@ -105,12 +105,15 @@ Route::prefix('whatsapp')
         Route::get('user/{phone}',          [WhatsAppController::class, 'getUser']);
         Route::get('attendance/{parentId}', [WhatsAppController::class, 'getAttendance']);
         Route::get('results/{parentId}',    [WhatsAppController::class, 'getResults']);
+        Route::get('report-card/{studentId}', [WhatsAppController::class, 'getReportCardPDF']);
         Route::get('fees/{parentId}',       [WhatsAppController::class, 'getFees']);
         Route::get('contact',               [WhatsAppController::class, 'getContact']);
+        Route::get('classes',               [WhatsAppController::class, 'getClasses']);
         Route::post('subscribe/{userId}',   [WhatsAppController::class, 'subscribe']);
         Route::post('unsubscribe/{userId}', [WhatsAppController::class, 'unsubscribe']);
         Route::post('ai/ask',               [WhatsAppController::class, 'askAi']);
         Route::post('login',                [WhatsAppController::class, 'login']);
+        Route::post('logout',               [WhatsAppController::class, 'logout']);
         Route::post('register',             [WhatsAppController::class, 'registerUser']);
         Route::post('verify',               [WhatsAppController::class, 'verifyOTP']);
         Route::post('staff/homework',       [WhatsAppController::class, 'staffHomework']);

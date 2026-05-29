@@ -120,10 +120,37 @@ class WhatsAppController extends Controller
         ]);
     }
 
+    public function logout(Request $request)
+    {
+        $request->validate([
+            'phone' => 'required|string',
+        ]);
+
+        $phone = preg_replace('/\D/', '', $request->phone);
+
+        $user = \App\Models\User::where('whatsapp_phone', $phone)->first();
+        if ($user) {
+            $user->whatsapp_phone = null;
+            $user->whatsapp_verified = false;
+            $user->whatsapp_subscribed = false;
+            $user->save();
+            return response()->json(['success' => true, 'message' => 'Logged out successfully']);
+        }
+
+        return response()->json(['success' => false, 'message' => 'No active session found for this number'], 404);
+    }
+
+    public function getClasses()
+    {
+        $classes = \App\Models\SchoolClass::all(['id', 'name']);
+        return response()->json(['success' => true, 'classes' => $classes]);
+    }
+
     public function getUser($phone)
     {
         $user = \App\Models\User::where('whatsapp_phone', $phone)
             ->whereIn('role', ['parent', 'teacher', 'admin', 'superadmin', 'bursar', 'student'])
+            ->with('tenant')
             ->first();
 
         if (!$user) {
@@ -258,11 +285,16 @@ class WhatsAppController extends Controller
             ],
             'students' => $parent->students->map(function ($student) {
                 $attendance = $student->attendanceMarks->first();
+                $apiKey = config('services.whatsapp.api_key');
+                $host = request()->schemeAndHttpHost();
+                $reportCardUrl = "{$host}/api/whatsapp/report-card/{$student->id}?key={$apiKey}&term=1&session=2026/2027";
+                
                 return [
                     'name' => $student->full_name,
                     'admission_number' => $student->admission_number,
                     'class' => $student->schoolClass?->name,
                     'attendance_today' => $attendance ? $attendance->status : null,
+                    'report_card_url' => $reportCardUrl,
                     'recent_scores' => $student->scores->map(function ($score) {
                         return [
                             'subject' => $score->subject?->name,
@@ -273,6 +305,140 @@ class WhatsAppController extends Controller
                     })->values()->all(),
                 ];
             })->values()->all(),
+        ];
+    }
+
+    private function buildStaffContext(\App\Models\User $staff): array
+    {
+        // 1. Get school details
+        $school = [
+            'name' => config('myacademy.school_name'),
+            'phone' => config('myacademy.school_phone'),
+            'email' => config('myacademy.school_email'),
+        ];
+
+        // 2. Fetch total students count
+        $totalStudents = \App\Models\Student::count();
+        $activeStudents = \App\Models\Student::where('status', 'Active')->count();
+        $inactiveStudents = $totalStudents - $activeStudents;
+
+        // 3. Gender breakdown
+        $maleStudents = \App\Models\Student::where('status', 'Active')->where('gender', 'Male')->count();
+        $femaleStudents = \App\Models\Student::where('status', 'Active')->where('gender', 'Female')->count();
+
+        // 4. Classes with student counts
+        $classesBreakdown = \App\Models\SchoolClass::withCount(['students' => function($query) {
+            $query->where('status', 'Active');
+        }])->get()->map(function($class) {
+            return [
+                'name' => $class->name,
+                'students_count' => $class->students_count,
+            ];
+        })->values()->all();
+
+        // 5. Total staff count
+        $totalStaff = \App\Models\User::whereIn('role', ['admin', 'teacher', 'bursar'])->count();
+
+        // 6. Today's attendance summary
+        $presentToday = \App\Models\AttendanceMark::whereHas('sheet', function ($q) {
+                $q->whereDate('date', today());
+            })
+            ->whereIn('status', ['P', 'L'])
+            ->count();
+            
+        $absentToday = \App\Models\AttendanceMark::whereHas('sheet', function ($q) {
+                $q->whereDate('date', today());
+            })
+            ->where('status', 'A')
+            ->count();
+
+        return [
+            'user' => [
+                'name' => $staff->name,
+                'email' => $staff->email,
+                'role' => $staff->role,
+            ],
+            'school' => $school,
+            'statistics' => [
+                'total_students' => $totalStudents,
+                'active_students' => $activeStudents,
+                'inactive_students' => $inactiveStudents,
+                'male_students' => $maleStudents,
+                'female_students' => $femaleStudents,
+                'total_staff' => $totalStaff,
+                'today_present_students' => $presentToday,
+                'today_absent_students' => $absentToday,
+            ],
+            'classes' => $classesBreakdown,
+        ];
+    }
+
+    private function buildStudentContext(\App\Models\User $user): array
+    {
+        $student = \App\Models\Student::where('user_id', $user->id)->first();
+
+        if (!$student) {
+            return [
+                'user' => [
+                    'name' => $user->name,
+                    'email' => $user->email,
+                    'role' => 'student',
+                ],
+                'message' => 'Student record not linked to this user yet.'
+            ];
+        }
+
+        $student->load(['schoolClass', 'section']);
+        
+        // Fetch homework
+        $homework = $student->getHomeworkForStudent()->map(function ($hw) {
+            return [
+                'subject' => $hw->subject?->name,
+                'title' => $hw->title,
+                'description' => $hw->description,
+                'due_date' => $hw->due_date,
+                'teacher' => $hw->teacher?->name,
+                'is_submitted' => $hw->submissions->isNotEmpty(),
+            ];
+        })->values()->all();
+
+        // Fetch attendance today
+        $attendance = $student->attendanceMarks()
+            ->whereHas('sheet', function ($q) {
+                $q->whereDate('date', today());
+            })
+            ->first();
+
+        // Fetch recent scores/results
+        $scores = $student->scores()
+            ->latest()
+            ->limit(5)
+            ->with('subject')
+            ->get()
+            ->map(function ($score) {
+                return [
+                    'subject' => $score->subject?->name,
+                    'total_score' => $score->total_score,
+                    'term' => $score->term,
+                    'session' => $score->session,
+                ];
+            })->values()->all();
+
+        return [
+            'student' => [
+                'name' => $student->full_name,
+                'admission_number' => $student->admission_number,
+                'class' => $student->schoolClass?->name,
+                'section' => $student->section?->name,
+                'attendance_today' => $attendance ? $attendance->status : null,
+            ],
+            'homework' => $homework,
+            'recent_scores' => $scores,
+            'school' => [
+                'name' => config('myacademy.school_name'),
+                'phone' => config('myacademy.school_phone'),
+                'email' => config('myacademy.school_email'),
+            ],
         ];
     }
 
@@ -372,4 +538,165 @@ class WhatsAppController extends Controller
         $phones = $query->pluck('whatsapp_phone')->toArray();
         return response()->json(['success' => true, 'phones' => $phones]);
     }
+
+    public function askAi(Request $request)
+    {
+        $request->validate([
+            'parent_id' => 'required',
+            'question'  => 'required|string',
+        ]);
+
+        $user = \App\Models\User::findOrFail($request->parent_id);
+        
+        if ($user->role === 'parent') {
+            $context = $this->buildParentContext($user);
+            $roleLabel = 'parent';
+        } elseif ($user->role === 'student') {
+            $context = $this->buildStudentContext($user);
+            $roleLabel = 'student';
+        } else {
+            $context = $this->buildStaffContext($user);
+            $roleLabel = "staff member ({$user->role})";
+        }
+        
+        $contextJson = json_encode($context, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+
+        $history = $request->input('history', []);
+        $historyText = "";
+        if (!empty($history) && is_array($history)) {
+            $historyText = "\nRECENT CONVERSATION HISTORY (Use this to remember pronouns, names, and previous context):\n";
+            foreach ($history as $chat) {
+                if (empty($chat['text'])) continue;
+                $role = isset($chat['role']) && $chat['role'] === 'user' ? 'User' : 'HubGenie';
+                $historyText .= "- {$role}: {$chat['text']}\n";
+            }
+            $historyText .= "\n";
+        }
+
+        $prompt = "You are HubGenie, a highly secure, ultra-concise, and intelligent virtual school assistant for the AcademyHub school management system.\n" .
+                  "You are chatting with a {$roleLabel} on WhatsApp. Here is the verified, real-time context of the logged-in user, their school, and system statistics:\n" .
+                  "{$contextJson}\n" .
+                  $historyText . "\n" .
+                  "User's Question:\n" .
+                  "\"{$request->question}\"\n\n" .
+                  "STRICT RULES & CONSTRAINTS:\n" .
+                  "1. BREVITY: Keep your answer extremely short, concise, and to-the-point (maximum 1 to 2 sentences). Avoid all conversational fluff, long pleasantries, greetings, or repetitive sentences.\n" .
+                  "2. STUDENT NAMES: Always fetch and explicitly state the student(s) full name(s) (e.g. 'Abdullahi Bala') when replying to questions about children, homework, attendance, or scores. Never refer to them generically as 'your child' or 'your student' if their name is available in the context.\n" .
+                  "3. SECURITY & SENSITIVE DATA: Never reveal, discuss, or query sensitive information (e.g. passwords, password hashes, login tokens, secret keys, API credentials, or internal database schemas). Under no circumstances should you retrieve or expose password details.\n" .
+                  "4. PASSWORD PROTECTION: If the user asks about passwords, credentials, resetting their password, or secure keys, you MUST immediately reject it and say exactly: '🔒 For security, passwords and login credentials cannot be accessed, modified, or discussed via WhatsApp.'\n" .
+                  "5. FORMATTING: Avoid raw markdown headings or bolding that looks weird on WhatsApp (like double asterisks). Use simple spacing, clean lists, and warm school emojis (e.g., 🎒, 📚, 📊).\n" .
+                  "6. Keep responses directly answering the question without extra surrounding filler.";
+
+        // Try Gemini first, then fallback to Groq
+        $answer = $this->tryGeminiAPI($prompt) ?: $this->tryGroqAPI($prompt);
+
+        if ($answer) {
+            return response()->json([
+                'success' => true,
+                'answer'  => $answer,
+            ]);
+        }
+
+        return response()->json([
+            'success' => false,
+            'message' => 'AI service is currently busy or unavailable. Please try quick commands.',
+        ], 500);
+    }
+
+    public function getReportCardPDF(Request $request, $studentId)
+    {
+        $student = \App\Models\Student::findOrFail($studentId);
+
+        $term = (int) $request->query('term', 1);
+        $session = (string) $request->query('session');
+        
+        if (empty($session)) {
+            $active = \App\Models\AcademicSession::activeName();
+            $session = $active ?: date('Y') . '/' . (date('Y') + 1);
+        }
+
+        $student->load(['schoolClass', 'section']);
+        $data = app(\App\Support\ReportCardService::class)->build($student, $term, $session);
+
+        $template = (string) config('myacademy.report_card_template', 'compact');
+        $view = match ($template) {
+            'compact' => 'pdf.report-card-compact',
+            'elegant' => 'pdf.report-card-elegant',
+            'modern' => 'pdf.report-card-modern',
+            'classic' => 'pdf.report-card-classic',
+            'aurora' => 'pdf.report-card-aurora',
+            'heritage' => 'pdf.report-card-heritage',
+            'nordic' => 'pdf.report-card-nordic',
+            'vanguard' => 'pdf.report-card-vanguard',
+            'signature' => 'pdf.report-card-signature',
+            default => 'pdf.report-card-compact',
+        };
+
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView($view, [
+            ...$data,
+        ])->setPaper('a4');
+
+        $filename = 'report-card-' . $student->admission_number . '-' . str_replace('/', '-', $session) . '-T' . $term . '.pdf';
+
+        return response($pdf->output(), 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => "inline; filename=\"{$filename}\"",
+        ]);
+    }
+
+    private function tryGeminiAPI(string $prompt): ?string
+    {
+        try {
+            $apiKey = config('services.gemini.key') ?: env('GEMINI_API_KEY');
+            if (empty($apiKey)) return null;
+
+            $response = \Illuminate\Support\Facades\Http::withOptions(['verify' => false])
+                ->timeout(30)
+                ->post("https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={$apiKey}", [
+                    'contents' => [['parts' => [['text' => $prompt]]]]
+                ]);
+
+            return $response->successful()
+                ? ($response->json()['candidates'][0]['content']['parts'][0]['text'] ?? null)
+                : null;
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::warning('WhatsApp AI: Gemini API error', ['error' => $e->getMessage()]);
+            return null;
+        }
+    }
+
+    private function tryGroqAPI(string $prompt): ?string
+    {
+        try {
+            $raw = config('services.groq.key') ?: env('GROQ_API_KEY');
+            if (empty($raw)) return null;
+
+            $keys = array_filter(array_map('trim', explode(',', $raw)));
+            if (empty($keys)) return null;
+            $apiKey = $keys[array_rand($keys)];
+
+            $response = \Illuminate\Support\Facades\Http::withOptions(['verify' => false])
+                ->timeout(30)
+                ->withHeaders([
+                    'Authorization' => 'Bearer ' . $apiKey,
+                    'Content-Type'  => 'application/json',
+                ])->post('https://api.groq.com/openai/v1/chat/completions', [
+                    'model'       => 'llama-3.3-70b-versatile',
+                    'messages'    => [
+                        ['role' => 'system', 'content' => 'You are HubGenie, a highly concise and secure WhatsApp assistant. You MUST strictly use the verified, real-time context provided in the user prompt to answer questions. Answer directly in 1-2 brief sentences max. No fluff or greetings. For security, never discuss or reveal sensitive credentials like passwords, and if asked about passwords, say: 🔒 For security, passwords and login credentials cannot be accessed, modified, or discussed via WhatsApp.'],
+                        ['role' => 'user',   'content' => $prompt],
+                    ],
+                    'temperature' => 0.7,
+                    'max_tokens'  => 1000,
+                ]);
+
+            return $response->successful()
+                ? ($response->json()['choices'][0]['message']['content'] ?? null)
+                : null;
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('WhatsApp AI: Groq API error', ['error' => $e->getMessage()]);
+            return null;
+        }
+    }
 }
+
