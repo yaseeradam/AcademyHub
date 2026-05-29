@@ -26,7 +26,7 @@ class ReportCardService
         }
 
         return $this->classScoresCache[$cacheKey] = Score::query()
-            ->where('class_id', $cacheId)
+            ->where('class_id', $classId)
             ->where('term', $term)
             ->where('session', $session)
             ->whereIn('subject_id', $subjectIds)
