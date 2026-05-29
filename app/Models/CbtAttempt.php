@@ -64,6 +64,21 @@ class CbtAttempt extends Model
         return $this->belongsTo(CbtExam::class, 'exam_id');
     }
 
+    protected static function booted(): void
+    {
+        static::saved(function ($attempt) {
+            if ($attempt->student_id) {
+                \App\Support\StudentPerformanceService::clearCache($attempt->student_id);
+            }
+        });
+
+        static::deleted(function ($attempt) {
+            if ($attempt->student_id) {
+                \App\Support\StudentPerformanceService::clearCache($attempt->student_id);
+            }
+        });
+    }
+
     public function student(): BelongsTo
     {
         return $this->belongsTo(Student::class);

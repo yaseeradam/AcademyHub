@@ -27,6 +27,21 @@ class HomeworkSubmission extends Model
         'graded_at' => 'datetime',
     ];
 
+    protected static function booted(): void
+    {
+        static::saved(function ($submission) {
+            if ($submission->student_id) {
+                \App\Support\StudentPerformanceService::clearCache($submission->student_id);
+            }
+        });
+
+        static::deleted(function ($submission) {
+            if ($submission->student_id) {
+                \App\Support\StudentPerformanceService::clearCache($submission->student_id);
+            }
+        });
+    }
+
     public function homework()
     {
         return $this->belongsTo(Homework::class);

@@ -13,23 +13,47 @@ use Illuminate\Support\Collection;
 
 class StudentPerformanceService
 {
+    /**
+     * Clear all performance caches for a specific student across common terms and sessions.
+     */
+    public static function clearCache(int $studentId): void
+    {
+        $currentYear = (int)date('Y');
+        $sessions = [
+            ($currentYear - 1) . '/' . $currentYear,
+            $currentYear . '/' . ($currentYear + 1),
+            ($currentYear + 1) . '/' . ($currentYear + 2),
+        ];
+
+        foreach ([1, 2, 3] as $term) {
+            foreach ($sessions as $session) {
+                $cacheKey = "student_performance:{$studentId}:term_{$term}:session_" . urlencode($session);
+                \Illuminate\Support\Facades\Cache::forget($cacheKey);
+            }
+        }
+    }
+
     public function getPerformanceAnalysis(Student $student, ?int $termNumber = null, ?string $session = null): array
     {
         $currentTerm = AcademicTerm::active() ?? AcademicTerm::latest()->first();
         $termNumber = $termNumber ?? $currentTerm?->term_number ?? 1;
         $session = $session ?? $currentTerm?->academicSession?->name ?? now()->format('Y') . '/' . (now()->format('Y') + 1);
 
-        return [
-            'overview' => $this->getOverview($student, $termNumber, $session),
-            'subject_performance' => $this->getSubjectPerformance($student, $termNumber, $session),
-            'strengths_weaknesses' => $this->getStrengthsAndWeaknesses($student, $termNumber, $session),
-            'term_comparison' => $this->getTermComparison($student, $session),
-            'attendance_impact' => $this->getAttendanceImpact($student, $termNumber, $session),
-            'homework_performance' => $this->getHomeworkPerformance($student),
-            'cbt_performance' => $this->getCbtPerformance($student),
-            'improvement_areas' => $this->getImprovementAreas($student, $termNumber, $session),
-            'progress_trend' => $this->getProgressTrend($student, $session),
-        ];
+        $cacheKey = "student_performance:{$student->id}:term_{$termNumber}:session_" . urlencode($session);
+
+        return \Illuminate\Support\Facades\Cache::remember($cacheKey, now()->addDay(), function () use ($student, $termNumber, $session) {
+            return [
+                'overview' => $this->getOverview($student, $termNumber, $session),
+                'subject_performance' => $this->getSubjectPerformance($student, $termNumber, $session),
+                'strengths_weaknesses' => $this->getStrengthsAndWeaknesses($student, $termNumber, $session),
+                'term_comparison' => $this->getTermComparison($student, $session),
+                'attendance_impact' => $this->getAttendanceImpact($student, $termNumber, $session),
+                'homework_performance' => $this->getHomeworkPerformance($student),
+                'cbt_performance' => $this->getCbtPerformance($student),
+                'improvement_areas' => $this->getImprovementAreas($student, $termNumber, $session),
+                'progress_trend' => $this->getProgressTrend($student, $session),
+            ];
+        });
     }
 
     public function getOverview(Student $student, int $term, string $session): array

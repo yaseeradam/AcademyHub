@@ -41,11 +41,26 @@ class StudentAuthController extends Controller
         $passwordValid = false;
         if ($student->password) {
             $passwordValid = Hash::check($request->password, $student->password);
+            
+            // Progressive upgrade: if the database has a legacy unhashed password, upgrade it
+            if (!$passwordValid && !str_starts_with($student->password, '$2y$')) {
+                $admissionSuffix = substr($student->admission_number, -4);
+                $expectedPassword = strtolower($student->first_name) . $admissionSuffix;
+                if (hash_equals($expectedPassword, $request->password)) {
+                    $passwordValid = true;
+                    $student->password = Hash::make($request->password);
+                    $student->save();
+                }
+            }
         } else {
-            // Default password: lowercase first_name + last 4 digits of admission_number
+            // Database fallback: if password column is empty, check and upgrade
             $admissionSuffix = substr($student->admission_number, -4);
             $expectedPassword = strtolower($student->first_name) . $admissionSuffix;
-            $passwordValid = hash_equals($expectedPassword, $request->password);
+            if (hash_equals($expectedPassword, $request->password)) {
+                $passwordValid = true;
+                $student->password = Hash::make($request->password);
+                $student->save();
+            }
         }
 
         if (!$passwordValid) {

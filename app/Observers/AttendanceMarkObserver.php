@@ -15,6 +15,10 @@ class AttendanceMarkObserver
      */
     public function saved(AttendanceMark $mark): void
     {
+        if ($mark->student_id) {
+            \App\Support\StudentPerformanceService::clearCache($mark->student_id);
+        }
+
         // Only trigger proactive notifications for 'Absent' status
         if ($mark->status !== 'A') {
             return;
@@ -38,6 +42,19 @@ class AttendanceMarkObserver
 
             $message = "🔔 *Attendance Alert:* Your child, *{$student->full_name}*, has been marked *Absent* today ({$sheetDate}). Please contact the school administration if this is an error.";
             WhatsAppService::sendMessage($parent->whatsapp_phone, $message);
+        }
+    }
+
+    /**
+     * Listen to the deleted event of AttendanceMark.
+     *
+     * @param AttendanceMark $mark
+     * @return void
+     */
+    public function deleted(AttendanceMark $mark): void
+    {
+        if ($mark->student_id) {
+            \App\Support\StudentPerformanceService::clearCache($mark->student_id);
         }
     }
 }

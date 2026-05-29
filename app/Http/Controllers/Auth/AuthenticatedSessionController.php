@@ -241,13 +241,25 @@ class AuthenticatedSessionController extends Controller
             $passwordValid = false;
 
             if ($student->password) {
-                // Custom password set — always bcrypt-hashed via model cast.
                 $passwordValid = Hash::check($request->password, $student->password);
+                
+                // Progressive upgrade: if the database has a legacy unhashed password, upgrade it
+                if (!$passwordValid && !str_starts_with($student->password, '$2y$')) {
+                    $expectedPassword = $this->generateStudentPassword($student);
+                    if (hash_equals($expectedPassword, $request->password)) {
+                        $passwordValid = true;
+                        $student->password = Hash::make($request->password);
+                        $student->save();
+                    }
+                }
             } else {
-                // Default scheme: firstname (lowercase) + last 4 digits of admission number.
-                // Compare using hash to avoid any plaintext comparison.
+                // Database fallback: if password column is empty, check and upgrade
                 $expectedPassword = $this->generateStudentPassword($student);
-                $passwordValid    = hash_equals($expectedPassword, $request->password);
+                if (hash_equals($expectedPassword, $request->password)) {
+                    $passwordValid = true;
+                    $student->password = Hash::make($request->password);
+                    $student->save();
+                }
             }
 
             if (! $passwordValid) {

@@ -16,6 +16,10 @@ class ScoreObserver
     public function saved(Score $score): void
     {
         $student = $score->student;
+        if ($student) {
+            \App\Support\StudentPerformanceService::clearCache($student->id);
+        }
+
         $subject = $score->subject;
         if (!$student || !$subject) {
             return;
@@ -36,6 +40,19 @@ class ScoreObserver
                        "• *Grade:* *{$score->grade}*";
             
             WhatsAppService::sendMessage($parent->whatsapp_phone, $message);
+        }
+    }
+
+    /**
+     * Listen to the deleted event of Score.
+     *
+     * @param Score $score
+     * @return void
+     */
+    public function deleted(Score $score): void
+    {
+        if ($score->student_id) {
+            \App\Support\StudentPerformanceService::clearCache($score->student_id);
         }
     }
 }

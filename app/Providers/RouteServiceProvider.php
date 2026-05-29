@@ -25,6 +25,22 @@ class RouteServiceProvider extends ServiceProvider
     public function boot(): void
     {
         RateLimiter::for('api', function (Request $request) {
+            // WhatsApp bot key bypass check
+            $isWhatsAppBot = false;
+            $expectedKey = config('services.whatsapp.api_key');
+            
+            if ($expectedKey && $request->is('api/whatsapp/*')) {
+                $providedKey = $request->header('X-WhatsApp-Api-Key') ?: $request->query('key');
+                if ($providedKey && hash_equals($expectedKey, $providedKey)) {
+                    $isWhatsAppBot = true;
+                }
+            }
+
+            if ($isWhatsAppBot) {
+                // Allow a much higher rate limit for our verified background WhatsApp bot
+                return Limit::perMinute(600)->by($request->ip());
+            }
+
             return Limit::perMinute(60)->by($request->user()?->id ?: $request->ip());
         });
 
