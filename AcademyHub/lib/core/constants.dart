@@ -18,10 +18,10 @@ class AppColors {
 class ApiConstants {
   static String get baseUrl {
     if (kIsWeb) {
-      return 'http://localhost:8000/api';
+      return 'http://localhost/api';
     }
     // Point directly to your computer's wireless IP on your active local network
     // This allows BOTH physical Android devices and Emulators to connect successfully!
-    return 'http://192.168.43.93:8000/api';
+    return 'http://192.168.43.92/api';
   }
 }

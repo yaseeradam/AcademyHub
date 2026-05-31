@@ -1,3 +1,4 @@
+<div class="space-y-4">
     {{-- Page Header --}}
     <div class="rounded-xl bg-slate-900 px-4 py-3 shadow-sm">
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
@@ -32,7 +33,7 @@
                     @if ($exam['status'] === 'in_progress')
                         <div class="absolute right-0 top-0 rounded-bl-lg bg-amber-400 px-2.5 py-0.5 text-[9px] font-bold text-amber-900 shadow-sm">IN PROGRESS</div>
                     @elseif ($isMarked)
-                        <div class="absolute right-0 top-0 rounded-bl-lg bg-emerald-500 px-2.5 py-0.5 text-[9px] font-bold text-white shadow-sm">MARKED ✓</div>
+                        <div class="absolute right-0 top-0 rounded-bl-lg bg-emerald-505 px-2.5 py-0.5 text-[9px] font-bold text-white shadow-sm">MARKED ✓</div>
                     @elseif ($exam['status'] === 'completed')
                         <div class="absolute right-0 top-0 rounded-bl-lg bg-slate-200 px-2.5 py-0.5 text-[9px] font-bold text-slate-700">COMPLETED</div>
                     @elseif ($exam['ends_at'] && \Carbon\Carbon::parse($exam['ends_at'])->diffInHours(now()) <= 24)
@@ -117,16 +118,15 @@
             $grade = $pct >= 70 ? 'Excellent' : ($pct >= 50 ? 'Good' : 'Needs Work');
             $gradeColor = $pct >= 70 ? 'text-emerald-600' : ($pct >= 50 ? 'text-amber-600' : 'text-red-600');
         @endphp
-        <div class="rounded-2xl border border-violet-200 bg-white shadow-lg overflow-hidden">
-                {-- Page Header --}
-    <div class="rounded-xl bg-slate-900 px-5 py-4 shadow-sm">
-        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-            <h1 class="text-base font-bold text-white">Exams</h1>
-            
-        </div>
-    </div>
+        <div class="rounded-2xl border border-violet-200 bg-white shadow-lg overflow-hidden mt-6">
+            {{-- Questions Section Header --}}
+            <div class="rounded-t-xl bg-slate-900 px-5 py-4 shadow-sm">
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                    <h1 class="text-base font-bold text-white">Exam Questions & Answers Breakdown</h1>
+                </div>
+            </div>
 
-    {{-- Questions --}}
+            {{-- Questions --}}
             <div class="divide-y divide-gray-100">
                 @foreach ($vQuestions as $idx => $q)
                     @php
