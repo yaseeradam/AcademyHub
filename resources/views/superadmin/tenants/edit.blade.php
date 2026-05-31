@@ -285,7 +285,25 @@
 
                     <div>
                         <label class="sa-form-label">Subscription Expiry / Due Date</label>
-                        <input type="date" name="expires_at" value="{{ old('expires_at', $tenant->expires_at ? $tenant->expires_at->format('Y-m-d') : '') }}" class="sa-form-input">
+                        <div style="display: flex; gap: 10px; align-items: center;">
+                            <input type="date" id="expires_at" name="expires_at" value="{{ old('expires_at', $tenant->expires_at ? $tenant->expires_at->format('Y-m-d') : '') }}" class="sa-form-input">
+                            <button type="button" 
+                                    @click="
+                                        let currentVal = document.getElementById('expires_at').value;
+                                        let baseDate = currentVal ? new Date(currentVal) : new Date();
+                                        baseDate.setMonth(baseDate.getMonth() + 4);
+                                        let yyyy = baseDate.getFullYear();
+                                        let mm = String(baseDate.getMonth() + 1).padStart(2, '0');
+                                        let dd = String(baseDate.getDate()).padStart(2, '0');
+                                        document.getElementById('expires_at').value = `${yyyy}-${mm}-${dd}`;
+                                    "
+                                    class="sa-btn" 
+                                    style="padding: 10px 16px; font-size: 12px; white-space: nowrap; font-weight: 700; background: #e0f2fe; color: #0369a1; border: 1.5px solid #bae6fd; border-radius: 12px; transition: all 0.2s;"
+                                    onmouseover="this.style.background='#bae6fd'"
+                                    onmouseout="this.style.background='#e0f2fe'">
+                                🎁 Give 1 Term Free (+4m)
+                            </button>
+                        </div>
                         @error('expires_at')<div class="sa-form-error">{{ $message }}</div>@enderror
                     </div>
                 </div>

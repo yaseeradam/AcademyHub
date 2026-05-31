@@ -195,7 +195,13 @@
         <!-- Order Summary -->
         <div class="rounded-2xl bg-slate-900 p-6 text-white shadow-xl">
             <h3 class="text-lg font-bold">Estimated Yearly Bill</h3>
-            <p class="mt-1 text-sm text-slate-400">Next billing cycle: {{ now()->addYear()->format('M Y') }}</p>
+            @php
+                $tenant = auth()->user()?->tenant;
+                $nextBilling = $tenant?->expires_at 
+                    ? $tenant->expires_at->format('M Y') 
+                    : now()->addMonths(4)->format('M Y');
+            @endphp
+            <p class="mt-1 text-sm text-slate-400">Next billing cycle: {{ $nextBilling }}</p>
             
             <div class="mt-6 flex flex-col gap-3 border-y border-slate-700 py-4 text-sm font-medium text-slate-300">
                 <div class="flex justify-between">

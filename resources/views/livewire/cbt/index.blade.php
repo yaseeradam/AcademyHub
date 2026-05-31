@@ -19,17 +19,16 @@
                 <h1 class="text-2xl sm:text-3xl font-black text-white tracking-tight">Computer Based Testing (CBT)</h1>
                 <p class="mt-1 text-sm text-slate-400 font-medium">Create custom online examinations, manage questions, and review real-time attempts.</p>
             </div>
-            
             <button wire:click="{{ $creating ? 'cancelCreate' : 'startCreate' }}"
-                    class="relative overflow-hidden group inline-flex items-center gap-2 self-start sm:self-auto rounded-xl px-5 py-2.5 text-xs font-black transition-all shadow-md active:scale-95
-                    {{ $creating ? 'bg-white/10 text-white hover:bg-white/20 border border-white/10' : 'bg-gradient-to-r from-amber-500 to-amber-600 text-white hover:from-amber-400 hover:to-amber-500 shadow-amber-500/10' }}">
-                @if(!$creating)
-                    <svg class="h-4 w-4 transition-transform group-hover:rotate-90 duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
-                        <path d="M12 5v14M5 12h14"/>
-                    </svg>
-                @endif
-                <span>{{ $creating ? 'Close Panel' : 'New Examination' }}</span>
-            </button>
+        class="relative overflow-hidden group inline-flex items-center gap-2 self-start sm:self-auto rounded-xl px-6 py-3 text-sm font-bold transition-all shadow-md active:scale-95
+        {{ $creating ? 'bg-white/10 text-white hover:bg-white/20 border border-white/10' : 'bg-gradient-to-r from-amber-500 to-amber-600 text-white hover:from-amber-400 hover:to-amber-500 shadow-amber-500/10' }}">
+    @if(!$creating)
+        <svg class="h-4 w-4 transition-transform group-hover:rotate-90 duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
+            <path d="M12 5v14M5 12h14"/>
+        </svg>
+    @endif
+    <span>{{ $creating ? 'Close Panel' : 'New Examination' }}</span>
+</button>
         </div>
     </div>
 
@@ -116,13 +115,13 @@
                                 class="rounded-xl border border-slate-300 bg-white px-5 py-2.5 text-xs font-extrabold text-slate-700 hover:bg-slate-50 transition-all active:scale-95">
                             Cancel
                         </button>
-                        <button wire:click="createExam"
-                                class="inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 px-6 py-2.5 text-xs font-black text-white hover:from-indigo-500 hover:to-violet-500 shadow-md active:scale-95">
-                            <span>Create & Add Questions</span>
-                            <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
-                                <path d="M9 5l7 7-7 7"/>
-                            </svg>
-                        </button>
+    <button wire:click="createExam"
+        class="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 px-7 py-3 text-sm font-bold text-white hover:from-indigo-500 hover:to-violet-500 shadow-md active:scale-95">
+    <span>Create & Add Questions</span>
+    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
+        <path d="M9 5l7 7-7 7"/>
+    </svg>
+</button>
                     </div>
                 </div>
             </div>
@@ -173,9 +172,6 @@
             @endphp
             <div class="group relative overflow-hidden rounded-2xl border p-5 transition-all duration-300 flex flex-col justify-between min-h-[200px] {{ $cardStyle }}">
                 
-                {{-- Left Side Accent Status Bar --}}
-                <div class="absolute left-0 top-0 bottom-0 w-1.5 {{ $accentColor }}"></div>
-
                 <div class="flex flex-1 flex-col pl-2">
                     {{-- Card Header --}}
                     <div class="flex items-start justify-between gap-3">

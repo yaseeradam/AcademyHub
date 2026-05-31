@@ -6,7 +6,8 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Super Admin Console — AcademyHub</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-    {{-- NOTE: Alpine is already bundled in app.js — DO NOT add a CDN Alpine script here, it causes double-init and breaks Livewire --}}
+    {{-- Load Alpine.js directly since there is no Livewire on Superadmin views --}}
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
