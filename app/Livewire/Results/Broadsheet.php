@@ -232,10 +232,11 @@ class Broadsheet extends Component
             'count' => $students->count(),
         ]);
 
-        return response()->download($zipPath)->deleteFileAfterSend(true)
-            ->header('Cache-Control', 'no-cache, no-store, must-revalidate')
-            ->header('Pragma', 'no-cache')
-            ->header('Expires', '0');
+        return response()->download($zipPath, null, [
+            'Cache-Control' => 'no-cache, no-store, must-revalidate',
+            'Pragma'        => 'no-cache',
+            'Expires'       => '0',
+        ])->deleteFileAfterSend(true);
     }
 
     public function publish(): void
