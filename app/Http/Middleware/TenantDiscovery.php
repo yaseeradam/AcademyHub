@@ -59,8 +59,9 @@ class TenantDiscovery
                 'host' => $host,
                 'mainDomainHost' => $mainDomainHost,
             ]);
-            // Only skip 404 for bare localhost/127.0.0.1 — subdomain mismatches should still 404
-            if (!in_array($host, ['localhost', '127.0.0.1'])) {
+            // Only skip 404 for bare localhost/127.0.0.1/private network IPs — subdomain mismatches should still 404
+            $isLocalIp = filter_var($host, FILTER_VALIDATE_IP) && !filter_var($host, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE);
+            if (!in_array($host, ['localhost', '127.0.0.1']) && !$isLocalIp) {
                 abort(404, "School instance '{$host}' not found.");
             }
         } else {
