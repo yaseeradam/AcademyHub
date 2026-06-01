@@ -41,7 +41,10 @@ class DashboardController extends Controller
 
             if ($coreCost > 0) {
                 $coreInvoiced += $coreCost;
-                if ($tenant->status === 'active') {
+                // A subscription is considered paid if the tenant is active and has not expired
+                $isSubscriptionActive = $tenant->status === 'active' && $tenant->expires_at && $tenant->expires_at->isFuture();
+                
+                if ($isSubscriptionActive) {
                     $corePaid += $coreCost;
                 } else {
                     $coreOutstanding += $coreCost;
@@ -49,9 +52,18 @@ class DashboardController extends Controller
             }
         }
 
-        $totalInvoiced = (float) \App\Models\TenantPluginBill::where('status', '!=', 'void')->sum('total_due') + $coreInvoiced;
-        $totalPaid = (float) \App\Models\TenantPluginBill::where('status', 'paid')->sum('total_due') + $corePaid;
-        $totalOutstanding = (float) \App\Models\TenantPluginBill::where('status', 'unpaid')->sum('total_due') + $coreOutstanding;
+        // Exclude bills for free tier tenants from platform metrics
+        $totalInvoiced = (float) \App\Models\TenantPluginBill::whereHas('tenant', function ($query) {
+            $query->where('plan', '!=', 'free');
+        })->where('status', '!=', 'void')->sum('total_due') + $coreInvoiced;
+
+        $totalPaid = (float) \App\Models\TenantPluginBill::whereHas('tenant', function ($query) {
+            $query->where('plan', '!=', 'free');
+        })->where('status', 'paid')->sum('total_due') + $corePaid;
+
+        $totalOutstanding = (float) \App\Models\TenantPluginBill::whereHas('tenant', function ($query) {
+            $query->where('plan', '!=', 'free');
+        })->where('status', 'unpaid')->sum('total_due') + $coreOutstanding;
         $totalInstalls = (int) DB::table('tenant_marketplace_components')
             ->whereNotNull('installed_at')
             ->whereNull('uninstalled_at')

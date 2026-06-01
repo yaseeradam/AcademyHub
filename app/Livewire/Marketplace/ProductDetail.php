@@ -353,8 +353,8 @@ class ProductDetail extends Component
         try {
             \Illuminate\Support\Facades\DB::beginTransaction();
 
-            $setupFee = (float) $dbComponent->setup_fee;
-            $usageFee = (float) $dbComponent->usage_fee_per_student;
+            $setupFee = $tenant->plan === 'free' ? 0.00 : (float) $dbComponent->setup_fee;
+            $usageFee = $tenant->plan === 'free' ? 0.00 : (float) $dbComponent->usage_fee_per_student;
 
             // Soft install or sync
             $tenant->marketplaceComponents()->syncWithoutDetaching([

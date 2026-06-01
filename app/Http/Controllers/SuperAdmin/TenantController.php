@@ -635,8 +635,8 @@ class TenantController extends Controller
 
         // 3. Activate and install missing allowed components
         foreach ($componentsToInstall as $component) {
-            $setupFee = (float) $component->setup_fee;
-            $usageFee = (float) $component->usage_fee_per_student;
+            $setupFee = $tenant->plan === 'free' ? 0.00 : (float) $component->setup_fee;
+            $usageFee = $tenant->plan === 'free' ? 0.00 : (float) $component->usage_fee_per_student;
 
             // Check if already installed (and not uninstalled)
             $pivot = $tenant->marketplaceComponents()
