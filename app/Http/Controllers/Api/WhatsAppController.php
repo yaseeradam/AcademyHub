@@ -587,8 +587,8 @@ class WhatsAppController extends Controller
                   "5. FORMATTING: Avoid raw markdown headings or bolding that looks weird on WhatsApp (like double asterisks). Use simple spacing, clean lists, and warm school emojis (e.g., 🎒, 📚, 📊).\n" .
                   "6. Keep responses directly answering the question without extra surrounding filler.";
 
-        // Try Gemini first, then fallback to Groq
-        $answer = $this->tryGeminiAPI($prompt) ?: $this->tryGroqAPI($prompt);
+        // Use Groq API exclusively
+        $answer = $this->tryGroqAPI($prompt);
 
         if ($answer) {
             return response()->json([
@@ -644,26 +644,6 @@ class WhatsAppController extends Controller
         ]);
     }
 
-    private function tryGeminiAPI(string $prompt): ?string
-    {
-        try {
-            $apiKey = config('services.gemini.key') ?: env('GEMINI_API_KEY');
-            if (empty($apiKey)) return null;
-
-            $response = \Illuminate\Support\Facades\Http::withOptions(['verify' => false])
-                ->timeout(30)
-                ->post("https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={$apiKey}", [
-                    'contents' => [['parts' => [['text' => $prompt]]]]
-                ]);
-
-            return $response->successful()
-                ? ($response->json()['candidates'][0]['content']['parts'][0]['text'] ?? null)
-                : null;
-        } catch (\Exception $e) {
-            \Illuminate\Support\Facades\Log::warning('WhatsApp AI: Gemini API error', ['error' => $e->getMessage()]);
-            return null;
-        }
-    }
 
     private function tryGroqAPI(string $prompt): ?string
     {
