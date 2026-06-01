@@ -72,7 +72,7 @@ class Index extends Component
         $reference = 'PLG-' . strtoupper(Str::random(12));
 
         $this->dispatch('open-paystack', [
-            'key'          => config('paystack.public_key', env('PAYSTACK_PUBLIC_KEY')),
+            'key'          => config('services.paystack.public_key', env('PAYSTACK_PUBLIC_KEY')),
             'email'        => $user->email,
             'amount'       => (int) ($component->price * 100), // Kobo — from DB, not frontend
             'ref'          => $reference,
@@ -88,7 +88,9 @@ class Index extends Component
         $user = auth()->user();
         abort_unless($user?->role === 'admin' || $user?->is_super_admin, 403);
 
-        $response = Http::withToken(config('paystack.secret_key', env('PAYSTACK_SECRET_KEY')))
+        $response = Http::withToken(config('services.paystack.secret_key', env('PAYSTACK_SECRET_KEY')))
+            ->withOptions(['verify' => false])
+            ->timeout(10)
             ->get("https://api.paystack.co/transaction/verify/{$reference}");
 
         if (! $response->successful() || $response->json('data.status') !== 'success') {

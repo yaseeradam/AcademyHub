@@ -43,4 +43,9 @@ return [
         'verify_token'    => env('WHATSAPP_VERIFY_TOKEN'),
     ],
 
+    'paystack' => [
+        'public_key' => env('PAYSTACK_PUBLIC_KEY'),
+        'secret_key' => env('PAYSTACK_SECRET_KEY'),
+    ],
+
 ];
