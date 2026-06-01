@@ -98,6 +98,9 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 });
 
+// Public Meta WhatsApp Webhook
+Route::match(['get', 'post'], 'whatsapp/webhook', [WhatsAppController::class, 'handleWebhook']);
+
 // WhatsApp Bot — authenticated via shared API key
 Route::prefix('whatsapp')
     ->middleware(\App\Http\Middleware\VerifyWhatsAppApiKey::class)
@@ -105,7 +108,7 @@ Route::prefix('whatsapp')
         Route::get('user/{phone}',          [WhatsAppController::class, 'getUser']);
         Route::get('attendance/{parentId}', [WhatsAppController::class, 'getAttendance']);
         Route::get('results/{parentId}',    [WhatsAppController::class, 'getResults']);
-        Route::get('report-card/{studentId}', [WhatsAppController::class, 'getReportCardPDF']);
+        Route::get('report-card/{studentId}', [WhatsAppController::class, 'getReportCardPDF'])->name('whatsapp.report-card');
         Route::get('fees/{parentId}',       [WhatsAppController::class, 'getFees']);
         Route::get('contact',               [WhatsAppController::class, 'getContact']);
         Route::get('classes',               [WhatsAppController::class, 'getClasses']);
@@ -118,4 +121,6 @@ Route::prefix('whatsapp')
         Route::post('verify',               [WhatsAppController::class, 'verifyOTP']);
         Route::post('staff/homework',       [WhatsAppController::class, 'staffHomework']);
         Route::post('admin/broadcast',      [WhatsAppController::class, 'adminBroadcast']);
+        Route::get('checkout',              [WhatsAppController::class, 'checkout'])->name('whatsapp.pay');
+        Route::post('checkout/process',     [WhatsAppController::class, 'processPayment'])->name('whatsapp.pay.process');
     });

@@ -214,6 +214,30 @@ class ProductDetail extends Component
                 'requirements' => ['MyAcademy system', 'Web browser', 'Active parent credentials'],
                 'benefits' => ['Instant parent engagement', 'Streamlined bill payments tracking', 'Reduce physical report card printing costs', 'Build stronger school-parent trust'],
             ],
+            'aptitude-test' => [
+                'name' => 'Aptitude Test & Screening',
+                'short_description' => 'MCQ question banks, self-grading candidate screening & admissions',
+                'description' => 'The MyAcademy Aptitude Test & Screening plugin enables schools to conduct automated entrance examinations for prospective students. Setup multiple-choice question pools by class, allow applicants to take self-grading online exams, and admit successful candidates with a single click.',
+                'icon' => 'exam',
+                'color' => 'purple',
+                'category' => 'Admission',
+                'features' => ['MCQ Question pools per class level', 'Self-grading candidate test room', 'Admissions scoring dashboard', 'One-click student auto-admission', 'Configurable test points and grading scales'],
+                'screenshots' => ['aptitude-test-1.png', 'aptitude-test-2.png', 'aptitude-test-3.png'],
+                'requirements' => ['MyAcademy system', 'Web browser', 'Stable internet connection'],
+                'benefits' => ['Eliminate manual entrance exams grading', 'Streamline student admissions by 80%', 'Instant applicant performance insights'],
+            ],
+            'payment-gateway' => [
+                'name' => 'Bursar & Parent Payment Gateway',
+                'short_description' => 'Real-time tuition fees billing structures and secure parent inline checkouts',
+                'description' => 'Integrate Paystack or other payment gateways to allow bursars to define customized class-level tuition due amounts, track active payment ledger streams in real-time, and let parents pay tuition outstanding balances online securely via credit cards, bank transfers, or POS with instant printable receipts.',
+                'icon' => 'finance',
+                'color' => 'emerald',
+                'category' => 'Finance',
+                'features' => ['Paystack secure keys configuration', 'Custom class tuition billing structure', 'Real-time bursar financial ledger', 'Parent-facing outstanding balance cards', 'Interactive secure credit card checkout mockup', 'Instant downloadable & printable fee receipts'],
+                'screenshots' => ['payment-gateway-1.png', 'payment-gateway-2.png', 'payment-gateway-3.png'],
+                'requirements' => ['MyAcademy system', 'Bursar access', 'Paystack active credentials (optional)'],
+                'benefits' => ['Eliminate physical cash handling issues', 'Improve collection rates by 40%', 'Instant transaction notifications via web & WhatsApp'],
+            ],
         ];
 
         return $products[$product] ?? [];

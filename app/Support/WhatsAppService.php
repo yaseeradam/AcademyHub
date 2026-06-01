@@ -19,6 +19,19 @@ class WhatsAppService
      */
     public static function sendMessage(string $phone, string $message, ?string $mediaUrl = null, ?string $filename = null, ?string $caption = null): bool
     {
+        if (app()->bound('currentTenant')) {
+            $tenant = app('currentTenant');
+            if ($tenant) {
+                $tenantActive = ($tenant->status === 'active') && (!$tenant->expires_at || !$tenant->expires_at->isPast());
+                $botActive = $tenant->activeMarketplaceComponents()->where('slug', 'whatsapp-bot')->exists();
+
+                if (!$tenantActive || !$botActive) {
+                    Log::warning("WhatsAppService: Blocked sending message to {$phone} because tenant '{$tenant->name}' (ID: {$tenant->id}) has active status = " . ($tenantActive ? 'yes' : 'no') . " and bot active = " . ($botActive ? 'yes' : 'no'));
+                    return false;
+                }
+            }
+        }
+
         $botUrl = env('WHATSAPP_BOT_WEBHOOK_URL', 'http://localhost:3000/webhook/send');
         $apiKey = config('services.whatsapp.api_key') ?: env('WHATSAPP_API_KEY', 'dev-local-whatsapp-key-change-in-production');
 

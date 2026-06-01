@@ -22,7 +22,7 @@ class RequiresPlugin
 
         if ($user = $request->user()) {
             $tenant = $user->tenant;
-        } elseif (session()->has('student_id')) {
+        } else {
             $tenant = app()->bound('currentTenant') ? app('currentTenant') : null;
         }
 

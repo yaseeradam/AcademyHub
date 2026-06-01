@@ -19,7 +19,7 @@ class UtilityController extends Controller
             return redirect()->route('cbt.student');
         }
 
-        return view('welcome');
+        return redirect()->route('login');
     }
 
     public function home()

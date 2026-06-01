@@ -25,9 +25,33 @@ class DashboardController extends Controller
         $enterpriseTenants = Tenant::where('plan', 'enterprise')->count();
 
         // Financial Overview & App Installs Metrics
-        $totalInvoiced = (float) \App\Models\TenantPluginBill::where('status', '!=', 'void')->sum('total_due');
-        $totalPaid = (float) \App\Models\TenantPluginBill::where('status', 'paid')->sum('total_due');
-        $totalOutstanding = (float) \App\Models\TenantPluginBill::where('status', 'unpaid')->sum('total_due');
+        $coreInvoiced = 0.00;
+        $corePaid = 0.00;
+        $coreOutstanding = 0.00;
+
+        $tenants = Tenant::all();
+        foreach ($tenants as $tenant) {
+            if ($tenant->plan === 'free') {
+                continue;
+            }
+
+            // Student count for this school
+            $studentCount = \App\Models\Student::withoutGlobalScopes()->where('tenant_id', $tenant->id)->count();
+            $coreCost = $studentCount * 1000;
+
+            if ($coreCost > 0) {
+                $coreInvoiced += $coreCost;
+                if ($tenant->status === 'active') {
+                    $corePaid += $coreCost;
+                } else {
+                    $coreOutstanding += $coreCost;
+                }
+            }
+        }
+
+        $totalInvoiced = (float) \App\Models\TenantPluginBill::where('status', '!=', 'void')->sum('total_due') + $coreInvoiced;
+        $totalPaid = (float) \App\Models\TenantPluginBill::where('status', 'paid')->sum('total_due') + $corePaid;
+        $totalOutstanding = (float) \App\Models\TenantPluginBill::where('status', 'unpaid')->sum('total_due') + $coreOutstanding;
         $totalInstalls = (int) DB::table('tenant_marketplace_components')
             ->whereNotNull('installed_at')
             ->whereNull('uninstalled_at')

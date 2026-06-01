@@ -152,6 +152,11 @@ Route::get('/student/profile', \App\Livewire\Student\Profile::class)
     ->middleware('student.session')
     ->name('student.profile');
 
+// Public Aptitude Test Screening — only accessible after purchasing/installing the Aptitude Test plugin
+Route::middleware('plugin:aptitude-test')->group(function () {
+    Route::get('/aptitude/take/{applicant}', \App\Livewire\Aptitude\TakeTest::class)->name('aptitude.take');
+});
+
 Route::middleware(['auth', 'active'])->group(function () {
     Route::get('/dashboard', [UtilityController::class, 'dashboard'])->name('dashboard');
 
@@ -276,6 +281,22 @@ Route::middleware(['auth', 'active'])->group(function () {
         // E-Learning — only accessible after purchasing/installing the E-Learning plugin
         Route::middleware('plugin:e-learning')->group(function () {
             Route::get('/e-learning', \App\Livewire\ELearning\Index::class)->name('e-learning.index');
+        });
+
+        // Aptitude Test — only accessible after purchasing/installing the Aptitude Test plugin
+        Route::middleware('plugin:aptitude-test')->group(function () {
+            Route::get('/aptitude', \App\Livewire\Aptitude\Index::class)->name('aptitude.index');
+            Route::get('/aptitude/questions', \App\Livewire\Aptitude\Questions::class)->name('aptitude.questions');
+        });
+
+        // Payment Gateway — only accessible after purchasing/installing the Payment Gateway plugin
+        Route::middleware('plugin:payment-gateway')->group(function () {
+            Route::middleware('role:admin,bursar')->group(function () {
+                Route::get('/payment-gateway', \App\Livewire\PaymentGateway\Index::class)->name('payment-gateway.index');
+            });
+            Route::middleware('role:parent')->group(function () {
+                Route::get('/parent/pay', \App\Livewire\PaymentGateway\ParentPay::class)->name('parent.pay');
+            });
         });
 
 

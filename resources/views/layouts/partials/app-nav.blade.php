@@ -46,6 +46,13 @@ HTML;
         '<path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>',
         request()->routeIs('students.*')) !!}
 
+    @if($user?->tenant?->activeMarketplaceComponents()->where('slug', 'payment-gateway')->exists())
+        {!! $navLink(route('parent.pay'), 'Pay Fees',
+            'bg-emerald-100', 'text-emerald-500',
+            '<path stroke-linecap="round" stroke-linejoin="round" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/>',
+            request()->routeIs('parent.pay')) !!}
+    @endif
+
     {!! $navLink(route('profile'), 'My Profile',
         'bg-violet-100', 'text-violet-500',
         '<path stroke-linecap="round" stroke-linejoin="round" d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>',
@@ -156,9 +163,9 @@ HTML;
         $hasHomework = auth()->user()?->tenant?->activeMarketplaceComponents()->where('slug', 'homework')->exists();
         $hasMessages = auth()->user()?->tenant?->activeMarketplaceComponents()->where('slug', 'messages')->exists();
         $tenantComponents = auth()->user()?->tenant?->activeMarketplaceComponents()->get() ?? collect();
-        $sidebarPlugins = $tenantComponents->whereNotIn('slug', ['whatsapp-bot', 'homework', 'messages']);
+        $sidebarPlugins = $tenantComponents->whereNotIn('slug', ['whatsapp-bot', 'homework', 'messages', 'payment-gateway']);
         
-        $isAddonsActive = request()->routeIs('homework.*') || request()->routeIs('messages') || $sidebarPlugins->contains(fn($p) => Route::has($p->slug . '.index') && request()->routeIs($p->slug . '.*'));
+        $isAddonsActive = request()->routeIs('homework.*') || request()->routeIs('messages') || $sidebarPlugins->contains(fn($p) => (Route::has($p->route_name) && request()->routeIs(explode('.', $p->route_name)[0] . '.*')) || (Route::has($p->slug . '.index') && request()->routeIs($p->slug . '.*')));
         $hasAddonsAccess = in_array($user?->role, ['admin', 'teacher'], true) && ($hasHomework || $hasMessages || $sidebarPlugins->isNotEmpty());
     @endphp
     @if($hasAddonsAccess)
@@ -195,13 +202,15 @@ HTML;
 
                 @foreach($sidebarPlugins as $component)
                     @php
-                        $routeExists = Route::has($component->slug . '.index');
-                        $href       = $routeExists ? route($component->slug . '.index') : '#';
-                        $isActive   = $routeExists && request()->routeIs($component->slug . '.*');
+                        $routeExists = Route::has($component->route_name) || Route::has($component->slug . '.index');
+                        $href       = Route::has($component->route_name) ? route($component->route_name) : (Route::has($component->slug . '.index') ? route($component->slug . '.index') : '#');
+                        $isActive   = (Route::has($component->route_name) && request()->routeIs(explode('.', $component->route_name)[0] . '.*')) || (Route::has($component->slug . '.index') && request()->routeIs($component->slug . '.*'));
 
                         $iconPath = '<path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-14L4 7m8 4v10M4 7v10l8 4"/>';
                         if ($component->slug === 'cbt') {
                             $iconPath = '<path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>';
+                        } elseif ($component->slug === 'aptitude-test') {
+                            $iconPath = '<path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>';
                         }
                     @endphp
 
@@ -243,6 +252,13 @@ HTML;
                         'bg-emerald-100', 'text-emerald-500',
                         '<path stroke-linecap="round" stroke-linejoin="round" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/>',
                         request()->routeIs('billing.*')) !!}
+                @endif
+
+                @if(($user?->role === 'bursar' || $user?->role === 'admin') && $user?->tenant?->activeMarketplaceComponents()->where('slug', 'payment-gateway')->exists())
+                    {!! $navLink(route('payment-gateway.index'), 'Payment Gateway',
+                        'bg-purple-100', 'text-purple-500',
+                        '<path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.952 11.952 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>',
+                        request()->routeIs('payment-gateway.index')) !!}
                 @endif
                 
                 {!! $navLink(route('more-features'), 'More Features',

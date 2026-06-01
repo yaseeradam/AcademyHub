@@ -37,7 +37,10 @@ return [
     ],
 
     'whatsapp' => [
-        'api_key' => env('WHATSAPP_API_KEY'),
+        'api_key'         => env('WHATSAPP_API_KEY'),
+        'token'           => env('WHATSAPP_TOKEN'),
+        'phone_number_id' => env('WHATSAPP_PHONE_NUMBER_ID'),
+        'verify_token'    => env('WHATSAPP_VERIFY_TOKEN'),
     ],
 
 ];
