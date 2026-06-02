@@ -19,9 +19,23 @@ class EnsureUserIsActive
         $user = $request->user();
 
         if ($user && ! $user->is_active) {
+            // Revoke current Sanctum token if present to prevent reuse
+            if (method_exists($user, 'currentAccessToken') && $user->currentAccessToken()) {
+                $user->currentAccessToken()->delete();
+            }
+
+            if ($request->expectsJson() || $request->is('api/*')) {
+                return response()->json([
+                    'message' => 'Your account is inactive. Contact the administrator.',
+                ], 403);
+            }
+
             Auth::logout();
-            $request->session()->invalidate();
-            $request->session()->regenerateToken();
+
+            if ($request->hasSession()) {
+                $request->session()->invalidate();
+                $request->session()->regenerateToken();
+            }
 
             return redirect()
                 ->route('login')

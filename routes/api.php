@@ -26,7 +26,7 @@ Route::post('/student/login', [StudentAuthController::class, 'login']);
 Route::get('/tenant/{slug}', [TenantDiscoveryController::class, 'show']);
 
 // Protected
-Route::middleware('auth:sanctum')->group(function () {
+Route::middleware(['auth:sanctum', 'active'])->group(function () {
 
     Route::get('/user',   [AuthController::class, 'me']);
     Route::post('/logout',[AuthController::class, 'logout']);
