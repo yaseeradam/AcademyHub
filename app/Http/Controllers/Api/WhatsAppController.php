@@ -1414,6 +1414,35 @@ class WhatsAppController extends Controller
             ->where('whatsapp_verified', true)
             ->first();
 
+        if ($user) {
+            // Verify that the User account itself is active
+            if (!$user->is_active) {
+                $user->whatsapp_phone = null;
+                $user->whatsapp_verified = false;
+                $user->whatsapp_subscribed = false;
+                $user->save();
+
+                \Illuminate\Support\Facades\Cache::forget($cacheKey);
+                $this->sendMetaMessage($phone, "⚠️ *Account Suspended*\n\nYour school account is currently inactive. WhatsApp access has been disconnected. Please contact the school administrator.");
+                return;
+            }
+
+            // If the user is a student, verify that their student profile is active
+            if ($user->role === 'student') {
+                $student = \App\Models\Student::where('user_id', $user->id)->first();
+                if (!$student || $student->status !== 'Active') {
+                    $user->whatsapp_phone = null;
+                    $user->whatsapp_verified = false;
+                    $user->whatsapp_subscribed = false;
+                    $user->save();
+
+                    \Illuminate\Support\Facades\Cache::forget($cacheKey);
+                    $this->sendMetaMessage($phone, "⚠️ *Access Revoked*\n\nYour student profile is no longer active. WhatsApp access has been disconnected.");
+                    return;
+                }
+            }
+        }
+
         if (!$user) {
             if (in_array($textLower, ['hi', 'hello', 'hey', 'menu', 'start', 'help'])) {
                 $this->sendMetaMessage($phone, "👋 *Welcome to HubGenie!*\n\nI don't recognize your number yet.\n\nType *login* to connect your account using the credentials you use on the school website.");

@@ -536,12 +536,35 @@
 
     $wire.on('upload-error', (event) => {
         if (progressModal) { progressModal.remove(); progressModal = null; }
-        showModal('error', 'Upload Failed', event[0].message);
+        
+        let data = event;
+        if (event && typeof event === 'object') {
+            if ('detail' in event) {
+                data = event.detail;
+            }
+        }
+        if (Array.isArray(data)) {
+            data = data[0];
+        }
+        
+        const message = data?.message ?? (typeof data === 'string' ? data : 'An unknown upload error occurred.');
+        showModal('error', 'Upload Failed', message);
     });
 
     $wire.on('student-saved', (event) => {
         if (progressModal) { progressModal.remove(); progressModal = null; }
-        const data = event?.[0] ?? event;
+        
+        // Robustly extract the data payload from different Livewire/Alpine callback structures
+        let data = event;
+        if (event && typeof event === 'object') {
+            if ('detail' in event) {
+                data = event.detail;
+            }
+        }
+        if (Array.isArray(data)) {
+            data = data[0];
+        }
+        
         showStudentSavedModal(data);
     });
 

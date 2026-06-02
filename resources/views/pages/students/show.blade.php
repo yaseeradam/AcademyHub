@@ -5,14 +5,24 @@
     use App\Models\Score;
     use App\Models\Transaction;
 
+    $user = auth()->user();
+    $tenant = $user ? $user->tenant : (app()->bound('currentTenant') ? app('currentTenant') : null);
+    $hasPaymentGateway = $tenant ? $tenant->activeMarketplaceComponents()->where('slug', 'payment-gateway')->exists() : false;
+
     $tab = request('tab', 'profile');
     $tabs = [
         'profile' => 'Profile Overview',
         'attendance' => 'Attendance Record',
         'results' => 'Academic Results',
-        'finance' => 'Financial Details',
-        'analytics' => 'Performance Analytics',
     ];
+    if ($hasPaymentGateway) {
+        $tabs['finance'] = 'Financial Details';
+    }
+    $tabs['analytics'] = 'Performance Analytics';
+
+    if ($tab === 'finance' && !$hasPaymentGateway) {
+        $tab = 'profile';
+    }
 
     $initials = collect(explode(' ', $student->full_name))
         ->filter()
@@ -58,24 +68,42 @@
     $attendanceCounts = collect();
     $lastAttendanceDate = null;
     if ($tab === 'attendance') {
+        $currentTerm = \App\Models\AcademicTerm::where('is_active', true)->first();
+        if (!$currentTerm) {
+            $currentTerm = \App\Models\AcademicTerm::latest()->first();
+        }
+
+        $session = $currentTerm?->academicSession?->name ?? now()->format('Y') . '/' . (now()->format('Y') + 1);
+        $term = $currentTerm?->term_number ?? 1;
+
         $attendanceMarks = AttendanceMark::query()
+            ->join('attendance_sheets', 'attendance_sheets.id', '=', 'attendance_marks.sheet_id')
+            ->select('attendance_marks.*')
             ->with([
                 'sheet' => fn ($q) => $q->with(['schoolClass', 'section', 'takenBy']),
             ])
-            ->where('student_id', $student->id)
-            ->orderByDesc('id')
+            ->where('attendance_marks.student_id', $student->id)
+            ->where('attendance_sheets.term', $term)
+            ->where('attendance_sheets.session', $session)
+            ->orderByDesc('attendance_sheets.date')
+            ->orderByDesc('attendance_marks.id')
             ->limit(30)
             ->get();
 
         $attendanceCounts = AttendanceMark::query()
-            ->where('student_id', $student->id)
-            ->selectRaw('status, COUNT(*) as total')
-            ->groupBy('status')
+            ->join('attendance_sheets', 'attendance_sheets.id', '=', 'attendance_marks.sheet_id')
+            ->where('attendance_marks.student_id', $student->id)
+            ->where('attendance_sheets.term', $term)
+            ->where('attendance_sheets.session', $session)
+            ->selectRaw('attendance_marks.status, COUNT(*) as total')
+            ->groupBy('attendance_marks.status')
             ->pluck('total', 'status');
 
         $lastAttendanceDate = AttendanceMark::query()
             ->where('student_id', $student->id)
             ->join('attendance_sheets', 'attendance_sheets.id', '=', 'attendance_marks.sheet_id')
+            ->where('attendance_sheets.term', $term)
+            ->where('attendance_sheets.session', $session)
             ->max('attendance_sheets.date');
     }
 
@@ -87,12 +115,8 @@
             $currentTerm = \App\Models\AcademicTerm::latest()->first();
         }
         if ($currentTerm) {
-            $performanceData = [
-                'overview' => $service->getOverview($student, $currentTerm->term_number, $currentTerm->academicSession->name ?? now()->format('Y') . '/' . (now()->format('Y') + 1)),
-                'attendance_impact' => $service->getAttendanceImpact($student, $currentTerm->term_number, $currentTerm->academicSession->name ?? now()->format('Y') . '/' . (now()->format('Y') + 1)),
-                'homework_performance' => $service->getHomeworkPerformance($student),
-                'cbt_performance' => $service->getCbtPerformance($student),
-            ];
+            $sessionName = $currentTerm->academicSession->name ?? now()->format('Y') . '/' . (now()->format('Y') + 1);
+            $performanceData = $service->getPerformanceAnalysis($student, $currentTerm->term_number, $sessionName);
         }
     }
 @endphp
@@ -474,10 +498,308 @@
         </div>
 
     @elseif ($tab === 'analytics')
-        <div class="rounded-2xl bg-white shadow-sm ring-1 ring-slate-100 p-8 text-center text-slate-500">
-            <svg class="mx-auto h-12 w-12 text-slate-300 mb-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
-            <div class="text-lg font-bold text-slate-800 mb-1">Analytics Dashboard</div>
-            <p>Comprehensive system analytics implementation typically resides here. This area adapts to the current active reporting modules.</p>
+        <div class="space-y-6">
+            {{-- Performance Analytics Title --}}
+            <div class="rounded-2xl bg-white shadow-sm ring-1 ring-slate-100 p-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                    <div class="text-lg font-bold text-slate-800">Performance Analytics</div>
+                    <div class="mt-0.5 text-sm text-slate-500">Comprehensive performance tracking and academic insights for the current active term.</div>
+                </div>
+            </div>
+
+            @if(!empty($performanceData))
+                {{-- Academic Performance Card --}}
+                <div class="rounded-2xl bg-white shadow-sm ring-1 ring-slate-100 overflow-hidden">
+                    <div class="border-b border-slate-100 px-6 py-4 bg-gradient-to-r from-blue-50/50 to-indigo-50/30">
+                        <div class="flex items-center gap-2.5">
+                            <div class="h-8 w-8 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center">
+                                <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            </div>
+                            <div class="text-base font-bold text-slate-800">Academic Performance</div>
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        @if(isset($performanceData['overview']) && $performanceData['overview']['total_subjects'] > 0)
+                            <div class="grid grid-cols-2 gap-4 lg:grid-cols-4">
+                                <div class="rounded-xl border border-blue-100 bg-gradient-to-br from-blue-50 to-blue-100/30 p-5 hover:shadow-md transition">
+                                    <div class="text-xs font-bold uppercase tracking-wider text-blue-600">Average Score</div>
+                                    <div class="mt-2 text-2xl font-black text-slate-800">{{ $performanceData['overview']['average_score'] }}</div>
+                                </div>
+                                <div class="rounded-xl border border-purple-100 bg-gradient-to-br from-purple-50 to-purple-100/30 p-5 hover:shadow-md transition">
+                                    <div class="text-xs font-bold uppercase tracking-wider text-purple-600">Current Grade</div>
+                                    <div class="mt-2 text-2xl font-black text-slate-800">{{ $performanceData['overview']['grade'] }}</div>
+                                </div>
+                                <div class="rounded-xl border border-emerald-100 bg-gradient-to-br from-emerald-50 to-emerald-100/30 p-5 hover:shadow-md transition">
+                                    <div class="text-xs font-bold uppercase tracking-wider text-emerald-600">Subjects Passed</div>
+                                    <div class="mt-2 text-2xl font-black text-slate-800">{{ $performanceData['overview']['subjects_passed'] }} / {{ $performanceData['overview']['total_subjects'] }}</div>
+                                </div>
+                                <div class="rounded-xl border border-indigo-100 bg-gradient-to-br from-indigo-50 to-indigo-100/30 p-5 hover:shadow-md transition">
+                                    <div class="text-xs font-bold uppercase tracking-wider text-indigo-600">Highest Score</div>
+                                    <div class="mt-2 text-2xl font-black text-slate-800">{{ $performanceData['overview']['highest_score'] }}</div>
+                                </div>
+                            </div>
+                        @else
+                            <div class="rounded-xl border border-dashed border-slate-200 bg-slate-50/50 p-8 text-center">
+                                <svg class="mx-auto h-12 w-12 text-slate-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                                <div class="mt-3 text-sm font-bold text-slate-700">No scores recorded yet</div>
+                                <div class="mt-1 text-xs text-slate-500">Academic performance scores will appear here once grades are entered for the active term.</div>
+                            </div>
+                        @endif
+                    </div>
+                </div>
+
+                {{-- Performance Trend and Strengths Grid --}}
+                @if(isset($performanceData['progress_trend']) && $performanceData['progress_trend']->isNotEmpty())
+                    <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
+                        {{-- Term-by-Term Progress Bar Chart --}}
+                        <div class="lg:col-span-2 rounded-2xl bg-white shadow-sm ring-1 ring-slate-100 overflow-hidden">
+                            <div class="border-b border-slate-100 px-6 py-4 bg-gradient-to-r from-violet-50/50 to-purple-50/30">
+                                <div class="flex items-center gap-2.5">
+                                    <div class="h-8 w-8 rounded-lg bg-violet-100 text-violet-600 flex items-center justify-center">
+                                        <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"></path><path stroke-linecap="round" stroke-linejoin="round" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"></path></svg>
+                                    </div>
+                                    <div class="text-base font-bold text-slate-800">Academic Progress Trend</div>
+                                </div>
+                            </div>
+                            <div class="p-6">
+                                <div class="rounded-xl bg-slate-50/50 p-5 ring-1 ring-slate-100">
+                                    <div class="flex items-end justify-around h-48 gap-4 pt-4">
+                                        @foreach($performanceData['progress_trend'] as $trend)
+                                            <div class="flex flex-col items-center gap-1.5 flex-1">
+                                                <span class="text-xs font-bold text-slate-700">{{ $trend['average'] }}</span>
+                                                <div class="w-full max-w-[40px] rounded-t-lg bg-gradient-to-t from-violet-500 to-indigo-400 shadow-sm transition-all duration-500 hover:opacity-90"
+                                                     style="height: {{ max(6, $trend['percentage'] * 1.5) }}px;"></div>
+                                                <span class="text-xs font-bold text-slate-500">{{ $trend['term'] }}</span>
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {{-- Strengths vs Weaknesses Mini List --}}
+                        <div class="rounded-2xl bg-white shadow-sm ring-1 ring-slate-100 overflow-hidden">
+                            <div class="border-b border-slate-100 px-6 py-4 bg-gradient-to-r from-emerald-50/50 to-rose-50/30">
+                                <div class="flex items-center gap-2.5">
+                                    <div class="h-8 w-8 rounded-lg bg-emerald-100 text-emerald-600 flex items-center justify-center">
+                                        <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"></path></svg>
+                                    </div>
+                                    <div class="text-base font-bold text-slate-800">Academic Standing</div>
+                                </div>
+                            </div>
+                            <div class="p-6 space-y-4">
+                                <div>
+                                    <div class="text-xs font-bold uppercase tracking-wider text-emerald-600 mb-2">Strengths</div>
+                                    @if(isset($performanceData['strengths_weaknesses']['strengths']) && $performanceData['strengths_weaknesses']['strengths']->isNotEmpty())
+                                        <div class="space-y-1.5">
+                                            @foreach($performanceData['strengths_weaknesses']['strengths'] as $s)
+                                                <div class="flex items-center justify-between text-xs font-semibold text-slate-700 bg-emerald-50 px-2.5 py-1.5 rounded-lg">
+                                                    <span>{{ $s['subject'] }}</span>
+                                                    <span class="text-emerald-700 font-bold">{{ $s['score'] }} ({{ $s['grade'] }})</span>
+                                                </div>
+                                            @endforeach
+                                        </div>
+                                    @else
+                                        <div class="text-xs text-slate-400 bg-slate-50 px-2.5 py-1.5 rounded-lg">No strengths identified yet.</div>
+                                    @endif
+                                </div>
+
+                                <div>
+                                    <div class="text-xs font-bold uppercase tracking-wider text-rose-600 mb-2">Needs Attention</div>
+                                    @if(isset($performanceData['strengths_weaknesses']['weaknesses']) && $performanceData['strengths_weaknesses']['weaknesses']->isNotEmpty())
+                                        <div class="space-y-1.5">
+                                            @foreach($performanceData['strengths_weaknesses']['weaknesses'] as $w)
+                                                <div class="flex items-center justify-between text-xs font-semibold text-slate-700 bg-rose-50 px-2.5 py-1.5 rounded-lg">
+                                                    <span>{{ $w['subject'] }}</span>
+                                                    <span class="text-rose-700 font-bold">{{ $w['score'] }} ({{ $w['grade'] }})</span>
+                                                </div>
+                                            @endforeach
+                                        </div>
+                                    @else
+                                        <div class="text-xs text-slate-400 bg-slate-50 px-2.5 py-1.5 rounded-lg">No weak areas identified.</div>
+                                    @endif
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                @endif
+
+                {{-- Subject Performance Progress Chart --}}
+                @if(isset($performanceData['subject_performance']) && $performanceData['subject_performance']->isNotEmpty())
+                    <div class="rounded-2xl bg-white shadow-sm ring-1 ring-slate-100 overflow-hidden">
+                        <div class="border-b border-slate-100 px-6 py-4 bg-gradient-to-r from-blue-50/50 to-indigo-50/30">
+                            <div class="flex items-center gap-2.5">
+                                <div class="h-8 w-8 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center">
+                                    <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+                                </div>
+                                <div class="text-base font-bold text-slate-800">Subject-wise Academic Standing</div>
+                            </div>
+                        </div>
+                        <div class="p-6 space-y-4">
+                            @foreach($performanceData['subject_performance'] as $sp)
+                                @php
+                                    $barBg = match(true) {
+                                        $sp['percentage'] >= 70 => 'bg-emerald-500',
+                                        $sp['percentage'] >= 50 => 'bg-blue-500',
+                                        default => 'bg-amber-500',
+                                    };
+                                @endphp
+                                <div class="space-y-1">
+                                    <div class="flex items-center justify-between text-sm font-bold text-slate-700">
+                                        <span>{{ $sp['subject'] }}</span>
+                                        <span>{{ $sp['total'] }} ({{ $sp['grade'] }} • {{ $sp['percentage'] }}%)</span>
+                                    </div>
+                                    <div class="w-full h-2 rounded-full bg-slate-100 overflow-hidden shadow-inner">
+                                        <div class="h-full rounded-full {{ $barBg }} transition-all duration-500" style="width: {{ $sp['percentage'] }}%"></div>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
+                @endif
+
+                {{-- Attendance Overview Card --}}
+                <div class="rounded-2xl bg-white shadow-sm ring-1 ring-slate-100 overflow-hidden">
+                    <div class="border-b border-slate-100 px-6 py-4 bg-gradient-to-r from-emerald-50/50 to-teal-50/30">
+                        <div class="flex items-center gap-2.5">
+                            <div class="h-8 w-8 rounded-lg bg-emerald-100 text-emerald-600 flex items-center justify-center">
+                                <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+                            </div>
+                            <div class="text-base font-bold text-slate-800">Attendance Overview</div>
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        @if(isset($performanceData['attendance_impact']) && $performanceData['attendance_impact']['total_days'] > 0)
+                            <div class="grid grid-cols-2 gap-4 lg:grid-cols-5">
+                                <div class="rounded-xl border border-emerald-100 bg-gradient-to-br from-emerald-50 to-emerald-100/30 p-5 hover:shadow-md transition">
+                                    <div class="text-xs font-bold uppercase tracking-wider text-emerald-600">Attendance Rate</div>
+                                    <div class="mt-2 text-2xl font-black text-slate-800">{{ $performanceData['attendance_impact']['attendance_rate'] }}%</div>
+                                </div>
+                                <div class="rounded-xl border border-slate-100 bg-white p-5 hover:shadow-md transition">
+                                    <div class="text-xs font-bold uppercase tracking-wider text-slate-400">Days Present</div>
+                                    <div class="mt-2 text-2xl font-black text-emerald-600">{{ $performanceData['attendance_impact']['present_days'] }}</div>
+                                </div>
+                                <div class="rounded-xl border border-slate-100 bg-white p-5 hover:shadow-md transition">
+                                    <div class="text-xs font-bold uppercase tracking-wider text-slate-400">Days Absent</div>
+                                    <div class="mt-2 text-2xl font-black text-red-500">{{ $performanceData['attendance_impact']['absent_days'] }}</div>
+                                </div>
+                                <div class="rounded-xl border border-slate-100 bg-white p-5 hover:shadow-md transition">
+                                    <div class="text-xs font-bold uppercase tracking-wider text-slate-400">Days Late</div>
+                                    <div class="mt-2 text-2xl font-black text-amber-500">{{ $performanceData['attendance_impact']['late_days'] }}</div>
+                                </div>
+                                <div class="rounded-xl border border-slate-100 bg-white p-5 hover:shadow-md transition">
+                                    <div class="text-xs font-bold uppercase tracking-wider text-slate-400">Total Term Days</div>
+                                    <div class="mt-2 text-2xl font-black text-slate-800">{{ $performanceData['attendance_impact']['total_days'] }}</div>
+                                </div>
+                            </div>
+                            <div class="mt-5 rounded-xl border border-blue-200 bg-gradient-to-r from-blue-50 to-indigo-50/50 p-4 shadow-sm">
+                                <div class="flex items-start gap-3">
+                                    <svg class="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                    <div class="text-sm font-semibold text-blue-900 leading-relaxed">{{ $performanceData['attendance_impact']['correlation'] }}</div>
+                                </div>
+                            </div>
+                        @else
+                            <div class="rounded-xl border border-dashed border-slate-200 bg-slate-50/50 p-8 text-center">
+                                <svg class="mx-auto h-12 w-12 text-slate-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                                <div class="mt-3 text-sm font-bold text-slate-700">No attendance records yet</div>
+                                <div class="mt-1 text-xs text-slate-500">Attendance analysis will populate once student roll-calls are marked.</div>
+                            </div>
+                        @endif
+                    </div>
+                </div>
+
+                {{-- Homework & CBT Grid --}}
+                <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
+                    {{-- Homework Performance Card --}}
+                    <div class="rounded-2xl bg-white shadow-sm ring-1 ring-slate-100 overflow-hidden">
+                        <div class="border-b border-slate-100 px-6 py-4 bg-gradient-to-r from-purple-50/50 to-pink-50/30">
+                            <div class="flex items-center gap-2.5">
+                                <div class="h-8 w-8 rounded-lg bg-purple-100 text-purple-600 flex items-center justify-center">
+                                    <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
+                                </div>
+                                <div class="text-base font-bold text-slate-800">Homework Performance</div>
+                            </div>
+                        </div>
+                        <div class="p-6">
+                            @if(isset($performanceData['homework_performance']) && $performanceData['homework_performance']['total_assignments'] > 0)
+                                <div class="space-y-4">
+                                    <div class="flex items-center justify-between rounded-xl border border-slate-100 bg-slate-50/50 px-4 py-3">
+                                        <span class="text-sm font-semibold text-slate-500">Total Assignments</span>
+                                        <span class="text-base font-black text-slate-800">{{ $performanceData['homework_performance']['total_assignments'] }}</span>
+                                    </div>
+                                    <div class="flex items-center justify-between rounded-xl border border-slate-100 bg-white px-4 py-3 shadow-sm">
+                                        <span class="text-sm font-semibold text-slate-500">Submitted Tasks</span>
+                                        <span class="text-base font-black text-emerald-600">{{ $performanceData['homework_performance']['submitted'] }}</span>
+                                    </div>
+                                    <div class="flex items-center justify-between rounded-xl border border-slate-100 bg-white px-4 py-3 shadow-sm">
+                                        <span class="text-sm font-semibold text-slate-500">Tasks On Time</span>
+                                        <span class="text-base font-black text-blue-600">{{ $performanceData['homework_performance']['on_time'] }}</span>
+                                    </div>
+                                    <div class="flex items-center justify-between rounded-xl border border-purple-150 bg-gradient-to-br from-purple-50 to-purple-100/30 px-4 py-3">
+                                        <span class="text-sm font-bold text-purple-700">Average Grade</span>
+                                        <span class="text-base font-black text-purple-950">{{ $performanceData['homework_performance']['average_grade'] }}</span>
+                                    </div>
+                                </div>
+                            @else
+                                <div class="rounded-xl border border-dashed border-slate-200 bg-slate-50/50 p-8 text-center">
+                                    <svg class="mx-auto h-12 w-12 text-slate-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                                    <div class="mt-3 text-sm font-bold text-slate-700">No homework assigned yet</div>
+                                    <div class="mt-1 text-xs text-slate-500">Homework stats will activate when assignments are submitted.</div>
+                                </div>
+                            @endif
+                        </div>
+                    </div>
+
+                    {{-- CBT Exam Performance Card --}}
+                    <div class="rounded-2xl bg-white shadow-sm ring-1 ring-slate-100 overflow-hidden">
+                        <div class="border-b border-slate-100 px-6 py-4 bg-gradient-to-r from-orange-50/50 to-amber-50/30">
+                            <div class="flex items-center gap-2.5">
+                                <div class="h-8 w-8 rounded-lg bg-orange-100 text-orange-600 flex items-center justify-center">
+                                    <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                                </div>
+                                <div class="text-base font-bold text-slate-800">CBT Exam Performance</div>
+                            </div>
+                        </div>
+                        <div class="p-6">
+                            @if(isset($performanceData['cbt_performance']) && $performanceData['cbt_performance']['total_exams'] > 0)
+                                <div class="space-y-4">
+                                    <div class="flex items-center justify-between rounded-xl border border-slate-100 bg-slate-50/50 px-4 py-3">
+                                        <span class="text-sm font-semibold text-slate-500">Total CBT Exams</span>
+                                        <span class="text-base font-black text-slate-800">{{ $performanceData['cbt_performance']['total_exams'] }}</span>
+                                    </div>
+                                    <div class="flex items-center justify-between rounded-xl border border-slate-100 bg-white px-4 py-3 shadow-sm">
+                                        <span class="text-sm font-semibold text-slate-500">Average CBT Score</span>
+                                        <span class="text-base font-black text-blue-600">{{ $performanceData['cbt_performance']['average_percent'] }}%</span>
+                                    </div>
+                                    <div class="flex items-center justify-between rounded-xl border border-slate-100 bg-white px-4 py-3 shadow-sm">
+                                        <span class="text-sm font-semibold text-slate-500">Exams Passed</span>
+                                        <span class="text-base font-black text-emerald-600">{{ $performanceData['cbt_performance']['exams_passed'] }}</span>
+                                    </div>
+                                    <div class="flex items-center justify-between rounded-xl border border-orange-150 bg-gradient-to-br from-orange-50 to-orange-100/30 px-4 py-3">
+                                        <span class="text-sm font-bold text-orange-700">Highest CBT Score</span>
+                                        <span class="text-base font-black text-orange-950">{{ $performanceData['cbt_performance']['highest_score'] }}</span>
+                                    </div>
+                                </div>
+                            @else
+                                <div class="rounded-xl border border-dashed border-slate-200 bg-slate-50/50 p-8 text-center">
+                                    <svg class="mx-auto h-12 w-12 text-slate-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                                    <div class="mt-3 text-sm font-bold text-slate-700">No CBT exams completed</div>
+                                    <div class="mt-1 text-xs text-slate-500">CBT performance metrics will activate once exam attempts are saved.</div>
+                                </div>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+            @else
+                {{-- No Academic Term Fallback --}}
+                <div class="rounded-2xl bg-white shadow-sm ring-1 ring-slate-100 p-12 text-center">
+                    <div class="mx-auto grid h-16 w-16 place-items-center rounded-2xl bg-amber-50 text-amber-600 shadow-md">
+                        <svg class="h-8 w-8" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                    </div>
+                    <div class="mt-5 text-lg font-black text-slate-800">No Academic Term Active</div>
+                    <p class="mt-2 text-sm text-slate-500 max-w-sm mx-auto">Please set up and activate an academic term in settings to populate live student performance analytics.</p>
+                </div>
+            @endif
         </div>
     @endif
 

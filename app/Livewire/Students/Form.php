@@ -321,6 +321,11 @@ class Form extends Component
             'parentPassword' => $this->create_parent_account ? $this->parent_password : null,
         ]);
 
+        if (!$isNew) {
+            session()->flash('status', 'Student profile updated successfully.');
+            return $this->redirect(route('students.index'), navigate: true);
+        }
+
         return null;
     }
 

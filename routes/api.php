@@ -82,7 +82,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/media/upload', [MediaUploadController::class, 'upload']);
 
     // Student portal API group
-    Route::prefix('student')->group(function () {
+    Route::prefix('student')
+        ->middleware(\App\Http\Middleware\EnsureStudentIsActive::class)
+        ->group(function () {
         Route::post('/logout',                  [StudentAuthController::class, 'logout']);
         Route::get('/dashboard',                [StudentDashboardController::class, 'dashboard']);
         Route::get('/results',                  [StudentResultsController::class, 'results']);

@@ -179,24 +179,9 @@ class StudentPerformanceService
 
     public function getAttendanceImpact(Student $student, int $term, string $session): array
     {
-        $currentTerm = AcademicTerm::where('term_number', $term)
-            ->whereHas('academicSession', fn($q) => $q->where('name', $session))
-            ->first();
-
-        if (!$currentTerm) {
-            return [
-                'attendance_rate' => 0,
-                'total_days' => 0,
-                'present_days' => 0,
-                'absent_days' => 0,
-                'late_days' => 0,
-                'correlation' => 'No data',
-            ];
-        }
-
         $marks = AttendanceMark::where('student_id', $student->id)
-            ->whereHas('sheet', function($q) use ($currentTerm) {
-                $q->whereBetween('date', [$currentTerm->starts_on, $currentTerm->ends_on ?? now()]);
+            ->whereHas('sheet', function($q) use ($term, $session) {
+                $q->where('term', $term)->where('session', $session);
             })
             ->get();
 
@@ -218,6 +203,7 @@ class StudentPerformanceService
         $performanceRate = $maxPossible > 0 ? ($avgScore / $maxPossible) * 100 : 0;
 
         $correlation = match(true) {
+            $total === 0 => 'No attendance data recorded yet.',
             $attendanceRate >= 90 && $performanceRate >= 70 => 'Excellent attendance, excellent performance',
             $attendanceRate >= 90 && $performanceRate < 70 => 'Good attendance, needs academic improvement',
             $attendanceRate < 75 && $performanceRate < 60 => 'Poor attendance affecting performance',

@@ -25,15 +25,15 @@
 
 <div class="space-y-6">
 
-        {-- Page Header --}
+    {{-- Page Header --}}
     <div class="rounded-xl bg-slate-900 px-5 py-4 shadow-sm">
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-                <h1 class="text-xl font-bold text-white">Performance</h1>
-            
+            <h1 class="text-xl font-bold text-white">Performance</h1>
         </div>
     </div>
 
     {{-- ── Stat Cards ── --}}
+    @if($totalSubs > 0)
         <div class="grid grid-cols-2 gap-4 sm:grid-cols-4">
 
             {{-- Average Score Ring --}}

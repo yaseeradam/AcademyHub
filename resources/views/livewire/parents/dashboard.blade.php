@@ -10,6 +10,10 @@
     $maxTotal  = $stats['maxTotal'] ?? 100;
     $ordinal   = fn($n) => $n . match(true) { $n%100>=11&&$n%100<=13=>'th', $n%10===1=>'st', $n%10===2=>'nd', $n%10===3=>'rd', default=>'th' };
     $gradeColor = fn($g) => match($g) { 'A'=>'bg-emerald-100 text-emerald-800','B'=>'bg-blue-100 text-blue-800','C'=>'bg-yellow-100 text-yellow-800','D'=>'bg-orange-100 text-orange-800',default=>'bg-red-100 text-red-800' };
+
+    $user = auth()->user();
+    $tenant = $user ? $user->tenant : (app()->bound('currentTenant') ? app('currentTenant') : null);
+    $hasPaymentGateway = $tenant ? $tenant->activeMarketplaceComponents()->where('slug', 'payment-gateway')->exists() : false;
 @endphp
 
 <div class="space-y-6 pb-12">
@@ -26,7 +30,11 @@
                 <span class="text-xs font-bold text-white tracking-wide uppercase">Parent Dashboard</span>
             </div>
             <h1 class="text-3xl font-black text-white sm:text-4xl tracking-tight">Welcome back, {{ auth()->user()->name }}</h1>
-            <p class="mt-2 text-sm text-brand-100 font-semibold max-w-lg">Track your children's academic progress, attendance, homework, and fees seamlessly from one place.</p>
+            @if($hasPaymentGateway)
+                <p class="mt-2 text-sm text-brand-100 font-semibold max-w-lg">Track your children's academic progress, attendance, homework, and fees seamlessly from one place.</p>
+            @else
+                <p class="mt-2 text-sm text-brand-100 font-semibold max-w-lg">Track your children's academic progress, attendance, and homework seamlessly from one place.</p>
+            @endif
         </div>
     </div>
 
@@ -128,8 +136,8 @@
             </div>
         </div>
 
-        {{-- 4 Stat Metrics Row --}}
-        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        {{-- Stat Metrics Row --}}
+        <div class="grid grid-cols-2 lg:grid-cols-{{ $hasPaymentGateway ? 4 : 3 }} gap-4">
             {{-- Metric 1: Average --}}
             <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm flex flex-col justify-between transition-transform hover:-translate-y-1 hover:shadow-md">
                 <div class="flex items-start justify-between">
@@ -165,16 +173,18 @@
                 <div class="mt-4 text-3xl font-black text-slate-800 tracking-tight">{{ $att['rate'] }}<span class="text-sm font-bold text-slate-400 ml-1">%</span></div>
             </div>
 
-            {{-- Metric 4: Fees --}}
-            <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm flex flex-col justify-between transition-transform hover:-translate-y-1 hover:shadow-md">
-                <div class="flex items-start justify-between">
-                    <div class="h-10 w-10 rounded-xl {{ $fees['outstanding'] > 0 ? 'bg-rose-50 text-rose-500' : 'bg-emerald-50 text-emerald-500' }} flex items-center justify-center">
-                        <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path></svg>
+            @if($hasPaymentGateway)
+                {{-- Metric 4: Fees --}}
+                <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm flex flex-col justify-between transition-transform hover:-translate-y-1 hover:shadow-md">
+                    <div class="flex items-start justify-between">
+                        <div class="h-10 w-10 rounded-xl {{ $fees['outstanding'] > 0 ? 'bg-rose-50 text-rose-500' : 'bg-emerald-50 text-emerald-500' }} flex items-center justify-center">
+                            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path></svg>
+                        </div>
+                        <p class="text-[10px] font-black uppercase tracking-wider text-slate-400 bg-slate-50 px-2 py-1 rounded-md">Outstanding</p>
                     </div>
-                    <p class="text-[10px] font-black uppercase tracking-wider text-slate-400 bg-slate-50 px-2 py-1 rounded-md">Outstanding</p>
+                    <div class="mt-4 text-2xl font-black {{ $fees['outstanding'] > 0 ? 'text-rose-600' : 'text-slate-800' }} tracking-tight truncate">₦{{ number_format($fees['outstanding']) }}</div>
                 </div>
-                <div class="mt-4 text-2xl font-black {{ $fees['outstanding'] > 0 ? 'text-rose-600' : 'text-slate-800' }} tracking-tight truncate">₦{{ number_format($fees['outstanding']) }}</div>
-            </div>
+            @endif
         </div>
 
         {{-- Grid Main Layout --}}
