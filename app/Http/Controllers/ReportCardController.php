@@ -10,7 +10,7 @@ use App\Support\Audit;
 use App\Support\ReportCardService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
+use Symfony\Component\HttpFoundation\Response;
 
 class ReportCardController extends Controller
 {
