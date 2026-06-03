@@ -140,7 +140,7 @@ class Start extends Component
                         'last_name' => $lastName !== '' ? $lastName : 'Candidate',
                         'class_id' => $classObj->id,
                         'section_id' => $sectionObj->id,
-                        'gender' => 'Other',
+                        'gender' => 'Male',
                         'status' => 'Active',
                         'password' => bcrypt('password'),
                     ]);
