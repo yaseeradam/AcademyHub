@@ -450,6 +450,10 @@ Route::prefix('superadmin')->name('superadmin.')->group(function () {
         Route::get('/notifications', [\App\Http\Controllers\SuperAdmin\NotificationsController::class, 'index'])->name('notifications.index');
         Route::post('/notifications/{notification}/read', [\App\Http\Controllers\SuperAdmin\NotificationsController::class, 'markRead'])->name('notifications.mark-read');
         Route::post('/notifications/mark-all-read', [\App\Http\Controllers\SuperAdmin\NotificationsController::class, 'markAllRead'])->name('notifications.mark-all-read');
+        
+        // Notifications Web Console
+        Route::get('/notifications-list', [\App\Http\Controllers\SuperAdmin\NotificationsController::class, 'listView'])->name('notifications.list');
+        Route::get('/notifications/{notification}/open', [\App\Http\Controllers\SuperAdmin\NotificationsController::class, 'open'])->name('notifications.open');
     });
 });
 

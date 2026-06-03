@@ -63,9 +63,14 @@
             <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
             Billing Ledger
         </button>
-        <button @click="activeTab = 'payout'" :class="activeTab === 'payout' ? 'active' : ''" class="cc-tab-btn">
-            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
-            Payout Settlement
+        <button @click="activeTab = 'payout'" :class="activeTab === 'payout' ? 'active' : ''" class="cc-tab-btn" style="display: flex; align-items: center; gap: 8px;">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="flex-shrink:0;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+            <span>Payout Settlement</span>
+            @if(!$tenant->activeMarketplaceComponents()->where('slug', 'payment-gateway')->exists())
+                <svg style="width: 12px; height: 12px; color: var(--sa-muted); margin-left: auto; flex-shrink:0;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                </svg>
+            @endif
         </button>
         <button @click="activeTab = 'backup'" :class="activeTab === 'backup' ? 'active' : ''" class="cc-tab-btn">
             <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"/></svg>
@@ -682,15 +687,44 @@
                                     </td>
                                     <td>
                                         @if($bill->status === 'unpaid')
-                                            <div style="display:flex; gap:6px;">
-                                                <form action="{{ route('superadmin.tenants.bills.pay', [$tenant, $bill]) }}" method="POST" data-confirm-password="Mark term bill for {{ $bill->term_name }} ({{ config('myacademy.currency_symbol', '₦') }}{{ number_format($bill->total_due, 2) }}) as fully paid">
-                                                    @csrf
-                                                    <button type="submit" class="sa-btn sa-btn-primary" style="padding: 4px 8px; font-size: 11px;">Mark Paid</button>
-                                                </form>
-                                                <form action="{{ route('superadmin.tenants.bills.void', [$tenant, $bill]) }}" method="POST" data-confirm-password="Void term bill for {{ $bill->term_name }} ({{ config('myacademy.currency_symbol', '₦') }}{{ number_format($bill->total_due, 2) }})">
-                                                    @csrf
-                                                    <button type="submit" class="sa-btn sa-btn-ghost" style="padding: 4px 8px; font-size: 11px;">Void</button>
-                                                </form>
+                                            <div class="sa-dropdown" x-data="{ open: false }" @click.outside="open = false">
+                                                <button @click="open = !open" class="sa-btn sa-btn-ghost" style="padding: 6px 12px; font-size: 12px; gap: 4px;">
+                                                    <span>Actions</span>
+                                                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" style="width: 10px; height: 10px; transition: transform 0.2s;" :style="open ? 'transform: rotate(180deg)' : ''">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+                                                    </svg>
+                                                </button>
+                                                <div x-show="open" 
+                                                     x-transition:enter="transition ease-out duration-100"
+                                                     x-transition:enter-start="transform opacity-0 scale-95"
+                                                     x-transition:enter-end="transform opacity-100 scale-100"
+                                                     x-transition:leave="transition ease-in duration-75"
+                                                     x-transition:leave-start="transform opacity-100 scale-100"
+                                                     x-transition:leave-end="transform opacity-0 scale-95"
+                                                     class="sa-dropdown-menu" 
+                                                     style="display: none; right: 0; min-width: 140px;">
+                                                    <form action="{{ route('superadmin.tenants.bills.pay', [$tenant, $bill]) }}" method="POST" data-confirm-password="Mark term bill for {{ $bill->term_name }} ({{ config('myacademy.currency_symbol', '₦') }}{{ number_format($bill->total_due, 2) }}) as fully paid" style="margin: 0; width: 100%;">
+                                                        @csrf
+                                                        <button type="submit" class="sa-dropdown-item" style="color: #10b981;">
+                                                            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                                            </svg>
+                                                            Mark Paid
+                                                        </button>
+                                                    </form>
+                                                    
+                                                    <div style="border-top: 1px solid rgba(226, 232, 240, 0.6); margin: 4px 0;"></div>
+
+                                                    <form action="{{ route('superadmin.tenants.bills.void', [$tenant, $bill]) }}" method="POST" data-confirm-password="Void term bill for {{ $bill->term_name }} ({{ config('myacademy.currency_symbol', '₦') }}{{ number_format($bill->total_due, 2) }})" style="margin: 0; width: 100%;">
+                                                        @csrf
+                                                        <button type="submit" class="sa-dropdown-item danger">
+                                                            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                                            </svg>
+                                                            Void Bill
+                                                        </button>
+                                                    </form>
+                                                </div>
                                             </div>
                                         @else
                                             <span style="font-size: 11px; color:var(--sa-muted); font-weight:600;">Locked</span>
@@ -845,7 +879,23 @@
 
     {{-- H. PAYOUT SETTLEMENT TAB --}}
     <div x-show="activeTab === 'payout'" x-transition:enter="transition ease-out duration-200" class="cc-tab-content">
-        <div class="sa-panel">
+        @if(!$tenant->activeMarketplaceComponents()->where('slug', 'payment-gateway')->exists())
+            <div class="sa-panel" style="padding: 48px; text-align: center; border: 1.5px dashed var(--sa-border); background: #f8fafc; border-radius: 20px;">
+                <div style="width: 64px; height: 64px; border-radius: 20px; background: rgba(124,58,237,.08); display: flex; align-items: center; justify-content: center; color: #7c3aed; margin: 0 auto 18px; box-shadow: 0 4px 12px rgba(124,58,237,.05);">
+                    <svg style="width: 32px; height: 32px;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                    </svg>
+                </div>
+                <h3 style="font-size: 18px; font-weight: 800; color: var(--sa-text); margin: 0 0 8px 0;">Payment Gateway Plugin Required</h3>
+                <p style="font-size: 13.5px; color: var(--sa-muted); line-height: 1.5; max-width: 420px; margin: 0 auto 20px;">
+                    This school has not installed or activated the <strong>Bursar & Parent Payment Gateway</strong> plugin. You must enable it under the Plugins Config tab to access payout settlement review.
+                </p>
+                <button @click="activeTab = 'plugins'" class="sa-btn sa-btn-primary" style="margin: 0 auto; font-size: 13px;">
+                    Go to Plugins Config &rarr;
+                </button>
+            </div>
+        @else
+            <div class="sa-panel">
             <div class="sa-panel-header">
                 <span class="sa-panel-title">School Payout Settlement Review</span>
                 @php
@@ -985,6 +1035,7 @@
                 @endif
             </div>
         </div>
+        @endif
     </div>
 
 </div>

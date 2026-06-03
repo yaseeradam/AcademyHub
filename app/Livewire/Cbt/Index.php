@@ -133,7 +133,7 @@ class Index extends Component
             'durationMinutes' => ['required', 'integer', 'min:1', 'max:300'],
         ]);
 
-        if ($user->role === 'teacher') {
+        if ($user->role === 'teacher' && $this->examType === 'academic') {
             $allocated = SubjectAllocation::query()
                 ->where('teacher_id', $user->id)
                 ->where('class_id', $data['classId'])

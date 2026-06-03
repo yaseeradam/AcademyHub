@@ -218,7 +218,7 @@
                                     <span>{{ $exam->schoolClass?->name ?? ($exam->exam_type === 'aptitude' ? 'Aptitude Test' : '-') }}</span>
                                     @if($exam->subject?->name)
                                         <span class="h-1 w-1 rounded-full bg-slate-300"></span>
-                                        <span class="text-indigo-600 font-extrabold">{{ $exam->subject->name }}</span>
+                                        <span class="text-indigo-600 font-extrabold">{{ $exam->subject?->name }}</span>
                                     @endif
                                     @if($exam->exam_type === 'aptitude')
                                         <span class="inline-flex items-center rounded-full bg-violet-100 px-2 py-0.5 text-[9px] font-black text-violet-700">APTITUDE</span>
@@ -280,18 +280,53 @@
                     {{-- Card Footer Actions --}}
                     <div class="mt-5 flex items-center justify-between border-t border-slate-100 pt-4">
                         <span class="text-[10px] text-slate-400 font-bold">by {{ $exam->creator?->name ?? 'Unknown' }}</span>
-                        
-                        @php
-                            $btnClass = $isLive ? 'from-emerald-600 to-emerald-700 hover:from-emerald-500 hover:to-emerald-600 shadow-emerald-500/10' : ($exam->status === 'draft' ? 'from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 shadow-amber-500/10' : 'from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 shadow-indigo-500/10');
-                        @endphp
-                        
-                        <a href="{{ route('cbt.exams.edit', $exam) }}"
-                           class="relative overflow-hidden group inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r px-4.5 py-2 text-xs font-black text-white transition-all shadow active:scale-95 {{ $btnClass }}">
-                            <span>{{ $exam->status === 'draft' ? 'Edit Exam' : 'Open Exam' }}</span>
-                            <svg class="w-3.5 h-3.5 transition-transform group-hover:translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6"/>
-                            </svg>
-                        </a>
+
+                        <div class="flex items-center gap-2">
+                            @if($isLive)
+                                {{-- Live: Monitor + share code --}}
+                                <a href="{{ route('cbt.exams.edit', ['exam' => $exam, 'tab' => 'monitor']) }}"
+                                   class="inline-flex items-center gap-1.5 rounded-xl bg-slate-100 px-3 py-2 text-[11px] font-bold text-slate-600 hover:bg-slate-200 transition-all active:scale-95">
+                                    <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                                    Monitor
+                                </a>
+                                <a href="{{ route('cbt.exams.edit', $exam) }}"
+                                   class="inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 px-3.5 py-2 text-[11px] font-bold text-white shadow-sm hover:from-emerald-400 hover:to-teal-400 transition-all active:scale-95">
+                                    <span class="h-1.5 w-1.5 rounded-full bg-white animate-pulse"></span>
+                                    Manage Live
+                                </a>
+                            @elseif($isPending)
+                                {{-- Pending: Review button --}}
+                                <a href="{{ route('cbt.exams.edit', $exam) }}"
+                                   class="inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-violet-500 to-purple-600 px-3.5 py-2 text-[11px] font-bold text-white shadow-sm hover:from-violet-400 hover:to-purple-500 transition-all active:scale-95">
+                                    <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                    {{ $isAdmin ? 'Review & Approve' : 'View Submission' }}
+                                </a>
+                            @elseif($isEnded)
+                                {{-- Ended: Results + open --}}
+                                <a href="{{ route('cbt.exams.edit', ['exam' => $exam, 'tab' => 'monitor']) }}"
+                                   class="inline-flex items-center gap-1.5 rounded-xl bg-slate-100 px-3 py-2 text-[11px] font-bold text-slate-600 hover:bg-slate-200 transition-all active:scale-95">
+                                    <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+                                    Results
+                                </a>
+                                <a href="{{ route('cbt.exams.edit', $exam) }}"
+                                   class="inline-flex items-center gap-1.5 rounded-xl bg-slate-700 px-3.5 py-2 text-[11px] font-bold text-white hover:bg-slate-600 transition-all active:scale-95">
+                                    Open
+                                    <svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path d="M9 5l7 7-7 7"/></svg>
+                                </a>
+                            @else
+                                {{-- Draft: Edit + Preview --}}
+                                <a href="{{ route('cbt.exams.edit', ['exam' => $exam, 'tab' => 'questions']) }}"
+                                   class="inline-flex items-center gap-1.5 rounded-xl bg-slate-100 px-3 py-2 text-[11px] font-bold text-slate-600 hover:bg-slate-200 transition-all active:scale-95">
+                                    <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                    Questions
+                                </a>
+                                <a href="{{ route('cbt.exams.edit', $exam) }}"
+                                   class="inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 px-3.5 py-2 text-[11px] font-bold text-white shadow-sm hover:from-amber-400 hover:to-orange-400 transition-all active:scale-95">
+                                    <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                                    Edit Exam
+                                </a>
+                            @endif
+                        </div>
                     </div>
                 </div>
             </div>

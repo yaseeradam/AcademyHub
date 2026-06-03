@@ -149,24 +149,61 @@
                         {{ $tenant->created_at->format('M j, Y') }}
                     </td>
                     <td style="text-align:right;">
-                        <div style="display:flex;align-items:center;justify-content:flex-end;gap:6px;">
-                            <a href="{{ route('superadmin.tenants.edit', $tenant) }}"
-                               class="sa-btn sa-btn-ghost sa-btn-icon" title="Edit">
-                                <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                        <div class="sa-dropdown" x-data="{ open: false }" @click.outside="open = false">
+                            <button @click="open = !open" class="sa-btn sa-btn-ghost" style="padding: 6px 12px; font-size: 12px; gap: 4px;">
+                                <span>Actions</span>
+                                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" style="width: 10px; height: 10px; transition: transform 0.2s;" :style="open ? 'transform: rotate(180deg)' : ''">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
                                 </svg>
-                            </a>
-                            <form action="{{ route('superadmin.tenants.destroy', $tenant) }}" method="POST" 
-                                  onsubmit="return confirm('Permanently delete {{ addslashes($tenant->name) }}? This cannot be undone.')"
-                                  style="display: inline-block; margin: 0;">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="sa-btn sa-btn-danger sa-btn-icon" title="Delete">
-                                    <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                            </button>
+                            <div x-show="open" 
+                                 x-transition:enter="transition ease-out duration-100"
+                                 x-transition:enter-start="transform opacity-0 scale-95"
+                                 x-transition:enter-end="transform opacity-100 scale-100"
+                                 x-transition:leave="transition ease-in duration-75"
+                                 x-transition:leave-start="transform opacity-100 scale-100"
+                                 x-transition:leave-end="transform opacity-0 scale-95"
+                                 class="sa-dropdown-menu" 
+                                 style="display: none; right: 0; min-width: 150px;">
+                                <a href="{{ route('superadmin.tenants.edit', $tenant) }}" class="sa-dropdown-item">
+                                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
                                     </svg>
-                                </button>
-                            </form>
+                                    Edit School
+                                </a>
+                                
+                                @if($tenant->domain)
+                                    <a href="https://{{ $tenant->domain }}" target="_blank" class="sa-dropdown-item">
+                                        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                                        </svg>
+                                        Visit Portal
+                                    </a>
+                                @else
+                                    @php $mainHost = parse_url(config('app.url'), PHP_URL_HOST); $subHost = $tenant->slug.'.'.$mainHost; @endphp
+                                    <a href="http://{{ $subHost }}" target="_blank" class="sa-dropdown-item">
+                                        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                                        </svg>
+                                        Visit Portal
+                                    </a>
+                                @endif
+
+                                <div style="border-top: 1px solid rgba(226, 232, 240, 0.6); margin: 4px 0;"></div>
+
+                                <form action="{{ route('superadmin.tenants.destroy', $tenant) }}" method="POST" 
+                                      onsubmit="return confirm('Permanently delete {{ addslashes($tenant->name) }}? This cannot be undone.')"
+                                      style="margin: 0; width: 100%;">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="sa-dropdown-item danger">
+                                        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                        </svg>
+                                        Delete School
+                                    </button>
+                                </form>
+                            </div>
                         </div>
                     </td>
                 </tr>

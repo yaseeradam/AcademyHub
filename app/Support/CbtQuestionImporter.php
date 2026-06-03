@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Log;
 class CbtQuestionImporter
 {
     /**
-     * Generate questions via AI (Gemini → Groq fallback).
+     * Generate questions via AI (Groq).
      */
     public static function fromAi(string $topic, string $subject, int $count, string $type, int $marks): array
     {
@@ -31,7 +31,7 @@ For theory:
 [{"type":"theory","prompt":"Question text?","marks":{$marks}}]
 PROMPT;
 
-        $raw = self::callGemini($prompt) ?? self::callGroq($prompt);
+        $raw = self::callGroq($prompt);
 
         if (! $raw) {
             throw new \RuntimeException('AI service unavailable. Please try again.');
@@ -194,70 +194,60 @@ PROMPT;
         return $out;
     }
 
-    private static function callGemini(string $prompt): ?string
-    {
-        try {
-            $apiKey = 'AIzaSyCpxhMyCyY6F9wvbPycf3499YdOvn1noMU';
-
-            $response = Http::withOptions(['verify' => false])
-                ->timeout(30)
-                ->post("https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={$apiKey}", [
-                    'contents' => [['parts' => [['text' => $prompt]]]],
-                ]);
-
-            if ($response->successful()) {
-                $text = $response->json('candidates.0.content.parts.0.text');
-                if ($text) {
-                    Log::info('CBT AI: Gemini success');
-                    return $text;
-                }
-            }
-
-            Log::warning('CBT AI: Gemini failed', ['status' => $response->status()]);
-            return null;
-        } catch (\Throwable $e) {
-            Log::warning('CBT AI: Gemini error', ['error' => $e->getMessage()]);
-            return null;
-        }
-    }
-
     private static function callGroq(string $prompt): ?string
     {
-        try {
-            $apiKey = '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';
+        $rawKeys = env('GROQ_API_KEY') ?: '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';
+        $keys = array_filter(array_map('trim', explode(',', $rawKeys)));
 
-            $response = Http::withOptions(['verify' => false])
-                ->timeout(30)
-                ->withHeaders([
-                    'Authorization' => 'Bearer '.$apiKey,
-                    'Content-Type'  => 'application/json',
-                ])
-                ->post('https://api.groq.com/openai/v1/chat/completions', [
-                    'model'    => 'llama-3.3-70b-versatile',
-                    'messages' => [
-                        [
-                            'role'    => 'system',
-                            'content' => 'You are an expert exam question writer. Always respond with valid JSON only. No markdown, no explanation.',
-                        ],
-                        ['role' => 'user', 'content' => $prompt],
-                    ],
-                    'temperature' => 0.7,
-                    'max_tokens'  => 3000,
-                ]);
-
-            if ($response->successful()) {
-                $text = $response->json('choices.0.message.content');
-                if ($text) {
-                    Log::info('CBT AI: Groq success (fallback)');
-                    return $text;
-                }
-            }
-
-            Log::error('CBT AI: Groq failed', ['status' => $response->status()]);
-            return null;
-        } catch (\Throwable $e) {
-            Log::error('CBT AI: Groq error', ['error' => $e->getMessage()]);
+        if (empty($keys)) {
+            Log::error('CBT AI: No Groq API keys configured.');
             return null;
         }
+
+        shuffle($keys);
+
+        foreach ($keys as $apiKey) {
+            try {
+                $response = Http::withOptions(['verify' => false])
+                    ->timeout(30)
+                    ->withHeaders([
+                        'Authorization' => 'Bearer '.$apiKey,
+                        'Content-Type'  => 'application/json',
+                    ])
+                    ->post('https://api.groq.com/openai/v1/chat/completions', [
+                        'model'    => 'llama-3.3-70b-versatile',
+                        'messages' => [
+                            [
+                                'role'    => 'system',
+                                'content' => 'You are an expert exam question writer. Always respond with valid JSON only. No markdown, no explanation.',
+                            ],
+                            ['role' => 'user', 'content' => $prompt],
+                        ],
+                        'temperature' => 0.7,
+                        'max_tokens'  => 3000,
+                    ]);
+
+                if ($response->successful()) {
+                    $text = $response->json('choices.0.message.content');
+                    if ($text) {
+                        Log::info('CBT AI: Groq success');
+                        return $text;
+                    }
+                }
+
+                Log::warning('CBT AI: Groq API key failed or rate-limited', [
+                    'key_preview' => substr($apiKey, 0, 8) . '...',
+                    'status' => $response->status(),
+                    'body' => $response->body()
+                ]);
+            } catch (\Throwable $e) {
+                Log::error('CBT AI: Groq key error', [
+                    'key_preview' => substr($apiKey, 0, 8) . '...',
+                    'error' => $e->getMessage()
+                ]);
+            }
+        }
+
+        return null;
     }
 }

@@ -397,6 +397,59 @@
             border-radius: 8px;
         }
 
+        /* ── Actions Dropdown ────────────────────────── */
+        .sa-dropdown {
+            position: relative;
+            display: inline-block;
+            text-align: left;
+        }
+        .sa-dropdown-menu {
+            position: absolute;
+            right: 0;
+            top: 100%;
+            margin-top: 6px;
+            width: 170px;
+            background: #ffffff;
+            border: 1px solid rgba(226, 232, 240, 0.8);
+            border-radius: 12px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+            z-index: 100;
+            overflow: hidden;
+            transform-origin: top right;
+        }
+        .sa-dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            width: 100%;
+            padding: 10px 14px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #475569;
+            text-decoration: none;
+            background: transparent;
+            border: none;
+            text-align: left;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+        .sa-dropdown-item:hover {
+            background: #f8fafc;
+            color: #7c3aed;
+        }
+        .sa-dropdown-item.danger {
+            color: #ef4444;
+        }
+        .sa-dropdown-item.danger:hover {
+            background: #fef2f2;
+            color: #dc2626;
+        }
+        .sa-dropdown-item svg {
+            width: 14px;
+            height: 14px;
+            flex-shrink: 0;
+        }
+
         /* ── Forms ────────────────────────────────────── */
         .sa-form-label {
             display: block;
@@ -547,6 +600,20 @@
                 System Health
             </a>
 
+            <a href="{{ route('superadmin.notifications.list') }}"
+               class="{{ request()->routeIs('superadmin.notifications.list') ? 'active' : '' }}">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                </svg>
+                Notifications
+                @php
+                    $saUnreadCount = \App\Models\SuperadminNotification::unreadCount();
+                @endphp
+                @if($saUnreadCount > 0)
+                    <span class="sa-nav-badge" style="background:#ef4444; color:white; animation: pulse 2s infinite;">{{ $saUnreadCount }}</span>
+                @endif
+            </a>
+
             <div class="sa-nav-label" style="margin-top:12px;">School Instances</div>
 
             <a href="{{ route('superadmin.tenants.index') }}"
@@ -555,6 +622,12 @@
                     <path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
                 </svg>
                 All Schools
+                @php
+                    $pendingPayoutCount = \App\Models\Tenant::where('settings->payment_gateway->subaccount_status', 'pending')->count();
+                @endphp
+                @if($pendingPayoutCount > 0)
+                    <span class="sa-nav-badge" style="background:#ef4444; color:white; animation: pulse 2s infinite;">{{ $pendingPayoutCount }}</span>
+                @endif
             </a>
 
             <a href="{{ route('superadmin.tenants.create') }}"
@@ -614,6 +687,89 @@
                         @yield('header_actions')
                     </div>
                 @endif
+                <!-- Superadmin Notifications Bell -->
+                <div x-data="saNotifications()" x-init="initNotifications()" style="position: relative; margin-right: 4px;">
+                    <button @click="toggleDropdown()" class="sa-bell-btn" style="position: relative; background: none; border: 1px solid var(--sa-border); padding: 8px; border-radius: 8px; color: var(--sa-muted); cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; justify-content: center; height: 38px; width: 38px;">
+                        <svg style="width: 20px; height: 20px;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                        </svg>
+                        <span x-show="unreadCount > 0" class="sa-bell-badge" style="position: absolute; top: -4px; right: -4px; height: 16px; min-width: 16px; border-radius: 999px; background: #ef4444; color: white; font-size: 10px; font-weight: 800; display: flex; align-items: center; justify-content: center; padding: 0 4px; box-shadow: 0 0 0 2px white; animation: pulse 2s infinite;" x-text="unreadCount"></span>
+                    </button>
+
+                    <!-- Dropdown Panel -->
+                    <div x-cloak x-show="isOpen" @click.away="isOpen = false" style="position: absolute; right: 0; top: 48px; width: 360px; background: white; border: 1px solid var(--sa-border); border-radius: 16px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.05); z-index: 100; overflow: hidden;">
+                        <!-- Header -->
+                        <div style="padding: 14px 18px; border-bottom: 1px solid var(--sa-border); display: flex; align-items: center; justify-content: space-between; background: #f8fafc;">
+                            <span style="font-size: 14px; font-weight: 800; color: var(--sa-text);">Notifications</span>
+                            <button x-show="unreadCount > 0" @click="markAllRead()" style="background: none; border: none; font-size: 11.5px; font-weight: 700; color: #7c3aed; cursor: pointer; padding: 0; margin: 0;">Mark all as read</button>
+                        </div>
+
+                        <!-- Scrollable Area -->
+                        <div style="max-height: 320px; overflow-y: auto;">
+                            <!-- Loading State -->
+                            <template x-if="loading">
+                                <div style="padding: 30px; text-align: center; color: var(--sa-muted); display: flex; flex-direction: column; align-items: center; gap: 8px;">
+                                    <div class="spinner" style="width: 20px; height: 20px; border: 2.5px solid transparent; border-top-color: #7c3aed; border-radius: 50%; animation: spin 0.8s linear infinite;"></div>
+                                    <span style="font-size: 12.5px; font-weight: 500;">Loading...</span>
+                                </div>
+                            </template>
+
+                            <!-- Empty State -->
+                            <template x-if="!loading && notifications.length === 0">
+                                <div style="padding: 40px 20px; text-align: center; color: var(--sa-muted); display: flex; flex-direction: column; align-items: center; gap: 10px;">
+                                    <div style="width: 44px; height: 44px; border-radius: 50%; background: #f1f5f9; display: flex; align-items: center; justify-content: center; color: #94a3b8;">
+                                        <svg style="width: 20px; height: 20px;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <div style="font-size: 13.5px; font-weight: 700; color: #475569;">All caught up!</div>
+                                        <div style="font-size: 11.5px; color: #64748b; margin-top: 2px;">No new alerts at this time.</div>
+                                    </div>
+                                </div>
+                            </template>
+
+                            <!-- Notifications List -->
+                            <template x-if="!loading && notifications.length > 0">
+                                <div>
+                                    <template x-for="item in notifications" :key="item.id">
+                                        <div @click="handleItemClick(item)" class="sa-notification-item" :style="item.read_at ? 'background: white; border-bottom: 1px solid #f1f5f9; padding: 14px 18px; cursor: pointer; transition: background 0.15s; display: flex; gap: 12px; align-items: flex-start;' : 'background: #faf5ff; border-bottom: 1px solid #f1f5f9; padding: 14px 18px; cursor: pointer; transition: background 0.15s; display: flex; gap: 12px; align-items: flex-start; border-left: 3px solid #7c3aed;'">
+                                            <!-- Icon / Badge based on notification type -->
+                                            <div :style="getIconStyle(item.type)" style="width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: white;">
+                                                <template x-if="item.type === 'payout_request'">
+                                                    <svg style="width: 16px; height: 16px;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                    </svg>
+                                                </template>
+                                                <template x-if="item.type === 'app_rating'">
+                                                    <svg style="width: 16px; height: 16px;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.907c.961 0 1.371 1.24.588 1.81l-3.97 2.883a1 1 0 00-.364 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.971-2.883a1 1 0 00-1.17 0l-3.971 2.883c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.364-1.118L2.98 10.3c-.783-.57-.38-1.81.588-1.81h4.907a1 1 0 00.95-.69l1.52-4.674z" />
+                                                    </svg>
+                                                </template>
+                                                <template x-if="item.type !== 'payout_request' && item.type !== 'app_rating'">
+                                                    <svg style="width: 16px; height: 16px;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                    </svg>
+                                                </template>
+                                            </div>
+
+                                            <!-- Text Content -->
+                                            <div style="flex: 1; min-width: 0;">
+                                                <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 4px;">
+                                                    <span style="font-size: 11px; font-weight: 800; color: #7c3aed; text-transform: uppercase;" x-text="item.tenant || 'System'"></span>
+                                                    <span style="font-size: 10px; color: #94a3b8; white-space: nowrap;" x-text="item.created_at"></span>
+                                                </div>
+                                                <div style="font-size: 13px; font-weight: 700; color: var(--sa-text); margin-top: 2px;" x-text="item.title"></div>
+                                                <div style="font-size: 12px; color: #64748b; margin-top: 4px; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;" x-text="item.message"></div>
+                                            </div>
+                                        </div>
+                                    </template>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="sa-status-pill">
                     <span class="sa-status-dot"></span>
                     <span class="hidden-xs">System Online</span>
@@ -815,6 +971,95 @@
                     }
                 }
             }
+        }
+
+        function saNotifications() {
+            return {
+                isOpen: false,
+                loading: false,
+                notifications: [],
+                unreadCount: 0,
+                pollingInterval: null,
+
+                initNotifications() {
+                    this.fetchNotifications();
+                    // Poll every 30 seconds
+                    this.pollingInterval = setInterval(() => {
+                        this.fetchNotifications();
+                    }, 30000);
+                },
+
+                toggleDropdown() {
+                    this.isOpen = !this.isOpen;
+                    if (this.isOpen) {
+                        this.fetchNotifications();
+                    }
+                },
+
+                async fetchNotifications() {
+                    this.loading = this.notifications.length === 0;
+                    try {
+                        const res = await fetch('{{ route('superadmin.notifications.index') }}');
+                        const data = await res.json();
+                        this.notifications = data.notifications;
+                        this.unreadCount = data.unread_count;
+                    } catch (err) {
+                        console.error('Failed to fetch notifications:', err);
+                    } finally {
+                        this.loading = false;
+                    }
+                },
+
+                async markAllRead() {
+                    try {
+                        const res = await fetch('{{ route('superadmin.notifications.mark-all-read') }}', {
+                            method: 'POST',
+                            headers: {
+                                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                'Accept': 'application/json'
+                            }
+                        });
+                        if (res.ok) {
+                            this.notifications.forEach(n => n.read_at = new Date().toISOString());
+                            this.unreadCount = 0;
+                        }
+                    } catch (err) {
+                        console.error('Failed to mark all read:', err);
+                    }
+                },
+
+                async handleItemClick(item) {
+                    if (!item.read_at) {
+                        try {
+                            await fetch(`/superadmin/notifications/${item.id}/read`, {
+                                method: 'POST',
+                                headers: {
+                                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                    'Accept': 'application/json'
+                                }
+                            });
+                            item.read_at = new Date().toISOString();
+                            this.unreadCount = Math.max(0, this.unreadCount - 1);
+                        } catch (err) {
+                            console.error('Failed to mark read:', err);
+                        }
+                    }
+                    this.isOpen = false;
+                    if (item.action_url) {
+                        window.location.href = item.action_url;
+                    }
+                },
+
+                getIconStyle(type) {
+                    if (type === 'payout_request') {
+                        return 'background: linear-gradient(135deg, #10b981, #059669);';
+                    } else if (type === 'app_rating') {
+                        return 'background: linear-gradient(135deg, #ff8c42, #fb923c);';
+                    } else {
+                        return 'background: linear-gradient(135deg, #6366f1, #4f46e5);';
+                    }
+                }
+            };
         }
     </script>
 

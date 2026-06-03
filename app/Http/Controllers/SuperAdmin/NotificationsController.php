@@ -46,4 +46,28 @@ class NotificationsController extends Controller
         SuperadminNotification::whereNull('read_at')->update(['read_at' => now()]);
         return response()->json(['unread_count' => 0]);
     }
+
+    /** Render a paginated list of all superadmin notifications. */
+    public function listView()
+    {
+        $notifications = SuperadminNotification::with('tenant')
+            ->latest()
+            ->paginate(15);
+
+        return view('superadmin.notifications.index', compact('notifications'));
+    }
+
+    /** Mark the notification as read and redirect to its action URL. */
+    public function open(SuperadminNotification $notification)
+    {
+        if (!$notification->read_at) {
+            $notification->update(['read_at' => now()]);
+        }
+
+        if ($notification->action_url) {
+            return redirect($notification->action_url);
+        }
+
+        return redirect()->route('superadmin.notifications.list')->with('status', 'Notification marked as read.');
+    }
 }

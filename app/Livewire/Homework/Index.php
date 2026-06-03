@@ -189,8 +189,8 @@ class Index extends Component
 
         $prompt = "Format this homework assignment into a well-structured document. Use clear section titles, numbered lists (1. 2. 3.), and proper spacing. Make it professional and easy to read.\n\nIMPORTANT: Write in plain text format without any markdown symbols (no #, *, **, -, etc.). Use simple formatting that's ready to copy-paste.\n\nContent to format:\n\n" . $this->content;
 
-        // Try Gemini first, then fallback to Groq
-        $formattedContent = $this->tryGeminiAPI($prompt) ?? $this->tryGroqAPI($prompt);
+        // Use Groq to format content
+        $formattedContent = $this->tryGroqAPI($prompt);
 
         if ($formattedContent) {
             // Remove any remaining markdown symbols
@@ -221,8 +221,8 @@ class Index extends Component
 
         $prompt = "Create a homework assignment for {$className} about: {$topic}\n\nSubject: {$subjectName}\n\nGenerate a complete homework assignment with:\n- Learning objectives\n- Clear instructions\n- Specific tasks or questions\n- Submission requirements\n\nIMPORTANT: Write in plain text format without any markdown symbols (no #, *, **, -, etc.). Use clear section titles, numbered lists (1. 2. 3.), and proper spacing. Make it ready to copy-paste directly.";
 
-        // Try Gemini first, then fallback to Groq
-        $generatedContent = $this->tryGeminiAPI($prompt) ?? $this->tryGroqAPI($prompt);
+        // Use Groq to generate content
+        $generatedContent = $this->tryGroqAPI($prompt);
 
         if ($generatedContent) {
             // Remove any remaining markdown symbols
@@ -263,27 +263,6 @@ class Index extends Component
         $text = preg_replace('/`(.+?)`/', '$1', $text);
         
         return trim($text);
-    }
-
-    private function tryGeminiAPI($prompt)
-    {
-        try {
-            $apiKey = config('services.gemini.key') ?: env('GEMINI_API_KEY');
-            if (empty($apiKey)) return null;
-
-            $response = \Illuminate\Support\Facades\Http::withOptions(['verify' => false])
-                ->timeout(60)
-                ->post("https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={$apiKey}", [
-                    'contents' => [['parts' => [['text' => $prompt]]]]
-                ]);
-
-            return $response->successful()
-                ? ($response->json()['candidates'][0]['content']['parts'][0]['text'] ?? null)
-                : null;
-        } catch (\Exception $e) {
-            \Illuminate\Support\Facades\Log::warning('Gemini API error', ['error' => $e->getMessage()]);
-            return null;
-        }
     }
 
     private function tryGroqAPI($prompt)

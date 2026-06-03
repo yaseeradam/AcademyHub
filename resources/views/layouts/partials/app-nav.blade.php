@@ -163,7 +163,7 @@ HTML;
         $hasHomework = auth()->user()?->tenant?->activeMarketplaceComponents()->where('slug', 'homework')->exists();
         $hasMessages = auth()->user()?->tenant?->activeMarketplaceComponents()->where('slug', 'messages')->exists();
         $tenantComponents = auth()->user()?->tenant?->activeMarketplaceComponents()->get() ?? collect();
-        $sidebarPlugins = $tenantComponents->whereNotIn('slug', ['whatsapp-bot', 'homework', 'messages', 'payment-gateway']);
+        $sidebarPlugins = $tenantComponents->whereNotIn('slug', ['whatsapp-bot', 'homework', 'messages', 'payment-gateway', 'student-dashboard', 'parent-portal']);
         
         $isAddonsActive = request()->routeIs('homework.*') || request()->routeIs('messages') || $sidebarPlugins->contains(fn($p) => (Route::has($p->route_name) && request()->routeIs(explode('.', $p->route_name)[0] . '.*')) || (Route::has($p->slug . '.index') && request()->routeIs($p->slug . '.*')));
         $hasAddonsAccess = in_array($user?->role, ['admin', 'teacher'], true) && ($hasHomework || $hasMessages || $sidebarPlugins->isNotEmpty());
@@ -202,9 +202,13 @@ HTML;
 
                 @foreach($sidebarPlugins as $component)
                     @php
-                        $routeExists = Route::has($component->route_name) || Route::has($component->slug . '.index');
-                        $href       = Route::has($component->route_name) ? route($component->route_name) : (Route::has($component->slug . '.index') ? route($component->slug . '.index') : '#');
-                        $isActive   = (Route::has($component->route_name) && request()->routeIs(explode('.', $component->route_name)[0] . '.*')) || (Route::has($component->slug . '.index') && request()->routeIs($component->slug . '.*'));
+                        $routeName = $component->route_name;
+                        if ($component->slug === 'cbt' && in_array($user?->role, ['admin', 'teacher', 'bursar'], true)) {
+                            $routeName = 'cbt.index';
+                        }
+                        $routeExists = Route::has($routeName) || Route::has($component->slug . '.index');
+                        $href       = Route::has($routeName) ? route($routeName) : (Route::has($component->slug . '.index') ? route($component->slug . '.index') : '#');
+                        $isActive   = (Route::has($routeName) && request()->routeIs(explode('.', $routeName)[0] . '.*')) || (Route::has($component->slug . '.index') && request()->routeIs($component->slug . '.*'));
 
                         $iconPath = '<path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-14L4 7m8 4v10M4 7v10l8 4"/>';
                         if ($component->slug === 'cbt') {

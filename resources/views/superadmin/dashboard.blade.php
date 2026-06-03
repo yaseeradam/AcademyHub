@@ -319,6 +319,64 @@
 
 </div>
 
+{{-- ── Pending Payout Approvals ─────────────────────────────────── --}}
+@if($pendingPayoutTenants->isNotEmpty())
+<div class="sa-panel" style="margin-bottom: 24px; border: 1.5px solid #7c3aed; box-shadow: 0 4px 12px rgba(124,58,237,.1);">
+    <div class="sa-panel-header" style="background: #faf5ff; border-bottom: 1px solid rgba(124,58,237,.15); padding: 14px 20px;">
+        <span class="sa-panel-title" style="color: #7c3aed; display: flex; align-items: center; gap: 8px;">
+            <svg style="width:18px; height:18px;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            Pending Payout Settlement Approvals ({{ $pendingPayoutTenants->count() }})
+        </span>
+        <span style="font-size:11px; color:#7c3aed; font-weight:700; background:rgba(124,58,237,.1); padding:2px 8px; border-radius:999px;">Action Required</span>
+    </div>
+    <div style="overflow-x:auto;">
+        <table class="sa-table">
+            <thead>
+                <tr>
+                    <th>School Name</th>
+                    <th>Bank Details</th>
+                    <th>Account Holder</th>
+                    <th>Collection Timing</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach($pendingPayoutTenants as $tenant)
+                @php
+                    $pgSettings = $tenant->settings['payment_gateway'] ?? [];
+                @endphp
+                <tr>
+                    <td>
+                        <div style="font-weight:700;color:#1e293b;">{{ $tenant->name }}</div>
+                        <span style="font-family:monospace;font-size:11px;background:#f1f5f9;padding:2px 6px;border-radius:4px;color:#475569;">{{ $tenant->slug }}</span>
+                    </td>
+                    <td>
+                        <div style="font-weight:600;color:#334155;">{{ $pgSettings['bank_name'] ?? 'N/A' }}</div>
+                        <div style="font-size:12px;color:#64748b;font-family:monospace;">{{ $pgSettings['account_number'] ?? 'N/A' }}</div>
+                    </td>
+                    <td style="font-weight:500;color:#475569;">
+                        {{ $pgSettings['account_name'] ?? 'N/A' }}
+                    </td>
+                    <td>
+                        <span class="sa-badge pro">
+                            {{ ucfirst(str_replace('_', ' ', $pgSettings['collection_timing'] ?? 'N/A')) }}
+                        </span>
+                    </td>
+                    <td>
+                        <a href="{{ route('superadmin.tenants.edit', $tenant) }}#payout" class="sa-btn sa-btn-primary" style="padding: 6px 12px; font-size: 12px; border-radius: 8px;">
+                            Review Details &rarr;
+                        </a>
+                    </td>
+                </tr>
+                @endforeach
+            </tbody>
+        </table>
+    </div>
+</div>
+@endif
+
 {{-- ── Recent Schools Table ────────────────────────────────────── --}}
 <div class="sa-panel">
     <div class="sa-panel-header">

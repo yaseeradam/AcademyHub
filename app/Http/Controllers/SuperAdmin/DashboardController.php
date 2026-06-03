@@ -99,11 +99,13 @@ class DashboardController extends Controller
         }
 
         $recentTenants = Tenant::latest()->take(8)->get();
+        $pendingPayoutTenants = Tenant::where('settings->payment_gateway->subaccount_status', 'pending')->get();
 
         return view('superadmin.dashboard', compact(
             'stats',
             'recentTenants',
-            'monthlyGrowth'
+            'monthlyGrowth',
+            'pendingPayoutTenants'
         ));
     }
 }

@@ -47,6 +47,35 @@ class SuperadminNotification extends Model
     }
 
     /**
+     * Create an "app rating/review submitted" notification.
+     */
+    public static function notifyAppRating(Tenant $tenant, string $appName, int $rating, ?string $comment): void
+    {
+        $stars = str_repeat('★', $rating) . str_repeat('☆', 5 - $rating);
+        static::create([
+            'tenant_id'  => $tenant->id,
+            'type'       => 'app_rating',
+            'title'      => "New App Rating ({$stars})",
+            'message'    => "{$tenant->name} rated '{$appName}' {$rating}/5 stars." . ($comment ? " Comment: \"{$comment}\"" : ""),
+            'action_url' => route('superadmin.marketplace.index'),
+        ]);
+    }
+
+    /**
+     * Create a "support ticket created" notification.
+     */
+    public static function notifySupportTicket(Tenant $tenant, SupportTicket $ticket): void
+    {
+        static::create([
+            'tenant_id'  => $tenant->id,
+            'type'       => 'support_ticket',
+            'title'      => "New Support Ticket (#{$ticket->id})",
+            'message'    => "{$tenant->name} created a new support ticket via WhatsApp: \"{$ticket->message}\"",
+            'action_url' => route('superadmin.dashboard'),
+        ]);
+    }
+
+    /**
      * Count unread notifications for topbar badge.
      */
     public static function unreadCount(): int
@@ -54,3 +83,4 @@ class SuperadminNotification extends Model
         return static::whereNull('read_at')->count();
     }
 }
+

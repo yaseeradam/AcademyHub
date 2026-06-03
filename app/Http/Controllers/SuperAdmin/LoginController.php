@@ -26,7 +26,7 @@ class LoginController extends Controller
         ]);
 
         // Look up user and validate credentials WITHOUT creating a session first.
-        $user = \App\Models\User::where('email', $credentials['email'])->first();
+        $user = \App\Models\User::withoutGlobalScope('tenant')->where('email', $credentials['email'])->first();
 
         if (! $user || ! \Illuminate\Support\Facades\Hash::check($credentials['password'], $user->password)) {
             throw ValidationException::withMessages([

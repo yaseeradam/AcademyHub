@@ -272,6 +272,12 @@ class ProductDetail extends Component
             $avg = PluginReview::where('component_slug', $this->product)->avg('rating');
             $cnt = PluginReview::where('component_slug', $this->product)->count();
             $component->update(['rating_avg' => round($avg, 2), 'rating_count' => $cnt]);
+
+            // Trigger superadmin notification
+            $tenant = auth()->user()->tenant;
+            if ($tenant) {
+                \App\Models\SuperadminNotification::notifyAppRating($tenant, $component->name, $this->reviewRating, $this->reviewComment);
+            }
         }
 
         $this->showReviewForm = false;

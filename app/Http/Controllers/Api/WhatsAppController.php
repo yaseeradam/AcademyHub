@@ -795,7 +795,7 @@ class WhatsAppController extends Controller
             
             if ($ticketDetected && !empty($ticketMessage)) {
                 // Log support ticket in database
-                \App\Models\SupportTicket::create([
+                $ticket = \App\Models\SupportTicket::create([
                     'tenant_id' => $user->tenant_id,
                     'user_id' => $user->id,
                     'phone' => $user->whatsapp_phone,
@@ -803,6 +803,11 @@ class WhatsAppController extends Controller
                     'status' => 'open',
                     'channel' => 'whatsapp',
                 ]);
+
+                // Trigger superadmin notification
+                if ($user->tenant) {
+                    \App\Models\SuperadminNotification::notifySupportTicket($user->tenant, $ticket);
+                }
                 
                 // Append a friendly confirmation of ticket creation
                 $answer .= "\n\n🔒 I have successfully recorded your support request in the school database. A school administrator has been notified and will contact you shortly.";
@@ -1658,6 +1663,11 @@ class WhatsAppController extends Controller
                     'status' => 'open',
                     'channel' => 'whatsapp',
                 ]);
+
+                // Trigger superadmin notification
+                if ($user->tenant) {
+                    \App\Models\SuperadminNotification::notifySupportTicket($user->tenant, $ticket);
+                }
                 $answer .= "\n\n🔒 I have successfully recorded your support request in the school database. A school administrator has been notified and will contact you shortly.";
 
                 // Real-time WhatsApp alert to school admins

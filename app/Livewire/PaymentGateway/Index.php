@@ -198,6 +198,9 @@ class Index extends Component
         $tenant->update(['settings' => $settings]);
         $this->isEditingBankDetails = false;
 
+        // Trigger superadmin notification
+        \App\Models\SuperadminNotification::notifyPayoutRequest($tenant);
+
         $this->dispatch('alert', message: 'Bank details submitted successfully! Payout status is now pending review.', type: 'success');
     }
 
