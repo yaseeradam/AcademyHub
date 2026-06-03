@@ -10,7 +10,7 @@
     @if(! $submitted) wire:poll.30s="heartbeatTick" @endif
     x-data="{
         remaining: 0,
-        timerDisplay: '--:--',
+        timerDisplay: '-- mins',
         canSubmit: false,
         _interval: null,
         localAnswers: @entangle('answers'),
@@ -43,7 +43,7 @@
         init() {
             if (this._cfg.submitted) {
                 this.remaining = 0;
-                this.timerDisplay = '00:00';
+                this.timerDisplay = '0 min';
                 return;
             }
             this._tick();
@@ -57,16 +57,15 @@
         _tick() {
             if (!this._cfg.startedAt || !this._cfg.dur) {
                 this.remaining = 0;
-                this.timerDisplay = '00:00';
+                this.timerDisplay = '0 min';
                 return;
             }
             const started = new Date(this._cfg.startedAt).getTime();
             const elapsed = Math.floor((Date.now() - started) / 1000);
             this.remaining = Math.max(0, this._cfg.dur - elapsed);
 
-            const mm = String(Math.floor(this.remaining / 60)).padStart(2, '0');
-            const ss = String(this.remaining % 60).padStart(2, '0');
-            this.timerDisplay = mm + ':' + ss;
+            const mm = Math.ceil(this.remaining / 60);
+            this.timerDisplay = mm + ' min' + (mm !== 1 ? 's' : '');
 
             this.canSubmit = elapsed >= this._cfg.minSub || this.remaining <= 0;
 
@@ -130,7 +129,7 @@
                     <div class="rounded-xl px-3.5 py-2 shadow-sm" :class="remaining <= 60 ? 'bg-rose-100' : 'bg-emerald-100'">
                         <div class="text-[10px] font-bold uppercase tracking-wider text-slate-600">Time Left</div>
                         <div class="mt-1 font-mono text-xl font-bold" :class="remaining <= 60 ? 'text-rose-700' : 'text-emerald-700'" x-text="timerDisplay">
-                            --:--
+                            -- mins
                         </div>
                     </div>
                     <div class="rounded-xl bg-slate-100 px-3.5 py-2 shadow-sm">
