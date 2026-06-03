@@ -2,17 +2,6 @@
     $submitted = (bool) $attempt->submitted_at;
     $questions = $exam?->questions?->values() ?? collect();
     $totalQuestions = $questions->count();
-    $answered = $questions->filter(function ($q) {
-        $questionType = strtolower((string) ($q->type ?? 'mcq'));
-        if ($questionType === 'theory') {
-            return trim((string) ($this->theoryAnswers[$q->id] ?? '')) !== '';
-        }
-
-        return (int) ($this->answers[$q->id] ?? 0) > 0;
-    })->count();
-    $currentIndex = max(0, min((int) $this->currentIndex, max(0, $totalQuestions - 1)));
-    $currentQuestion = $totalQuestions > 0 ? $questions->get($currentIndex) : null;
-    $progressPercent = $totalQuestions > 0 ? round(($answered / $totalQuestions) * 100, 1) : 0;
     $hasTheory = $questions->contains(fn ($q) => $q->type === 'theory');
 @endphp
 
@@ -24,11 +13,30 @@
         timerDisplay: '--:--',
         canSubmit: false,
         _interval: null,
+        localAnswers: @js($this->answers),
+        localTheoryAnswers: @js($this->theoryAnswers),
+        currentIndex: @entangle('currentIndex'),
+        questions: @js($questions->map(fn($q) => [
+            'id' => $q->id,
+            'type' => $q->type,
+            'options' => $q->options->map(fn($o) => ['id' => $o->id])->values()->all(),
+        ])->values()->all()),
         _cfg: {
             startedAt: @js($this->startedAtIso ?? null),
             dur: @js($this->durationSeconds ?? 0),
             submitted: @js($submitted),
             minSub: @js($submitted ? 0 : $this->minSubmitSeconds()),
+        },
+
+        get answeredCount() {
+            return this.questions.filter(q => {
+                if (q.type === 'theory') {
+                    const val = this.localTheoryAnswers[q.id];
+                    return val !== undefined && val !== null && String(val).trim() !== '';
+                }
+                const val = this.localAnswers[q.id];
+                return val !== undefined && val !== null && Number(val) > 0;
+            }).length;
         },
 
         init() {
@@ -75,16 +83,19 @@
             const key = event.key.toLowerCase();
             if (key === 'arrowright' || key === 'arrowdown') {
                 event.preventDefault();
-                const btn = this.$el.querySelector('button[wire\\:click=\'next\']');
-                if (btn && !btn.disabled) btn.click();
+                this.currentIndex = Math.min(this.questions.length - 1, this.currentIndex + 1);
             } else if (key === 'arrowleft' || key === 'arrowup') {
                 event.preventDefault();
-                const btn = this.$el.querySelector('button[wire\\:click=\'prev\']');
-                if (btn && !btn.disabled) btn.click();
+                this.currentIndex = Math.max(0, this.currentIndex - 1);
             } else if (['a', 'b', 'c', 'd'].includes(key)) {
                 event.preventDefault();
-                const opt = this.$el.querySelector('button[data-option-index=\'' + (key.charCodeAt(0) - 97) + '\']');
-                if (opt) opt.click();
+                const optIdx = key.charCodeAt(0) - 97;
+                const currentQ = this.questions[this.currentIndex];
+                if (currentQ && currentQ.type !== 'theory' && currentQ.options && currentQ.options[optIdx]) {
+                    const optId = currentQ.options[optIdx].id;
+                    this.localAnswers[currentQ.id] = optId;
+                    this.$wire.selectOption(currentQ.id, optId);
+                }
             }
         }
     }"
@@ -123,14 +134,14 @@
                     </div>
                     <div class="rounded-xl bg-slate-100 px-3.5 py-2 shadow-sm">
                         <div class="text-[10px] font-bold uppercase tracking-wider text-slate-600">Progress</div>
-                        <div class="mt-1 text-xl font-bold text-slate-800">{{ $answered }}/{{ $totalQuestions }}</div>
+                        <div class="mt-1 text-xl font-bold text-slate-800"><span x-text="answeredCount"></span>/{{ $totalQuestions }}</div>
                         <div class="mt-2 h-1.5 w-24 overflow-hidden rounded-full bg-white">
-                            <div class="h-full rounded-full bg-slate-700" style="width: {{ $progressPercent }}%"></div>
+                            <div class="h-full rounded-full bg-slate-700 transition-all duration-300" :style="'width: ' + (questions.length > 0 ? (answeredCount / questions.length) * 100 : 0) + '%'"></div>
                         </div>
                     </div>
                     <div class="rounded-xl bg-amber-100 px-3.5 py-2 shadow-sm">
                         <div class="text-[10px] font-bold uppercase tracking-wider text-slate-600">Question</div>
-                        <div class="mt-1 text-xl font-bold text-amber-800">{{ $currentIndex + 1 }} of {{ $totalQuestions }}</div>
+                        <div class="mt-1 text-xl font-bold text-amber-800"><span x-text="currentIndex + 1"></span> of {{ $totalQuestions }}</div>
                     </div>
                 </div>
             </div>
@@ -322,17 +333,11 @@
                         </div>
                         <div class="mt-4 grid grid-cols-5 gap-2">
                             @foreach ($questions as $idx => $q)
-                                @php
-                                    $questionType = strtolower((string) ($q->type ?? 'mcq'));
-                                    $isAnswered = $questionType === 'theory'
-                                        ? trim((string) ($this->theoryAnswers[$q->id] ?? '')) !== ''
-                                        : (int) ($this->answers[$q->id] ?? 0) > 0;
-                                    $isCurrent = (int) $idx === (int) $currentIndex;
-                                @endphp
                                 <button
                                     type="button"
-                                    wire:click="goTo({{ $idx }})"
-                                    class="h-11 w-11 rounded-xl text-xs font-bold transition-all {{ $isCurrent ? 'bg-amber-500 text-white shadow-md' : ($isAnswered ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-100 text-slate-600 hover:bg-slate-200') }}"
+                                    @click="currentIndex = {{ $idx }}"
+                                    class="h-11 w-11 rounded-xl text-xs font-bold transition-all"
+                                    :class="currentIndex === {{ $idx }} ? 'bg-amber-500 text-white shadow-md' : (localAnswers[{{ $q->id }}] > 0 || (localTheoryAnswers[{{ $q->id }}] && String(localTheoryAnswers[{{ $q->id }}]).trim() !== '') ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-100 text-slate-600 hover:bg-slate-200')"
                                 >
                                     {{ $idx + 1 }}
                                 </button>
@@ -360,101 +365,104 @@
                 </div>
 
                 <div>
-                    @if (! $currentQuestion)
+                    @if ($totalQuestions === 0)
                         <div class="rounded-2xl bg-white p-8 shadow-md ring-1 ring-slate-100">
                             <p class="text-lg text-slate-500">No questions available.</p>
                         </div>
                     @else
-                        @php
-                            $selected = (int) ($this->answers[$currentQuestion->id] ?? 0);
-                            $currentQuestionType = strtolower((string) ($currentQuestion->type ?? 'mcq'));
-                        @endphp
+                        @foreach ($questions as $idx => $q)
+                            @php
+                                $qType = strtolower((string) ($q->type ?? 'mcq'));
+                            @endphp
+                            <div x-show="currentIndex === {{ $idx }}" x-cloak class="rounded-2xl bg-white p-5 shadow-md ring-1 ring-slate-100">
+                                <div class="flex flex-col gap-5">
+                                    <div>
+                                        <div class="inline-flex items-center gap-2 rounded-full bg-amber-50 px-3 py-1.5 text-xs font-bold text-amber-700">
+                                            Question {{ $idx + 1 }} of {{ $totalQuestions }}
+                                        </div>
+                                        <h3 class="mt-3 text-lg font-bold leading-relaxed text-slate-900">
+                                            {{ $q->prompt }}
+                                        </h3>
+                                        <div class="mt-3 inline-flex items-center gap-2 rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600">
+                                            {{ (int) $q->marks }} {{ (int) $q->marks === 1 ? 'mark' : 'marks' }}
+                                        </div>
+                                    </div>
 
-                        <div class="rounded-2xl bg-white p-5 shadow-md ring-1 ring-slate-100">
-                            <div class="flex flex-col gap-5">
-                                <div>
-                                    <div class="inline-flex items-center gap-2 rounded-full bg-amber-50 px-3 py-1.5 text-xs font-bold text-amber-700">
-                                        Question {{ $currentIndex + 1 }} of {{ $totalQuestions }}
-                                    </div>
-                                    <h3 class="mt-3 text-lg font-bold leading-relaxed text-slate-900">
-                                        {{ $currentQuestion->prompt }}
-                                    </h3>
-                                    <div class="mt-3 inline-flex items-center gap-2 rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600">
-                                        {{ (int) $currentQuestion->marks }} {{ (int) $currentQuestion->marks === 1 ? 'mark' : 'marks' }}
-                                    </div>
+                                    @if ($qType === 'theory')
+                                        <div class="space-y-2">
+                                            <textarea
+                                                x-model="localTheoryAnswers[{{ $q->id }}]"
+                                                @input.debounce.600ms="$wire.set('theoryAnswers.{{ $q->id }}', $event.target.value)"
+                                                rows="6"
+                                                class="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-800 shadow-sm focus:border-amber-400 focus:ring-amber-300"
+                                                placeholder="Type your answer here..."
+                                            ></textarea>
+                                            <div class="text-xs text-slate-500">Your response is saved automatically.</div>
+                                        </div>
+                                    @else
+                                        <div class="space-y-2.5">
+                                            @foreach ($q->options as $opt)
+                                                <button
+                                                    type="button"
+                                                    class="group flex w-full cursor-pointer items-start gap-3 rounded-xl border border-slate-100 p-3.5 text-left transition-all"
+                                                    :class="localAnswers[{{ $q->id }}] === {{ $opt->id }} ? 'bg-amber-500 text-white shadow-md' : 'bg-slate-50 hover:bg-white hover:shadow-sm'"
+                                                    data-option-index="{{ $loop->index }}"
+                                                    data-option-id="{{ $opt->id }}"
+                                                    data-question-id="{{ $q->id }}"
+                                                    @click="localAnswers[{{ $q->id }}] = {{ $opt->id }}; $wire.selectOption({{ $q->id }}, {{ $opt->id }})"
+                                                >
+                                                    <div class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg text-xs font-bold"
+                                                         :class="localAnswers[{{ $q->id }}] === {{ $opt->id }} ? 'bg-white text-amber-700' : 'bg-white text-slate-700 group-hover:text-amber-700'">
+                                                        {{ chr(65 + $loop->index) }}
+                                                    </div>
+                                                    <span class="min-w-0 flex-1 text-sm leading-relaxed"
+                                                          :class="localAnswers[{{ $q->id }}] === {{ $opt->id }} ? 'font-semibold text-white' : 'font-medium text-slate-800'">
+                                                        {{ $opt->label }}
+                                                    </span>
+                                                </button>
+                                            @endforeach
+                                        </div>
+                                    @endif
                                 </div>
+                            </div>
+                        @endforeach
 
-                                @if ($currentQuestionType === 'theory')
-                                    <div class="space-y-2">
-                                        <textarea
-                                            wire:model.debounce.600ms="theoryAnswers.{{ $currentQuestion->id }}"
-                                            rows="6"
-                                            class="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-800 shadow-sm focus:border-amber-400 focus:ring-amber-300"
-                                            placeholder="Type your answer here..."
-                                        ></textarea>
-                                        <div class="text-xs text-slate-500">Your response is saved automatically.</div>
-                                    </div>
-                                @else
-                                    <div class="space-y-2.5">
-                                        @foreach ($currentQuestion->options as $opt)
-                                            @php($isSelected = $selected === (int) $opt->id)
-                                            <button
-                                                type="button"
-                                                class="group flex w-full cursor-pointer items-start gap-3 rounded-xl border border-slate-100 p-3.5 text-left transition-all {{ $isSelected ? 'bg-amber-500 text-white shadow-md' : 'bg-slate-50 hover:bg-white hover:shadow-sm' }}"
-                                                data-option-index="{{ $loop->index }}"
-                                                data-option-id="{{ $opt->id }}"
-                                                data-question-id="{{ $currentQuestion->id }}"
-                                                wire:click="selectOption({{ $currentQuestion->id }}, {{ $opt->id }})"
-                                                wire:loading.attr="disabled"
-                                                wire:target="selectOption"
-                                            >
-                                                <div class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg text-xs font-bold {{ $isSelected ? 'bg-white text-amber-700' : 'bg-white text-slate-700 group-hover:text-amber-700' }}">
-                                                    {{ chr(65 + $loop->index) }}
-                                                </div>
-                                                <span class="min-w-0 flex-1 text-sm leading-relaxed {{ $isSelected ? 'font-semibold text-white' : 'font-medium text-slate-800' }}">
-                                                    {{ $opt->label }}
-                                                </span>
-                                            </button>
-                                        @endforeach
-                                    </div>
-                                @endif
-
-                                <div class="mt-6 flex flex-col gap-3 border-t border-slate-100 pt-4 sm:flex-row sm:items-center sm:justify-between">
-                                    <div class="text-sm font-semibold text-slate-700">
-                                        <span class="text-emerald-600">{{ $answered }}</span> answered
+                        <div class="mt-4 rounded-2xl bg-white p-5 shadow-md ring-1 ring-slate-100">
+                            <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                                <div class="text-sm font-semibold text-slate-700">
+                                    <span class="text-emerald-600" x-text="answeredCount"></span> answered
+                                    <span class="mx-2 text-slate-300">|</span>
+                                    <span class="text-slate-900" x-text="questions.length - answeredCount"></span> remaining
+                                    @if ($lastSavedAt)
                                         <span class="mx-2 text-slate-300">|</span>
-                                        <span class="text-slate-900">{{ max(0, $totalQuestions - $answered) }}</span> remaining
-                                        @if ($lastSavedAt)
-                                            <span class="mx-2 text-slate-300">|</span>
-                                            <span class="text-xs text-slate-400">saved {{ $lastSavedAt }}</span>
-                                        @endif
-                                    </div>
-                                    <div class="flex flex-wrap gap-3">
-                                        <button
-                                            type="button"
-                                            wire:click="prev"
-                                            @disabled($currentIndex === 0)
-                                            class="rounded-lg bg-slate-100 px-4 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-200 disabled:cursor-not-allowed disabled:opacity-40"
-                                        >
-                                            Previous
-                                        </button>
-                                        <button
-                                            type="button"
-                                            wire:click="next"
-                                            @disabled($currentIndex >= $totalQuestions - 1)
-                                            class="rounded-lg bg-amber-500 px-4 py-2.5 text-xs font-bold text-white hover:bg-amber-600 disabled:cursor-not-allowed disabled:opacity-40"
-                                        >
-                                            Next
-                                        </button>
-                                        <button
-                                            type="button"
-                                            @click="$dispatch('open-submit-modal')"
-                                            :disabled="!canSubmit"
-                                            class="rounded-lg bg-emerald-600 px-5 py-2.5 text-xs font-bold text-white shadow-sm hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-50"
-                                        >
-                                            Submit Exam
-                                        </button>
-                                    </div>
+                                        <span class="text-xs text-slate-400">saved {{ $lastSavedAt }}</span>
+                                    @endif
+                                </div>
+                                <div class="flex flex-wrap gap-3">
+                                    <button
+                                        type="button"
+                                        @click="currentIndex = Math.max(0, currentIndex - 1)"
+                                        :disabled="currentIndex === 0"
+                                        class="rounded-lg bg-slate-100 px-4 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-200 disabled:cursor-not-allowed disabled:opacity-40"
+                                    >
+                                        Previous
+                                    </button>
+                                    <button
+                                        type="button"
+                                        @click="currentIndex = Math.min(questions.length - 1, currentIndex + 1)"
+                                        :disabled="currentIndex >= questions.length - 1"
+                                        class="rounded-lg bg-amber-500 px-4 py-2.5 text-xs font-bold text-white hover:bg-amber-600 disabled:cursor-not-allowed disabled:opacity-40"
+                                    >
+                                        Next
+                                    </button>
+                                    <button
+                                        type="button"
+                                        @click="$dispatch('open-submit-modal')"
+                                        :disabled="!canSubmit"
+                                        class="rounded-lg bg-emerald-600 px-5 py-2.5 text-xs font-bold text-white shadow-sm hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-50"
+                                    >
+                                        Submit Exam
+                                    </button>
                                 </div>
                             </div>
                         </div>
