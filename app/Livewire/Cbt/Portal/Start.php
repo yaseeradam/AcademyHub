@@ -131,6 +131,16 @@ class Start extends Component
 
         abort_unless($attempt, 500);
 
+        // Establish student session so they can access the exam take page
+        session([
+            'tenant_id'         => $student->tenant_id ?? \App\Support\TenantSettings::tenantId(),
+            'student_id'        => $student->id,
+            'student_name'      => $student->full_name,
+            'student_admission' => $student->admission_number,
+            'student_class'     => $student->schoolClass?->name,
+            'login_type'        => 'student',
+        ]);
+
         if ($attempt->terminated_at) {
             $this->addError('admissionNumber', 'Your attempt was terminated by an admin.');
             return;

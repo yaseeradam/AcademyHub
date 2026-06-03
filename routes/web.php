@@ -71,12 +71,13 @@ Route::get('/', [UtilityController::class, 'welcome']);
 
 Route::get('/home', [UtilityController::class, 'home']);
 
-// CBT Portal Routes (student session required)
-Route::middleware('student.session')->group(function () {
-    Route::get('/cbt/portal', CbtPortalStart::class)->name('cbt.portal');
-    Route::get('/cbt/portal/{attempt}', CbtPortalTake::class)->name('cbt.portal.take');
+// CBT Portal Start Routes (public, no student session required to enter code/admission no)
+Route::get('/cbt/portal', CbtPortalStart::class)->name('cbt.portal');
+Route::get('/cbt/student', CbtPortalStart::class)->name('cbt.student');
 
-    Route::get('/cbt/student', CbtPortalStart::class)->name('cbt.student');
+// CBT Portal Take Routes (student session required to take the exam)
+Route::middleware('student.session')->group(function () {
+    Route::get('/cbt/portal/{attempt}', CbtPortalTake::class)->name('cbt.portal.take');
     Route::get('/cbt/student/{attempt}', CbtPortalTake::class)->name('cbt.student.take');
 });
 
