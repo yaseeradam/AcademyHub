@@ -148,6 +148,7 @@ class ReportCardService
             'show_teacher_remarks'  => isset($optionsOverrides['show_teacher_remarks']) ? (bool) $optionsOverrides['show_teacher_remarks'] : $this->settingBool('rc_show_teacher_remarks', true),
             'show_principal_remarks'=> isset($optionsOverrides['show_principal_remarks']) ? (bool) $optionsOverrides['show_principal_remarks'] : $this->settingBool('rc_show_principal_remarks', true),
             'show_psychomotor'      => isset($optionsOverrides['show_psychomotor']) ? (bool) $optionsOverrides['show_psychomotor'] : $this->settingBool('rc_show_psychomotor', false),
+            'psychomotor_style'     => isset($optionsOverrides['psychomotor_style']) ? (string) $optionsOverrides['psychomotor_style'] : ($this->settings()['rc_psychomotor_style'] ?? 'progress'),
             'show_school_fees'      => isset($optionsOverrides['show_school_fees']) ? (bool) $optionsOverrides['show_school_fees'] : $this->settingBool('rc_show_school_fees', false),
             'show_signatures'       => isset($optionsOverrides['show_signatures']) ? (bool) $optionsOverrides['show_signatures'] : $this->settingBool('rc_show_signatures', false),
         ];

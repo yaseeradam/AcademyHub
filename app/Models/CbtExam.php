@@ -15,6 +15,7 @@ class CbtExam extends Model
 
     protected $fillable = [
         'tenant_id',
+        'exam_type',
         'title',
         'description',
         'class_id',

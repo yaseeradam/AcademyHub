@@ -63,6 +63,10 @@
             <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
             Billing Ledger
         </button>
+        <button @click="activeTab = 'payout'" :class="activeTab === 'payout' ? 'active' : ''" class="cc-tab-btn">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+            Payout Settlement
+        </button>
         <button @click="activeTab = 'backup'" :class="activeTab === 'backup' ? 'active' : ''" class="cc-tab-btn">
             <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"/></svg>
             Backup & Restore
@@ -836,6 +840,150 @@
                 </div>
             </div>
 
+        </div>
+    </div>
+
+    {{-- H. PAYOUT SETTLEMENT TAB --}}
+    <div x-show="activeTab === 'payout'" x-transition:enter="transition ease-out duration-200" class="cc-tab-content">
+        <div class="sa-panel">
+            <div class="sa-panel-header">
+                <span class="sa-panel-title">School Payout Settlement Review</span>
+                @php
+                    $pgSettings = $tenant->settings['payment_gateway'] ?? [];
+                    $status = $pgSettings['subaccount_status'] ?? 'not_submitted';
+                @endphp
+                <div>
+                    @if($status === 'approved')
+                        <span class="badge badge-success" style="background:#d1fae5; color:#065f46; font-weight:700; padding:4px 10px; border-radius:6px; border:1px solid #a7f3d0; font-size:12px;">Approved &amp; Live</span>
+                    @elseif($status === 'pending')
+                        <span class="badge badge-warning" style="background:#fef3c7; color:#92400e; font-weight:700; padding:4px 10px; border-radius:6px; border:1px solid #fde68a; font-size:12px;">Pending Review</span>
+                    @else
+                        <span class="badge badge-muted" style="background:#f1f5f9; color:#475569; font-weight:700; padding:4px 10px; border-radius:6px; border:1px solid #cbd5e1; font-size:12px;">Not Configured</span>
+                    @endif
+                </div>
+            </div>
+            
+            <div style="padding: 24px;">
+                @if(empty($pgSettings) || $status === 'not_submitted')
+                    <div style="text-align: center; padding: 40px 20px; color: var(--sa-muted); font-size: 13.5px;">
+                        <span style="font-size:40px; display:block; margin-bottom:12px;">🏦</span>
+                        This school has not submitted their bank account details for settlement yet.
+                    </div>
+                @else
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6" style="margin-bottom: 24px;">
+                        <div style="background: #f8fafc; border: 1px solid var(--sa-border); border-radius: 12px; padding: 18px;">
+                            <h4 style="font-weight: 700; color: var(--sa-text); margin: 0 0 14px; font-size: 14px; border-bottom: 1px solid var(--sa-border); padding-bottom: 8px;">Payout Bank Details</h4>
+                            <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
+                                <tr style="border-bottom: 1px solid #f1f5f9;">
+                                    <td style="padding: 8px 0; color: var(--sa-muted); font-weight:600; width: 40%;">Settlement Bank:</td>
+                                    <td style="padding: 8px 0; color: var(--sa-text); font-weight: 700;">{{ $pgSettings['bank_name'] ?? 'N/A' }}</td>
+                                </tr>
+                                <tr style="border-bottom: 1px solid #f1f5f9;">
+                                    <td style="padding: 8px 0; color: var(--sa-muted); font-weight:600;">Account Number:</td>
+                                    <td style="padding: 8px 0; color: var(--sa-text); font-weight: 700; font-family: monospace; font-size:14px;">{{ $pgSettings['account_number'] ?? 'N/A' }}</td>
+                                </tr>
+                                <tr style="border-bottom: 1px solid #f1f5f9;">
+                                    <td style="padding: 8px 0; color: var(--sa-muted); font-weight:600;">Account Name:</td>
+                                    <td style="padding: 8px 0; color: var(--sa-text); font-weight: 700;">{{ $pgSettings['account_name'] ?? 'N/A' }}</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 8px 0; color: var(--sa-muted); font-weight:600;">Settlement Cycle:</td>
+                                    <td style="padding: 8px 0; font-weight: 700;">
+                                        @php
+                                            $timingLabels = [
+                                                'per_term'  => 'Per Term Payout',
+                                                'monthly'   => 'Monthly Payout',
+                                                'weekly'    => 'Weekly Payout',
+                                                'on_demand' => 'On-Demand / Manual',
+                                                // Legacy labels
+                                                'Immediately' => 'Immediately',
+                                                'Daily'       => 'Daily',
+                                                'Weekly'      => 'Weekly',
+                                                'Monthly'     => 'Monthly',
+                                            ];
+                                            $timingRaw   = $pgSettings['collection_timing'] ?? 'Not Set';
+                                            $timingLabel = $timingLabels[$timingRaw] ?? $timingRaw;
+                                        @endphp
+                                        <span style="color: #4f46e5;">{{ $timingLabel }}</span>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+
+                        {{-- Installment Plans Read-Only Summary --}}
+                        <div style="background: #f8fafc; border: 1px solid var(--sa-border); border-radius: 12px; padding: 18px; margin-top: 16px;">
+                            <h4 style="font-weight: 700; color: var(--sa-text); margin: 0 0 12px; font-size: 14px; border-bottom: 1px solid var(--sa-border); padding-bottom: 8px;">
+                                Parent Installment Plans Enabled
+                            </h4>
+                            @php
+                                // Summarise installment plans across all fee structures for this tenant
+                                $feeStructures = \App\Models\FeeStructure::withoutGlobalScopes()
+                                    ->where('tenant_id', $tenant->id)
+                                    ->where('category', 'Tuition')
+                                    ->whereNotNull('installment_plans')
+                                    ->with('schoolClass')
+                                    ->get();
+                            @endphp
+                            @if($feeStructures->isEmpty())
+                                <p style="font-size: 12px; color: var(--sa-muted); font-style: italic;">No installment plans configured yet. School admin sets these per class in the Payment Gateway Cockpit.</p>
+                            @else
+                                <div style="display: flex; flex-direction: column; gap: 8px;">
+                                    @foreach($feeStructures as $fs)
+                                        @php $plans = $fs->enabledPlans(); @endphp
+                                        <div style="display: flex; align-items: center; justify-content: space-between; font-size: 12.5px; border-bottom: 1px solid #f1f5f9; padding-bottom: 6px;">
+                                            <span style="font-weight: 700; color: var(--sa-text);">{{ $fs->schoolClass?->name ?? 'Unknown Class' }} — Term {{ $fs->term }}</span>
+                                            <div style="display: flex; gap: 6px;">
+                                                @if(!empty($plans['full']))
+                                                    <span style="background:#d1fae5; color:#065f46; font-size:10px; font-weight:700; padding:2px 8px; border-radius:20px; border:1px solid #a7f3d0;">Full</span>
+                                                @endif
+                                                @if(!empty($plans['two_installments']))
+                                                    <span style="background:#ede9fe; color:#4c1d95; font-size:10px; font-weight:700; padding:2px 8px; border-radius:20px; border:1px solid #c4b5fd;">2-Part</span>
+                                                @endif
+                                                @if(!empty($plans['monthly']))
+                                                    <span style="background:#e0f2fe; color:#075985; font-size:10px; font-weight:700; padding:2px 8px; border-radius:20px; border:1px solid #bae6fd;">Monthly</span>
+                                                @endif
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            @endif
+                        </div>
+
+                        <div style="background: #f8fafc; border: 1px solid var(--sa-border); border-radius: 12px; padding: 18px; display: flex; flex-direction: column; justify-content: space-between;">
+                            <div>
+                                <h4 style="font-weight: 700; color: var(--sa-text); margin: 0 0 10px; font-size: 14px;">Settlement Control Cockpit</h4>
+                                <p style="font-size: 12px; color: var(--sa-muted); line-height: 1.5; margin: 0 0 16px;">
+                                    Review the bank details provided. Approving this settlement configuration will register a Paystack subaccount internally and enable online payment checkouts for students and parents of this school immediately.
+                                </p>
+                            </div>
+                            
+                            <div style="display: flex; gap: 12px; justify-content: flex-end;">
+                                @if($status === 'pending')
+                                    <form action="{{ route('superadmin.tenants.reject-subaccount', $tenant) }}" method="POST" data-confirm-password="Reject settlement details. This will reset the school's payment gateway setup.">
+                                        @csrf
+                                        <button type="submit" class="sa-btn sa-btn-danger" style="padding: 10px 16px; font-size:12px;">
+                                            Reject &amp; Reset Request
+                                        </button>
+                                    </form>
+                                    <form action="{{ route('superadmin.tenants.approve-subaccount', $tenant) }}" method="POST" data-confirm-password="Approve settlement bank details for '{{ $tenant->name }}'. This will activate parent online credit card checkouts immediately.">
+                                        @csrf
+                                        <button type="submit" class="sa-btn sa-btn-primary" style="padding: 10px 18px; font-size:12px; font-weight: 700; background: linear-gradient(135deg, #059669, #10b981); border:none; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);">
+                                            Approve &amp; Activate Online Payments
+                                        </button>
+                                    </form>
+                                @elseif($status === 'approved')
+                                    <form action="{{ route('superadmin.tenants.reject-subaccount', $tenant) }}" method="POST" data-confirm-password="Revoke subaccount approval and deactivate online checkouts for '{{ $tenant->name }}'">
+                                        @csrf
+                                        <button type="submit" class="sa-btn sa-btn-danger" style="padding: 10px 16px; font-size:12px; width: 100%; justify-content: center;">
+                                            Revoke Settlement Account Approval
+                                        </button>
+                                    </form>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+                @endif
+            </div>
         </div>
     </div>
 

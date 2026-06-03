@@ -21,6 +21,8 @@ class Transaction extends Model
         'session',
         'amount_paid',
         'payment_method',
+        'installment_plan',
+        'installment_number',
         'receipt_number',
         'is_void',
         'void_reason',

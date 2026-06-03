@@ -23,6 +23,7 @@ class Management extends Component
     public bool $showCreateModal = false;
     public bool $showLinkModal = false;
     public bool $showEditWhatsappModal = false;
+    public bool $showEditModal = false;
     public ?int $selectedParentId = null;
     public ?int $editParentId = null;
 
@@ -32,6 +33,12 @@ class Management extends Component
     public string $password = '';
     public string $phone = '';
     public string $whatsappPhone = '';
+
+    // Edit parent form
+    public string $editName = '';
+    public string $editEmail = '';
+    public string $editPhone = '';
+    public string $editPassword = '';
 
     // Link children form
     public array $selectedChildren = [];
@@ -52,9 +59,112 @@ class Management extends Component
                       ->orWhere('email', 'like', '%' . $this->search . '%');
                 });
             })
+            ->with(['students.schoolClass'])
             ->withCount('students')
             ->orderBy('name')
             ->paginate(10);
+    }
+
+    #[Computed]
+    public function parentBalances(): array
+    {
+        $parents = $this->parents();
+        if ($parents->isEmpty()) {
+            return [];
+        }
+
+        $studentIds = [];
+        $classIds = [];
+        $parentStudentsMap = [];
+
+        foreach ($parents as $parent) {
+            $parentStudentsMap[$parent->id] = [];
+            foreach ($parent->students as $student) {
+                $studentIds[] = $student->id;
+                if ($student->class_id) {
+                    $classIds[] = $student->class_id;
+                }
+                $parentStudentsMap[$parent->id][] = $student;
+            }
+        }
+
+        $studentIds = array_unique($studentIds);
+        $classIds = array_unique($classIds);
+
+        if (empty($studentIds)) {
+            return [];
+        }
+
+        $term = \App\Models\AcademicTerm::activeTermNumber();
+        $session = \App\Models\AcademicTerm::activeSessionName();
+
+        $feeRows = \App\Models\FeeStructure::query()
+            ->whereIn('class_id', $classIds)
+            ->where('category', 'Tuition')
+            ->where(function ($q) use ($term) {
+                if ($term === null) {
+                    $q->whereNull('term');
+                } else {
+                    $q->whereNull('term')->orWhere('term', $term);
+                }
+            })
+            ->where(function ($q) use ($session) {
+                if (!$session) {
+                    $q->whereNull('session');
+                } else {
+                    $q->whereNull('session')->orWhere('session', $session);
+                }
+            })
+            ->get(['class_id', 'term', 'session', 'amount_due']);
+
+        $feesByClass = $feeRows
+            ->groupBy('class_id')
+            ->map(function ($rows) {
+                $best = null;
+                $bestScore = -1;
+                foreach ($rows as $row) {
+                    $score = 0;
+                    if ($row->term !== null) {
+                        $score += 2;
+                    }
+                    if ($row->session !== null) {
+                        $score += 1;
+                    }
+                    if ($score > $bestScore) {
+                        $best = $row;
+                        $bestScore = $score;
+                    }
+                }
+                return $best?->amount_due ?? 0;
+            });
+
+        $paidByStudent = \App\Models\Transaction::query()
+            ->whereIn('student_id', $studentIds)
+            ->where('type', 'Income')
+            ->where('category', 'Tuition')
+            ->where('is_void', false)
+            ->where('term', $term)
+            ->where('session', $session)
+            ->selectRaw('student_id, COALESCE(SUM(amount_paid), 0) as paid')
+            ->groupBy('student_id')
+            ->pluck('paid', 'student_id');
+
+        $balances = [];
+        foreach ($parents as $parent) {
+            $totalDue = 0.0;
+            $totalPaid = 0.0;
+            
+            foreach ($parentStudentsMap[$parent->id] as $student) {
+                $due = (float) ($feesByClass->get($student->class_id, 0) ?? 0);
+                $paid = (float) ($paidByStudent[$student->id] ?? 0);
+                $totalDue += $due;
+                $totalPaid += $paid;
+            }
+
+            $balances[$parent->id] = max(0.0, $totalDue - $totalPaid);
+        }
+
+        return $balances;
     }
 
     #[Computed]
@@ -256,6 +366,91 @@ class Management extends Component
 
         $this->dispatch('alert', message: 'Parent account deleted successfully.', type: 'success');
         $this->dispatch('refresh');
+    }
+
+    public function openEditModal(int $parentId): void
+    {
+        $parent = User::query()->where('role', 'parent')->whereKey($parentId)->first();
+        if (!$parent) {
+            return;
+        }
+
+        $this->editParentId = $parent->id;
+        $this->editName = $parent->name;
+        $this->editEmail = $parent->email;
+        $this->editPhone = $parent->custom_fields['phone'] ?? '';
+        $this->editPassword = '';
+        $this->showEditModal = true;
+    }
+
+    public function closeEditModal(): void
+    {
+        $this->showEditModal = false;
+        $this->editParentId = null;
+        $this->editName = '';
+        $this->editEmail = '';
+        $this->editPhone = '';
+        $this->editPassword = '';
+    }
+
+    public function updateParent(): void
+    {
+        if (!$this->editParentId) {
+            return;
+        }
+
+        $parent = User::query()->where('role', 'parent')->whereKey($this->editParentId)->first();
+        if (!$parent) {
+            return;
+        }
+
+        $this->validate([
+            'editName' => 'required|string|max:255',
+            'editEmail' => [
+                'required',
+                'email',
+                \Illuminate\Validation\Rule::unique('users', 'email')
+                    ->ignore($this->editParentId)
+                    ->where('tenant_id', \App\Support\TenantSettings::tenantId())
+            ],
+            'editPhone' => 'nullable|string|max:20',
+            'editPassword' => 'nullable|string|min:6',
+        ]);
+
+        $parent->name = $this->editName;
+        $parent->email = $this->editEmail;
+
+        if (!empty($this->editPassword)) {
+            $parent->password = Hash::make($this->editPassword);
+        }
+
+        $customFields = $parent->custom_fields ?? [];
+        if ($this->editPhone) {
+            $customFields['phone'] = $this->editPhone;
+        } else {
+            unset($customFields['phone']);
+        }
+        $parent->custom_fields = empty($customFields) ? null : $customFields;
+
+        // Also normalize phone for WhatsApp if updated
+        $normalizedPhone = preg_replace('/\D+/', '', $this->editPhone);
+        $normalizedPhone = $normalizedPhone !== '' ? $normalizedPhone : null;
+        if ($normalizedPhone && !$parent->whatsapp_phone) {
+            $parent->whatsapp_phone = $normalizedPhone;
+            $parent->whatsapp_verified = true;
+            $parent->whatsapp_subscribed = true;
+        }
+
+        $parent->save();
+
+        Audit::log('parents.updated', $parent, [
+            'name' => $parent->name,
+            'email' => $parent->email,
+        ]);
+
+        $this->dispatch('alert', message: 'Parent account updated successfully.', type: 'success');
+        $this->dispatch('refresh');
+        $this->closeEditModal();
     }
 
     private function resetForm(): void

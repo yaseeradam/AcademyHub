@@ -255,6 +255,16 @@ Route::middleware(['auth', 'active'])->group(function () {
         Route::get('/parents/performance', \App\Livewire\Student\Performance::class)->name('parents.performance');
     });
 
+    // Payment Gateway — only accessible after purchasing/installing the Payment Gateway plugin
+    Route::middleware('plugin:payment-gateway')->group(function () {
+        Route::middleware('role:admin,bursar')->group(function () {
+            Route::get('/payment-gateway', \App\Livewire\PaymentGateway\Index::class)->name('payment-gateway.index');
+        });
+        Route::middleware('role:parent')->group(function () {
+            Route::get('/parent/pay', \App\Livewire\PaymentGateway\ParentPay::class)->name('parent.pay');
+        });
+    });
+
     Route::middleware('role:admin,teacher')->group(function () {
         Route::view('/institute', 'pages.institute.index')->name('institute');
         Route::view('/teachers', 'pages.teachers.index')->name('teachers');
@@ -287,16 +297,6 @@ Route::middleware(['auth', 'active'])->group(function () {
         Route::middleware('plugin:aptitude-test')->group(function () {
             Route::get('/aptitude', \App\Livewire\Aptitude\Index::class)->name('aptitude.index');
             Route::get('/aptitude/questions', \App\Livewire\Aptitude\Questions::class)->name('aptitude.questions');
-        });
-
-        // Payment Gateway — only accessible after purchasing/installing the Payment Gateway plugin
-        Route::middleware('plugin:payment-gateway')->group(function () {
-            Route::middleware('role:admin,bursar')->group(function () {
-                Route::get('/payment-gateway', \App\Livewire\PaymentGateway\Index::class)->name('payment-gateway.index');
-            });
-            Route::middleware('role:parent')->group(function () {
-                Route::get('/parent/pay', \App\Livewire\PaymentGateway\ParentPay::class)->name('parent.pay');
-            });
         });
 
 
@@ -429,6 +429,8 @@ Route::prefix('superadmin')->name('superadmin.')->group(function () {
         Route::post('tenants/{tenant}/impersonate', [\App\Http\Controllers\SuperAdmin\TenantController::class, 'impersonate'])->name('tenants.impersonate');
         Route::post('tenants/{tenant}/save-flags', [\App\Http\Controllers\SuperAdmin\TenantController::class, 'saveFlags'])->name('tenants.save-flags');
         Route::post('tenants/{tenant}/save-broadcast', [\App\Http\Controllers\SuperAdmin\TenantController::class, 'saveBroadcast'])->name('tenants.save-broadcast');
+        Route::post('tenants/{tenant}/approve-subaccount', [\App\Http\Controllers\SuperAdmin\TenantController::class, 'approveSubaccount'])->name('tenants.approve-subaccount');
+        Route::post('tenants/{tenant}/reject-subaccount', [\App\Http\Controllers\SuperAdmin\TenantController::class, 'rejectSubaccount'])->name('tenants.reject-subaccount');
         Route::put('tenants/{tenant}/plugins/{component}', [\App\Http\Controllers\SuperAdmin\TenantController::class, 'updatePluginPricing'])->name('tenants.plugins.update');
         Route::post('tenants/{tenant}/backup', [\App\Http\Controllers\SuperAdmin\TenantController::class, 'exportBackup'])->name('tenants.backup');
         Route::post('tenants/{tenant}/restore', [\App\Http\Controllers\SuperAdmin\TenantController::class, 'importBackup'])->name('tenants.restore');
@@ -443,6 +445,11 @@ Route::prefix('superadmin')->name('superadmin.')->group(function () {
         Route::get('/health/ping-endpoint', [\App\Http\Controllers\SuperAdmin\HealthController::class, 'pingEndpoint'])->name('health.ping-endpoint');
         Route::post('/health/start-background-ping', [\App\Http\Controllers\SuperAdmin\HealthController::class, 'startBackgroundPing'])->name('health.start-background-ping');
         Route::get('/health/ping-status', [\App\Http\Controllers\SuperAdmin\HealthController::class, 'pingStatus'])->name('health.ping-status');
+
+        // Notification Bell API
+        Route::get('/notifications', [\App\Http\Controllers\SuperAdmin\NotificationsController::class, 'index'])->name('notifications.index');
+        Route::post('/notifications/{notification}/read', [\App\Http\Controllers\SuperAdmin\NotificationsController::class, 'markRead'])->name('notifications.mark-read');
+        Route::post('/notifications/mark-all-read', [\App\Http\Controllers\SuperAdmin\NotificationsController::class, 'markAllRead'])->name('notifications.mark-all-read');
     });
 });
 

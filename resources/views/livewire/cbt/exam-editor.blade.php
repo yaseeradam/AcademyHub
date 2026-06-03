@@ -111,6 +111,26 @@
                     <input wire:model="title" class="w-full px-4 py-3 text-base border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 bg-white shadow-sm" />
                     @error('title') <div class="mt-2 text-sm text-red-600 font-medium">{{ $message }}</div> @enderror
                 </div>
+                <div class="lg:col-span-2">
+                    <label class="block text-sm font-bold text-gray-800 mb-2">Exam Type</label>
+                    <div class="flex gap-3">
+                        <label class="flex flex-1 cursor-pointer items-center gap-3 rounded-xl border-2 p-3 transition-all {{ $examType === 'academic' ? 'border-indigo-500 bg-indigo-50' : 'border-gray-200 bg-white' }}">
+                            <input type="radio" wire:model.live="examType" value="academic" class="text-indigo-600" />
+                            <div>
+                                <div class="text-sm font-bold text-gray-800">Academic Exam</div>
+                                <div class="text-xs text-gray-500">Assigned to a class & subject</div>
+                            </div>
+                        </label>
+                        <label class="flex flex-1 cursor-pointer items-center gap-3 rounded-xl border-2 p-3 transition-all {{ $examType === 'aptitude' ? 'border-violet-500 bg-violet-50' : 'border-gray-200 bg-white' }}">
+                            <input type="radio" wire:model.live="examType" value="aptitude" class="text-violet-600" />
+                            <div>
+                                <div class="text-sm font-bold text-gray-800">Aptitude / Entrance Test</div>
+                                <div class="text-xs text-gray-500">Open to anyone with the access code</div>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+                @if($examType === 'academic')
                 <div>
                     <label class="block text-sm font-bold text-gray-800 mb-2">Class</label>
                     <select wire:model.live="classId" class="w-full px-4 py-3 text-base border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 bg-white shadow-sm">
@@ -131,6 +151,11 @@
                     </select>
                     @error('subjectId') <div class="mt-2 text-sm text-red-600 font-medium">{{ $message }}</div> @enderror
                 </div>
+                @else
+                <div class="lg:col-span-2 rounded-xl border border-violet-200 bg-violet-50 px-4 py-3 text-sm text-violet-700">
+                    🎯 Aptitude test — no class or subject required. Share the access code with candidates.
+                </div>
+                @endif
                 <div>
                     <label class="block text-sm font-bold text-gray-800 mb-2">Duration (minutes)</label>
                     <input wire:model="durationMinutes" type="number" min="1" class="w-full px-4 py-3 text-base border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 bg-white shadow-sm" />

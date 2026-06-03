@@ -295,6 +295,7 @@ class SettingsController extends Controller
                 'rc_show_teacher_remarks' => ['nullable', 'boolean'],
                 'rc_show_principal_remarks' => ['nullable', 'boolean'],
                 'rc_show_psychomotor' => ['nullable', 'boolean'],
+                'rc_psychomotor_style' => ['nullable', 'string', 'in:progress,grid,numeric'],
                 'rc_show_school_fees' => ['nullable', 'boolean'],
                 'rc_school_fees_account_number' => ['nullable', 'string', 'max:50'],
                 'rc_school_fees_bank_name' => ['nullable', 'string', 'max:100'],
@@ -327,6 +328,9 @@ class SettingsController extends Controller
                 // always — we compare input($key) directly to '1'.
                 $settings[$key] = $request->input($key) === '1';
             }
+
+            // Psychomotor Style
+            $settings['rc_psychomotor_style'] = $data['rc_psychomotor_style'] ?? 'progress';
 
             // School fees details
             $settings['rc_school_fees_account_number'] = $data['rc_school_fees_account_number'] ?? null;
@@ -389,6 +393,12 @@ class SettingsController extends Controller
             $this->persistSettings($settingsPath, $settings);
 
             $this->refreshSettingsCache();
+
+            // Clear cached report card PDFs so new configuration takes effect immediately
+            $cacheDir = storage_path('app/public/report-cards');
+            if (File::exists($cacheDir)) {
+                File::cleanDirectory($cacheDir);
+            }
 
             return back()->with('status', 'Report card settings saved.');
             

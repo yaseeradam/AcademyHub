@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en">
     <head>
-        <meta charset="utf-8" />
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
         <title>{{ $transaction->receipt_number }}</title>
         <style>
             * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -427,7 +427,15 @@
 
             <div class="amount-box">
                 <div class="amount-label">Amount Paid</div>
-                <div class="amount-value">{{ config('myacademy.currency_symbol') }}{{ number_format((float) $transaction->amount_paid, 2) }}</div>
+                @php
+                    $currencySymbol = config('myacademy.currency_symbol', '₦');
+                    if ($currencySymbol === '₦' || html_entity_decode($currencySymbol) === '₦') {
+                        $currencyHtml = '<span style="font-family: DejaVu Sans, sans-serif;">&#8358;</span>';
+                    } else {
+                        $currencyHtml = '<span style="font-family: DejaVu Sans, sans-serif;">' . e($currencySymbol) . '</span>';
+                    }
+                @endphp
+                <div class="amount-value">{!! $currencyHtml !!}{{ number_format((float) $transaction->amount_paid, 2) }}</div>
                 <div class="amount-words">
                     ({{ \App\Support\MoneyWords::forReceipt($transaction->amount_paid, config('myacademy.currency_name', 'Naira'), config('myacademy.currency_subunit', 'Kobo')) }})
                 </div>

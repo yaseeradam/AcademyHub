@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta charset="utf-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <title>{{ $exam->title }}</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }

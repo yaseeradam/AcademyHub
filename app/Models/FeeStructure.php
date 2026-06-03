@@ -19,14 +19,35 @@ class FeeStructure extends Model
         'term',
         'session',
         'amount_due',
+        'installment_plans',
     ];
 
     protected $casts = [
-        'tenant_id' => 'integer',
-        'class_id' => 'integer',
-        'term' => 'integer',
-        'amount_due' => 'decimal:2',
+        'tenant_id'          => 'integer',
+        'class_id'           => 'integer',
+        'term'               => 'integer',
+        'amount_due'         => 'decimal:2',
+        'installment_plans'  => 'array',
     ];
+
+    /**
+     * Returns the set of enabled installment plans for this fee structure.
+     * Full payment is always available.
+     */
+    public function enabledPlans(): array
+    {
+        $plans = $this->installment_plans ?? [];
+        $enabled = ['full' => true];
+
+        if (!empty($plans['two_installments'])) {
+            $enabled['two_installments'] = true;
+        }
+        if (!empty($plans['monthly'])) {
+            $enabled['monthly'] = true;
+        }
+
+        return $enabled;
+    }
 
     public function schoolClass(): BelongsTo
     {

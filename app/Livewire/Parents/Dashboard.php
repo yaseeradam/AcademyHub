@@ -23,6 +23,7 @@ class Dashboard extends Component
     public ?int $selectedChildId = null;
     public int $term = 1;
     public string $session = '';
+    public string $activeTab = 'overview';
 
     public function mount(): void
     {
@@ -164,6 +165,50 @@ class Dashboard extends Component
     public function selectChild(int $id): void
     {
         $this->selectedChildId = $id;
+        $this->activeTab = 'overview';
+    }
+
+    #[Computed]
+    public function announcements(): Collection
+    {
+        return \App\Models\Announcement::query()
+            ->whereIn('audience', ['parent', 'all'])
+            ->latest('created_at')
+            ->limit(5)
+            ->get();
+    }
+
+    #[Computed]
+    public function timetable(): Collection
+    {
+        if (! $this->selectedChild) return collect();
+        return \App\Models\TimetableEntry::where('class_id', $this->selectedChild->class_id)
+            ->with(['subject', 'teacher'])
+            ->orderBy('day_of_week')
+            ->orderBy('starts_at')
+            ->get();
+    }
+
+    #[Computed]
+    public function transactions(): Collection
+    {
+        if (! $this->selectedChild) return collect();
+        return Transaction::where('student_id', $this->selectedChild->id)
+            ->where('session', $this->session)
+            ->orderByDesc('date')
+            ->get();
+    }
+
+    #[Computed]
+    public function classTeachers(): Collection
+    {
+        if (! $this->selectedChild) return collect();
+        return \App\Models\SubjectAllocation::where('class_id', $this->selectedChild->class_id)
+            ->with('teacher')
+            ->get()
+            ->pluck('teacher')
+            ->filter()
+            ->unique('id');
     }
 
     private function defaultSession(): string

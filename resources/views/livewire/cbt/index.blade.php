@@ -56,6 +56,29 @@
                                placeholder="e.g. Mathematics First Term Quiz" autofocus />
                         @error('title') <div class="mt-1.5 text-xs font-bold text-rose-600 flex items-center gap-1">⚠ {{ $message }}</div> @enderror
                     </div>
+
+                    {{-- Exam Type --}}
+                    <div class="lg:col-span-2">
+                        <label class="mb-1.5 block text-xs font-black text-slate-700 uppercase tracking-wider">Exam Type <span class="text-red-500">*</span></label>
+                        <div class="flex gap-3">
+                            <label class="flex flex-1 cursor-pointer items-center gap-3 rounded-xl border-2 p-3.5 transition-all {{ $examType === 'academic' ? 'border-indigo-500 bg-indigo-50' : 'border-slate-200 bg-white hover:border-slate-300' }}">
+                                <input type="radio" wire:model.live="examType" value="academic" class="text-indigo-600" />
+                                <div>
+                                    <div class="text-xs font-black text-slate-800">Academic Exam</div>
+                                    <div class="text-[10px] text-slate-500">Assigned to a specific class & subject</div>
+                                </div>
+                            </label>
+                            <label class="flex flex-1 cursor-pointer items-center gap-3 rounded-xl border-2 p-3.5 transition-all {{ $examType === 'aptitude' ? 'border-violet-500 bg-violet-50' : 'border-slate-200 bg-white hover:border-slate-300' }}">
+                                <input type="radio" wire:model.live="examType" value="aptitude" class="text-violet-600" />
+                                <div>
+                                    <div class="text-xs font-black text-slate-800">Aptitude / Entrance Test</div>
+                                    <div class="text-[10px] text-slate-500">Open to anyone with the access code</div>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    @if($examType === 'academic')
                     <div>
                         <label class="mb-1.5 block text-xs font-black text-slate-700 uppercase tracking-wider">Target Class <span class="text-red-500">*</span></label>
                         <select wire:model.live="classId"
@@ -78,6 +101,11 @@
                         </select>
                         @error('subjectId') <div class="mt-1.5 text-xs font-bold text-rose-600 flex items-center gap-1">⚠ {{ $message }}</div> @enderror
                     </div>
+                    @else
+                    <div class="lg:col-span-2 rounded-xl border border-violet-200 bg-violet-50/50 px-4 py-3 text-xs text-violet-700 font-medium">
+                        🎯 No class required — anyone with the access code can take this exam.
+                    </div>
+                    @endif
                     <div>
                         <label class="mb-1.5 block text-xs font-black text-slate-700 uppercase tracking-wider">Duration (minutes)</label>
                         <input wire:model="durationMinutes" type="number" min="1"
@@ -187,10 +215,13 @@
                                     {{ $exam->title }}
                                 </h3>
                                 <div class="mt-0.5 text-xs text-slate-400 font-bold flex items-center gap-1.5">
-                                    <span>{{ $exam->schoolClass?->name }}</span>
+                                    <span>{{ $exam->schoolClass?->name ?? ($exam->exam_type === 'aptitude' ? 'Aptitude Test' : '-') }}</span>
                                     @if($exam->subject?->name)
                                         <span class="h-1 w-1 rounded-full bg-slate-300"></span>
                                         <span class="text-indigo-600 font-extrabold">{{ $exam->subject->name }}</span>
+                                    @endif
+                                    @if($exam->exam_type === 'aptitude')
+                                        <span class="inline-flex items-center rounded-full bg-violet-100 px-2 py-0.5 text-[9px] font-black text-violet-700">APTITUDE</span>
                                     @endif
                                 </div>
                             </div>

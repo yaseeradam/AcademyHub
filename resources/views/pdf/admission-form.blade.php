@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta charset="utf-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <title>Admission Form - {{ $student->admission_number }}</title>
     <style>
         @page { margin: 20mm; }

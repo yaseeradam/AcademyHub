@@ -742,6 +742,31 @@ class TenantController extends Controller
             }
         }
     }
+
+    public function approveSubaccount(Tenant $tenant)
+    {
+        $settings = $tenant->settings ?? [];
+        if (!isset($settings['payment_gateway'])) {
+            $settings['payment_gateway'] = [];
+        }
+        $settings['payment_gateway']['subaccount_status'] = 'approved';
+        $tenant->update(['settings' => $settings]);
+
+        return redirect()->route('superadmin.tenants.edit', $tenant)
+            ->with('status', 'School settlement account approved successfully. Online payment is now active.');
+    }
+
+    public function rejectSubaccount(Tenant $tenant)
+    {
+        $settings = $tenant->settings ?? [];
+        if (isset($settings['payment_gateway'])) {
+            $settings['payment_gateway']['subaccount_status'] = 'not_submitted';
+        }
+        $tenant->update(['settings' => $settings]);
+
+        return redirect()->route('superadmin.tenants.edit', $tenant)
+            ->with('status', 'School settlement account request has been reset.');
+    }
 }
 
 

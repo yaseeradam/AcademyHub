@@ -17,6 +17,7 @@
         $rcShowTeacherRemarks = old('rc_show_teacher_remarks', config('myacademy.rc_show_teacher_remarks', true));
         $rcShowPrincipalRemarks = old('rc_show_principal_remarks', config('myacademy.rc_show_principal_remarks', true));
         $rcShowPsychomotor = old('rc_show_psychomotor', config('myacademy.rc_show_psychomotor', false));
+        $rcPsychomotorStyle = old('rc_psychomotor_style', config('myacademy.rc_psychomotor_style', 'progress'));
         $rcShowSchoolFees = old('rc_show_school_fees', config('myacademy.rc_show_school_fees', false));
         
 
@@ -40,6 +41,7 @@
             selectedReportTemplate: '{{ $reportCardTemplate }}',
             showSchoolFees: {{ $rcShowSchoolFees ? 'true' : 'false' }},
             showSignatures: {{ $rcShowSignatures ? 'true' : 'false' }},
+            showPsychomotor: {{ $rcShowPsychomotor ? 'true' : 'false' }},
         }">
         <x-page-header title="Report Card Settings" subtitle="Choose template and customize what appears on the report card."
             accent="settings" />
@@ -385,14 +387,25 @@
                     </label>
 
                     {{-- Psychomotor Domain --}}
-                    <label class="flex items-center gap-3 rounded-2xl border border-gray-200 bg-white/80 p-4 shadow-sm cursor-pointer hover:border-violet-300 transition">
-                        <input type="hidden" name="rc_show_psychomotor" value="0" />
-                        <input type="checkbox" name="rc_show_psychomotor" value="1" class="h-5 w-5 rounded-lg border-gray-300 text-violet-600 focus:ring-violet-500" @checked($rcShowPsychomotor) />
-                        <div>
-                            <div class="text-sm font-bold text-gray-900">Psychomotor Domain</div>
-                            <div class="text-xs text-gray-500">Handwriting, sports, punctuality, neatness, etc.</div>
+                    <div class="rounded-2xl border border-gray-200 bg-white/80 p-4 shadow-sm hover:border-violet-300 transition">
+                        <label class="flex items-center gap-3 cursor-pointer">
+                            <input type="hidden" name="rc_show_psychomotor" value="0" />
+                            <input type="checkbox" name="rc_show_psychomotor" value="1" class="h-5 w-5 rounded-lg border-gray-300 text-violet-600 focus:ring-violet-500" x-model="showPsychomotor" @checked($rcShowPsychomotor) />
+                            <div>
+                                <div class="text-sm font-bold text-gray-900">Psychomotor Domain</div>
+                                <div class="text-xs text-gray-500">Handwriting, sports, punctuality, neatness, etc.</div>
+                            </div>
+                        </label>
+                        <div x-show="showPsychomotor" x-transition class="mt-3 pl-8 space-y-2 border-t border-gray-100 pt-3">
+                            <label class="block text-xs font-bold text-gray-700">Psychomotor Presentation Style</label>
+                            <select name="rc_psychomotor_style" class="w-full rounded-xl border-gray-300 py-2 pl-3 pr-10 text-sm focus:border-violet-500 focus:ring-violet-500">
+                                <option value="progress" @selected($rcPsychomotorStyle === 'progress')>Progress Bars (Default)</option>
+                                <option value="grid" @selected($rcPsychomotorStyle === 'grid')>Grid Checkbox (Nigerian Standard)</option>
+                                <option value="numeric" @selected($rcPsychomotorStyle === 'numeric')>Numeric Grade Scale (1-5 Blocks)</option>
+                            </select>
+                            <p class="text-[10px] text-gray-500">Choose how psychomotor / affective traits are rendered on student report cards.</p>
                         </div>
-                    </label>
+                    </div>
                 </div>
             </div>
 

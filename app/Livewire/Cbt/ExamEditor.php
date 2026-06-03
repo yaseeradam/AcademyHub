@@ -37,6 +37,7 @@ class ExamEditor extends Component
 
     public string $title = '';
     public string $description = '';
+    public string $examType = 'academic';
     public ?int $classId = null;
     public ?int $subjectId = null;
     public int $durationMinutes = 30;
@@ -116,7 +117,8 @@ class ExamEditor extends Component
     {
         $this->title = (string) $exam->title;
         $this->description = (string) ($exam->description ?? '');
-        $this->classId = (int) $exam->class_id;
+        $this->examType = (string) ($exam->exam_type ?? 'academic');
+        $this->classId = $exam->class_id ? (int) $exam->class_id : null;
         $this->subjectId = (int) $exam->subject_id;
         $this->durationMinutes = (int) ($exam->duration_minutes ?? 30);
         $this->term = (int) ($exam->term ?? 1);
@@ -270,9 +272,10 @@ class ExamEditor extends Component
 
         $rules = [
             'title' => ['required', 'string', 'max:255'],
+            'examType' => ['required', 'in:academic,aptitude'],
             'description' => ['nullable', 'string', 'max:5000'],
-            'classId' => ['required', 'integer', 'exists:classes,id'],
-            'subjectId' => ['required', 'integer', 'exists:subjects,id'],
+            'classId' => $this->examType === 'academic' ? ['required', 'integer', 'exists:classes,id'] : ['nullable', 'integer'],
+            'subjectId' => $this->examType === 'academic' ? ['required', 'integer', 'exists:subjects,id'] : ['nullable', 'integer'],
             'session' => ['nullable', 'string', 'max:9'],
             'term' => ['required', 'integer', 'min:1', 'max:3'],
             'durationMinutes' => ['required', 'integer', 'min:1', 'max:300'],
@@ -304,10 +307,11 @@ class ExamEditor extends Component
         $exam = $this->exam;
 
         $attrs = [
+            'exam_type' => $this->examType,
             'title' => trim($data['title']),
             'description' => trim((string) ($data['description'] ?? '')) !== '' ? trim((string) $data['description']) : null,
-            'class_id' => (int) $data['classId'],
-            'subject_id' => (int) $data['subjectId'],
+            'class_id' => $this->examType === 'academic' ? (int) $data['classId'] : null,
+            'subject_id' => $this->examType === 'academic' ? (int) $data['subjectId'] : null,
             'term' => (int) $data['term'],
             'session' => trim((string) ($data['session'] ?? '')) !== '' ? trim((string) $data['session']) : null,
             'duration_minutes' => (int) $data['durationMinutes'],
@@ -530,6 +534,42 @@ class ExamEditor extends Component
 
         $exam = $this->exam;
         $totalQuestions = (int) $exam->questions->count();
+
+        // For aptitude exams with no class, build roster from attempts only
+        if (! $exam->class_id) {
+            $attempts = CbtAttempt::query()
+                ->where('exam_id', $exam->id)
+                ->with(['student:id,admission_number,first_name,last_name,passport_photo'])
+                ->get()
+                ->keyBy('student_id');
+
+            $attemptIds = $attempts->pluck('id')->filter()->values();
+            $answeredCounts = $attemptIds->isNotEmpty()
+                ? CbtAnswer::query()
+                    ->selectRaw('attempt_id, count(*) as answered')
+                    ->whereIn('attempt_id', $attemptIds)
+                    ->where(function ($q) {
+                        $q->whereNotNull('option_id')->orWhereNotNull('text_answer');
+                    })
+                    ->groupBy('attempt_id')
+                    ->pluck('answered', 'attempt_id')
+                : collect();
+
+            return $attempts->map(function ($attempt) use ($answeredCounts, $totalQuestions) {
+                $state = 'not_started';
+                if ($attempt->terminated_at) $state = 'terminated';
+                elseif ($attempt->submitted_at) $state = 'submitted';
+                elseif ($attempt->started_at) $state = 'in_progress';
+
+                return [
+                    'student' => $attempt->student,
+                    'attempt' => $attempt,
+                    'state' => $state,
+                    'answered' => (int) ($answeredCounts[$attempt->id] ?? 0),
+                    'remaining' => max(0, $totalQuestions - (int) ($answeredCounts[$attempt->id] ?? 0)),
+                ];
+            })->values();
+        }
 
         $students = Student::query()
             ->where('class_id', $exam->class_id)

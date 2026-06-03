@@ -54,6 +54,7 @@ return [
     'rc_show_teacher_remarks' => true,
     'rc_show_principal_remarks' => true,
     'rc_show_psychomotor' => false,
+    'rc_psychomotor_style' => 'progress',
     'rc_show_school_fees' => false,
     'rc_school_fees_account_number' => null,
     'rc_school_fees_bank_name' => null,

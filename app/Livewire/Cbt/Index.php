@@ -20,6 +20,7 @@ class Index extends Component
     public bool $creating = false;
 
     public string $title = '';
+    public string $examType = 'academic';
     public ?int $classId = null;
     public ?int $subjectId = null;
     public int $durationMinutes = 30;
@@ -55,6 +56,7 @@ class Index extends Component
     private function resetForm(): void
     {
         $this->title = '';
+        $this->examType = 'academic';
         $this->classId = null;
         $this->subjectId = null;
         $this->durationMinutes = 30;
@@ -123,8 +125,9 @@ class Index extends Component
 
         $data = $this->validate([
             'title' => ['required', 'string', 'max:255'],
-            'classId' => ['required', 'integer', 'exists:classes,id'],
-            'subjectId' => ['required', 'integer', 'exists:subjects,id'],
+            'examType' => ['required', 'in:academic,aptitude'],
+            'classId' => $this->examType === 'academic' ? ['required', 'integer', 'exists:classes,id'] : ['nullable', 'integer'],
+            'subjectId' => $this->examType === 'academic' ? ['required', 'integer', 'exists:subjects,id'] : ['nullable', 'integer'],
             'session' => ['nullable', 'string', 'max:9'],
             'term' => ['required', 'integer', 'min:1', 'max:3'],
             'durationMinutes' => ['required', 'integer', 'min:1', 'max:300'],
@@ -147,9 +150,10 @@ class Index extends Component
             $code = $this->generateAccessCode();
 
             return CbtExam::query()->create([
+                'exam_type' => $this->examType,
                 'title' => trim($data['title']),
-                'class_id' => (int) $data['classId'],
-                'subject_id' => (int) $data['subjectId'],
+                'class_id' => $this->examType === 'academic' ? (int) $data['classId'] : null,
+                'subject_id' => $this->examType === 'academic' ? (int) $data['subjectId'] : null,
                 'term' => (int) $data['term'],
                 'session' => trim((string) ($data['session'] ?? '')) !== '' ? trim((string) $data['session']) : null,
                 'duration_minutes' => (int) $data['durationMinutes'],

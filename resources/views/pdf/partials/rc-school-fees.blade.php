@@ -1,11 +1,19 @@
 {{-- School Fees Partial --}}
 @if(($showSchoolFees ?? false) && !empty($schoolFees))
+@php
+    $feeCurrency = $schoolFees['currency'] ?? '₦';
+    if ($feeCurrency === '₦' || html_entity_decode($feeCurrency) === '₦') {
+        $currencyHtml = '<span style="font-family: DejaVu Sans, sans-serif;">&#8358;</span>';
+    } else {
+        $currencyHtml = '<span style="font-family: DejaVu Sans, sans-serif;">' . e($feeCurrency) . '</span>';
+    }
+@endphp
 <div style="border: 3px solid {{ $rcBorderColor ?? '#d97706' }}; border-radius: 10px; padding: 12px; margin-bottom: 14px; background: {{ $rcBgLight ?? '#fff7ed' }};">
     <div style="font-size: 10px; font-weight: 900; color: {{ $rcTitleColor ?? '#92400e' }}; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 8px; text-align: center;">
         School Fees for Next Term
     </div>
     <div style="font-size: 16px; font-weight: 900; color: {{ $rcTitleColor ?? '#92400e' }}; text-align: center; padding: 8px; background: white; border: 2px solid {{ $rcBorderColor ?? '#d97706' }}; border-radius: 8px; margin-bottom: 8px;">
-        {{ $schoolFees['currency'] ?? '₦' }}{{ number_format($schoolFees['amount'], 2) }}
+        {!! $currencyHtml !!}{{ number_format($schoolFees['amount'], 2) }}
     </div>
     <div style="display: table; width: 100%;">
         @if($schoolFees['bank_name'] ?? null)

@@ -61,7 +61,9 @@ class TenantDiscovery
             ]);
             // Only skip 404 for bare localhost/127.0.0.1/private network IPs — subdomain mismatches should still 404
             $isLocalIp = filter_var($host, FILTER_VALIDATE_IP) && !filter_var($host, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE);
-            if (!in_array($host, ['localhost', '127.0.0.1']) && !$isLocalIp) {
+            $isWebhookRoute = str_contains($request->getPathInfo(), '/api/whatsapp/webhook');
+            $isTunnelDomain = str_ends_with($host, '.trycloudflare.com') || str_ends_with($host, '.ngrok.io') || str_ends_with($host, '.ngrok-free.app');
+            if (!in_array($host, ['localhost', '127.0.0.1']) && !$isLocalIp && !$isWebhookRoute && !$isTunnelDomain) {
                 abort(404, "School instance '{$host}' not found.");
             }
         } else {

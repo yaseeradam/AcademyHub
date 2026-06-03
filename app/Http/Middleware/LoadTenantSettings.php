@@ -64,6 +64,7 @@ class LoadTenantSettings
                 'rc_show_teacher_remarks',
                 'rc_show_principal_remarks',
                 'rc_show_psychomotor',
+                'rc_psychomotor_style',
                 'rc_show_school_fees',
                 'rc_school_fees_account_number',
                 'rc_school_fees_bank_name',
