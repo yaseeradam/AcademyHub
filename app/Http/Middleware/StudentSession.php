@@ -14,6 +14,15 @@ class StudentSession
     {
         $studentId = session('student_id');
         if (! $studentId) {
+            if (auth()->check()) {
+                $user = auth()->user();
+                if (in_array($user->role, ['admin', 'teacher', 'bursar'], true)) {
+                    return redirect()
+                        ->route('cbt.index')
+                        ->with('warning', 'You are logged in as staff. To test or preview the exam from the student\'s perspective, please log in with a student account or use a private/incognito window.');
+                }
+            }
+            session(['url.intended' => $request->fullUrl()]);
             return redirect()->route('login');
         }
 

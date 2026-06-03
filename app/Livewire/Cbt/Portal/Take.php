@@ -131,7 +131,7 @@ class Take extends Component
         abort_unless($attempt->exam && in_array($attempt->exam->status, ['live', 'approved']), 403, 'Exam is not active.');
         abort_unless((bool) $attempt->exam->published_at, 403, 'Exam is not live.');
         abort_unless($attempt->student && $attempt->student->status === 'Active', 403, 'Student is not active.');
-        abort_unless((int) $attempt->student->class_id === (int) $attempt->exam->class_id, 403);
+        abort_unless($attempt->exam->exam_type === 'aptitude' || (int) $attempt->student->class_id === (int) $attempt->exam->class_id, 403);
         if ($attempt->terminated_at) {
             session()->flash('error', 'Your exam attempt was terminated by an admin.');
             redirect()->route('student.exams');

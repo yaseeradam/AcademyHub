@@ -101,7 +101,7 @@ class Start extends Component
             return;
         }
 
-        if ((int) $student->class_id !== (int) $exam->class_id) {
+        if ($exam->exam_type !== 'aptitude' && (int) $student->class_id !== (int) $exam->class_id) {
             $this->addError('admissionNumber', 'Student is not in the exam class.');
             return;
         }
