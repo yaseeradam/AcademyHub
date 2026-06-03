@@ -13,8 +13,9 @@
         timerDisplay: '--:--',
         canSubmit: false,
         _interval: null,
-        localAnswers: @js($this->answers),
-        localTheoryAnswers: @js($this->theoryAnswers),
+        localAnswers: @entangle('answers'),
+        localTheoryAnswers: @entangle('theoryAnswers'),
+
         currentIndex: @entangle('currentIndex'),
         questions: @js($questions->map(fn($q) => [
             'id' => $q->id,
