@@ -28,11 +28,22 @@ class Start extends Component
         }
     }
 
+    #[Computed]
+    public function exam()
+    {
+        if (trim($this->examCode) === '') {
+            return null;
+        }
+        return CbtExam::query()
+            ->where('access_code', strtoupper(trim($this->examCode)))
+            ->first();
+    }
+
     public function start()
     {
         $data = $this->validate([
             'examCode' => ['required', 'string', 'max:32'],
-            'admissionNumber' => ['required', 'string', 'max:50'],
+            'admissionNumber' => ['required', 'string', 'max:100'],
             'surname' => ['nullable', 'string', 'max:100'],
             'pin' => ['nullable', 'string', 'max:20'],
         ], [
@@ -90,20 +101,66 @@ class Start extends Component
                 return;
             }
         }
-        $student = Student::query()->where('admission_number', $admission)->first();
-        if (! $student || $student->status !== 'Active') {
-            $this->addError('admissionNumber', 'Student not found or inactive.');
-            return;
-        }
 
-        if ($surname !== '' && strcasecmp(trim((string) $student->last_name), $surname) !== 0) {
-            $this->addError('surname', 'Surname does not match this admission number.');
-            return;
-        }
+        if ($exam->exam_type === 'aptitude') {
+            $student = Student::query()->where('admission_number', $admission)->first();
+            
+            if (! $student) {
+                $cleanName = trim(preg_replace('/\s+/', ' ', $admission));
+                $parts = explode(' ', $cleanName, 2);
+                $firstName = trim($parts[0]);
+                $lastName = isset($parts[1]) ? trim($parts[1]) : 'Candidate';
 
-        if ($exam->exam_type !== 'aptitude' && (int) $student->class_id !== (int) $exam->class_id) {
-            $this->addError('admissionNumber', 'Student is not in the exam class.');
-            return;
+                $student = Student::query()
+                    ->where('first_name', $firstName)
+                    ->where('last_name', $lastName)
+                    ->where('admission_number', 'like', 'APT-%')
+                    ->first();
+
+                if (! $student) {
+                    $classObj = \App\Models\SchoolClass::query()->where('name', 'Default Class')->first();
+                    if (! $classObj) {
+                        $classObj = \App\Models\SchoolClass::query()->create(['name' => 'Default Class', 'level' => 1]);
+                    }
+                    $sectionObj = \App\Models\Section::query()->where('class_id', $classObj->id)->where('name', 'A')->first();
+                    if (! $sectionObj) {
+                        $sectionObj = \App\Models\Section::query()->create(['class_id' => $classObj->id, 'name' => 'A']);
+                    }
+
+                    $admNo = 'APT-' . strtoupper(Str::random(6));
+                    while (Student::query()->where('admission_number', $admNo)->exists()) {
+                        $admNo = 'APT-' . strtoupper(Str::random(6));
+                    }
+
+                    $student = Student::query()->create([
+                        'tenant_id' => $exam->tenant_id ?? \App\Support\TenantSettings::tenantId(),
+                        'admission_number' => $admNo,
+                        'first_name' => $firstName !== '' ? $firstName : 'Aptitude',
+                        'last_name' => $lastName !== '' ? $lastName : 'Candidate',
+                        'class_id' => $classObj->id,
+                        'section_id' => $sectionObj->id,
+                        'gender' => 'Other',
+                        'status' => 'Active',
+                        'password' => bcrypt('password'),
+                    ]);
+                }
+            }
+        } else {
+            $student = Student::query()->where('admission_number', $admission)->first();
+            if (! $student || $student->status !== 'Active') {
+                $this->addError('admissionNumber', 'Student not found or inactive.');
+                return;
+            }
+
+            if ($surname !== '' && strcasecmp(trim((string) $student->last_name), $surname) !== 0) {
+                $this->addError('surname', 'Surname does not match this admission number.');
+                return;
+            }
+
+            if ((int) $student->class_id !== (int) $exam->class_id) {
+                $this->addError('admissionNumber', 'Student is not in the exam class.');
+                return;
+            }
         }
 
         $attempt = CbtAttempt::query()

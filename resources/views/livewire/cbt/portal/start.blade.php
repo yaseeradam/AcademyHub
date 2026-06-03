@@ -28,8 +28,11 @@
                 @endif
 
                 <div>
-                    <label class="text-xs font-bold uppercase tracking-wider text-gray-700">Admission Number</label>
-                    <input wire:model="admissionNumber" class="mt-1.5 w-full rounded-xl border-2 border-gray-200 bg-white px-4 py-2.5 text-sm font-semibold text-gray-900 shadow-sm transition-all focus:border-rose-500 focus:ring-4 focus:ring-rose-500/20" placeholder="e.g. STU20240001" />
+                    <label class="text-xs font-bold uppercase tracking-wider text-gray-700">
+                        {{ $this->exam?->exam_type === 'aptitude' ? 'Full Name / Candidate Name' : 'Admission Number' }}
+                    </label>
+                    <input wire:model="admissionNumber" class="mt-1.5 w-full rounded-xl border-2 border-gray-200 bg-white px-4 py-2.5 text-sm font-semibold text-gray-900 shadow-sm transition-all focus:border-rose-500 focus:ring-4 focus:ring-rose-500/20" 
+                           placeholder="{{ $this->exam?->exam_type === 'aptitude' ? 'e.g. John Doe' : 'e.g. STU20240001' }}" />
                     @error('admissionNumber') <div class="mt-1.5 text-xs font-semibold text-rose-700">{{ $message }}</div> @enderror
                 </div>
 
