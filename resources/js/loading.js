@@ -35,6 +35,7 @@ document.addEventListener('livewire:init', () => {
         '$refresh',
         'tick',
         'refreshCount',
+        'selectOption',
     ]);
 
     /**
