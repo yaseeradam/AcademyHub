@@ -36,6 +36,8 @@ class StudentSession
                     app()->instance('currentTenant', $tenant);
                     $request->attributes->add(['tenant' => $tenant]);
                     $tenantId = $tenant->id;
+                    // Load settings now that tenant is bound in container
+                    TenantSettings::loadToConfig();
                 }
             }
         }
