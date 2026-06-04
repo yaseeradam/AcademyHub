@@ -57,4 +57,37 @@ class ResultsEntryMaxScoreTest extends TestCase
         $this->assertSame(15, (int) $score->ca2);
         $this->assertSame(50, (int) $score->exam);
     }
+
+    public function test_scores_are_saved_automatically_on_updating_scores(): void
+    {
+        $this->seed();
+
+        $admin = User::query()->where('email', 'admin@myacademy.local')->firstOrFail();
+        $class = SchoolClass::query()->where('name', 'JSS 2')->firstOrFail();
+        $subject = Subject::query()->where('code', 'MTH')->firstOrFail();
+        $student = Student::query()->where('class_id', $class->id)->firstOrFail();
+
+        Livewire::actingAs($admin)
+            ->test(ResultsEntry::class)
+            ->set('classId', $class->id)
+            ->set('subjectId', $subject->id)
+            ->set('term', 1)
+            ->set('session', '2026/2027')
+            ->set("scores.{$student->id}.ca1", 8)
+            ->set("scores.{$student->id}.ca2", 12)
+            ->set("scores.{$student->id}.exam", 45);
+
+        $score = Score::query()
+            ->where('student_id', $student->id)
+            ->where('class_id', $class->id)
+            ->where('subject_id', $subject->id)
+            ->where('term', 1)
+            ->where('session', '2026/2027')
+            ->firstOrFail();
+
+        $this->assertSame(8, (int) $score->ca1);
+        $this->assertSame(12, (int) $score->ca2);
+        $this->assertSame(45, (int) $score->exam);
+    }
 }
+

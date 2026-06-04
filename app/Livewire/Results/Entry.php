@@ -441,8 +441,82 @@ class Entry extends Component
             $this->validationErrors[$errorKey] = 'exceeded';
             $this->dispatch('alert', message: "{$label} max is {$max}.", type: 'warning');
             $this->dispatch('shake-row', studentId: $studentId, field: $field);
+            return;
         }
+
+        $this->autoSaveScore($studentId);
     }
+
+    protected function autoSaveScore(int $studentId): void
+    {
+        if (! $this->classId || ! $this->subjectId) {
+            return;
+        }
+
+        $user = auth()->user();
+        if (! $user || ! $user->hasPermission('results.entry')) {
+            return;
+        }
+
+        if ($this->isPublished) {
+            return;
+        }
+
+        if ($user->role === 'teacher') {
+            $submission = $this->submission;
+            if ($submission && in_array($submission->status, ['submitted', 'approved'], true)) {
+                return;
+            }
+        }
+
+        if ($user->role !== 'admin') {
+            $allowed = SubjectAllocation::query()
+                ->where('teacher_id', $user->id)
+                ->where('class_id', $this->classId)
+                ->where('subject_id', $this->subjectId)
+                ->exists();
+
+            if (! $allowed) {
+                return;
+            }
+        }
+
+        if (! $this->term || ! $this->session) {
+            return;
+        }
+
+        $row = $this->scores[$studentId] ?? [];
+        $ca1 = (int) ($row['ca1'] ?? 0);
+        $ca2 = (int) ($row['ca2'] ?? 0);
+        $exam = (int) ($row['exam'] ?? 0);
+
+        $maxMarks = $this->maxMarks();
+        if (
+            $ca1 < 0 || $ca1 > $maxMarks['ca1']
+            || $ca2 < 0 || $ca2 > $maxMarks['ca2']
+            || $exam < 0 || $exam > $maxMarks['exam']
+        ) {
+            return;
+        }
+
+        Score::query()->updateOrCreate(
+            [
+                'student_id' => $studentId,
+                'subject_id' => $this->subjectId,
+                'class_id' => $this->classId,
+                'term' => $this->term,
+                'session' => $this->session,
+            ],
+            [
+                'ca1' => $ca1,
+                'ca2' => $ca2,
+                'exam' => $exam,
+            ]
+        );
+
+        $this->dispatch('alert', message: 'Score auto-saved.', type: 'success');
+    }
+
 
     public function save(): void
     {
