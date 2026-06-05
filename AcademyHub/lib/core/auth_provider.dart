@@ -13,8 +13,16 @@ class User {
   final String email;
   final String role;
   final bool? isSuperAdmin;
+  final String? profilePhotoUrl;
 
-  User({required this.id, required this.name, required this.email, required this.role, this.isSuperAdmin});
+  User({
+    required this.id,
+    required this.name,
+    required this.email,
+    required this.role,
+    this.isSuperAdmin,
+    this.profilePhotoUrl,
+  });
 
   factory User.fromJson(Map<String, dynamic> json) => User(
         id: json['id'],
@@ -22,17 +30,24 @@ class User {
         email: json['email'] ?? json['admission_number'] ?? '',
         role: json['role'] ?? 'student',
         isSuperAdmin: json['is_super_admin'] == 1 || json['is_super_admin'] == true,
+        profilePhotoUrl: json['profile_photo_url'],
       );
 
   Map<String, dynamic> toJson() => {
-        'id': id, 'name': name, 'email': email,
-        'role': role, 'is_super_admin': isSuperAdmin,
+        'id': id,
+        'name': name,
+        'email': email,
+        'role': role,
+        'is_super_admin': isSuperAdmin,
+        'profile_photo_url': profilePhotoUrl,
       };
 }
 
 class AuthProvider extends ChangeNotifier {
   final Dio _dio = Dio(BaseOptions(
     baseUrl: ApiConstants.baseUrl,
+    connectTimeout: const Duration(seconds: 5),
+    receiveTimeout: const Duration(seconds: 5),
     headers: {'Accept': 'application/json'},
   ));
 
@@ -41,6 +56,8 @@ class AuthProvider extends ChangeNotifier {
   bool    _isLoading = true;
   bool    _initialSyncDone = false;
   String? _error;
+  List<String> _activePlugins = [];
+  List<Map<String, dynamic>> _allPlugins = [];
 
   // School Tenant branding properties
   String? _tenantSlug;
@@ -60,6 +77,10 @@ class AuthProvider extends ChangeNotifier {
   String? get tenantName            => _tenantName;
   String? get tenantLogoUrl         => _tenantLogoUrl;
   String? get tenantPrimaryColorHex => _tenantPrimaryColorHex;
+  List<String> get activePlugins    => _activePlugins;
+  List<Map<String, dynamic>> get allPlugins => _allPlugins;
+
+  bool isPluginActive(String slug) => _activePlugins.contains(slug);
 
   Color get tenantPrimaryColor {
     if (_tenantPrimaryColorHex != null) {
@@ -98,10 +119,43 @@ class AuthProvider extends ChangeNotifier {
         _user = User.fromJson(response.data['data']);
         _initialSyncDone = prefs.getBool('initial_sync_done') ?? false;
 
+        final cachedAllPlugins = prefs.getString('tenant_all_plugins');
+        if (cachedAllPlugins != null) {
+          try {
+            _allPlugins = List<Map<String, dynamic>>.from(jsonDecode(cachedAllPlugins));
+          } catch (_) {}
+        }
+
+        try {
+          final termRes = await _dio.get('/term');
+          final activePluginsList = List<String>.from(termRes.data['active_plugins'] ?? []);
+          _activePlugins = activePluginsList;
+          await prefs.setStringList('tenant_active_plugins', activePluginsList);
+
+          final allPluginsList = List<Map<String, dynamic>>.from(termRes.data['all_plugins'] ?? []);
+          _allPlugins = allPluginsList;
+          await prefs.setString('tenant_all_plugins', jsonEncode(allPluginsList));
+        } catch (_) {
+          _activePlugins = prefs.getStringList('tenant_active_plugins') ?? [];
+          final cachedAll = prefs.getString('tenant_all_plugins');
+          if (cachedAll != null) {
+            try {
+              _allPlugins = List<Map<String, dynamic>>.from(jsonDecode(cachedAll));
+            } catch (_) {}
+          }
+        }
+
         if (_initialSyncDone && _user != null) {
           _syncService.backgroundRefresh(_user!.role);
         }
       } catch (_) {
+        _activePlugins = prefs.getStringList('tenant_active_plugins') ?? [];
+        final cachedAll = prefs.getString('tenant_all_plugins');
+        if (cachedAll != null) {
+          try {
+            _allPlugins = List<Map<String, dynamic>>.from(jsonDecode(cachedAll));
+          } catch (_) {}
+        }
         // Offline resilience: Recover user from SharedPreferences cache if network fails
         final cachedUserJson = prefs.getString('cached_user');
         if (cachedUserJson != null) {
@@ -172,6 +226,8 @@ class AuthProvider extends ChangeNotifier {
     _token = null;
     _user = null;
     _initialSyncDone = false;
+    _activePlugins = [];
+    _allPlugins = [];
 
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('tenant_slug');
@@ -183,6 +239,8 @@ class AuthProvider extends ChangeNotifier {
     await prefs.remove('cached_user');
     await prefs.remove('student_admission_number');
     await prefs.remove('student_id');
+    await prefs.remove('tenant_active_plugins');
+    await prefs.remove('tenant_all_plugins');
 
     _dio.options.headers.remove('X-Tenant-Slug');
     _dio.options.headers.remove('Authorization');
@@ -232,6 +290,20 @@ class AuthProvider extends ChangeNotifier {
       }
       _dio.options.headers['Authorization'] = 'Bearer $_token';
 
+      try {
+        final termRes = await _dio.get('/term');
+        final activePluginsList = List<String>.from(termRes.data['active_plugins'] ?? []);
+        _activePlugins = activePluginsList;
+        await prefs.setStringList('tenant_active_plugins', activePluginsList);
+
+        final allPluginsList = List<Map<String, dynamic>>.from(termRes.data['all_plugins'] ?? []);
+        _allPlugins = allPluginsList;
+        await prefs.setString('tenant_all_plugins', jsonEncode(allPluginsList));
+      } catch (_) {
+        _activePlugins = [];
+        _allPlugins = [];
+      }
+
       _initialSyncDone = prefs.getBool('initial_sync_done') ?? false;
 
       _isLoading = false;
@@ -249,6 +321,24 @@ class AuthProvider extends ChangeNotifier {
       notifyListeners();
       return false;
     }
+  }
+
+  Future<void> refreshPlugins() async {
+    if (_token == null) return;
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final termRes = await _dio.get('/term');
+      
+      final activePluginsList = List<String>.from(termRes.data['active_plugins'] ?? []);
+      _activePlugins = activePluginsList;
+      await prefs.setStringList('tenant_active_plugins', activePluginsList);
+
+      final allPluginsList = List<Map<String, dynamic>>.from(termRes.data['all_plugins'] ?? []);
+      _allPlugins = allPluginsList;
+      await prefs.setString('tenant_all_plugins', jsonEncode(allPluginsList));
+      
+      notifyListeners();
+    } catch (_) {}
   }
 
   void markSyncDone() {
@@ -275,12 +365,16 @@ class AuthProvider extends ChangeNotifier {
     _user            = null;
     _initialSyncDone = false;
 
+    _activePlugins = [];
+    _allPlugins = [];
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('auth_token');
     await prefs.remove('initial_sync_done');
     await prefs.remove('cached_user');
     await prefs.remove('student_admission_number');
     await prefs.remove('student_id');
+    await prefs.remove('tenant_active_plugins');
+    await prefs.remove('tenant_all_plugins');
     _dio.options.headers.remove('Authorization');
 
     notifyListeners();

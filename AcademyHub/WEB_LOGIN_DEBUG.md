@@ -7,7 +7,7 @@ Flutter Web has CORS (Cross-Origin Resource Sharing) restrictions when connectin
 
 ### 1. **Start Laravel Server**
 ```bash
-cd c:\laragon\www\myacademy-laravel
+cd c:\laragon\www\academyhub-laravel
 php artisan serve --host=0.0.0.0 --port=8000
 ```
 
@@ -23,7 +23,7 @@ Open browser and go to: `http://localhost:8000/api/login`
 
 ### 4. **Run Flutter Web**
 ```bash
-cd myacademy_app
+cd academyhub_app
 flutter run -d chrome
 ```
 
@@ -53,7 +53,7 @@ Access to XMLHttpRequest at 'http://localhost:8000/api/login' from origin 'http:
 ### **Issue 4: Database not seeded**
 **Solution**:
 ```bash
-cd c:\laragon\www\myacademy-laravel
+cd c:\laragon\www\academyhub-laravel
 php artisan migrate:fresh --seed
 ```
 
@@ -67,7 +67,7 @@ php artisan migrate:fresh --seed
 curl -X POST http://localhost:8000/api/login \
   -H "Content-Type: application/json" \
   -H "Accept: application/json" \
-  -d "{\"email\":\"admin@myacademy.local\",\"password\":\"password\"}"
+  -d "{\"email\":\"admin@academyhub.local\",\"password\":\"password\"}"
 ```
 
 Should return:
@@ -77,7 +77,7 @@ Should return:
   "user": {
     "id": 1,
     "name": "Admin User",
-    "email": "admin@myacademy.local",
+    "email": "admin@academyhub.local",
     "role": "admin"
   }
 }
@@ -110,7 +110,7 @@ Use: `http://localhost:8000/api`
 Look for these debug messages:
 ```
 Attempting login to: http://localhost:8000/api/login
-Email: admin@myacademy.local
+Email: admin@academyhub.local
 Login response: {token: ..., user: ...}
 Login successful for user: Admin User
 ```
@@ -139,7 +139,7 @@ Login successful for user: Admin User
 
 ## 🎯 Expected Flow
 
-1. **Enter credentials**: `admin@myacademy.local` / `password`
+1. **Enter credentials**: `admin@academyhub.local` / `password`
 2. **See loading spinner** on login button
 3. **Check console** for debug messages
 4. **Success**: Navigate to admin dashboard with real data

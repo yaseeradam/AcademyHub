@@ -2,6 +2,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../core/auth_provider.dart';
+import '../../core/toast_utility.dart';
 
 class TenantSelectionScreen extends StatefulWidget {
   const TenantSelectionScreen({super.key});
@@ -29,25 +30,25 @@ class _TenantSelectionScreenState extends State<TenantSelectionScreen> {
 
     try {
       final success = await auth.resolveTenant(_slugController.text.trim().toLowerCase());
-      if (!success && mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(auth.error ?? 'School domain not found.'),
-            backgroundColor: const Color(0xFFF43F5E),
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          ),
+      if (success && mounted) {
+        CustomToast.show(
+          context: context,
+          message: 'Connected to ${auth.tenantName ?? "School"} successfully!',
+          type: 'success',
+        );
+      } else if (!success && mounted) {
+        CustomToast.show(
+          context: context,
+          message: auth.error ?? 'School domain not found.',
+          type: 'error',
         );
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(e.toString()),
-            backgroundColor: const Color(0xFFF43F5E),
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          ),
+        CustomToast.show(
+          context: context,
+          message: 'Connection failed: Please check server status.',
+          type: 'error',
         );
       }
     } finally {
@@ -158,10 +159,12 @@ class _TenantSelectionScreenState extends State<TenantSelectionScreen> {
                 ),
               ],
             ),
-            child: const Icon(
-              Icons.domain_verification_rounded,
-              color: Colors.white,
-              size: 32,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(16),
+              child: Image.asset(
+                'assets/images/Alogo.png',
+                fit: BoxFit.cover,
+              ),
             ),
           ),
           const SizedBox(height: 20),

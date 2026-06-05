@@ -63,10 +63,12 @@ class _LoginScreenState extends State<LoginScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  const Icon(
-                    Icons.school_rounded,
-                    size: 80,
-                    color: AppColors.primary,
+                  Center(
+                    child: Image.asset(
+                      'assets/images/Alogo.png',
+                      width: 88,
+                      height: 88,
+                    ),
                   ),
                   const SizedBox(height: 24),
                   Text(
@@ -76,7 +78,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Sign in to your MyAcademy account',
+                    'Sign in to your AcademyHub account',
                     textAlign: TextAlign.center,
                     style: Theme.of(context).textTheme.bodyMedium,
                   ),

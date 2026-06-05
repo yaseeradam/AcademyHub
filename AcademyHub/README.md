@@ -1,4 +1,4 @@
-# myacademy_app
+# academyhub_app
 
 A new Flutter project.
 

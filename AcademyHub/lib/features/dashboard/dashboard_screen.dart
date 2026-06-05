@@ -77,7 +77,7 @@ class DashboardContent extends StatelessWidget {
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Text(
-                    'MyAcademy Dashboard',
+                    'AcademyHub Dashboard',
                     style: TextStyle(
                       fontSize: 17,
                       color: Colors.white.withValues(alpha: 0.9),

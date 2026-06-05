@@ -1,4 +1,4 @@
-# MyAcademy Flutter Mobile Layout Implementation
+# AcademyHub Flutter Mobile Layout Implementation
 
 This implementation replicates the exact mobile view design from the Laravel web interface, including:
 
@@ -110,7 +110,7 @@ class AdminHome extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MobileLayout(
-      title: 'MyAcademy',
+      title: 'AcademyHub',
       child: YourContentHere(),
     );
   }

@@ -6,7 +6,7 @@
 - Beautiful gradient background (blue → cyan → emerald)
 - Animated logo with pulsing effect
 - 20 floating particles
-- Typewriter text: "MyAcademy"
+- Typewriter text: "AcademyHub"
 - "Empowering Education Through Intelligence" subtitle
 - Loading indicator
 - "Powered by Emotional Intelligence" footer
@@ -28,7 +28,7 @@
 
 ### Option 1: Fresh Install (Recommended)
 1. **Clear app data** (if you've run the app before):
-   - Android: Settings → Apps → MyAcademy → Storage → Clear Data
+   - Android: Settings → Apps → AcademyHub → Storage → Clear Data
    - iOS: Delete and reinstall the app
    - Or use: `flutter clean && flutter pub get`
 
@@ -121,7 +121,7 @@ home: const LoginScreen(), // Direct to login
 ## 🎯 Demo Credentials
 
 The login screen comes pre-filled with:
-- **Email**: admin@myacademy.local
+- **Email**: admin@academyhub.local
 - **Password**: password
 
 Just tap "Sign in to Dashboard" to proceed!

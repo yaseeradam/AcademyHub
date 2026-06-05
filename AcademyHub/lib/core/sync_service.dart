@@ -29,6 +29,19 @@ class SyncService {
 
   SyncService(this.dio) {
     _emitPendingCount();
+    _initConnectivity();
+  }
+
+  Future<void> _initConnectivity() async {
+    // 1. Check initial connectivity state on startup
+    try {
+      final results = await Connectivity().checkConnectivity();
+      if (!results.contains(ConnectivityResult.none)) {
+        syncNow();
+      }
+    } catch (_) {}
+
+    // 2. Listen to subsequent connection status changes
     _connectivitySub = Connectivity().onConnectivityChanged.listen((results) {
       if (!results.contains(ConnectivityResult.none)) {
         syncNow();
@@ -62,6 +75,8 @@ class SyncService {
       await prefs.setInt('active_term', term);
       await prefs.setString('active_session', session);
 
+      final activePlugins = prefs.getStringList('tenant_active_plugins') ?? [];
+
       _emit('Downloading announcements...', 0.1);
       await _fetchAnnouncements();
 
@@ -70,7 +85,9 @@ class SyncService {
       } else if (role == 'student') {
         await _syncStudentData(term, session);
       } else if (role == 'parent') {
-        await _syncParentData(term, session);
+        if (activePlugins.contains('parent-portal')) {
+          await _syncParentData(term, session);
+        }
       }
 
       _emit('All done!', 1.0);
@@ -82,6 +99,9 @@ class SyncService {
   }
 
   Future<void> _syncTeacherData(int term, String session) async {
+    final prefs = await SharedPreferences.getInstance();
+    final activePlugins = prefs.getStringList('tenant_active_plugins') ?? [];
+
     _emit('Downloading your classes...', 0.15);
     final classesRes = await dio.get('/teacher/classes');
     final classes    = (classesRes.data['data'] as List).cast<Map<String, dynamic>>();
@@ -117,19 +137,23 @@ class SyncService {
       });
     }
 
-    _emit('Downloading homework...', 0.72);
-    await _fetchHomework();
+    if (activePlugins.contains('homework')) {
+      _emit('Downloading homework...', 0.72);
+      await _fetchHomework();
+    }
 
     _emit('Downloading timetable...', 0.85);
     await _fetchTimetable();
   }
 
   Future<void> _syncStudentData(int term, String session) async {
+    final prefs = await SharedPreferences.getInstance();
+    final activePlugins = prefs.getStringList('tenant_active_plugins') ?? [];
+
     _emit('Downloading student stats...', 0.15);
     await _tryFetch(() async {
       final r = await dio.get('/student/dashboard');
       final data = r.data['data'] ?? r.data;
-      final prefs = await SharedPreferences.getInstance();
       final admissionNo = prefs.getString('student_admission_number') ?? '';
       if (admissionNo.isNotEmpty) {
         await _db.saveStudentStats(admissionNo, data);
@@ -139,8 +163,21 @@ class SyncService {
     _emit('Downloading academic results...', 0.3);
     await _tryFetch(() async {
       final r = await dio.get('/student/results');
-      final list = (r.data['data'] as List?)?.cast<Map<String, dynamic>>() ?? [];
-      await _db.upsertScores(list);
+      final isPublished = r.data['is_published'] ?? true;
+      if (isPublished) {
+        final list = (r.data['results'] as List?)?.cast<Map<String, dynamic>>() ?? [];
+        final term = r.data['term'] ?? 1;
+        final session = r.data['session'] ?? '';
+        final studentId = prefs.getInt('student_id') ?? 0;
+        final mappedList = list.map((s) => {
+          ...s,
+          'student_id': studentId,
+          'class_id': 0,
+          'term': term,
+          'session': session,
+        }).toList();
+        await _db.upsertScores(mappedList);
+      }
     });
 
     _emit('Downloading attendance...', 0.4);
@@ -150,28 +187,34 @@ class SyncService {
       await _db.upsertAttendance(0, '', term, session, list);
     });
 
-    _emit('Downloading live exams...', 0.55);
-    await _tryFetch(() async {
-      final r = await dio.get('/student/cbt');
-      final exams = (r.data['data'] as List?)?.cast<Map<String, dynamic>>() ?? [];
-      await _db.upsertCbtExams(exams);
-      for (final e in exams) {
-        final examId = e['id'] as int;
-        final detailRes = await dio.get('/student/cbt/$examId');
-        final questions = (detailRes.data['questions'] as List?)?.cast<Map<String, dynamic>>() ?? [];
-        await _db.upsertCbtQuestions(examId, questions);
-      }
-    });
+    if (activePlugins.contains('cbt')) {
+      _emit('Downloading live exams...', 0.55);
+      await _tryFetch(() async {
+        final r = await dio.get('/student/cbt');
+        final exams = (r.data['data'] as List?)?.cast<Map<String, dynamic>>() ?? [];
+        await _db.upsertCbtExams(exams);
+        for (final e in exams) {
+          final examId = e['id'] as int;
+          final detailRes = await dio.get('/student/cbt/$examId');
+          final questions = (detailRes.data['questions'] as List?)?.cast<Map<String, dynamic>>() ?? [];
+          await _db.upsertCbtQuestions(examId, questions);
+        }
+      });
+    }
 
-    _emit('Downloading learning materials...', 0.7);
-    await _tryFetch(() async {
-      final r = await dio.get('/student/elearning');
-      final list = (r.data['data'] as List?)?.cast<Map<String, dynamic>>() ?? [];
-      await _db.upsertELearningNotes(list);
-    });
+    if (activePlugins.contains('e-learning')) {
+      _emit('Downloading learning materials...', 0.7);
+      await _tryFetch(() async {
+        final r = await dio.get('/student/elearning');
+        final list = (r.data['data'] as List?)?.cast<Map<String, dynamic>>() ?? [];
+        await _db.upsertELearningNotes(list);
+      });
+    }
 
-    _emit('Downloading assignments feed...', 0.8);
-    await _fetchHomework();
+    if (activePlugins.contains('homework')) {
+      _emit('Downloading assignments feed...', 0.8);
+      await _fetchHomework();
+    }
 
     _emit('Downloading announcements...', 0.85);
     await _fetchAnnouncements();
@@ -188,6 +231,9 @@ class SyncService {
   }
 
   Future<void> _syncParentData(int term, String session) async {
+    final prefs = await SharedPreferences.getInstance();
+    final activePlugins = prefs.getStringList('tenant_active_plugins') ?? [];
+
     _emit('Downloading children data...', 0.2);
     await _tryFetch(() async {
       final r        = await dio.get('/students');
@@ -195,15 +241,17 @@ class SyncService {
       await _db.upsertStudents(students);
     });
 
-    _emit('Downloading fee records...', 0.4);
-    await _tryFetch(() async {
-      await dio.get('/billing');
-      // Cache is saved by ApiService; billing is read-only so no local table needed
-      // The raw response is already cached via cache_storage by getWithCache
-    });
+    if (activePlugins.contains('payment-gateway')) {
+      _emit('Downloading fee records...', 0.4);
+      await _tryFetch(() async {
+        await dio.get('/billing');
+      });
+    }
 
-    _emit('Downloading homework...', 0.6);
-    await _fetchHomework();
+    if (activePlugins.contains('homework')) {
+      _emit('Downloading homework...', 0.6);
+      await _fetchHomework();
+    }
 
     _emit('Downloading timetable...', 0.75);
     await _fetchTimetable();
@@ -259,18 +307,33 @@ class SyncService {
     if (_isSyncing) return;
     _isSyncing = true;
     _statusController.add(SyncStatus.syncing);
+    bool hasError = false;
+
+    Future<void> runStep(Future<void> Function() step) async {
+      try {
+        await step();
+      } catch (e) {
+        hasError = true;
+      }
+    }
+
     try {
-      await _uploadAttendance();
-      await _uploadScores();
-      await _uploadHomework();
-      await _uploadSubmissions();
-      await _uploadCbtAttempts();
-      await _uploadNotifications();
-      await _emitPendingCount();
-      _statusController.add(SyncStatus.synced);
+      await runStep(_uploadAttendance);
+      await runStep(_uploadScores);
+      await runStep(_uploadHomework);
+      await runStep(_uploadSubmissions);
+      await runStep(_uploadCbtAttempts);
+      await runStep(_uploadNotifications);
+      
+      if (hasError) {
+        _statusController.add(SyncStatus.error);
+      } else {
+        _statusController.add(SyncStatus.synced);
+      }
     } catch (_) {
       _statusController.add(SyncStatus.error);
     } finally {
+      await _emitPendingCount();
       _isSyncing = false;
     }
   }
@@ -280,18 +343,32 @@ class SyncService {
     if (dirty.isEmpty) return;
     final Map<String, List<Map<String, dynamic>>> grouped = {};
     for (final row in dirty) {
-      final key = '${row['class_id']}_${row['date']}_${row['term']}_${row['session']}';
-      grouped.putIfAbsent(key, () => []).add(row);
+      final studentId = row['student_id'] as int;
+      final studentSectionId = await _db.getStudentSectionId(studentId);
+      final key = '${row['class_id']}_${studentSectionId ?? 0}_${row['date']}_${row['term']}_${row['session']}';
+      
+      final markedRow = Map<String, dynamic>.from(row);
+      markedRow['section_id'] = studentSectionId;
+      grouped.putIfAbsent(key, () => []).add(markedRow);
     }
     for (final rows in grouped.values) {
       final first = rows.first;
+      final sectionId = first['section_id'] as int?;
       final res   = await dio.post('/teacher/attendance', data: {
-        'class_id': first['class_id'], 'date': first['date'],
+        'class_id': first['class_id'],
+        if (sectionId != null && sectionId > 0) 'section_id': sectionId,
+        'date': first['date'],
         'term': first['term'], 'session': first['session'],
         'marks': rows.map((r) => {'student_id': r['student_id'], 'status': r['status'], 'note': r['note']}).toList(),
       });
       if ((res.statusCode ?? 0) < 300) {
-        await _db.markAttendanceSynced(first['class_id'] as int, first['date'] as String);
+        for (final r in rows) {
+          await _db.markSingleAttendanceSynced(
+            r['student_id'] as int,
+            r['class_id'] as int,
+            r['date'] as String,
+          );
+        }
       }
     }
   }

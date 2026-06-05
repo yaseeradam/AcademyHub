@@ -89,13 +89,13 @@ BEGIN
     BEGIN
         BLOCK "040904e4"
         BEGIN
-            VALUE "CompanyName", "com.myacademy" "\0"
-            VALUE "FileDescription", "myacademy_app" "\0"
+            VALUE "CompanyName", "com.academyhub" "\0"
+            VALUE "FileDescription", "academyhub_app" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "myacademy_app" "\0"
-            VALUE "LegalCopyright", "Copyright (C) 2026 com.myacademy. All rights reserved." "\0"
-            VALUE "OriginalFilename", "myacademy_app.exe" "\0"
-            VALUE "ProductName", "myacademy_app" "\0"
+            VALUE "InternalName", "academyhub_app" "\0"
+            VALUE "LegalCopyright", "Copyright (C) 2026 com.academyhub. All rights reserved." "\0"
+            VALUE "OriginalFilename", "academyhub_app.exe" "\0"
+            VALUE "ProductName", "academyhub_app" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

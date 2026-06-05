@@ -11,6 +11,9 @@ import '../features/teacher/teacher_scores_screen.dart';
 import '../features/teacher/teacher_homework_screen.dart';
 import '../features/parent/parent_home.dart';
 import '../features/admin/admin_home.dart';
+import '../features/analytics/performance_analytics_screen.dart';
+import '../features/admin/students_list_screen.dart';
+import '../features/admin/cbt_management_screen.dart';
 
 class AppRouter {
   static GoRouter router(AuthProvider authProvider) {
@@ -81,15 +84,22 @@ class AppRouter {
         ),
         GoRoute(
           path: '/students',
-          builder: (_, _) => const Scaffold(
-            body: Center(child: Text('Students — coming soon')),
-          ),
+          builder: (_, _) => const StudentsListScreen(),
         ),
         GoRoute(
           path: '/cbt',
-          builder: (_, _) => const Scaffold(
-            body: Center(child: Text('CBT Exams — coming soon')),
-          ),
+          builder: (_, _) => const CbtManagementScreen(),
+        ),
+        GoRoute(
+          path: '/performance',
+          builder: (context, state) {
+            final extra = state.extra as Map<String, dynamic>?;
+            return PerformanceAnalyticsScreen(
+              studentId: extra?['studentId'] as int?,
+              studentName: extra?['studentName'] as String?,
+              admissionNumber: extra?['admissionNumber'] as String?,
+            );
+          },
         ),
       ],
     );

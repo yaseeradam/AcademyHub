@@ -251,8 +251,10 @@ class _CbtExamScreenState extends State<CbtExamScreen> {
     final auth = context.read<AuthProvider>();
     final primary = auth.tenantPrimaryColor;
 
-    return WillPopScope(
-      onWillPop: () async {
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) async {
+        if (didPop) return;
         final leave = await showDialog<bool>(
           context: context,
           builder: (context) => AlertDialog(
@@ -272,11 +274,17 @@ class _CbtExamScreenState extends State<CbtExamScreen> {
             ],
           ),
         );
-        return leave ?? false;
+        if (leave == true && context.mounted) {
+          Navigator.pop(context);
+        }
       },
       child: Scaffold(
         appBar: AppBar(
           title: Text(widget.exam['title']),
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () => Navigator.maybePop(context),
+          ),
           automaticallyImplyLeading: false,
           actions: [
             Container(

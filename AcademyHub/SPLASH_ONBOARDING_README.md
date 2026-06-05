@@ -1,4 +1,4 @@
-# MyAcademy Flutter Splash & Onboarding Implementation
+# AcademyHub Flutter Splash & Onboarding Implementation
 
 This implementation creates an emotional intelligence-focused splash screen and onboarding experience with advanced animations using Flutter's most powerful animation packages.
 
@@ -19,7 +19,7 @@ This implementation creates an emotional intelligence-focused splash screen and 
 - **Multi-gradient Background**: Blue → Cyan → Emerald gradient
 - **Animated Logo**: Elastic scale + pulse + subtle rotation
 - **Floating Particles**: 20 animated particles with random movement
-- **Typewriter Text**: "MyAcademy" with typewriter effect
+- **Typewriter Text**: "AcademyHub" with typewriter effect
 - **Fade Text**: Subtitle with fade animation
 - **Loading Indicator**: Rotating progress indicator
 - **Bottom Branding**: "Powered by Emotional Intelligence"
@@ -230,4 +230,4 @@ SplashScreen → OnboardingScreen → LoginScreen → MainApp
 - Modify onboarding page transition speeds
 - Customize text reveal timing
 
-This implementation creates a world-class onboarding experience that combines cutting-edge animation technology with emotional intelligence principles, ensuring users feel connected and engaged from their very first interaction with MyAcademy.
+This implementation creates a world-class onboarding experience that combines cutting-edge animation technology with emotional intelligence principles, ensuring users feel connected and engaged from their very first interaction with AcademyHub.

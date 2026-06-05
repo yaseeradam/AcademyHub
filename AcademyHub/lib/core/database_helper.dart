@@ -16,8 +16,8 @@ class DatabaseHelper {
   }
 
   Future<Database> _initDatabase() async {
-    final path = join(await getDatabasesPath(), 'myacademy_offline.db');
-    return await openDatabase(path, version: 4, onCreate: _onCreate, onUpgrade: _onUpgrade);
+    final path = join(await getDatabasesPath(), 'academyhub_offline.db');
+    return await openDatabase(path, version: 5, onCreate: _onCreate, onUpgrade: _onUpgrade);
   }
 
   Future<void> _onCreate(Database db, int version) async {
@@ -25,6 +25,9 @@ class DatabaseHelper {
   }
 
   Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
+    if (oldVersion < 5) {
+      await db.execute('DROP TABLE IF EXISTS local_scores');
+    }
     await _createAllTables(db); // CREATE TABLE IF NOT EXISTS is safe to re-run
   }
 
@@ -50,7 +53,7 @@ class DatabaseHelper {
         student_id INTEGER, subject_id INTEGER, class_id INTEGER,
         term INTEGER, session TEXT,
         ca1 INTEGER DEFAULT 0, ca2 INTEGER DEFAULT 0, exam INTEGER DEFAULT 0,
-        total INTEGER DEFAULT 0, grade TEXT, is_dirty INTEGER DEFAULT 0,
+        total INTEGER DEFAULT 0, grade TEXT, subject_name TEXT, is_dirty INTEGER DEFAULT 0,
         UNIQUE(student_id, subject_id, class_id, term, session)
       )''',
       '''CREATE TABLE IF NOT EXISTS local_attendance (
@@ -244,7 +247,9 @@ class DatabaseHelper {
         'student_id': s['student_id'], 'subject_id': s['subject_id'], 'class_id': s['class_id'],
         'term': s['term'], 'session': s['session'],
         'ca1': s['ca1'] ?? 0, 'ca2': s['ca2'] ?? 0, 'exam': s['exam'] ?? 0,
-        'total': s['total'] ?? 0, 'grade': s['grade'] ?? '', 'is_dirty': 0,
+        'total': s['total'] ?? 0, 'grade': s['grade'] ?? '',
+        'subject_name': s['subject_name'] ?? s['subject']?['name'] ?? '',
+        'is_dirty': 0,
       }, conflictAlgorithm: ConflictAlgorithm.replace);
     }
     await batch.commit(noResult: true);
@@ -674,6 +679,28 @@ class DatabaseHelper {
   Future<void> markNotificationSynced(int id) async {
     final db = await database;
     await db.update('local_notifications', {'is_dirty': 0}, where: 'id = ?', whereArgs: [id]);
+  }
+
+  Future<int?> getStudentSectionId(int studentId) async {
+    final db = await database;
+    final list = await db.query(
+      'local_students',
+      columns: ['section_id'],
+      where: 'id = ?',
+      whereArgs: [studentId],
+    );
+    if (list.isEmpty) return null;
+    return list.first['section_id'] as int?;
+  }
+
+  Future<void> markSingleAttendanceSynced(int studentId, int classId, String date) async {
+    final db = await database;
+    await db.update(
+      'local_attendance',
+      {'is_dirty': 0},
+      where: 'student_id = ? AND class_id = ? AND date = ?',
+      whereArgs: [studentId, classId, date],
+    );
   }
 
   Future<int> getTotalDirtyCount() async {

@@ -77,7 +77,10 @@ class _InitialSyncScreenState extends State<InitialSyncScreen>
                       color: const Color(0xFF3B82F6).withValues(alpha: 0.1),
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(Icons.school_rounded, size: 48, color: Color(0xFF3B82F6)),
+                    child: Padding(
+                      padding: const EdgeInsets.all(20),
+                      child: Image.asset('assets/images/Alogo.png'),
+                    ),
                   ),
                 ),
               ),

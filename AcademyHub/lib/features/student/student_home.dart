@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:go_router/go_router.dart';
 import '../../core/auth_provider.dart';
 import '../../core/database_helper.dart';
 import '../../core/mobile_layout.dart';
@@ -72,7 +73,10 @@ class _StudentHomeState extends State<StudentHome> with SingleTickerProviderStat
     setState(() => _loading = true);
     final auth = context.read<AuthProvider>();
     try {
-      await auth.syncService.backgroundRefresh('student');
+      await Future.wait([
+        auth.syncService.backgroundRefresh('student'),
+        auth.refreshPlugins(),
+      ]);
       await _loadData();
     } catch (e) {
       if (mounted) {
@@ -89,6 +93,9 @@ class _StudentHomeState extends State<StudentHome> with SingleTickerProviderStat
     final auth = context.watch<AuthProvider>();
     final user = auth.user;
     final primary = auth.tenantPrimaryColor;
+    final userInitial = (user != null && user.name.trim().isNotEmpty)
+        ? user.name.trim().substring(0, 1).toUpperCase()
+        : 'S';
 
     return MobileLayout(
       title: 'Student Portal',
@@ -111,14 +118,19 @@ class _StudentHomeState extends State<StudentHome> with SingleTickerProviderStat
                   CircleAvatar(
                     radius: 24,
                     backgroundColor: Colors.white.withValues(alpha: 0.2),
-                    child: Text(
-                      user?.name.substring(0, 1).toUpperCase() ?? 'S',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
+                    backgroundImage: (user?.profilePhotoUrl != null && user!.profilePhotoUrl!.trim().isNotEmpty)
+                        ? NetworkImage(user.profilePhotoUrl!)
+                        : null,
+                    child: (user?.profilePhotoUrl != null && user!.profilePhotoUrl!.trim().isNotEmpty)
+                        ? null
+                        : Text(
+                            userInitial,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                   ),
                   const SizedBox(width: 16),
                   Expanded(
@@ -200,6 +212,58 @@ class _StudentHomeState extends State<StudentHome> with SingleTickerProviderStat
     return ListView(
       padding: const EdgeInsets.all(20),
       children: [
+        // Performance Analytics Banner Card
+        GestureDetector(
+          onTap: () => context.push('/performance'),
+          child: Container(
+            width: double.infinity,
+            margin: const EdgeInsets.only(bottom: 16),
+            padding: const EdgeInsets.all(18),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [primary, primary.withValues(alpha: 0.8)],
+              ),
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: primary.withValues(alpha: 0.25),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                )
+              ],
+            ),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.2),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(Icons.insights_rounded, color: Colors.white, size: 24),
+                ),
+                const SizedBox(width: 14),
+                const Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Performance Analytics',
+                        style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 15),
+                      ),
+                      SizedBox(height: 2),
+                      Text(
+                        'Track your strengths, weak areas & trends',
+                        style: TextStyle(color: Colors.white70, fontSize: 11),
+                      ),
+                    ],
+                  ),
+                ),
+                const Icon(Icons.arrow_forward_ios_rounded, color: Colors.white, size: 16),
+              ],
+            ),
+          ),
+        ),
         // Quick Stats Summary Row
         Row(
           children: [

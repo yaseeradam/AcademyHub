@@ -2,6 +2,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../core/auth_provider.dart';
+import '../../core/toast_utility.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -35,25 +36,25 @@ class _LoginScreenState extends State<LoginScreen> {
         _emailController.text.trim(),
         _passwordController.text,
       );
-      if (!success && mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(context.read<AuthProvider>().error ?? 'Login failed'),
-            backgroundColor: const Color(0xFFF43F5E),
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          ),
+      if (success && mounted) {
+        CustomToast.show(
+          context: context,
+          message: 'Welcome back! Sign in successful.',
+          type: 'success',
+        );
+      } else if (!success && mounted) {
+        CustomToast.show(
+          context: context,
+          message: context.read<AuthProvider>().error ?? 'Login failed. Please verify credentials.',
+          type: 'error',
         );
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(e.toString()),
-            backgroundColor: const Color(0xFFF43F5E),
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          ),
+        CustomToast.show(
+          context: context,
+          message: 'Network error or connection timed out.',
+          type: 'error',
         );
       }
     } finally {
@@ -180,23 +181,27 @@ class _LoginScreenState extends State<LoginScreen> {
                     child: Image.network(
                       auth.tenantLogoUrl!,
                       fit: BoxFit.cover,
-                      errorBuilder: (_, _, _) => const Icon(
-                        Icons.school,
-                        color: Colors.white,
-                        size: 32,
+                      errorBuilder: (_, _, _) => ClipRRect(
+                        borderRadius: BorderRadius.circular(16),
+                        child: Image.asset(
+                          'assets/images/Alogo.png',
+                          fit: BoxFit.cover,
+                        ),
                       ),
                     ),
                   )
-                : const Icon(
-                    Icons.school,
-                    color: Colors.white,
-                    size: 32,
+                : ClipRRect(
+                    borderRadius: BorderRadius.circular(16),
+                    child: Image.asset(
+                      'assets/images/Alogo.png',
+                      fit: BoxFit.cover,
+                    ),
                   ),
           ),
           const SizedBox(height: 16),
           // Dynamic School Name
           Text(
-            auth.tenantName ?? 'MyAcademy',
+            auth.tenantName ?? 'AcademyHub',
             textAlign: TextAlign.center,
             style: const TextStyle(
               fontSize: 22,
@@ -385,7 +390,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.transparent,
                   foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  padding: EdgeInsets.zero,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),

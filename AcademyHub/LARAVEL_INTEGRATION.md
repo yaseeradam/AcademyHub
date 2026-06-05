@@ -1,14 +1,14 @@
 # 🔗 Laravel Backend Integration Guide
 
 ## Overview
-Your Flutter app is now configured to connect to your Laravel MyAcademy backend and use the same authentication and data.
+Your Flutter app is now configured to connect to your Laravel AcademyHub backend and use the same authentication and data.
 
 ## 🚀 Quick Setup
 
 ### 1. Start Your Laravel Server
 ```bash
 # In your Laravel project directory
-cd c:\laragon\www\myacademy-laravel
+cd c:\laragon\www\academyhub-laravel
 php artisan serve --host=0.0.0.0 --port=8000
 ```
 
@@ -25,7 +25,7 @@ static const String baseUrl = 'http://127.0.0.1:8000/api';
 
 ### 3. Run Flutter App
 ```bash
-cd myacademy_app
+cd academyhub_app
 flutter run
 ```
 
@@ -38,9 +38,9 @@ flutter run
 4. **All subsequent requests** include `Authorization: Bearer {token}`
 
 ### Demo Accounts (from Laravel seeders)
-- **Admin**: `admin@myacademy.local` / `password`
-- **Teacher**: `teacher@myacademy.local` / `password`
-- **Bursar**: `bursar@myacademy.local` / `password`
+- **Admin**: `admin@academyhub.local` / `password`
+- **Teacher**: `teacher@academyhub.local` / `password`
+- **Bursar**: `bursar@academyhub.local` / `password`
 
 ## 📊 Data Integration
 
@@ -113,7 +113,7 @@ static const String baseUrl = 'http://10.0.2.2:8000/api';
    ```bash
    curl -X POST http://127.0.0.1:8000/api/login \
      -H "Content-Type: application/json" \
-     -d '{"email":"admin@myacademy.local","password":"password"}'
+     -d '{"email":"admin@academyhub.local","password":"password"}'
    ```
 
 3. **Check Flutter console** for error messages
@@ -166,4 +166,4 @@ When everything works correctly, you'll see:
 - **Role-based access control** matching Laravel
 - **HTTPS ready** for production deployment
 
-Your Flutter app is now a true mobile client for your Laravel MyAcademy system! 🎊
+Your Flutter app is now a true mobile client for your Laravel AcademyHub system! 🎊
