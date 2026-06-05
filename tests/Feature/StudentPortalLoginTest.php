@@ -55,5 +55,54 @@ class StudentPortalLoginTest extends TestCase
             'password' => 'NewPass123',
         ])->assertRedirect('/student/dashboard');
     }
+
+    public function test_student_cannot_login_if_student_dashboard_plugin_is_not_installed(): void
+    {
+        $this->seed();
+
+        $class = SchoolClass::query()->firstOrFail();
+        $section = Section::query()->where('class_id', $class->id)->firstOrFail();
+        $tenant = Tenant::firstOrFail();
+        app()->instance('currentTenant', $tenant);
+
+        // Deactivate student-dashboard plugin for the tenant
+        $component = \App\Models\MarketplaceComponent::where('slug', 'student-dashboard')->firstOrFail();
+        $tenant->marketplaceComponents()->updateExistingPivot($component->id, [
+            'uninstalled_at' => now(),
+        ]);
+
+        $student = Student::query()->create([
+            'admission_number' => 'ADM-2026-9999',
+            'first_name' => 'Test',
+            'last_name' => 'Student',
+            'class_id' => $class->id,
+            'section_id' => $section->id,
+            'gender' => 'Male',
+            'status' => 'Active',
+        ]);
+
+        $defaultPassword = 'test9999';
+
+        // 1. Attempt login -> Should fail
+        $this->post('/login', [
+            'login_type' => 'student',
+            'admission_number' => $student->admission_number,
+            'password' => $defaultPassword,
+        ])->assertSessionHasErrors('admission_number');
+
+        // 2. Mock logged-in session, attempt dashboard access -> Should redirect to login
+        session([
+            'tenant_id' => $tenant->id,
+            'student_id' => $student->id,
+            'student_name' => $student->full_name,
+            'student_admission' => $student->admission_number,
+            'student_class' => $class->name,
+            'login_type' => 'student',
+        ]);
+
+        $this->get('/student/dashboard')
+            ->assertRedirect(route('login'))
+            ->assertSessionHas('warning');
+    }
 }
 

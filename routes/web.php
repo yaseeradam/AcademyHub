@@ -72,11 +72,13 @@ Route::get('/', [UtilityController::class, 'welcome']);
 Route::get('/home', [UtilityController::class, 'home']);
 
 // CBT Portal Start Routes (public, no student session required to enter code/admission no)
-Route::get('/cbt/portal', CbtPortalStart::class)->name('cbt.portal');
-Route::get('/cbt/student', CbtPortalStart::class)->name('cbt.student');
+Route::middleware('plugin:cbt')->group(function () {
+    Route::get('/cbt/portal', CbtPortalStart::class)->name('cbt.portal');
+    Route::get('/cbt/student', CbtPortalStart::class)->name('cbt.student');
+});
 
 // CBT Portal Take Routes (student session required to take the exam)
-Route::middleware('student.session')->group(function () {
+Route::middleware(['student.session', 'plugin:cbt'])->group(function () {
     Route::get('/cbt/portal/{attempt}', CbtPortalTake::class)->name('cbt.portal.take');
     Route::get('/cbt/student/{attempt}', CbtPortalTake::class)->name('cbt.student.take');
 });
@@ -126,7 +128,7 @@ Route::get('/student/e-learning', \App\Livewire\Student\ELearning::class)
     ->name('student.e-learning');
 
 Route::get('/student/exams', \App\Livewire\Student\Exams::class)
-    ->middleware('student.session')
+    ->middleware(['student.session', 'plugin:cbt'])
     ->name('student.exams');
 
 Route::get('/student/results', \App\Livewire\Student\Results::class)

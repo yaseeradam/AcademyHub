@@ -215,6 +215,14 @@ class AuthenticatedSessionController extends Controller
                 ]);
             }
 
+            // Check if Student Dashboard plugin is active/installed for this school
+            $tenant = app()->bound('currentTenant') ? app('currentTenant') : \App\Models\Tenant::find($tenantId);
+            if (! $tenant || ! $tenant->activeMarketplaceComponents()->where('slug', 'student-dashboard')->exists()) {
+                throw ValidationException::withMessages([
+                    'admission_number' => 'Student Dashboard is not enabled for this school. Please contact school administration.',
+                ]);
+            }
+
             $request->validate([
                 'admission_number' => ['required', 'string'],
                 'password'         => ['required', 'string'],
