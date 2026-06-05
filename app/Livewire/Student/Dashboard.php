@@ -32,7 +32,7 @@ class Dashboard extends Component
 
     public function loadStats()
     {
-        $currentSession = AcademicTerm::activeSessionName() ?? config('myacademy.current_session', '');
+        $currentSession = AcademicTerm::activeSessionName() ?? config('academyhub.current_session', '');
         $currentTerm = AcademicTerm::activeTermNumber();
 
         $this->stats['current_session'] = $currentSession;

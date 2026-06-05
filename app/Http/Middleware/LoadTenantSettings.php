@@ -94,7 +94,7 @@ class LoadTenantSettings
                 $value = (bool) $value;
             }
 
-            config(["myacademy.{$key}" => $value]);
+            config(["academyhub.{$key}" => $value]);
         }
 
         return $next($request);

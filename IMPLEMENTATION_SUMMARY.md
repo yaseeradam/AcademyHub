@@ -194,3 +194,5 @@ The Student Performance Tracking System is now fully integrated into MyAcademy w
 ---
 
 **Need Help?** Check the full documentation in `STUDENT_PERFORMANCE_TRACKING.md`
+
+php artisan serve --host=0.0.0.0 --port=8000

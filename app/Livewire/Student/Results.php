@@ -23,7 +23,7 @@ class Results extends Component
             return;
         }
 
-        $this->selectedSession = AcademicTerm::activeSessionName() ?? config('myacademy.current_session', '');
+        $this->selectedSession = AcademicTerm::activeSessionName() ?? config('academyhub.current_session', '');
         $this->selectedTerm    = AcademicTerm::activeTermNumber();
     }
 
@@ -90,9 +90,9 @@ class Results extends Component
         $failed         = $scores->whereIn('grade', ['F', 'E'])->count();
 
         $maxTotal = max(1,
-            (int) config('myacademy.results_ca1_max', 20) +
-            (int) config('myacademy.results_ca2_max', 20) +
-            (int) config('myacademy.results_exam_max', 60)
+            (int) config('academyhub.results_ca1_max', 20) +
+            (int) config('academyhub.results_ca2_max', 20) +
+            (int) config('academyhub.results_exam_max', 60)
         );
 
         return view('livewire.student.results', compact(

@@ -82,9 +82,9 @@ class Dashboard extends Component
         if ($scores->isEmpty()) return ['average' => 0, 'subjects' => 0, 'passed' => 0, 'failed' => 0, 'position' => null, 'classSize' => 0];
 
         $maxTotal = max(1,
-            (int) config('myacademy.results_ca1_max', 20) +
-            (int) config('myacademy.results_ca2_max', 20) +
-            (int) config('myacademy.results_exam_max', 60)
+            (int) config('academyhub.results_ca1_max', 20) +
+            (int) config('academyhub.results_ca2_max', 20) +
+            (int) config('academyhub.results_exam_max', 60)
         );
 
         $average   = round($scores->avg('total'), 1);

@@ -37,8 +37,8 @@
 
     {{-- PAGE 1: Main Content --}}
     <div class="header">
-        <div class="school-name">{{ config('myacademy.school_name', 'MyAcademy') }}</div>
-        <div style="color: #6b7280; font-size: 10pt;">{{ config('myacademy.school_tagline', 'Excellence in Education') }}</div>
+        <div class="school-name">{{ config('academyhub.school_name', 'AcademyHub') }}</div>
+        <div style="color: #6b7280; font-size: 10pt;">{{ config('academyhub.school_tagline', 'Excellence in Education') }}</div>
         <div class="form-title">STUDENT ADMISSION FORM</div>
     </div>
 
@@ -118,7 +118,7 @@
     <div class="page-break"></div>
 
     <div class="header">
-        <div class="school-name">{{ config('myacademy.school_name', 'MyAcademy') }}</div>
+        <div class="school-name">{{ config('academyhub.school_name', 'AcademyHub') }}</div>
         <div class="form-title">ADMISSION FORM — OFFICE COPY</div>
     </div>
 
@@ -136,7 +136,7 @@
         </div>
 
         <div style="margin-top: 16px; font-size: 8pt; color: #9ca3af; font-style: italic;">
-            This document was generated electronically &bull; {{ config('myacademy.school_name', 'MyAcademy') }} &bull; Powered by MyAcademy SMS
+            This document was generated electronically &bull; {{ config('academyhub.school_name', 'AcademyHub') }} &bull; Powered by AcademyHub SMS
         </div>
 
         <div class="stamp-area">

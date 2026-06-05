@@ -3,7 +3,7 @@
     use App\Support\ReportCardService;
 
     // We can use the existing settings json logic to store opening balance
-    $settingsPath = storage_path('app/myacademy/settings.json');
+    $settingsPath = storage_path('app/academyhub/settings.json');
     $settings = file_exists($settingsPath) ? json_decode(file_get_contents($settingsPath), true) : [];
     $openingBalance = (float) ($settings['bursar_opening_balance'] ?? 0);
 
@@ -51,10 +51,10 @@
         </x-page-header>
 
         <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <x-stat-card label="Opening Balance" :value="config('myacademy.currency_symbol').' '.number_format($openingBalance, 2)" iconBg="bg-blue-50" iconColor="text-blue-600" />
-            <x-stat-card label="Total Income" :value="config('myacademy.currency_symbol').' '.number_format($incomeTotal, 2)" iconBg="bg-green-50" iconColor="text-green-600" />
-            <x-stat-card label="Total Expenses" :value="config('myacademy.currency_symbol').' '.number_format($expenseTotal, 2)" iconBg="bg-orange-50" iconColor="text-orange-600" />
-            <x-stat-card label="Net Balance" :value="config('myacademy.currency_symbol').' '.number_format($net, 2)" iconBg="bg-indigo-50" iconColor="text-indigo-600" />
+            <x-stat-card label="Opening Balance" :value="config('academyhub.currency_symbol').' '.number_format($openingBalance, 2)" iconBg="bg-blue-50" iconColor="text-blue-600" />
+            <x-stat-card label="Total Income" :value="config('academyhub.currency_symbol').' '.number_format($incomeTotal, 2)" iconBg="bg-green-50" iconColor="text-green-600" />
+            <x-stat-card label="Total Expenses" :value="config('academyhub.currency_symbol').' '.number_format($expenseTotal, 2)" iconBg="bg-orange-50" iconColor="text-orange-600" />
+            <x-stat-card label="Net Balance" :value="config('academyhub.currency_symbol').' '.number_format($net, 2)" iconBg="bg-indigo-50" iconColor="text-indigo-600" />
         </div>
 
         <div class="grid grid-cols-1 gap-4 lg:grid-cols-3">
@@ -83,7 +83,7 @@
                                         <x-status-badge variant="{{ $t->type === 'Income' ? 'success' : 'warning' }}">{{ $t->type }}</x-status-badge>
                                     </td>
                                     <td class="px-5 py-4 text-sm text-gray-700">{{ $t->category }}</td>
-                                    <td class="px-5 py-4 text-right text-sm font-semibold text-gray-900">{{ config('myacademy.currency_symbol') }}{{ number_format((float) $t->amount_paid, 2) }}</td>
+                                    <td class="px-5 py-4 text-right text-sm font-semibold text-gray-900">{{ config('academyhub.currency_symbol') }}{{ number_format((float) $t->amount_paid, 2) }}</td>
                                 </tr>
                             @empty
                                 <tr>
@@ -104,7 +104,7 @@
                                 <div class="truncate text-sm font-semibold text-gray-900">{{ $row->category }}</div>
                                 <div class="mt-1 text-xs text-gray-500">All time</div>
                             </div>
-                            <div class="text-sm font-semibold text-gray-900">{{ config('myacademy.currency_symbol') }}{{ number_format((float) $row->total, 2) }}</div>
+                            <div class="text-sm font-semibold text-gray-900">{{ config('academyhub.currency_symbol') }}{{ number_format((float) $row->total, 2) }}</div>
                         </div>
                     @empty
                         <div class="rounded-2xl bg-gray-50 p-5 text-sm text-gray-600 ring-1 ring-inset ring-gray-100">

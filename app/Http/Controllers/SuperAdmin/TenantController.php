@@ -241,7 +241,7 @@ class TenantController extends Controller
     public function checkDns(Tenant $tenant)
     {
         $mainHost = parse_url(config('app.url'), PHP_URL_HOST);
-        $domain = $tenant->domain ?: ($tenant->slug . '.' . ($mainHost ?: 'myacademy.local'));
+        $domain = $tenant->domain ?: ($tenant->slug . '.' . ($mainHost ?: 'academyhub.local'));
         
         $dnsResults = [];
         $pingResult = 'Offline / No connection';

@@ -20,7 +20,7 @@ class StudentPhotoUploadTest extends TestCase
         Storage::fake('uploads');
         $this->seed();
 
-        $admin = User::query()->where('email', 'admin@myacademy.local')->firstOrFail();
+        $admin = User::query()->where('email', 'admin@academyhub.local')->firstOrFail();
         $student = Student::query()->firstOrFail();
 
         // 1x1 transparent PNG (no GD dependency)

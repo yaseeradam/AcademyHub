@@ -62,7 +62,7 @@ body{font-family:'Inter',sans-serif;min-height:100vh;display:flex;background:#0a
     <div class="sa-grid"></div>
     <div class="sa-left-content">
       <div class="sa-logo">
-        <img src="{{ asset('images/myacademyhub-logo.png') }}" alt="AcademyHub">
+        <img src="{{ asset('full.png') }}" alt="AcademyHub">
       </div>
       <div class="sa-hero">
         <h2>Super<br><span>Admin</span><br>Portal</h2>
@@ -106,7 +106,7 @@ body{font-family:'Inter',sans-serif;min-height:100vh;display:flex;background:#0a
         <div class="field">
           <label for="email">Email Address</label>
           <div class="input-wrap">
-            <input id="email" name="email" type="email" value="{{ old('email') }}" autofocus required placeholder="superadmin@myacademyhub.com">
+            <input id="email" name="email" type="email" value="{{ old('email') }}" autofocus required placeholder="superadmin@academyhub.com">
             <svg class="ico" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
           </div>
         </div>

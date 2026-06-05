@@ -40,10 +40,7 @@ HTML;
             @if($schoolLogo)
                 <img src="{{ asset('uploads/'.str_replace('\\','/',$schoolLogo)) }}" alt="Logo" class="h-full w-full object-contain p-1"/>
             @else
-                <svg class="h-5 w-5 text-violet-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 3L1 9l11 6 9-4.91V17a2 2 0 01-1.1 1.79l-7.4 3.7a2 2 0 01-1.8 0l-7.4-3.7A2 2 0 012 17V9"/>
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 21V9"/>
-                </svg>
+                <img src="{{ asset('full.png') }}" alt="Logo" class="h-full w-full object-contain p-0.5"/>
             @endif
         </div>
         <div class="min-w-0 text-left" x-show="!sidebarCollapsed || {{ $isMobile ? 'true' : 'false' }}" x-transition.opacity>

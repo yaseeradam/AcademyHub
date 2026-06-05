@@ -4,7 +4,7 @@
 @php
     $hasPremium = true;
     $isCertLocked = false;
-    $certificateTemplate = old('certificate_template', config('myacademy.certificate_template', 'modern'));
+    $certificateTemplate = old('certificate_template', config('academyhub.certificate_template', 'modern'));
     $certificateTemplatesData = [
         ['key' => 'modern',   'title' => 'Modern',   'desc' => 'Clean and contemporary design.',       'preview' => route('settings.templates.preview', ['type' => 'certificate', 'template' => 'modern']),   'free' => true],
         ['key' => 'classic',  'title' => 'Classic',  'desc' => 'Traditional and formal appearance.',   'preview' => route('settings.templates.preview', ['type' => 'certificate', 'template' => 'classic']),  'free' => true],
@@ -65,7 +65,7 @@
                     <div class="grid grid-cols-1 gap-4 lg:grid-cols-3">
                         <div>
                             <label class="text-xs font-bold uppercase tracking-wider text-gray-700">Orientation</label>
-                            @php($orientation = old('certificate_orientation', config('myacademy.certificate_orientation', 'landscape')))
+                            @php($orientation = old('certificate_orientation', config('academyhub.certificate_orientation', 'landscape')))
                             <select name="certificate_orientation" class="mt-2 w-full rounded-xl border-0 bg-white/80 px-4 py-3 text-sm font-semibold text-gray-900 ring-1 ring-white/60 backdrop-blur-sm focus:ring-2 focus:ring-amber-500">
                                 <option value="landscape" @selected($orientation === 'landscape')>Landscape</option>
                                 <option value="portrait" @selected($orientation === 'portrait')>Portrait</option>
@@ -75,13 +75,13 @@
                             <label class="text-xs font-bold uppercase tracking-wider text-gray-700">Border color</label>
                             <input name="certificate_border_color" type="color"
                                 class="mt-2 h-12 w-full rounded-xl border-0 bg-white/80 p-1 ring-1 ring-white/60 backdrop-blur-sm focus:ring-2 focus:ring-amber-500"
-                                value="{{ old('certificate_border_color', config('myacademy.certificate_border_color', '#0ea5e9')) }}" required />
+                                value="{{ old('certificate_border_color', config('academyhub.certificate_border_color', '#0ea5e9')) }}" required />
                         </div>
                         <div>
                             <label class="text-xs font-bold uppercase tracking-wider text-gray-700">Accent color</label>
                             <input name="certificate_accent_color" type="color"
                                 class="mt-2 h-12 w-full rounded-xl border-0 bg-white/80 p-1 ring-1 ring-white/60 backdrop-blur-sm focus:ring-2 focus:ring-amber-500"
-                                value="{{ old('certificate_accent_color', config('myacademy.certificate_accent_color', '#0ea5e9')) }}" required />
+                                value="{{ old('certificate_accent_color', config('academyhub.certificate_accent_color', '#0ea5e9')) }}" required />
                         </div>
                     </div>
 
@@ -91,7 +91,7 @@
                             <label class="flex items-center gap-3 text-sm font-semibold text-gray-700">
                                 <input type="checkbox" name="certificate_show_logo" value="1"
                                     class="h-4 w-4 rounded border-gray-300 text-amber-600 focus:ring-amber-500"
-                                    @checked(old('certificate_show_logo', (bool) config('myacademy.certificate_show_logo', true))) />
+                                    @checked(old('certificate_show_logo', (bool) config('academyhub.certificate_show_logo', true))) />
                                 Show school logo
                             </label>
                         </div>
@@ -100,7 +100,7 @@
                             <label class="flex items-center gap-3 text-sm font-semibold text-gray-700">
                                 <input type="checkbox" name="certificate_show_watermark" value="1"
                                     class="h-4 w-4 rounded border-gray-300 text-amber-600 focus:ring-amber-500"
-                                    @checked(old('certificate_show_watermark', (bool) config('myacademy.certificate_show_watermark', false))) />
+                                    @checked(old('certificate_show_watermark', (bool) config('academyhub.certificate_show_watermark', false))) />
                                 Show watermark image (if uploaded)
                             </label>
                         </div>
@@ -111,14 +111,14 @@
                         <input name="certificate_watermark_image" type="file" accept="image/*"
                             class="mt-2 w-full rounded-xl border-0 bg-white/80 px-4 py-3 text-sm font-semibold text-gray-900 ring-1 ring-white/60 backdrop-blur-sm focus:ring-2 focus:ring-amber-500" />
                         <input type="hidden" name="certificate_watermark_remove" value="0" />
-                        @if(config('myacademy.certificate_watermark_image'))
+                        @if(config('academyhub.certificate_watermark_image'))
                             <div class="mt-3 flex items-center justify-between gap-3 rounded-2xl border border-white/70 bg-white/60 p-3">
                                 <div class="flex items-center gap-3 min-w-0">
-                                    <img src="{{ asset('uploads/' . str_replace('\\', '/', config('myacademy.certificate_watermark_image'))) }}"
+                                    <img src="{{ asset('uploads/' . str_replace('\\', '/', config('academyhub.certificate_watermark_image'))) }}"
                                         alt="Watermark" class="h-12 w-12 rounded-xl bg-white object-contain p-2 ring-1 ring-white/60" />
                                     <div class="min-w-0">
                                         <div class="text-xs font-bold uppercase tracking-wider text-gray-600">Current watermark</div>
-                                        <div class="mt-1 truncate text-xs text-gray-600">{{ basename(config('myacademy.certificate_watermark_image')) }}</div>
+                                        <div class="mt-1 truncate text-xs text-gray-600">{{ basename(config('academyhub.certificate_watermark_image')) }}</div>
                                     </div>
                                 </div>
                                 <label class="flex items-center gap-2 text-xs font-semibold text-gray-700">
@@ -145,13 +145,13 @@
                                 <label class="text-xs font-semibold uppercase tracking-wider text-gray-500">Label</label>
                                 <input name="certificate_signature_label"
                                     class="mt-2 w-full rounded-xl border-0 bg-white/80 px-4 py-3 text-sm font-semibold text-gray-900 ring-1 ring-white/60 backdrop-blur-sm focus:ring-2 focus:ring-amber-500"
-                                    value="{{ old('certificate_signature_label', config('myacademy.certificate_signature_label', 'Authorized Signature')) }}" />
+                                    value="{{ old('certificate_signature_label', config('academyhub.certificate_signature_label', 'Authorized Signature')) }}" />
                             </div>
                             <div>
                                 <label class="text-xs font-semibold uppercase tracking-wider text-gray-500">Name (optional)</label>
                                 <input name="certificate_signature_name"
                                     class="mt-2 w-full rounded-xl border-0 bg-white/80 px-4 py-3 text-sm font-semibold text-gray-900 ring-1 ring-white/60 backdrop-blur-sm focus:ring-2 focus:ring-amber-500"
-                                    value="{{ old('certificate_signature_name', config('myacademy.certificate_signature_name')) }}" />
+                                    value="{{ old('certificate_signature_name', config('academyhub.certificate_signature_name')) }}" />
                             </div>
                         </div>
                         <div>
@@ -159,14 +159,14 @@
                             <input name="certificate_signature_image" type="file" accept="image/*"
                                 class="mt-2 w-full rounded-xl border-0 bg-white/80 px-4 py-3 text-sm font-semibold text-gray-900 ring-1 ring-white/60 backdrop-blur-sm focus:ring-2 focus:ring-amber-500" />
                             <input type="hidden" name="certificate_signature_remove" value="0" />
-                            @if(config('myacademy.certificate_signature_image'))
+                            @if(config('academyhub.certificate_signature_image'))
                                 <div class="mt-3 flex items-center justify-between gap-3 rounded-2xl border border-white/70 bg-white/60 p-3">
                                     <div class="flex items-center gap-3 min-w-0">
-                                        <img src="{{ asset('uploads/' . str_replace('\\', '/', config('myacademy.certificate_signature_image'))) }}"
+                                        <img src="{{ asset('uploads/' . str_replace('\\', '/', config('academyhub.certificate_signature_image'))) }}"
                                             alt="Signature" class="h-12 w-24 rounded-xl bg-white object-contain p-2 ring-1 ring-white/60" />
                                         <div class="min-w-0">
                                             <div class="text-xs font-bold uppercase tracking-wider text-gray-600">Current signature</div>
-                                            <div class="mt-1 truncate text-xs text-gray-600">{{ basename(config('myacademy.certificate_signature_image')) }}</div>
+                                            <div class="mt-1 truncate text-xs text-gray-600">{{ basename(config('academyhub.certificate_signature_image')) }}</div>
                                         </div>
                                     </div>
                                     <label class="flex items-center gap-2 text-xs font-semibold text-gray-700">
@@ -187,13 +187,13 @@
                                 <label class="text-xs font-semibold uppercase tracking-wider text-gray-500">Label</label>
                                 <input name="certificate_signature2_label" placeholder="e.g. Registrar"
                                     class="mt-2 w-full rounded-xl border-0 bg-white/80 px-4 py-3 text-sm font-semibold text-gray-900 ring-1 ring-white/60 backdrop-blur-sm focus:ring-2 focus:ring-amber-500"
-                                    value="{{ old('certificate_signature2_label', config('myacademy.certificate_signature2_label')) }}" />
+                                    value="{{ old('certificate_signature2_label', config('academyhub.certificate_signature2_label')) }}" />
                             </div>
                             <div>
                                 <label class="text-xs font-semibold uppercase tracking-wider text-gray-500">Name (optional)</label>
                                 <input name="certificate_signature2_name"
                                     class="mt-2 w-full rounded-xl border-0 bg-white/80 px-4 py-3 text-sm font-semibold text-gray-900 ring-1 ring-white/60 backdrop-blur-sm focus:ring-2 focus:ring-amber-500"
-                                    value="{{ old('certificate_signature2_name', config('myacademy.certificate_signature2_name')) }}" />
+                                    value="{{ old('certificate_signature2_name', config('academyhub.certificate_signature2_name')) }}" />
                             </div>
                         </div>
                         <div>
@@ -201,14 +201,14 @@
                             <input name="certificate_signature2_image" type="file" accept="image/*"
                                 class="mt-2 w-full rounded-xl border-0 bg-white/80 px-4 py-3 text-sm font-semibold text-gray-900 ring-1 ring-white/60 backdrop-blur-sm focus:ring-2 focus:ring-amber-500" />
                             <input type="hidden" name="certificate_signature2_remove" value="0" />
-                            @if(config('myacademy.certificate_signature2_image'))
+                            @if(config('academyhub.certificate_signature2_image'))
                                 <div class="mt-3 flex items-center justify-between gap-3 rounded-2xl border border-white/70 bg-white/60 p-3">
                                     <div class="flex items-center gap-3 min-w-0">
-                                        <img src="{{ asset('uploads/' . str_replace('\\', '/', config('myacademy.certificate_signature2_image'))) }}"
+                                        <img src="{{ asset('uploads/' . str_replace('\\', '/', config('academyhub.certificate_signature2_image'))) }}"
                                             alt="Signature 2" class="h-12 w-24 rounded-xl bg-white object-contain p-2 ring-1 ring-white/60" />
                                         <div class="min-w-0">
                                             <div class="text-xs font-bold uppercase tracking-wider text-gray-600">Current signature</div>
-                                            <div class="mt-1 truncate text-xs text-gray-600">{{ basename(config('myacademy.certificate_signature2_image')) }}</div>
+                                            <div class="mt-1 truncate text-xs text-gray-600">{{ basename(config('academyhub.certificate_signature2_image')) }}</div>
                                         </div>
                                     </div>
                                     <label class="flex items-center gap-2 text-xs font-semibold text-gray-700">
@@ -233,19 +233,19 @@
                         <label class="text-xs font-semibold uppercase tracking-wider text-gray-500">Default type</label>
                         <input name="certificate_default_type"
                             class="mt-2 w-full rounded-xl border-0 bg-white/80 px-4 py-3 text-sm font-semibold text-gray-900 ring-1 ring-white/60 backdrop-blur-sm focus:ring-2 focus:ring-amber-500"
-                            value="{{ old('certificate_default_type', config('myacademy.certificate_default_type', 'General')) }}" />
+                            value="{{ old('certificate_default_type', config('academyhub.certificate_default_type', 'General')) }}" />
                     </div>
                     <div class="lg:col-span-2">
                         <label class="text-xs font-semibold uppercase tracking-wider text-gray-500">Default title</label>
                         <input name="certificate_default_title"
                             class="mt-2 w-full rounded-xl border-0 bg-white/80 px-4 py-3 text-sm font-semibold text-gray-900 ring-1 ring-white/60 backdrop-blur-sm focus:ring-2 focus:ring-amber-500"
-                            value="{{ old('certificate_default_title', config('myacademy.certificate_default_title', 'Certificate')) }}" />
+                            value="{{ old('certificate_default_title', config('academyhub.certificate_default_title', 'Certificate')) }}" />
                     </div>
                 </div>
                 <div class="mt-4">
                     <label class="text-xs font-semibold uppercase tracking-wider text-gray-500">Default body</label>
                     <textarea name="certificate_default_body" rows="5"
-                        class="mt-2 w-full rounded-xl border-0 bg-white/80 px-4 py-3 text-sm font-semibold text-gray-900 ring-1 ring-white/60 backdrop-blur-sm focus:ring-2 focus:ring-amber-500">{{ old('certificate_default_body', config('myacademy.certificate_default_body')) }}</textarea>
+                        class="mt-2 w-full rounded-xl border-0 bg-white/80 px-4 py-3 text-sm font-semibold text-gray-900 ring-1 ring-white/60 backdrop-blur-sm focus:ring-2 focus:ring-amber-500">{{ old('certificate_default_body', config('academyhub.certificate_default_body')) }}</textarea>
                     <div class="mt-2 text-xs text-gray-600">
                         Placeholders: <span class="font-mono">{student_name}</span>, <span class="font-mono">{admission_number}</span>,
                         <span class="font-mono">{class}</span>, <span class="font-mono">{section}</span>,

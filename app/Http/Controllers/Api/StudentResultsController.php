@@ -19,7 +19,7 @@ class StudentResultsController extends Controller
             return response()->json(['message' => 'Unauthorized or invalid student context.'], 403);
         }
 
-        $session = $request->query('session', AcademicTerm::activeSessionName() ?? config('myacademy.current_session', ''));
+        $session = $request->query('session', AcademicTerm::activeSessionName() ?? config('academyhub.current_session', ''));
         $term = (int) $request->query('term', AcademicTerm::activeTermNumber());
 
         // Get class subjects allocated
@@ -72,11 +72,17 @@ class StudentResultsController extends Controller
                 'ca2' => $score?->ca2 ?? null,
                 'exam' => $score?->exam ?? null,
                 'total' => $score?->total ?? null,
-                'grade' => $score?->grade ?? ($score ? Score::gradeForTotal((int) $score->total, max(0, (int) config('myacademy.results_ca1_max', 20)) + max(0, (int) config('myacademy.results_ca2_max', 20)) + max(0, (int) config('myacademy.results_exam_max', 60))) : null),
+                'grade' => $score?->grade ?? ($score ? Score::gradeForTotal((int) $score->total, max(0, (int) config('academyhub.results_ca1_max', 20)) + max(0, (int) config('academyhub.results_ca2_max', 20)) + max(0, (int) config('academyhub.results_exam_max', 60))) : null),
                 'class_avg' => $subjectClassAvgs->get($subject->id) ?? null,
                 'position' => $score ? ($subjectPositions->get($subject->id) ?? null) : null,
             ];
         })->values();
+
+        $published = \App\Models\ResultPublication::where('class_id', $student->class_id)
+            ->where('term', $term)
+            ->where('session', $session)
+            ->whereNotNull('published_at')
+            ->exists();
 
         // Calculate summary
         $grandTotal = $rows->sum('total');
@@ -86,12 +92,18 @@ class StudentResultsController extends Controller
         return response()->json([
             'session' => $session,
             'term' => $term,
-            'results' => $rows,
-            'summary' => [
+            'is_published' => $published,
+            'results' => $published ? $rows : [],
+            'summary' => $published ? [
                 'grand_total' => $grandTotal,
                 'average' => $average,
                 'total_subjects' => $subjects->count(),
                 'graded_subjects' => $validScoreCount,
+            ] : [
+                'grand_total' => 0,
+                'average' => 0,
+                'total_subjects' => $subjects->count(),
+                'graded_subjects' => 0,
             ]
         ]);
     }

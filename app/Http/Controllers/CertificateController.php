@@ -37,10 +37,10 @@ class CertificateController extends Controller
             'ivory' => 'pdf.certificate-ivory',
         ];
 
-        $template = $certificate->template ?: (string) config('myacademy.certificate_template', 'modern');
+        $template = $certificate->template ?: (string) config('academyhub.certificate_template', 'modern');
         $view = $templateViews[$template] ?? 'pdf.certificate';
 
-        $orientation = (string) config('myacademy.certificate_orientation', 'landscape');
+        $orientation = (string) config('academyhub.certificate_orientation', 'landscape');
         $orientation = in_array($orientation, ['landscape', 'portrait'], true) ? $orientation : 'landscape';
 
         $pdfContent = CertificatePdf::fromView($view, [

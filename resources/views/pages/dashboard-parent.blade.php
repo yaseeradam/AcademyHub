@@ -6,7 +6,7 @@
     use App\Models\Score;
 
     $user = auth()->user();
-    $schoolName = config('myacademy.school_name', config('app.name', 'MyAcademy'));
+    $schoolName = config('academyhub.school_name', config('app.name', 'AcademyHub'));
     $children = $user->students()->with(['schoolClass', 'section'])->get();
 
     // Latest 3 announcements

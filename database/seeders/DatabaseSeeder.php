@@ -25,7 +25,7 @@ class DatabaseSeeder extends Seeder
     {
         // Superadmin (main domain only). This account should not belong to any tenant.
         User::query()->updateOrCreate(
-            ['email' => env('MYACADEMY_ADMIN_EMAIL', 'admin@myacademy.local')],
+            ['email' => env('MYACADEMY_ADMIN_EMAIL', 'admin@academyhub.local')],
             [
                 'name' => 'Super Admin',
                 'password' => Hash::make(env('MYACADEMY_ADMIN_PASSWORD', 'password')),
@@ -66,7 +66,7 @@ class DatabaseSeeder extends Seeder
 
         // Tenant demo users
         User::query()->updateOrCreate(
-            ['email' => 'bursar@myacademy.local'],
+            ['email' => 'bursar@academyhub.local'],
             [
                 'name' => 'Bursar',
                 'password' => Hash::make('password'),
@@ -78,7 +78,7 @@ class DatabaseSeeder extends Seeder
         );
 
         User::query()->updateOrCreate(
-            ['email' => 'teacher@myacademy.local'],
+            ['email' => 'teacher@academyhub.local'],
             [
                 'name' => 'Teacher',
                 'password' => Hash::make('password'),
@@ -125,7 +125,7 @@ class DatabaseSeeder extends Seeder
             ]);
         }
 
-        $teacher = User::query()->where('email', 'teacher@myacademy.local')->first();
+        $teacher = User::query()->where('email', 'teacher@academyhub.local')->first();
         $jss2 = SchoolClass::query()->where('tenant_id', $tenant->id)->where('name', 'JSS 2')->first();
 
         if ($teacher && $jss2) {

@@ -308,9 +308,9 @@ class WhatsAppController extends Controller
                 'active_session' => \App\Models\AcademicTerm::activeSessionName() ?: date('Y') . '/' . (date('Y') + 1),
             ],
             'school' => [
-                'name' => config('myacademy.school_name'),
-                'phone' => config('myacademy.school_phone'),
-                'email' => config('myacademy.school_email'),
+                'name' => config('academyhub.school_name'),
+                'phone' => config('academyhub.school_phone'),
+                'email' => config('academyhub.school_email'),
             ],
             'upcoming_events' => $events,
             'recent_announcements' => $announcements,
@@ -394,9 +394,9 @@ class WhatsAppController extends Controller
     {
         // 1. Get school details
         $school = [
-            'name' => config('myacademy.school_name'),
-            'phone' => config('myacademy.school_phone'),
-            'email' => config('myacademy.school_email'),
+            'name' => config('academyhub.school_name'),
+            'phone' => config('academyhub.school_phone'),
+            'email' => config('academyhub.school_email'),
         ];
 
         // 2. Fetch total students count
@@ -606,9 +606,9 @@ class WhatsAppController extends Controller
             'upcoming_events' => $events,
             'recent_announcements' => $announcements,
             'school' => [
-                'name' => config('myacademy.school_name'),
-                'phone' => config('myacademy.school_phone'),
-                'email' => config('myacademy.school_email'),
+                'name' => config('academyhub.school_name'),
+                'phone' => config('academyhub.school_phone'),
+                'email' => config('academyhub.school_email'),
             ],
         ];
     }
@@ -635,8 +635,8 @@ class WhatsAppController extends Controller
     {
         return response()->json([
             'success' => true,
-            'phone' => config('myacademy.school_phone'),
-            'email' => config('myacademy.school_email'),
+            'phone' => config('academyhub.school_phone'),
+            'email' => config('academyhub.school_email'),
         ]);
     }
 
@@ -925,7 +925,7 @@ class WhatsAppController extends Controller
             $student->load(['schoolClass', 'section']);
             $data = app(\App\Support\ReportCardService::class)->build($student, $term, $session);
 
-            $template = (string) config('myacademy.report_card_template', 'compact');
+            $template = (string) config('academyhub.report_card_template', 'compact');
             $view = match ($template) {
                 'compact' => 'pdf.report-card-compact',
                 'elegant' => 'pdf.report-card-elegant',
@@ -972,8 +972,8 @@ class WhatsAppController extends Controller
             })->first();
 
         $parentName = $parent ? $parent->name : 'Parent / Guardian';
-        $schoolName = config('myacademy.school_name', 'AcademyHub');
-        $currency = config('myacademy.currency_symbol', '₦');
+        $schoolName = config('academyhub.school_name', 'AcademyHub');
+        $currency = config('academyhub.currency_symbol', '₦');
 
         return view('whatsapp.pay', [
             'student'     => $student,
@@ -1025,9 +1025,9 @@ class WhatsAppController extends Controller
             })->first();
 
         if ($parent && $parent->whatsapp_phone) {
-            $currency = config('myacademy.currency_symbol', '₦');
+            $currency = config('academyhub.currency_symbol', '₦');
             $formattedAmount = number_format($amount, 2);
-            $schoolName = config('myacademy.school_name', 'AcademyHub');
+            $schoolName = config('academyhub.school_name', 'AcademyHub');
             
             $msg = "💳 *Payment Received Successfully!*\n\n" .
                    "Thank you, *{$parent->name}*. We have successfully processed your tuition payment via WhatsApp QuickPay:\n\n" .
@@ -1133,7 +1133,7 @@ class WhatsAppController extends Controller
     private function loadTenantSettings(\App\Models\Tenant $tenant): void
     {
         $settings = \Illuminate\Support\Facades\Cache::rememberForever(\App\Support\TenantSettings::settingsCacheKey($tenant), function () use ($tenant) {
-            $path = storage_path('app/myacademy/tenants/' . $tenant->id . '/settings.json');
+            $path = storage_path('app/academyhub/tenants/' . $tenant->id . '/settings.json');
             if (! \Illuminate\Support\Facades\File::exists($path)) {
                 return [];
             }
@@ -1145,7 +1145,7 @@ class WhatsAppController extends Controller
             if ($value === null || $value === '') {
                 continue;
             }
-            config(["myacademy.{$key}" => $value]);
+            config(["academyhub.{$key}" => $value]);
         }
     }
 
@@ -1515,8 +1515,8 @@ class WhatsAppController extends Controller
 
         // 7. Handle Contact
         if ($textLower === 'contact') {
-            $schoolPhone = config('myacademy.school_phone') ?: 'N/A';
-            $schoolEmail = config('myacademy.school_email') ?: 'N/A';
+            $schoolPhone = config('academyhub.school_phone') ?: 'N/A';
+            $schoolEmail = config('academyhub.school_email') ?: 'N/A';
             $this->sendMetaMessage($phone, "☎️ School Contact\nPhone: {$schoolPhone}\nEmail: {$schoolEmail}");
             return;
         }
@@ -1570,7 +1570,7 @@ class WhatsAppController extends Controller
 
         // 9. Standard Menu / Help
         if ($textLower === 'menu' || $textLower === 'help') {
-            $schoolName = config('myacademy.school_name') ?: 'AcademyHub';
+            $schoolName = config('academyhub.school_name') ?: 'AcademyHub';
             $reply = "====================================\n" .
                      "       🎒  *{$schoolName}*      \n" .
                      "====================================\n\n" .

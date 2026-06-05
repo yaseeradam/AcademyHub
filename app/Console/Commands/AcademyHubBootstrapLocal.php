@@ -11,10 +11,10 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 
-class MyAcademyBootstrapLocal extends Command
+class AcademyHubBootstrapLocal extends Command
 {
-    protected $signature = 'myacademy:bootstrap-local
-                            {--main-host= : Main host you will use locally (e.g. myacademy.test)}
+    protected $signature = 'academyhub:bootstrap-local
+                            {--main-host= : Main host you will use locally (e.g. academyhub.test)}
                             {--tenant-name=Demo School : Tenant/school name}
                             {--tenant-slug=demo : Tenant slug (used as subdomain)}
                             {--tenant-domain= : Optional custom tenant domain (exact host match)}
@@ -22,7 +22,7 @@ class MyAcademyBootstrapLocal extends Command
                             {--admin-email=admin@school.local : Tenant admin email}
                             {--admin-password=password : Tenant admin password}
                             {--super-name=Super Admin : Superadmin name}
-                            {--super-email=admin@myacademy.local : Superadmin email}
+                            {--super-email=admin@academyhub.local : Superadmin email}
                             {--super-password=password : Superadmin password}
                             {--adopt-null-data : Assign NULL tenant_id rows to the created tenant}
                             {--force : Allow running outside local env}';

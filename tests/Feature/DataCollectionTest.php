@@ -20,7 +20,7 @@ class DataCollectionTest extends TestCase
     {
         $this->seed();
 
-        $teacher = User::query()->where('email', 'teacher@myacademy.local')->firstOrFail();
+        $teacher = User::query()->where('email', 'teacher@academyhub.local')->firstOrFail();
         $class = SchoolClass::query()->where('name', 'JSS 2')->firstOrFail();
         $section = Section::query()->where('class_id', $class->id)->where('name', 'A')->firstOrFail();
 
@@ -59,8 +59,8 @@ class DataCollectionTest extends TestCase
     {
         $this->seed();
 
-        $teacher = User::query()->where('email', 'teacher@myacademy.local')->firstOrFail();
-        $admin = User::query()->where('email', 'admin@myacademy.local')->firstOrFail();
+        $teacher = User::query()->where('email', 'teacher@academyhub.local')->firstOrFail();
+        $admin = User::query()->where('email', 'admin@academyhub.local')->firstOrFail();
         $class = SchoolClass::query()->where('name', 'JSS 2')->firstOrFail();
         $section = Section::query()->where('class_id', $class->id)->where('name', 'A')->firstOrFail();
 

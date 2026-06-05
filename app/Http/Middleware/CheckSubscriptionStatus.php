@@ -23,7 +23,7 @@ class CheckSubscriptionStatus
 
         // Use the config values already loaded and cached by LoadTenantSettings middleware
         // instead of redundantly reading the JSON file from disk.
-        $dueDateRaw = config('myacademy.subscription_due_date');
+        $dueDateRaw = config('academyhub.subscription_due_date');
         // Fallback to exactly 1 year if not set
         $dueDate = !empty($dueDateRaw)
             ? \Carbon\Carbon::parse($dueDateRaw)

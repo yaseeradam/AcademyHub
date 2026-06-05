@@ -122,7 +122,7 @@
                                 @endphp
                                 @if($balance > 0)
                                     <span class="inline-flex items-center rounded-full bg-red-50 border border-red-200 px-3 py-1 text-xs font-bold text-red-700 shadow-sm">
-                                        {{ config('myacademy.currency_symbol', '₦') }}{{ number_format($balance, 2) }}
+                                        {{ config('academyhub.currency_symbol', '₦') }}{{ number_format($balance, 2) }}
                                     </span>
                                 @else
                                     <span class="inline-flex items-center rounded-full bg-emerald-50 border border-emerald-200 px-3 py-1 text-xs font-bold text-emerald-700 shadow-sm">

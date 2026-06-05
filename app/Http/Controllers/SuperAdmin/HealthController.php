@@ -319,7 +319,7 @@ class HealthController extends Controller
         curl_setopt($ch, CURLOPT_TIMEOUT, 5);
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
         curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
-        curl_setopt($ch, CURLOPT_USERAGENT, 'MyAcademy Diagnostic Ping/1.0');
+        curl_setopt($ch, CURLOPT_USERAGENT, 'AcademyHub Diagnostic Ping/1.0');
         
         // Also set Host header just in case local wildcard hostname resolution is tricky!
         curl_setopt($ch, CURLOPT_HTTPHEADER, [

@@ -16,19 +16,19 @@ class UsersTest extends TestCase
     {
         $this->seed();
 
-        $admin = User::query()->where('email', 'admin@myacademy.local')->firstOrFail();
+        $admin = User::query()->where('email', 'admin@academyhub.local')->firstOrFail();
 
         Livewire::actingAs($admin)
             ->test(UsersIndex::class)
             ->set('name', 'Test Teacher')
-            ->set('email', 'teacher2@myacademy.local')
+            ->set('email', 'teacher2@academyhub.local')
             ->set('role', 'teacher')
             ->set('isActive', true)
             ->set('password', 'password123')
             ->call('createUser');
 
         $this->assertDatabaseHas('users', [
-            'email' => 'teacher2@myacademy.local',
+            'email' => 'teacher2@academyhub.local',
             'role' => 'teacher',
             'is_active' => 1,
         ]);

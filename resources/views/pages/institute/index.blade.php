@@ -5,7 +5,7 @@
     use App\Models\Subject;
     use App\Models\SubjectAllocation;
 
-    $schoolName = config('myacademy.school_name', config('app.name', 'MyAcademy'));
+    $schoolName = config('academyhub.school_name', config('app.name', 'AcademyHub'));
 
     $classRows = SchoolClass::query()
         ->withCount(['sections', 'students'])

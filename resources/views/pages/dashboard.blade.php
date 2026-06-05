@@ -88,7 +88,7 @@
                 <span class="text-[10px] font-black uppercase tracking-widest text-[#34d399]">Live System</span>
             </div>
             <h2 class="text-3xl lg:text-4xl font-black text-white tracking-tight leading-[1.1] mb-1.5">
-                {{ config('myacademy.school_name', config('app.name', 'FrontalMinds Islamic and Science Academy')) }}
+                {{ config('academyhub.school_name', config('app.name', 'FrontalMinds Islamic and Science Academy')) }}
             </h2>
             <p class="text-sm font-medium text-blue-200 mb-5">School Management System</p>
             

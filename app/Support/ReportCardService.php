@@ -103,7 +103,7 @@ class ReportCardService
                 'ca2'       => $score?->ca2 ?? null,
                 'exam'      => $score?->exam ?? null,
                 'total'     => $score?->total ?? null,
-                'grade'     => $score?->grade ?? ($score ? Score::gradeForTotal((int) $score->total, max(0, (int) config('myacademy.results_ca1_max', 20)) + max(0, (int) config('myacademy.results_ca2_max', 20)) + max(0, (int) config('myacademy.results_exam_max', 60))) : null),
+                'grade'     => $score?->grade ?? ($score ? Score::gradeForTotal((int) $score->total, max(0, (int) config('academyhub.results_ca1_max', 20)) + max(0, (int) config('academyhub.results_ca2_max', 20)) + max(0, (int) config('academyhub.results_exam_max', 60))) : null),
                 'class_avg' => $subjectClassAvgs->get($subject->id),
                 'position'  => $score ? $subjectPositions->get($subject->id) : null,
             ];
@@ -168,10 +168,10 @@ class ReportCardService
             if ($feeAmount !== null) {
                 $schoolFees = [
                     'amount'         => (float) $feeAmount,
-                    'account_number' => $rawSettings['rc_school_fees_account_number'] ?? config('myacademy.rc_school_fees_account_number'),
-                    'bank_name'      => $rawSettings['rc_school_fees_bank_name'] ?? config('myacademy.rc_school_fees_bank_name'),
-                    'account_name'   => $rawSettings['rc_school_fees_account_name'] ?? config('myacademy.rc_school_fees_account_name'),
-                    'currency'       => $rawSettings['currency_symbol'] ?? config('myacademy.currency_symbol', '₦'),
+                    'account_number' => $rawSettings['rc_school_fees_account_number'] ?? config('academyhub.rc_school_fees_account_number'),
+                    'bank_name'      => $rawSettings['rc_school_fees_bank_name'] ?? config('academyhub.rc_school_fees_bank_name'),
+                    'account_name'   => $rawSettings['rc_school_fees_account_name'] ?? config('academyhub.rc_school_fees_account_name'),
+                    'currency'       => $rawSettings['currency_symbol'] ?? config('academyhub.currency_symbol', '₦'),
                 ];
             }
         }

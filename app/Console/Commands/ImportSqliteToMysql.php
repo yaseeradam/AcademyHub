@@ -9,7 +9,7 @@ use Throwable;
 
 class ImportSqliteToMysql extends Command
 {
-    protected $signature = 'myacademy:import-sqlite
+    protected $signature = 'academyhub:import-sqlite
         {--path= : Path to sqlite db (default: database/database.sqlite)}
         {--chunk=500 : Rows per batch}
         {--only= : Comma-separated list of tables to import}

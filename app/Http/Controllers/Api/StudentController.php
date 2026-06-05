@@ -47,7 +47,16 @@ class StudentController extends Controller
         $term    = (int) $request->query('term', AcademicTerm::activeTermNumber());
         $session = $request->query('session', AcademicTerm::activeSessionName());
 
-        $scores = Score::where('student_id', $id)
+        $published = true;
+        if ($user->role === 'parent' || $user->role === 'student') {
+            $published = \App\Models\ResultPublication::where('class_id', $student->class_id)
+                ->where('term', $term)
+                ->where('session', $session)
+                ->whereNotNull('published_at')
+                ->exists();
+        }
+
+        $scores = $published ? Score::where('student_id', $id)
             ->where('term', $term)
             ->where('session', $session)
             ->with('subject:id,name')
@@ -59,14 +68,15 @@ class StudentController extends Controller
                 'exam'    => $s->exam,
                 'total'   => $s->total,
                 'grade'   => $s->grade,
-            ]);
+            ]) : collect();
 
         return response()->json([
             'data' => [
-                'student'    => $student,
-                'session'    => $session,
-                'term'       => $term,
-                'subjects'   => $scores,
+                'student'      => $student,
+                'session'      => $session,
+                'term'         => $term,
+                'is_published' => $published,
+                'subjects'     => $scores,
             ],
         ]);
     }

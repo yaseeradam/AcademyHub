@@ -62,6 +62,7 @@ class AuthController extends Controller
                 'role' => $user->role,
                 'is_super_admin' => $user->is_super_admin,
                 'tenant_id' => $user->tenant_id,
+                'profile_photo_url' => $user->profile_photo_url,
             ],
         ]);
     }
@@ -77,6 +78,7 @@ class AuthController extends Controller
                 'email' => $user->email,
                 'role' => $user->role,
                 'is_super_admin' => $user->is_super_admin,
+                'profile_photo_url' => $user->profile_photo_url,
             ],
         ]);
     }

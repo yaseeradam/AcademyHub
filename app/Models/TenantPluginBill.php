@@ -43,6 +43,6 @@ class TenantPluginBill extends Model
 
     public function getFormattedTotalDueAttribute(): string
     {
-        return config('myacademy.currency_symbol', '₦') . number_format($this->total_due, 2);
+        return config('academyhub.currency_symbol', '₦') . number_format($this->total_due, 2);
     }
 }

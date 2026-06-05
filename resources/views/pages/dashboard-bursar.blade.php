@@ -7,7 +7,7 @@
 
     $todayLabel = now()->format('l, F j, Y');
     $user = auth()->user();
-    $schoolName = config('myacademy.school_name', config('app.name', 'MyAcademy'));
+    $schoolName = config('academyhub.school_name', config('app.name', 'AcademyHub'));
     $currentTerm = AcademicTerm::active();
 
     // Check if savings-loan plugin is installed for this tenant
@@ -173,7 +173,7 @@
                                     <line x1="12" y1="1" x2="12" y2="23"/>
                                     <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
                                 </svg>
-                                <span class="text-sm font-bold text-white">{{ config('myacademy.currency_symbol') }}{{ number_format($feesCollectedToday, 2) }} Today</span>
+                                <span class="text-sm font-bold text-white">{{ config('academyhub.currency_symbol') }}{{ number_format($feesCollectedToday, 2) }} Today</span>
                             </div>
                         </div>
 
@@ -211,7 +211,7 @@
                     <div class="flex items-start justify-between gap-4">
                         <div>
                             <div class="text-xs font-medium uppercase tracking-wide text-emerald-600">Today's Collection</div>
-                            <div class="mt-2.5 text-3xl font-bold tracking-tight text-slate-900">{{ config('myacademy.currency_symbol') }}{{ number_format($feesCollectedToday, 2) }}</div>
+                            <div class="mt-2.5 text-3xl font-bold tracking-tight text-slate-900">{{ config('academyhub.currency_symbol') }}{{ number_format($feesCollectedToday, 2) }}</div>
                             <div class="mt-1.5 text-xs text-slate-600">{{ $totalTransactionsToday }} transactions</div>
                         </div>
                         <div class="icon-3d grid h-14 w-14 place-items-center rounded-xl bg-gradient-to-br from-emerald-400 to-emerald-600 text-white shadow-lg shadow-emerald-500/30">
@@ -228,7 +228,7 @@
                     <div class="flex items-start justify-between gap-4">
                         <div>
                             <div class="text-xs font-medium uppercase tracking-wide text-blue-600">This Week</div>
-                            <div class="mt-2.5 text-3xl font-bold tracking-tight text-slate-900">{{ config('myacademy.currency_symbol') }}{{ number_format($feesCollectedThisWeek, 2) }}</div>
+                            <div class="mt-2.5 text-3xl font-bold tracking-tight text-slate-900">{{ config('academyhub.currency_symbol') }}{{ number_format($feesCollectedThisWeek, 2) }}</div>
                             <div class="mt-1.5 text-xs text-slate-600">weekly collection</div>
                         </div>
                         <div class="icon-3d grid h-14 w-14 place-items-center rounded-xl bg-gradient-to-br from-blue-400 to-blue-600 text-white shadow-lg shadow-blue-500/30">
@@ -247,7 +247,7 @@
                     <div class="flex items-start justify-between gap-4">
                         <div>
                             <div class="text-xs font-medium uppercase tracking-wide text-purple-600">This Month</div>
-                            <div class="mt-2.5 text-3xl font-bold tracking-tight text-slate-900">{{ config('myacademy.currency_symbol') }}{{ number_format($feesCollectedThisMonth, 2) }}</div>
+                            <div class="mt-2.5 text-3xl font-bold tracking-tight text-slate-900">{{ config('academyhub.currency_symbol') }}{{ number_format($feesCollectedThisMonth, 2) }}</div>
                             <div class="mt-1.5 text-xs text-slate-600">monthly total</div>
                         </div>
                         <div class="icon-3d grid h-14 w-14 place-items-center rounded-xl bg-gradient-to-br from-purple-400 to-purple-600 text-white shadow-lg shadow-purple-500/30">
@@ -264,7 +264,7 @@
                     <div class="flex items-start justify-between gap-4">
                         <div>
                             <div class="text-xs font-medium uppercase tracking-wide text-red-600">Outstanding</div>
-                            <div class="mt-2.5 text-3xl font-bold tracking-tight text-slate-900">{{ config('myacademy.currency_symbol') }}{{ number_format($outstandingPaymentsEstimate, 2) }}</div>
+                            <div class="mt-2.5 text-3xl font-bold tracking-tight text-slate-900">{{ config('academyhub.currency_symbol') }}{{ number_format($outstandingPaymentsEstimate, 2) }}</div>
                             <div class="mt-1.5 text-xs text-slate-600">{{ $overdueInvoices }} overdue</div>
                         </div>
                         <div class="icon-3d grid h-14 w-14 place-items-center rounded-xl bg-gradient-to-br from-red-400 to-red-600 text-white shadow-lg shadow-red-500/30">
@@ -345,7 +345,7 @@
                                         <div class="mt-1 text-xs text-slate-500">{{ $transaction->student?->admission_number ?? '' }}</div>
                                     </td>
                                     <td class="px-5 py-4">
-                                        <div class="text-sm font-semibold text-emerald-600">{{ config('myacademy.currency_symbol') }}{{ number_format($transaction->amount_paid, 2) }}</div>
+                                        <div class="text-sm font-semibold text-emerald-600">{{ config('academyhub.currency_symbol') }}{{ number_format($transaction->amount_paid, 2) }}</div>
                                         <div class="mt-1 text-xs text-slate-500">{{ $transaction->category ?? 'Fee' }}</div>
                                     </td>
                                     <td class="px-5 py-4 text-sm text-slate-700">{{ $transaction->payment_method ?? 'Cash' }}</td>

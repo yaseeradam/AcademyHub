@@ -56,9 +56,9 @@ class AnalyticsExportController extends Controller
                 $query->where('class_id', $classId);
             }
 
-            $maxPossible = config('myacademy.results_ca1_max', 20) + 
-                          config('myacademy.results_ca2_max', 20) + 
-                          config('myacademy.results_exam_max', 60);
+            $maxPossible = config('academyhub.results_ca1_max', 20) + 
+                          config('academyhub.results_ca2_max', 20) + 
+                          config('academyhub.results_exam_max', 60);
 
             foreach ($query->cursor() as $score) {
                 $percentage = $maxPossible > 0 ? round(($score->total / $maxPossible) * 100, 2) : 0;

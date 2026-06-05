@@ -175,7 +175,7 @@ class PingEndpointsCommand extends Command
         curl_setopt($ch, CURLOPT_TIMEOUT, 5);
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
         curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
-        curl_setopt($ch, CURLOPT_USERAGENT, 'MyAcademy Diagnostic Ping/1.0');
+        curl_setopt($ch, CURLOPT_USERAGENT, 'AcademyHub Diagnostic Ping/1.0');
         
         curl_setopt($ch, CURLOPT_HTTPHEADER, [
             "Host: {$targetHost}"

@@ -72,7 +72,7 @@ class ReportCardController extends Controller
 
         $data = app(ReportCardService::class)->build($student, $term, $session);
 
-        $template = (string) config('myacademy.report_card_template', 'compact');
+        $template = (string) config('academyhub.report_card_template', 'compact');
         $view = match ($template) {
             'compact' => 'pdf.report-card-compact',
             'elegant' => 'pdf.report-card-elegant',

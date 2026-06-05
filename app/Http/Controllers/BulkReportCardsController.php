@@ -113,7 +113,7 @@ class BulkReportCardsController extends Controller
 
                 $payload = $service->build($student, $term, $session, $optionsOverrides);
 
-                $template = $request->filled('template') ? $request->input('template') : (string) config('myacademy.report_card_template', 'compact');
+                $template = $request->filled('template') ? $request->input('template') : (string) config('academyhub.report_card_template', 'compact');
                 $view = match ($template) {
                     'compact' => 'pdf.report-card-compact',
                     'elegant' => 'pdf.report-card-elegant',
@@ -188,7 +188,7 @@ class BulkReportCardsController extends Controller
 
         $payload = $service->build($student, $term, $session, $optionsOverrides);
 
-        $template = $request->filled('template') ? $request->input('template') : (string) config('myacademy.report_card_template', 'compact');
+        $template = $request->filled('template') ? $request->input('template') : (string) config('academyhub.report_card_template', 'compact');
         $view = match ($template) {
             'compact' => 'pdf.report-card-compact',
             'elegant' => 'pdf.report-card-elegant',

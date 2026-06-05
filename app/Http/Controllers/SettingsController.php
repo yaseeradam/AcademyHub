@@ -449,7 +449,7 @@ class SettingsController extends Controller
                 'issued_on' => Carbon::now(),
             ]);
 
-            $orientation = (string) config('myacademy.certificate_orientation', 'landscape');
+            $orientation = (string) config('academyhub.certificate_orientation', 'landscape');
             $orientation = in_array($orientation, ['landscape', 'portrait'], true) ? $orientation : 'landscape';
 
             $data = [
@@ -541,7 +541,7 @@ class SettingsController extends Controller
                     'amount'         => 45000.00,
                     'account_number' => '1023456789',
                     'bank_name'      => 'Zenith Bank',
-                    'account_name'   => 'MyAcademy Primary School',
+                    'account_name'   => 'AcademyHub Primary School',
                     'currency'       => '₦',
                 ],
                 'signatureImages' => [

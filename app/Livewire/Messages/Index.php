@@ -322,7 +322,7 @@ class Index extends Component
             $attachmentSize = (int) ($this->attachment->getSize() ?: 0);
 
             $attachmentPath = $this->attachment->storeAs(
-                'myacademy/messages/'.$this->conversationId,
+                'academyhub/messages/'.$this->conversationId,
                 now()->format('YmdHis').'_'.bin2hex(random_bytes(6)).'_'.$attachmentName,
                 'local'
             );

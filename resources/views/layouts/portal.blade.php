@@ -5,7 +5,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <meta name="csrf-token" content="{{ csrf_token() }}" />
 
-        <title>{{ config('myacademy.school_name', config('app.name', 'AcademyHub')) }} &middot; CBT Portal</title>
+        <title>{{ config('academyhub.school_name', config('app.name', 'AcademyHub')) }} &middot; CBT Portal</title>
 
         @vite(['resources/css/app.css', 'resources/js/app.js'])
         @livewireStyles

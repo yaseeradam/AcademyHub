@@ -8,8 +8,8 @@
 @section('content')
     <div class="space-y-8" x-data="{ 
         classId: '', 
-        session: '{{ config('myacademy.current_session', '2025/2026') }}',
-        term: '{{ config('myacademy.current_term', 1) }}',
+        session: '{{ config('academyhub.current_session', '2025/2026') }}',
+        term: '{{ config('academyhub.current_term', 1) }}',
         template: '',
         students: [], 
         selectedStudents: [], 

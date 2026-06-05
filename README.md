@@ -1,6 +1,6 @@
-# MyAcademy
+# AcademyHub
 
-MyAcademy is a comprehensive cloud-based School Management System built with Laravel.
+AcademyHub is a comprehensive cloud-based School Management System built with Laravel.
 
 ## Stack
 
@@ -84,13 +84,13 @@ php artisan view:cache
 
 ## Pricing
 
-MyAcademy is a paid cloud-based service. Contact us for pricing and subscription plans.
+AcademyHub is a paid cloud-based service. Contact us for pricing and subscription plans.
 
 ## Demo Accounts (seeded)
 
-- `admin@myacademy.local` / `password`
-- `bursar@myacademy.local` / `password`
-- `teacher@myacademy.local` / `password`
+- `admin@academyhub.local` / `password`
+- `bursar@academyhub.local` / `password`
+- `teacher@academyhub.local` / `password`
 - Student login: Use admission number (e.g., `STU20240001`) with password format: `firstname + last4digits` (e.g., `john0001`)
 
 ## Backup & Restore (Admin)
@@ -116,8 +116,8 @@ If `mysqldump` / `mysql` are not in PATH on your server, set:
 
 ## Support
 
-For technical support and inquiries, contact the MyAcademy team.
+For technical support and inquiries, contact the AcademyHub team.
 
 ---
 
-© 2024 MyAcademy - Cloud School Management System
+© 2024 AcademyHub - Cloud School Management System

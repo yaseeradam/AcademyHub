@@ -52,7 +52,7 @@
                                 min="0"
                                 max="200"
                                 class="mt-2 w-full rounded-xl border-0 bg-white/80 px-4 py-3 text-sm font-semibold text-gray-900 ring-1 ring-white/60 backdrop-blur-sm focus:ring-2 focus:ring-purple-500"
-                                value="{{ old('results_ca1_max', config('myacademy.results_ca1_max', 20)) }}"
+                                value="{{ old('results_ca1_max', config('academyhub.results_ca1_max', 20)) }}"
                                 required
                             />
                         </div>
@@ -64,7 +64,7 @@
                                 min="0"
                                 max="200"
                                 class="mt-2 w-full rounded-xl border-0 bg-white/80 px-4 py-3 text-sm font-semibold text-gray-900 ring-1 ring-white/60 backdrop-blur-sm focus:ring-2 focus:ring-purple-500"
-                                value="{{ old('results_ca2_max', config('myacademy.results_ca2_max', 20)) }}"
+                                value="{{ old('results_ca2_max', config('academyhub.results_ca2_max', 20)) }}"
                                 required
                             />
                         </div>
@@ -76,7 +76,7 @@
                                 min="0"
                                 max="200"
                                 class="mt-2 w-full rounded-xl border-0 bg-white/80 px-4 py-3 text-sm font-semibold text-gray-900 ring-1 ring-white/60 backdrop-blur-sm focus:ring-2 focus:ring-purple-500"
-                                value="{{ old('results_exam_max', config('myacademy.results_exam_max', 60)) }}"
+                                value="{{ old('results_exam_max', config('academyhub.results_exam_max', 60)) }}"
                                 required
                             />
                         </div>

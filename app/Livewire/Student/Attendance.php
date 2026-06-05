@@ -51,7 +51,7 @@ class Attendance extends Component
         $student = $this->getStudent();
         abort_unless((bool) $student, 403);
 
-        $currentSession = AcademicTerm::activeSessionName() ?? config('myacademy.current_session', '');
+        $currentSession = AcademicTerm::activeSessionName() ?? config('academyhub.current_session', '');
         $currentTerm    = AcademicTerm::activeTermNumber();
 
         // ── Load ALL marks with sheets for this student ──────────────────

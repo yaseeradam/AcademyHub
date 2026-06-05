@@ -17,7 +17,7 @@ class StudentAttendanceController extends Controller
             return response()->json(['message' => 'Unauthorized or invalid student context.'], 403);
         }
 
-        $session = $request->query('session', AcademicTerm::activeSessionName() ?? config('myacademy.current_session', ''));
+        $session = $request->query('session', AcademicTerm::activeSessionName() ?? config('academyhub.current_session', ''));
         $term = (int) $request->query('term', AcademicTerm::activeTermNumber());
 
         $marks = AttendanceMark::with(['sheet.takenBy'])

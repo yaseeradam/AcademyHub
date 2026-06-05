@@ -62,7 +62,7 @@ if %ERRORLEVEL% EQU 0 (
     echo   All good! App is ready.
     echo  ============================================
     echo.
-    echo   Open: http://myacademy-laravel.test
+    echo   Open: http://academyhub-laravel.test
     echo   Or:   php artisan serve
     echo.
 ) else (

@@ -84,11 +84,11 @@ class TimetableController extends Controller
         }
 
         // School info
-        $schoolName = config('myacademy.school_name', config('app.name', 'School'));
-        $schoolAddress = config('myacademy.school_address', '');
-        $schoolPhone = config('myacademy.school_phone', '');
-        $schoolEmail = config('myacademy.school_email', '');
-        $logoPath = config('myacademy.school_logo');
+        $schoolName = config('academyhub.school_name', config('app.name', 'School'));
+        $schoolAddress = config('academyhub.school_address', '');
+        $schoolPhone = config('academyhub.school_phone', '');
+        $schoolEmail = config('academyhub.school_email', '');
+        $logoPath = config('academyhub.school_logo');
 
         $logoBase64 = null;
         if ($logoPath) {

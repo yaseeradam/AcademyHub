@@ -81,10 +81,10 @@
                         <td>
                             @if($component->setup_fee > 0 || $component->usage_fee_per_student > 0)
                                 <div style="font-weight:700; color:var(--sa-text); font-size:13px;">
-                                    Setup: {{ config('myacademy.currency_symbol', '₦') }}{{ number_format($component->setup_fee, 2) }}
+                                    Setup: {{ config('academyhub.currency_symbol', '₦') }}{{ number_format($component->setup_fee, 2) }}
                                 </div>
                                 <div style="font-size:11px; color:var(--sa-muted); margin-top:2px;">
-                                    Usage: {{ config('myacademy.currency_symbol', '₦') }}{{ number_format($component->usage_fee_per_student, 2) }}/student
+                                    Usage: {{ config('academyhub.currency_symbol', '₦') }}{{ number_format($component->usage_fee_per_student, 2) }}/student
                                 </div>
                             @else
                                 <span class="sa-badge free">Free</span>

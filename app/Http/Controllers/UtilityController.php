@@ -15,7 +15,7 @@ class UtilityController extends Controller
 {
     public function welcome()
     {
-        if (config('myacademy.mode') === 'cbt') {
+        if (config('academyhub.mode') === 'cbt') {
             return redirect()->route('cbt.student');
         }
 
@@ -24,7 +24,7 @@ class UtilityController extends Controller
 
     public function home()
     {
-        if (config('myacademy.mode') === 'cbt') {
+        if (config('academyhub.mode') === 'cbt') {
             return redirect()->route('cbt.student');
         }
 
@@ -86,7 +86,7 @@ class UtilityController extends Controller
 
         $data = $reportCardService->build($student, $term, $session);
 
-        $template = (string) config('myacademy.report_card_template', 'compact');
+        $template = (string) config('academyhub.report_card_template', 'compact');
         $view = match ($template) {
             'compact' => 'pdf.report-card-compact',
             'elegant' => 'pdf.report-card-elegant',
@@ -126,11 +126,11 @@ class UtilityController extends Controller
 
         return response()->json([
             'config_values' => [
-                'rc_show_position' => config('myacademy.rc_show_position'),
-                'rc_show_attendance' => config('myacademy.rc_show_attendance'),
-                'rc_show_next_term_date' => config('myacademy.rc_show_next_term_date'),
-                'rc_show_teacher_remarks' => config('myacademy.rc_show_teacher_remarks'),
-                'rc_show_principal_remarks' => config('myacademy.rc_show_principal_remarks'),
+                'rc_show_position' => config('academyhub.rc_show_position'),
+                'rc_show_attendance' => config('academyhub.rc_show_attendance'),
+                'rc_show_next_term_date' => config('academyhub.rc_show_next_term_date'),
+                'rc_show_teacher_remarks' => config('academyhub.rc_show_teacher_remarks'),
+                'rc_show_principal_remarks' => config('academyhub.rc_show_principal_remarks'),
             ],
             'cache_key' => $cacheKey,
             'cache_key_exists' => Cache::has($cacheKey),

@@ -6,7 +6,7 @@ echo 🚀 AcademyHub Cloudflare Tunnel Activator
 echo ====================================================
 echo.
 
-set DEFAULT_HOST=yis.myacademy-laravel.test
+set DEFAULT_HOST=yis.academyhub-laravel.test
 set /p LOCAL_HOST="Enter your local virtual host [%DEFAULT_HOST%]: "
 if "%LOCAL_HOST%"=="" set LOCAL_HOST=%DEFAULT_HOST%
 
@@ -89,7 +89,7 @@ if "%TUNNEL_NAME%"=="" set TUNNEL_NAME=academy-tunnel
 echo Creating tunnel: %TUNNEL_NAME%...
 %CLOUDFLARED_PATH% tunnel create %TUNNEL_NAME%
 echo.
-set /p MY_DOMAIN="Enter your domain (e.g. myacademy.com): "
+set /p MY_DOMAIN="Enter your domain (e.g. academyhub.com): "
 if "%MY_DOMAIN%"=="" (
     echo [ERROR] Domain name is required for custom setup.
     pause

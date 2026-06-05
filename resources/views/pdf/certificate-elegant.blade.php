@@ -1,23 +1,23 @@
 @php
-    $schoolName = config('myacademy.school_name', config('app.name', 'MyAcademy'));
-    $logo = config('myacademy.school_logo');
+    $schoolName = config('academyhub.school_name', config('app.name', 'AcademyHub'));
+    $logo = config('academyhub.school_logo');
     $logoPath = $logo ? public_path('uploads/' . str_replace('\\', '/', $logo)) : null;
 
     $borderColor = '#d4af37'; // Gold
     $accentColor = '#1e3a5f'; // Navy Blue
-    $showLogo = (bool) config('myacademy.certificate_show_logo', true);
-    $showWatermark = (bool) config('myacademy.certificate_show_watermark', false);
-    $watermark = config('myacademy.certificate_watermark_image');
+    $showLogo = (bool) config('academyhub.certificate_show_logo', true);
+    $showWatermark = (bool) config('academyhub.certificate_show_watermark', false);
+    $watermark = config('academyhub.certificate_watermark_image');
     $watermarkPath = ($watermark && $showWatermark) ? public_path('uploads/' . str_replace('\\', '/', $watermark)) : null;
 
-    $sig1Label = config('myacademy.certificate_signature_label', 'Authorized Signature');
-    $sig1Name = config('myacademy.certificate_signature_name');
-    $sig1Image = config('myacademy.certificate_signature_image');
+    $sig1Label = config('academyhub.certificate_signature_label', 'Authorized Signature');
+    $sig1Name = config('academyhub.certificate_signature_name');
+    $sig1Image = config('academyhub.certificate_signature_image');
     $sig1ImagePath = $sig1Image ? public_path('uploads/' . str_replace('\\', '/', $sig1Image)) : null;
 
-    $sig2Label = config('myacademy.certificate_signature2_label');
-    $sig2Name = config('myacademy.certificate_signature2_name');
-    $sig2Image = config('myacademy.certificate_signature2_image');
+    $sig2Label = config('academyhub.certificate_signature2_label');
+    $sig2Name = config('academyhub.certificate_signature2_name');
+    $sig2Image = config('academyhub.certificate_signature2_image');
     $sig2ImagePath = $sig2Image ? public_path('uploads/' . str_replace('\\', '/', $sig2Image)) : null;
 @endphp
 <!DOCTYPE html>

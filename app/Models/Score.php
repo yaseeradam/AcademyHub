@@ -46,9 +46,9 @@ class Score extends Model
             $score->total = (int) $score->ca1 + (int) $score->ca2 + (int) $score->exam;
 
             $maxTotal =
-                max(0, (int) config('myacademy.results_ca1_max', 20))
-                + max(0, (int) config('myacademy.results_ca2_max', 20))
-                + max(0, (int) config('myacademy.results_exam_max', 60));
+                max(0, (int) config('academyhub.results_ca1_max', 20))
+                + max(0, (int) config('academyhub.results_ca2_max', 20))
+                + max(0, (int) config('academyhub.results_exam_max', 60));
 
             $score->grade = self::gradeForTotal($score->total, $maxTotal);
         });

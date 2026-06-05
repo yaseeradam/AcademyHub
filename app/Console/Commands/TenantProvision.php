@@ -25,7 +25,7 @@ class TenantProvision extends Command
         $provisioner->provision($tenant);
 
         $this->info("Provisioned tenant #{$tenant->id} ({$tenant->name}).");
-        $this->line('Settings file: '.storage_path('app/myacademy/tenants/'.$tenant->id.'/settings.json'));
+        $this->line('Settings file: '.storage_path('app/academyhub/tenants/'.$tenant->id.'/settings.json'));
 
         return 0;
     }

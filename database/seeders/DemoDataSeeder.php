@@ -24,7 +24,7 @@ class DemoDataSeeder extends Seeder
         ];
 
         foreach ($teacherNames as $index => $name) {
-            $email = 'teacher' . ($index + 1) . '@myacademy.local';
+            $email = 'teacher' . ($index + 1) . '@academyhub.local';
             $teachers[] = User::firstOrCreate(
                 ['email' => $email],
                 [

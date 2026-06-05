@@ -74,7 +74,7 @@ class MarketplaceComponent extends Model
     public function getFormattedPriceAttribute(): string
     {
         if ((float) $this->price <= 0) return 'FREE';
-        return config('myacademy.currency_symbol', '₦') . number_format($this->price, 2);
+        return config('academyhub.currency_symbol', '₦') . number_format($this->price, 2);
     }
 
     public function getRealRatingAvgAttribute(): float

@@ -4,33 +4,33 @@
     @php
         $hasPremium = true;
 
-        $certificateTemplate = old('certificate_template', config('myacademy.certificate_template', 'modern'));
-        $reportCardTemplate = old('report_card_template', config('myacademy.report_card_template', 'compact'));
+        $certificateTemplate = old('certificate_template', config('academyhub.certificate_template', 'modern'));
+        $reportCardTemplate = old('report_card_template', config('academyhub.report_card_template', 'compact'));
 
         // Report card options
-        $rcShowPosition = old('rc_show_position', config('myacademy.rc_show_position', true));
-        $rcShowAttendance = old('rc_show_attendance', config('myacademy.rc_show_attendance', true));
-        $rcShowGradingKey = old('rc_show_grading_key', config('myacademy.rc_show_grading_key', true));
-        $rcShowClassAverage = old('rc_show_class_average', config('myacademy.rc_show_class_average', true));
-        $rcShowWatermark = old('rc_show_watermark', config('myacademy.rc_show_watermark', true));
-        $rcShowNextTermDate = old('rc_show_next_term_date', config('myacademy.rc_show_next_term_date', true));
-        $rcShowTeacherRemarks = old('rc_show_teacher_remarks', config('myacademy.rc_show_teacher_remarks', true));
-        $rcShowPrincipalRemarks = old('rc_show_principal_remarks', config('myacademy.rc_show_principal_remarks', true));
-        $rcShowPsychomotor = old('rc_show_psychomotor', config('myacademy.rc_show_psychomotor', false));
-        $rcPsychomotorStyle = old('rc_psychomotor_style', config('myacademy.rc_psychomotor_style', 'progress'));
-        $rcShowSchoolFees = old('rc_show_school_fees', config('myacademy.rc_show_school_fees', false));
+        $rcShowPosition = old('rc_show_position', config('academyhub.rc_show_position', true));
+        $rcShowAttendance = old('rc_show_attendance', config('academyhub.rc_show_attendance', true));
+        $rcShowGradingKey = old('rc_show_grading_key', config('academyhub.rc_show_grading_key', true));
+        $rcShowClassAverage = old('rc_show_class_average', config('academyhub.rc_show_class_average', true));
+        $rcShowWatermark = old('rc_show_watermark', config('academyhub.rc_show_watermark', true));
+        $rcShowNextTermDate = old('rc_show_next_term_date', config('academyhub.rc_show_next_term_date', true));
+        $rcShowTeacherRemarks = old('rc_show_teacher_remarks', config('academyhub.rc_show_teacher_remarks', true));
+        $rcShowPrincipalRemarks = old('rc_show_principal_remarks', config('academyhub.rc_show_principal_remarks', true));
+        $rcShowPsychomotor = old('rc_show_psychomotor', config('academyhub.rc_show_psychomotor', false));
+        $rcPsychomotorStyle = old('rc_psychomotor_style', config('academyhub.rc_psychomotor_style', 'progress'));
+        $rcShowSchoolFees = old('rc_show_school_fees', config('academyhub.rc_show_school_fees', false));
         
 
-        $rcSchoolFeesAccountNumber = old('rc_school_fees_account_number', config('myacademy.rc_school_fees_account_number'));
-        $rcSchoolFeesBankName = old('rc_school_fees_bank_name', config('myacademy.rc_school_fees_bank_name'));
-        $rcSchoolFeesAccountName = old('rc_school_fees_account_name', config('myacademy.rc_school_fees_account_name'));
-        $rcSchoolFeesByClass = config('myacademy.rc_school_fees_by_class', []);
+        $rcSchoolFeesAccountNumber = old('rc_school_fees_account_number', config('academyhub.rc_school_fees_account_number'));
+        $rcSchoolFeesBankName = old('rc_school_fees_bank_name', config('academyhub.rc_school_fees_bank_name'));
+        $rcSchoolFeesAccountName = old('rc_school_fees_account_name', config('academyhub.rc_school_fees_account_name'));
+        $rcSchoolFeesByClass = config('academyhub.rc_school_fees_by_class', []);
         if (is_string($rcSchoolFeesByClass)) {
             $rcSchoolFeesByClass = json_decode($rcSchoolFeesByClass, true) ?? [];
         }
-        $rcShowSignatures = old('rc_show_signatures', config('myacademy.rc_show_signatures', false));
-        $rcPrincipalSignatureImage = config('myacademy.rc_principal_signature_image');
-        $rcTeacherSignatureImage = config('myacademy.rc_teacher_signature_image');
+        $rcShowSignatures = old('rc_show_signatures', config('academyhub.rc_show_signatures', false));
+        $rcPrincipalSignatureImage = config('academyhub.rc_principal_signature_image');
+        $rcTeacherSignatureImage = config('academyhub.rc_teacher_signature_image');
     @endphp
 
     <div class="space-y-6"
@@ -474,7 +474,7 @@
                                         <div class="text-xs font-bold text-gray-800">{{ $class->name }}</div>
                                     </div>
                                     <div class="flex items-center gap-1">
-                                        <span class="text-sm font-bold text-gray-500">{{ config('myacademy.currency_symbol', '₦') }}</span>
+                                        <span class="text-sm font-bold text-gray-500">{{ config('academyhub.currency_symbol', '₦') }}</span>
                                         <input name="rc_school_fees_by_class[{{ $class->id }}]"
                                             type="number" step="0.01" min="0"
                                             class="w-28 rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm focus:ring-2 focus:ring-amber-500 focus:border-amber-500"

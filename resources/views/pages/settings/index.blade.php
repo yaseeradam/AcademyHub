@@ -23,7 +23,7 @@
             <div class="mt-4">
                 <span class="inline-flex items-center gap-2 rounded-lg px-4 py-1.5 text-sm font-semibold text-white" style="background:rgba(255,255,255,0.12);">
                     <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-                    {{ config('myacademy.school_name', 'School') }}
+                    {{ config('academyhub.school_name', 'School') }}
                 </span>
             </div>
         </div>
@@ -87,8 +87,8 @@
                 <div class="text-base font-bold text-slate-800">School Information</div>
                 <div class="text-xs text-slate-400">Update your school's public profile</div>
             </div>
-            @if(config('myacademy.school_logo'))
-                <img src="{{ asset('uploads/' . str_replace('\\', '/', config('myacademy.school_logo'))) }}"
+            @if(config('academyhub.school_logo'))
+                <img src="{{ asset('uploads/' . str_replace('\\', '/', config('academyhub.school_logo'))) }}"
                     class="h-10 w-10 rounded-xl object-contain ring-1 ring-slate-200" />
             @endif
         </div>
@@ -109,7 +109,7 @@
                                 </div>
                                 <input name="school_name" placeholder="e.g. Greenfield Academy"
                                     class="w-full rounded-xl border border-slate-300 bg-slate-50 py-2.5 pl-10 pr-4 text-sm font-medium text-slate-800 placeholder-slate-400 transition focus:border-orange-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-orange-100"
-                                    value="{{ old('school_name', config('myacademy.school_name')) }}" required />
+                                    value="{{ old('school_name', config('academyhub.school_name')) }}" required />
                             </div>
                         </div>
 
@@ -121,7 +121,7 @@
                                 </div>
                                 <input name="school_address" placeholder="123 School Street, City"
                                     class="w-full rounded-xl border border-slate-300 bg-slate-50 py-2.5 pl-10 pr-4 text-sm text-slate-800 placeholder-slate-400 transition focus:border-orange-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-orange-100"
-                                    value="{{ old('school_address', config('myacademy.school_address')) }}" />
+                                    value="{{ old('school_address', config('academyhub.school_address')) }}" />
                             </div>
                         </div>
 
@@ -133,7 +133,7 @@
                                 </div>
                                 <input name="school_phone" placeholder="+1 234 567 8900"
                                     class="w-full rounded-xl border border-slate-300 bg-slate-50 py-2.5 pl-10 pr-4 text-sm text-slate-800 placeholder-slate-400 transition focus:border-orange-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-orange-100"
-                                    value="{{ old('school_phone', config('myacademy.school_phone')) }}" />
+                                    value="{{ old('school_phone', config('academyhub.school_phone')) }}" />
                             </div>
                         </div>
 
@@ -145,7 +145,7 @@
                                 </div>
                                 <input name="school_email" type="email" placeholder="info@school.edu"
                                     class="w-full rounded-xl border border-slate-300 bg-slate-50 py-2.5 pl-10 pr-4 text-sm text-slate-800 placeholder-slate-400 transition focus:border-orange-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-orange-100"
-                                    value="{{ old('school_email', config('myacademy.school_email')) }}" />
+                                    value="{{ old('school_email', config('academyhub.school_email')) }}" />
                             </div>
                         </div>
 
@@ -160,9 +160,9 @@
 
                             <img x-show="preview" :src="preview" class="absolute inset-0 h-full w-full object-cover rounded-2xl" />
 
-                            @if(config('myacademy.school_logo'))
+                            @if(config('academyhub.school_logo'))
                                 <img x-show="!preview"
-                                    src="{{ asset('uploads/' . str_replace('\\', '/', config('myacademy.school_logo'))) }}"
+                                    src="{{ asset('uploads/' . str_replace('\\', '/', config('academyhub.school_logo'))) }}"
                                     class="absolute inset-0 h-full w-full object-cover rounded-2xl" />
                             @endif
 
@@ -171,7 +171,7 @@
                                 <span class="mt-1 text-[10px] font-bold text-white">Change</span>
                             </div>
 
-                            @if(!config('myacademy.school_logo'))
+                            @if(!config('academyhub.school_logo'))
                                 <div x-show="!preview" class="flex flex-col items-center gap-1">
                                     <svg class="h-7 w-7 text-slate-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
                                     <span class="text-[10px] font-semibold text-slate-400">Upload</span>

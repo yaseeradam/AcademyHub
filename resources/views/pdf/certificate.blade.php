@@ -1,6 +1,6 @@
 @php
-    $schoolName = config('myacademy.school_name', config('app.name', 'MyAcademy'));
-    $logo = config('myacademy.school_logo');
+    $schoolName = config('academyhub.school_name', config('app.name', 'AcademyHub'));
+    $logo = config('academyhub.school_logo');
     $logoPath = $logo ? public_path('uploads/'.str_replace('\\', '/', $logo)) : null;
 
     $issuedOn = $certificate?->issued_on ?? $certificate?->issue_date ?? now();

@@ -1,4 +1,4 @@
-# MyAcademy - License Removal & Online Service Update
+# AcademyHub - License Removal & Online Service Update
 
 ## Changes Made
 
@@ -6,8 +6,8 @@
 
 **Files Deleted:**
 - `app/Support/LicenseManager.php` - License management class
-- `storage/app/myacademy/license.json` - License data file
-- `storage/app/myacademy/license-last-seen.txt` - License tracking file
+- `storage/app/academyhub/license.json` - License data file
+- `storage/app/academyhub/license-last-seen.txt` - License tracking file
 
 **Files Modified:**
 - `app/Providers/AppServiceProvider.php`
@@ -126,4 +126,4 @@
 
 ---
 
-© 2024 MyAcademy - Cloud School Management System
+© 2024 AcademyHub - Cloud School Management System

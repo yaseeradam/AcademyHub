@@ -60,9 +60,9 @@ class Entry extends Component
     public function maxMarks(): array
     {
         return [
-            'ca1' => max(0, (int) config('myacademy.results_ca1_max', 20)),
-            'ca2' => max(0, (int) config('myacademy.results_ca2_max', 20)),
-            'exam' => max(0, (int) config('myacademy.results_exam_max', 60)),
+            'ca1' => max(0, (int) config('academyhub.results_ca1_max', 20)),
+            'ca2' => max(0, (int) config('academyhub.results_ca2_max', 20)),
+            'exam' => max(0, (int) config('academyhub.results_exam_max', 60)),
         ];
     }
 

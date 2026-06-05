@@ -341,8 +341,8 @@
     </head>
     <body>
         @php
-            $schoolName = config('myacademy.school_name', config('app.name', 'MyAcademy'));
-            $logo       = config('myacademy.school_logo');
+            $schoolName = config('academyhub.school_name', config('app.name', 'AcademyHub'));
+            $logo       = config('academyhub.school_logo');
             $logoPath   = $logo ? public_path('uploads/' . str_replace('\\', '/', $logo)) : null;
             $logoExists = $logoPath && file_exists($logoPath);
         @endphp
@@ -378,17 +378,17 @@
                         @endif
                         <div class="header-cell" style="text-align: center;">
                             <div class="school-name">{{ $schoolName }}</div>
-                            @if(config('myacademy.school_motto'))
-                                <div class="school-motto">"{{ config('myacademy.school_motto') }}"</div>
+                            @if(config('academyhub.school_motto'))
+                                <div class="school-motto">"{{ config('academyhub.school_motto') }}"</div>
                             @endif
-                            @if(config('myacademy.school_address'))
-                                <div class="school-info">{{ config('myacademy.school_address') }}</div>
+                            @if(config('academyhub.school_address'))
+                                <div class="school-info">{{ config('academyhub.school_address') }}</div>
                             @endif
-                            @if(config('myacademy.school_phone') || config('myacademy.school_email'))
+                            @if(config('academyhub.school_phone') || config('academyhub.school_email'))
                                 <div class="school-info">
-                                    {{ config('myacademy.school_phone') }}
-                                    @if(config('myacademy.school_phone') && config('myacademy.school_email')) | @endif
-                                    {{ config('myacademy.school_email') }}
+                                    {{ config('academyhub.school_phone') }}
+                                    @if(config('academyhub.school_phone') && config('academyhub.school_email')) | @endif
+                                    {{ config('academyhub.school_email') }}
                                 </div>
                             @endif
                             <div class="report-badge">Report Card</div>
@@ -564,7 +564,7 @@
 @endif
 
                 <div class="footer">
-                    Generated on {{ now()->format('l, F j, Y \a\t g:i A') }} • {{ $schoolName }} • Powered by MyAcademy SMS
+                    Generated on {{ now()->format('l, F j, Y \a\t g:i A') }} • {{ $schoolName }} • Powered by AcademyHub SMS
                 </div>
             </div>
         </div>

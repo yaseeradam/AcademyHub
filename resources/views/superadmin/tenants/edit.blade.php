@@ -548,19 +548,19 @@
                                         <div>
                                             <label class="sa-form-label">Setup Fee (override)</label>
                                             <div style="position:relative;">
-                                                <span style="position:absolute; left:12px; top:50%; transform:translateY(-50%); font-weight:700; color:var(--sa-muted);">{{ config('myacademy.currency_symbol', '₦') }}</span>
+                                                <span style="position:absolute; left:12px; top:50%; transform:translateY(-50%); font-weight:700; color:var(--sa-muted);">{{ config('academyhub.currency_symbol', '₦') }}</span>
                                                 <input type="number" name="setup_fee" value="{{ old('setup_fee', $pivot->setup_fee ?? $component->setup_fee) }}" required min="0" step="0.01" class="sa-form-input" style="padding-left:30px; font-family:monospace; font-weight:600;">
                                             </div>
-                                            <div class="sa-form-hint">Central Base: {{ config('myacademy.currency_symbol', '₦') }}{{ number_format($component->setup_fee, 2) }}</div>
+                                            <div class="sa-form-hint">Central Base: {{ config('academyhub.currency_symbol', '₦') }}{{ number_format($component->setup_fee, 2) }}</div>
                                         </div>
 
                                         <div>
                                             <label class="sa-form-label">Usage Fee/Student (override)</label>
                                             <div style="position:relative;">
-                                                <span style="position:absolute; left:12px; top:50%; transform:translateY(-50%); font-weight:700; color:var(--sa-muted);">{{ config('myacademy.currency_symbol', '₦') }}</span>
+                                                <span style="position:absolute; left:12px; top:50%; transform:translateY(-50%); font-weight:700; color:var(--sa-muted);">{{ config('academyhub.currency_symbol', '₦') }}</span>
                                                 <input type="number" name="usage_fee_per_student" value="{{ old('usage_fee_per_student', $pivot->usage_fee_per_student ?? $component->usage_fee_per_student) }}" required min="0" step="0.01" class="sa-form-input" style="padding-left:30px; font-family:monospace; font-weight:600;">
                                             </div>
-                                            <div class="sa-form-hint">Central Base: {{ config('myacademy.currency_symbol', '₦') }}{{ number_format($component->usage_fee_per_student, 2) }}</div>
+                                            <div class="sa-form-hint">Central Base: {{ config('academyhub.currency_symbol', '₦') }}{{ number_format($component->usage_fee_per_student, 2) }}</div>
                                         </div>
 
                                         <div>
@@ -665,14 +665,14 @@
                                     <td>
                                         @if($bill->bill_type === 'usage')
                                             <div style="font-size:12.5px; font-weight:600; font-family:monospace;">{{ $bill->student_count }} studs</div>
-                                            <div style="font-size:11px; color:var(--sa-muted); font-family:monospace;">&times; {{ config('myacademy.currency_symbol', '₦') }}{{ number_format($bill->usage_fee_per_student, 2) }}</div>
+                                            <div style="font-size:11px; color:var(--sa-muted); font-family:monospace;">&times; {{ config('academyhub.currency_symbol', '₦') }}{{ number_format($bill->usage_fee_per_student, 2) }}</div>
                                         @else
                                             <div style="font-size:12.5px; font-weight:600; font-family:monospace;">Single Fee</div>
-                                            <div style="font-size:11px; color:var(--sa-muted); font-family:monospace;">{{ config('myacademy.currency_symbol', '₦') }}{{ number_format($bill->setup_fee, 2) }}</div>
+                                            <div style="font-size:11px; color:var(--sa-muted); font-family:monospace;">{{ config('academyhub.currency_symbol', '₦') }}{{ number_format($bill->setup_fee, 2) }}</div>
                                         @endif
                                     </td>
                                     <td style="font-family:monospace; font-weight: 700; color:var(--sa-primary);">
-                                        {{ config('myacademy.currency_symbol', '₦') }}{{ number_format($bill->total_due, 2) }}
+                                        {{ config('academyhub.currency_symbol', '₦') }}{{ number_format($bill->total_due, 2) }}
                                     </td>
                                     <td>
                                         @if($bill->status === 'paid')
@@ -703,7 +703,7 @@
                                                      x-transition:leave-end="transform opacity-0 scale-95"
                                                      class="sa-dropdown-menu" 
                                                      style="display: none; right: 0; min-width: 140px;">
-                                                    <form action="{{ route('superadmin.tenants.bills.pay', [$tenant, $bill]) }}" method="POST" data-confirm-password="Mark term bill for {{ $bill->term_name }} ({{ config('myacademy.currency_symbol', '₦') }}{{ number_format($bill->total_due, 2) }}) as fully paid" style="margin: 0; width: 100%;">
+                                                    <form action="{{ route('superadmin.tenants.bills.pay', [$tenant, $bill]) }}" method="POST" data-confirm-password="Mark term bill for {{ $bill->term_name }} ({{ config('academyhub.currency_symbol', '₦') }}{{ number_format($bill->total_due, 2) }}) as fully paid" style="margin: 0; width: 100%;">
                                                         @csrf
                                                         <button type="submit" class="sa-dropdown-item" style="color: #10b981;">
                                                             <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -715,7 +715,7 @@
                                                     
                                                     <div style="border-top: 1px solid rgba(226, 232, 240, 0.6); margin: 4px 0;"></div>
 
-                                                    <form action="{{ route('superadmin.tenants.bills.void', [$tenant, $bill]) }}" method="POST" data-confirm-password="Void term bill for {{ $bill->term_name }} ({{ config('myacademy.currency_symbol', '₦') }}{{ number_format($bill->total_due, 2) }})" style="margin: 0; width: 100%;">
+                                                    <form action="{{ route('superadmin.tenants.bills.void', [$tenant, $bill]) }}" method="POST" data-confirm-password="Void term bill for {{ $bill->term_name }} ({{ config('academyhub.currency_symbol', '₦') }}{{ number_format($bill->total_due, 2) }})" style="margin: 0; width: 100%;">
                                                         @csrf
                                                         <button type="submit" class="sa-dropdown-item danger">
                                                             <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">

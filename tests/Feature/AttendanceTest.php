@@ -21,7 +21,7 @@ class AttendanceTest extends TestCase
     {
         $this->seed();
 
-        $admin = User::query()->where('email', 'admin@myacademy.local')->firstOrFail();
+        $admin = User::query()->where('email', 'admin@academyhub.local')->firstOrFail();
 
         $this->actingAs($admin)
             ->get('/attendance')
@@ -33,7 +33,7 @@ class AttendanceTest extends TestCase
     {
         $this->seed();
 
-        $admin = User::query()->where('email', 'admin@myacademy.local')->firstOrFail();
+        $admin = User::query()->where('email', 'admin@academyhub.local')->firstOrFail();
 
         $class = SchoolClass::query()->where('name', 'JSS 2')->firstOrFail();
         $section = Section::query()->where('class_id', $class->id)->where('name', 'A')->firstOrFail();
@@ -67,7 +67,7 @@ class AttendanceTest extends TestCase
     {
         $this->seed();
 
-        $admin = User::query()->where('email', 'admin@myacademy.local')->firstOrFail();
+        $admin = User::query()->where('email', 'admin@academyhub.local')->firstOrFail();
         $class = SchoolClass::query()->where('name', 'JSS 2')->firstOrFail();
         $section = Section::query()->where('class_id', $class->id)->where('name', 'A')->firstOrFail();
 

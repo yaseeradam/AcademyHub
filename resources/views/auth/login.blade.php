@@ -69,9 +69,9 @@
     <div class="left-content">
       <!-- Logo -->
       <div class="left-logo">
-        <img src="{{ asset('images/myacademyhub-logo.png') }}" alt="AcademyHub Logo">
+        <img src="{{ asset('full.png') }}" alt="AcademyHub Logo">
         <div class="left-logo-text">
-          <div class="name">{{ config('myacademy.school_name', config('app.name', 'AcademyHub')) }}</div>
+          <div class="name">{{ config('academyhub.school_name', config('app.name', 'AcademyHub')) }}</div>
           <div class="sub">Smart Learning System</div>
         </div>
       </div>
@@ -261,7 +261,7 @@
       </div>
       <div class="card-divider" id="card-divider" style="background:#E78B2C"></div>
       <div class="card-tagline" id="card-tagline">Lead with vision, manage with purpose.</div>
-      <div class="card-copyright">&copy; {{ date('Y') }} {{ config('myacademy.school_name', config('app.name', 'AcademyHub')) }}. All rights reserved.</div>
+      <div class="card-copyright">&copy; {{ date('Y') }} {{ config('academyhub.school_name', config('app.name', 'AcademyHub')) }}. All rights reserved.</div>
     </div>
   </div>
 </div>

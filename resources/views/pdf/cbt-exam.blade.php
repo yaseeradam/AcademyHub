@@ -39,12 +39,12 @@
         @if(file_exists(public_path('images/logo.png')))
             <img src="{{ public_path('images/logo.png') }}" alt="School Logo" class="school-logo">
         @endif
-        <div class="school-name">{{ config('myacademy.school_name', 'MyAcademy International School') }}</div>
-        @if(config('myacademy.school_address'))
-            <div class="school-address">{{ config('myacademy.school_address') }}</div>
+        <div class="school-name">{{ config('academyhub.school_name', 'AcademyHub International School') }}</div>
+        @if(config('academyhub.school_address'))
+            <div class="school-address">{{ config('academyhub.school_address') }}</div>
         @endif
-        @if(config('myacademy.school_phone'))
-            <div class="school-address">Tel: {{ config('myacademy.school_phone') }} | Email: {{ config('myacademy.school_email') }}</div>
+        @if(config('academyhub.school_phone'))
+            <div class="school-address">Tel: {{ config('academyhub.school_phone') }} | Email: {{ config('academyhub.school_email') }}</div>
         @endif
     </div>
 
@@ -137,7 +137,7 @@
     </div>
 
     <div class="footer">
-        <strong>{{ config('myacademy.school_name', 'MyAcademy') }}</strong><br>
+        <strong>{{ config('academyhub.school_name', 'AcademyHub') }}</strong><br>
         Generated on {{ now()->format('F j, Y \a\t g:i A') }}
     </div>
 </body>

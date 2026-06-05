@@ -281,7 +281,7 @@
                                     </span>
                                 @elseif($component->price > 0)
                                     <span class="px-2.5 py-0.5 rounded-md text-[9px] font-black uppercase tracking-wider bg-blue-50 text-blue-700 border border-blue-100">
-                                        {{ config('myacademy.currency_symbol', '₦') }}{{ number_format($component->price, 0) }}
+                                        {{ config('academyhub.currency_symbol', '₦') }}{{ number_format($component->price, 0) }}
                                     </span>
                                 @else
                                     <span class="px-2.5 py-0.5 rounded-md text-[9px] font-black uppercase tracking-wider {{ $badgeStyle }}">

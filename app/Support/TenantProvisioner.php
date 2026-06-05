@@ -26,7 +26,7 @@ class TenantProvisioner
 
     private function ensureSettingsFile(Tenant $tenant): void
     {
-        $path = storage_path('app/myacademy/tenants/'.$tenant->id.'/settings.json');
+        $path = storage_path('app/academyhub/tenants/'.$tenant->id.'/settings.json');
 
         File::ensureDirectoryExists(dirname($path));
 

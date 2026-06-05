@@ -81,7 +81,7 @@
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-purple-100">Revenue</p>
-                    <p class="text-3xl font-bold">{{ config('myacademy.currency_symbol', '₦') }}{{ number_format($this->financialStats['total_revenue']) }}</p>
+                    <p class="text-3xl font-bold">{{ config('academyhub.currency_symbol', '₦') }}{{ number_format($this->financialStats['total_revenue']) }}</p>
                     <p class="text-sm text-purple-100">{{ $this->financialStats['transaction_count'] }} Transactions</p>
                 </div>
                 <div class="rounded-full bg-white/20 p-3">

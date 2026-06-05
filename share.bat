@@ -6,7 +6,7 @@ echo 🚀 AcademyHub WhatsApp Webhook Tunnel Activator
 echo ====================================================
 echo.
 
-set DEFAULT_HOST=yis.myacademy-laravel.test
+set DEFAULT_HOST=yis.academyhub-laravel.test
 set /p LOCAL_HOST="Enter your local virtual host [%DEFAULT_HOST%]: "
 if "%LOCAL_HOST%"=="" set LOCAL_HOST=%DEFAULT_HOST%
 

@@ -1,24 +1,24 @@
-# MyAcademy Production Deployment Guide
+# AcademyHub Production Deployment Guide
 
 ## Overview
 
-MyAcademy is a cloud-based School Management System. This guide covers production deployment on Linux servers.
+AcademyHub is a cloud-based School Management System. This guide covers production deployment on Linux servers.
 
 ## Local Multi-School (Recommended Dev Setup)
 Use a main host + wildcard subdomains locally so multi-tenant routing matches production.
 
-1) Pick a local main host (example `myacademy.test`) and add these to your Windows hosts file:
-   - `127.0.0.1 myacademy.test`
-   - `127.0.0.1 demo.myacademy.test`
+1) Pick a local main host (example `academyhub.test`) and add these to your Windows hosts file:
+   - `127.0.0.1 academyhub.test`
+   - `127.0.0.1 demo.academyhub.test`
 2) Set `.env`:
-   - `APP_URL=http://myacademy.test`
+   - `APP_URL=http://academyhub.test`
    - `SESSION_SECURE_COOKIE=false`
-   - Optional: `SESSION_DOMAIN=.myacademy.test`
+   - Optional: `SESSION_DOMAIN=.academyhub.test`
 3) Bootstrap superadmin + demo tenant + tenant admin:
-   - `php artisan myacademy:bootstrap-local --main-host=myacademy.test --tenant-slug=demo --tenant-name="Demo School"`
+   - `php artisan academyhub:bootstrap-local --main-host=academyhub.test --tenant-slug=demo --tenant-name="Demo School"`
 4) Login:
-   - Superadmin: `http://myacademy.test/login` then `http://myacademy.test/superadmin`
-   - School admin: `http://demo.myacademy.test/login`
+   - Superadmin: `http://academyhub.test/login` then `http://academyhub.test/superadmin`
+   - School admin: `http://demo.academyhub.test/login`
 
 ## Server Requirements
 
@@ -85,9 +85,9 @@ sudo mysql -u root -p
 ```
 
 ```sql
-CREATE DATABASE myacademy CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-CREATE USER 'myacademy_user'@'localhost' IDENTIFIED BY 'strong_password_here';
-GRANT ALL PRIVILEGES ON myacademy.* TO 'myacademy_user'@'localhost';
+CREATE DATABASE academyhub CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE USER 'academyhub_user'@'localhost' IDENTIFIED BY 'strong_password_here';
+GRANT ALL PRIVILEGES ON academyhub.* TO 'academyhub_user'@'localhost';
 FLUSH PRIVILEGES;
 EXIT;
 ```
@@ -96,14 +96,14 @@ EXIT;
 
 ```bash
 # Create application directory
-sudo mkdir -p /var/www/myacademy
-cd /var/www/myacademy
+sudo mkdir -p /var/www/academyhub
+cd /var/www/academyhub
 
 # Clone or upload application files
 # (Upload via FTP/SFTP or git clone)
 
 # Set ownership
-sudo chown -R www-data:www-data /var/www/myacademy
+sudo chown -R www-data:www-data /var/www/academyhub
 
 # Install dependencies
 composer install --no-dev --optimize-autoloader
@@ -113,7 +113,7 @@ rm -f public/hot
 npm run build
 
 # Set permissions
-sudo chmod -R 755 /var/www/myacademy
+sudo chmod -R 755 /var/www/academyhub
 sudo chmod -R 775 storage bootstrap/cache
 ```
 
@@ -130,7 +130,7 @@ nano .env
 **Required .env settings:**
 
 ```env
-APP_NAME=MyAcademy
+APP_NAME=AcademyHub
 APP_ENV=production
 APP_DEBUG=false
 APP_URL=https://yourdomain.com
@@ -138,8 +138,8 @@ APP_URL=https://yourdomain.com
 DB_CONNECTION=mysql
 DB_HOST=127.0.0.1
 DB_PORT=3306
-DB_DATABASE=myacademy
-DB_USERNAME=myacademy_user
+DB_DATABASE=academyhub
+DB_USERNAME=academyhub_user
 DB_PASSWORD=strong_password_here
 
 MAIL_MAILER=smtp
@@ -181,7 +181,7 @@ php artisan storage:link
 ### 6. Nginx Configuration
 
 ```bash
-sudo nano /etc/nginx/sites-available/myacademy
+sudo nano /etc/nginx/sites-available/academyhub
 ```
 
 **Nginx configuration:**
@@ -195,7 +195,7 @@ server {
     # If you don't include the exact hostname you browse, Nginx will serve the
     # default site and you'll see: "404 Not Found nginx/..."
     server_name yourdomain.com www.yourdomain.com *.yourdomain.com;
-    root /var/www/myacademy/public;
+    root /var/www/academyhub/public;
 
     add_header X-Frame-Options "SAMEORIGIN";
     add_header X-Content-Type-Options "nosniff";
@@ -234,7 +234,7 @@ server {
 
 ```bash
 # Enable site
-sudo ln -s /etc/nginx/sites-available/myacademy /etc/nginx/sites-enabled/
+sudo ln -s /etc/nginx/sites-available/academyhub /etc/nginx/sites-enabled/
 
 # Test configuration
 sudo nginx -t
@@ -259,13 +259,13 @@ sudo certbot --nginx -d yourdomain.com -d www.yourdomain.com
 
 ```bash
 # Create supervisor configuration
-sudo nano /etc/supervisor/conf.d/myacademy-worker.conf
+sudo nano /etc/supervisor/conf.d/academyhub-worker.conf
 ```
 
 ```ini
-[program:myacademy-worker]
+[program:academyhub-worker]
 process_name=%(program_name)s_%(process_num)02d
-command=php /var/www/myacademy/artisan queue:work --sleep=3 --tries=3 --max-time=3600
+command=php /var/www/academyhub/artisan queue:work --sleep=3 --tries=3 --max-time=3600
 autostart=true
 autorestart=true
 stopasgroup=true
@@ -273,7 +273,7 @@ killasgroup=true
 user=www-data
 numprocs=2
 redirect_stderr=true
-stdout_logfile=/var/www/myacademy/storage/logs/worker.log
+stdout_logfile=/var/www/academyhub/storage/logs/worker.log
 stopwaitsecs=3600
 ```
 
@@ -281,7 +281,7 @@ stopwaitsecs=3600
 # Update supervisor
 sudo supervisorctl reread
 sudo supervisorctl update
-sudo supervisorctl start myacademy-worker:*
+sudo supervisorctl start academyhub-worker:*
 ```
 
 ### 9. Cron Jobs
@@ -294,7 +294,7 @@ sudo crontab -e -u www-data
 Add:
 
 ```cron
-* * * * * cd /var/www/myacademy && php artisan schedule:run >> /dev/null 2>&1
+* * * * * cd /var/www/academyhub && php artisan schedule:run >> /dev/null 2>&1
 ```
 
 ## WhatsApp Bot Setup
@@ -308,13 +308,13 @@ sudo npm install -g pm2
 ### 2. Configure Bot
 
 ```bash
-cd /var/www/myacademy/whatsapp-bot
+cd /var/www/academyhub/whatsapp-bot
 
 # Install dependencies
 npm install
 
 # Start bot with PM2
-pm2 start index.js --name myacademy-whatsapp-bot
+pm2 start index.js --name academyhub-whatsapp-bot
 
 # Save PM2 configuration
 pm2 save
@@ -327,13 +327,13 @@ pm2 startup
 
 ```bash
 # View logs
-pm2 logs myacademy-whatsapp-bot
+pm2 logs academyhub-whatsapp-bot
 
 # Check status
 pm2 status
 
 # Restart bot
-pm2 restart myacademy-whatsapp-bot
+pm2 restart academyhub-whatsapp-bot
 ```
 
 ## Security Hardening
@@ -368,11 +368,11 @@ sudo systemctl start fail2ban
 
 ```bash
 # Secure permissions
-sudo chown -R www-data:www-data /var/www/myacademy
-sudo find /var/www/myacademy -type f -exec chmod 644 {} \;
-sudo find /var/www/myacademy -type d -exec chmod 755 {} \;
-sudo chmod -R 775 /var/www/myacademy/storage
-sudo chmod -R 775 /var/www/myacademy/bootstrap/cache
+sudo chown -R www-data:www-data /var/www/academyhub
+sudo find /var/www/academyhub -type f -exec chmod 644 {} \;
+sudo find /var/www/academyhub -type d -exec chmod 755 {} \;
+sudo chmod -R 775 /var/www/academyhub/storage
+sudo chmod -R 775 /var/www/academyhub/bootstrap/cache
 ```
 
 ## Backup Strategy
@@ -381,19 +381,19 @@ sudo chmod -R 775 /var/www/myacademy/bootstrap/cache
 
 ```bash
 # Create backup script
-sudo nano /usr/local/bin/myacademy-backup.sh
+sudo nano /usr/local/bin/academyhub-backup.sh
 ```
 
 ```bash
 #!/bin/bash
-BACKUP_DIR="/var/backups/myacademy"
+BACKUP_DIR="/var/backups/academyhub"
 DATE=$(date +%Y%m%d_%H%M%S)
-APP_DIR="/var/www/myacademy"
+APP_DIR="/var/www/academyhub"
 
 mkdir -p $BACKUP_DIR
 
 # Database backup
-mysqldump -u myacademy_user -p'password' myacademy > $BACKUP_DIR/db_$DATE.sql
+mysqldump -u academyhub_user -p'password' academyhub > $BACKUP_DIR/db_$DATE.sql
 
 # Files backup
 tar -czf $BACKUP_DIR/files_$DATE.tar.gz $APP_DIR/storage/app/public $APP_DIR/public/uploads
@@ -406,7 +406,7 @@ echo "Backup completed: $DATE"
 
 ```bash
 # Make executable
-sudo chmod +x /usr/local/bin/myacademy-backup.sh
+sudo chmod +x /usr/local/bin/academyhub-backup.sh
 
 # Add to crontab (daily at 2 AM)
 sudo crontab -e
@@ -415,7 +415,7 @@ sudo crontab -e
 Add:
 
 ```cron
-0 2 * * * /usr/local/bin/myacademy-backup.sh >> /var/log/myacademy-backup.log 2>&1
+0 2 * * * /usr/local/bin/academyhub-backup.sh >> /var/log/academyhub-backup.log 2>&1
 ```
 
 ## Monitoring
@@ -424,7 +424,7 @@ Add:
 
 ```bash
 # Laravel logs
-tail -f /var/www/myacademy/storage/logs/laravel.log
+tail -f /var/www/academyhub/storage/logs/laravel.log
 
 # Nginx access logs
 tail -f /var/log/nginx/access.log
@@ -448,7 +448,7 @@ htop
 ### Update Application
 
 ```bash
-cd /var/www/myacademy
+cd /var/www/academyhub
 
 # Backup first
 php artisan down
@@ -488,21 +488,21 @@ php artisan view:clear
 ### Permission Issues
 
 ```bash
-sudo chown -R www-data:www-data /var/www/myacademy
+sudo chown -R www-data:www-data /var/www/academyhub
 sudo chmod -R 775 storage bootstrap/cache
 ```
 
 ### Queue Not Processing
 
 ```bash
-sudo supervisorctl restart myacademy-worker:*
+sudo supervisorctl restart academyhub-worker:*
 ```
 
 ### WhatsApp Bot Not Working
 
 ```bash
-pm2 restart myacademy-whatsapp-bot
-pm2 logs myacademy-whatsapp-bot
+pm2 restart academyhub-whatsapp-bot
+pm2 logs academyhub-whatsapp-bot
 ```
 
 ### Database Connection Issues
@@ -515,8 +515,8 @@ php artisan tinker
 
 ## Support
 
-For deployment assistance and technical support, contact the MyAcademy team.
+For deployment assistance and technical support, contact the AcademyHub team.
 
 ---
 
-© 2024 MyAcademy - Cloud School Management System
+© 2024 AcademyHub - Cloud School Management System

@@ -558,7 +558,7 @@
                                 <h4 class="font-heading text-2xl font-bold text-violet-800">Admin</h4>
                             </div>
                             <div class="space-y-3 font-medium text-slate-700">
-                                <div><span class="text-violet-400 text-sm font-bold uppercase tracking-wide">ID</span> <br/><span class="bg-white px-3 py-1 rounded-xl shadow-sm text-base">admin@myacademy.local</span></div>
+                                <div><span class="text-violet-400 text-sm font-bold uppercase tracking-wide">ID</span> <br/><span class="bg-white px-3 py-1 rounded-xl shadow-sm text-base">admin@academyhub.local</span></div>
                                 <div><span class="text-violet-400 text-sm font-bold uppercase tracking-wide">Secret Pass</span> <br/><span class="bg-white px-3 py-1 rounded-xl shadow-sm tracking-widest text-base">password</span></div>
                             </div>
                             <a href="{{ route('login') }}" class="mt-6 block w-full text-center rounded-2xl bg-violet-500 py-3 font-bold text-white shadow-md hover:bg-violet-600 hover:-translate-y-1 transition">Play as Admin</a>
@@ -571,7 +571,7 @@
                                 <h4 class="font-heading text-2xl font-bold text-emerald-800">Teacher</h4>
                             </div>
                             <div class="space-y-3 font-medium text-slate-700">
-                                <div><span class="text-emerald-400 text-sm font-bold uppercase tracking-wide">ID</span> <br/><span class="bg-white px-3 py-1 rounded-xl shadow-sm text-base">teacher@myacademy.local</span></div>
+                                <div><span class="text-emerald-400 text-sm font-bold uppercase tracking-wide">ID</span> <br/><span class="bg-white px-3 py-1 rounded-xl shadow-sm text-base">teacher@academyhub.local</span></div>
                                 <div><span class="text-emerald-400 text-sm font-bold uppercase tracking-wide">Secret Pass</span> <br/><span class="bg-white px-3 py-1 rounded-xl shadow-sm tracking-widest text-base">password</span></div>
                             </div>
                             <a href="{{ route('login') }}" class="mt-6 block w-full text-center rounded-2xl bg-emerald-500 py-3 font-bold text-white shadow-md hover:bg-emerald-600 hover:-translate-y-1 transition">Play as Teacher</a>
@@ -597,7 +597,7 @@
                                 <h4 class="font-heading text-2xl font-bold text-pink-800">Parent</h4>
                             </div>
                             <div class="space-y-3 font-medium text-slate-700">
-                                <div><span class="text-pink-400 text-sm font-bold uppercase tracking-wide">ID</span> <br/><span class="bg-white px-3 py-1 rounded-xl shadow-sm text-base">parent1@myacademy.local</span></div>
+                                <div><span class="text-pink-400 text-sm font-bold uppercase tracking-wide">ID</span> <br/><span class="bg-white px-3 py-1 rounded-xl shadow-sm text-base">parent1@academyhub.local</span></div>
                                 <div><span class="text-pink-400 text-sm font-bold uppercase tracking-wide">Secret Pass</span> <br/><span class="bg-white px-3 py-1 rounded-xl shadow-sm tracking-widest text-base">password</span></div>
                             </div>
                             <a href="{{ route('login') }}" class="mt-6 block w-full text-center rounded-2xl bg-pink-500 py-3 font-bold text-white shadow-md hover:bg-pink-600 hover:-translate-y-1 transition">Play as Parent</a>

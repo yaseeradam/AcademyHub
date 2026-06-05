@@ -18,7 +18,7 @@ class StudentDashboardController extends Controller
             return response()->json(['message' => 'Unauthorized or invalid student context.'], 403);
         }
 
-        $currentSession = AcademicTerm::activeSessionName() ?? config('myacademy.current_session', '');
+        $currentSession = AcademicTerm::activeSessionName() ?? config('academyhub.current_session', '');
         $currentTerm = AcademicTerm::activeTermNumber();
 
         $stats = [

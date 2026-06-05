@@ -25,8 +25,8 @@ class TenantSettings
         $tenantId = self::tenantId();
 
         return $tenantId
-            ? storage_path('app/myacademy/tenants/'.$tenantId.'/settings.json')
-            : storage_path('app/myacademy/settings.json');
+            ? storage_path('app/academyhub/tenants/'.$tenantId.'/settings.json')
+            : storage_path('app/academyhub/settings.json');
     }
 
     public static function settingsCacheKey(?\App\Models\Tenant $tenant = null): string
@@ -34,8 +34,8 @@ class TenantSettings
         $tenantId = $tenant?->id ?? self::tenantId();
 
         return $tenantId
-            ? 'myacademy_settings_cache_tenant_'.$tenantId
-            : 'myacademy_settings_cache_global';
+            ? 'academyhub_settings_cache_tenant_'.$tenantId
+            : 'academyhub_settings_cache_global';
     }
 
     public static function uploadsSubdir(string $baseDir): string

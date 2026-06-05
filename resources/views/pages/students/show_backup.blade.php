@@ -331,7 +331,7 @@
                 </div>
 
                 <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                    <x-stat-card label="Total Paid" :value="config('myacademy.currency_symbol').' '.number_format($studentIncomeTotal, 2)" iconBg="bg-green-50" iconColor="text-green-600" />
+                    <x-stat-card label="Total Paid" :value="config('academyhub.currency_symbol').' '.number_format($studentIncomeTotal, 2)" iconBg="bg-green-50" iconColor="text-green-600" />
                     <x-stat-card label="Transactions" :value="number_format((int) $studentTransactions->count())" />
                     <x-stat-card label="Receipts" :value="number_format((int) $studentTransactions->whereNotNull('receipt_number')->count())" iconBg="bg-green-50" iconColor="text-green-600" />
                 </div>
@@ -364,7 +364,7 @@
                                         @endif
                                     </div>
                                 </td>
-                                <td class="px-5 py-4 text-right text-sm font-semibold text-gray-900">{{ config('myacademy.currency_symbol') }}{{ number_format((float) $t->amount_paid, 2) }}</td>
+                                <td class="px-5 py-4 text-right text-sm font-semibold text-gray-900">{{ config('academyhub.currency_symbol') }}{{ number_format((float) $t->amount_paid, 2) }}</td>
                                 <td class="px-5 py-4 text-sm font-medium text-gray-700">
                                     {{ $t->receipt_number ?: '-' }}
                                 </td>

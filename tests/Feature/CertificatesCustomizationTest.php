@@ -19,12 +19,12 @@ class CertificatesCustomizationTest extends TestCase
         $this->seed();
 
         config([
-            'myacademy.certificate_default_type' => 'Character',
-            'myacademy.certificate_default_title' => 'Testimonial',
-            'myacademy.certificate_default_body' => 'Hello {student_name}',
+            'academyhub.certificate_default_type' => 'Character',
+            'academyhub.certificate_default_title' => 'Testimonial',
+            'academyhub.certificate_default_body' => 'Hello {student_name}',
         ]);
 
-        $teacher = User::query()->where('email', 'teacher@myacademy.local')->firstOrFail();
+        $teacher = User::query()->where('email', 'teacher@academyhub.local')->firstOrFail();
 
         Livewire::actingAs($teacher)
             ->test(CertificatesIndex::class)
@@ -38,17 +38,17 @@ class CertificatesCustomizationTest extends TestCase
         $this->seed();
 
         config([
-            'myacademy.certificate_orientation' => 'portrait',
-            'myacademy.certificate_border_color' => '#ff0000',
-            'myacademy.certificate_accent_color' => '#00ff00',
-            'myacademy.certificate_show_logo' => false,
-            'myacademy.certificate_show_watermark' => false,
-            'myacademy.certificate_signature_label' => 'Principal',
-            'myacademy.certificate_signature_name' => 'Jane Doe',
-            'myacademy.certificate_template' => 'classic',
+            'academyhub.certificate_orientation' => 'portrait',
+            'academyhub.certificate_border_color' => '#ff0000',
+            'academyhub.certificate_accent_color' => '#00ff00',
+            'academyhub.certificate_show_logo' => false,
+            'academyhub.certificate_show_watermark' => false,
+            'academyhub.certificate_signature_label' => 'Principal',
+            'academyhub.certificate_signature_name' => 'Jane Doe',
+            'academyhub.certificate_template' => 'classic',
         ]);
 
-        $teacher = User::query()->where('email', 'teacher@myacademy.local')->firstOrFail();
+        $teacher = User::query()->where('email', 'teacher@academyhub.local')->firstOrFail();
         $student = Student::query()->firstOrFail();
 
         $certificate = Certificate::query()->create([
@@ -72,7 +72,7 @@ class CertificatesCustomizationTest extends TestCase
     {
         $this->seed();
 
-        $admin = User::query()->where('email', 'admin@myacademy.local')->firstOrFail();
+        $admin = User::query()->where('email', 'admin@academyhub.local')->firstOrFail();
 
         $cert = $this->actingAs($admin)->get(route('settings.templates.preview', [
             'type' => 'certificate',

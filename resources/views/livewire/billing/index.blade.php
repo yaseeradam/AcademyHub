@@ -22,7 +22,7 @@
                 <div>
                     <p class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Total Income</p>
                     <h3 class="text-2xl font-black text-emerald-600">
-                        {{ config('myacademy.currency_symbol', '₦') }}{{ number_format($this->totalIncome, 2) }}
+                        {{ config('academyhub.currency_symbol', '₦') }}{{ number_format($this->totalIncome, 2) }}
                     </h3>
                 </div>
                 <div class="h-12 w-12 rounded-full bg-emerald-50 text-emerald-500 flex items-center justify-center">
@@ -34,7 +34,7 @@
                 <div>
                     <p class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Total Expenses</p>
                     <h3 class="text-2xl font-black text-rose-500">
-                        {{ config('myacademy.currency_symbol', '₦') }}{{ number_format($this->totalExpenses, 2) }}
+                        {{ config('academyhub.currency_symbol', '₦') }}{{ number_format($this->totalExpenses, 2) }}
                     </h3>
                 </div>
                 <div class="h-12 w-12 rounded-full bg-rose-50 text-rose-500 flex items-center justify-center">
@@ -46,7 +46,7 @@
                 <div>
                     <p class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Net Balance</p>
                     <h3 class="text-2xl font-black {{ $this->netBalance >= 0 ? 'text-slate-900' : 'text-rose-600' }}">
-                        {{ config('myacademy.currency_symbol', '₦') }}{{ number_format($this->netBalance, 2) }}
+                        {{ config('academyhub.currency_symbol', '₦') }}{{ number_format($this->netBalance, 2) }}
                     </h3>
                 </div>
                 <div class="h-12 w-12 rounded-full bg-slate-50 text-slate-500 flex items-center justify-center">
@@ -195,10 +195,10 @@
                         <td class="px-5 py-4 text-sm text-gray-700">
                             {{ $row['student']->schoolClass?->name }} / {{ $row['student']->section?->name }}
                         </td>
-                        <td class="px-5 py-4 text-right text-sm font-semibold text-gray-900">{{ config('myacademy.currency_symbol') }}{{ number_format($row['due'], 2) }}</td>
-                        <td class="px-5 py-4 text-right text-sm font-semibold text-gray-900">{{ config('myacademy.currency_symbol') }}{{ number_format($row['paid'], 2) }}</td>
+                        <td class="px-5 py-4 text-right text-sm font-semibold text-gray-900">{{ config('academyhub.currency_symbol') }}{{ number_format($row['due'], 2) }}</td>
+                        <td class="px-5 py-4 text-right text-sm font-semibold text-gray-900">{{ config('academyhub.currency_symbol') }}{{ number_format($row['paid'], 2) }}</td>
                         <td class="px-5 py-4 text-right">
-                            <x-status-badge variant="warning">{{ config('myacademy.currency_symbol') }}{{ number_format($row['balance'], 2) }}</x-status-badge>
+                            <x-status-badge variant="warning">{{ config('academyhub.currency_symbol') }}{{ number_format($row['balance'], 2) }}</x-status-badge>
                         </td>
                     </tr>
                 @empty
@@ -298,7 +298,7 @@
                         <td class="px-5 py-4 text-sm text-gray-700">{{ $fee->session ?: 'Default' }}</td>
                         <td class="px-5 py-4 text-sm text-gray-700">{{ $fee->term ?: 'Default' }}</td>
                         <td class="px-5 py-4 text-right text-sm font-semibold text-gray-900">
-                            {{ config('myacademy.currency_symbol') }}{{ number_format((float) $fee->amount_due, 2) }}
+                            {{ config('academyhub.currency_symbol') }}{{ number_format((float) $fee->amount_due, 2) }}
                         </td>
                         <td class="px-5 py-4 text-right">
                             <div class="flex justify-end gap-1">
@@ -358,7 +358,7 @@
                                     @endif
                                 </div>
                             </td>
-                            <td class="px-5 py-4 text-right text-sm font-semibold text-gray-900">{{ config('myacademy.currency_symbol') }}{{ number_format((float) $t->amount_paid, 2) }}</td>
+                            <td class="px-5 py-4 text-right text-sm font-semibold text-gray-900">{{ config('academyhub.currency_symbol') }}{{ number_format((float) $t->amount_paid, 2) }}</td>
                             <td class="px-5 py-4 text-sm font-medium text-gray-700">
                                 <div class="flex items-center gap-2">
                                     <span>{{ $t->receipt_number ?: '-' }}</span>

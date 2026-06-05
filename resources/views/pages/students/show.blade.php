@@ -442,7 +442,7 @@
             <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-emerald-400 to-green-500 p-6 text-white shadow-lg">
                 <div class="absolute -right-6 -top-6 h-28 w-28 rounded-full bg-white/10"></div>
                 <div class="relative">
-                    <div class="text-3xl font-black">{{ config('myacademy.currency_symbol') }}{{ number_format($studentIncomeTotal, 2) }}</div>
+                    <div class="text-3xl font-black">{{ config('academyhub.currency_symbol') }}{{ number_format($studentIncomeTotal, 2) }}</div>
                     <div class="mt-1 text-sm font-semibold text-white/80">Total Processed Income</div>
                 </div>
             </div>
@@ -486,7 +486,7 @@
                                     <div class="font-bold text-slate-800">{{ $t->category }}</div>
                                     <div class="text-xs text-slate-400">{{ $t->session }}{{ $t->term ? ' · Term '.$t->term : '' }}</div>
                                 </td>
-                                <td class="px-6 py-4 text-right text-sm font-black text-slate-800">{{ config('myacademy.currency_symbol') }}{{ number_format((float)$t->amount_paid, 2) }}</td>
+                                <td class="px-6 py-4 text-right text-sm font-black text-slate-800">{{ config('academyhub.currency_symbol') }}{{ number_format((float)$t->amount_paid, 2) }}</td>
                                 <td class="px-6 py-4 text-right text-sm text-slate-500 font-mono">{{ $t->receipt_number ?: '—' }}</td>
                             </tr>
                         @empty

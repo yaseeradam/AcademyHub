@@ -236,7 +236,7 @@ class Manager extends Component
         $templateViews = collect($this->availableTemplates)->pluck('view', 'key')->toArray();
         $view = $templateViews[$this->template] ?? 'pdf.certificate';
 
-        $orientation = (string) config('myacademy.certificate_orientation', 'landscape');
+        $orientation = (string) config('academyhub.certificate_orientation', 'landscape');
         $orientation = in_array($orientation, ['landscape', 'portrait'], true) ? $orientation : 'landscape';
 
         foreach ($students as $student) {

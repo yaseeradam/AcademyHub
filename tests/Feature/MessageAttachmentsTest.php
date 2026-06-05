@@ -57,7 +57,7 @@ class MessageAttachmentsTest extends TestCase
             'conversation_id' => $conversation->id,
             'sender_id' => $sender->id,
             'body' => '',
-            'attachment_path' => 'myacademy/messages/'.$conversation->id.'/file.txt',
+            'attachment_path' => 'academyhub/messages/'.$conversation->id.'/file.txt',
             'attachment_name' => 'file.txt',
             'attachment_mime' => 'text/plain',
             'attachment_size' => 10,

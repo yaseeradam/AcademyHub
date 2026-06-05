@@ -113,7 +113,7 @@
         </div>
         <div class="sa-premium-info">
             <div class="sa-premium-label">Total Platform Billings</div>
-            <div class="sa-premium-value">{{ config('myacademy.currency_symbol', '₦') }}{{ number_format($stats['total_invoiced'], 2) }}</div>
+            <div class="sa-premium-value">{{ config('academyhub.currency_symbol', '₦') }}{{ number_format($stats['total_invoiced'], 2) }}</div>
             <div class="sa-premium-desc" title="Aggregate invoiced setup & student fees">
                 <span style="width:5px;height:5px;background:rgba(255,255,255,0.6);border-radius:50%;display:inline-block;"></span>
                 Invoiced setup &amp; student fees
@@ -131,7 +131,7 @@
         </div>
         <div class="sa-premium-info">
             <div class="sa-premium-label">Total Paid Revenue</div>
-            <div class="sa-premium-value" style="color: #ffffff;">{{ config('myacademy.currency_symbol', '₦') }}{{ number_format($stats['total_paid'], 2) }}</div>
+            <div class="sa-premium-value" style="color: #ffffff;">{{ config('academyhub.currency_symbol', '₦') }}{{ number_format($stats['total_paid'], 2) }}</div>
             <div class="sa-premium-desc" title="Processed via Paystack & cleared logs">
                 <span style="width:5px;height:5px;background:#ffffff;border-radius:50%;display:inline-block;"></span>
                 Paystack &amp; cleared logs
@@ -149,7 +149,7 @@
         </div>
         <div class="sa-premium-info">
             <div class="sa-premium-label">Outstanding Balances</div>
-            <div class="sa-premium-value" style="color: #ffffff;">{{ config('myacademy.currency_symbol', '₦') }}{{ number_format($stats['total_outstanding'], 2) }}</div>
+            <div class="sa-premium-value" style="color: #ffffff;">{{ config('academyhub.currency_symbol', '₦') }}{{ number_format($stats['total_outstanding'], 2) }}</div>
             <div class="sa-premium-desc" title="Awaiting school bursar payments">
                 <span style="width:5px;height:5px;background:#ffffff;border-radius:50%;display:inline-block;"></span>
                 Awaiting school payments

@@ -101,9 +101,9 @@ class Dashboard extends Component
         }
 
         $totals = $scores->map(fn($score) => $score->total);
-        $maxPossible = config('myacademy.results_ca1_max', 20) + 
-                      config('myacademy.results_ca2_max', 20) + 
-                      config('myacademy.results_exam_max', 60);
+        $maxPossible = config('academyhub.results_ca1_max', 20) + 
+                      config('academyhub.results_ca2_max', 20) + 
+                      config('academyhub.results_exam_max', 60);
 
         // Grade distribution
         $gradeDistribution = [];

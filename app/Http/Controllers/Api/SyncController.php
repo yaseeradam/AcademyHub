@@ -39,6 +39,8 @@ class SyncController extends Controller
                         $this->syncAttendance($request->user(), $payload);
                     } elseif (str_contains($endpoint, 'scores')) {
                         $this->syncScores($request->user(), $payload);
+                    } elseif (str_contains($endpoint, 'announcements')) {
+                        $this->syncAnnouncement($request->user(), $payload);
                     }
                     $successIds[] = $id;
                 } catch (\Exception $e) {
@@ -125,5 +127,17 @@ class SyncController extends Controller
     {
         if ($user->role === 'admin') return true;
         return SubjectAllocation::where('teacher_id', $user->id)->where('class_id', $classId)->exists();
+    }
+
+    private function syncAnnouncement($user, array $payload): void
+    {
+        abort_unless($user->role === 'admin' || $user->role === 'teacher', 403);
+        \App\Models\Announcement::create([
+            'title' => $payload['title'],
+            'body' => $payload['body'],
+            'audience' => $payload['audience'] ?? 'all',
+            'published_at' => now(),
+            'created_by' => $user->id,
+        ]);
     }
 }

@@ -19,7 +19,7 @@ class ExampleTest extends TestCase
 
         $this->get('/')->assertRedirect('/login');
 
-        $admin = User::query()->where('email', 'admin@myacademy.local')->firstOrFail();
+        $admin = User::query()->where('email', 'admin@academyhub.local')->firstOrFail();
 
         $this->actingAs($admin)->get('/dashboard')->assertStatus(200);
     }

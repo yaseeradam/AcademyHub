@@ -315,9 +315,9 @@ class ParentPay extends Component
 
         // Send WhatsApp receipt if parent has a WhatsApp number
         if ($parent->whatsapp_phone) {
-            $currency      = config('myacademy.currency_symbol', '₦');
+            $currency      = config('academyhub.currency_symbol', '₦');
             $formattedAmt  = number_format($transaction->amount_paid, 2);
-            $schoolName    = config('myacademy.school_name', 'AcademyHub');
+            $schoolName    = config('academyhub.school_name', 'AcademyHub');
             $planDesc      = match ($this->selectedPlan) {
                 'two_installments' => "Installment {$this->installmentNumber} of 2",
                 'monthly'          => "Monthly Installment #{$this->installmentNumber}",

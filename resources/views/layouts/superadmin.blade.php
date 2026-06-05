@@ -565,7 +565,7 @@
         <!-- Brand -->
         <div class="sa-brand" style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
             <div style="display: flex; align-items: center; gap: 12px;">
-                <img src="{{ asset('images/myacademyhub-logo.png') }}" alt="AcademyHub" style="height:40px;width:auto;flex-shrink:0;">
+                <img src="{{ asset('full.png') }}" alt="AcademyHub" style="height:40px;width:auto;flex-shrink:0;">
                 <div class="sa-brand-text">
                     <div class="sa-brand-title">AcademyHub</div>
                     <div class="sa-brand-sub">Super Admin Console</div>

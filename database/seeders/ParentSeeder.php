@@ -15,7 +15,7 @@ class ParentSeeder extends Seeder
         $parents = [
             [
                 'name' => 'John Doe',
-                'email' => 'parent1@myacademy.local',
+                'email' => 'parent1@academyhub.local',
                 'password' => Hash::make('password'),
                 'role' => 'parent',
                 'is_active' => true,
@@ -23,7 +23,7 @@ class ParentSeeder extends Seeder
             ],
             [
                 'name' => 'Jane Smith',
-                'email' => 'parent2@myacademy.local',
+                'email' => 'parent2@academyhub.local',
                 'password' => Hash::make('password'),
                 'role' => 'parent',
                 'is_active' => true,
@@ -31,7 +31,7 @@ class ParentSeeder extends Seeder
             ],
             [
                 'name' => 'Michael Johnson',
-                'email' => 'parent3@myacademy.local',
+                'email' => 'parent3@academyhub.local',
                 'password' => Hash::make('password'),
                 'role' => 'parent',
                 'is_active' => true,
@@ -59,8 +59,8 @@ class ParentSeeder extends Seeder
 
         $this->command->info('Demo parent accounts created successfully!');
         $this->command->info('Login credentials:');
-        $this->command->info('- parent1@myacademy.local / password');
-        $this->command->info('- parent2@myacademy.local / password');
-        $this->command->info('- parent3@myacademy.local / password');
+        $this->command->info('- parent1@academyhub.local / password');
+        $this->command->info('- parent2@academyhub.local / password');
+        $this->command->info('- parent3@academyhub.local / password');
     }
 }

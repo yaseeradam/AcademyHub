@@ -10,8 +10,14 @@ class TenantDiscoveryController extends Controller
 {
     public function show(Request $request, $slug)
     {
-        $tenant = Tenant::where('slug', $slug)
-            ->where('status', 'active')
+        $tenant = Tenant::where('status', 'active')
+            ->where(function ($query) use ($slug) {
+                $query->where('slug', $slug)
+                      ->orWhere('domain', $slug)
+                      ->orWhere('domain', 'like', $slug . '.%')
+                      ->orWhere('slug', 'like', '%' . $slug . '%')
+                      ->orWhere('domain', 'like', '%' . $slug . '%');
+            })
             ->first();
 
         if (!$tenant) {

@@ -312,37 +312,37 @@
             <div class="void-watermark">VOID</div>
         @endif
 
-        @if(config('myacademy.school_logo'))
+        @if(config('academyhub.school_logo'))
             <div class="watermark">
-                <img src="{{ storage_path('app/public/' . config('myacademy.school_logo')) }}" alt="Watermark" style="width: 100%; height: 100%; object-fit: contain;" />
+                <img src="{{ storage_path('app/public/' . config('academyhub.school_logo')) }}" alt="Watermark" style="width: 100%; height: 100%; object-fit: contain;" />
             </div>
         @endif
 
         <div class="receipt-container">
             <div class="header">
                 <div class="header-flex">
-                    @if(config('myacademy.school_logo'))
+                    @if(config('academyhub.school_logo'))
                         <div class="header-logo">
-                            <img src="{{ storage_path('app/public/' . config('myacademy.school_logo')) }}" alt="Logo" class="logo" />
+                            <img src="{{ storage_path('app/public/' . config('academyhub.school_logo')) }}" alt="Logo" class="logo" />
                         </div>
                     @endif
                     <div class="header-center">
-                        <div class="school-name">{{ config('myacademy.school_name', config('app.name', 'MyAcademy')) }}</div>
-                        @if(config('myacademy.school_address'))
-                            <div class="school-info">{{ config('myacademy.school_address') }}</div>
+                        <div class="school-name">{{ config('academyhub.school_name', config('app.name', 'AcademyHub')) }}</div>
+                        @if(config('academyhub.school_address'))
+                            <div class="school-info">{{ config('academyhub.school_address') }}</div>
                         @endif
-                        @if(config('myacademy.school_phone') || config('myacademy.school_email'))
+                        @if(config('academyhub.school_phone') || config('academyhub.school_email'))
                             <div class="school-info">
-                                {{ config('myacademy.school_phone') }}
-                                @if(config('myacademy.school_phone') && config('myacademy.school_email')) • @endif
-                                {{ config('myacademy.school_email') }}
+                                {{ config('academyhub.school_phone') }}
+                                @if(config('academyhub.school_phone') && config('academyhub.school_email')) • @endif
+                                {{ config('academyhub.school_email') }}
                             </div>
                         @endif
                         <div class="receipt-title">Official Payment Receipt</div>
                     </div>
-                    @if(config('myacademy.school_logo'))
+                    @if(config('academyhub.school_logo'))
                         <div class="header-logo">
-                            <img src="{{ storage_path('app/public/' . config('myacademy.school_logo')) }}" alt="Logo" class="logo" />
+                            <img src="{{ storage_path('app/public/' . config('academyhub.school_logo')) }}" alt="Logo" class="logo" />
                         </div>
                     @endif
                 </div>
@@ -428,7 +428,7 @@
             <div class="amount-box">
                 <div class="amount-label">Amount Paid</div>
                 @php
-                    $currencySymbol = config('myacademy.currency_symbol', '₦');
+                    $currencySymbol = config('academyhub.currency_symbol', '₦');
                     if ($currencySymbol === '₦' || html_entity_decode($currencySymbol) === '₦') {
                         $currencyHtml = '<span style="font-family: DejaVu Sans, sans-serif;">&#8358;</span>';
                     } else {
@@ -437,14 +437,14 @@
                 @endphp
                 <div class="amount-value">{!! $currencyHtml !!}{{ number_format((float) $transaction->amount_paid, 2) }}</div>
                 <div class="amount-words">
-                    ({{ \App\Support\MoneyWords::forReceipt($transaction->amount_paid, config('myacademy.currency_name', 'Naira'), config('myacademy.currency_subunit', 'Kobo')) }})
+                    ({{ \App\Support\MoneyWords::forReceipt($transaction->amount_paid, config('academyhub.currency_name', 'Naira'), config('academyhub.currency_subunit', 'Kobo')) }})
                 </div>
             </div>
 
             <div class="notes-section">
                 <div class="notes-title">IMPORTANT NOTES:</div>
                 <div class="notes-content">
-                    • This is an official receipt issued by {{ config('myacademy.school_name', config('app.name', 'MyAcademy')) }}<br/>
+                    • This is an official receipt issued by {{ config('academyhub.school_name', config('app.name', 'AcademyHub')) }}<br/>
                     • Please keep this receipt for your records<br/>
                     • This receipt is valid only when stamped and signed<br/>
                     • For any queries, contact the school bursar
@@ -464,7 +464,7 @@
 
             <div class="footer">
                 Generated on {{ now()->format('l, F j, Y \a\t g:i A') }}<br/>
-                {{ config('myacademy.school_name', config('app.name', 'MyAcademy')) }} • Powered by MyAcademy SMS
+                {{ config('academyhub.school_name', config('app.name', 'AcademyHub')) }} • Powered by AcademyHub SMS
             </div>
 
             <div class="footer-note">

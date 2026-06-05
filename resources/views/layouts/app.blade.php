@@ -37,7 +37,7 @@
             }).catch(function() {});
         });
     </script>
-    <title>{{ config('myacademy.school_name', config('app.name', 'AcademyHub')) }}</title>
+    <title>{{ config('academyhub.school_name', config('app.name', 'AcademyHub')) }}</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @livewireStyles
     <style>
@@ -83,11 +83,11 @@
 
 @php
 $hasCbt            = true;
-$appMode           = (string) config('myacademy.mode', 'full');
+$appMode           = (string) config('academyhub.mode', 'full');
 $cbtLocked         = false;
 $user              = auth()->user();
-$schoolLogo        = config('myacademy.school_logo');
-$schoolName        = config('myacademy.school_name', config('app.name', 'AcademyHub'));
+$schoolLogo        = config('academyhub.school_logo');
+$schoolName        = config('academyhub.school_name', config('app.name', 'AcademyHub'));
 $userInitial       = mb_strtoupper(mb_substr($user?->name ?? 'U', 0, 1));
 
 // Role-aware accent colour (used for active state)
@@ -149,7 +149,7 @@ $activeShadow = "shadow-{$accent}-200";
                     @if($schoolLogo)
                         <img src="{{ asset('uploads/'.str_replace('\\','/',$schoolLogo)) }}" alt="Logo" class="h-full w-full object-contain p-1"/>
                     @else
-                        <img src="{{ asset('images/myacademyhub-logo.png') }}" alt="AcademyHub" class="h-full w-full object-contain p-0.5"/>
+                        <img src="{{ asset('full.png') }}" alt="AcademyHub" class="h-full w-full object-contain p-0.5"/>
                     @endif
                 </div>
                 <div class="min-w-0">
@@ -181,7 +181,7 @@ $activeShadow = "shadow-{$accent}-200";
                     @if($schoolLogo)
                         <img src="{{ asset('uploads/'.str_replace('\\','/',$schoolLogo)) }}" alt="Logo" class="h-full w-full object-contain p-1"/>
                     @else
-                        <img src="{{ asset('images/myacademyhub-logo.png') }}" alt="AcademyHub" class="h-full w-full object-contain p-0.5"/>
+                        <img src="{{ asset('full.png') }}" alt="AcademyHub" class="h-full w-full object-contain p-0.5"/>
                     @endif
                 </div>
                 <div class="min-w-0" x-show="!sidebarCollapsed" x-transition.opacity>

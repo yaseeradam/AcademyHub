@@ -21,12 +21,12 @@ class ResultsEntryMaxScoreTest extends TestCase
         $this->seed();
 
         config([
-            'myacademy.results_ca1_max' => 10,
-            'myacademy.results_ca2_max' => 15,
-            'myacademy.results_exam_max' => 50,
+            'academyhub.results_ca1_max' => 10,
+            'academyhub.results_ca2_max' => 15,
+            'academyhub.results_exam_max' => 50,
         ]);
 
-        $admin = User::query()->where('email', 'admin@myacademy.local')->firstOrFail();
+        $admin = User::query()->where('email', 'admin@academyhub.local')->firstOrFail();
         $class = SchoolClass::query()->where('name', 'JSS 2')->firstOrFail();
         $subject = Subject::query()->where('code', 'MTH')->firstOrFail();
         $student = Student::query()->where('class_id', $class->id)->firstOrFail();

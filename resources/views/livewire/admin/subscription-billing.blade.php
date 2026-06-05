@@ -155,10 +155,10 @@
                                     <div class="text-xs font-medium text-slate-500 mt-0.5">{{ $plugin->short_description }}</div>
                                     <div class="mt-2 flex flex-wrap gap-2">
                                         <span class="inline-flex items-center rounded-md bg-slate-50 px-2 py-0.5 text-[10px] font-semibold text-slate-600 ring-1 ring-inset ring-slate-500/10">
-                                            Setup Fee: {{ config('myacademy.currency_symbol','₦') }}{{ number_format($plugin->pivot->setup_fee ?? $plugin->setup_fee, 2) }}
+                                            Setup Fee: {{ config('academyhub.currency_symbol','₦') }}{{ number_format($plugin->pivot->setup_fee ?? $plugin->setup_fee, 2) }}
                                         </span>
                                         <span class="inline-flex items-center rounded-md bg-indigo-50 px-2 py-0.5 text-[10px] font-semibold text-indigo-600 ring-1 ring-inset ring-indigo-500/10">
-                                            Usage: {{ config('myacademy.currency_symbol','₦') }}{{ number_format($plugin->pivot->usage_fee_per_student ?? $plugin->usage_fee_per_student, 2) }}/std/term
+                                            Usage: {{ config('academyhub.currency_symbol','₦') }}{{ number_format($plugin->pivot->usage_fee_per_student ?? $plugin->usage_fee_per_student, 2) }}/std/term
                                         </span>
                                         <span class="inline-flex items-center rounded-md bg-purple-50 px-2 py-0.5 text-[10px] font-semibold text-purple-600 ring-1 ring-inset ring-purple-500/10">
                                             Target: {{ count($classes) }} {{ Str::plural('Class', count($classes)) }} ({{ number_format($pluginStudentCount) }} stds)
@@ -169,7 +169,7 @@
                             <div class="text-left sm:text-right flex-shrink-0">
                                 <div class="text-sm font-bold text-slate-400 uppercase tracking-wider text-[10px]">Est. Yearly Cost</div>
                                 <div class="text-xl font-black text-slate-900 mt-0.5">
-                                    {{ config('myacademy.currency_symbol','₦') }}{{ number_format($yearlyCost, 2) }}
+                                    {{ config('academyhub.currency_symbol','₦') }}{{ number_format($yearlyCost, 2) }}
                                 </div>
                                 <a href="{{ route('marketplace.show', $plugin->slug) }}" class="mt-1.5 inline-block text-xs font-extrabold text-indigo-600 hover:text-indigo-800 transition">
                                     Manage Settings

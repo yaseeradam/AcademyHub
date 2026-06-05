@@ -248,7 +248,7 @@
                     </div>
                     <div class="flex-1">
                         <div class="text-base font-black text-rose-400">⚠ Delete App: {{ $productData['name'] }}</div>
-                        <p class="text-xs text-slate-400 mt-2">Are you absolutely sure you want to remove this plugin entirely from the MyAcademy marketplace? This action will destroy the record permanently and cannot be undone.</p>
+                        <p class="text-xs text-slate-400 mt-2">Are you absolutely sure you want to remove this plugin entirely from the AcademyHub marketplace? This action will destroy the record permanently and cannot be undone.</p>
                     </div>
                 </div>
                 <div class="flex justify-end gap-2 pt-2">
@@ -358,21 +358,21 @@
                                 <div>
                                     <div class="text-xs text-slate-500 font-bold uppercase tracking-wider">Setup Fee (One-Time)</div>
                                     <div class="text-xl font-black text-indigo-900 mt-0.5">
-                                        {{ config('myacademy.currency_symbol','₦') }}{{ number_format($setupFee, 2) }}
+                                        {{ config('academyhub.currency_symbol','₦') }}{{ number_format($setupFee, 2) }}
                                     </div>
                                 </div>
                                 
                                 <div class="border-t border-indigo-100/50 pt-2">
                                     <div class="text-xs text-slate-500 font-bold uppercase tracking-wider">Usage Fee (Termly)</div>
                                     <div class="text-sm text-slate-600 mt-0.5 font-medium">
-                                        {{ config('myacademy.currency_symbol','₦') }}{{ number_format($usageFeePerStudent, 2) }} <span class="text-slate-400 font-normal">/ student</span>
+                                        {{ config('academyhub.currency_symbol','₦') }}{{ number_format($usageFeePerStudent, 2) }} <span class="text-slate-400 font-normal">/ student</span>
                                     </div>
                                     @if($calculatedStudentCount > 0)
                                         <div class="text-xs text-emerald-600 font-semibold mt-0.5">
                                             × {{ number_format($calculatedStudentCount) }} target {{ Str::plural('student', $calculatedStudentCount) }}
                                         </div>
                                         <div class="text-lg font-black text-emerald-600 mt-1 transition-all duration-300">
-                                            {{ config('myacademy.currency_symbol','₦') }}{{ number_format($estimatedTermlyUsageFee, 2) }} <span class="text-xs text-slate-400 font-normal">/ term</span>
+                                            {{ config('academyhub.currency_symbol','₦') }}{{ number_format($estimatedTermlyUsageFee, 2) }} <span class="text-xs text-slate-400 font-normal">/ term</span>
                                         </div>
                                     @else
                                         <div class="text-xs text-rose-500 font-semibold mt-1">
@@ -420,7 +420,7 @@
                     <li class="text-sm text-red-700">⚠ Existing data will be preserved but inaccessible until reinstalled.</li>
                     @if($setupFee > 0)
                     <li class="text-sm font-semibold text-red-800">
-                        ⚠ Reinstalling will require paying the Setup Fee of <strong>{{ config('myacademy.currency_symbol','₦') }}{{ number_format($setupFee, 2) }}</strong> again.
+                        ⚠ Reinstalling will require paying the Setup Fee of <strong>{{ config('academyhub.currency_symbol','₦') }}{{ number_format($setupFee, 2) }}</strong> again.
                     </li>
                     @endif
                 </ul>
@@ -481,7 +481,7 @@
                         <div class="flex justify-between items-center">
                             <span class="font-semibold text-slate-600">Setup / Install Fee (One-Time)</span>
                             <span class="font-black text-slate-900">
-                                {{ config('myacademy.currency_symbol','₦') }}{{ number_format($setupFee, 2) }}
+                                {{ config('academyhub.currency_symbol','₦') }}{{ number_format($setupFee, 2) }}
                             </span>
                         </div>
 
@@ -489,7 +489,7 @@
                         <div class="flex justify-between items-center border-t border-indigo-100/20 pt-2">
                             <span class="font-semibold text-slate-600">License per Student (Termly)</span>
                             <span class="font-black text-slate-900">
-                                {{ config('myacademy.currency_symbol','₦') }}{{ number_format($usageFeePerStudent, 2) }} / std
+                                {{ config('academyhub.currency_symbol','₦') }}{{ number_format($usageFeePerStudent, 2) }} / std
                             </span>
                         </div>
 
@@ -499,7 +499,7 @@
                                 <div class="text-xs font-black text-indigo-955 uppercase tracking-wider">Est. Termly Usage Fee</div>
                             </div>
                             <span class="text-base font-black text-indigo-700">
-                                {{ config('myacademy.currency_symbol','₦') }}{{ number_format($estimatedTermlyUsageFee, 2) }}
+                                {{ config('academyhub.currency_symbol','₦') }}{{ number_format($estimatedTermlyUsageFee, 2) }}
                             </span>
                         </div>
                     </div>
@@ -725,36 +725,7 @@
             </div>
 
             {{-- Install CTA --}}
-            @if(!$isInstalled)
-            <div class="card-padded bg-gradient-to-br from-indigo-50/80 to-purple-50/80 border border-indigo-100 shadow-sm rounded-2xl">
-                <div class="text-center space-y-3">
-                    <div class="text-sm font-bold text-slate-800">Plugin Pricing Overview</div>
-                    
-                    <div class="grid grid-cols-2 gap-2 text-left bg-white/50 backdrop-blur-sm p-3 rounded-xl border border-indigo-50/50">
-                        <div>
-                            <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Setup</div>
-                            <div class="text-sm font-black text-indigo-900">{{ config('myacademy.currency_symbol','₦') }}{{ number_format($setupFee, 2) }}</div>
-                        </div>
-                        <div>
-                            <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Usage</div>
-                            <div class="text-sm font-black text-emerald-600">{{ config('myacademy.currency_symbol','₦') }}{{ number_format($usageFeePerStudent, 2) }} <span class="text-[10px] font-normal text-slate-400">/ student / term</span></div>
-                        </div>
-                    </div>
-
-                    @if($calculatedStudentCount > 0)
-                        <div class="text-xs text-slate-500 font-semibold">
-                            Est. termly: <span class="text-emerald-600 font-bold">{{ config('myacademy.currency_symbol','₦') }}{{ number_format($estimatedTermlyUsageFee, 2) }}</span>
-                        </div>
-                    @endif
-
-                    <button wire:click="previewInstall" wire:loading.attr="disabled" class="btn-primary w-full py-3 flex items-center justify-center gap-2 shadow-sm">
-                        <span wire:loading.remove wire:target="previewInstall">Install Plugin</span>
-                        <span wire:loading wire:target="previewInstall">Installing...</span>
-                    </button>
-                    <p class="text-[10px] text-gray-400">Compatible with MyAcademy v2.0+</p>
-                </div>
-            </div>
-            @else
+            @if($isInstalled)
             <div class="card-padded bg-emerald-50/60 border border-emerald-100 shadow-sm rounded-2xl">
                 <div class="space-y-3">
                     <div class="flex items-center gap-3">
@@ -777,7 +748,7 @@
                             <strong>Students Billed:</strong> {{ number_format($calculatedStudentCount) }}
                         </div>
                         <div>
-                            <strong>Est. Usage Fee:</strong> {{ config('myacademy.currency_symbol','₦') }}{{ number_format($estimatedTermlyUsageFee, 2) }} / term
+                            <strong>Est. Usage Fee:</strong> {{ config('academyhub.currency_symbol','₦') }}{{ number_format($estimatedTermlyUsageFee, 2) }} / term
                         </div>
                     </div>
                 </div>

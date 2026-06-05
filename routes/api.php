@@ -34,11 +34,18 @@ Route::middleware(['auth:sanctum', 'active'])->group(function () {
     // Active term
     Route::get('/term', function () {
         $term = \App\Models\AcademicTerm::active();
+        $tenantId = \App\Support\TenantSettings::tenantId();
+        $tenant = $tenantId ? \App\Models\Tenant::find($tenantId) : null;
+        $activePlugins = $tenant ? $tenant->activeMarketplaceComponents()->pluck('slug')->toArray() : [];
+        $allPlugins = \App\Models\MarketplaceComponent::where('is_active', true)->get(['name', 'slug', 'description', 'price'])->toArray();
+
         return response()->json([
             'term'    => $term?->term_number ?? 1,
             'session' => $term?->academicSession?->name
                       ?? \App\Models\AcademicSession::activeName()
                       ?? date('Y') . '/' . (date('Y') + 1),
+            'active_plugins' => $activePlugins,
+            'all_plugins'    => $allPlugins,
         ]);
     });
 
@@ -48,9 +55,11 @@ Route::middleware(['auth:sanctum', 'active'])->group(function () {
 
     // Billing
     Route::get('/billing', [BillingController::class, 'index']);
+    Route::get('/billing/checkout-url', [BillingController::class, 'checkoutUrl']);
 
     // Announcements
     Route::get('/announcements', [AnnouncementController::class, 'index']);
+    Route::post('/announcements', [AnnouncementController::class, 'store']);
 
     // Timetable
     Route::get('/timetable', [TimetableController::class, 'index']);

@@ -20,7 +20,7 @@ class TeacherApiAttendanceTest extends TestCase
     {
         $this->seed();
 
-        $teacher = User::query()->where('email', 'teacher@myacademy.local')->firstOrFail();
+        $teacher = User::query()->where('email', 'teacher@academyhub.local')->firstOrFail();
         Sanctum::actingAs($teacher);
 
         $class = SchoolClass::query()->where('name', 'JSS 2')->firstOrFail();
@@ -43,7 +43,7 @@ class TeacherApiAttendanceTest extends TestCase
     {
         $this->seed();
 
-        $teacher = User::query()->where('email', 'teacher@myacademy.local')->firstOrFail();
+        $teacher = User::query()->where('email', 'teacher@academyhub.local')->firstOrFail();
         Sanctum::actingAs($teacher);
 
         $class = SchoolClass::query()->where('name', 'JSS 2')->firstOrFail();

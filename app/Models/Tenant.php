@@ -40,7 +40,7 @@ class Tenant extends Model
     protected static function booted()
     {
         static::saved(function (Tenant $tenant) {
-            $path = storage_path('app/myacademy/tenants/' . $tenant->id . '/settings.json');
+            $path = storage_path('app/academyhub/tenants/' . $tenant->id . '/settings.json');
             
             if (\Illuminate\Support\Facades\File::exists($path)) {
                 $existing = json_decode(\Illuminate\Support\Facades\File::get($path), true);

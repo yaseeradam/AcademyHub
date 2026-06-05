@@ -32,7 +32,7 @@ class ParentPortalTest extends TestCase
 
         $parent = User::query()->create([
             'name' => 'Parent One',
-            'email' => 'parent-test@myacademy.local',
+            'email' => 'parent-test@academyhub.local',
             'password' => 'password',
             'role' => 'parent',
             'is_active' => true,

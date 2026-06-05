@@ -20,7 +20,7 @@ class ImportsTest extends TestCase
     {
         $this->seed();
 
-        $admin = User::query()->where('email', 'admin@myacademy.local')->firstOrFail();
+        $admin = User::query()->where('email', 'admin@academyhub.local')->firstOrFail();
 
         $csv = "code,name\nPHY,Physics\n";
         $file = UploadedFile::fake()->createWithContent('subjects.csv', $csv);
@@ -41,7 +41,7 @@ class ImportsTest extends TestCase
     {
         $this->seed();
 
-        $admin = User::query()->where('email', 'admin@myacademy.local')->firstOrFail();
+        $admin = User::query()->where('email', 'admin@academyhub.local')->firstOrFail();
 
         $csv = implode("\n", [
             'admission_number,first_name,last_name,gender,class_name,section_name,status',

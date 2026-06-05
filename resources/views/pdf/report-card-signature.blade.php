@@ -83,8 +83,8 @@
 </head>
 <body>
 @php
-    $schoolName = config('myacademy.school_name', config('app.name', 'MyAcademy'));
-    $logo = config('myacademy.school_logo');
+    $schoolName = config('academyhub.school_name', config('app.name', 'AcademyHub'));
+    $logo = config('academyhub.school_logo');
     $logoPath = $logo ? public_path('uploads/'.str_replace('\\', '/', $logo)) : null;
     $logoExists = $logoPath && file_exists($logoPath);
     $opts = $rcOptions ?? [];
@@ -115,9 +115,9 @@
                 </div>
                 <div class="header-cell">
                     <div class="school-name">{{ $schoolName }}</div>
-                    @if(config('myacademy.school_address'))<div class="school-meta">{{ config('myacademy.school_address') }}</div>@endif
-                    @if(config('myacademy.school_phone') || config('myacademy.school_email'))
-                        <div class="school-meta">{{ config('myacademy.school_phone') }}@if(config('myacademy.school_phone') && config('myacademy.school_email')) • @endif{{ config('myacademy.school_email') }}</div>
+                    @if(config('academyhub.school_address'))<div class="school-meta">{{ config('academyhub.school_address') }}</div>@endif
+                    @if(config('academyhub.school_phone') || config('academyhub.school_email'))
+                        <div class="school-meta">{{ config('academyhub.school_phone') }}@if(config('academyhub.school_phone') && config('academyhub.school_email')) • @endif{{ config('academyhub.school_email') }}</div>
                     @endif
                     <div class="badge">Official Progress Statement</div>
                 </div>
@@ -150,9 +150,9 @@
             <thead>
                 <tr>
                     <th style="width:32%;text-align:left;padding-left:8px;">Subject</th>
-                    <th style="width:10%;">CA1<br/>({{ config('myacademy.results_ca1_max',20) }})</th>
-                    <th style="width:10%;">CA2<br/>({{ config('myacademy.results_ca2_max',20) }})</th>
-                    <th style="width:10%;">Exam<br/>({{ config('myacademy.results_exam_max',60) }})</th>
+                    <th style="width:10%;">CA1<br/>({{ config('academyhub.results_ca1_max',20) }})</th>
+                    <th style="width:10%;">CA2<br/>({{ config('academyhub.results_ca2_max',20) }})</th>
+                    <th style="width:10%;">Exam<br/>({{ config('academyhub.results_exam_max',60) }})</th>
                     <th style="width:10%;">Total</th>
                     <th style="width:9%;">Grade</th>
                     @if($showClassAverage)<th style="width:9%;">Avg</th>@endif
@@ -233,7 +233,7 @@
         </div>
         @endif
 
-        <div class="footer">Generated {{ now()->format('d M Y, g:i A') }} • {{ $schoolName }} • Powered by MyAcademy SMS</div>
+        <div class="footer">Generated {{ now()->format('d M Y, g:i A') }} • {{ $schoolName }} • Powered by AcademyHub SMS</div>
     </div>
 </div>
 </body>

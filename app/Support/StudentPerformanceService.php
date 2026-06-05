@@ -63,9 +63,9 @@ class StudentPerformanceService
             ->where('session', $session)
             ->get();
 
-        $maxPossible = config('myacademy.results_ca1_max', 20) + 
-                      config('myacademy.results_ca2_max', 20) + 
-                      config('myacademy.results_exam_max', 60);
+        $maxPossible = config('academyhub.results_ca1_max', 20) + 
+                      config('academyhub.results_ca2_max', 20) + 
+                      config('academyhub.results_exam_max', 60);
 
         $average = $scores->avg('total') ?? 0;
         $percentage = $maxPossible > 0 ? ($average / $maxPossible) * 100 : 0;
@@ -84,9 +84,9 @@ class StudentPerformanceService
 
     private function getSubjectPerformance(Student $student, int $term, string $session): Collection
     {
-        $maxPossible = config('myacademy.results_ca1_max', 20) + 
-                      config('myacademy.results_ca2_max', 20) + 
-                      config('myacademy.results_exam_max', 60);
+        $maxPossible = config('academyhub.results_ca1_max', 20) + 
+                      config('academyhub.results_ca2_max', 20) + 
+                      config('academyhub.results_exam_max', 60);
 
         return Score::where('student_id', $student->id)
             ->where('term', $term)
@@ -118,9 +118,9 @@ class StudentPerformanceService
             ->with('subject')
             ->get();
 
-        $maxPossible = config('myacademy.results_ca1_max', 20) + 
-                      config('myacademy.results_ca2_max', 20) + 
-                      config('myacademy.results_exam_max', 60);
+        $maxPossible = config('academyhub.results_ca1_max', 20) + 
+                      config('academyhub.results_ca2_max', 20) + 
+                      config('academyhub.results_exam_max', 60);
 
         $strengths = $scores
             ->filter(fn($s) => ($s->total / $maxPossible) >= 0.7)
@@ -154,9 +154,9 @@ class StudentPerformanceService
 
     private function getTermComparison(Student $student, string $session): Collection
     {
-        $maxPossible = config('myacademy.results_ca1_max', 20) + 
-                      config('myacademy.results_ca2_max', 20) + 
-                      config('myacademy.results_exam_max', 60);
+        $maxPossible = config('academyhub.results_ca1_max', 20) + 
+                      config('academyhub.results_ca2_max', 20) + 
+                      config('academyhub.results_exam_max', 60);
 
         return collect([1, 2, 3])->map(function ($term) use ($student, $session, $maxPossible) {
             $scores = Score::where('student_id', $student->id)
@@ -197,9 +197,9 @@ class StudentPerformanceService
             ->get();
         
         $avgScore = $scores->avg('total') ?? 0;
-        $maxPossible = config('myacademy.results_ca1_max', 20) + 
-                      config('myacademy.results_ca2_max', 20) + 
-                      config('myacademy.results_exam_max', 60);
+        $maxPossible = config('academyhub.results_ca1_max', 20) + 
+                      config('academyhub.results_ca2_max', 20) + 
+                      config('academyhub.results_exam_max', 60);
         $performanceRate = $maxPossible > 0 ? ($avgScore / $maxPossible) * 100 : 0;
 
         $correlation = match(true) {
@@ -305,9 +305,9 @@ class StudentPerformanceService
 
     private function getProgressTrend(Student $student, string $session): Collection
     {
-        $maxPossible = config('myacademy.results_ca1_max', 20) + 
-                      config('myacademy.results_ca2_max', 20) + 
-                      config('myacademy.results_exam_max', 60);
+        $maxPossible = config('academyhub.results_ca1_max', 20) + 
+                      config('academyhub.results_ca2_max', 20) + 
+                      config('academyhub.results_exam_max', 60);
 
         return collect([1, 2, 3])->map(function ($term) use ($student, $session, $maxPossible) {
             $scores = Score::where('student_id', $student->id)

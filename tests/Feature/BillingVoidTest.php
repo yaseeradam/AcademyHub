@@ -18,7 +18,7 @@ class BillingVoidTest extends TestCase
     {
         $this->seed();
 
-        $bursar = User::query()->where('email', 'bursar@myacademy.local')->firstOrFail();
+        $bursar = User::query()->where('email', 'bursar@academyhub.local')->firstOrFail();
         $student = Student::query()->firstOrFail();
 
         $transaction = Transaction::query()->create([
@@ -49,7 +49,7 @@ class BillingVoidTest extends TestCase
     {
         $this->seed();
 
-        $bursar = User::query()->where('email', 'bursar@myacademy.local')->firstOrFail();
+        $bursar = User::query()->where('email', 'bursar@academyhub.local')->firstOrFail();
         $student = Student::query()->firstOrFail();
 
         $t1 = Transaction::query()->create([

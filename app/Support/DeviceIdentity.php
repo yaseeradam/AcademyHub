@@ -9,7 +9,7 @@ class DeviceIdentity
 {
     public static function id(): string
     {
-        $path = storage_path('app/myacademy/device-id.txt');
+        $path = storage_path('app/academyhub/device-id.txt');
 
         try {
             if (File::exists($path)) {

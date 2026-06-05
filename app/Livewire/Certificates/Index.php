@@ -38,10 +38,10 @@ class Index extends Component
 
     private function applyCertificateDefaults(): void
     {
-        $this->type = (string) config('myacademy.certificate_default_type', 'General');
-        $this->title = (string) config('myacademy.certificate_default_title', 'Certificate');
+        $this->type = (string) config('academyhub.certificate_default_type', 'General');
+        $this->title = (string) config('academyhub.certificate_default_title', 'Certificate');
 
-        $defaultBody = config('myacademy.certificate_default_body');
+        $defaultBody = config('academyhub.certificate_default_body');
         $this->body = is_string($defaultBody) && trim($defaultBody) !== ''
             ? $defaultBody
             : 'This is to certify that the above-named student has successfully completed the requirements and is hereby awarded this certificate.';
