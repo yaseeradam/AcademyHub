@@ -433,6 +433,8 @@ Route::prefix('superadmin')->name('superadmin.')->group(function () {
         Route::post('tenants/{tenant}/approve-subaccount', [\App\Http\Controllers\SuperAdmin\TenantController::class, 'approveSubaccount'])->name('tenants.approve-subaccount');
         Route::post('tenants/{tenant}/reject-subaccount', [\App\Http\Controllers\SuperAdmin\TenantController::class, 'rejectSubaccount'])->name('tenants.reject-subaccount');
         Route::put('tenants/{tenant}/plugins/{component}', [\App\Http\Controllers\SuperAdmin\TenantController::class, 'updatePluginPricing'])->name('tenants.plugins.update');
+        Route::post('tenants/{tenant}/plugins/{component}/activate', [\App\Http\Controllers\SuperAdmin\TenantController::class, 'activatePlugin'])->name('tenants.plugins.activate');
+        Route::post('tenants/{tenant}/plugins/{component}/deactivate', [\App\Http\Controllers\SuperAdmin\TenantController::class, 'deactivatePlugin'])->name('tenants.plugins.deactivate');
         Route::post('tenants/{tenant}/backup', [\App\Http\Controllers\SuperAdmin\TenantController::class, 'exportBackup'])->name('tenants.backup');
         Route::post('tenants/{tenant}/restore', [\App\Http\Controllers\SuperAdmin\TenantController::class, 'importBackup'])->name('tenants.restore');
         

@@ -164,13 +164,26 @@
                             $isLocked = !$t['free'] && !$hasPremium;
                         @endphp
                         <label
-                            :class="selectedReportTemplate === '{{ $t['key'] }}' ? 'border-emerald-300 ring-2 ring-emerald-600 bg-emerald-50/10' : 'border-gray-100'"
-                            class="group cursor-pointer rounded-3xl border bg-white/70 p-5 shadow-sm ring-1 ring-white/50 backdrop-blur transition hover:shadow-md hover:border-emerald-200 {{ $isLocked ? 'opacity-60' : '' }} flex flex-col h-full">
+                            :class="selectedReportTemplate === '{{ $t['key'] }}' ? 'border-emerald-500 ring-4 ring-emerald-500/20 bg-gradient-to-br from-white to-emerald-50/20 shadow-xl scale-[1.02] -translate-y-1 z-10' : 'border-gray-100 hover:border-emerald-250'"
+                            class="group cursor-pointer rounded-3xl border bg-white/70 p-5 shadow-sm ring-1 ring-white/50 backdrop-blur transition-all duration-300 ease-out hover:shadow-md {{ $isLocked ? 'opacity-60' : '' }} flex flex-col h-full">
                             <input type="radio" name="report_card_template" value="{{ $t['key'] }}" class="sr-only" x-model="selectedReportTemplate"
                                 @checked($reportCardTemplate === $t['key']) @disabled($isLocked) />
 
                             <!-- Dynamic CSS Skeleton Preview -->
-                            <div class="relative w-full overflow-hidden rounded-xl border border-gray-200 bg-slate-50 p-3 pointer-events-none select-none mb-4 flex flex-col justify-between" style="aspect-ratio: 1 / 1.414;">
+                            <div :class="selectedReportTemplate === '{{ $t['key'] }}' ? 'border-emerald-500 ring-2 ring-emerald-500/20' : 'border-gray-200'"
+                                 class="relative w-full overflow-hidden rounded-xl border bg-slate-50 p-3 pointer-events-none select-none mb-4 flex flex-col justify-between transition-all duration-300" style="aspect-ratio: 1 / 1.414;">
+                                
+                                <!-- Glowing Selection Checkmark -->
+                                <div x-show="selectedReportTemplate === '{{ $t['key'] }}'" 
+                                     x-transition:enter="transition ease-out duration-250"
+                                     x-transition:enter-start="opacity-0 scale-75"
+                                     x-transition:enter-end="opacity-100 scale-100"
+                                     class="absolute top-2 right-2 z-20 bg-emerald-600 text-white rounded-full p-1.5 shadow-lg flex items-center justify-center border border-emerald-400">
+                                    <svg class="h-3.5 w-3.5 stroke-[3.5]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                                    </svg>
+                                </div>
+
                                 {{-- Header block --}}
                                 @if($t['key'] === 'aurora')
                                     <div class="h-8 rounded-lg bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500 flex items-center justify-between px-2 text-[6px] text-white font-bold">
@@ -277,8 +290,18 @@
                             </div>
 
                             <div class="mt-auto pt-4 flex items-center justify-between">
-                                <div class="text-[10px] font-semibold text-gray-500 uppercase tracking-wider">
-                                    {{ $isLocked ? 'Locked' : 'Click to select' }}</div>
+                                <div class="text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5 transition-colors duration-300"
+                                     :class="selectedReportTemplate === '{{ $t['key'] }}' ? 'text-emerald-700' : 'text-gray-500'">
+                                    <template x-if="selectedReportTemplate === '{{ $t['key'] }}'">
+                                        <span class="flex items-center gap-1">
+                                            <span class="h-1.5 w-1.5 rounded-full bg-emerald-600 animate-pulse"></span>
+                                            Active Template
+                                        </span>
+                                    </template>
+                                    <template x-if="selectedReportTemplate !== '{{ $t['key'] }}'">
+                                        <span>{{ $isLocked ? 'Locked' : 'Click to select' }}</span>
+                                    </template>
+                                </div>
                                 <button type="button" class="rounded-lg bg-slate-50 px-3 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-100 border border-slate-200 transition-colors"
                                     @click.stop="open = true; src = @js($t['preview']); title = @js('Report Card · ' . $t['title'])">
                                     Full Preview

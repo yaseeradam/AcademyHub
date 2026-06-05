@@ -503,7 +503,10 @@
                 <div style="display:grid; grid-template-columns: 1fr; gap: 20px;">
                     @foreach($components as $component)
                         @php
-                            $installedRelation = $tenant->marketplaceComponents->firstWhere('id', $component->id);
+                            $installedRelation = $tenant->marketplaceComponents
+                                ->where('id', $component->id)
+                                ->filter(fn($c) => is_null($c->pivot->uninstalled_at))
+                                ->first();
                             $pivot = $installedRelation ? $installedRelation->pivot : null;
                             $allowedClasses = $pivot && $pivot->allowed_class_ids ? $pivot->allowed_class_ids : [];
                         @endphp
@@ -525,15 +528,33 @@
                                         <div style="font-size:11.5px; color:var(--sa-muted);">{{ $component->description }}</div>
                                     </div>
                                 </div>
-                                <div>
-                                    @if($pivot)
-                                        @if($pivot->status === 'active')
-                                            <span class="sa-badge active"><span class="sa-badge-dot"></span> Active Usage</span>
+                                <div style="display:flex; align-items:center; gap:12px;">
+                                    <div>
+                                        @if($pivot)
+                                            @if($pivot->status === 'active')
+                                                <span class="sa-badge active"><span class="sa-badge-dot"></span> Active Usage</span>
+                                            @else
+                                                <span class="sa-badge suspended"><span class="sa-badge-dot"></span> Suspended</span>
+                                            @endif
                                         @else
-                                            <span class="sa-badge suspended"><span class="sa-badge-dot"></span> Suspended</span>
+                                            <span class="sa-badge free">Not Installed</span>
                                         @endif
+                                    </div>
+                                    
+                                    @if($pivot)
+                                        <form action="{{ route('superadmin.tenants.plugins.deactivate', [$tenant, $component]) }}" method="POST" onsubmit="return confirm('Are you sure you want to deactivate and uninstall this plugin for this school?')" style="margin: 0; display: inline;">
+                                            @csrf
+                                            <button type="submit" class="sa-btn sa-btn-danger" style="padding: 6px 12px; font-size: 12px; font-weight: 700; background: #dc2626; color: white;">
+                                                Deactivate
+                                            </button>
+                                        </form>
                                     @else
-                                        <span class="sa-badge free">Not Installed</span>
+                                        <form action="{{ route('superadmin.tenants.plugins.activate', [$tenant, $component]) }}" method="POST" onsubmit="return confirm('Are you sure you want to activate and install this plugin for this school?')" style="margin: 0; display: inline;">
+                                            @csrf
+                                            <button type="submit" class="sa-btn" style="padding: 6px 12px; font-size: 12px; font-weight: 700; background: linear-gradient(135deg, #059669, #10b981); border: none; color: white;">
+                                                Activate
+                                            </button>
+                                        </form>
                                     @endif
                                 </div>
                             </div>

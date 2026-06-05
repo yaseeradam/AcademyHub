@@ -346,7 +346,6 @@ class TenantController extends Controller
             ->with('status', 'Broadcast banner successfully saved.');
     }
 
-    // Custom Plugin Configuration Pricing
     public function updatePluginPricing(Request $request, Tenant $tenant, \App\Models\MarketplaceComponent $component)
     {
         $data = $request->validate([
@@ -363,6 +362,106 @@ class TenantController extends Controller
         
         return redirect()->route('superadmin.tenants.edit', $tenant)
             ->with('status', 'Plugin configuration override updated successfully.');
+    }
+
+    public function activatePlugin(Tenant $tenant, \App\Models\MarketplaceComponent $component)
+    {
+        $pivot = $tenant->marketplaceComponents()
+            ->where('marketplace_component_id', $component->id)
+            ->first();
+
+        $setupFee = (float) $component->setup_fee;
+        $usageFee = (float) $component->usage_fee_per_student;
+
+        if ($pivot) {
+            // Update existing pivot row
+            $tenant->marketplaceComponents()->updateExistingPivot($component->id, [
+                'installed_at'   => now(),
+                'uninstalled_at' => null,
+                'status'         => 'active',
+            ]);
+        } else {
+            // Attach a new pivot row
+            $tenant->marketplaceComponents()->attach($component->id, [
+                'installed_at'             => now(),
+                'uninstalled_at'           => null,
+                'status'                   => 'active',
+                'setup_fee'                => $setupFee,
+                'usage_fee_per_student'    => $usageFee,
+                'price_paid'               => $setupFee,
+                'student_count_at_install' => 0,
+                'allowed_class_ids'        => [],
+            ]);
+        }
+
+        // Increment installs count
+        $component->increment('installs');
+
+        // Check if setup bill already exists
+        $hasSetupBill = \App\Models\TenantPluginBill::where('tenant_id', $tenant->id)
+            ->where('marketplace_component_id', $component->id)
+            ->where('bill_type', 'setup')
+            ->exists();
+
+        if (!$hasSetupBill && $setupFee > 0) {
+            \App\Models\TenantPluginBill::create([
+                'tenant_id'                => $tenant->id,
+                'marketplace_component_id' => $component->id,
+                'bill_type'                => 'setup',
+                'term_name'                => null,
+                'session_name'             => null,
+                'student_count'            => null,
+                'setup_fee'                => $setupFee,
+                'usage_fee_per_student'    => 0,
+                'total_due'                => $setupFee,
+                'status'                   => 'paid',
+                'paid_at'                  => now(),
+            ]);
+        }
+
+        // Audit Log
+        AuditLog::create([
+            'user_id'  => auth()->id() ?? 1,
+            'action'   => 'plugin_activated_by_superadmin',
+            'model'    => 'MarketplaceComponent',
+            'model_id' => $component->id,
+            'changes'  => json_encode([
+                'slug'      => $component->slug,
+                'setup_fee' => $setupFee,
+                'usage_fee' => $usageFee,
+            ]),
+        ]);
+
+        return redirect()->route('superadmin.tenants.edit', $tenant)
+            ->with('status', "Plugin '{$component->name}' has been successfully activated.");
+    }
+
+    public function deactivatePlugin(Tenant $tenant, \App\Models\MarketplaceComponent $component)
+    {
+        $tenant->marketplaceComponents()
+            ->wherePivot('marketplace_component_id', $component->id)
+            ->updateExistingPivot($component->id, [
+                'uninstalled_at' => now(),
+            ]);
+
+        if ($component->installs > 0) {
+            $component->decrement('installs');
+        }
+
+        // Audit Log
+        AuditLog::create([
+            'user_id'  => auth()->id() ?? 1,
+            'action'   => 'plugin_deactivated_by_superadmin',
+            'model'    => 'MarketplaceComponent',
+            'model_id' => $component->id,
+            'changes'  => json_encode([
+                'slug'           => $component->slug,
+                'uninstalled_at' => now()
+            ]),
+        ]);
+
+        return redirect()->route('superadmin.tenants.edit', $tenant)
+            ->with('status', "Plugin '{$component->name}' has been successfully deactivated.");
     }
 
     // Generate Invoice
