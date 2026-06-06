@@ -81,6 +81,7 @@ Route::middleware('plugin:cbt')->group(function () {
 Route::middleware(['student.session', 'plugin:cbt'])->group(function () {
     Route::get('/cbt/portal/{attempt}', CbtPortalTake::class)->name('cbt.portal.take');
     Route::get('/cbt/student/{attempt}', CbtPortalTake::class)->name('cbt.student.take');
+    Route::get('/cbt/attempt/{attempt}/export-pdf', [CbtExportController::class, 'exportAttemptResultPdf'])->name('cbt.attempt.export-pdf');
 });
 
 // Fresh CSRF token endpoint — used by JS logout to prevent 419 Page Expired
@@ -154,11 +155,6 @@ Route::get('/student/notifications', \App\Livewire\Student\Notifications::class)
 Route::get('/student/profile', \App\Livewire\Student\Profile::class)
     ->middleware('student.session')
     ->name('student.profile');
-
-// Public Aptitude Test Screening — only accessible after purchasing/installing the Aptitude Test plugin
-Route::middleware('plugin:aptitude-test')->group(function () {
-    Route::get('/aptitude/take/{applicant}', \App\Livewire\Aptitude\TakeTest::class)->name('aptitude.take');
-});
 
 Route::middleware(['auth', 'active'])->group(function () {
     Route::get('/dashboard', [UtilityController::class, 'dashboard'])->name('dashboard');
@@ -294,12 +290,6 @@ Route::middleware(['auth', 'active'])->group(function () {
         // E-Learning — only accessible after purchasing/installing the E-Learning plugin
         Route::middleware('plugin:e-learning')->group(function () {
             Route::get('/e-learning', \App\Livewire\ELearning\Index::class)->name('e-learning.index');
-        });
-
-        // Aptitude Test — only accessible after purchasing/installing the Aptitude Test plugin
-        Route::middleware('plugin:aptitude-test')->group(function () {
-            Route::get('/aptitude', \App\Livewire\Aptitude\Index::class)->name('aptitude.index');
-            Route::get('/aptitude/questions', \App\Livewire\Aptitude\Questions::class)->name('aptitude.questions');
         });
 
 

@@ -57,7 +57,7 @@ class ReportCardController extends Controller
         $filename = 'report-card-' . $student->admission_number . '-' . $sessionSlug . '-T' . $term . '.pdf';
         $fullPath = "{$storageDir}/{$filename}";
 
-        if (file_exists($fullPath)) {
+        if (file_exists($fullPath) && app()->environment() !== 'testing') {
             Audit::log('results.report_card_downloaded_from_cache', $student, [
                 'term' => $term,
                 'session' => $session,

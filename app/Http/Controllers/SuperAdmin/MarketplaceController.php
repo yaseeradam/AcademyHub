@@ -26,6 +26,7 @@ class MarketplaceController extends Controller
             'name'                  => 'required|string|max:255',
             'slug'                  => 'required|string|max:255|unique:marketplace_components,slug',
             'route_name'            => 'nullable|string|max:255',
+            'price'                 => 'required|numeric|min:0',
             'setup_fee'             => 'required|numeric|min:0',
             'usage_fee_per_student' => 'required|numeric|min:0',
             'description'           => 'nullable|string',
@@ -37,9 +38,9 @@ class MarketplaceController extends Controller
         $data['is_active'] = $request->has('is_active');
         
         $isPaid = $request->input('pricing_type') === 'paid';
+        $data['price']                 = $isPaid ? (float) $request->input('price', 0) : 0.0;
         $data['setup_fee']             = $isPaid ? (float) $request->input('setup_fee', 0) : 0.0;
         $data['usage_fee_per_student'] = $isPaid ? (float) $request->input('usage_fee_per_student', 0) : 0.0;
-        $data['price']                 = $data['setup_fee'];
 
         // Process screenshots metadata
         $screenshotsMetadata = [];
@@ -87,6 +88,7 @@ class MarketplaceController extends Controller
             'name'                  => 'required|string|max:255',
             'slug'                  => 'required|string|max:255|unique:marketplace_components,slug,' . $marketplace->id,
             'route_name'            => 'nullable|string|max:255',
+            'price'                 => 'required|numeric|min:0',
             'setup_fee'             => 'required|numeric|min:0',
             'usage_fee_per_student' => 'required|numeric|min:0',
             'description'           => 'nullable|string',
@@ -98,9 +100,9 @@ class MarketplaceController extends Controller
         $data['is_active'] = $request->has('is_active');
 
         $isPaid = $request->input('pricing_type') === 'paid';
+        $data['price']                 = $isPaid ? (float) $request->input('price', 0) : 0.0;
         $data['setup_fee']             = $isPaid ? (float) $request->input('setup_fee', 0) : 0.0;
         $data['usage_fee_per_student'] = $isPaid ? (float) $request->input('usage_fee_per_student', 0) : 0.0;
-        $data['price']                 = $data['setup_fee'];
 
         // Process screenshots metadata
         $screenshotsMetadata = [];

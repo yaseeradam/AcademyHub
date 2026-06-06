@@ -214,18 +214,6 @@ class ProductDetail extends Component
                 'requirements' => ['AcademyHub system', 'Web browser', 'Active parent credentials'],
                 'benefits' => ['Instant parent engagement', 'Streamlined bill payments tracking', 'Reduce physical report card printing costs', 'Build stronger school-parent trust'],
             ],
-            'aptitude-test' => [
-                'name' => 'Aptitude Test & Screening',
-                'short_description' => 'MCQ question banks, self-grading candidate screening & admissions',
-                'description' => 'The AcademyHub Aptitude Test & Screening plugin enables schools to conduct automated entrance examinations for prospective students. Setup multiple-choice question pools by class, allow applicants to take self-grading online exams, and admit successful candidates with a single click.',
-                'icon' => 'exam',
-                'color' => 'purple',
-                'category' => 'Admission',
-                'features' => ['MCQ Question pools per class level', 'Self-grading candidate test room', 'Admissions scoring dashboard', 'One-click student auto-admission', 'Configurable test points and grading scales'],
-                'screenshots' => ['aptitude-test-1.png', 'aptitude-test-2.png', 'aptitude-test-3.png'],
-                'requirements' => ['AcademyHub system', 'Web browser', 'Stable internet connection'],
-                'benefits' => ['Eliminate manual entrance exams grading', 'Streamline student admissions by 80%', 'Instant applicant performance insights'],
-            ],
             'payment-gateway' => [
                 'name' => 'Bursar & Parent Payment Gateway',
                 'short_description' => 'Real-time tuition fees billing structures and secure parent inline checkouts',

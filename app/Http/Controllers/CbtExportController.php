@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\CbtExam;
+use App\Models\CbtAttempt;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\DB;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -122,6 +123,57 @@ class CbtExportController extends Controller
 
         $pdf = Pdf::loadView('pdf.cbt-exam', ['exam' => $exam]);
         $filename = 'exam-'.str_replace(' ', '-', strtolower($exam->title)).'.pdf';
+
+        return $pdf->download($filename)
+            ->header('Cache-Control', 'no-cache, no-store, must-revalidate')
+            ->header('Pragma', 'no-cache')
+            ->header('Expires', '0');
+    }
+
+    public function exportAttemptResultPdf(CbtAttempt $attempt)
+    {
+        $studentId = session('student_id');
+        $user = auth()->user();
+        
+        $isAuthorized = ($studentId && (int) $attempt->student_id === (int) $studentId)
+            || ($user && in_array($user->role, ['admin', 'teacher'], true));
+
+        abort_unless($isAuthorized, 403, 'Unauthorized access to this attempt.');
+        abort_unless($attempt->submitted_at, 403, 'This attempt has not been submitted yet.');
+        abort_unless($attempt->exam->exam_type === 'aptitude', 403, 'Only aptitude exam attempts can be exported to PDF.');
+
+        $attempt->load([
+            'exam.questions.options',
+            'student.schoolClass',
+            'answers.question.options',
+            'answers.option'
+        ]);
+
+        $schoolName = config('myacademy.school_name', config('app.name', 'School'));
+        $schoolAddress = config('myacademy.school_address', '');
+        $schoolPhone = config('myacademy.school_phone', '');
+        $schoolEmail = config('myacademy.school_email', '');
+        $logoPath = config('myacademy.school_logo');
+
+        $logoBase64 = null;
+        if ($logoPath) {
+            $fullPath = storage_path('app/public/' . $logoPath);
+            if (file_exists($fullPath)) {
+                $mime = mime_content_type($fullPath) ?: 'image/png';
+                $logoBase64 = 'data:' . $mime . ';base64,' . base64_encode(file_get_contents($fullPath));
+            }
+        }
+
+        $pdf = Pdf::loadView('pdf.cbt-attempt-result', [
+            'attempt' => $attempt,
+            'schoolName' => $schoolName,
+            'schoolAddress' => $schoolAddress,
+            'schoolPhone' => $schoolPhone,
+            'schoolEmail' => $schoolEmail,
+            'logoBase64' => $logoBase64,
+        ]);
+
+        $filename = 'aptitude-result-' . str_replace(' ', '-', strtolower($attempt->student->first_name . '-' . $attempt->student->last_name)) . '.pdf';
 
         return $pdf->download($filename)
             ->header('Cache-Control', 'no-cache, no-store, must-revalidate')

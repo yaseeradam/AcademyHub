@@ -93,19 +93,24 @@
                         <label class="sa-form-label">Pricing Type</label>
                         <div style="display:flex; gap:16px; align-items:center; height:40px;">
                             <label style="display:flex; align-items:center; gap:6px; cursor:pointer;">
-                                <input type="radio" name="pricing_type" value="free" {{ (old('setup_fee', $component->setup_fee) == 0 && old('usage_fee_per_student', $component->usage_fee_per_student) == 0) ? 'checked' : '' }} onchange="togglePrice(false)">
+                                <input type="radio" name="pricing_type" value="free" {{ (old('price', $component->price) == 0 && old('setup_fee', $component->setup_fee) == 0 && old('usage_fee_per_student', $component->usage_fee_per_student) == 0) ? 'checked' : '' }} onchange="togglePrice(false)">
                                 <span style="font-size:14px; font-weight:600; color:var(--sa-text);">Free</span>
                             </label>
                             <label style="display:flex; align-items:center; gap:6px; cursor:pointer;">
-                                <input type="radio" name="pricing_type" value="paid" {{ (old('setup_fee', $component->setup_fee) > 0 || old('usage_fee_per_student', $component->usage_fee_per_student) > 0) ? 'checked' : '' }} onchange="togglePrice(true)">
+                                <input type="radio" name="pricing_type" value="paid" {{ (old('price', $component->price) > 0 || old('setup_fee', $component->setup_fee) > 0 || old('usage_fee_per_student', $component->usage_fee_per_student) > 0) ? 'checked' : '' }} onchange="togglePrice(true)">
                                 <span style="font-size:14px; font-weight:600; color:var(--sa-text);">Paid</span>
                             </label>
                         </div>
                     </div>
                 </div>
 
-                <div id="price_wrapper" style="margin-bottom:20px; {{ (old('setup_fee', $component->setup_fee) > 0 || old('usage_fee_per_student', $component->usage_fee_per_student) > 0) ? '' : 'display:none;' }}">
-                    <div class="sa-grid-2">
+                <div id="price_wrapper" style="margin-bottom:20px; {{ (old('price', $component->price) > 0 || old('setup_fee', $component->setup_fee) > 0 || old('usage_fee_per_student', $component->usage_fee_per_student) > 0) ? '' : 'display:none;' }}">
+                    <div class="sa-grid-3" style="grid-template-columns: repeat(3, 1fr); gap: 16px;">
+                        <div>
+                            <label for="price" class="sa-form-label">Marketplace Purchase Price (₦) <span style="color:#ef4444;">*</span></label>
+                            <input type="number" step="0.01" name="price" id="price" value="{{ old('price', $component->price ?? 0) }}" class="sa-form-input">
+                            @error('price')<div class="sa-form-error">{{ $message }}</div>@enderror
+                        </div>
                         <div>
                             <label for="setup_fee" class="sa-form-label">Setup / Install Fee <span style="color:#ef4444;">*</span></label>
                             <input type="number" step="0.01" name="setup_fee" id="setup_fee" value="{{ old('setup_fee', $component->setup_fee ?? 0) }}" class="sa-form-input">
@@ -238,16 +243,20 @@
 <script>
     function togglePrice(isPaid) {
         const wrapper = document.getElementById('price_wrapper');
+        const priceInput = document.getElementById('price');
         const setupInput = document.getElementById('setup_fee');
         const usageInput = document.getElementById('usage_fee_per_student');
         if (isPaid) {
             wrapper.style.display = 'block';
+            priceInput.setAttribute('required', 'required');
             setupInput.setAttribute('required', 'required');
             usageInput.setAttribute('required', 'required');
         } else {
             wrapper.style.display = 'none';
+            priceInput.removeAttribute('required');
             setupInput.removeAttribute('required');
             usageInput.removeAttribute('required');
+            priceInput.value = '0';
             setupInput.value = '0';
             usageInput.value = '0';
         }

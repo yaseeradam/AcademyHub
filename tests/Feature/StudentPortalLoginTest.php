@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\SchoolClass;
 use App\Models\Section;
 use App\Models\Student;
+use App\Models\Tenant;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -19,7 +20,11 @@ class StudentPortalLoginTest extends TestCase
         $class = SchoolClass::query()->firstOrFail();
         $section = Section::query()->where('class_id', $class->id)->firstOrFail();
 
+        $tenant = Tenant::firstOrFail();
+        app()->instance('currentTenant', $tenant);
+
         $student = Student::query()->create([
+            'tenant_id' => $tenant->id,
             'admission_number' => 'ADM-2026-1234',
             'first_name' => 'Amina',
             'last_name' => 'Yusuf',
@@ -72,6 +77,7 @@ class StudentPortalLoginTest extends TestCase
         ]);
 
         $student = Student::query()->create([
+            'tenant_id' => $tenant->id,
             'admission_number' => 'ADM-2026-9999',
             'first_name' => 'Test',
             'last_name' => 'Student',

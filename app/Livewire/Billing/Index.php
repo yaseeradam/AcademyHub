@@ -67,7 +67,7 @@ class Index extends Component
         $canTransactions = (bool) ($user?->hasPermission('billing.transactions') ?? false);
         $canFees = (bool) ($user?->hasPermission('fees.manage') ?? false);
 
-        $allowedTabs = ['debtors'];
+        $allowedTabs = ['debtors', 'plugin-bills'];
         if ($canTransactions) {
             $allowedTabs[] = 'transactions';
         }
@@ -625,6 +625,85 @@ class Index extends Component
         $next = $year + 1;
 
         return "{$year}/{$next}";
+    }
+
+    #[Computed]
+    public function pluginBills()
+    {
+        $tenant = auth()->user()?->tenant;
+        if (!$tenant) {
+            return collect();
+        }
+        return \App\Models\TenantPluginBill::query()
+            ->with('marketplaceComponent')
+            ->where('tenant_id', $tenant->id)
+            ->orderByDesc('id')
+            ->get();
+    }
+
+    public function payPluginBill(int $billId): void
+    {
+        $user = auth()->user();
+        abort_unless($user && ($user->hasPermission('billing.transactions') || $user->hasPermission('fees.manage')), 403);
+
+        $tenant = $user->tenant;
+        abort_unless($tenant, 404);
+
+        $bill = \App\Models\TenantPluginBill::where('tenant_id', $tenant->id)->findOrFail($billId);
+
+        if ($bill->status === 'paid') {
+            $this->dispatch('alert', message: 'This bill is already paid.', type: 'info');
+            return;
+        }
+
+        $amountInKobo = (int) ($bill->total_due * 100);
+        $email = $user->email ?? 'admin@school.com';
+        $reference = 'BILL_' . $bill->id . '_' . uniqid() . '_' . time();
+
+        $this->dispatch('initialize-plugin-paystack', [
+            'amount' => $amountInKobo,
+            'email' => $email,
+            'ref' => $reference
+        ]);
+    }
+
+    public function verifyPluginBillPayment(string $reference): void
+    {
+        $user = auth()->user();
+        abort_unless($user && ($user->hasPermission('billing.transactions') || $user->hasPermission('fees.manage')), 403);
+
+        $response = \Illuminate\Support\Facades\Http::withToken(config('services.paystack.secret_key'))
+            ->withOptions(['verify' => false])
+            ->timeout(10)
+            ->get("https://api.paystack.co/transaction/verify/{$reference}");
+
+        if ($response->successful() && $response->json('data.status') === 'success') {
+            if (preg_match('/^BILL_(\d+)_/', $reference, $matches)) {
+                $billId = (int) $matches[1];
+                $tenant = $user->tenant;
+                abort_unless($tenant, 404);
+
+                $bill = \App\Models\TenantPluginBill::where('tenant_id', $tenant->id)->findOrFail($billId);
+                
+                if ($bill->status !== 'paid') {
+                    $bill->update([
+                        'status' => 'paid',
+                        'paid_at' => now(),
+                    ]);
+
+                    Audit::log('billing.plugin_bill_paid', $bill, [
+                        'bill_id' => $bill->id,
+                        'amount' => (string) $bill->total_due,
+                    ]);
+                }
+
+                $this->dispatch('alert', message: 'Payment successful! Plugin bill marked as paid.', type: 'success');
+            } else {
+                $this->dispatch('alert', message: 'Invalid payment reference format.', type: 'error');
+            }
+        } else {
+            $this->dispatch('alert', message: 'Payment verification failed. Please try again.', type: 'error');
+        }
     }
 
     public function render()

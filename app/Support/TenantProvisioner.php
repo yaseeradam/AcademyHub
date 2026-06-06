@@ -36,6 +36,11 @@ class TenantProvisioner
             'school_phone' => $tenant->contact_phone ?: null,
         ], static fn ($v) => $v !== null && $v !== '');
 
+        $settings['subscription_fee_per_student'] = $tenant->subscription_fee_per_student;
+        $settings['subscription_due_date'] = $tenant->expires_at
+            ? $tenant->expires_at->toDateString()
+            : null;
+
         // Always write (overwrite) so the name is always correct
         File::put($path, json_encode($settings, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
 

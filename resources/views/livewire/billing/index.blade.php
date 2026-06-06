@@ -13,6 +13,30 @@
                 <a href="{{ route('accounts') }}" class="btn-outline">Accounts</a>
             @endif
         </x-slot:actions>
+        <x-slot:after>
+            <div class="flex flex-wrap gap-2">
+                @if ($canTransactions)
+                    <button wire:click="$set('tab', 'transactions')" 
+                            class="px-4 py-2 text-xs font-bold rounded-xl transition-all duration-200 {{ $tab === 'transactions' ? 'bg-emerald-500 text-white shadow-md' : 'bg-transparent text-slate-600 hover:bg-slate-100' }}">
+                        Transactions
+                    </button>
+                @endif
+                <button wire:click="$set('tab', 'debtors')" 
+                        class="px-4 py-2 text-xs font-bold rounded-xl transition-all duration-200 {{ $tab === 'debtors' ? 'bg-emerald-500 text-white shadow-md' : 'bg-transparent text-slate-600 hover:bg-slate-100' }}">
+                    Outstanding Balances
+                </button>
+                @if ($canFees)
+                    <button wire:click="$set('tab', 'fees')" 
+                            class="px-4 py-2 text-xs font-bold rounded-xl transition-all duration-200 {{ $tab === 'fees' ? 'bg-emerald-500 text-white shadow-md' : 'bg-transparent text-slate-600 hover:bg-slate-100' }}">
+                        Fee Structures
+                    </button>
+                @endif
+                <button wire:click="$set('tab', 'plugin-bills')" 
+                        class="px-4 py-2 text-xs font-bold rounded-xl transition-all duration-200 {{ $tab === 'plugin-bills' ? 'bg-emerald-500 text-white shadow-md' : 'bg-transparent text-slate-600 hover:bg-slate-100' }}">
+                    Plugin Invoices
+                </button>
+            </div>
+        </x-slot:after>
     </x-page-header>
 
     {{-- Financial Overview Cards --}}
@@ -110,7 +134,6 @@
                     <button type="submit" class="btn-primary px-6">Save</button>
                 </div>
             </form>
-            </div>
         </div>
     @endif
 
@@ -397,5 +420,143 @@
                 </tbody>
             </x-table>
         @endif
+    @elseif ($tab === 'plugin-bills')
+        <div class="relative overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200">
+            <div class="absolute inset-0 bg-gradient-to-br from-emerald-500/5 to-emerald-600/10"></div>
+            <div class="relative p-6">
+                <div class="mb-4 flex items-center gap-3">
+                    <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-500 text-white">
+                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-900">Plugin Invoices</h3>
+                        <p class="text-sm text-gray-600">Pending setup and usage billing for your installed marketplace components</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <x-table>
+            <thead class="bg-gray-50 text-xs font-semibold uppercase tracking-wider text-gray-500">
+                <tr>
+                    <th class="px-5 py-3">Plugin / Component</th>
+                    <th class="px-5 py-3">Bill Type</th>
+                    <th class="px-5 py-3">Billing Period</th>
+                    <th class="px-5 py-3 text-right">Student Count</th>
+                    <th class="px-5 py-3 text-right">Pricing Details</th>
+                    <th class="px-5 py-3 text-right">Total Due</th>
+                    <th class="px-5 py-3">Status</th>
+                    <th class="px-5 py-3 text-right">Action</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100">
+                @forelse ($this->pluginBills as $bill)
+                    <tr class="bg-white hover:bg-gray-50">
+                        <td class="px-5 py-4">
+                            <div class="flex items-center gap-3">
+                                <div class="rounded-xl bg-slate-100 p-2 text-slate-700 font-bold">
+                                    @if(!empty($bill->marketplaceComponent->icon) && str_contains($bill->marketplaceComponent->icon, '<svg'))
+                                        <div class="h-5 w-5 [&>svg]:w-5 [&>svg]:h-5 [&>svg]:stroke-current">{!! $bill->marketplaceComponent->icon !!}</div>
+                                    @else
+                                        <span class="text-lg">🧩</span>
+                                    @endif
+                                </div>
+                                <div>
+                                    <div class="text-sm font-semibold text-gray-900">{{ $bill->marketplaceComponent->name ?? 'Plugin' }}</div>
+                                    <div class="text-xs text-gray-500">{{ $bill->marketplaceComponent->short_description ?? '' }}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-5 py-4 text-sm text-gray-700 capitalize">
+                            @if ($bill->bill_type === 'setup')
+                                <span class="inline-flex items-center rounded-md bg-purple-50 px-2 py-0.5 text-xs font-semibold text-purple-700 ring-1 ring-inset ring-purple-600/10">Setup Fee</span>
+                            @else
+                                <span class="inline-flex items-center rounded-md bg-blue-50 px-2 py-0.5 text-xs font-semibold text-blue-700 ring-1 ring-inset ring-blue-600/10">Usage Fee</span>
+                            @endif
+                        </td>
+                        <td class="px-5 py-4 text-sm text-gray-700">
+                            @if ($bill->bill_type === 'usage')
+                                <div>{{ $bill->term_name }}</div>
+                                <div class="text-xs text-gray-500">{{ $bill->session_name }}</div>
+                            @else
+                                <span class="text-gray-400">—</span>
+                            @endif
+                        </td>
+                        <td class="px-5 py-4 text-right text-sm text-gray-700">
+                            @if ($bill->bill_type === 'usage')
+                                {{ number_format($bill->student_count) }}
+                            @else
+                                <span class="text-gray-400">—</span>
+                            @endif
+                        </td>
+                        <td class="px-5 py-4 text-right text-sm text-gray-700">
+                            @if ($bill->bill_type === 'setup')
+                                <div>Setup: {{ config('myacademy.currency_symbol', '₦') }}{{ number_format($bill->setup_fee, 2) }}</div>
+                            @else
+                                <div>Rate: {{ config('myacademy.currency_symbol', '₦') }}{{ number_format($bill->usage_fee_per_student, 2) }}/std</div>
+                            @endif
+                        </td>
+                        <td class="px-5 py-4 text-right text-sm font-semibold text-gray-900">
+                            {{ config('myacademy.currency_symbol', '₦') }}{{ number_format($bill->total_due, 2) }}
+                        </td>
+                        <td class="px-5 py-4">
+                            @if ($bill->status === 'paid')
+                                <x-status-badge variant="success">Paid</x-status-badge>
+                                @if ($bill->paid_at)
+                                    <div class="mt-1 text-[10px] text-gray-400">on {{ $bill->paid_at->format('M j, Y') }}</div>
+                                @endif
+                            @elseif ($bill->status === 'void')
+                                <x-status-badge>Voided</x-status-badge>
+                            @else
+                                <x-status-badge variant="warning">Unpaid</x-status-badge>
+                            @endif
+                        </td>
+                        <td class="px-5 py-4 text-right">
+                            @if ($bill->status === 'unpaid')
+                                <button type="button" 
+                                        wire:click="payPluginBill({{ $bill->id }})" 
+                                        wire:loading.attr="disabled"
+                                        class="btn-primary btn-sm bg-emerald-600 hover:bg-emerald-700 border-none px-4 text-white">
+                                    <span wire:loading.remove wire:target="payPluginBill({{ $bill->id }})">Pay Now</span>
+                                    <span wire:loading wire:target="payPluginBill({{ $bill->id }})">...</span>
+                                </button>
+                            @else
+                                <span class="text-gray-400 text-xs font-medium">—</span>
+                            @endif
+                        </td>
+                    </tr>
+                @empty
+                    <tr>
+                        <td colspan="8" class="px-5 py-10 text-center text-sm text-gray-500">No plugin bills or invoices found.</td>
+                    </tr>
+                @endforelse
+            </tbody>
+        </x-table>
     @endif
 </div>
+
+@assets
+<script src="https://js.paystack.co/v1/inline.js" defer></script>
+@endassets
+
+@script
+    $wire.on('initialize-plugin-paystack', (eventData) => {
+        let data = Array.isArray(eventData) ? eventData[0] : eventData;
+        let handler = PaystackPop.setup({
+            key: '{{ env('PAYSTACK_PUBLIC_KEY', 'pk_test_') }}',
+            email: data.email,
+            amount: data.amount,
+            ref: data.ref,
+            currency: 'NGN',
+            callback: function(response) {
+                $wire.verifyPluginBillPayment(response.reference);
+            },
+            onClose: function() {
+                // Optional
+            }
+        });
+        handler.openIframe();
+    });
+@endscript

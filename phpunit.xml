@@ -18,6 +18,7 @@
         </include>
     </source>
     <php>
+        <env name="MYACADEMY_ADMIN_EMAIL" value="admin@academyhub.local"/>
         <env name="APP_ENV" value="testing"/>
         <env name="APP_URL" value="http://localhost"/>
         <env name="MYACADEMY_SEED_DEMO_TENANT" value="true"/>
