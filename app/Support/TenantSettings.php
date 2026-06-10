@@ -131,6 +131,7 @@ class TenantSettings
             }
 
             config(["myacademy.{$key}" => $value]);
+            config(["academyhub.{$key}" => $value]);
         }
     }
 }

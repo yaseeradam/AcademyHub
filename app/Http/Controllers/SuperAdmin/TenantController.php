@@ -195,6 +195,7 @@ class TenantController extends Controller
     {
         $data = $request->validate([
             'name'          => ['required', 'string', 'max:255'],
+            'slug'          => ['required', 'string', 'max:255', 'alpha_dash', 'unique:tenants,slug,' . $tenant->id],
             'domain'        => ['nullable', 'string', 'max:255', 'unique:tenants,domain,' . $tenant->id],
             'plan'          => ['required', 'string', 'in:free,pro,enterprise'],
             'status'        => ['required', 'string', 'in:active,suspended,pending'],
@@ -205,7 +206,20 @@ class TenantController extends Controller
             'expires_at'    => ['nullable', 'date'],
         ]);
 
+        $oldMainHost = parse_url(config('app.url'), PHP_URL_HOST);
+        $oldAccessHost = $tenant->domain ?: ($oldMainHost ? ($tenant->slug.'.'.$oldMainHost) : $tenant->slug);
+
         $tenant->update($data);
+
+        $newMainHost = parse_url(config('app.url'), PHP_URL_HOST);
+        $newAccessHost = $tenant->domain ?: ($newMainHost ? ($tenant->slug.'.'.$newMainHost) : $tenant->slug);
+
+        if ($oldAccessHost !== $newAccessHost) {
+            if (app()->environment('local', 'development') || str_contains(config('app.url'), '.test')) {
+                $this->removeFromHostsFile($oldAccessHost);
+                $this->addToHostsFile($newAccessHost);
+            }
+        }
 
         // Keep plugins synced with the plan on update
         $this->syncTenantPluginsByPlan($tenant, $tenant->plan);

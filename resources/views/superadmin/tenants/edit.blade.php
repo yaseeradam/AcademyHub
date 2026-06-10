@@ -235,6 +235,12 @@
                     </div>
 
                     <div>
+                        <label class="sa-form-label">School Slug <span style="color:#ef4444;">*</span></label>
+                        <input type="text" name="slug" value="{{ old('slug', $tenant->slug) }}" required class="sa-form-input">
+                        @error('slug')<div class="sa-form-error">{{ $message }}</div>@enderror
+                    </div>
+
+                    <div>
                         <label class="sa-form-label">Custom Domain <span style="color:#94a3b8;">(optional)</span></label>
                         <input type="text" name="domain" value="{{ old('domain', $tenant->domain) }}" class="sa-form-input" placeholder="portal.school.edu">
                         @error('domain')<div class="sa-form-error">{{ $message }}</div>@enderror

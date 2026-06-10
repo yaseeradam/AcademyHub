@@ -48,7 +48,7 @@ class DatabaseSeeder extends Seeder
         /** @var \App\Support\TenantProvisioner $provisioner */
         $provisioner = app(TenantProvisioner::class);
 
-        $tenant = Tenant::query()->firstOrCreate(
+        $tenant = Tenant::query()->updateOrCreate(
             ['slug' => env('MYACADEMY_DEMO_TENANT_SLUG', 'demo')],
             [
                 'name' => env('MYACADEMY_DEMO_TENANT_NAME', 'Demo School'),
