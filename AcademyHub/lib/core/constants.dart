@@ -29,7 +29,7 @@ class ApiConstants {
     }
 
     // Default to Android emulator loopback redirection port 8000,
-    // or change to http://10.131.201.125:8000/api for physical devices on local network
-    return 'http://10.131.201.125:8000/api';
+    // or change to http://192.168.43.92:8000/api for physical devices on local network
+    return 'http://192.168.43.92:8000/api';
   }
 }
