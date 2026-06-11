@@ -117,13 +117,13 @@
             <td class="info-label">Candidate Name</td>
             <td class="info-value">{{ $candidateName }}</td>
             <td class="info-label">Candidate ID</td>
-            <td class="info-value font-mono">{{ $attempt->student->admission_number ?? ('APT-' . strtoupper(substr(md5($candidateName), 0, 6))) }}</td>
+            <td class="info-value font-mono">{{ $attempt->student?->admission_number ?? ('APT-' . strtoupper(substr(md5($candidateName), 0, 6))) }}</td>
         </tr>
         <tr>
             <td class="info-label">Test Name</td>
             <td class="info-value">{{ $attempt->exam->title }}</td>
             <td class="info-label">Class Category</td>
-            <td class="info-value">{{ $attempt->student->schoolClass->name ?? 'Aptitude Candidate' }}</td>
+            <td class="info-value">{{ $attempt->student?->schoolClass?->name ?? 'Aptitude Candidate' }}</td>
         </tr>
         <tr>
             <td class="info-label">Date Completed</td>

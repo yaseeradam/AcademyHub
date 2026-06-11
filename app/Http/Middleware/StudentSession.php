@@ -68,6 +68,15 @@ class StudentSession
                 return redirect()->route('login');
             }
 
+            // Prevent aptitude candidates from accessing non-exam student routes
+            if (! $request->is('cbt/portal*', 'cbt/student*', 'student/logout', 'livewire*')) {
+                $attempt = \App\Models\CbtAttempt::query()->find($attemptId);
+                if ($attempt) {
+                    return redirect()->route('cbt.student.take', ['attempt' => $attempt]);
+                }
+                return redirect()->route('login');
+            }
+
             return $next($request);
         }
 

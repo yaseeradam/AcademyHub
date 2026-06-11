@@ -22,7 +22,7 @@
                 @else
                     <div>
                         <label class="text-xs font-bold uppercase tracking-wider text-gray-700">Exam Code</label>
-                        <input wire:model="examCode" class="mt-1.5 w-full rounded-xl border-2 border-gray-200 bg-white px-4 py-2.5 font-mono text-sm font-semibold text-gray-900 shadow-sm transition-all focus:border-rose-500 focus:ring-4 focus:ring-rose-500/20 uppercase" placeholder="CBT-XXXXXX" />
+                        <input wire:model.live="examCode" class="mt-1.5 w-full rounded-xl border-2 border-gray-200 bg-white px-4 py-2.5 font-mono text-sm font-semibold text-gray-900 shadow-sm transition-all focus:border-rose-500 focus:ring-4 focus:ring-rose-500/20 uppercase" placeholder="CBT-XXXXXX" />
                         @error('examCode') <div class="mt-1.5 text-xs font-semibold text-rose-700">{{ $message }}</div> @enderror
                     </div>
                 @endif
