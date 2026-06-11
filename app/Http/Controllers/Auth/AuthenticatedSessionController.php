@@ -161,6 +161,7 @@ class AuthenticatedSessionController extends Controller
                 ]);
             }
 
+            $request->session()->forget(['student_id', 'student_name', 'student_admission', 'student_class', 'login_type', 'aptitude_attempt_id', 'student_must_reset_password']);
             $request->session()->regenerate();
             $newSessionId = $request->session()->getId();
 

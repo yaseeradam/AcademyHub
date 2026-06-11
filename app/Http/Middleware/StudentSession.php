@@ -49,11 +49,6 @@ class StudentSession
         }
 
         $tenant = app()->bound('currentTenant') ? app('currentTenant') : \App\Models\Tenant::find($tenantId);
-        if (! $tenant || ! $tenant->activeMarketplaceComponents()->where('slug', 'student-dashboard')->exists()) {
-            $request->session()->forget(['tenant_id', 'student_id', 'student_name', 'student_admission', 'student_class', 'login_type', 'student_must_reset_password']);
-            $request->session()->regenerateToken();
-            return redirect()->route('login')->with('warning', 'Student Dashboard is not active for this school.');
-        }
 
         // For aptitude test candidates, verify the attempt exists instead of a student
         if (session('login_type') === 'aptitude') {
@@ -78,6 +73,12 @@ class StudentSession
             }
 
             return $next($request);
+        }
+
+        if (! $tenant || ! $tenant->activeMarketplaceComponents()->where('slug', 'student-dashboard')->exists()) {
+            $request->session()->forget(['tenant_id', 'student_id', 'student_name', 'student_admission', 'student_class', 'login_type', 'student_must_reset_password']);
+            $request->session()->regenerateToken();
+            return redirect()->route('login')->with('warning', 'Student Dashboard is not active for this school.');
         }
 
         $studentExists = Student::query()

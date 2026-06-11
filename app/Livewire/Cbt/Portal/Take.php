@@ -97,7 +97,12 @@ class Take extends Component
 
         if ($attempt->terminated_at) {
             session()->flash('error', 'Your exam attempt was terminated by an admin.');
-            $this->redirect(route('student.exams'));
+            $isAptitude = $attempt->exam?->exam_type === 'aptitude';
+            if ($isAptitude) {
+                $this->redirect(route('cbt.student', ['code' => $this->examCode]));
+            } else {
+                $this->redirect(route('student.exams'));
+            }
             return;
         }
 
@@ -139,7 +144,11 @@ class Take extends Component
         }
         if ($attempt->terminated_at) {
             session()->flash('error', 'Your exam attempt was terminated by an admin.');
-            redirect()->route('student.exams');
+            if ($isAptitude) {
+                redirect()->route('cbt.student', ['code' => $this->examCode]);
+            } else {
+                redirect()->route('student.exams');
+            }
             return;
         }
 

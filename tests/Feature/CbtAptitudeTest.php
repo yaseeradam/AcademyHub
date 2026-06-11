@@ -98,4 +98,81 @@ class CbtAptitudeTest extends TestCase
         $response = $this->get(route('cbt.attempt.export-pdf', ['attempt' => $attempt->uuid]));
         $response->assertRedirect(route('login'));
     }
+
+    public function test_aptitude_candidate_can_access_take_exam_even_if_student_dashboard_plugin_is_not_installed(): void
+    {
+        $this->seed();
+
+        $admin = User::query()->where('email', 'admin@academyhub.local')->firstOrFail();
+
+        $tenant = \App\Models\Tenant::first();
+        app()->instance('currentTenant', $tenant);
+
+        // Deactivate student-dashboard plugin for this tenant
+        $tenant->activeMarketplaceComponents()->where('slug', 'student-dashboard')->delete();
+
+        $exam = CbtExam::query()->create([
+            'tenant_id' => $tenant->id,
+            'title' => 'Aptitude Test',
+            'exam_type' => 'aptitude',
+            'access_code' => 'APT123',
+            'status' => 'live',
+            'published_at' => now(),
+            'starts_at' => now()->subHour(),
+            'created_by' => $admin->id,
+        ]);
+
+        $attempt = CbtAttempt::query()->create([
+            'tenant_id' => $tenant->id,
+            'uuid' => (string) \Illuminate\Support\Str::uuid(),
+            'exam_id' => $exam->id,
+            'student_id' => null,
+            'candidate_name' => 'John Doe',
+            'started_at' => now(),
+        ]);
+
+        // Access route as candidate (mock session keys)
+        $response = $this->withSession([
+            'tenant_id'         => $tenant->id,
+            'student_id'        => $attempt->id,
+            'student_name'      => 'John Doe',
+            'student_admission' => 'APT-123456',
+            'student_class'     => 'Aptitude',
+            'login_type'        => 'aptitude',
+            'aptitude_attempt_id' => $attempt->id,
+        ])->get(route('cbt.student.take', ['attempt' => $attempt->uuid]));
+
+        $response->assertStatus(200);
+    }
+
+    public function test_staff_login_clears_old_student_session_data(): void
+    {
+        $this->seed();
+
+        $admin = User::query()->where('email', 'admin@academyhub.local')->firstOrFail();
+
+        $tenant = \App\Models\Tenant::first();
+        app()->instance('currentTenant', $tenant);
+
+        $admin->password = bcrypt('password');
+        $admin->tenant_id = $tenant->id;
+        $admin->is_super_admin = false;
+        $admin->save();
+
+        $response = $this->withSession([
+            'student_id'        => 999,
+            'login_type'        => 'aptitude',
+            'aptitude_attempt_id' => 999,
+        ])->post(route('login.store'), [
+            'email' => $admin->email,
+            'password' => 'password',
+            'login_type' => 'staff',
+        ]);
+
+        $response->assertRedirect('/dashboard');
+
+        $this->assertNull(session('student_id'));
+        $this->assertNull(session('login_type'));
+        $this->assertNull(session('aptitude_attempt_id'));
+    }
 }
