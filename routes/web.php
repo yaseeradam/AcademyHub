@@ -81,7 +81,6 @@ Route::middleware('plugin:cbt')->group(function () {
 Route::middleware(['student.session', 'plugin:cbt'])->group(function () {
     Route::get('/cbt/portal/{attempt}', CbtPortalTake::class)->name('cbt.portal.take');
     Route::get('/cbt/student/{attempt}', CbtPortalTake::class)->name('cbt.student.take');
-    Route::get('/cbt/attempt/{attempt}/export-pdf', [CbtExportController::class, 'exportAttemptResultPdf'])->name('cbt.attempt.export-pdf');
 });
 
 // Fresh CSRF token endpoint — used by JS logout to prevent 419 Page Expired
@@ -285,6 +284,8 @@ Route::middleware(['auth', 'active'])->group(function () {
                 ->name('cbt.exams.pdf');
             Route::get('/cbt/sample-download', [UtilityController::class, 'cbtSampleDownload'])
                 ->name('cbt.sample-download');
+            Route::get('/cbt/attempt/{attempt}/export-pdf', [CbtExportController::class, 'exportAttemptResultPdf'])
+                ->name('cbt.attempt.export-pdf');
         });
 
         // E-Learning — only accessible after purchasing/installing the E-Learning plugin

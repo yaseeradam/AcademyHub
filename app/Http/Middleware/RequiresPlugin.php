@@ -18,12 +18,10 @@ class RequiresPlugin
      */
     public function handle(Request $request, Closure $next, string $slug): Response
     {
-        $tenant = null;
+        $tenant = app()->bound('currentTenant') ? app('currentTenant') : null;
 
-        if ($user = $request->user()) {
+        if (! $tenant && ($user = $request->user())) {
             $tenant = $user->tenant;
-        } else {
-            $tenant = app()->bound('currentTenant') ? app('currentTenant') : null;
         }
 
         if (! $tenant) {

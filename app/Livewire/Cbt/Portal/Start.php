@@ -104,64 +104,105 @@ class Start extends Component
         }
 
         if ($exam->exam_type === 'aptitude') {
-            $student = Student::query()->where('admission_number', $admission)->first();
-            
-            if (! $student) {
-                $cleanName = trim(preg_replace('/\s+/', ' ', $admission));
-                $parts = explode(' ', $cleanName, 2);
-                $firstName = trim($parts[0]);
-                $lastName = isset($parts[1]) ? trim($parts[1]) : 'Candidate';
+            // Aptitude tests: no Student record needed, store name on the attempt
+            $candidateName = trim(preg_replace('/\s+/', ' ', $admission));
 
-                $student = Student::query()
-                    ->where('first_name', $firstName)
-                    ->where('last_name', $lastName)
-                    ->where('admission_number', 'like', 'APT-%')
-                    ->first();
+            if ($candidateName === '') {
+                $this->addError('admissionNumber', 'Please enter your full name.');
+                return;
+            }
 
-                if (! $student) {
-                    $classObj = \App\Models\SchoolClass::query()->where('name', 'Default Class')->first();
-                    if (! $classObj) {
-                        $classObj = \App\Models\SchoolClass::query()->create(['name' => 'Default Class', 'level' => 1]);
-                    }
-                    $sectionObj = \App\Models\Section::query()->where('class_id', $classObj->id)->where('name', 'A')->first();
-                    if (! $sectionObj) {
-                        $sectionObj = \App\Models\Section::query()->create(['class_id' => $classObj->id, 'name' => 'A']);
-                    }
+            // Look for an existing attempt for this exam by this candidate name
+            $attempt = CbtAttempt::query()
+                ->where('exam_id', $exam->id)
+                ->whereRaw('LOWER(candidate_name) = ?', [mb_strtolower($candidateName)])
+                ->first();
 
-                    $admNo = 'APT-' . strtoupper(Str::random(6));
-                    while (Student::query()->where('admission_number', $admNo)->exists()) {
-                        $admNo = 'APT-' . strtoupper(Str::random(6));
-                    }
-
-                    $student = Student::query()->create([
-                        'tenant_id' => $exam->tenant_id ?? \App\Support\TenantSettings::tenantId(),
-                        'admission_number' => $admNo,
-                        'first_name' => $firstName !== '' ? $firstName : 'Aptitude',
-                        'last_name' => $lastName !== '' ? $lastName : 'Candidate',
-                        'class_id' => $classObj->id,
-                        'section_id' => $sectionObj->id,
-                        'gender' => 'Male',
-                        'status' => 'Active',
-                        'password' => bcrypt('password'),
-                    ]);
+            // Also try swapped name order (e.g. "John Doe" vs "Doe John")
+            if (! $attempt) {
+                $parts = explode(' ', $candidateName, 2);
+                if (isset($parts[1])) {
+                    $swapped = trim($parts[1]) . ' ' . trim($parts[0]);
+                    $attempt = CbtAttempt::query()
+                        ->where('exam_id', $exam->id)
+                        ->whereRaw('LOWER(candidate_name) = ?', [mb_strtolower($swapped)])
+                        ->first();
                 }
             }
-        } else {
-            $student = Student::query()->where('admission_number', $admission)->first();
-            if (! $student || $student->status !== 'Active') {
-                $this->addError('admissionNumber', 'Student not found or inactive.');
+
+            if (! $attempt) {
+                try {
+                    $attempt = CbtAttempt::query()->create([
+                        'uuid' => (string) Str::uuid(),
+                        'exam_id' => $exam->id,
+                        'student_id' => null,
+                        'candidate_name' => $candidateName,
+                        'started_at' => now(),
+                        'last_activity_at' => now(),
+                        'ip_address' => $ip,
+                    ]);
+                } catch (QueryException) {
+                    $attempt = CbtAttempt::query()
+                        ->where('exam_id', $exam->id)
+                        ->whereRaw('LOWER(candidate_name) = ?', [mb_strtolower($candidateName)])
+                        ->first();
+                }
+            }
+
+            abort_unless($attempt, 500);
+
+            // Establish a session so the student.session middleware allows access
+            session([
+                'tenant_id'         => $exam->tenant_id ?? \App\Support\TenantSettings::tenantId(),
+                'student_id'        => $attempt->id, // Use attempt ID as pseudo-student for session
+                'student_name'      => $candidateName,
+                'student_admission' => 'APT-' . strtoupper(substr(md5($candidateName), 0, 6)),
+                'student_class'     => 'Aptitude',
+                'login_type'        => 'aptitude',
+                'aptitude_attempt_id' => $attempt->id,
+            ]);
+
+            if ($attempt->terminated_at) {
+                $this->addError('admissionNumber', 'Your attempt was terminated by an admin.');
                 return;
             }
 
-            if ($surname !== '' && strcasecmp(trim((string) $student->last_name), $surname) !== 0) {
-                $this->addError('surname', 'Surname does not match this admission number.');
-                return;
+            if (! $attempt->started_at) {
+                $attempt->forceFill(['started_at' => now()])->save();
             }
 
-            if ((int) $student->class_id !== (int) $exam->class_id) {
-                $this->addError('admissionNumber', 'Student is not in the exam class.');
-                return;
+            $lockedIp = trim((string) ($attempt->ip_address ?? ''));
+            $allowedIp = trim((string) ($attempt->allowed_ip ?? ''));
+
+            if ($lockedIp === '') {
+                $attempt->forceFill(['ip_address' => $ip])->save();
+            } elseif ($lockedIp !== $ip) {
+                if ($allowedIp !== '' && $allowedIp === $ip) {
+                    $attempt->forceFill(['ip_address' => $ip, 'allowed_ip' => null])->save();
+                } else {
+                    $this->addError('admissionNumber', 'This attempt is locked to another device/IP. Ask an admin to update your IP or reset your attempt.');
+                    return;
+                }
             }
+
+            return redirect()->route('cbt.student.take', ['attempt' => $attempt, 'code' => $code]);
+        }
+
+        // Academic exams: require a valid Student record
+        $student = Student::query()->where('admission_number', $admission)->first();
+        if (! $student || $student->status !== 'Active') {
+            $this->addError('admissionNumber', 'Student not found or inactive.');
+            return;
+        }
+
+        if ($surname !== '' && strcasecmp(trim((string) $student->last_name), $surname) !== 0) {
+            $this->addError('surname', 'Surname does not match this admission number.');
+            return;
+        }
+
+        if ((int) $student->class_id !== (int) $exam->class_id) {
+            $this->addError('admissionNumber', 'Student is not in the exam class.');
+            return;
         }
 
         $attempt = CbtAttempt::query()

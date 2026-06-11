@@ -132,11 +132,9 @@ class CbtExportController extends Controller
 
     public function exportAttemptResultPdf(CbtAttempt $attempt)
     {
-        $studentId = session('student_id');
         $user = auth()->user();
         
-        $isAuthorized = ($studentId && (int) $attempt->student_id === (int) $studentId)
-            || ($user && in_array($user->role, ['admin', 'teacher'], true));
+        $isAuthorized = $user && in_array($user->role, ['admin', 'teacher'], true);
 
         abort_unless($isAuthorized, 403, 'Unauthorized access to this attempt.');
         abort_unless($attempt->submitted_at, 403, 'This attempt has not been submitted yet.');
@@ -148,6 +146,13 @@ class CbtExportController extends Controller
             'answers.question.options',
             'answers.option'
         ]);
+
+        // Build candidate name from attempt or student
+        $candidateName = $attempt->candidate_name;
+        if (! $candidateName && $attempt->student) {
+            $candidateName = $attempt->student->full_name;
+        }
+        $candidateName = $candidateName ?: 'Unknown Candidate';
 
         $schoolName = config('myacademy.school_name', config('app.name', 'School'));
         $schoolAddress = config('myacademy.school_address', '');
@@ -166,6 +171,7 @@ class CbtExportController extends Controller
 
         $pdf = Pdf::loadView('pdf.cbt-attempt-result', [
             'attempt' => $attempt,
+            'candidateName' => $candidateName,
             'schoolName' => $schoolName,
             'schoolAddress' => $schoolAddress,
             'schoolPhone' => $schoolPhone,
@@ -173,7 +179,7 @@ class CbtExportController extends Controller
             'logoBase64' => $logoBase64,
         ]);
 
-        $filename = 'aptitude-result-' . str_replace(' ', '-', strtolower($attempt->student->first_name . '-' . $attempt->student->last_name)) . '.pdf';
+        $filename = 'aptitude-result-' . str_replace(' ', '-', strtolower($candidateName)) . '.pdf';
 
         return $pdf->download($filename)
             ->header('Cache-Control', 'no-cache, no-store, must-revalidate')

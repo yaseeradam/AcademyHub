@@ -514,7 +514,6 @@ class Entry extends Component
             ]
         );
 
-        $this->dispatch('alert', message: 'Score auto-saved.', type: 'success');
     }
 
 

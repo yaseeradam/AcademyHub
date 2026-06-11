@@ -55,6 +55,22 @@ class StudentSession
             return redirect()->route('login')->with('warning', 'Student Dashboard is not active for this school.');
         }
 
+        // For aptitude test candidates, verify the attempt exists instead of a student
+        if (session('login_type') === 'aptitude') {
+            $attemptId = session('aptitude_attempt_id');
+            $attemptExists = $attemptId && \App\Models\CbtAttempt::query()
+                ->where('id', $attemptId)
+                ->exists();
+
+            if (! $attemptExists) {
+                $request->session()->forget(['student_id', 'student_name', 'student_admission', 'student_class', 'login_type', 'aptitude_attempt_id']);
+                $request->session()->regenerateToken();
+                return redirect()->route('login');
+            }
+
+            return $next($request);
+        }
+
         $studentExists = Student::query()
             ->where('id', $studentId)
             ->where('status', 'Active')

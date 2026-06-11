@@ -540,8 +540,7 @@ class ExamEditor extends Component
             $attempts = CbtAttempt::query()
                 ->where('exam_id', $exam->id)
                 ->with(['student:id,admission_number,first_name,last_name,passport_photo'])
-                ->get()
-                ->keyBy('student_id');
+                ->get();
 
             $attemptIds = $attempts->pluck('id')->filter()->values();
             $answeredCounts = $attemptIds->isNotEmpty()
@@ -561,8 +560,20 @@ class ExamEditor extends Component
                 elseif ($attempt->submitted_at) $state = 'submitted';
                 elseif ($attempt->started_at) $state = 'in_progress';
 
+                // Build student object from attempt's candidate_name if no student record
+                $student = $attempt->student;
+                if (! $student && $attempt->candidate_name) {
+                    $student = new \stdClass();
+                    $parts = explode(' ', $attempt->candidate_name, 2);
+                    $student->first_name = $parts[0] ?? 'Candidate';
+                    $student->last_name = $parts[1] ?? '';
+                    $student->full_name = $attempt->candidate_name;
+                    $student->admission_number = 'APT-' . strtoupper(substr(md5($attempt->candidate_name), 0, 6));
+                    $student->passport_photo_url = null;
+                }
+
                 return [
-                    'student' => $attempt->student,
+                    'student' => $student,
                     'attempt' => $attempt,
                     'state' => $state,
                     'answered' => (int) ($answeredCounts[$attempt->id] ?? 0),

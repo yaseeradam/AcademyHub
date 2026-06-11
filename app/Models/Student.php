@@ -70,6 +70,11 @@ class Student extends Model
         return $this->hasMany(Score::class);
     }
 
+    public function cbtAttempts(): HasMany
+    {
+        return $this->hasMany(CbtAttempt::class);
+    }
+
     public function transactions(): HasMany
     {
         return $this->hasMany(Transaction::class);

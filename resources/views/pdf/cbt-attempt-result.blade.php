@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-    <title>Aptitude Test Result - {{ $attempt->student->full_name }}</title>
+    <title>Aptitude Test Result - {{ $candidateName }}</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'DejaVu Sans', sans-serif; font-size: 10pt; line-height: 1.5; color: #1e293b; padding: 30px; background-color: #ffffff; }
@@ -115,15 +115,15 @@
     <table class="grid-container">
         <tr>
             <td class="info-label">Candidate Name</td>
-            <td class="info-value">{{ $attempt->student->full_name }}</td>
+            <td class="info-value">{{ $candidateName }}</td>
             <td class="info-label">Candidate ID</td>
-            <td class="info-value font-mono">{{ $attempt->student->admission_number }}</td>
+            <td class="info-value font-mono">{{ $attempt->student->admission_number ?? ('APT-' . strtoupper(substr(md5($candidateName), 0, 6))) }}</td>
         </tr>
         <tr>
             <td class="info-label">Test Name</td>
             <td class="info-value">{{ $attempt->exam->title }}</td>
             <td class="info-label">Class Category</td>
-            <td class="info-value">{{ $attempt->student->schoolClass?->name ?? 'Default Class' }}</td>
+            <td class="info-value">{{ $attempt->student->schoolClass->name ?? 'Aptitude Candidate' }}</td>
         </tr>
         <tr>
             <td class="info-label">Date Completed</td>

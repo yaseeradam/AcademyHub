@@ -18,6 +18,7 @@ class CbtAttempt extends Model
         'uuid',
         'exam_id',
         'student_id',
+        'candidate_name',
         'ip_address',
         'allowed_ip',
         'started_at',
