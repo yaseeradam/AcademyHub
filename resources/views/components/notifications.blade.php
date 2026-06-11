@@ -140,4 +140,19 @@ window.showWarningNotification = function(message) {
         duration: 4000
     });
 };
+
+document.addEventListener('DOMContentLoaded', () => {
+    @if(session('success'))
+        window.showNotification("{{ addslashes(session('success')) }}", 'success');
+    @endif
+    @if(session('error'))
+        window.showNotification("{{ addslashes(session('error')) }}", 'error');
+    @endif
+    @if(session('warning'))
+        window.showNotification("{{ addslashes(session('warning')) }}", 'warning');
+    @endif
+    @if(session('status') && !is_array(session('status')))
+        window.showNotification("{{ addslashes(session('status')) }}", 'info');
+    @endif
+});
 </script>
