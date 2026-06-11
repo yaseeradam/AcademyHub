@@ -619,7 +619,8 @@
                                         
                                         @if($classes->isNotEmpty())
                                             @php
-                                                $selectedClassesObjects = $classes->filter(fn($c) => in_array($c->id, $allowedClasses));
+                                                $allowedClassesArray = is_string($allowedClasses) ? (json_decode($allowedClasses, true) ?: []) : (is_array($allowedClasses) ? $allowedClasses : []);
+                                                $selectedClassesObjects = $classes->filter(fn($c) => in_array($c->id, $allowedClassesArray));
                                             @endphp
                                             @if($selectedClassesObjects->isNotEmpty())
                                                 <div style="display:flex; flex-wrap: wrap; gap: 8px;">
