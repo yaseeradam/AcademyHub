@@ -44,12 +44,18 @@
                     <img src="{{ $student->passport_photo_url }}" alt="{{ $student->full_name }}"
                          class="h-40 w-auto object-contain object-bottom" style="display:block;">
                 @else
-                    <div class="h-40 w-32 flex items-center justify-center" style="background:rgba(255,255,255,0.1);">
-                        <div class="h-16 w-16 rounded-full flex items-center justify-center text-white text-3xl font-black"
-                             style="background:rgba(255,255,255,0.2);">
-                            {{ mb_strtoupper(mb_substr($student->first_name, 0, 1)) }}
-                        </div>
-                    </div>
+                    @php
+                        $avatarPath = 'avatars/student yellow.png';
+                        if (isset($student->gender)) {
+                            if ($student->gender === 'Female') {
+                                $avatarPath = 'avatars/girl student pink.png';
+                            } elseif ($student->gender === 'Male') {
+                                $avatarPath = 'avatars/studentblue.png';
+                            }
+                        }
+                    @endphp
+                    <img src="{{ asset($avatarPath) }}" alt="{{ $student->full_name }}"
+                         class="h-40 w-auto object-contain object-bottom" style="display:block;">
                 @endif
             </div>
         </div>

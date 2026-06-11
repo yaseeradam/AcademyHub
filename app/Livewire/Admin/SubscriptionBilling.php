@@ -60,7 +60,7 @@ class SubscriptionBilling extends Component
         // Calculate student count for these classes
         if (!empty($classes)) {
             $studentCount = Student::whereIn('class_id', $classes)
-                ->where('status', 'active')
+                ->where('status', 'Active')
                 ->count();
         } else {
             // Fallback to studentCount at install or total if empty

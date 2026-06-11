@@ -505,13 +505,13 @@ class TenantController extends Controller
             $studentCount = Student::withoutGlobalScopes()
                 ->where('tenant_id', $tenant->id)
                 ->whereIn('class_id', $allowedClassIds)
-                ->where('status', 'active')
+                ->where('status', 'Active')
                 ->count();
         } else {
             // Default to all active students
             $studentCount = Student::withoutGlobalScopes()
                 ->where('tenant_id', $tenant->id)
-                ->where('status', 'active')
+                ->where('status', 'Active')
                 ->count();
         }
         

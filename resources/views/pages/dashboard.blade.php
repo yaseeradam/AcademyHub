@@ -112,7 +112,7 @@
         <div class="relative z-10 w-full md:w-2/5 flex items-center justify-end py-6 md:py-0">
             
             {{-- Avatar Placeholder 1 (Hero Admin) --}}
-            <!-- <img src="SUPER_ADMIN_AVATAR.png" class="absolute bottom-0 -left-6 h-64 z-20 object-contain drop-shadow-2xl" alt="Admin Avatar"> -->
+            <img src="{{ asset('avatars/Admin.png') }}" class="absolute bottom-0 -left-6 h-64 z-20 object-contain drop-shadow-2xl" alt="Admin Avatar">
 
             <div class="bg-white/10 backdrop-blur-md rounded-2xl border border-white/10 p-4 shadow-xl w-full max-w-[280px] relative z-10 mt-6 md:mt-0">
                 <div class="flex items-center justify-between mb-3">
@@ -156,7 +156,7 @@
                 </div>
             </div>
             {{-- Avatar Placeholder 2 (Boy Student) --}}
-            <!-- <img src="BOY_STUDENT_AVATAR.png" class="absolute bottom-0 -right-2 h-[120%] object-contain origin-bottom scale-90 translate-x-2 z-0" alt="Student"> -->
+            <img src="{{ asset('avatars/studentblue.png') }}" class="absolute bottom-0 -right-2 h-[120%] object-contain origin-bottom scale-90 translate-x-2 z-0" alt="Student">
         </div>
 
         {{-- Purple: Teachers --}}
@@ -178,7 +178,7 @@
                 </div>
             </div>
             {{-- Avatar Placeholder 3 (Teacher Female) --}}
-            <!-- <img src="FEMALE_TEACHER_AVATAR.png" class="absolute bottom-0 right-2 h-[115%] object-contain scale-90 translate-x-2 z-0" alt="Teacher"> -->
+            <img src="{{ asset('avatars/girl student pink.png') }}" class="absolute bottom-0 right-2 h-[115%] object-contain scale-90 translate-x-2 z-0" alt="Teacher">
         </div>
 
         {{-- Teal: Classes --}}
@@ -200,7 +200,7 @@
                 </div>
             </div>
             {{-- Avatar Placeholder 4 (Boy Pointing) --}}
-            <!-- <img src="BOY_POINTING_AVATAR.png" class="absolute bottom-0 -right-2 h-[120%] object-contain scale-90 translate-x-2 z-0" alt="Student"> -->
+            <img src="{{ asset('avatars/student yellow.png') }}" class="absolute bottom-0 -right-2 h-[120%] object-contain scale-90 translate-x-2 z-0" alt="Student">
         </div>
 
     </div>

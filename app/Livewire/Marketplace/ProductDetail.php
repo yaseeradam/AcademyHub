@@ -351,8 +351,17 @@ class ProductDetail extends Component
         try {
             \Illuminate\Support\Facades\DB::beginTransaction();
 
-            $setupFee = $tenant->plan === 'free' ? 0.00 : (float) $dbComponent->setup_fee;
-            $usageFee = $tenant->plan === 'free' ? 0.00 : (float) $dbComponent->usage_fee_per_student;
+            $existingPivot = $tenant->marketplaceComponents()
+                ->where('marketplace_component_id', $dbComponent->id)
+                ->first();
+
+            $setupFee = $existingPivot && $existingPivot->pivot->setup_fee !== null 
+                ? (float) $existingPivot->pivot->setup_fee 
+                : ($tenant->plan === 'free' ? 0.00 : (float) $dbComponent->setup_fee);
+                
+            $usageFee = $existingPivot && $existingPivot->pivot->usage_fee_per_student !== null 
+                ? (float) $existingPivot->pivot->usage_fee_per_student 
+                : ($tenant->plan === 'free' ? 0.00 : (float) $dbComponent->usage_fee_per_student);
 
             // Soft install or sync
             $tenant->marketplaceComponents()->syncWithoutDetaching([
@@ -508,20 +517,18 @@ class ProductDetail extends Component
                     $this->usageFeePerStudent = 0.00;
                 }
 
-                $pivot = $tenant->marketplaceComponents()
+                $existingPivot = $tenant->marketplaceComponents()
                     ->where('marketplace_component_id', $dbComponent->id)
-                    ->wherePivotNotNull('installed_at')
-                    ->wherePivotNull('uninstalled_at')
                     ->first();
-                $isInstalled = $pivot !== null;
-                $installPivot = $pivot?->pivot;
+                $isInstalled = $existingPivot && $existingPivot->pivot->installed_at !== null && $existingPivot->pivot->uninstalled_at === null;
+                $installPivot = $existingPivot?->pivot;
 
-                if ($pivot && $pivot->pivot) {
-                    if ($pivot->pivot->setup_fee !== null) {
-                        $this->setupFee = (float) $pivot->pivot->setup_fee;
+                if ($existingPivot && $existingPivot->pivot) {
+                    if ($existingPivot->pivot->setup_fee !== null) {
+                        $this->setupFee = (float) $existingPivot->pivot->setup_fee;
                     }
-                    if ($pivot->pivot->usage_fee_per_student !== null) {
-                        $this->usageFeePerStudent = (float) $pivot->pivot->usage_fee_per_student;
+                    if ($existingPivot->pivot->usage_fee_per_student !== null) {
+                        $this->usageFeePerStudent = (float) $existingPivot->pivot->usage_fee_per_student;
                     }
                 }
             }
@@ -529,13 +536,13 @@ class ProductDetail extends Component
 
         // Load active classes with student counts
         $classes = \App\Models\SchoolClass::withCount(['students' => function($query) {
-            $query->where('status', 'active');
+            $query->where('status', 'Active');
         }])->orderBy('level')->orderBy('name')->get();
 
         // Recalculate dynamic student count based on class selection
         if (!empty($this->selectedClasses)) {
             $this->calculatedStudentCount = Student::whereIn('class_id', $this->selectedClasses)
-                ->where('status', 'active')
+                ->where('status', 'Active')
                 ->count();
         } else {
             $this->calculatedStudentCount = 0;
