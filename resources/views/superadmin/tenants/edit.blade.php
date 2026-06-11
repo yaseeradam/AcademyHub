@@ -619,7 +619,16 @@
                                         
                                         @if($classes->isNotEmpty())
                                             @php
-                                                $allowedClassesArray = is_string($allowedClasses) ? (json_decode($allowedClasses, true) ?: []) : (is_array($allowedClasses) ? $allowedClasses : []);
+                                                $allowedClassesArray = $allowedClasses;
+                                                if (is_string($allowedClassesArray)) {
+                                                    $allowedClassesArray = json_decode($allowedClassesArray, true);
+                                                }
+                                                if (is_string($allowedClassesArray)) {
+                                                    $allowedClassesArray = json_decode($allowedClassesArray, true);
+                                                }
+                                                if (!is_array($allowedClassesArray)) {
+                                                    $allowedClassesArray = ($allowedClassesArray !== null && $allowedClassesArray !== '') ? (array) $allowedClassesArray : [];
+                                                }
                                                 $selectedClassesObjects = $classes->filter(fn($c) => in_array($c->id, $allowedClassesArray));
                                             @endphp
                                             @if($selectedClassesObjects->isNotEmpty())

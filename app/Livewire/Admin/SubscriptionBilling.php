@@ -49,9 +49,13 @@ class SubscriptionBilling extends Component
     {
         // Get allowed classes from pivot
         $rawClasses = $plugin->pivot->allowed_class_ids ?? [];
-        $classes = is_string($rawClasses)
-            ? (json_decode($rawClasses, true) ?: [])
-            : (is_array($rawClasses) ? $rawClasses : []);
+        if (is_string($rawClasses)) {
+            $rawClasses = json_decode($rawClasses, true);
+        }
+        if (is_string($rawClasses)) {
+            $rawClasses = json_decode($rawClasses, true);
+        }
+        $classes = is_array($rawClasses) ? $rawClasses : [];
 
         // Calculate student count for these classes
         if (!empty($classes)) {

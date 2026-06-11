@@ -107,9 +107,13 @@ class ProductDetail extends Component
                     ->first();
                 if ($pivot && $pivot->pivot) {
                     $rawClasses = $pivot->pivot->allowed_class_ids ?? [];
-                    $this->selectedClasses = is_string($rawClasses)
-                        ? (json_decode($rawClasses, true) ?: [])
-                        : (is_array($rawClasses) ? $rawClasses : []);
+                    if (is_string($rawClasses)) {
+                        $rawClasses = json_decode($rawClasses, true);
+                    }
+                    if (is_string($rawClasses)) {
+                        $rawClasses = json_decode($rawClasses, true);
+                    }
+                    $this->selectedClasses = is_array($rawClasses) ? $rawClasses : [];
                 }
             }
         }
