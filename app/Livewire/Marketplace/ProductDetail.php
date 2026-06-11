@@ -357,11 +357,11 @@ class ProductDetail extends Component
 
             $setupFee = $existingPivot && $existingPivot->pivot->setup_fee !== null 
                 ? (float) $existingPivot->pivot->setup_fee 
-                : ($tenant->plan === 'free' ? 0.00 : (float) $dbComponent->setup_fee);
+                : (float) $dbComponent->setup_fee;
                 
             $usageFee = $existingPivot && $existingPivot->pivot->usage_fee_per_student !== null 
                 ? (float) $existingPivot->pivot->usage_fee_per_student 
-                : ($tenant->plan === 'free' ? 0.00 : (float) $dbComponent->usage_fee_per_student);
+                : (float) $dbComponent->usage_fee_per_student;
 
             // Soft install or sync
             $tenant->marketplaceComponents()->syncWithoutDetaching([
@@ -512,10 +512,6 @@ class ProductDetail extends Component
             $this->usageFeePerStudent = (float) $dbComponent->usage_fee_per_student;
 
             if ($tenant) {
-                if ($tenant->plan === 'free') {
-                    $this->setupFee = 0.00;
-                    $this->usageFeePerStudent = 0.00;
-                }
 
                 $existingPivot = $tenant->marketplaceComponents()
                     ->where('marketplace_component_id', $dbComponent->id)

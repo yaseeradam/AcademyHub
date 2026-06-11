@@ -748,14 +748,14 @@ class TenantController extends Controller
 
         // 3. Activate and install missing allowed components
         foreach ($componentsToInstall as $component) {
-            $setupFee = $tenant->plan === 'free' ? 0.00 : (float) $component->setup_fee;
-            $usageFee = $tenant->plan === 'free' ? 0.00 : (float) $component->usage_fee_per_student;
-
             // Check if already installed (and not uninstalled)
             $pivot = $tenant->marketplaceComponents()
                 ->where('marketplace_component_id', $component->id)
                 ->wherePivotNull('uninstalled_at')
                 ->first();
+
+            $setupFee = ($plan === 'pro' || $plan === 'enterprise') ? 0.00 : (float) ($pivot ? ($pivot->pivot->setup_fee ?? $component->setup_fee) : $component->setup_fee);
+            $usageFee = (float) ($pivot ? ($pivot->pivot->usage_fee_per_student ?? $component->usage_fee_per_student) : $component->usage_fee_per_student);
 
             if (!$pivot) {
                 // Attach or update existing pivot
@@ -816,21 +816,11 @@ class TenantController extends Controller
                     ]),
                 ]);
             } else {
-                // If it is already installed, update pricing to reflect any plan transitions
-                if ($tenant->plan === 'free') {
-                    $tenant->marketplaceComponents()->updateExistingPivot($component->id, [
-                        'setup_fee'             => 0.00,
-                        'usage_fee_per_student' => 0.00,
-                    ]);
-                } else {
-                    // Upgraded to paid plan (pro/enterprise). If the pivot fees are 0.00, restore them to defaults
-                    if ((float)$pivot->pivot->setup_fee === 0.00 || (float)$pivot->pivot->usage_fee_per_student === 0.00) {
-                        $tenant->marketplaceComponents()->updateExistingPivot($component->id, [
-                            'setup_fee'             => $pivot->pivot->setup_fee == 0.00 ? (float)$component->setup_fee : $pivot->pivot->setup_fee,
-                            'usage_fee_per_student' => $pivot->pivot->usage_fee_per_student == 0.00 ? (float)$component->usage_fee_per_student : $pivot->pivot->usage_fee_per_student,
-                        ]);
-                    }
-                }
+                // If it is already installed, update/sync pricing to reflect the plan settings (0.00 setup fee for Pro/Enterprise)
+                $tenant->marketplaceComponents()->updateExistingPivot($component->id, [
+                    'setup_fee'             => $setupFee,
+                    'usage_fee_per_student' => $usageFee,
+                ]);
             }
 
             $installedIds[] = $component->id;
@@ -844,11 +834,13 @@ class TenantController extends Controller
 
         foreach ($activeComponents as $activeComp) {
             if (!in_array($activeComp->id, $installedIds)) {
-                // Soft-uninstall
+                // Soft-uninstall and restore standard pricing in the pivot table
                 $tenant->marketplaceComponents()
                     ->wherePivot('marketplace_component_id', $activeComp->id)
                     ->updateExistingPivot($activeComp->id, [
-                        'uninstalled_at' => now(),
+                        'uninstalled_at'        => now(),
+                        'setup_fee'             => (float) $activeComp->setup_fee,
+                        'usage_fee_per_student' => (float) $activeComp->usage_fee_per_student,
                     ]);
 
                 // Decrement install count if greater than 0
