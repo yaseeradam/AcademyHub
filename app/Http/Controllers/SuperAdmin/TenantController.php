@@ -815,6 +815,22 @@ class TenantController extends Controller
                         'usage_fee' => $usageFee,
                     ]),
                 ]);
+            } else {
+                // If it is already installed, update pricing to reflect any plan transitions
+                if ($tenant->plan === 'free') {
+                    $tenant->marketplaceComponents()->updateExistingPivot($component->id, [
+                        'setup_fee'             => 0.00,
+                        'usage_fee_per_student' => 0.00,
+                    ]);
+                } else {
+                    // Upgraded to paid plan (pro/enterprise). If the pivot fees are 0.00, restore them to defaults
+                    if ((float)$pivot->pivot->setup_fee === 0.00 || (float)$pivot->pivot->usage_fee_per_student === 0.00) {
+                        $tenant->marketplaceComponents()->updateExistingPivot($component->id, [
+                            'setup_fee'             => $pivot->pivot->setup_fee == 0.00 ? (float)$component->setup_fee : $pivot->pivot->setup_fee,
+                            'usage_fee_per_student' => $pivot->pivot->usage_fee_per_student == 0.00 ? (float)$component->usage_fee_per_student : $pivot->pivot->usage_fee_per_student,
+                        ]);
+                    }
+                }
             }
 
             $installedIds[] = $component->id;
