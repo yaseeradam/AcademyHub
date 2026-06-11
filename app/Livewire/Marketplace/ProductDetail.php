@@ -499,6 +499,11 @@ class ProductDetail extends Component
             $this->usageFeePerStudent = (float) $dbComponent->usage_fee_per_student;
 
             if ($tenant) {
+                if ($tenant->plan === 'free') {
+                    $this->setupFee = 0.00;
+                    $this->usageFeePerStudent = 0.00;
+                }
+
                 $pivot = $tenant->marketplaceComponents()
                     ->where('marketplace_component_id', $dbComponent->id)
                     ->wherePivotNotNull('installed_at')

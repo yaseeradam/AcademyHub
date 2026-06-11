@@ -279,7 +279,9 @@
                                     <span class="px-2.5 py-0.5 rounded-md text-[9px] font-black uppercase tracking-wider bg-indigo-50 text-indigo-700 border border-indigo-100">
                                         Installed
                                     </span>
-                                @elseif($component->price > 0)
+                                @endif
+
+                                @if($component->price > 0)
                                     <span class="px-2.5 py-0.5 rounded-md text-[9px] font-black uppercase tracking-wider bg-blue-50 text-blue-700 border border-blue-100">
                                         {{ config('academyhub.currency_symbol', '₦') }}{{ number_format($component->price, 0) }}
                                     </span>

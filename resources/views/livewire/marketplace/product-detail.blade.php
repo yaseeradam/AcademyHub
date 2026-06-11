@@ -360,6 +360,11 @@
                                     <div class="text-xl font-black text-indigo-900 mt-0.5">
                                         {{ config('academyhub.currency_symbol','₦') }}{{ number_format($setupFee, 2) }}
                                     </div>
+                                    @if($setupFee != (float)$dbComponent->setup_fee)
+                                        <div class="text-[10px] text-slate-400 font-semibold line-through">
+                                            Standard: {{ config('academyhub.currency_symbol','₦') }}{{ number_format($dbComponent->setup_fee, 2) }}
+                                        </div>
+                                    @endif
                                 </div>
                                 
                                 <div class="border-t border-indigo-100/50 pt-2">
@@ -367,8 +372,13 @@
                                     <div class="text-sm text-slate-600 mt-0.5 font-medium">
                                         {{ config('academyhub.currency_symbol','₦') }}{{ number_format($usageFeePerStudent, 2) }} <span class="text-slate-400 font-normal">/ student</span>
                                     </div>
+                                    @if($usageFeePerStudent != (float)$dbComponent->usage_fee_per_student)
+                                        <div class="text-[10px] text-slate-400 font-semibold line-through mt-0.5">
+                                            Standard: {{ config('academyhub.currency_symbol','₦') }}{{ number_format($dbComponent->usage_fee_per_student, 2) }} / std
+                                        </div>
+                                    @endif
                                     @if($calculatedStudentCount > 0)
-                                        <div class="text-xs text-emerald-600 font-semibold mt-0.5">
+                                        <div class="text-xs text-emerald-600 font-semibold mt-1">
                                             × {{ number_format($calculatedStudentCount) }} target {{ Str::plural('student', $calculatedStudentCount) }}
                                         </div>
                                         <div class="text-lg font-black text-emerald-600 mt-1 transition-all duration-300">
@@ -480,17 +490,31 @@
                         {{-- Setup Fee --}}
                         <div class="flex justify-between items-center">
                             <span class="font-semibold text-slate-600">Setup / Install Fee (One-Time)</span>
-                            <span class="font-black text-slate-900">
-                                {{ config('academyhub.currency_symbol','₦') }}{{ number_format($setupFee, 2) }}
-                            </span>
+                            <div class="flex flex-col items-end">
+                                <span class="font-black text-slate-900">
+                                    {{ config('academyhub.currency_symbol','₦') }}{{ number_format($setupFee, 2) }}
+                                </span>
+                                @if($setupFee != (float)$dbComponent->setup_fee)
+                                    <span class="text-[10px] text-slate-400 font-semibold line-through">
+                                        Standard: {{ config('academyhub.currency_symbol','₦') }}{{ number_format($dbComponent->setup_fee, 2) }}
+                                    </span>
+                                @endif
+                            </div>
                         </div>
 
                         {{-- Usage Fee Per Student --}}
                         <div class="flex justify-between items-center border-t border-indigo-100/20 pt-2">
                             <span class="font-semibold text-slate-600">License per Student (Termly)</span>
-                            <span class="font-black text-slate-900">
-                                {{ config('academyhub.currency_symbol','₦') }}{{ number_format($usageFeePerStudent, 2) }} / std
-                            </span>
+                            <div class="flex flex-col items-end">
+                                <span class="font-black text-slate-900">
+                                    {{ config('academyhub.currency_symbol','₦') }}{{ number_format($usageFeePerStudent, 2) }} / std
+                                </span>
+                                @if($usageFeePerStudent != (float)$dbComponent->usage_fee_per_student)
+                                    <span class="text-[10px] text-slate-400 font-semibold line-through">
+                                        Standard: {{ config('academyhub.currency_symbol','₦') }}{{ number_format($dbComponent->usage_fee_per_student, 2) }} / std
+                                    </span>
+                                @endif
+                            </div>
                         </div>
 
                         {{-- Total Termly Est --}}
@@ -741,6 +765,18 @@
                     </div>
                     
                     <div class="border-t border-emerald-100/50 pt-2 text-xs text-slate-600 space-y-1">
+                        <div>
+                            <strong>Setup Fee Paid:</strong> {{ config('academyhub.currency_symbol','₦') }}{{ number_format($setupFee, 2) }}
+                            @if($setupFee != (float)$dbComponent->setup_fee)
+                                <span class="text-[10px] text-slate-400 line-through">(Std: {{ config('academyhub.currency_symbol','₦') }}{{ number_format($dbComponent->setup_fee, 0) }})</span>
+                            @endif
+                        </div>
+                        <div>
+                            <strong>Usage Fee Rate:</strong> {{ config('academyhub.currency_symbol','₦') }}{{ number_format($usageFeePerStudent, 2) }} / std
+                            @if($usageFeePerStudent != (float)$dbComponent->usage_fee_per_student)
+                                <span class="text-[10px] text-slate-400 line-through">(Std: {{ config('academyhub.currency_symbol','₦') }}{{ number_format($dbComponent->usage_fee_per_student, 0) }})</span>
+                            @endif
+                        </div>
                         <div>
                             <strong>Active Target Classes:</strong> {{ count($selectedClasses) }}
                         </div>
