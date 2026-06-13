@@ -264,8 +264,8 @@ $activeShadow = "shadow-{$accent}-200";
         {{-- Subscription banners --}}
         @if(isset($subscriptionDueDate) && $user && !$user->is_super_admin && $user->tenant_id && !request()->routeIs('settings.subscription'))
             @if($subscriptionIsPastDue)
-                <!-- Subscription Expired Side Alert Toast -->
-                <div class="fixed bottom-4 right-4 z-[999] max-w-sm bg-white/95 backdrop-blur-md border-l-4 border-red-500 rounded-2xl shadow-2xl p-4 animate-bounce-subtle border border-slate-100">
+                <!-- Subscription Expired Top Alert Toast -->
+                <div class="fixed {{ session()->has('original_superadmin_id') ? 'top-24' : 'top-4' }} left-1/2 -translate-x-1/2 z-[9999] w-[90%] max-w-lg bg-white/95 backdrop-blur-md border-l-4 border-red-500 rounded-2xl shadow-2xl p-4 border border-slate-100 animate-bounce-subtle">
                     <div class="flex items-start gap-3">
                         <div class="flex-shrink-0 w-9 h-9 rounded-xl bg-red-50 text-red-500 flex items-center justify-center shadow-inner">
                             <svg class="w-5 h-5 animate-pulse" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
@@ -499,8 +499,8 @@ $activeShadow = "shadow-{$accent}-200";
                     }, true);
                 </script>
             @elseif(!$subscriptionIsPastDue && $subscriptionDaysUntilDue <= 7)
-                <!-- Subscription Expiring Soon Side Alert Toast -->
-                <div class="fixed bottom-4 right-4 z-[999] max-w-sm bg-white/95 backdrop-blur-md border-l-4 border-amber-500 rounded-2xl shadow-2xl p-4 animate-bounce-subtle border border-slate-100">
+                <!-- Subscription Expiring Soon Top Alert Toast -->
+                <div class="fixed {{ session()->has('original_superadmin_id') ? 'top-24' : 'top-4' }} left-1/2 -translate-x-1/2 z-[9999] w-[90%] max-w-lg bg-white/95 backdrop-blur-md border-l-4 border-amber-500 rounded-2xl shadow-2xl p-4 border border-slate-100 animate-bounce-subtle">
                     <div class="flex items-start gap-3">
                         <div class="flex-shrink-0 w-9 h-9 rounded-xl bg-amber-50 text-amber-500 flex items-center justify-center shadow-inner">
                             <svg class="w-5 h-5 animate-pulse" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
