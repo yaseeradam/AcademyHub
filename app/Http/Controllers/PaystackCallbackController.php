@@ -232,23 +232,28 @@ class PaystackCallbackController extends Controller
 
     private function processSubscriptionRenewal(string $reference, array $data)
     {
-        $newExpiry = now()->addYear();
+        $tenantId = TenantSettings::tenantId();
+        $tenant = $tenantId ? Tenant::find($tenantId) : null;
+        
+        // Base extension on the existing expiry date if it is in the future, otherwise use now()
+        $baseDate = now();
+        if ($tenant && $tenant->expires_at && \Carbon\Carbon::parse($tenant->expires_at)->isFuture()) {
+            $baseDate = \Carbon\Carbon::parse($tenant->expires_at);
+        }
+        
+        $newExpiry = $baseDate->addMonths(4);
+
+        if ($tenant) {
+            $tenant->update([
+                'expires_at' => $newExpiry,
+            ]);
+        }
 
         // Extend settings.json subscription_due_date
         $settingsPath = TenantSettings::settingsPath();
         $existing = file_exists($settingsPath) ? (json_decode(file_get_contents($settingsPath), true) ?? []) : [];
         $existing['subscription_due_date'] = $newExpiry->toDateString();
         file_put_contents($settingsPath, json_encode($existing, JSON_PRETTY_PRINT));
-
-        $tenantId = TenantSettings::tenantId();
-        if ($tenantId) {
-            $tenant = Tenant::find($tenantId);
-            if ($tenant) {
-                $tenant->update([
-                    'expires_at' => $newExpiry,
-                ]);
-            }
-        }
 
         \Illuminate\Support\Facades\Cache::forget(TenantSettings::settingsCacheKey());
 

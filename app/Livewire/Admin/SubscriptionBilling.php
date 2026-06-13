@@ -68,7 +68,7 @@ class SubscriptionBilling extends Component
         return $tenant->activeMarketplaceComponents()->get();
     }
 
-    public function getPluginYearlyCost($plugin)
+    public function getPluginTermlyCost($plugin)
     {
         // Get allowed classes from pivot
         $rawClasses = $plugin->pivot->allowed_class_ids ?? [];
@@ -92,15 +92,15 @@ class SubscriptionBilling extends Component
 
         $usageFee = (float) ($plugin->pivot->usage_fee_per_student ?? $plugin->usage_fee_per_student ?? 0);
         
-        // Termly usage fee * 3 terms
-        return $usageFee * $studentCount * 3;
+        // Termly usage fee (for 4 months / 1 term)
+        return $usageFee * $studentCount;
     }
 
     public function getAddonsCostProperty()
     {
         $cost = 0;
         foreach ($this->activePlugins as $plugin) {
-            $cost += $this->getPluginYearlyCost($plugin);
+            $cost += $this->getPluginTermlyCost($plugin);
         }
         return $cost;
     }

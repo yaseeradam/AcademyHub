@@ -89,7 +89,7 @@
                 <p class="mt-1 text-sm font-medium text-slate-500">Base school management system containing students, results, fees, and attendance.</p>
             </div>
             <div class="mt-4 sm:mt-0 sm:text-right">
-                <div class="text-3xl font-black text-slate-900">₦1,000<span class="text-base font-normal text-slate-500"> / student / yr</span></div>
+                <div class="text-3xl font-black text-slate-900">₦1,000<span class="text-base font-normal text-slate-500"> / student / term</span></div>
             </div>
         </div>
         <div class="p-6">
@@ -109,7 +109,7 @@
                     </div>
                 </div>
                 <div class="text-right">
-                    <div class="text-sm font-semibold text-slate-600">Yearly Base Cost</div>
+                    <div class="text-sm font-semibold text-slate-600">Termly Base Cost</div>
                     <div class="text-2xl font-black text-slate-900">₦{{ number_format($this->coreCost) }}</div>
                 </div>
             </div>
@@ -137,7 +137,7 @@
                             $rawClasses = $plugin->pivot->allowed_class_ids ?? [];
                             $classes = is_string($rawClasses) ? (json_decode($rawClasses, true) ?: []) : (is_array($rawClasses) ? $rawClasses : []);
                             $pluginStudentCount = \App\Models\Student::whereIn('class_id', $classes)->where('status', 'active')->count();
-                            $yearlyCost = $this->getPluginYearlyCost($plugin);
+                            $termlyCost = $this->getPluginTermlyCost($plugin);
                         @endphp
                         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pt-6 first:pt-0">
                             <div class="flex items-start gap-4">
@@ -167,9 +167,9 @@
                                 </div>
                             </div>
                             <div class="text-left sm:text-right flex-shrink-0">
-                                <div class="text-sm font-bold text-slate-400 uppercase tracking-wider text-[10px]">Est. Yearly Cost</div>
+                                <div class="text-sm font-bold text-slate-400 uppercase tracking-wider text-[10px]">Termly Cost</div>
                                 <div class="text-xl font-black text-slate-900 mt-0.5">
-                                    {{ config('academyhub.currency_symbol','₦') }}{{ number_format($yearlyCost, 2) }}
+                                    {{ config('academyhub.currency_symbol','₦') }}{{ number_format($termlyCost, 2) }}
                                 </div>
                                 <a href="{{ route('marketplace.show', $plugin->slug) }}" class="mt-1.5 inline-block text-xs font-extrabold text-indigo-600 hover:text-indigo-800 transition">
                                     Manage Settings
@@ -194,7 +194,7 @@
 
         <!-- Order Summary -->
         <div class="rounded-2xl bg-slate-900 p-6 text-white shadow-xl">
-            <h3 class="text-lg font-bold">Estimated Yearly Bill</h3>
+            <h3 class="text-lg font-bold">Estimated Termly Bill</h3>
             @php
                 $tenant = auth()->user()?->tenant;
                 $nextBilling = $tenant?->expires_at
@@ -234,18 +234,18 @@
                 </div>
                 @foreach($this->activePlugins as $plugin)
                     @php
-                        $yearlyCost = $this->getPluginYearlyCost($plugin);
+                        $termlyCost = $this->getPluginTermlyCost($plugin);
                     @endphp
                     <div class="flex justify-between text-indigo-300">
                         <span>{{ $plugin->name }}</span>
-                        <span>₦{{ number_format($yearlyCost) }}</span>
+                        <span>₦{{ number_format($termlyCost) }}</span>
                     </div>
                 @endforeach
             </div>
             
             <div class="mt-6">
                 <div class="flex items-end justify-between">
-                    <span class="text-sm font-medium text-slate-400">Total Yearly</span>
+                    <span class="text-sm font-medium text-slate-400">Total Termly</span>
                     <span class="text-3xl font-black">₦{{ number_format($this->totalCost) }}</span>
                 </div>
                 @if ($errorMessage)
