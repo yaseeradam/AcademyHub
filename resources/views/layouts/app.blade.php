@@ -262,8 +262,7 @@ $activeShadow = "shadow-{$accent}-200";
         </header>
 
         {{-- Subscription banners --}}
-        {{-- Subscription banners --}}
-        @if(isset($subscriptionDueDate) && $user && !$user->is_super_admin && $user->tenant_id)
+        @if(isset($subscriptionDueDate) && $user && !$user->is_super_admin && $user->tenant_id && !request()->routeIs('settings.subscription'))
             @if($subscriptionIsPastDue)
                 <!-- Subscription Expired Side Alert Toast -->
                 <div class="fixed bottom-4 right-4 z-[999] max-w-sm bg-white/95 backdrop-blur-md border-l-4 border-red-500 rounded-2xl shadow-2xl p-4 animate-bounce-subtle border border-slate-100">
