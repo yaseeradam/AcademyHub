@@ -250,7 +250,7 @@
                         <label class="sa-form-label">Pricing Plan Tier <span style="color:#ef4444;">*</span></label>
                         <div style="position:relative;">
                             <select name="plan" required class="sa-form-input" style="appearance:none;padding-right:36px;">
-                                <option value="free" @selected(old('plan',$tenant->plan)=='free')>Free Tier</option>
+                                <option value="basic" @selected(old('plan',$tenant->plan)=='basic')>Basic Tier</option>
                                 <option value="pro" @selected(old('plan',$tenant->plan)=='pro')>Pro Tier</option>
                                 <option value="enterprise" @selected(old('plan',$tenant->plan)=='enterprise')>Enterprise Tier</option>
                             </select>

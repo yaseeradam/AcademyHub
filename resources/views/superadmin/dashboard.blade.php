@@ -300,7 +300,7 @@
                 @php
                     $total = $stats['total_tenants'] ?: 1;
                     $plans = [
-                        ['Free', $stats['free_tenants'], '#94a3b8'],
+                        ['Basic', $stats['free_tenants'], '#38bdf8'],
                         ['Pro', $stats['pro_tenants'], '#3b82f6'],
                         ['Enterprise', $stats['enterprise_tenants'], '#8b5cf6'],
                     ];
@@ -509,10 +509,10 @@
     new Chart(ctx, {
         type: 'doughnut',
         data: {
-            labels: ['Free', 'Pro', 'Enterprise'],
+            labels: ['Basic', 'Pro', 'Enterprise'],
             datasets: [{
                 data: [free || 0.001, pro || 0.001, ent || 0.001],
-                backgroundColor: ['#94a3b8', '#3b82f6', '#8b5cf6'],
+                backgroundColor: ['#38bdf8', '#3b82f6', '#8b5cf6'],
                 borderWidth: 0,
                 hoverOffset: 4,
             }]

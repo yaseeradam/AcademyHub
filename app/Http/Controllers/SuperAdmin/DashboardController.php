@@ -20,7 +20,7 @@ class DashboardController extends Controller
         $totalSuperAdmins = User::where('is_super_admin', true)->count();
 
         // Plan breakdown
-        $freeTenants       = Tenant::where('plan', 'free')->count();
+        $basicTenants      = Tenant::where('plan', 'basic')->count();
         $proTenants        = Tenant::where('plan', 'pro')->count();
         $enterpriseTenants = Tenant::where('plan', 'enterprise')->count();
 
@@ -31,10 +31,6 @@ class DashboardController extends Controller
 
         $tenants = Tenant::all();
         foreach ($tenants as $tenant) {
-            if ($tenant->plan === 'free') {
-                continue;
-            }
-
             // Student count for this school
             $studentCount = \App\Models\Student::withoutGlobalScopes()->where('tenant_id', $tenant->id)->count();
             $coreCost = $studentCount * 1000;
@@ -52,18 +48,12 @@ class DashboardController extends Controller
             }
         }
 
-        // Exclude bills for free tier tenants from platform metrics
-        $totalInvoiced = (float) \App\Models\TenantPluginBill::whereHas('tenant', function ($query) {
-            $query->where('plan', '!=', 'free');
-        })->where('status', '!=', 'void')->sum('total_due') + $coreInvoiced;
+        // Include all bills in metrics
+        $totalInvoiced = (float) \App\Models\TenantPluginBill::where('status', '!=', 'void')->sum('total_due') + $coreInvoiced;
 
-        $totalPaid = (float) \App\Models\TenantPluginBill::whereHas('tenant', function ($query) {
-            $query->where('plan', '!=', 'free');
-        })->where('status', 'paid')->sum('total_due') + $corePaid;
+        $totalPaid = (float) \App\Models\TenantPluginBill::where('status', 'paid')->sum('total_due') + $corePaid;
 
-        $totalOutstanding = (float) \App\Models\TenantPluginBill::whereHas('tenant', function ($query) {
-            $query->where('plan', '!=', 'free');
-        })->where('status', 'unpaid')->sum('total_due') + $coreOutstanding;
+        $totalOutstanding = (float) \App\Models\TenantPluginBill::where('status', 'unpaid')->sum('total_due') + $coreOutstanding;
         $totalInstalls = (int) DB::table('tenant_marketplace_components')
             ->whereNotNull('installed_at')
             ->whereNull('uninstalled_at')
@@ -76,7 +66,7 @@ class DashboardController extends Controller
             'suspended_tenants' => $suspendedTenants,
             'total_users'       => $totalUsers,
             'total_superadmins' => $totalSuperAdmins,
-            'free_tenants'      => $freeTenants,
+            'free_tenants'      => $basicTenants,
             'pro_tenants'       => $proTenants,
             'enterprise_tenants'=> $enterpriseTenants,
             'total_invoiced'    => $totalInvoiced,

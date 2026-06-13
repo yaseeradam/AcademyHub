@@ -43,12 +43,13 @@ class TenantController extends Controller
         $data = $request->validate([
             'name'          => ['required', 'string', 'max:255'],
             'domain'        => ['nullable', 'string', 'max:255', 'unique:tenants,domain'],
-            'plan'          => ['required', 'string', 'in:free,pro,enterprise'],
+            'plan'          => ['required', 'string', 'in:basic,pro,enterprise'],
             'status'        => ['required', 'string', 'in:active,suspended,pending'],
             'max_students'  => ['required', 'integer', 'min:1'],
             'max_teachers'  => ['required', 'integer', 'min:1'],
             'contact_email' => ['nullable', 'email', 'max:255'],
             'contact_phone' => ['nullable', 'string', 'max:50'],
+            'expires_at'    => ['nullable', 'date'],
             'adopt_existing_data' => ['nullable', 'boolean'],
 
             // Optional admin account
@@ -199,7 +200,7 @@ class TenantController extends Controller
             'name'          => ['required', 'string', 'max:255'],
             'slug'          => ['required', 'string', 'max:255', 'alpha_dash', 'unique:tenants,slug,' . $tenant->id],
             'domain'        => ['nullable', 'string', 'max:255', 'unique:tenants,domain,' . $tenant->id],
-            'plan'          => ['required', 'string', 'in:free,pro,enterprise'],
+            'plan'          => ['required', 'string', 'in:basic,pro,enterprise'],
             'status'        => ['required', 'string', 'in:active,suspended,pending'],
             'max_students'  => ['required', 'integer', 'min:1'],
             'max_teachers'  => ['required', 'integer', 'min:1'],
@@ -320,18 +321,25 @@ class TenantController extends Controller
             return redirect()->back()->with('error', 'No admin user found for this school.');
         }
         
-        // Store superadmin ID in session so they can stop impersonating later
-        $superadminId = auth()->id();
-        session(['impersonator_id' => $superadminId]);
+        // Generate a secure timing-safe single-use cache token
+        $token = \Illuminate\Support\Str::random(40);
+        \Illuminate\Support\Facades\Cache::put('impersonate_' . $token, [
+            'superadmin_id' => auth()->id(),
+            'user_id' => $admin->id,
+        ], now()->addMinutes(2));
+
+        $appUrl = config('app.url'); // e.g. http://localhost:8000
+        $parsed = parse_url($appUrl);
+        $domain = $parsed['host'] ?? 'localhost';
+        $port = isset($parsed['port']) ? ':' . $parsed['port'] : '';
+        $scheme = $parsed['scheme'] ?? 'http';
+
+        // Check if tenant has a custom domain mapped, otherwise use subdomain
+        $host = $tenant->domain ? $tenant->domain : $tenant->slug . '.' . $domain;
         
-        // Log in as the tenant admin
-        auth()->login($admin);
-        
-        // Set context
-        app()->instance('currentTenant', $tenant);
-        
-        // Redirect to school dashboard
-        return redirect()->route('dashboard')->with('status', 'Impersonating ' . $admin->name);
+        $redirectUrl = $scheme . '://' . $host . $port . '/impersonate/login?token=' . $token;
+
+        return redirect($redirectUrl);
     }
 
     // Modular Feature Flags & resource quotas

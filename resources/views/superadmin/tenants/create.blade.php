@@ -429,16 +429,16 @@
 
                 <!-- Plan Selection Cards -->
                 <div class="plan-cards-grid">
-                    <!-- Free Card -->
-                    <div class="plan-card free-tier" :class="{ 'selected': selectedPlan === 'free' }" @click="selectPlan('free')">
-                        <span class="plan-card-badge badge-free">Lite</span>
+                    <!-- Basic Card -->
+                    <div class="plan-card free-tier" :class="{ 'selected': selectedPlan === 'basic' }" @click="selectPlan('basic')">
+                        <span class="plan-card-badge badge-free">Basic</span>
                         <div>
                             <div class="plan-icon free">
                                 <svg style="width:20px;height:20px;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
                             </div>
-                            <h4 class="plan-name">Free Plan</h4>
-                            <div class="plan-price">₦0<span>/month</span></div>
-                            <p class="plan-desc">Basic student &amp; teacher databases. Ideal for small, budding classrooms.</p>
+                            <h4 class="plan-name">Basic Plan</h4>
+                            <div class="plan-price">₦1,000<span>/student/term</span></div>
+                            <p class="plan-desc">Standard databases with student-based termly billing. Billing starts immediately.</p>
                         </div>
                         <ul class="plan-features-list">
                             <li class="plan-feature-item"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg> Max 50 Students</li>
@@ -492,9 +492,9 @@
                     </div>
 
                     <!-- Dynamic plugin active summaries based on selected card -->
-                    <div x-show="selectedPlan === 'free'">
+                    <div x-show="selectedPlan === 'basic'">
                         <p style="margin:0; font-size:12.5px; color:#64748b; line-height:1.6;">
-                            ℹ️ The **Free plan** does not include any active marketplace plugins. The school's admin can manually subscribe and pay for plugins individually inside their marketplace if needed later.
+                            ℹ️ The **Basic plan** does not include any active marketplace plugins. The school's admin can manually subscribe and pay for plugins individually inside their marketplace if needed later.
                         </p>
                     </div>
 
@@ -592,6 +592,14 @@
                                 <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
                             </div>
                         </div>
+                    </div>
+
+                    <div>
+                        <label class="sa-form-label">Subscription Expiry Date</label>
+                        <input type="date" name="expires_at" x-model="expiresAt"
+                               class="sa-form-input" style="font-family:monospace; font-weight:700;">
+                        @error('expires_at')<div class="sa-form-error">{{ $message }}</div>@enderror
+                        <div class="sa-form-hint">Leave blank for no expiry. Auto-prefilled for paid plans.</div>
                     </div>
                 </div>
 
@@ -717,10 +725,11 @@
     function schoolWizard() {
         return {
             currentStep: 1,
-            selectedPlan: 'free',
+            selectedPlan: 'basic',
             schoolName: '{{ old('name', '') }}',
             maxStudents: 50,
             maxTeachers: 5,
+            expiresAt: '',
             
             get progressPercent() {
                 // Return progress indicator bar percent mapping
@@ -730,7 +739,7 @@
 
             init() {
                 // Initialize default plan if old plan input exists
-                const oldPlan = '{{ old('plan', 'free') }}';
+                const oldPlan = '{{ old('plan', 'basic') }}';
                 this.selectPlan(oldPlan);
             },
 
@@ -738,7 +747,7 @@
                 this.selectedPlan = plan;
                 
                 // Prefill limits according to dynamic standard options
-                if (plan === 'free') {
+                if (plan === 'basic') {
                     this.maxStudents = 50;
                     this.maxTeachers = 5;
                 } else if (plan === 'pro') {
@@ -748,6 +757,9 @@
                     this.maxStudents = 10000;
                     this.maxTeachers = 1000;
                 }
+                
+                // Expiry is blank by default for all plans (billing starts right away)
+                this.expiresAt = '';
             },
 
             nextStep() {
