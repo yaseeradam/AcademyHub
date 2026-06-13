@@ -333,8 +333,16 @@ $activeShadow = "shadow-{$accent}-200";
                 </div>
 
                 <style>
-                    main input:not(.allow-billing), main select:not(.allow-billing), main textarea:not(.allow-billing), main button:not(.allow-billing) {
-                        opacity: 0.7 !important;
+                    /* Fade inputs and submit buttons in mutating forms only */
+                    form[method="POST"] input:not(.allow-billing),
+                    form[method="POST"] select:not(.allow-billing),
+                    form[method="POST"] textarea:not(.allow-billing),
+                    form[method="POST"] button:not(.allow-billing),
+                    form[method="POST"] button[type="submit"]:not(.allow-billing),
+                    .btn-danger:not(.allow-billing),
+                    .btn-primary:not(.allow-billing),
+                    .btn-success:not(.allow-billing) {
+                        opacity: 0.75 !important;
                         cursor: not-allowed !important;
                     }
                 </style>
@@ -368,6 +376,105 @@ $activeShadow = "shadow-{$accent}-200";
                         }
                     }
 
+                    function isMutatingInteraction(element) {
+                        const tagName = element.tagName;
+                        
+                        // 1. If inside a form, check the form method
+                        const form = element.closest('form');
+                        if (form) {
+                            const method = (form.getAttribute('method') || 'GET').toUpperCase();
+                            const hasMethodSpoof = form.querySelector('input[name="_method"]');
+                            const isGetForm = method === 'GET' && !hasMethodSpoof;
+                            
+                            // If it's a GET form (like search/filter), it is not mutating!
+                            if (isGetForm) {
+                                return false;
+                            }
+                        }
+
+                        // 2. Ignore elements with explicit safe classes/attributes
+                        if (element.classList.contains('allow-billing') || element.closest('.allow-billing')) {
+                            return false;
+                        }
+
+                        // 3. Skip layout, navigation, tabs, search, and pagination
+                        const text = (element.textContent || '').trim().toLowerCase();
+                        
+                        // Non-mutating button/link texts
+                        const safeTexts = ['search', 'filter', 'clear', 'view', 'show', 'details', 'print', 'export', 'download', 'close', 'cancel', 'dismiss', 'next', 'previous', 'prev', 'back', 'toggle', 'menu', 'tab', 'profile', 'logout'];
+                        if (safeTexts.some(t => text.includes(t))) {
+                            return false;
+                        }
+
+                        // Identify search/filter inputs
+                        if (tagName === 'INPUT') {
+                            const type = (element.getAttribute('type') || '').toLowerCase();
+                            const name = (element.getAttribute('name') || '').toLowerCase();
+                            const placeholder = (element.getAttribute('placeholder') || '').toLowerCase();
+                            
+                            if (type === 'search' || name.includes('search') || name === 'q' || placeholder.includes('search') || placeholder.includes('filter')) {
+                                return false;
+                            }
+                        }
+
+                        // 4. Check for mutating actions
+                        if (tagName === 'BUTTON' || tagName === 'A') {
+                            // If it has wire:click, check the action name
+                            const wireClick = element.getAttribute('wire:click') || '';
+                            const isMutatingWire = wireClick && (
+                                wireClick.includes('save') || 
+                                wireClick.includes('store') || 
+                                wireClick.includes('update') || 
+                                wireClick.includes('delete') || 
+                                wireClick.includes('destroy') || 
+                                wireClick.includes('create') || 
+                                wireClick.includes('add') || 
+                                wireClick.includes('remove') ||
+                                wireClick.includes('confirm') ||
+                                wireClick.includes('void') ||
+                                wireClick.includes('approve') ||
+                                wireClick.includes('reject')
+                            );
+
+                            if (isMutatingWire) {
+                                return true;
+                            }
+
+                            // Check text content for mutating actions
+                            const mutatingTexts = ['save', 'submit', 'create', 'update', 'delete', 'add', 'void', 'approve', 'reject', 'remove', 'insert', 'import', 'upload', 'reset password', 'generate', 'post', 'activate', 'deactivate', 'register', 'confirm'];
+                            if (mutatingTexts.some(t => text === t || text.startsWith(t + ' ') || text.endsWith(' ' + t))) {
+                                return true;
+                            }
+
+                            // If it's a submit button inside a form (which we already know isn't a GET form), it's mutating
+                            if (tagName === 'BUTTON' && (element.type === 'submit' || !element.type) && form) {
+                                return true;
+                            }
+
+                            return false;
+                        }
+
+                        // 5. For inputs, selects, and textareas:
+                        if (['INPUT', 'SELECT', 'TEXTAREA'].includes(tagName)) {
+                            // If it's inside a create/edit form or page
+                            const path = window.location.pathname.toLowerCase();
+                            const isEditPage = path.includes('/create') || path.includes('/edit') || path.includes('/add') || path.includes('/setup');
+                            
+                            if (isEditPage) {
+                                return true;
+                            }
+
+                            // If it's inside a mutating form
+                            if (form) {
+                                return true;
+                            }
+
+                            return false;
+                        }
+
+                        return false;
+                    }
+
                     // Global capture-phase listener to intercept input and submit clicks
                     document.addEventListener('click', function(e) {
                         if (window.subscriptionExpired) {
@@ -380,20 +487,7 @@ $activeShadow = "shadow-{$accent}-200";
                                     return;
                                 }
 
-                                const isInput = ['INPUT', 'SELECT', 'TEXTAREA'].includes(tagName);
-                                const isButton = tagName === 'BUTTON';
-                                
-                                // Intercept links designed to create/edit/delete/save or with Wire attributes that call actions
-                                const href = element.getAttribute('href');
-                                const isMutatingLink = tagName === 'A' && (
-                                    (href && (href.includes('create') || href.includes('edit') || href.includes('delete') || href.includes('store') || href.includes('update'))) || 
-                                    element.getAttribute('wire:click') || 
-                                    element.classList.contains('btn-primary') || 
-                                    element.classList.contains('btn-danger') || 
-                                    element.classList.contains('btn-success')
-                                );
-
-                                if (isInput || isButton || isMutatingLink) {
+                                if (isMutatingInteraction(element)) {
                                     e.preventDefault();
                                     e.stopPropagation();
                                     showSubscriptionModal();
