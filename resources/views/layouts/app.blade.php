@@ -262,28 +262,170 @@ $activeShadow = "shadow-{$accent}-200";
         </header>
 
         {{-- Subscription banners --}}
+        {{-- Subscription banners --}}
         @if(isset($subscriptionDueDate) && $user && !$user->is_super_admin && $user->tenant_id)
             @if($subscriptionIsPastDue)
-                <div class="fixed inset-x-0 bottom-0 z-50 p-3">
-                    <div class="mx-auto max-w-4xl rounded-2xl bg-red-600 px-5 py-3 shadow-xl flex items-center justify-between gap-4">
-                        @if($user->role === 'admin')
-                            <p class="text-sm font-bold text-white">Subscription expired — edit features (CRUD) are locked. <a href="{{ route('settings.subscription') }}" class="underline">Renew now</a></p>
-                        @else
-                            <p class="text-sm font-bold text-white">Subscription expired — school portal is in read-only mode. Please contact your school administrator to renew.</p>
-                        @endif
+                <!-- Subscription Expired Side Alert Toast -->
+                <div class="fixed bottom-4 right-4 z-[999] max-w-sm bg-white/95 backdrop-blur-md border-l-4 border-red-500 rounded-2xl shadow-2xl p-4 animate-bounce-subtle border border-slate-100">
+                    <div class="flex items-start gap-3">
+                        <div class="flex-shrink-0 w-9 h-9 rounded-xl bg-red-50 text-red-500 flex items-center justify-center shadow-inner">
+                            <svg class="w-5 h-5 animate-pulse" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                            </svg>
+                        </div>
+                        <div class="flex-1">
+                            <h4 class="text-xs font-black uppercase tracking-wider text-slate-800">Subscription Expired</h4>
+                            <p class="text-[11px] font-semibold text-slate-500 mt-0.5 leading-relaxed">
+                                @if($user->role === 'admin')
+                                    School portal is in read-only mode. <a href="{{ route('settings.subscription') }}" class="text-red-600 hover:text-red-700 font-extrabold underline allow-billing">Renew subscription</a>
+                                @else
+                                    School portal is in read-only mode. Please notify your administrator to renew.
+                                @endif
+                            </p>
+                        </div>
+                        <button onclick="this.closest('.fixed').remove()" class="text-slate-400 hover:text-slate-600 transition-colors">
+                            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                        </button>
                     </div>
                 </div>
-                <style>#mainContent main input,#mainContent main select,#mainContent main textarea,#mainContent main button:not(.allow-billing){pointer-events:none!important;opacity:.6!important}</style>
+
+                <!-- Subscription Expired Interactive Modal -->
+                <div id="subscription-expired-modal" class="fixed inset-0 z-[10000] hidden items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm transition-all duration-300">
+                    <div class="bg-white rounded-3xl shadow-2xl max-w-md w-full border border-red-100 overflow-hidden transform scale-95 opacity-0 transition-all duration-300" id="subscription-modal-content">
+                        <!-- Header Banner with Icon -->
+                        <div class="bg-gradient-to-br from-red-500 to-rose-600 p-6 text-white text-center relative overflow-hidden">
+                            <div class="absolute -right-10 -top-10 w-32 h-32 rounded-full bg-white/10"></div>
+                            <div class="absolute -left-10 -bottom-10 w-24 h-24 rounded-full bg-white/10"></div>
+                            
+                            <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-white/20 backdrop-blur-md text-white mb-3 shadow-inner">
+                                <svg class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                                </svg>
+                            </div>
+                            <h3 class="text-lg font-black tracking-tight uppercase">Feature Locked</h3>
+                            <p class="text-[10px] uppercase text-red-100 mt-1 font-bold tracking-wider">Read-Only Mode Active</p>
+                        </div>
+                        
+                        <!-- Body -->
+                        <div class="p-6 text-center">
+                            <p class="text-slate-600 text-xs sm:text-sm font-medium leading-relaxed mb-6">
+                                @if($user->role === 'admin')
+                                    Your school's subscription has ended. Creating, updating, or deleting data is disabled in read-only mode. Please renew to restore full access.
+                                @else
+                                    This school's subscription has ended. Creating, updating, or deleting data is disabled in read-only mode. Please contact your school administrator to renew the subscription.
+                                @endif
+                            </p>
+                            
+                            <div class="flex flex-col gap-2">
+                                @if($user->role === 'admin')
+                                    <a href="{{ route('settings.subscription') }}" class="w-full inline-flex items-center justify-center px-5 py-3 rounded-xl bg-red-600 hover:bg-red-700 text-white font-extrabold text-xs uppercase tracking-wider shadow-lg shadow-red-500/20 transition-all gap-2 transform hover:-translate-y-0.5 active:translate-y-0 allow-billing">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 0 0 2.25-2.25V6.75A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25v10.5A2.25 2.25 0 0 0 4.5 19.5Z"></path>
+                                        </svg>
+                                        Renew Subscription Now
+                                    </a>
+                                @endif
+                                <button type="button" onclick="closeSubscriptionModal()" class="w-full inline-flex items-center justify-center px-5 py-2.5 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-500 font-bold text-xs uppercase tracking-wider transition-all">
+                                    Dismiss
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <style>
+                    main input:not(.allow-billing), main select:not(.allow-billing), main textarea:not(.allow-billing), main button:not(.allow-billing) {
+                        opacity: 0.7 !important;
+                        cursor: not-allowed !important;
+                    }
+                </style>
+
+                <script>
+                    window.subscriptionExpired = true;
+
+                    function showSubscriptionModal() {
+                        const modal = document.getElementById('subscription-expired-modal');
+                        const content = document.getElementById('subscription-modal-content');
+                        if (modal && content) {
+                            modal.classList.remove('hidden');
+                            modal.classList.add('flex');
+                            setTimeout(() => {
+                                content.classList.remove('scale-95', 'opacity-0');
+                                content.classList.add('scale-100', 'opacity-100');
+                            }, 50);
+                        }
+                    }
+
+                    function closeSubscriptionModal() {
+                        const modal = document.getElementById('subscription-expired-modal');
+                        const content = document.getElementById('subscription-modal-content');
+                        if (modal && content) {
+                            content.classList.remove('scale-100', 'opacity-100');
+                            content.classList.add('scale-95', 'opacity-0');
+                            setTimeout(() => {
+                                modal.classList.remove('flex');
+                                modal.classList.add('hidden');
+                            }, 300);
+                        }
+                    }
+
+                    // Global capture-phase listener to intercept input and submit clicks
+                    document.addEventListener('click', function(e) {
+                        if (window.subscriptionExpired) {
+                            let element = e.target;
+                            while (element && element !== document.body) {
+                                const tagName = element.tagName;
+                                
+                                // Don't intercept clicks inside the modal itself or on allow-billing targets
+                                if (element.closest('#subscription-expired-modal') || element.classList.contains('allow-billing')) {
+                                    return;
+                                }
+
+                                const isInput = ['INPUT', 'SELECT', 'TEXTAREA'].includes(tagName);
+                                const isButton = tagName === 'BUTTON';
+                                
+                                // Intercept links designed to create/edit/delete/save or with Wire attributes that call actions
+                                const href = element.getAttribute('href');
+                                const isMutatingLink = tagName === 'A' && (
+                                    (href && (href.includes('create') || href.includes('edit') || href.includes('delete') || href.includes('store') || href.includes('update'))) || 
+                                    element.getAttribute('wire:click') || 
+                                    element.classList.contains('btn-primary') || 
+                                    element.classList.contains('btn-danger') || 
+                                    element.classList.contains('btn-success')
+                                );
+
+                                if (isInput || isButton || isMutatingLink) {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    showSubscriptionModal();
+                                    return;
+                                }
+                                element = element.parentElement;
+                            }
+                        }
+                    }, true);
+                </script>
             @elseif(!$subscriptionIsPastDue && $subscriptionDaysUntilDue <= 7)
-                <div class="fixed inset-x-0 bottom-0 z-50 p-3">
-                    <div class="mx-auto max-w-4xl rounded-2xl bg-amber-500 px-5 py-3 shadow-xl flex items-center justify-between gap-4">
-                        @if($user->role === 'admin')
-                            <p class="text-sm font-bold text-white">Subscription expires in {{ $subscriptionDaysUntilDue }} days. <a href="{{ route('settings.subscription') }}" class="underline">Renew now</a></p>
-                        @else
-                            <p class="text-sm font-bold text-white">Subscription expires in {{ $subscriptionDaysUntilDue }} days. Please inform your school administrator to renew.</p>
-                        @endif
-                        <button onclick="this.closest('.fixed').remove()" class="text-white/80 hover:text-white">
-                            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                <!-- Subscription Expiring Soon Side Alert Toast -->
+                <div class="fixed bottom-4 right-4 z-[999] max-w-sm bg-white/95 backdrop-blur-md border-l-4 border-amber-500 rounded-2xl shadow-2xl p-4 animate-bounce-subtle border border-slate-100">
+                    <div class="flex items-start gap-3">
+                        <div class="flex-shrink-0 w-9 h-9 rounded-xl bg-amber-50 text-amber-500 flex items-center justify-center shadow-inner">
+                            <svg class="w-5 h-5 animate-pulse" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                            </svg>
+                        </div>
+                        <div class="flex-1">
+                            <h4 class="text-xs font-black uppercase tracking-wider text-slate-800">Expiring Soon</h4>
+                            <p class="text-[11px] font-semibold text-slate-500 mt-0.5 leading-relaxed">
+                                @if($user->role === 'admin')
+                                    Expires in {{ $subscriptionDaysUntilDue }} days. Please <a href="{{ route('settings.subscription') }}" class="text-amber-600 hover:text-amber-700 font-extrabold underline allow-billing">renew now</a> to avoid service interruption.
+                                @else
+                                    Expires in {{ $subscriptionDaysUntilDue }} days. Please notify your administrator to renew.
+                                @endif
+                            </p>
+                        </div>
+                        <button onclick="this.closest('.fixed').remove()" class="text-slate-400 hover:text-slate-600 transition-colors">
+                            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
                         </button>
                     </div>
                 </div>
