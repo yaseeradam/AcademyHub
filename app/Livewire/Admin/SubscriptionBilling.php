@@ -4,6 +4,8 @@ namespace App\Livewire\Admin;
 
 use App\Models\Student;
 use App\Support\TenantSettings;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use Livewire\Component;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
@@ -13,7 +15,8 @@ use Livewire\Attributes\Title;
 class SubscriptionBilling extends Component
 {
     public int $studentCount = 0;
-    
+    public string $errorMessage = '';
+
     public bool $whatsapp = false;
     public bool $cbt = false;
     public bool $parent_app = false;
@@ -29,6 +32,26 @@ class SubscriptionBilling extends Component
             $this->cbt = in_array('cbt', $activeSlugs, true);
             $this->parent_app = in_array('parent-portal', $activeSlugs, true);
         }
+    }
+
+    /** True when subscription expires within the next 30 days (including already expired) */
+    public function getIsExpiringSoonProperty(): bool
+    {
+        $tenant = auth()->user()?->tenant;
+        if (!$tenant || !$tenant->expires_at) {
+            return true; // No expiry set — treat as needing renewal
+        }
+        return $tenant->expires_at->diffInDays(now(), false) >= -30;
+    }
+
+    /** True when subscription is already past its expiry date */
+    public function getIsExpiredProperty(): bool
+    {
+        $tenant = auth()->user()?->tenant;
+        if (!$tenant || !$tenant->expires_at) {
+            return false;
+        }
+        return $tenant->expires_at->isPast();
     }
 
     public function getCoreCostProperty()
@@ -89,15 +112,50 @@ class SubscriptionBilling extends Component
 
     public function payNow()
     {
+        $this->errorMessage = '';
+
+        // Block payment when subscription is healthy (more than 30 days remaining)
+        if (!$this->isExpiringSoon) {
+            $this->errorMessage = 'Your subscription is still active with more than 30 days remaining. No payment is due yet.';
+            return;
+        }
+
+        if ($this->totalCost <= 0) {
+            $this->errorMessage = 'Nothing to pay — your subscription cost is ₦0. Please configure your plugins with target classes first.';
+            return;
+        }
+
         $amountInKobo = $this->totalCost * 100;
-        $email = auth()->user()->email ?? 'admin@school.com';
+        $email = str_replace('.local', '.com', auth()->user()->email ?? 'admin@school.com');
         $reference = 'SUB_' . uniqid() . '_' . time();
 
-        $this->dispatch('initialize-paystack', [
-            'amount' => $amountInKobo,
-            'email' => $email,
-            'ref' => $reference
-        ]);
+        $secretKey = config('services.paystack.secret_key', env('PAYSTACK_SECRET_KEY'));
+
+        $response = Http::withToken($secretKey)
+            ->withOptions(['verify' => false])
+            ->post('https://api.paystack.co/transaction/initialize', [
+                'email' => $email,
+                'amount' => $amountInKobo,
+                'reference' => $reference,
+                'callback_url' => route('paystack.callback'),
+                'metadata' => [
+                    'payment_type' => 'subscription',
+                    'tenant_id' => TenantSettings::tenantId(),
+                ]
+            ]);
+
+        if (!$response->successful() || !$response->json('status')) {
+            Log::error("Paystack Subscription Payment initialization failed", [
+                'response' => $response->json()
+            ]);
+            $msg = $response->json('message') ?? 'Unable to connect to Paystack gateway.';
+            $this->errorMessage = 'Payment initialization failed: ' . $msg;
+            $this->dispatch('alert', message: $this->errorMessage, type: 'error');
+            return;
+        }
+
+        $authorizationUrl = $response->json('data.authorization_url');
+        return redirect()->away($authorizationUrl);
     }
 
     private function settingsPath(): string

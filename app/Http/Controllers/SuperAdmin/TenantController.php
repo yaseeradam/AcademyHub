@@ -15,6 +15,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rules\Password;
 
@@ -867,14 +869,127 @@ class TenantController extends Controller
     public function approveSubaccount(Tenant $tenant)
     {
         $settings = $tenant->settings ?? [];
-        if (!isset($settings['payment_gateway'])) {
-            $settings['payment_gateway'] = [];
+        $pgSettings = $settings['payment_gateway'] ?? [];
+
+        $bankName = $pgSettings['bank_name'] ?? null;
+        $accountNum = $pgSettings['account_number'] ?? null;
+        $accountName = $pgSettings['account_name'] ?? null;
+
+        if (!$bankName || !$accountNum || !$accountName) {
+            return redirect()->route('superadmin.tenants.edit', $tenant)
+                ->withErrors(['error' => 'Incomplete payment gateway settings. Cannot approve.']);
         }
+
+        $bankCode = $this->getPaystackBankCode($bankName);
+        if (!$bankCode) {
+            return redirect()->route('superadmin.tenants.edit', $tenant)
+                ->withErrors(['error' => "Could not resolve bank code for bank: {$bankName}"]);
+        }
+
+        // Register subaccount on Paystack
+        $secretKey = config('services.paystack.secret_key', env('PAYSTACK_SECRET_KEY'));
+        $response = Http::withToken($secretKey)
+            ->withOptions(['verify' => false])
+            ->post('https://api.paystack.co/subaccount', [
+                'business_name' => $tenant->name,
+                'settlement_bank' => $bankCode,
+                'account_number' => $accountNum,
+                'percentage_charge' => 100, // tenant bears 100% of transaction fees
+            ]);
+
+        if (!$response->successful() || !$response->json('status')) {
+            Log::error("Paystack Subaccount creation failed for tenant ID: {$tenant->id}", [
+                'response' => $response->json(),
+                'payload' => [
+                    'business_name' => $tenant->name,
+                    'settlement_bank' => $bankCode,
+                    'account_number' => $accountNum
+                ]
+            ]);
+            $msg = $response->json('message') ?? 'Paystack API communication error.';
+            return redirect()->route('superadmin.tenants.edit', $tenant)
+                ->withErrors(['error' => "Paystack Subaccount registration failed: {$msg}"]);
+        }
+
+        $subaccountCode = $response->json('data.subaccount_code');
+        $settings['payment_gateway']['subaccount_code'] = $subaccountCode;
         $settings['payment_gateway']['subaccount_status'] = 'approved';
         $tenant->update(['settings' => $settings]);
 
         return redirect()->route('superadmin.tenants.edit', $tenant)
-            ->with('status', 'School settlement account approved successfully. Online payment is now active.');
+            ->with('status', 'School settlement account approved and Paystack subaccount registered successfully.');
+    }
+
+    private function getPaystackBankCode(string $bankName): ?string
+    {
+        $map = [
+            'Access Bank' => '044',
+            'Guaranty Trust Bank (GTBank)' => '058',
+            'Zenith Bank' => '057',
+            'United Bank for Africa (UBA)' => '033',
+            'First Bank of Nigeria' => '011',
+            'Wema Bank' => '035',
+            'Sterling Bank' => '050',
+            'Union Bank' => '032',
+            'Fidelity Bank' => '070',
+            'Stanbic IBTC Bank' => '221',
+            'Ecobank Nigeria' => '010',
+            'Kuda Bank' => '50211',
+            'OPay' => '999992',
+            'Moniepoint MFB' => '50515',
+            'Polaris Bank' => '076',
+            'Heritage Bank' => '030',
+            'Citibank Nigeria' => '023',
+            'Jaiz Bank' => '301',
+            'SunTrust Bank' => '100',
+            'Titan Trust Bank' => '102',
+            'Providus Bank' => '101',
+            'Parallex Bank' => '526',
+            'PalmPay' => '999991',
+            'Carbon (One Finance)' => '565',
+            'VFD Microfinance Bank' => '566',
+            'LAPO Microfinance Bank' => '50502',
+            'AB Microfinance Bank' => '50914',
+            'Accion MFB' => '50824',
+            'Eyowo' => '50143',
+            'Fairmoney' => '51318',
+            'Raven Bank' => '50692',
+            'Sparkle' => '50796',
+            'Standard Chartered Bank' => '068',
+            'Keystone Bank' => '082',
+            'First City Monument Bank (FCMB)' => '214',
+            'Coronation Bank' => '307',
+            'Globus Bank' => '103',
+            'Premium Trust Bank' => '104',
+            'Optimus Bank' => '107',
+            'Signature Bank' => '106',
+        ];
+
+        $code = $map[$bankName] ?? null;
+        if ($code) {
+            return $code;
+        }
+
+        // Fallback: search via Paystack API
+        try {
+            $secretKey = config('services.paystack.secret_key', env('PAYSTACK_SECRET_KEY'));
+            $response = Http::withToken($secretKey)
+                ->withOptions(['verify' => false])
+                ->get('https://api.paystack.co/bank');
+
+            if ($response->successful()) {
+                $banks = $response->json('data') ?? [];
+                foreach ($banks as $bank) {
+                    if (strcasecmp($bank['name'], $bankName) === 0 || str_contains(strtolower($bank['name']), strtolower($bankName))) {
+                        return $bank['code'];
+                    }
+                }
+            }
+        } catch (\Exception $e) {
+            Log::error('Paystack bank list fallback lookup failed: ' . $e->getMessage());
+        }
+
+        return null;
     }
 
     public function rejectSubaccount(Tenant $tenant)

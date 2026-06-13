@@ -296,7 +296,7 @@
             border-radius: 20px;
             border: 1px solid var(--sa-border);
             box-shadow: 0 4px 6px -1px rgba(0,0,0,0.04), 0 2px 4px -1px rgba(0,0,0,0.01);
-            overflow: hidden;
+            overflow: visible;
         }
 
         .sa-panel-header {
@@ -304,6 +304,8 @@
             padding: 18px 24px;
             border-bottom: 1px solid var(--sa-border);
             background: #ffffff;
+            border-top-left-radius: 20px;
+            border-top-right-radius: 20px;
         }
         .sa-panel-title { font-size: 14.5px; font-weight: 800; color: var(--sa-text); }
 
@@ -318,8 +320,24 @@
         }
         .sa-panel-link:hover { background: rgba(124,58,237,.14); }
 
+        /* Responsive Table Wrapper */
+        .sa-table-responsive {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        @media (min-width: 1024px) {
+            .sa-table-responsive {
+                overflow: visible !important;
+            }
+        }
+
         /* ── Table ───────────────────────────────────── */
-        .sa-table { width: 100%; border-collapse: collapse; }
+        .sa-table { width: 100%; border-collapse: separate; border-spacing: 0; }
+        .sa-table thead tr:first-child th:first-child { border-top-left-radius: 20px; }
+        .sa-table thead tr:first-child th:last-child { border-top-right-radius: 20px; }
+        .sa-table tbody tr:last-child td:first-child { border-bottom-left-radius: 20px; }
+        .sa-table tbody tr:last-child td:last-child { border-bottom-right-radius: 20px; }
+
         .sa-table thead th {
             padding: 14px 20px;
             text-align: left;
@@ -775,9 +793,9 @@
                     <span class="hidden-xs">System Online</span>
                     <span class="lg-hidden">Online</span>
                 </div>
-                <form method="POST" action="{{ route('superadmin.logout') }}" style="margin: 0; display: inline-flex;">
+                <form method="POST" action="{{ route('superadmin.logout') }}" id="saLogoutForm" style="margin: 0; display: inline-flex;">
                     @csrf
-                    <button type="submit" class="sa-logout-btn" title="Logout" style="display: inline-flex; align-items: center; justify-content: center; background: none; border: 1px solid var(--sa-border); padding: 8px 12px; border-radius: 8px; font-weight: bold; color: var(--sa-muted); cursor: pointer; transition: all 0.2s; font-size: 13px; gap: 6px;">
+                    <button type="button" onclick="doSaLogout()" title="Logout" style="display: inline-flex; align-items: center; justify-content: center; background: none; border: 1px solid var(--sa-border); padding: 8px 12px; border-radius: 8px; font-weight: bold; color: var(--sa-muted); cursor: pointer; transition: all 0.2s; font-size: 13px; gap: 6px;">
                         <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="width: 14px; height: 14px;">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
                         </svg>
@@ -1060,6 +1078,19 @@
                     }
                 }
             };
+        }
+
+        function doSaLogout(formId = 'saLogoutForm') {
+            fetch('/csrf-token', { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+                .then(r => r.json())
+                .then(d => {
+                    if (d.token) {
+                        document.querySelector('meta[name="csrf-token"]').setAttribute('content', d.token);
+                        document.querySelectorAll('input[name="_token"]').forEach(el => el.value = d.token);
+                    }
+                })
+                .catch(() => {})
+                .finally(() => document.getElementById(formId).submit());
         }
     </script>
 

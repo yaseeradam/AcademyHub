@@ -13,12 +13,14 @@ use Illuminate\Support\Str;
 #[Title('Marketplace')]
 class Index extends Component
 {
+    public string $errorMessage = '';
     /**
      * Free plugin — install immediately.
      * ID comes from Alpine, price is always fetched from DB (not trusted from frontend).
      */
     public function confirmInstall(int $componentId): void
     {
+        $this->errorMessage = '';
         $user = auth()->user();
         abort_unless($user?->role === 'admin' || $user?->is_super_admin, 403);
 
@@ -57,12 +59,9 @@ class Index extends Component
         $this->redirect(route('marketplace'), navigate: false);
     }
 
-    /**
-     * Paid plugin — generate a reference and open the Paystack popup via a browser event.
-     * Amount is fetched from DB only — never from the frontend.
-     */
-    public function startPayment(int $componentId): void
+    public function startPayment(int $componentId)
     {
+        $this->errorMessage = '';
         $user = auth()->user();
         abort_unless($user?->role === 'admin' || $user?->is_super_admin, 403);
 
@@ -70,14 +69,34 @@ class Index extends Component
         abort_unless($component->price > 0, 403, 'This plugin is free, use confirmInstall.');
 
         $reference = 'PLG-' . strtoupper(Str::random(12));
+        $amountInKobo = (int) ($component->price * 100);
 
-        $this->dispatch('open-paystack', [
-            'key'          => config('services.paystack.public_key', env('PAYSTACK_PUBLIC_KEY')),
-            'email'        => $user->email,
-            'amount'       => (int) ($component->price * 100), // Kobo — from DB, not frontend
-            'ref'          => $reference,
-            'component_id' => $component->id,
-        ]);
+        $secretKey = config('services.paystack.secret_key', env('PAYSTACK_SECRET_KEY'));
+
+        $response = Http::withToken($secretKey)
+            ->withOptions(['verify' => false])
+            ->post('https://api.paystack.co/transaction/initialize', [
+                'email' => str_replace('.local', '.com', $user->email),
+                'amount' => $amountInKobo,
+                'reference' => $reference,
+                'callback_url' => route('paystack.callback'),
+                'metadata' => [
+                    'payment_type' => 'marketplace',
+                    'component_id' => $component->id,
+                    'tenant_id' => $user->tenant_id,
+                    'user_id' => $user->id,
+                ]
+            ]);
+
+        if (!$response->successful() || !$response->json('status')) {
+            $msg = $response->json('message') ?? 'Unable to initialize payment transaction.';
+            $this->errorMessage = 'Payment initialization failed: ' . $msg;
+            $this->dispatch('alert', message: $this->errorMessage, type: 'error');
+            return;
+        }
+
+        $authorizationUrl = $response->json('data.authorization_url');
+        return redirect()->away($authorizationUrl);
     }
 
     /**
@@ -85,6 +104,7 @@ class Index extends Component
      */
     public function verifyPayment(string $reference): void
     {
+        $this->errorMessage = '';
         $user = auth()->user();
         abort_unless($user?->role === 'admin' || $user?->is_super_admin, 403);
 
@@ -94,7 +114,8 @@ class Index extends Component
             ->get("https://api.paystack.co/transaction/verify/{$reference}");
 
         if (! $response->successful() || $response->json('data.status') !== 'success') {
-            $this->dispatch('alert', message: 'Payment verification failed. Please contact support.', type: 'error');
+            $this->errorMessage = 'Payment verification failed. Please contact support.';
+            $this->dispatch('alert', message: $this->errorMessage, type: 'error');
             return;
         }
 
@@ -102,14 +123,16 @@ class Index extends Component
         $componentId = $data['metadata']['custom_fields'][0]['value'] ?? null;
 
         if (! $componentId) {
-            $this->dispatch('alert', message: 'Invalid payment metadata.', type: 'error');
+            $this->errorMessage = 'Invalid payment metadata.';
+            $this->dispatch('alert', message: $this->errorMessage, type: 'error');
             return;
         }
 
         $component = MarketplaceComponent::find((int) $componentId);
 
         if (! $component) {
-            $this->dispatch('alert', message: 'Plugin not found.', type: 'error');
+            $this->errorMessage = 'Plugin not found.';
+            $this->dispatch('alert', message: $this->errorMessage, type: 'error');
             return;
         }
 
@@ -118,7 +141,8 @@ class Index extends Component
         $expectedKobo   = (int) ($component->price * 100);
 
         if ($amountPaidKobo < $expectedKobo) {
-            $this->dispatch('alert', message: 'Payment amount mismatch. Please contact support.', type: 'error');
+            $this->errorMessage = 'Payment amount mismatch. Please contact support.';
+            $this->dispatch('alert', message: $this->errorMessage, type: 'error');
             return;
         }
 

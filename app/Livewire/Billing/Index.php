@@ -9,6 +9,8 @@ use App\Models\Student;
 use App\Models\Transaction;
 use Illuminate\Support\Carbon;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
@@ -19,6 +21,7 @@ use Livewire\Component;
 class Index extends Component
 {
     public string $tab = 'transactions';
+    public string $errorMessage = '';
 
     public ?int $studentId = null;
     public ?int $selectedClassId = null;
@@ -106,6 +109,7 @@ class Index extends Component
 
     public function updatedTab(): void
     {
+        $this->errorMessage = '';
         // Reset selections when switching tabs to avoid confusion
         if ($this->tab !== 'transactions') {
             $this->selectedClassId = null;
@@ -641,7 +645,7 @@ class Index extends Component
             ->get();
     }
 
-    public function payPluginBill(int $billId): void
+    public function payPluginBill(int $billId)
     {
         $user = auth()->user();
         abort_unless($user && ($user->hasPermission('billing.transactions') || $user->hasPermission('fees.manage')), 403);
@@ -657,14 +661,37 @@ class Index extends Component
         }
 
         $amountInKobo = (int) ($bill->total_due * 100);
-        $email = $user->email ?? 'admin@school.com';
+        $email = str_replace('.local', '.com', $user->email ?? 'admin@school.com');
         $reference = 'BILL_' . $bill->id . '_' . uniqid() . '_' . time();
 
-        $this->dispatch('initialize-plugin-paystack', [
-            'amount' => $amountInKobo,
-            'email' => $email,
-            'ref' => $reference
-        ]);
+        $secretKey = config('services.paystack.secret_key', env('PAYSTACK_SECRET_KEY'));
+
+        $response = Http::withToken($secretKey)
+            ->withOptions(['verify' => false])
+            ->post('https://api.paystack.co/transaction/initialize', [
+                'email' => $email,
+                'amount' => $amountInKobo,
+                'reference' => $reference,
+                'callback_url' => route('paystack.callback'),
+                'metadata' => [
+                    'payment_type' => 'billing',
+                    'bill_id' => $bill->id,
+                    'tenant_id' => $tenant->id,
+                ]
+            ]);
+
+        if (!$response->successful() || !$response->json('status')) {
+            Log::error("Paystack Bill Payment initialization failed", [
+                'response' => $response->json()
+            ]);
+            $msg = $response->json('message') ?? 'Unable to connect to Paystack gateway.';
+            $this->errorMessage = 'Payment initialization failed: ' . $msg;
+            $this->dispatch('alert', message: $this->errorMessage, type: 'error');
+            return;
+        }
+
+        $authorizationUrl = $response->json('data.authorization_url');
+        return redirect()->away($authorizationUrl);
     }
 
     public function verifyPluginBillPayment(string $reference): void

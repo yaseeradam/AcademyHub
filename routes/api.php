@@ -21,8 +21,8 @@ use App\Http\Controllers\Api\StudentNotificationController;
 use App\Http\Controllers\Api\MediaUploadController;
 
 // Public
-Route::post('/login', [AuthController::class, 'login']);
-Route::post('/student/login', [StudentAuthController::class, 'login']);
+Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:login_attempts');
+Route::post('/student/login', [StudentAuthController::class, 'login'])->middleware('throttle:login_attempts');
 Route::get('/tenant/{slug}', [TenantDiscoveryController::class, 'show']);
 
 // Protected
@@ -88,7 +88,7 @@ Route::middleware(['auth:sanctum', 'active'])->group(function () {
     Route::post('/sync', [SyncController::class, 'handleSync']);
 
     // Media upload (teachers/admins/students)
-    Route::post('/media/upload', [MediaUploadController::class, 'upload']);
+    Route::post('/media/upload', [MediaUploadController::class, 'upload'])->middleware('throttle:media_uploads');
 
     // Student portal API group
     Route::prefix('student')

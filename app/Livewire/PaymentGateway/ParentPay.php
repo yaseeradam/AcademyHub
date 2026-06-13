@@ -11,6 +11,7 @@ use App\Models\AcademicTerm;
 use App\Models\AcademicSession;
 use App\Models\Transaction;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 #[Layout('layouts.app')]
 #[Title('Secure Tuition Payment Center')]
@@ -22,11 +23,7 @@ class ParentPay extends Component
     public float $amount_paid = 0.0;
     public float $outstanding_balance = 0.0;
     public bool $isGatewayApproved = false;
-
-    // Card inputs
-    public string $card_number = '';
-    public string $card_expiry = '';
-    public string $card_cvv    = '';
+    public string $errorMessage = '';
 
     // Success State
     public bool $paymentSuccess  = false;
@@ -64,6 +61,14 @@ class ParentPay extends Component
     {
         $user = auth()->user();
         abort_unless($user?->role === 'parent', 403);
+
+        if (session('parent_pay_success')) {
+            $this->paymentSuccess = true;
+            $this->receiptNumber = session('receipt_number', '');
+            $this->receiptDate = session('receipt_date', '');
+            $this->paymentAmount = session('payment_amount', 0.0);
+            $this->installmentLabel = session('installment_label', '');
+        }
 
         $termObj = AcademicTerm::active();
         $this->selectedTerm    = $termObj?->term_number ?? 1;
@@ -128,6 +133,7 @@ class ParentPay extends Component
 
     private function calculateBalances(): void
     {
+        $this->errorMessage = '';
         if (!$this->selectedStudentId) {
             return;
         }
@@ -177,6 +183,7 @@ class ParentPay extends Component
      */
     private function recalculatePaymentAmount(): void
     {
+        $this->errorMessage = '';
         if (!$this->selectedStudentId || $this->amount_due <= 0) {
             $this->paymentAmount    = 0.0;
             $this->installmentLabel = '';
@@ -273,9 +280,6 @@ class ParentPay extends Component
     {
         $this->validate([
             'selectedStudentId' => 'required|exists:students,id',
-            'card_number'       => 'required|string|min:16',
-            'card_expiry'       => 'required|string|min:5',
-            'card_cvv'          => 'required|string|min:3|max:4',
         ]);
 
         if (!$this->isGatewayApproved) {
@@ -297,56 +301,54 @@ class ParentPay extends Component
         $tenantId = $student->tenant_id;
         $parent   = auth()->user();
 
-        // Record the transaction with installment metadata
-        $transaction = Transaction::create([
-            'tenant_id'          => $tenantId,
-            'student_id'         => $student->id,
-            'type'               => 'Income',
-            'category'           => 'Tuition',
-            'term'               => $this->selectedTerm,
-            'session'            => $this->selectedSession,
-            'amount_paid'        => $this->paymentAmount,
-            'payment_method'     => 'Transfer',
-            'installment_plan'   => $this->selectedPlan,
-            'installment_number' => $this->selectedPlan !== 'full' ? $this->installmentNumber : null,
-            'date'               => now()->toDateString(),
-            'is_void'            => false,
-        ]);
+        $amountInKobo = (int) ($this->paymentAmount * 100);
+        $reference = 'TUI_' . uniqid() . '_' . time();
+        $email = str_replace('.local', '.com', $parent->email ?? 'parent@school.com');
 
-        // Send WhatsApp receipt if parent has a WhatsApp number
-        if ($parent->whatsapp_phone) {
-            $currency      = config('academyhub.currency_symbol', '₦');
-            $formattedAmt  = number_format($transaction->amount_paid, 2);
-            $schoolName    = config('academyhub.school_name', 'AcademyHub');
-            $planDesc      = match ($this->selectedPlan) {
-                'two_installments' => "Installment {$this->installmentNumber} of 2",
-                'monthly'          => "Monthly Installment #{$this->installmentNumber}",
-                default            => 'Full Payment',
-            };
+        // Load the subaccount code if available
+        $tenant = $student->tenant;
+        $subaccount = $tenant->settings['payment_gateway']['subaccount_code'] ?? null;
 
-            $msg = "💳 *Payment Received Successfully!*\n\n" .
-                   "Thank you, *{$parent->name}*. We have successfully processed your tuition payment:\n\n" .
-                   "• *Student:* {$student->full_name}\n" .
-                   "• *Class:* " . ($student->schoolClass?->name ?? 'N/A') . "\n" .
-                   "• *Term / Session:* Term {$this->selectedTerm} ({$this->selectedSession})\n" .
-                   "• *Payment Plan:* {$planDesc}\n" .
-                   "• *Amount Paid:* {$currency}{$formattedAmt}\n" .
-                   "• *Receipt No:* {$transaction->receipt_number}\n\n" .
-                   "🏫 *{$schoolName}*";
+        $secretKey = config('services.paystack.secret_key', env('PAYSTACK_SECRET_KEY'));
 
-            $this->sendOutboundWhatsApp($parent->whatsapp_phone, $msg);
+        $payload = [
+            'email' => $email,
+            'amount' => $amountInKobo,
+            'reference' => $reference,
+            'callback_url' => route('paystack.callback'),
+            'metadata' => [
+                'payment_type' => 'tuition',
+                'student_id' => $student->id,
+                'installment_plan' => $this->selectedPlan,
+                'installment_number' => $this->selectedPlan !== 'full' ? $this->installmentNumber : null,
+                'tenant_id' => $tenantId,
+                'parent_id' => $parent->id,
+                'term' => $this->selectedTerm,
+                'session' => $this->selectedSession,
+            ]
+        ];
+
+        if ($subaccount) {
+            $payload['subaccount'] = $subaccount;
         }
 
-        // Set success state
-        $this->receiptNumber = $transaction->receipt_number;
-        $this->receiptDate   = now()->format('F j, Y, g:i a');
-        $this->paymentSuccess = true;
+        $response = Http::withToken($secretKey)
+            ->withOptions(['verify' => false])
+            ->post('https://api.paystack.co/transaction/initialize', $payload);
 
-        $this->dispatch('alert', message: 'Payment successfully processed! Receipt has been registered.', type: 'success');
+        if (!$response->successful() || !$response->json('status')) {
+            Log::error("Paystack Tuition Payment initialization failed", [
+                'response' => $response->json()
+            ]);
+            $msg = $response->json('message') ?? 'Unable to connect to Paystack gateway.';
+            $this->errorMessage = 'Payment initialization failed: ' . $msg;
+            $this->dispatch('alert', message: $this->errorMessage, type: 'error');
+            return;
+        }
 
-        // Clear card form and refresh balances
-        $this->reset(['card_number', 'card_expiry', 'card_cvv']);
-        $this->calculateBalances();
+        $authorizationUrl = $response->json('data.authorization_url');
+        
+        $this->redirect($authorizationUrl, navigate: false);
     }
 
     private function sendOutboundWhatsApp(string $toPhone, string $messageText): void

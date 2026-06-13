@@ -14,6 +14,7 @@ use App\Models\AcademicSession;
 use App\Models\Tenant;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Http;
 use Livewire\Livewire;
 use Tests\TestCase;
 
@@ -353,13 +354,21 @@ class ParentManagementTest extends TestCase
             'amount_due' => 15000.00,
         ]);
 
+        // Fake Paystack initialize transaction response
+        Http::fake([
+            'https://api.paystack.co/transaction/initialize' => Http::response([
+                'status' => true,
+                'data' => [
+                    'authorization_url' => 'https://checkout.paystack.com/mock-checkout-url-tuition',
+                    'reference' => 'TUI_mock_ref_123',
+                ],
+            ], 200),
+        ]);
+
         // When subaccount is pending, parent checkout page is disabled
         Livewire::actingAs($parent)
             ->test(\App\Livewire\PaymentGateway\ParentPay::class)
             ->assertSet('isGatewayApproved', false)
-            ->set('card_number', '1234567812345678')
-            ->set('card_expiry', '12/29')
-            ->set('card_cvv', '123')
             ->call('processCardPayment')
             ->assertSet('paymentSuccess', false);
 
@@ -371,12 +380,8 @@ class ParentManagementTest extends TestCase
         Livewire::actingAs($parent)
             ->test(\App\Livewire\PaymentGateway\ParentPay::class)
             ->assertSet('isGatewayApproved', true)
-            ->set('card_number', '1234567812345678')
-            ->set('card_expiry', '12/29')
-            ->set('card_cvv', '123')
             ->call('processCardPayment')
-            ->assertHasNoErrors()
-            ->assertSet('paymentSuccess', true);
+            ->assertRedirect('https://checkout.paystack.com/mock-checkout-url-tuition');
     }
 
     public function test_superadmin_can_approve_and_reject_subaccount_settlements(): void
@@ -409,6 +414,17 @@ class ParentManagementTest extends TestCase
         $superadmin->is_super_admin = true;
         $superadmin->save();
 
+        // Fake Paystack subaccount response
+        Http::fake([
+            'https://api.paystack.co/subaccount' => Http::response([
+                'status' => true,
+                'message' => 'Subaccount created',
+                'data' => [
+                    'subaccount_code' => 'ACCT_test_payout_123',
+                ]
+            ], 200)
+        ]);
+
         // Action as superadmin approving subaccount
         $this->actingAs($superadmin)
             ->post(route('superadmin.tenants.approve-subaccount', $tenant))
@@ -416,6 +432,7 @@ class ParentManagementTest extends TestCase
 
         $tenant->refresh();
         $this->assertEquals('approved', $tenant->settings['payment_gateway']['subaccount_status']);
+        $this->assertEquals('ACCT_test_payout_123', $tenant->settings['payment_gateway']['subaccount_code']);
 
         // Reject/reset action
         $this->actingAs($superadmin)

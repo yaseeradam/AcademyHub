@@ -17,6 +17,7 @@ use App\Http\Controllers\StudentController;
 use App\Http\Controllers\StudentsExportController;
 use App\Http\Controllers\MessageAttachmentController;
 use App\Http\Controllers\SchoolClassController;
+use App\Http\Controllers\PaystackCallbackController;
 use App\Http\Controllers\SectionController;
 use App\Http\Controllers\SubjectController;
 use App\Http\Controllers\TeacherController;
@@ -72,7 +73,7 @@ Route::get('/', [UtilityController::class, 'welcome']);
 Route::get('/home', [UtilityController::class, 'home']);
 
 // CBT Portal Start Routes (public, no student session required to enter code/admission no)
-Route::middleware('plugin:cbt')->group(function () {
+Route::middleware(['plugin:cbt', 'throttle:cbt_portal'])->group(function () {
     Route::get('/cbt/portal', CbtPortalStart::class)->name('cbt.portal');
     Route::get('/cbt/student', CbtPortalStart::class)->name('cbt.student');
 });
@@ -88,21 +89,25 @@ Route::get('/csrf-token', [UtilityController::class, 'csrfToken']);
 Route::post('/log-error', [UtilityController::class, 'logClientError']);
 
 Route::middleware('guest')->group(function () {
-    Route::get('/login', [AuthenticatedSessionController::class, 'create'])->name('login');
+    Route::get('/login', [AuthenticatedSessionController::class, 'create'])
+        ->middleware('throttle:auth_views')
+        ->name('login');
     Route::post('/login', [AuthenticatedSessionController::class, 'store'])
-        ->middleware('throttle:5,1')  // 5 attempts per 1 minute per IP
+        ->middleware('throttle:login_attempts')
         ->name('login.store');
 
     // Password Reset
     Route::get('/forgot-password', [\App\Http\Controllers\Auth\PasswordResetLinkController::class, 'create'])
+        ->middleware('throttle:auth_views')
         ->name('password.request');
     Route::post('/forgot-password', [\App\Http\Controllers\Auth\PasswordResetLinkController::class, 'store'])
-        ->middleware('throttle:3,1')
+        ->middleware('throttle:login_attempts')
         ->name('password.email');
     Route::get('/reset-password/{token}', [\App\Http\Controllers\Auth\NewPasswordController::class, 'create'])
+        ->middleware('throttle:auth_views')
         ->name('password.reset');
     Route::post('/reset-password', [\App\Http\Controllers\Auth\NewPasswordController::class, 'store'])
-        ->middleware('throttle:3,1')
+        ->middleware('throttle:login_attempts')
         ->name('password.update');
 });
 
@@ -156,6 +161,9 @@ Route::get('/student/profile', \App\Livewire\Student\Profile::class)
     ->name('student.profile');
 
 Route::middleware(['auth', 'active'])->group(function () {
+    Route::get('/paystack/callback', [PaystackCallbackController::class, 'handleCallback'])
+        ->middleware('throttle:payment_callback')
+        ->name('paystack.callback');
     Route::get('/dashboard', [UtilityController::class, 'dashboard'])->name('dashboard');
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile');

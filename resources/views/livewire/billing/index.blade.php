@@ -421,6 +421,14 @@
             </x-table>
         @endif
     @elseif ($tab === 'plugin-bills')
+        @if ($errorMessage)
+            <div class="mb-4 p-4 rounded-xl bg-red-50 border border-red-200 text-sm text-red-600 font-semibold flex items-center gap-2.5 shadow-sm">
+                <svg class="h-5 w-5 text-red-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+                <span>{{ $errorMessage }}</span>
+            </div>
+        @endif
         <div class="relative overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200">
             <div class="absolute inset-0 bg-gradient-to-br from-emerald-500/5 to-emerald-600/10"></div>
             <div class="relative p-6">
@@ -537,26 +545,4 @@
     @endif
 </div>
 
-@assets
-<script src="https://js.paystack.co/v1/inline.js" defer></script>
-@endassets
 
-@script
-    $wire.on('initialize-plugin-paystack', (eventData) => {
-        let data = Array.isArray(eventData) ? eventData[0] : eventData;
-        let handler = PaystackPop.setup({
-            key: '{{ env('PAYSTACK_PUBLIC_KEY', 'pk_test_') }}',
-            email: data.email,
-            amount: data.amount,
-            ref: data.ref,
-            currency: 'NGN',
-            callback: function(response) {
-                $wire.verifyPluginBillPayment(response.reference);
-            },
-            onClose: function() {
-                // Optional
-            }
-        });
-        handler.openIframe();
-    });
-@endscript

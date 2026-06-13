@@ -197,11 +197,35 @@
             <h3 class="text-lg font-bold">Estimated Yearly Bill</h3>
             @php
                 $tenant = auth()->user()?->tenant;
-                $nextBilling = $tenant?->expires_at 
-                    ? $tenant->expires_at->format('M Y') 
+                $nextBilling = $tenant?->expires_at
+                    ? $tenant->expires_at->format('M Y')
                     : now()->addMonths(4)->format('M Y');
             @endphp
             <p class="mt-1 text-sm text-slate-400">Next billing cycle: {{ $nextBilling }}</p>
+
+            @php
+                $expiresAt = $tenant?->expires_at;
+                $isExpired = $expiresAt && $expiresAt->isPast();
+                $daysLeft  = $expiresAt ? (int) now()->diffInDays($expiresAt, false) : null;
+                $isExpiring = $daysLeft !== null && $daysLeft >= 0 && $daysLeft <= 30;
+            @endphp
+
+            @if ($isExpired)
+                <div class="mt-3 flex items-center gap-2 rounded-xl bg-red-500/20 border border-red-500/30 px-3 py-2 text-xs font-bold text-red-300">
+                    <svg class="h-4 w-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                    Subscription expired &mdash; renew to restore access
+                </div>
+            @elseif ($isExpiring)
+                <div class="mt-3 flex items-center gap-2 rounded-xl bg-amber-500/20 border border-amber-500/30 px-3 py-2 text-xs font-bold text-amber-300">
+                    <svg class="h-4 w-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    Expires in {{ $daysLeft }} day{{ $daysLeft === 1 ? '' : 's' }} &mdash; renew now to avoid interruption
+                </div>
+            @else
+                <div class="mt-3 flex items-center gap-2 rounded-xl bg-emerald-500/20 border border-emerald-500/30 px-3 py-2 text-xs font-bold text-emerald-300">
+                    <svg class="h-4 w-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    Subscription active &mdash; {{ $daysLeft }} day{{ $daysLeft === 1 ? '' : 's' }} remaining
+                </div>
+            @endif
             
             <div class="mt-6 flex flex-col gap-3 border-y border-slate-700 py-4 text-sm font-medium text-slate-300">
                 <div class="flex justify-between">
@@ -224,36 +248,37 @@
                     <span class="text-sm font-medium text-slate-400">Total Yearly</span>
                     <span class="text-3xl font-black">₦{{ number_format($this->totalCost) }}</span>
                 </div>
-                <button type="button" wire:click="payNow" wire:loading.attr="disabled" class="mt-6 w-full rounded-xl bg-amber-500 p-3 text-center text-sm font-bold text-slate-900 shadow hover:bg-amber-400 transition-colors disabled:opacity-50">
-                    <span wire:loading.remove wire:target="payNow">Pay Now / Renew</span>
-                    <span wire:loading wire:target="payNow">Initializing...</span>
-                </button>
+                @if ($errorMessage)
+                    <div class="mt-3 p-3 rounded-xl bg-rose-500/20 text-red-200 border border-rose-500/30 text-xs font-semibold">
+                        {{ $errorMessage }}
+                    </div>
+                @endif
+
+                @if ($isExpired || $isExpiring)
+                    <button type="button" wire:click="payNow" wire:loading.attr="disabled"
+                        class="mt-6 w-full rounded-xl p-3 text-center text-sm font-bold text-slate-900 shadow transition-colors disabled:opacity-50
+                               {{ $isExpired ? 'bg-red-500 hover:bg-red-400' : 'bg-amber-500 hover:bg-amber-400' }}">
+                        <span wire:loading.remove wire:target="payNow">
+                            {{ $isExpired ? '⚠ Subscription Expired — Renew Now' : 'Renew Subscription (' . $daysLeft . 'd left)' }}
+                        </span>
+                        <span wire:loading wire:target="payNow">Initializing...</span>
+                    </button>
+                @else
+                    {{-- Subscription is healthy — no payment button, just info --}}
+                    <div class="mt-6 w-full rounded-xl bg-emerald-500/10 border border-emerald-500/20 p-4 text-center space-y-1">
+                        <div class="text-sm font-bold text-emerald-300">✓ Subscription Active</div>
+                        <div class="text-xs text-slate-400 font-medium">
+                            {{ $daysLeft }} day{{ $daysLeft === 1 ? '' : 's' }} remaining — no payment due yet.
+                        </div>
+                        <div class="text-[10px] text-slate-500 pt-1">
+                            You will be prompted to renew when within 30 days of expiry.
+                        </div>
+                    </div>
+                @endif
+
             </div>
         </div>
     </div>
 </div>
 
-@assets
-<script src="https://js.paystack.co/v1/inline.js" defer></script>
-@endassets
 
-@script
-    $wire.on('initialize-paystack', (eventData) => {
-        let data = Array.isArray(eventData) ? eventData[0] : eventData;
-        let handler = PaystackPop.setup({
-            key: '{{ env('PAYSTACK_PUBLIC_KEY', 'pk_test_') }}', // Handled by standard env
-            email: data.email,
-            amount: data.amount, // in kobo
-            ref: data.ref,
-            currency: 'NGN',
-            callback: function(response) {
-                // Confirm payment success with Livewire component
-                $wire.verifyPayment(response.reference);
-            },
-            onClose: function() {
-                // Optional: alert('Transaction cancelled');
-            }
-        });
-        handler.openIframe();
-    });
-@endscript

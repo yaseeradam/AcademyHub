@@ -109,10 +109,10 @@
         </div>
 
         {{-- Right Content: Mini "Today's Overview" Widget & 3D Avatar --}}
-        <div class="relative z-10 w-full md:w-2/5 flex items-center justify-end py-6 md:py-0">
+        <div class="relative z-10 w-full md:w-2/5 flex items-center justify-end py-6 md:py-0 md:self-stretch">
             
             {{-- Avatar Placeholder 1 (Hero Admin) --}}
-            <img src="{{ asset('avatars/Admin.png') }}" class="absolute bottom-0 -left-6 h-64 z-20 object-contain drop-shadow-2xl" alt="Admin Avatar">
+            <img src="{{ asset('avatars/Admin.png') }}" class="absolute bottom-0 -left-12 h-56 md:h-[220px] lg:h-[240px] xl:h-[250px] z-20 object-contain drop-shadow-2xl hidden md:block" alt="Admin Avatar">
 
             <div class="bg-white/10 backdrop-blur-md rounded-2xl border border-white/10 p-4 shadow-xl w-full max-w-[280px] relative z-10 mt-6 md:mt-0">
                 <div class="flex items-center justify-between mb-3">

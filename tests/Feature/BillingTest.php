@@ -93,16 +93,22 @@ class BillingTest extends TestCase
             'status' => 'unpaid',
         ]);
 
+        // Fake Paystack initialize transaction response
+        Http::fake([
+            'https://api.paystack.co/transaction/initialize' => Http::response([
+                'status' => true,
+                'data' => [
+                    'authorization_url' => 'https://checkout.paystack.com/mock-checkout-url-plugin-bill',
+                    'reference' => 'BILL_' . $bill->id . '_abc123',
+                ],
+            ], 200),
+        ]);
+
         Livewire::actingAs($bursar)
             ->test(BillingIndex::class)
             ->set('tab', 'plugin-bills')
             ->call('payPluginBill', $bill->id)
-            ->assertDispatched('initialize-plugin-paystack', function ($event, $params) use ($bursar, $bill) {
-                $data = $params[0] ?? $params;
-                return isset($data['amount']) && $data['amount'] === 500000 &&
-                       isset($data['email']) && $data['email'] === $bursar->email &&
-                       isset($data['ref']) && str_starts_with($data['ref'], 'BILL_' . $bill->id . '_');
-            });
+            ->assertRedirect('https://checkout.paystack.com/mock-checkout-url-plugin-bill');
     }
 
     public function test_user_can_verify_paystack_payment_successfully(): void

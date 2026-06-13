@@ -223,75 +223,77 @@
                             <p class="text-slate-400 text-xs mt-1 max-w-xs leading-relaxed">Great job! There are no outstanding tuition fees left to pay for this child for the current term.</p>
                         </div>
                     @else
-                        <!-- Credit Card Display Mockup -->
-                        <div class="w-full bg-gradient-to-r from-violet-600 to-pink-600 rounded-2xl p-6 shadow-lg shadow-violet-500/10 flex flex-col justify-between mb-6 overflow-hidden relative">
-                            <div class="absolute -right-4 -bottom-4 w-32 h-32 bg-white/5 rounded-full z-0"></div>
-                            
-                            <div class="flex justify-between items-center z-10">
-                                <div class="h-8 w-11 bg-gradient-to-br from-amber-400 to-amber-600 rounded-md"></div>
-                                <span class="text-[10px] uppercase tracking-widest text-white/60 font-black">QuickPay</span>
-                            </div>
-
-                            <div class="text-lg font-mono font-bold tracking-widest text-white z-10 text-shadow mt-4">
-                                {{ $card_number ? wordwrap(str_replace(' ', '', $card_number), 4, ' ', true) : '•••• •••• •••• ••••' }}
-                            </div>
-
-                            <div class="flex justify-between items-end mt-4 z-10">
-                                <div>
-                                    <span class="text-[8px] uppercase tracking-wider text-white/50 block">Card Holder</span>
-                                    <span class="text-xs font-bold uppercase text-white tracking-wider truncate max-w-[150px] block">{{ auth()->user()->name }}</span>
-                                </div>
-                                <div class="text-right">
-                                    <span class="text-[8px] uppercase tracking-wider text-white/50 block">Expires</span>
-                                    <span class="text-xs font-bold text-white font-mono block">{{ $card_expiry ?: 'MM/YY' }}</span>
+                        <!-- Premium Checkout Summary -->
+                        <div class="space-y-6">
+                            <div class="bg-gradient-to-br from-violet-600 to-indigo-700 rounded-2xl p-6 text-white relative overflow-hidden shadow-lg shadow-violet-500/10">
+                                <div class="absolute -right-4 -bottom-4 w-32 h-32 bg-white/5 rounded-full z-0"></div>
+                                <div class="relative z-10">
+                                    <span class="text-[9px] uppercase tracking-widest text-violet-200 font-extrabold bg-white/10 px-2.5 py-1 rounded-full">Secure Checkout</span>
+                                    
+                                    <h3 class="text-xl font-black mt-4 mb-1">Official School Tuition portal</h3>
+                                    <p class="text-xs text-violet-100/80 leading-relaxed font-semibold">
+                                        Your payment transaction will be initialized and securely redirected to Paystack. Complete your checkout via Card, Bank Transfer, USSD, or Bank App.
+                                    </p>
                                 </div>
                             </div>
+
+                            <!-- Charge Summary Banner -->
+                            <div class="bg-slate-50 rounded-2xl border border-slate-100 p-5 space-y-4">
+                                <div class="text-xs uppercase tracking-widest text-slate-400 font-bold border-b border-slate-200 pb-2">
+                                    Order Summary
+                                </div>
+
+                                <div class="flex justify-between items-center text-sm font-semibold">
+                                    <span class="text-slate-400">Student Name</span>
+                                    <span class="text-slate-800 font-bold">
+                                        @foreach($students as $s)
+                                            @if($s->id == $selectedStudentId)
+                                                {{ $s->full_name }}
+                                            @endif
+                                        @endforeach
+                                    </span>
+                                </div>
+
+                                <div class="flex justify-between items-center text-sm font-semibold">
+                                    <span class="text-slate-400">Payment Plan</span>
+                                    <span class="text-slate-800 font-bold capitalize">
+                                        {{ str_replace('_', ' ', $selectedPlan) }}
+                                    </span>
+                                </div>
+
+                                @if($installmentLabel && $selectedPlan !== 'full')
+                                    <div class="flex justify-between items-center text-sm font-semibold text-violet-700">
+                                        <span>Current Stage</span>
+                                        <span class="font-extrabold bg-violet-50 border border-violet-100 px-2 py-0.5 rounded-lg text-xs">{{ $installmentLabel }}</span>
+                                    </div>
+                                @endif
+
+                                <div class="flex justify-between items-center text-base pt-3 border-t border-slate-200 border-dashed font-bold">
+                                    <span class="text-slate-900">Total Amount Due Now</span>
+                                    <span class="text-xl font-black text-emerald-600">
+                                        ₦{{ number_format($paymentAmount, 2) }}
+                                    </span>
+                                </div>
+                            </div>
+
+                            @if ($errorMessage)
+                                <div class="mt-4 p-4 rounded-xl bg-red-50 border border-red-200 text-sm text-red-600 font-semibold flex items-center gap-2.5 shadow-sm">
+                                    <svg class="h-5 w-5 text-red-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                    </svg>
+                                    <span>{{ $errorMessage }}</span>
+                                </div>
+                            @endif
+
+                            <form wire:submit.prevent="processCardPayment" class="space-y-4">
+                                <button type="submit" class="w-full rounded-xl bg-violet-600 hover:bg-violet-700 text-white font-bold py-3.5 transition duration-200 shadow-md hover:shadow-lg shadow-violet-500/10 flex items-center justify-center gap-2 mt-6">
+                                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                                    </svg>
+                                    Proceed to Paystack Checkout
+                                </button>
+                            </form>
                         </div>
-
-                        <!-- Charge Summary Banner -->
-                        <div class="bg-slate-50 rounded-xl border border-slate-200 px-4 py-3 mb-4 flex items-center justify-between">
-                            <div>
-                                <p class="text-xs text-slate-400 font-semibold">
-                                    @if($selectedPlan !== 'full' && $installmentLabel)
-                                        {{ $installmentLabel }}
-                                    @else
-                                        Full Payment
-                                    @endif
-                                </p>
-                                <p class="text-xs text-slate-500 mt-0.5">Charging now</p>
-                            </div>
-                            <span class="text-xl font-black text-violet-700">₦{{ number_format($paymentAmount, 2) }}</span>
-                        </div>
-
-                        <!-- Card details Form -->
-                        <form wire:submit.prevent="processCardPayment" class="space-y-4">
-                            <div>
-                                <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Card Number</label>
-                                <input type="text" wire:model.live="card_number" maxlength="19" class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-900 focus:bg-white focus:border-violet-500 focus:ring-1 focus:ring-violet-500 outline-none transition duration-200 font-mono" placeholder="4111 2222 3333 4444">
-                                @error('card_number') <span class="text-xs text-rose-500 mt-1 block">{{ $message }}</span> @enderror
-                            </div>
-
-                            <div class="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Expiry Date</label>
-                                    <input type="text" wire:model.live="card_expiry" placeholder="MM/YY" maxlength="5" class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-900 focus:bg-white focus:border-violet-500 focus:ring-1 focus:ring-violet-500 outline-none transition duration-200 font-mono">
-                                    @error('card_expiry') <span class="text-xs text-rose-500 mt-1 block">{{ $message }}</span> @enderror
-                                </div>
-
-                                <div>
-                                    <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">CVV</label>
-                                    <input type="password" wire:model.live="card_cvv" placeholder="•••" maxlength="4" class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-900 focus:bg-white focus:border-violet-500 focus:ring-1 focus:ring-violet-500 outline-none transition duration-200 font-mono">
-                                    @error('card_cvv') <span class="text-xs text-rose-500 mt-1 block">{{ $message }}</span> @enderror
-                                </div>
-                            </div>
-
-                            <button type="submit" class="w-full rounded-xl bg-violet-600 hover:bg-violet-700 text-white font-bold py-3.5 transition duration-200 shadow-md hover:shadow-lg shadow-violet-500/10 flex items-center justify-center gap-2 mt-6">
-                                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                                </svg>
-                                Pay ₦{{ number_format($paymentAmount, 2) }} Securely
-                            </button>
-                        </form>
                     @endif
                 </div>
 

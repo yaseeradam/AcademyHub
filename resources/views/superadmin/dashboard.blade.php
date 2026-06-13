@@ -331,7 +331,7 @@
         </span>
         <span style="font-size:11px; color:#7c3aed; font-weight:700; background:rgba(124,58,237,.1); padding:2px 8px; border-radius:999px;">Action Required</span>
     </div>
-    <div style="overflow-x:auto;">
+    <div class="sa-table-responsive">
         <table class="sa-table">
             <thead>
                 <tr>
@@ -389,7 +389,7 @@
         <a href="{{ route('superadmin.tenants.index') }}" class="sa-panel-link">View All →</a>
     </div>
 
-    <div style="overflow-x:auto;">
+    <div class="sa-table-responsive">
         <table class="sa-table">
             <thead>
                 <tr>

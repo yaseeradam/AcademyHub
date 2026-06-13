@@ -70,7 +70,7 @@
         <span class="sa-panel-title">All Schools ({{ $tenants->total() }})</span>
     </div>
 
-    <div style="overflow-x:auto;">
+    <div class="sa-table-responsive">
         <table class="sa-table">
             <thead>
                 <tr>
