@@ -66,7 +66,7 @@ HTML;
         $hasRegistryAccess = in_array($user?->role, ['admin', 'teacher', 'bursar'], true);
     @endphp
     @if($hasRegistryAccess)
-        <div x-data="{ open: {{ $isRegistryActive ? 'true' : 'false' }} }" class="mb-1" x-cloak>
+        <div x-data="{ open: {{ $isRegistryActive ? 'true' : 'false' }} }" class="mb-1">
             <button @click="open = !open" 
                 class="w-full flex items-center justify-between rounded-2xl py-2.5 transition-all duration-300 text-slate-700 hover:bg-white hover:shadow-sm"
                 x-bind:class="sidebarCollapsed ? 'justify-center px-1' : 'px-3'">
@@ -109,7 +109,7 @@ HTML;
         $hasAcademicsAccess = in_array($user?->role, ['admin', 'teacher'], true);
     @endphp
     @if($hasAcademicsAccess)
-        <div x-data="{ open: {{ $isAcademicsActive ? 'true' : 'false' }} }" class="mb-1" x-cloak>
+        <div x-data="{ open: {{ $isAcademicsActive ? 'true' : 'false' }} }" class="mb-1">
             <button @click="open = !open" 
                 class="w-full flex items-center justify-between rounded-2xl py-2.5 transition-all duration-300 text-slate-700 hover:bg-white hover:shadow-sm"
                 x-bind:class="sidebarCollapsed ? 'justify-center px-1' : 'px-3'">
@@ -169,7 +169,7 @@ HTML;
         $hasAddonsAccess = in_array($user?->role, ['admin', 'teacher'], true) && ($hasHomework || $hasMessages || $sidebarPlugins->isNotEmpty());
     @endphp
     @if($hasAddonsAccess)
-        <div x-data="{ open: {{ $isAddonsActive ? 'true' : 'false' }} }" class="mb-1" x-cloak>
+        <div x-data="{ open: {{ $isAddonsActive ? 'true' : 'false' }} }" class="mb-1">
             <button @click="open = !open" 
                 class="w-full flex items-center justify-between rounded-2xl py-2.5 transition-all duration-300 text-slate-700 hover:bg-white hover:shadow-sm"
                 x-bind:class="sidebarCollapsed ? 'justify-center px-1' : 'px-3'">
@@ -231,7 +231,7 @@ HTML;
         $hasSystemAccess = in_array($user?->role, ['admin', 'teacher', 'bursar'], true);
     @endphp
     @if($hasSystemAccess)
-        <div x-data="{ open: {{ $isSystemActive ? 'true' : 'false' }} }" class="mb-1" x-cloak>
+        <div x-data="{ open: {{ $isSystemActive ? 'true' : 'false' }} }" class="mb-1">
             <button @click="open = !open" 
                 class="w-full flex items-center justify-between rounded-2xl py-2.5 transition-all duration-300 text-slate-700 hover:bg-white hover:shadow-sm"
                 x-bind:class="sidebarCollapsed ? 'justify-center px-1' : 'px-3'">

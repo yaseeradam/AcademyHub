@@ -184,13 +184,41 @@
 @stack('scripts')
 
 {{-- Nav loading indicator --}}
+@php $studentSchoolLogo = config('academyhub.school_logo'); @endphp
 <div x-data="{ loading: false }"
      x-on:livewire:navigating.window="loading = true"
      x-on:livewire:navigated.window="loading = false"
      x-show="loading" style="display:none"
-     class="fixed inset-0 z-[9999] flex items-center justify-center bg-white/40 backdrop-blur-sm">
-    <div class="h-10 w-10 animate-spin rounded-full border-4 border-slate-200 border-t-slate-800 shadow-lg"></div>
+     x-transition:enter="transition ease-out duration-200"
+     x-transition:enter-start="opacity-0"
+     x-transition:enter-end="opacity-100"
+     x-transition:leave="transition ease-in duration-150"
+     x-transition:leave-start="opacity-100"
+     x-transition:leave-end="opacity-0"
+     class="fixed inset-0 z-[9999] flex items-center justify-center bg-gradient-to-br from-slate-50/90 via-white/95 to-violet-50/90 backdrop-blur-md">
+    <div class="flex flex-col items-center gap-5">
+        <div class="relative flex items-center justify-center">
+            <div class="absolute h-20 w-20 rounded-2xl bg-violet-400/20 animate-ping" style="animation-duration:1.8s;"></div>
+            <div class="relative flex h-16 w-16 items-center justify-center rounded-2xl bg-white shadow-xl ring-1 ring-violet-100">
+                @if($studentSchoolLogo)
+                    <img src="{{ asset('uploads/'.str_replace('\\','/',$studentSchoolLogo)) }}" alt="Logo" class="h-10 w-10 object-contain"/>
+                @else
+                    <img src="{{ asset('full.png') }}" alt="AcademyHub" class="h-10 w-10 object-contain"/>
+                @endif
+            </div>
+        </div>
+        <div class="w-40 h-1 rounded-full bg-slate-200 overflow-hidden">
+            <div class="h-full w-1/2 rounded-full bg-gradient-to-r from-violet-500 to-indigo-500 animate-[loadSlide_1.2s_ease-in-out_infinite]"></div>
+        </div>
+        <span class="text-xs font-bold text-slate-400 tracking-widest uppercase">Loading…</span>
+    </div>
 </div>
+<style>
+    @keyframes loadSlide {
+        0%   { transform: translateX(-100%); }
+        100% { transform: translateX(300%); }
+    }
+</style>
 
 </body>
 </html>
