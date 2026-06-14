@@ -60,19 +60,19 @@
                 <table class="min-w-full border-2 border-slate-200">
                     <thead>
                         <tr class="bg-blue-600">
-                            <th class="border-r-2 border-white px-4 py-3 text-left text-xs font-bold uppercase text-white">Time</th>
-                            @foreach($days as $d)
-                                <th class="border-r-2 border-white px-4 py-3 text-center text-xs font-bold uppercase text-white">{{ $d['label'] }}</th>
+                            <th class="border-r-2 border-white px-4 py-3 text-center text-xs font-bold uppercase text-white min-w-[100px]">Time / Date</th>
+                            @foreach($timeSlots as $slot)
+                                <th class="border-r-2 border-white px-4 py-3 text-center text-xs font-bold uppercase text-white min-w-[120px]">{{ $slot['label'] }}</th>
                             @endforeach
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach($timeSlots as $slot)
+                        @foreach($days as $d)
                             <tr class="border-b-2 border-slate-200">
-                                <td class="border-r-2 border-slate-200 bg-slate-50 px-4 py-3 text-xs font-bold text-slate-700">
-                                    {{ $slot['label'] }}
+                                <td class="border-r-2 border-slate-200 bg-slate-50 px-4 py-3 text-center text-xs font-bold text-slate-700">
+                                    {{ $d['label'] }}
                                 </td>
-                                @foreach($days as $d)
+                                @foreach($timeSlots as $slot)
                                     @php
                                         $entry = $slotMap[$d['day']][$slot['key']] ?? null;
                                     @endphp

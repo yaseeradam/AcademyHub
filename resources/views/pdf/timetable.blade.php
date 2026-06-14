@@ -285,17 +285,19 @@
     <table class="timetable">
         <thead>
             <tr>
-                <th class="time-col">Time</th>
-                @foreach($days as $dayNum => $dayName)
-                    <th>{{ $dayName }}</th>
+                <th class="time-col" style="background: #1e3a8a; width: 10%;">Time / Date</th>
+                @foreach($timeSlots as $slot)
+                    <th style="font-size: 8px;">{{ $slot['label'] }}</th>
                 @endforeach
             </tr>
         </thead>
         <tbody>
-            @forelse($timeSlots as $slot)
+            @foreach($days as $dayNum => $dayName)
             <tr>
-                <td class="time-cell">{{ $slot['label'] }}</td>
-                @foreach($days as $dayNum => $dayName)
+                <td class="time-cell" style="font-weight: bold; background: #f8fafc; border-right: 2px solid #cbd5e1; text-align: center; vertical-align: middle;">
+                    {{ substr($dayName, 0, 3) }}
+                </td>
+                @foreach($timeSlots as $slot)
                 <td>
                     @if(isset($slotMap[$dayNum][$slot['key']]))
                     @php($entry = $slotMap[$dayNum][$slot['key']])
@@ -316,13 +318,7 @@
                 </td>
                 @endforeach
             </tr>
-            @empty
-            <tr>
-                <td colspan="6" style="text-align: center; padding: 30px; color: #94a3b8; font-size: 11px;">
-                    No timetable entries found for this class.
-                </td>
-            </tr>
-            @endforelse
+            @endforeach
         </tbody>
     </table>
 
