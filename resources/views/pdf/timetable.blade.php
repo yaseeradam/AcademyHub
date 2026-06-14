@@ -305,14 +305,12 @@
 
                     @if($entry && $entry->is_break)
                         @php
-                            // Calculate rowspan: count how many consecutive days starting from this one
-                            // have a break with the exact same break text in this time slot.
+                            $targetText = trim($entry->break_text ?? 'BREAK');
                             $rowspan = 1;
-                            $targetText = $entry->break_text;
                             
                             for ($d = $dayNum + 1; $d <= 5; $d++) {
                                 $nextEntry = $slotMap[$d][$slot['key']] ?? null;
-                                if ($nextEntry && $nextEntry->is_break && $nextEntry->break_text === $targetText) {
+                                if ($nextEntry && $nextEntry->is_break && strcasecmp(trim($nextEntry->break_text ?? 'BREAK'), $targetText) === 0) {
                                     $rowspan++;
                                 } else {
                                     break;
@@ -323,12 +321,65 @@
                             for ($offset = 1; $offset < $rowspan; $offset++) {
                                 $rendered[$dayNum + $offset][$slot['key']] = true;
                             }
+
+                            $c = $entry->color ?? 'slate';
+                            $bgColor = match($c) {
+                                'blue'     => '#eff6ff',
+                                'indigo'   => '#eef2ff',
+                                'violet'   => '#f5f3ff',
+                                'purple'   => '#faf5ff',
+                                'pink'     => '#fdf2f8',
+                                'red'      => '#fef2f2',
+                                'orange'   => '#fff7ed',
+                                'amber'    => '#fffbeb',
+                                'yellow'   => '#fefce8',
+                                'green'    => '#f0fdf4',
+                                'emerald'  => '#ecfdf5',
+                                'teal'     => '#f0fdfa',
+                                'cyan'     => '#ecfeff',
+                                'sky'      => '#f0f9ff',
+                                default    => '#f1f5f9',
+                            };
+                            $textColor = match($c) {
+                                'blue'     => '#1e3a8a',
+                                'indigo'   => '#312e81',
+                                'violet'   => '#4c1d95',
+                                'purple'   => '#581c87',
+                                'pink'     => '#9d174d',
+                                'red'      => '#991b1b',
+                                'orange'   => '#9a3412',
+                                'amber'    => '#92400e',
+                                'yellow'   => '#854d0e',
+                                'green'    => '#166534',
+                                'emerald'  => '#065f46',
+                                'teal'     => '#115e59',
+                                'cyan'     => '#155e75',
+                                'sky'      => '#075985',
+                                default    => '#334155',
+                            };
+                            $borderColor = match($c) {
+                                'blue'     => '#bfdbfe',
+                                'indigo'   => '#c7d2fe',
+                                'violet'   => '#ddd6fe',
+                                'purple'   => '#e9d5ff',
+                                'pink'     => '#fbcfe8',
+                                'red'      => '#fca5a5',
+                                'orange'   => '#ffedd5',
+                                'amber'    => '#fde68a',
+                                'yellow'   => '#fef08a',
+                                'green'    => '#bbf7d0',
+                                'emerald'  => '#a7f3d0',
+                                'teal'     => '#99f6e4',
+                                'cyan'     => '#a5f3fc',
+                                'sky'      => '#bae6fd',
+                                default    => '#cbd5e1',
+                            };
                         @endphp
-                        <td rowspan="{{ $rowspan }}" class="color-{{ $entry->color ?? 'slate' }} is-break" style="vertical-align: middle; text-align: center; background: #f1f5f9; padding: 6px 4px;">
+                        <td rowspan="{{ $rowspan }}" class="is-break" style="vertical-align: middle; text-align: center; background-color: {{ $bgColor }}; color: {{ $textColor }}; border: 1px solid {{ $borderColor }}; padding: 6px 4px;">
                             @if($rowspan > 1)
-                                <div style="display: inline-block; font-size: 8px; font-weight: 950; color: #334155; text-transform: uppercase; letter-spacing: 1px;">
+                                <div style="display: inline-block; font-size: 8px; font-weight: 950; color: {{ $textColor }}; text-transform: uppercase; letter-spacing: 1px;">
                                     @php
-                                        $chars = mb_str_split($targetText ?? 'BREAK');
+                                        $chars = mb_str_split($targetText);
                                         foreach ($chars as $char) {
                                             if ($char === ' ') {
                                                 echo '<span style="margin: 3px 0; display: block;"></span>';
@@ -339,8 +390,8 @@
                                     @endphp
                                 </div>
                             @else
-                                <div style="font-size: 8px; font-weight: 950; color: #334155; text-transform: uppercase; letter-spacing: 0.5px;">
-                                    {{ $entry->break_text ?? 'BREAK' }}
+                                <div style="font-size: 8px; font-weight: 950; color: {{ $textColor }}; text-transform: uppercase; letter-spacing: 0.5px;">
+                                    {{ $targetText }}
                                 </div>
                             @endif
                         </td>

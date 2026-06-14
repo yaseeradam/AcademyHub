@@ -67,6 +67,9 @@
                         </tr>
                     </thead>
                     <tbody>
+                        @php
+                            $rendered = [];
+                        @endphp
                         @foreach($days as $d)
                             <tr class="border-b-2 border-slate-200">
                                 <td class="border-r-2 border-slate-200 bg-slate-50 px-4 py-3 text-center text-xs font-bold text-slate-700">
@@ -74,11 +77,87 @@
                                 </td>
                                 @foreach($timeSlots as $slot)
                                     @php
+                                        // Skip if already rendered as part of a rowspan
+                                        if (isset($rendered[$d['day']][$slot['key']])) {
+                                            continue;
+                                        }
+
                                         $entry = $slotMap[$d['day']][$slot['key']] ?? null;
                                     @endphp
-                                    <td class="border-r-2 border-slate-200 p-2">
-                                        @if($entry)
-                                            @php
+
+                                    @if($entry && $entry->is_break)
+                                        @php
+                                            $rowspan = 1;
+                                            $targetText = trim($entry->break_text ?? 'BREAK');
+                                            
+                                            for ($dayVal = $d['day'] + 1; $dayVal <= 5; $dayVal++) {
+                                                $nextEntry = $slotMap[$dayVal][$slot['key']] ?? null;
+                                                if ($nextEntry && $nextEntry->is_break && strcasecmp(trim($nextEntry->break_text ?? 'BREAK'), $targetText) === 0) {
+                                                    $rowspan++;
+                                                } else {
+                                                    break;
+                                                }
+                                            }
+
+                                            // Mark subsequent days as rendered
+                                            for ($offset = 1; $offset < $rowspan; $offset++) {
+                                                $rendered[$d['day'] + $offset][$slot['key']] = true;
+                                            }
+
+                                            $c = $entry->color ?? 'slate';
+                                            $colorClasses = match($c) {
+                                                'blue'     => 'bg-blue-50 border-blue-200 hover:bg-blue-100/70 text-blue-900 border-l-4 border-l-blue-500',
+                                                'indigo'   => 'bg-indigo-50 border-indigo-200 hover:bg-indigo-100/70 text-indigo-900 border-l-4 border-l-indigo-500',
+                                                'violet'   => 'bg-violet-50 border-violet-200 hover:bg-violet-100/70 text-violet-900 border-l-4 border-l-violet-500',
+                                                'purple'   => 'bg-purple-50 border-purple-200 hover:bg-purple-100/70 text-purple-900 border-l-4 border-l-purple-500',
+                                                'pink'     => 'bg-pink-50 border-pink-200 hover:bg-pink-100/70 text-pink-900 border-l-4 border-l-pink-500',
+                                                'red'      => 'bg-red-50 border-red-200 hover:bg-red-100/70 text-red-900 border-l-4 border-l-red-500',
+                                                'orange'   => 'bg-orange-50 border-orange-200 hover:bg-orange-100/70 text-orange-900 border-l-4 border-l-orange-500',
+                                                'amber'    => 'bg-amber-50 border-amber-200 hover:bg-amber-100/70 text-amber-900 border-l-4 border-l-amber-500',
+                                                'yellow'   => 'bg-yellow-50 border-yellow-200 hover:bg-yellow-100/70 text-yellow-900 border-l-4 border-l-yellow-500',
+                                                'green'    => 'bg-green-50 border-green-200 hover:bg-green-100/70 text-green-900 border-l-4 border-l-green-500',
+                                                'emerald'  => 'bg-emerald-50 border-emerald-200 hover:bg-emerald-100/70 text-emerald-900 border-l-4 border-l-emerald-500',
+                                                'teal'     => 'bg-teal-50 border-teal-200 hover:bg-teal-100/70 text-teal-900 border-l-4 border-l-teal-500',
+                                                'cyan'     => 'bg-cyan-50 border-cyan-200 hover:bg-cyan-100/70 text-cyan-900 border-l-4 border-l-cyan-500',
+                                                'sky'      => 'bg-sky-50 border-sky-200 hover:bg-sky-100/70 text-sky-900 border-l-4 border-l-sky-500',
+                                                default    => 'bg-slate-100 border-slate-200 hover:bg-slate-200/70 text-slate-900 border-l-4 border-l-slate-400',
+                                            };
+                                        @endphp
+                                        <td rowspan="{{ $rowspan }}" class="border-r-2 border-slate-200 p-1 text-center align-middle {{ $colorClasses }}" style="height: 1px;">
+                                            @if($isAdmin)
+                                                <button type="button" wire:click="edit({{ $entry->id }})" x-data x-on:click="$dispatch('open-modal', 'timetable-form')" class="w-full h-full min-h-[80px] flex flex-col items-center justify-center font-black uppercase tracking-wider text-xs leading-none text-current hover:opacity-85 focus:outline-none">
+                                                    @if($rowspan > 1)
+                                                        @foreach(mb_str_split($targetText) as $char)
+                                                            @if($char === ' ')
+                                                                <span class="my-1"></span>
+                                                            @else
+                                                                <span>{{ $char }}</span>
+                                                            @endif
+                                                        @endforeach
+                                                    @else
+                                                        <span>{{ $targetText }}</span>
+                                                    @endif
+                                                </button>
+                                            @else
+                                                <div class="w-full h-full min-h-[80px] flex flex-col items-center justify-center font-black uppercase tracking-wider text-xs leading-none">
+                                                    @if($rowspan > 1)
+                                                        @foreach(mb_str_split($targetText) as $char)
+                                                            @if($char === ' ')
+                                                                <span class="my-1"></span>
+                                                            @else
+                                                                <span>{{ $char }}</span>
+                                                            @endif
+                                                        @endforeach
+                                                    @else
+                                                        <span>{{ $targetText }}</span>
+                                                    @endif
+                                                </div>
+                                            @endif
+                                        </td>
+                                    @else
+                                        @php
+                                            $colorClasses = '';
+                                            if ($entry) {
                                                 $c = $entry->color ?? 'slate';
                                                 $colorClasses = match($c) {
                                                     'blue'     => 'bg-blue-50 border-blue-200 hover:bg-blue-100/70 text-blue-900 border-l-4 border-l-blue-500',
@@ -97,47 +176,38 @@
                                                     'sky'      => 'bg-sky-50 border-sky-200 hover:bg-sky-100/70 text-sky-900 border-l-4 border-l-sky-500',
                                                     default    => 'bg-slate-100 border-slate-200 hover:bg-slate-200/70 text-slate-900 border-l-4 border-l-slate-400',
                                                 };
-                                            @endphp
-
-                                            @if($isAdmin)
-                                                <button type="button" wire:click="edit({{ $entry->id }})" x-data x-on:click="$dispatch('open-modal', 'timetable-form')" class="w-full rounded-lg border-2 p-3 text-left transition-all {{ $colorClasses }}">
-                                                    @if($entry->is_break)
-                                                        <div class="flex flex-col items-center justify-center py-2 text-center uppercase tracking-wider text-[11px] font-black leading-tight">
-                                                            <span>{{ $entry->break_text ?? 'BREAK' }}</span>
-                                                        </div>
-                                                    @else
+                                            }
+                                        @endphp
+                                        <td class="border-r-2 border-slate-200 p-2">
+                                            @if($entry)
+                                                @if($isAdmin)
+                                                    <button type="button" wire:click="edit({{ $entry->id }})" x-data x-on:click="$dispatch('open-modal', 'timetable-form')" class="w-full rounded-lg border-2 p-3 text-left transition-all {{ $colorClasses }}">
                                                         <div class="text-sm font-bold leading-tight">{{ $entry->subject?->name }}</div>
                                                         <div class="mt-1 text-xs opacity-80 leading-none">{{ $entry->teacher?->name ?? 'No teacher' }}</div>
                                                         @if($entry->room)
                                                             <div class="mt-1 text-[11px] opacity-75 font-semibold">Room: {{ $entry->room }}</div>
                                                         @endif
-                                                    @endif
-                                                </button>
-                                            @else
-                                                <div class="rounded-lg border-2 p-3 {{ $colorClasses }}">
-                                                    @if($entry->is_break)
-                                                        <div class="flex flex-col items-center justify-center py-2 text-center uppercase tracking-wider text-[11px] font-black leading-tight">
-                                                            <span>{{ $entry->break_text ?? 'BREAK' }}</span>
-                                                        </div>
-                                                    @else
+                                                    </button>
+                                                @else
+                                                    <div class="rounded-lg border-2 p-3 {{ $colorClasses }}">
                                                         <div class="text-sm font-bold leading-tight">{{ $entry->subject?->name }}</div>
                                                         <div class="mt-1 text-xs opacity-80 leading-none">{{ $entry->teacher?->name ?? 'No teacher' }}</div>
                                                         @if($entry->room)
                                                             <div class="mt-1 text-[11px] opacity-75 font-semibold">Room: {{ $entry->room }}</div>
                                                         @endif
-                                                    @endif
-                                                </div>
-                                            @endif
-                                        @else
-                                            @if($isAdmin)
-                                                <button type="button" wire:click="selectSlot({{ $d['day'] }}, @js($slot['start']), @js($slot['end']))" x-data x-on:click="$dispatch('open-modal', 'timetable-form')" class="w-full rounded-lg border-2 border-dashed border-slate-300 bg-slate-50 p-3 text-xs text-slate-400 hover:border-blue-400 hover:bg-blue-50 hover:text-blue-600 transition-colors">
-                                                    + Add
-                                                </button>
+                                                    </div>
+                                                @endif
                                             @else
-                                                <div class="p-3 text-center text-xs text-slate-300">—</div>
+                                                @if($isAdmin)
+                                                    <button type="button" wire:click="selectSlot({{ $d['day'] }}, @js($slot['start']), @js($slot['end']))" x-data x-on:click="$dispatch('open-modal', 'timetable-form')" class="w-full rounded-lg border-2 border-dashed border-slate-300 bg-slate-50 p-3 text-xs text-slate-400 hover:border-blue-400 hover:bg-blue-50 hover:text-blue-600 transition-colors">
+                                                        + Add
+                                                    </button>
+                                                @else
+                                                    <div class="p-3 text-center text-xs text-slate-300">—</div>
+                                                @endif
                                             @endif
-                                        @endif
-                                    </td>
+                                        </td>
+                                    @endif
                                 @endforeach
                             </tr>
                         @endforeach
