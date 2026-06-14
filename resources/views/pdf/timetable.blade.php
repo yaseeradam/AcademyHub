@@ -247,36 +247,29 @@
 <body>
 
     {{-- ═══════ HEADER ═══════ --}}
-    <table class="header-table">
+    <table class="header-table" style="width: 100%; border-bottom: 2px solid #0c4a6e; padding-bottom: 8px; margin-bottom: 15px;">
         <tr>
             @if($logoBase64)
-                <td class="logo-cell">
-                    <img src="{{ $logoBase64 }}" alt="Logo">
+                <td class="logo-cell" style="width: 65px; vertical-align: middle;">
+                    <img src="{{ $logoBase64 }}" alt="Logo" style="width: 60px; height: 60px; border-radius: 8px;">
                 </td>
             @endif
-            <td>
-                <div class="school-name">{{ $schoolName }}</div>
+            <td style="vertical-align: middle; text-align: left;">
+                <div class="school-name" style="font-size: 18px; font-weight: 900; color: #0c4a6e; letter-spacing: 0.5px; text-transform: uppercase;">{{ $schoolName }}</div>
                 @if($schoolAddress || $schoolPhone || $schoolEmail)
-                    <div class="school-details">
+                    <div class="school-details" style="font-size: 8px; color: #475569; margin-top: 3px; font-weight: 500;">
                         {{ implode('  •  ', array_filter([$schoolAddress, $schoolPhone, $schoolEmail])) }}
                     </div>
                 @endif
             </td>
-        </tr>
-    </table>
-
-    {{-- ═══════ TITLE BAR ═══════ --}}
-    <table class="title-bar">
-        <tr>
-            <td>
-                <div class="doc-title">Weekly Timetable</div>
-                <div class="doc-subtitle">
-                    {{ $class->name }}@if($section) — {{ $section->name }}@endif
+            <td style="vertical-align: middle; text-align: right;">
+                <div style="font-size: 14px; font-weight: 900; color: #0c4a6e; text-transform: uppercase; letter-spacing: 1px;">Weekly Timetable</div>
+                <div style="font-size: 11px; font-weight: 800; color: #0ea5e9; margin-top: 2px;">
+                    Class: {{ $class->name }}@if($section) — {{ $section->name }}@endif
                 </div>
-            </td>
-            <td style="text-align: right;">
-                <span class="badge">{{ $termLabel }}</span>
-                <span class="badge" style="margin-left: 4px;">{{ $sessionLabel }}</span>
+                <div style="font-size: 9px; font-weight: bold; color: #64748b; margin-top: 2px;">
+                    {{ $termLabel }} &bull; {{ $sessionLabel }} Session
+                </div>
             </td>
         </tr>
     </table>
@@ -292,30 +285,80 @@
             </tr>
         </thead>
         <tbody>
+            @php
+                $rendered = [];
+            @endphp
             @foreach($days as $dayNum => $dayName)
             <tr>
                 <td class="time-cell" style="font-weight: bold; background: #f8fafc; border-right: 2px solid #cbd5e1; text-align: center; vertical-align: middle;">
                     {{ substr($dayName, 0, 3) }}
                 </td>
                 @foreach($timeSlots as $slot)
-                <td>
-                    @if(isset($slotMap[$dayNum][$slot['key']]))
-                    @php($entry = $slotMap[$dayNum][$slot['key']])
-                        <div class="entry-card color-{{ $entry->color ?? 'slate' }} {{ $entry->is_break ? 'is-break' : '' }}">
-                            @if($entry->is_break)
-                                <div class="break-title">{{ $entry->break_text ?? 'BREAK' }}</div>
+                    @php
+                        // Check if already rendered as part of a rowspan
+                        if (isset($rendered[$dayNum][$slot['key']])) {
+                            continue;
+                        }
+
+                        $entry = $slotMap[$dayNum][$slot['key']] ?? null;
+                    @endphp
+
+                    @if($entry && $entry->is_break)
+                        @php
+                            // Calculate rowspan: count how many consecutive days starting from this one
+                            // have a break with the exact same break text in this time slot.
+                            $rowspan = 1;
+                            $targetText = $entry->break_text;
+                            
+                            for ($d = $dayNum + 1; $d <= 5; $d++) {
+                                $nextEntry = $slotMap[$d][$slot['key']] ?? null;
+                                if ($nextEntry && $nextEntry->is_break && $nextEntry->break_text === $targetText) {
+                                    $rowspan++;
+                                } else {
+                                    break;
+                                }
+                            }
+
+                            // Mark subsequent days as rendered
+                            for ($offset = 1; $offset < $rowspan; $offset++) {
+                                $rendered[$dayNum + $offset][$slot['key']] = true;
+                            }
+                        @endphp
+                        <td rowspan="{{ $rowspan }}" class="color-{{ $entry->color ?? 'slate' }} is-break" style="vertical-align: middle; text-align: center; background: #f1f5f9; padding: 6px 4px;">
+                            @if($rowspan > 1)
+                                <div style="display: inline-block; font-size: 8px; font-weight: 950; color: #334155; text-transform: uppercase; letter-spacing: 1px;">
+                                    @php
+                                        $chars = mb_str_split($targetText ?? 'BREAK');
+                                        foreach ($chars as $char) {
+                                            if ($char === ' ') {
+                                                echo '<span style="margin: 3px 0; display: block;"></span>';
+                                            } else {
+                                                echo '<span style="display: block; line-height: 1.1;">' . e($char) . '</span>';
+                                            }
+                                        }
+                                    @endphp
+                                </div>
                             @else
-                                <div class="entry-subject">{{ $entry->subject?->name ?? 'N/A' }}</div>
-                                <div class="entry-teacher">{{ $entry->teacher?->name ?? 'No Teacher' }}</div>
-                                @if($entry->room)
-                                    <div class="entry-room">Room: {{ $entry->room }}</div>
-                                @endif
+                                <div style="font-size: 8px; font-weight: 950; color: #334155; text-transform: uppercase; letter-spacing: 0.5px;">
+                                    {{ $entry->break_text ?? 'BREAK' }}
+                                </div>
                             @endif
-                        </div>
+                        </td>
                     @else
-                    <div class="empty-cell">—</div>
+                        <td>
+                            @if($entry)
+                                <div class="entry-card color-{{ $entry->color ?? 'slate' }}">
+                                    <div class="entry-subject">{{ $entry->subject?->name ?? 'N/A' }}</div>
+                                    <div class="entry-teacher">{{ $entry->teacher?->name ?? 'No Teacher' }}</div>
+                                    @if($entry->room)
+                                        <div class="entry-room">Room: {{ $entry->room }}</div>
+                                    @endif
+                                </div>
+                            @else
+                                <div class="empty-cell">—</div>
+                            @endif
+                        </td>
                     @endif
-                </td>
                 @endforeach
             </tr>
             @endforeach
