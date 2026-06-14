@@ -458,6 +458,10 @@ Route::prefix('superadmin')->name('superadmin.')->group(function () {
         // Notifications Web Console
         Route::get('/notifications-list', [\App\Http\Controllers\SuperAdmin\NotificationsController::class, 'listView'])->name('notifications.list');
         Route::get('/notifications/{notification}/open', [\App\Http\Controllers\SuperAdmin\NotificationsController::class, 'open'])->name('notifications.open');
+
+        // Platform Pricing Settings
+        Route::get('/settings/pricing', [\App\Http\Controllers\SuperAdmin\PlatformSettingsController::class, 'edit'])->name('settings.pricing');
+        Route::post('/settings/pricing', [\App\Http\Controllers\SuperAdmin\PlatformSettingsController::class, 'update'])->name('settings.pricing.update');
     });
 });
 

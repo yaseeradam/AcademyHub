@@ -89,7 +89,7 @@
                 <p class="mt-1 text-sm font-medium text-slate-500">Base school management system containing students, results, fees, and attendance.</p>
             </div>
             <div class="mt-4 sm:mt-0 sm:text-right">
-                <div class="text-3xl font-black text-slate-900">₦1,000<span class="text-base font-normal text-slate-500"> / student / term</span></div>
+                <div class="text-3xl font-black text-slate-900">₦{{ number_format(\App\Support\PlatformSettings::getStudentTermlyFee()) }}<span class="text-base font-normal text-slate-500"> / student / term</span></div>
             </div>
         </div>
         <div class="p-6">

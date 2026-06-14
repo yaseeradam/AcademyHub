@@ -56,7 +56,7 @@ class SubscriptionBilling extends Component
 
     public function getCoreCostProperty()
     {
-        return $this->studentCount * 1000;
+        return $this->studentCount * \App\Support\PlatformSettings::getStudentTermlyFee();
     }
 
     public function getActivePluginsProperty()

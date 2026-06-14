@@ -33,7 +33,7 @@ class DashboardController extends Controller
         foreach ($tenants as $tenant) {
             // Student count for this school
             $studentCount = \App\Models\Student::withoutGlobalScopes()->where('tenant_id', $tenant->id)->count();
-            $coreCost = $studentCount * 1000;
+            $coreCost = $studentCount * \App\Support\PlatformSettings::getStudentTermlyFee();
 
             if ($coreCost > 0) {
                 $coreInvoiced += $coreCost;
