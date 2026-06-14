@@ -20,6 +20,9 @@ class TimetableEntry extends Model
         'subject_id',
         'teacher_id',
         'room',
+        'is_break',
+        'break_text',
+        'color',
     ];
 
     protected $casts = [
@@ -30,6 +33,7 @@ class TimetableEntry extends Model
         'teacher_id' => 'integer',
         'starts_at' => 'string',
         'ends_at' => 'string',
+        'is_break' => 'boolean',
     ];
 
     public function schoolClass(): BelongsTo

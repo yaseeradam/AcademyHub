@@ -78,26 +78,59 @@
                                     @endphp
                                     <td class="border-r-2 border-slate-200 p-2">
                                         @if($entry)
+                                            @php
+                                                $c = $entry->color ?? 'slate';
+                                                $colorClasses = match($c) {
+                                                    'blue'     => 'bg-blue-50 border-blue-200 hover:bg-blue-100/70 text-blue-900 border-l-4 border-l-blue-500',
+                                                    'indigo'   => 'bg-indigo-50 border-indigo-200 hover:bg-indigo-100/70 text-indigo-900 border-l-4 border-l-indigo-500',
+                                                    'violet'   => 'bg-violet-50 border-violet-200 hover:bg-violet-100/70 text-violet-900 border-l-4 border-l-violet-500',
+                                                    'purple'   => 'bg-purple-50 border-purple-200 hover:bg-purple-100/70 text-purple-900 border-l-4 border-l-purple-500',
+                                                    'pink'     => 'bg-pink-50 border-pink-200 hover:bg-pink-100/70 text-pink-900 border-l-4 border-l-pink-500',
+                                                    'red'      => 'bg-red-50 border-red-200 hover:bg-red-100/70 text-red-900 border-l-4 border-l-red-500',
+                                                    'orange'   => 'bg-orange-50 border-orange-200 hover:bg-orange-100/70 text-orange-900 border-l-4 border-l-orange-500',
+                                                    'amber'    => 'bg-amber-50 border-amber-200 hover:bg-amber-100/70 text-amber-900 border-l-4 border-l-amber-500',
+                                                    'yellow'   => 'bg-yellow-50 border-yellow-200 hover:bg-yellow-100/70 text-yellow-900 border-l-4 border-l-yellow-500',
+                                                    'green'    => 'bg-green-50 border-green-200 hover:bg-green-100/70 text-green-900 border-l-4 border-l-green-500',
+                                                    'emerald'  => 'bg-emerald-50 border-emerald-200 hover:bg-emerald-100/70 text-emerald-900 border-l-4 border-l-emerald-500',
+                                                    'teal'     => 'bg-teal-50 border-teal-200 hover:bg-teal-100/70 text-teal-900 border-l-4 border-l-teal-500',
+                                                    'cyan'     => 'bg-cyan-50 border-cyan-200 hover:bg-cyan-100/70 text-cyan-900 border-l-4 border-l-cyan-500',
+                                                    'sky'      => 'bg-sky-50 border-sky-200 hover:bg-sky-100/70 text-sky-900 border-l-4 border-l-sky-500',
+                                                    default    => 'bg-slate-100 border-slate-200 hover:bg-slate-200/70 text-slate-900 border-l-4 border-l-slate-400',
+                                                };
+                                            @endphp
+
                                             @if($isAdmin)
-                                                <button type="button" wire:click="edit({{ $entry->id }})" x-data x-on:click="$dispatch('open-modal', 'timetable-form')" class="w-full rounded-lg border-2 border-blue-200 bg-blue-50 p-3 text-left hover:border-blue-400 hover:bg-blue-100">
-                                                    <div class="text-sm font-bold text-blue-900">{{ $entry->subject?->name }}</div>
-                                                    <div class="mt-1 text-xs text-blue-700">{{ $entry->teacher?->name ?? 'No teacher' }}</div>
-                                                    @if($entry->room)
-                                                        <div class="mt-1 text-xs text-blue-600">Room: {{ $entry->room }}</div>
+                                                <button type="button" wire:click="edit({{ $entry->id }})" x-data x-on:click="$dispatch('open-modal', 'timetable-form')" class="w-full rounded-lg border-2 p-3 text-left transition-all {{ $colorClasses }}">
+                                                    @if($entry->is_break)
+                                                        <div class="flex flex-col items-center justify-center py-2 text-center uppercase tracking-wider text-[11px] font-black leading-tight">
+                                                            <span>{{ $entry->break_text ?? 'BREAK' }}</span>
+                                                        </div>
+                                                    @else
+                                                        <div class="text-sm font-bold leading-tight">{{ $entry->subject?->name }}</div>
+                                                        <div class="mt-1 text-xs opacity-80 leading-none">{{ $entry->teacher?->name ?? 'No teacher' }}</div>
+                                                        @if($entry->room)
+                                                            <div class="mt-1 text-[11px] opacity-75 font-semibold">Room: {{ $entry->room }}</div>
+                                                        @endif
                                                     @endif
                                                 </button>
                                             @else
-                                                <div class="rounded-lg border-2 border-blue-200 bg-blue-50 p-3">
-                                                    <div class="text-sm font-bold text-blue-900">{{ $entry->subject?->name }}</div>
-                                                    <div class="mt-1 text-xs text-blue-700">{{ $entry->teacher?->name ?? 'No teacher' }}</div>
-                                                    @if($entry->room)
-                                                        <div class="mt-1 text-xs text-blue-600">Room: {{ $entry->room }}</div>
+                                                <div class="rounded-lg border-2 p-3 {{ $colorClasses }}">
+                                                    @if($entry->is_break)
+                                                        <div class="flex flex-col items-center justify-center py-2 text-center uppercase tracking-wider text-[11px] font-black leading-tight">
+                                                            <span>{{ $entry->break_text ?? 'BREAK' }}</span>
+                                                        </div>
+                                                    @else
+                                                        <div class="text-sm font-bold leading-tight">{{ $entry->subject?->name }}</div>
+                                                        <div class="mt-1 text-xs opacity-80 leading-none">{{ $entry->teacher?->name ?? 'No teacher' }}</div>
+                                                        @if($entry->room)
+                                                            <div class="mt-1 text-[11px] opacity-75 font-semibold">Room: {{ $entry->room }}</div>
+                                                        @endif
                                                     @endif
                                                 </div>
                                             @endif
                                         @else
                                             @if($isAdmin)
-                                                <button type="button" wire:click="selectSlot({{ $d['day'] }}, @js($slot['start']), @js($slot['end']))" x-data x-on:click="$dispatch('open-modal', 'timetable-form')" class="w-full rounded-lg border-2 border-dashed border-slate-300 bg-slate-50 p-3 text-xs text-slate-400 hover:border-blue-400 hover:bg-blue-50 hover:text-blue-600">
+                                                <button type="button" wire:click="selectSlot({{ $d['day'] }}, @js($slot['start']), @js($slot['end']))" x-data x-on:click="$dispatch('open-modal', 'timetable-form')" class="w-full rounded-lg border-2 border-dashed border-slate-300 bg-slate-50 p-3 text-xs text-slate-400 hover:border-blue-400 hover:bg-blue-50 hover:text-blue-600 transition-colors">
                                                     + Add
                                                 </button>
                                             @else
@@ -116,9 +149,9 @@
         @if($isAdmin)
             <div x-data="{ open: false }" x-on:open-modal.window="if ($event.detail === 'timetable-form') open = true" x-on:close.window="open = false" x-show="open" x-cloak class="fixed inset-0 z-50 overflow-y-auto" style="display: none;">
                 <div class="flex min-h-screen items-center justify-center px-4 py-6">
-                    <div x-on:click="open = false" class="fixed inset-0 bg-black/50 transition-opacity"></div>
+                    <div x-on:click="open = false" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity"></div>
                     
-                    <div x-on:click.stop class="relative w-full max-w-2xl rounded-2xl bg-white p-6 shadow-2xl">
+                    <div x-on:click.stop class="relative w-full max-w-2xl rounded-2xl bg-white p-6 shadow-2xl border border-slate-100">
                         <h3 class="text-lg font-black text-slate-900">{{ $editingId ? 'Edit Entry' : 'Add Entry' }}</h3>
                         <p class="mt-1 text-sm text-slate-600">Fill in the details below</p>
 
@@ -136,17 +169,6 @@
                             </div>
 
                             <div>
-                                <label class="text-xs font-bold uppercase text-slate-700">Subject</label>
-                                <select wire:model.live="subjectId" class="mt-2 w-full rounded-lg border-2 border-slate-200 px-4 py-2.5 text-sm">
-                                    <option value="">Select Subject</option>
-                                    @foreach($this->subjects as $s)
-                                        <option value="{{ $s->id }}">{{ $s->name }}</option>
-                                    @endforeach
-                                </select>
-                                @error('subjectId') <div class="mt-1 text-xs text-red-600">{{ $message }}</div> @enderror
-                            </div>
-
-                            <div>
                                 <label class="text-xs font-bold uppercase text-slate-700">Start Time</label>
                                 <input wire:model="startsAt" type="time" class="mt-2 w-full rounded-lg border-2 border-slate-200 px-4 py-2.5 text-sm">
                                 @error('startsAt') <div class="mt-1 text-xs text-red-600">{{ $message }}</div> @enderror
@@ -158,34 +180,100 @@
                                 @error('endsAt') <div class="mt-1 text-xs text-red-600">{{ $message }}</div> @enderror
                             </div>
 
-                            <div>
-                                <label class="text-xs font-bold uppercase text-slate-700">Teacher</label>
-                                <select wire:model.live="teacherId" class="mt-2 w-full rounded-lg border-2 border-slate-200 px-4 py-2.5 text-sm">
-                                    <option value="">Select Teacher</option>
-                                    @foreach($this->teachers as $t)
-                                        <option value="{{ $t->id }}">{{ $t->name }}</option>
-                                    @endforeach
-                                </select>
-                                @error('teacherId') <div class="mt-1 text-xs text-red-600">{{ $message }}</div> @enderror
+                            <div class="md:col-span-2">
+                                <label class="flex items-center gap-3 cursor-pointer select-none">
+                                    <input type="checkbox" wire:model.live="isBreak" class="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500/20">
+                                    <span class="text-sm font-bold text-slate-700">Is this a Break / Interval Slot?</span>
+                                </label>
                             </div>
 
-                            <div>
-                                <label class="text-xs font-bold uppercase text-slate-700">Room (Optional)</label>
-                                <input wire:model="room" class="mt-2 w-full rounded-lg border-2 border-slate-200 px-4 py-2.5 text-sm" placeholder="e.g. Lab 1">
-                                @error('room') <div class="mt-1 text-xs text-red-600">{{ $message }}</div> @enderror
+                            @if($isBreak)
+                                <div class="md:col-span-2">
+                                    <label class="text-xs font-bold uppercase text-slate-700">Break Label / Text</label>
+                                    <input wire:model="breakText" type="text" class="mt-2 w-full rounded-lg border-2 border-slate-200 px-4 py-2.5 text-sm" placeholder="e.g. BREAK, ZUHR - BREAK, Lunch, Jumat Prayer">
+                                    @error('breakText') <div class="mt-1 text-xs text-red-600">{{ $message }}</div> @enderror
+                                </div>
+                            @else
+                                <div>
+                                    <label class="text-xs font-bold uppercase text-slate-700">Subject</label>
+                                    <select wire:model.live="subjectId" class="mt-2 w-full rounded-lg border-2 border-slate-200 px-4 py-2.5 text-sm">
+                                        <option value="">Select Subject</option>
+                                        @foreach($this->subjects as $s)
+                                            <option value="{{ $s->id }}">{{ $s->name }}</option>
+                                        @endforeach
+                                    </select>
+                                    @error('subjectId') <div class="mt-1 text-xs text-red-600">{{ $message }}</div> @enderror
+                                </div>
+
+                                <div>
+                                    <label class="text-xs font-bold uppercase text-slate-700">Teacher</label>
+                                    <select wire:model.live="teacherId" class="mt-2 w-full rounded-lg border-2 border-slate-200 px-4 py-2.5 text-sm">
+                                        <option value="">Select Teacher</option>
+                                        @foreach($this->teachers as $t)
+                                            <option value="{{ $t->id }}">{{ $t->name }}</option>
+                                        @endforeach
+                                    </select>
+                                    @error('teacherId') <div class="mt-1 text-xs text-red-600">{{ $message }}</div> @enderror
+                                </div>
+
+                                <div class="md:col-span-2">
+                                    <label class="text-xs font-bold uppercase text-slate-700">Room (Optional)</label>
+                                    <input wire:model="room" class="mt-2 w-full rounded-lg border-2 border-slate-200 px-4 py-2.5 text-sm" placeholder="e.g. Lab 1">
+                                    @error('room') <div class="mt-1 text-xs text-red-600">{{ $message }}</div> @enderror
+                                </div>
+                            @endif
+
+                            <div class="md:col-span-2">
+                                <label class="text-xs font-bold uppercase text-slate-700 block mb-2">Color Theme</label>
+                                <div class="flex flex-wrap gap-2.5">
+                                    @php
+                                        $colorsList = [
+                                            'slate' => 'bg-slate-500',
+                                            'blue' => 'bg-blue-500',
+                                            'indigo' => 'bg-indigo-500',
+                                            'violet' => 'bg-violet-500',
+                                            'purple' => 'bg-purple-500',
+                                            'pink' => 'bg-pink-500',
+                                            'red' => 'bg-red-500',
+                                            'orange' => 'bg-orange-500',
+                                            'amber' => 'bg-amber-500',
+                                            'yellow' => 'bg-yellow-500',
+                                            'green' => 'bg-green-500',
+                                            'emerald' => 'bg-emerald-500',
+                                            'teal' => 'bg-teal-500',
+                                            'cyan' => 'bg-cyan-500',
+                                            'sky' => 'bg-sky-500',
+                                        ];
+                                    @endphp
+                                    @foreach($colorsList as $colorKey => $colorClass)
+                                        <button type="button" wire:click="$set('color', '{{ $colorKey }}')" 
+                                                class="h-8 w-8 rounded-full {{ $colorClass }} transition-all focus:outline-none focus:ring-4 focus:ring-offset-2 {{ $color === $colorKey ? 'ring-4 ring-offset-2 ring-slate-800 scale-110 shadow-md' : 'opacity-85 hover:opacity-100 hover:scale-105' }}"
+                                                title="{{ ucfirst($colorKey) }}"></button>
+                                    @endforeach
+                                </div>
+                                @error('color') <div class="mt-1 text-xs text-red-600">{{ $message }}</div> @enderror
                             </div>
+
+                            @if(!$editingId)
+                                <div class="md:col-span-2 mt-2">
+                                    <label class="flex items-center gap-3 cursor-pointer select-none">
+                                        <input type="checkbox" wire:model="applyToAllDays" class="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500/20">
+                                        <span class="text-sm font-semibold text-slate-600">Apply this slot/break to all days of the week (Mon-Fri)</span>
+                                    </label>
+                                </div>
+                            @endif
                         </div>
 
                         <div class="mt-6 flex items-center justify-end gap-3">
                             @if($editingId)
-                                <button type="button" wire:click="delete({{ $editingId }})" x-on:click="open = false" onclick="return confirm('Delete this entry?')" class="rounded-lg bg-red-600 px-5 py-2.5 text-sm font-bold text-white hover:bg-red-700">
+                                <button type="button" wire:click="delete({{ $editingId }})" x-on:click="open = false" onclick="return confirm('Delete this entry?')" class="rounded-lg bg-red-600 px-5 py-2.5 text-sm font-bold text-white hover:bg-red-700 shadow-md transition-all">
                                     Delete
                                 </button>
                             @endif
-                            <button type="button" x-on:click="open = false" class="rounded-lg border-2 border-slate-200 bg-white px-5 py-2.5 text-sm font-bold text-slate-700 hover:bg-slate-50">
+                            <button type="button" x-on:click="open = false" class="rounded-lg border-2 border-slate-200 bg-white px-5 py-2.5 text-sm font-bold text-slate-700 hover:bg-slate-50 transition-all">
                                 Cancel
                             </button>
-                            <button type="button" wire:click="save" x-on:click="open = false" class="rounded-lg bg-blue-600 px-6 py-2.5 text-sm font-bold text-white hover:bg-blue-700">
+                            <button type="button" wire:click="save" x-on:click="open = false" class="rounded-lg bg-blue-600 px-6 py-2.5 text-sm font-bold text-white hover:bg-blue-700 shadow-md transition-all">
                                 {{ $editingId ? 'Update' : 'Save' }}
                             </button>
                         </div>

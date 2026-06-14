@@ -33,6 +33,10 @@ class Index extends Component
     public ?int $subjectId = null;
     public ?int $teacherId = null;
     public ?string $room = null;
+    public bool $isBreak = false;
+    public ?string $breakText = null;
+    public string $color = 'slate';
+    public bool $applyToAllDays = false;
 
     #[Computed]
     public function classes()
@@ -125,6 +129,10 @@ class Index extends Component
         $this->subjectId = null;
         $this->teacherId = null;
         $this->room = null;
+        $this->isBreak = false;
+        $this->breakText = null;
+        $this->color = 'slate';
+        $this->applyToAllDays = false;
     }
 
     public function selectSlot(int $day, string $start, string $end): void
@@ -152,6 +160,10 @@ class Index extends Component
         $this->subjectId = $e->subject_id;
         $this->teacherId = $e->teacher_id;
         $this->room = $e->room;
+        $this->isBreak = (bool) $e->is_break;
+        $this->breakText = $e->break_text;
+        $this->color = $e->color ?? 'slate';
+        $this->applyToAllDays = false;
     }
 
     public function save(): void
@@ -159,14 +171,26 @@ class Index extends Component
         $user = auth()->user();
         abort_unless($user?->role === 'admin', 403);
 
-        $data = $this->validate([
+        $rules = [
             'entryDay' => ['required', 'integer', 'between:1,5'],
             'startsAt' => ['required', 'date_format:H:i'],
             'endsAt' => ['required', 'date_format:H:i'],
-            'subjectId' => ['required', 'integer', 'exists:subjects,id'],
-            'teacherId' => ['nullable', 'integer', 'exists:users,id'],
-            'room' => ['nullable', 'string', 'max:50'],
-        ]);
+            'isBreak' => ['required', 'boolean'],
+            'breakText' => ['nullable', 'string', 'max:100'],
+            'color' => ['required', 'string', 'max:30'],
+        ];
+
+        if ($this->isBreak) {
+            $rules['subjectId'] = ['nullable'];
+            $rules['teacherId'] = ['nullable'];
+            $rules['room'] = ['nullable'];
+        } else {
+            $rules['subjectId'] = ['required', 'integer', 'exists:subjects,id'];
+            $rules['teacherId'] = ['nullable', 'integer', 'exists:users,id'];
+            $rules['room'] = ['nullable', 'string', 'max:50'];
+        }
+
+        $data = $this->validate($rules);
 
         abort_unless($this->classId, 400);
 
@@ -179,29 +203,48 @@ class Index extends Component
             ]);
         }
 
-        $this->ensureNoConflicts(
-            editingId: $this->editingId,
-            classId: (int) $this->classId,
-            sectionId: null,
-            day: (int) $data['entryDay'],
-            startSec: $startSec,
-            endSec: $endSec,
-            teacherId: $data['teacherId'] ? (int) $data['teacherId'] : null
-        );
+        $daysToSave = [$data['entryDay']];
+        if ($this->applyToAllDays && ! $this->editingId) {
+            $daysToSave = [1, 2, 3, 4, 5];
+        }
 
-        TimetableEntry::query()->updateOrCreate(
-            ['id' => $this->editingId],
-            [
-                'class_id' => (int) $this->classId,
-                'section_id' => null,
-                'day_of_week' => (int) $data['entryDay'],
-                'starts_at' => $data['startsAt'],
-                'ends_at' => $data['endsAt'],
-                'subject_id' => (int) $data['subjectId'],
-                'teacher_id' => $data['teacherId'] ? (int) $data['teacherId'] : null,
-                'room' => $data['room'] ? trim($data['room']) : null,
-            ]
-        );
+        // 1. Conflict Check
+        foreach ($daysToSave as $day) {
+            $this->ensureNoConflicts(
+                editingId: $this->editingId,
+                classId: (int) $this->classId,
+                sectionId: null,
+                day: $day,
+                startSec: $startSec,
+                endSec: $endSec,
+                teacherId: (!$this->isBreak && $data['teacherId']) ? (int) $data['teacherId'] : null
+            );
+        }
+
+        // 2. Save
+        foreach ($daysToSave as $day) {
+            TimetableEntry::query()->updateOrCreate(
+                $this->editingId ? ['id' => $this->editingId] : [
+                    'class_id' => (int) $this->classId,
+                    'day_of_week' => $day,
+                    'starts_at' => $data['startsAt'],
+                    'ends_at' => $data['endsAt'],
+                ],
+                [
+                    'class_id' => (int) $this->classId,
+                    'section_id' => null,
+                    'day_of_week' => $day,
+                    'starts_at' => $data['startsAt'],
+                    'ends_at' => $data['endsAt'],
+                    'subject_id' => !$this->isBreak ? (int) $data['subjectId'] : null,
+                    'teacher_id' => (!$this->isBreak && $data['teacherId']) ? (int) $data['teacherId'] : null,
+                    'room' => (!$this->isBreak && $data['room']) ? trim($data['room']) : null,
+                    'is_break' => (bool) $this->isBreak,
+                    'break_text' => $this->isBreak ? ($data['breakText'] ? trim($data['breakText']) : 'BREAK') : null,
+                    'color' => $data['color'],
+                ]
+            );
+        }
 
         $this->dispatch('alert', message: 'Timetable entry saved.', type: 'success');
         $this->clearForm();
