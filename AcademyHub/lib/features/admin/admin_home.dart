@@ -323,6 +323,7 @@ class _AdminHomeState extends State<AdminHome> {
 
   // ─── Command Tab ────────────────────────────────────────────────────────────
   Widget _buildCommand(BuildContext context, bool isAdmin, bool isBursar, bool hasHomework, bool hasCbt) {
+    debugPrint('Building AdminHome Command Tab');
     final auth    = context.watch<AuthProvider>();
     final primary = auth.tenantPrimaryColor;
     final user    = auth.user;

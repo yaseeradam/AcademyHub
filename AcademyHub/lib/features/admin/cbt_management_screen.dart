@@ -170,7 +170,15 @@ class _CbtManagementScreenState extends State<CbtManagementScreen> with SingleTi
       separatorBuilder: (_, index) => const SizedBox(height: 10),
       itemBuilder: (context, i) {
         final attempt = _attempts[i];
-        final score = (attempt['score'] as num?)?.toDouble() ?? 0.0;
+        final rawScore = attempt['score'];
+        double score = 0.0;
+        if (rawScore != null) {
+          if (rawScore is num) {
+            score = rawScore.toDouble();
+          } else if (rawScore is String) {
+            score = double.tryParse(rawScore) ?? 0.0;
+          }
+        }
         final date = (attempt['started_at'] as String?)?.substring(0, 16).replaceFirst('T', ' ') ?? '';
         final isDirty = (attempt['is_dirty'] as int? ?? 0) == 1;
 

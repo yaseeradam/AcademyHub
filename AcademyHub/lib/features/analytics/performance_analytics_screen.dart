@@ -112,7 +112,7 @@ class _PerformanceAnalyticsScreenState extends State<PerformanceAnalyticsScreen>
       List<Map<String, dynamic>> subjectList = [];
 
       for (final s in studentScores) {
-        final total = (s['total'] as num?)?.toDouble() ?? 0.0;
+        final total = _parseNum(s['total']);
         totalAcademic += total;
         scoresCount++;
 
@@ -140,7 +140,7 @@ class _PerformanceAnalyticsScreenState extends State<PerformanceAnalyticsScreen>
         final lateCount = localAttendance.where((a) => a['status'] == 'late').length;
         attRate = ((present + lateCount) / localAttendance.length) * 100.0;
       } else if (_studentStats != null) {
-        attRate = (_studentStats!['attendance_rate'] as num?)?.toDouble() ?? 100.0;
+        attRate = _parseNum(_studentStats!['attendance_rate'], 100.0);
       }
 
       // Homework completion
@@ -151,12 +151,12 @@ class _PerformanceAnalyticsScreenState extends State<PerformanceAnalyticsScreen>
       int cbtCount = cbtAttempts.length;
       double cbtSum = 0.0;
       for (final attempt in cbtAttempts) {
-        cbtSum += (attempt['score'] as num?)?.toDouble() ?? 0.0;
+        cbtSum += _parseNum(attempt['score']);
       }
 
       if (mounted) {
         setState(() {
-          _averageScore = scoresCount > 0 ? (totalAcademic / scoresCount) : ((_studentStats?['average_score'] as num?)?.toDouble() ?? 0.0);
+          _averageScore = scoresCount > 0 ? (totalAcademic / scoresCount) : _parseNum(_studentStats?['average_score']);
           _attendanceRate = attRate;
           _completedHomeworkCount = completedHw;
           _totalHomeworkCount = totalHw > completedHw ? totalHw : completedHw;
@@ -624,4 +624,11 @@ class _PerformanceAnalyticsScreenState extends State<PerformanceAnalyticsScreen>
         fillColor: AppColors.surface2,
         filled: true,
       );
+}
+
+double _parseNum(dynamic val, [double defaultVal = 0.0]) {
+  if (val == null) return defaultVal;
+  if (val is num) return val.toDouble();
+  if (val is String) return double.tryParse(val) ?? defaultVal;
+  return defaultVal;
 }

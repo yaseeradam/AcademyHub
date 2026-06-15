@@ -163,8 +163,25 @@ class _StudentHomeState extends State<StudentHome>
   // ─── Feed Tab ──────────────────────────────────────────────────────────────
   Widget _buildFeed(Color primary, Color accent, List<AHNavItem> activeTabs) {
     final stats         = _studentStats;
-    final attendanceRate = (stats?['attendance_rate'] as num?)?.toDouble() ?? 0.0;
-    final averageScore   = (stats?['average_score'] as num?)?.toDouble() ?? 0.0;
+    final rawAtt = stats?['attendance_rate'];
+    double attendanceRate = 0.0;
+    if (rawAtt != null) {
+      if (rawAtt is num) {
+        attendanceRate = rawAtt.toDouble();
+      } else if (rawAtt is String) {
+        attendanceRate = double.tryParse(rawAtt) ?? 0.0;
+      }
+    }
+
+    final rawScore = stats?['average_score'];
+    double averageScore = 0.0;
+    if (rawScore != null) {
+      if (rawScore is num) {
+        averageScore = rawScore.toDouble();
+      } else if (rawScore is String) {
+        averageScore = double.tryParse(rawScore) ?? 0.0;
+      }
+    }
     final classRank      = stats?['class_rank'] ?? 0;
     final pendingHw      = stats?['pending_homework'] ?? 0;
     final auth           = context.watch<AuthProvider>();
