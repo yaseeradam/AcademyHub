@@ -2,17 +2,62 @@ import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 
 class AppColors {
-  static const Color primary = Color(0xFFF59E0B); // Amber 500
-  static const Color primaryDark = Color(0xFFD97706); // Amber 600
-  static const Color background = Color(0xFFF8FAFC); // Slate 50
-  static const Color surface = Colors.white;
-  static const Color textPrimary = Color(0xFF0F172A); // Slate 900
-  static const Color textSecondary = Color(0xFF64748B); // Slate 500
+  // Theme State
+  static bool isDark = false; // default is light theme
 
-  static const Color success = Color(0xFF10B981); // Emerald 500
-  static const Color error = Color(0xFFF43F5E); // Rose 500
-  static const Color info = Color(0xFF3B82F6); // Blue 500
-  static const Color warning = Color(0xFFF59E0B); // Amber 500
+  // ── Theme colors ──────────────────────────────────────────────────────
+  static const Color primary    = Color(0xFFF59E0B); // Amber (tenant-overridable)
+  static const Color primaryDark = Color(0xFFD97706);
+
+  // Backgrounds
+  static Color get background  => isDark ? const Color(0xFF0D1117) : const Color(0xFFF8FAFC); // near-black ink vs clean slate off-white
+  static Color get surface     => isDark ? const Color(0xFF161B22) : const Color(0xFFFFFFFF); // dark card vs pure white card
+  static Color get surface2    => isDark ? const Color(0xFF21262D) : const Color(0xFFF1F5F9); // elevated card vs slate-100
+  static Color get surface3    => isDark ? const Color(0xFF30363D) : const Color(0xFFE2E8F0); // hover/pressed vs slate-200
+
+  // Text
+  static Color get textPrimary   => isDark ? const Color(0xFFF0F6FC) : const Color(0xFF0F172A); // off-white vs slate-900
+  static Color get textSecondary => isDark ? const Color(0xFF8B949E) : const Color(0xFF475569); // grey vs slate-600
+  static Color get textMuted     => isDark ? const Color(0xFF484F58) : const Color(0xFF94A3B8); // dark-grey vs slate-400
+
+  // Borders
+  static Color get borderLight      => isDark ? const Color(0xFF30363D) : const Color(0xFFE2E8F0); // dark border vs slate-200
+  static Color get borderExtraLight => isDark ? const Color(0xFF21262D) : const Color(0xFFF1F5F9);
+
+  // Semantic
+  static const Color success = Color(0xFF3FB950); // green
+  static const Color error   = Color(0xFFF85149); // red
+  static const Color info    = Color(0xFF58A6FF); // blue
+  static const Color warning = Color(0xFFD29922); // yellow
+
+  // Role accent colors
+  static const Color studentAccent = Color(0xFF6366F1); // indigo
+  static const Color teacherAccent = Color(0xFF10B981); // emerald
+  static const Color adminAccent   = Color(0xFFF59E0B); // amber
+  static const Color parentAccent  = Color(0xFFA855F7); // violet
+
+  // Layout tokens
+  static const double radiusMedium = 12.0;
+  static const double radiusSmall  = 8.0;
+  static const double radiusLarge  = 16.0;
+  static const double radiusXL     = 20.0;
+
+  static List<BoxShadow> get subtleShadow => [
+        BoxShadow(
+          color: Colors.black.withValues(alpha: 0.15),
+          blurRadius: 12,
+          offset: const Offset(0, 4),
+        ),
+      ];
+
+  static List<BoxShadow> get glowShadow => [
+        BoxShadow(
+          color: primary.withValues(alpha: 0.25),
+          blurRadius: 20,
+          spreadRadius: 0,
+          offset: const Offset(0, 4),
+        ),
+      ];
 }
 
 class ApiConstants {
@@ -25,11 +70,11 @@ class ApiConstants {
     if (defaultTargetPlatform == TargetPlatform.linux ||
         defaultTargetPlatform == TargetPlatform.macOS ||
         defaultTargetPlatform == TargetPlatform.windows) {
-      return 'http://127.0.0.1:8000/api';
+      return 'http://10.142.155.125:8000/api';
     }
 
     // Default to Android emulator loopback redirection port 8000,
-    // or change to http://192.168.43.92:8000/api for physical devices on local network
-    return 'http://192.168.43.92:8000/api';
+    // or change to http://[IP_ADDRESS]/api for physical devices on local network
+    return 'http://10.142.155.125:8000/api';
   }
 }

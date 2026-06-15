@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../../core/mobile_layout.dart';
 import '../../core/auth_provider.dart';
+import '../../core/constants.dart';
 
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({super.key});
@@ -20,230 +22,150 @@ class DashboardContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final user = context.watch<AuthProvider>().user;
-    
+    final auth    = context.watch<AuthProvider>();
+    final user    = auth.user;
+
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(24),
+      padding: const EdgeInsets.all(20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Welcome section
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(24),
-            decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  Color(0xFF6366F1), // Indigo 500
-                  Color(0xFF8B5CF6), // Violet 500
-                ],
-              ),
-              borderRadius: BorderRadius.circular(16),
-              boxShadow: [
-                BoxShadow(
-                  color: const Color(0xFF6366F1).withValues(alpha: 0.3),
-                  blurRadius: 20,
-                  offset: const Offset(0, 8),
-                ),
-              ],
-            ),
+          // Welcome hero
+          GlassHeroCard(
+            gradientColors: [
+              const Color(0xFF6366F1),
+              const Color(0xFF8B5CF6),
+            ],
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   'Welcome back, ${user?.name ?? 'User'}!',
-                  style: const TextStyle(
-                    fontSize: 30,
+                  style: GoogleFonts.spaceGrotesk(
+                    fontSize: 22,
                     fontWeight: FontWeight.bold,
                     color: Colors.white,
                   ),
                 ),
-                const SizedBox(height: 8),
-                Text(
-                  'Role: ${user?.role.toUpperCase() ?? 'USER'}',
-                  style: TextStyle(
-                    fontSize: 20,
-                    color: Colors.white.withValues(alpha: 0.9),
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 6),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 10, vertical: 4),
                   decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.2),
+                    color: Colors.white.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Text(
-                    'AcademyHub Dashboard',
-                    style: TextStyle(
-                      fontSize: 17,
-                      color: Colors.white.withValues(alpha: 0.9),
-                      fontWeight: FontWeight.w600,
+                    (user?.role ?? 'user').toUpperCase(),
+                    style: GoogleFonts.spaceGrotesk(
+                      fontSize: 11,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white70,
                     ),
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  'AcademyHub Dashboard',
+                  style: GoogleFonts.spaceGrotesk(
+                    fontSize: 13,
+                    color: Colors.white70,
                   ),
                 ),
               ],
             ),
           ),
-          
-          const SizedBox(height: 24),
-          
-          // Quick stats
-          const Text(
+
+          const SizedBox(height: 20),
+
+          Text(
             'Quick Overview',
-            style: TextStyle(
-              fontSize: 20,
+            style: GoogleFonts.spaceGrotesk(
+              fontSize: 14,
               fontWeight: FontWeight.bold,
-              color: Color(0xFF1F2937),
+              color: AppColors.textPrimary,
             ),
           ),
-          
-          const SizedBox(height: 16),
-          
+          const SizedBox(height: 12),
+
           GridView.count(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
             crossAxisCount: 2,
-            crossAxisSpacing: 16,
-            mainAxisSpacing: 16,
+            crossAxisSpacing: 12,
+            mainAxisSpacing: 12,
             childAspectRatio: 1.2,
             children: [
-              _buildStatCard(
-                'Students',
-                '0',
-                Icons.people,
-                const Color(0xFF3B82F6),
+              DarkStatCard(
+                label: 'Students',
+                value: '0',
+                icon: Icons.people_rounded,
+                color: AppColors.info,
               ),
-              _buildStatCard(
-                'Classes',
-                '0',
-                Icons.class_,
-                const Color(0xFF10B981),
+              DarkStatCard(
+                label: 'Classes',
+                value: '0',
+                icon: Icons.class_rounded,
+                color: AppColors.success,
               ),
-              _buildStatCard(
-                'Subjects',
-                '0',
-                Icons.book,
-                const Color(0xFFF59E0B),
+              DarkStatCard(
+                label: 'Subjects',
+                value: '0',
+                icon: Icons.book_rounded,
+                color: AppColors.primary,
               ),
-              _buildStatCard(
-                'Teachers',
-                '0',
-                Icons.school,
-                const Color(0xFFEF4444),
+              DarkStatCard(
+                label: 'Teachers',
+                value: '0',
+                icon: Icons.school_rounded,
+                color: AppColors.error,
               ),
             ],
           ),
-          
+
           const SizedBox(height: 24),
-          
-          // Recent activity
-          const Text(
+
+          Text(
             'Recent Activity',
-            style: TextStyle(
-              fontSize: 20,
+            style: GoogleFonts.spaceGrotesk(
+              fontSize: 14,
               fontWeight: FontWeight.bold,
-              color: Color(0xFF1F2937),
+              color: AppColors.textPrimary,
             ),
           ),
-          
-          const SizedBox(height: 16),
-          
+          const SizedBox(height: 12),
+
           Container(
             width: double.infinity,
-            padding: const EdgeInsets.all(24),
+            padding: const EdgeInsets.all(32),
             decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(16),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.05),
-                  blurRadius: 10,
-                  offset: const Offset(0, 4),
-                ),
-              ],
+              color: AppColors.surface,
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(color: AppColors.borderLight),
             ),
             child: Column(
               children: [
-                Icon(
-                  Icons.inbox_outlined,
-                  size: 48,
-                  color: Colors.grey[400],
-                ),
-                const SizedBox(height: 16),
+                Icon(Icons.inbox_outlined,
+                    size: 40, color: AppColors.textMuted),
+                const SizedBox(height: 12),
                 Text(
                   'No recent activity',
-                  style: TextStyle(
-                    fontSize: 16,
+                  style: GoogleFonts.spaceGrotesk(
+                    fontSize: 14,
                     fontWeight: FontWeight.w600,
-                    color: Colors.grey[600],
+                    color: AppColors.textSecondary,
                   ),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 6),
                 Text(
                   'Activity will appear here as you use the system',
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.grey[500],
+                  style: GoogleFonts.spaceGrotesk(
+                    fontSize: 12,
+                    color: AppColors.textMuted,
                   ),
                   textAlign: TextAlign.center,
                 ),
               ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildStatCard(String title, String value, IconData icon, Color color) {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Icon(
-              icon,
-              color: color,
-              size: 24,
-            ),
-          ),
-          const Spacer(),
-          Text(
-            value,
-            style: const TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color: Color(0xFF1F2937),
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            title,
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w500,
-              color: Colors.grey[600],
             ),
           ),
         ],

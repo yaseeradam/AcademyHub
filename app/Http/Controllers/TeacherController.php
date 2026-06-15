@@ -41,7 +41,7 @@ class TeacherController extends Controller
             $profilePhotoPath = str_replace('\\', '/', (string) $profilePhotoPath);
         }
 
-        User::query()->create([
+        $teacher = User::query()->create([
             'name'             => $data['name'],
             'email'            => $data['email'],
             'password'         => $data['password'],
@@ -52,8 +52,8 @@ class TeacherController extends Controller
         ]);
 
         return redirect()
-            ->route('teachers')
-            ->with('status', 'Teacher added successfully.');
+            ->route('teachers.show', $teacher)
+            ->with('success', 'Teacher added successfully.');
     }
 
     public function show(User $teacher)

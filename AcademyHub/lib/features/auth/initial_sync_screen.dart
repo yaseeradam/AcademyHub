@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../../core/auth_provider.dart';
+import '../../core/constants.dart';
 
 class InitialSyncScreen extends StatefulWidget {
   const InitialSyncScreen({super.key});
@@ -16,12 +18,14 @@ class _InitialSyncScreenState extends State<InitialSyncScreen>
   String _message  = 'Preparing your data...';
   double _progress = 0.0;
   bool   _failed   = false;
+  bool   _retrying = false;
 
   @override
   void initState() {
     super.initState();
-    _pulse = AnimationController(vsync: this, duration: const Duration(seconds: 2))
-      ..repeat(reverse: true);
+    _pulse =
+        AnimationController(vsync: this, duration: const Duration(seconds: 2))
+          ..repeat(reverse: true);
     _startSync();
   }
 
@@ -33,32 +37,35 @@ class _InitialSyncScreenState extends State<InitialSyncScreen>
 
   Future<void> _startSync() async {
     final auth = context.read<AuthProvider>();
-
-    // Listen to progress updates
     auth.syncService.progressStream.listen((p) {
       if (mounted) setState(() { _message = p.message; _progress = p.progress; });
     });
-
     try {
       await auth.syncService.initialSync(auth.user?.role ?? 'teacher');
       auth.markSyncDone();
       if (mounted) context.go('/');
     } catch (e) {
-      if (mounted) setState(() => _failed = true);
+      if (mounted) setState(() { _failed = true; _retrying = false; });
     }
   }
 
   Future<void> _retry() async {
-    setState(() { _failed = false; _progress = 0.0; _message = 'Retrying...'; });
+    setState(() { _failed = false; _retrying = true; _progress = 0.0; _message = 'Retrying...'; });
     _startSync();
+  }
+
+  Future<void> _skipSync() async {
+    context.read<AuthProvider>().markSyncDone();
+    context.go('/');
   }
 
   @override
   Widget build(BuildContext context) {
-    final user = context.read<AuthProvider>().user;
+    final user    = context.read<AuthProvider>().user;
+    final primary = context.read<AuthProvider>().tenantPrimaryColor;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
+      backgroundColor: AppColors.background,
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(32),
@@ -74,12 +81,14 @@ class _InitialSyncScreenState extends State<InitialSyncScreen>
                     width: 96,
                     height: 96,
                     decoration: BoxDecoration(
-                      color: const Color(0xFF3B82F6).withValues(alpha: 0.1),
+                      color: primary.withValues(alpha: 0.1),
                       shape: BoxShape.circle,
+                      border: Border.all(
+                          color: primary.withValues(alpha: 0.3), width: 1.5),
                     ),
                     child: Padding(
                       padding: const EdgeInsets.all(20),
-                      child: Image.asset('assets/images/Alogo.png'),
+                      child: Image.asset('lib/Alogo.png'),
                     ),
                   ),
                 ),
@@ -87,13 +96,18 @@ class _InitialSyncScreenState extends State<InitialSyncScreen>
               const SizedBox(height: 32),
               Text(
                 'Setting up for ${user?.name ?? 'you'}',
-                style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Color(0xFF0F172A)),
+                style: GoogleFonts.spaceGrotesk(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.textPrimary,
+                ),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 8),
-              const Text(
+              Text(
                 'Downloading your data so the app works offline too.',
-                style: TextStyle(fontSize: 14, color: Color(0xFF64748B)),
+                style: GoogleFonts.spaceGrotesk(
+                    fontSize: 14, color: AppColors.textSecondary),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 40),
@@ -105,42 +119,53 @@ class _InitialSyncScreenState extends State<InitialSyncScreen>
                   child: LinearProgressIndicator(
                     value: _progress,
                     minHeight: 8,
-                    backgroundColor: const Color(0xFFE2E8F0),
-                    valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF3B82F6)),
+                    backgroundColor: AppColors.surface2,
+                    valueColor: AlwaysStoppedAnimation<Color>(primary),
                   ),
                 ),
                 const SizedBox(height: 16),
                 Text(
                   _message,
-                  style: const TextStyle(fontSize: 13, color: Color(0xFF64748B)),
+                  style: GoogleFonts.spaceGrotesk(
+                      fontSize: 13, color: AppColors.textSecondary),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 8),
                 Text(
                   '${(_progress * 100).toInt()}%',
-                  style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Color(0xFF3B82F6)),
+                  style: GoogleFonts.spaceGrotesk(
+                    fontSize: 13,
+                    fontWeight: FontWeight.bold,
+                    color: primary,
+                  ),
                 ),
               ] else ...[
                 // Error state
                 Container(
                   padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFFEF2F2),
+                    color: AppColors.error.withValues(alpha: 0.08),
                     borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: const Color(0xFFFECACA)),
+                    border: Border.all(
+                        color: AppColors.error.withValues(alpha: 0.25)),
                   ),
                   child: Column(
                     children: [
-                      const Icon(Icons.wifi_off_rounded, size: 40, color: Color(0xFFEF4444)),
+                      Icon(Icons.wifi_off_rounded,
+                          size: 40, color: AppColors.error),
                       const SizedBox(height: 12),
-                      const Text(
+                      Text(
                         'Could not connect to server',
-                        style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF0F172A)),
+                        style: GoogleFonts.spaceGrotesk(
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.textPrimary,
+                        ),
                       ),
                       const SizedBox(height: 6),
-                      const Text(
+                      Text(
                         'Check your internet connection and try again.',
-                        style: TextStyle(fontSize: 13, color: Color(0xFF64748B)),
+                        style: GoogleFonts.spaceGrotesk(
+                            fontSize: 13, color: AppColors.textSecondary),
                         textAlign: TextAlign.center,
                       ),
                       const SizedBox(height: 16),
@@ -148,19 +173,44 @@ class _InitialSyncScreenState extends State<InitialSyncScreen>
                         children: [
                           Expanded(
                             child: OutlinedButton(
-                              onPressed: () {
-                                context.read<AuthProvider>().markSyncDone();
-                                context.go('/');
-                              },
-                              child: const Text('Skip for now'),
+                              onPressed: _retrying ? null : _skipSync,
+                              style: OutlinedButton.styleFrom(
+                                foregroundColor: AppColors.textSecondary,
+                                side: BorderSide(
+                                    color: AppColors.borderLight),
+                                padding: const EdgeInsets.symmetric(
+                                    vertical: 14),
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10)),
+                              ),
+                              child: Text('Skip for now',
+                                  style: GoogleFonts.spaceGrotesk(
+                                      fontWeight: FontWeight.bold)),
                             ),
                           ),
                           const SizedBox(width: 12),
                           Expanded(
                             child: ElevatedButton(
-                              onPressed: _retry,
-                              style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF3B82F6)),
-                              child: const Text('Retry', style: TextStyle(color: Colors.white)),
+                              onPressed: _retrying ? null : _retry,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: primary,
+                                foregroundColor: Colors.black,
+                                padding: const EdgeInsets.symmetric(
+                                    vertical: 14),
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10)),
+                                elevation: 0,
+                              ),
+                              child: _retrying
+                                  ? const SizedBox(
+                                      width: 18,
+                                      height: 18,
+                                      child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                          color: Colors.black54))
+                                  : Text('Retry',
+                                      style: GoogleFonts.spaceGrotesk(
+                                          fontWeight: FontWeight.bold)),
                             ),
                           ),
                         ],

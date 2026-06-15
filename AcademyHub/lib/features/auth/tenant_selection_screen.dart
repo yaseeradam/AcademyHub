@@ -1,8 +1,9 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../../core/auth_provider.dart';
 import '../../core/toast_utility.dart';
+import '../../core/constants.dart';
 
 class TenantSelectionScreen extends StatefulWidget {
   const TenantSelectionScreen({super.key});
@@ -12,7 +13,7 @@ class TenantSelectionScreen extends StatefulWidget {
 }
 
 class _TenantSelectionScreenState extends State<TenantSelectionScreen> {
-  final _formKey = GlobalKey<FormState>();
+  final _formKey      = GlobalKey<FormState>();
   final _slugController = TextEditingController();
   bool _isLoading = false;
 
@@ -24,16 +25,17 @@ class _TenantSelectionScreenState extends State<TenantSelectionScreen> {
 
   Future<void> _handleTenantSelect() async {
     if (!_formKey.currentState!.validate()) return;
-
     setState(() => _isLoading = true);
     final auth = context.read<AuthProvider>();
 
     try {
-      final success = await auth.resolveTenant(_slugController.text.trim().toLowerCase());
+      final success = await auth.resolveTenant(
+          _slugController.text.trim().toLowerCase());
       if (success && mounted) {
         CustomToast.show(
           context: context,
-          message: 'Connected to ${auth.tenantName ?? "School"} successfully!',
+          message:
+              'Connected to ${auth.tenantName ?? "School"} successfully!',
           type: 'success',
         );
       } else if (!success && mounted) {
@@ -59,245 +61,172 @@ class _TenantSelectionScreenState extends State<TenantSelectionScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              Color(0xFF0F172A), // Slate 900
-              Color(0xFF1E3A8A), // Blue 900
-              Color(0xFF311042), // Deep Violet
-            ],
-            stops: [0.0, 0.5, 1.0],
+      backgroundColor: AppColors.background,
+      body: SafeArea(
+        child: Center(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(24),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 400),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  _buildCard(),
+                  const SizedBox(height: 24),
+                  Text(
+                    'AcademyHub School Workspace Gateway',
+                    style: GoogleFonts.spaceGrotesk(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
+                      color: AppColors.textMuted,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
+            ),
           ),
         ),
-        child: Stack(
+      ),
+    );
+  }
+
+  Widget _buildCard() {
+    final auth = context.watch<AuthProvider>();
+    final primary = auth.tenantPrimaryColor;
+
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: AppColors.borderLight),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.3),
+            blurRadius: 24,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      padding: const EdgeInsets.all(28),
+      child: Form(
+        key: _formKey,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            SafeArea(
-              child: Center(
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.all(24),
-                  child: ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 400),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        _buildGlassCard(),
-                        const SizedBox(height: 24),
-                        _buildFooter(),
-                      ],
+            // Logo
+            Center(
+              child: Container(
+                width: 72,
+                height: 72,
+                decoration: BoxDecoration(
+                  color: AppColors.surface2,
+                  borderRadius: BorderRadius.circular(18),
+                  border: Border.all(
+                      color: primary.withValues(alpha: 0.3), width: 1.5),
+                  boxShadow: [
+                    BoxShadow(
+                      color: primary.withValues(alpha: 0.15),
+                      blurRadius: 16,
                     ),
+                  ],
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(18),
+                  child: Padding(
+                    padding: const EdgeInsets.all(10),
+                    child: Image.asset('lib/Alogo.png', fit: BoxFit.contain),
                   ),
                 ),
               ),
             ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildGlassCard() {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.08),
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(
-          color: Colors.white.withValues(alpha: 0.15),
-          width: 1,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.25),
-            blurRadius: 20,
-            offset: const Offset(0, 10),
-          ),
-        ],
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(24),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
-          child: Column(
-            children: [
-              _buildHeader(),
-              _buildForm(),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildHeader() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 40),
-      decoration: BoxDecoration(
-        border: Border(
-          bottom: BorderSide(
-            color: Colors.white.withValues(alpha: 0.08),
-            width: 1,
-          ),
-        ),
-      ),
-      child: Column(
-        children: [
-          Container(
-            width: 64,
-            height: 64,
-            decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                colors: [Color(0xFF3B82F6), Color(0xFF8B5CF6)],
-              ),
-              borderRadius: BorderRadius.circular(16),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.2),
-                  blurRadius: 8,
-                  offset: const Offset(0, 4),
-                ),
-              ],
-            ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(16),
-              child: Image.asset(
-                'assets/images/Alogo.png',
-                fit: BoxFit.cover,
+            const SizedBox(height: 24),
+            Text(
+              'Connect Your School',
+              textAlign: TextAlign.center,
+              style: GoogleFonts.spaceGrotesk(
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+                color: AppColors.textPrimary,
+                letterSpacing: -0.5,
               ),
             ),
-          ),
-          const SizedBox(height: 20),
-          const Text(
-            'Connect School',
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.w900,
-              color: Colors.white,
-              letterSpacing: -0.5,
+            const SizedBox(height: 6),
+            Text(
+              'Enter your school workspace domain slug',
+              textAlign: TextAlign.center,
+              style: GoogleFonts.spaceGrotesk(
+                fontSize: 14,
+                color: AppColors.textSecondary,
+                fontWeight: FontWeight.w500,
+              ),
             ),
-          ),
-          const SizedBox(height: 6),
-          Text(
-            'Enter your unique school workspace domain',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 13,
-              color: Colors.white.withValues(alpha: 0.65),
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildForm() {
-    return Padding(
-      padding: const EdgeInsets.all(32),
-      child: Form(
-        key: _formKey,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'School Slug / Domain',
-              style: TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-                color: Colors.white,
+            const SizedBox(height: 28),
+            Text(
+              'SCHOOL WORKSPACE DOMAIN',
+              style: GoogleFonts.spaceGrotesk(
+                fontSize: 10,
+                fontWeight: FontWeight.bold,
+                color: AppColors.textSecondary,
+                letterSpacing: 1.2,
               ),
             ),
             const SizedBox(height: 8),
             TextFormField(
               controller: _slugController,
               keyboardType: TextInputType.text,
-              style: const TextStyle(color: Colors.white, fontSize: 14),
+              style: GoogleFonts.spaceGrotesk(
+                color: AppColors.textPrimary,
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+              ),
               decoration: InputDecoration(
-                hintText: 'e.g., yaseeradam',
-                hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.35)),
-                filled: true,
-                fillColor: Colors.white.withValues(alpha: 0.05),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.1)),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.1)),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: const BorderSide(color: Color(0xFF3B82F6), width: 2),
-                ),
-                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                prefixIcon: Icon(Icons.school_outlined, color: Colors.white.withValues(alpha: 0.5)),
+                hintText: 'e.g., yaseeradam or model.myacademy.com.ng',
+                 prefixIcon: Icon(Icons.domain_rounded,
+                     color: AppColors.textSecondary, size: 20),
               ),
               validator: (value) {
-                if (value?.trim().isEmpty ?? true) {
+                if (value == null || value.trim().isEmpty) {
                   return 'Please enter school domain slug';
                 }
                 return null;
               },
             ),
             const SizedBox(height: 24),
+            // Continue button
             SizedBox(
-              width: double.infinity,
+              height: 52,
               child: ElevatedButton(
                 onPressed: _isLoading ? null : _handleTenantSelect,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.transparent,
-                  foregroundColor: Colors.white,
-                  padding: EdgeInsets.zero,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  backgroundColor: primary,
+                  foregroundColor: Colors.black,
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12)),
                   elevation: 0,
                 ),
-                child: Ink(
-                  decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      colors: [Color(0xFF3B82F6), Color(0xFF8B5CF6)],
-                    ),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    alignment: Alignment.center,
-                    child: _isLoading
-                        ? const SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                            ),
-                          )
-                        : const Text(
-                            'Continue to Login',
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                            ),
-                          ),
-                  ),
-                ),
+                child: _isLoading
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor:
+                              AlwaysStoppedAnimation<Color>(Colors.black54),
+                        ),
+                      )
+                    : Text(
+                        'Continue to Login',
+                        style: GoogleFonts.spaceGrotesk(
+                          fontSize: 15,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
               ),
             ),
           ],
         ),
       ),
-    );
-  }
-
-  Widget _buildFooter() {
-    return Text(
-      'AcademyHub Network Gateway',
-      style: TextStyle(
-        fontSize: 12,
-        fontWeight: FontWeight.w600,
-        color: Colors.white.withValues(alpha: 0.5),
-      ),
-      textAlign: TextAlign.center,
     );
   }
 }

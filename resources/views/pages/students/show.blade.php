@@ -126,6 +126,32 @@
 @section('content')
 <div class="space-y-6">
 
+    @if (session('parent_credentials'))
+        <div class="rounded-2xl border-2 border-indigo-200 bg-indigo-50/60 p-6 shadow-sm animate-fadeIn mb-4">
+            <div class="flex items-start gap-4">
+                <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-100 text-indigo-600 shadow-inner shrink-0">
+                    <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
+                    </svg>
+                </div>
+                <div class="flex-1">
+                    <h3 class="text-base font-bold text-indigo-900">Parent Account Created Successfully</h3>
+                    <p class="mt-1 text-sm text-indigo-700 font-medium">We registered a new parent account and linked it to this student. Please share these credentials with the parent:</p>
+                    <div class="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2 max-w-lg bg-white/80 border border-indigo-100 rounded-xl p-3.5 text-sm">
+                        <div>
+                            <span class="text-xs font-semibold text-slate-500 block">Username / Email</span>
+                            <span class="font-bold text-slate-800">{{ session('parent_credentials')['email'] }}</span>
+                        </div>
+                        <div>
+                            <span class="text-xs font-semibold text-slate-500 block">Password</span>
+                            <span class="font-bold text-slate-800">{{ session('parent_credentials')['password'] }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    @endif
+
     {{-- Profile Header Card --}}
     <div class="rounded-2xl bg-white shadow-sm ring-1 ring-slate-100 px-6 py-6 mb-2">
         <div class="flex flex-col gap-6 md:flex-row md:items-center justify-between">

@@ -1,10 +1,14 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:open_filex/open_filex.dart';
 import '../../core/auth_provider.dart';
 import '../../core/database_helper.dart';
+import '../../core/constants.dart';
+import '../../core/toast_utility.dart';
+import 'notes_comments_sheet.dart';
 
 class NotesDownloadTile extends StatefulWidget {
   final Map<String, dynamic> note;
@@ -41,8 +45,10 @@ class _NotesDownloadTileState extends State<NotesDownloadTile> {
   Future<void> _downloadFile() async {
     final fileUrl = widget.note['file_url'] as String?;
     if (fileUrl == null || fileUrl.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('No downloadable file attached to this note.')),
+      CustomToast.show(
+        context: context,
+        message: 'No downloadable file attached to this material.',
+        type: 'warning',
       );
       return;
     }
@@ -79,21 +85,19 @@ class _NotesDownloadTileState extends State<NotesDownloadTile> {
           _downloading = false;
           _localPath = savePath;
         });
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Material downloaded successfully! Available offline.'),
-            backgroundColor: Color(0xFF10B981),
-          ),
+        CustomToast.show(
+          context: context,
+          message: 'Material downloaded! Available offline.',
+          type: 'success',
         );
       }
     } catch (e) {
       if (mounted) {
         setState(() => _downloading = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Download failed: ${e.toString()}'),
-            backgroundColor: const Color(0xFFEF4444),
-          ),
+        CustomToast.show(
+          context: context,
+          message: 'Download failed: ${e.toString()}',
+          type: 'error',
         );
       }
     }
@@ -104,14 +108,18 @@ class _NotesDownloadTileState extends State<NotesDownloadTile> {
     try {
       final result = await OpenFilex.open(_localPath!);
       if (result.type != ResultType.done && mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Could not open file: ${result.message}')),
+        CustomToast.show(
+          context: context,
+          message: 'Could not open file: ${result.message}',
+          type: 'error',
         );
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error opening file: $e')),
+        CustomToast.show(
+          context: context,
+          message: 'Error opening file: $e',
+          type: 'error',
         );
       }
     }
@@ -126,16 +134,9 @@ class _NotesDownloadTileState extends State<NotesDownloadTile> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFF1F5F9)),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x05000000),
-            blurRadius: 10,
-            offset: Offset(0, 4),
-          ),
-        ],
+        border: Border.all(color: AppColors.borderLight),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -145,7 +146,7 @@ class _NotesDownloadTileState extends State<NotesDownloadTile> {
               Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: primary.withValues(alpha: 0.1),
+                  color: primary.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Icon(
@@ -161,8 +162,8 @@ class _NotesDownloadTileState extends State<NotesDownloadTile> {
                   children: [
                     Text(
                       widget.note['subject_name'] ?? 'General',
-                      style: TextStyle(
-                        fontSize: 12,
+                      style: GoogleFonts.spaceGrotesk(
+                        fontSize: 11,
                         fontWeight: FontWeight.bold,
                         color: primary,
                       ),
@@ -170,10 +171,10 @@ class _NotesDownloadTileState extends State<NotesDownloadTile> {
                     const SizedBox(height: 2),
                     Text(
                       widget.note['title'] ?? '',
-                      style: const TextStyle(
-                        fontSize: 15,
+                      style: GoogleFonts.spaceGrotesk(
+                        fontSize: 14,
                         fontWeight: FontWeight.bold,
-                        color: Color(0xFF0F172A),
+                        color: AppColors.textPrimary,
                       ),
                     ),
                   ],
@@ -187,9 +188,9 @@ class _NotesDownloadTileState extends State<NotesDownloadTile> {
               widget.note['content'] as String,
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
-              style: const TextStyle(
+              style: GoogleFonts.spaceGrotesk(
                 fontSize: 13,
-                color: Color(0xFF64748B),
+                color: AppColors.textSecondary,
                 height: 1.4,
               ),
             ),
@@ -204,15 +205,16 @@ class _NotesDownloadTileState extends State<NotesDownloadTile> {
                         borderRadius: BorderRadius.circular(4),
                         child: LinearProgressIndicator(
                           value: _progress,
-                          backgroundColor: const Color(0xFFF1F5F9),
+                          backgroundColor: AppColors.surface2,
                           valueColor: AlwaysStoppedAnimation<Color>(primary),
+                          minHeight: 4,
                         ),
                       ),
                     ),
                     const SizedBox(width: 12),
                     Text(
                       '${(_progress * 100).toStringAsFixed(0)}%',
-                      style: TextStyle(
+                      style: GoogleFonts.spaceGrotesk(
                         fontSize: 12,
                         fontWeight: FontWeight.bold,
                         color: primary,
@@ -220,25 +222,58 @@ class _NotesDownloadTileState extends State<NotesDownloadTile> {
                     ),
                   ],
                 )
-              : SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton.icon(
-                    onPressed: isDownloaded ? _openFile : _downloadFile,
-                    icon: Icon(
-                      isDownloaded
-                          ? Icons.folder_open_rounded
-                          : Icons.file_download_outlined,
-                      size: 18,
-                    ),
-                    label: Text(isDownloaded ? 'Open Material' : 'Download Note'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: isDownloaded ? const Color(0xFF10B981) : primary,
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
+              : Row(
+                  children: [
+                    Expanded(
+                      child: SizedBox(
+                        height: 40,
+                        child: OutlinedButton.icon(
+                          onPressed: () {
+                            NotesCommentsSheet.show(
+                              context,
+                              widget.note['id'] as int,
+                              widget.note['title'] ?? 'Note',
+                            );
+                          },
+                          icon: Icon(Icons.chat_bubble_outline, size: 16, color: primary),
+                          label: Text('Discussion',
+                              style: GoogleFonts.spaceGrotesk(fontSize: 11, color: primary, fontWeight: FontWeight.bold)),
+                          style: OutlinedButton.styleFrom(
+                            side: BorderSide(color: primary.withValues(alpha: 0.5)),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                          ),
+                        ),
                       ),
                     ),
-                  ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: SizedBox(
+                        height: 40,
+                        child: ElevatedButton.icon(
+                          onPressed: isDownloaded ? _openFile : _downloadFile,
+                          icon: Icon(
+                            isDownloaded
+                                ? Icons.folder_open_rounded
+                                : Icons.file_download_outlined,
+                            size: 16,
+                            color: Colors.black,
+                          ),
+                          label: Text(
+                            isDownloaded ? 'Open' : 'Download',
+                            style: GoogleFonts.spaceGrotesk(fontWeight: FontWeight.bold, color: Colors.black, fontSize: 11),
+                          ),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: isDownloaded ? AppColors.success : primary,
+                            foregroundColor: Colors.black,
+                            elevation: 0,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
         ],
       ),

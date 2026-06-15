@@ -311,6 +311,16 @@ $activeShadow = "shadow-{$accent}-200";
             @endif
             @yield('content')
             {{ $slot ?? '' }}
+
+            {{-- Session to Toast Bridge --}}
+            <div x-data="{}" x-init="
+                @if(session('success')) window.showNotification({!! json_encode(session('success')) !!}, 'success'); @endif
+                @if(session('error')) window.showNotification({!! json_encode(session('error')) !!}, 'error'); @endif
+                @if(session('warning')) window.showNotification({!! json_encode(session('warning')) !!}, 'warning'); @endif
+                @if(session('status') && !is_array(session('status'))) window.showNotification({!! json_encode(session('status')) !!}, 'info'); @endif
+                @if(session('message')) window.showNotification({!! json_encode(session('message')) !!}, 'success'); @endif
+                @if(session('modal')) window.showNotification({!! json_encode(session('modal')['message']) !!}, {!! json_encode(session('modal')['type']) !!}); @endif
+            "></div>
         </main>
 
         <livewire:global-modal />

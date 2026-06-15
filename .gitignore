@@ -22,3 +22,5 @@ yarn-error.log
 /.idea
 /.vscode
 /scratch
+.agents
+skills-lock.json

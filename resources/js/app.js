@@ -191,7 +191,11 @@ document.addEventListener('livewire:init', () => {
         const message = typeof payload === 'string' ? payload : (payload.message || 'Done.');
         const type = typeof payload === 'object' && payload.type ? payload.type : 'info';
         const title = typeof payload === 'object' && payload.title ? payload.title : undefined;
-        window.showAlertModal(message, type, { title });
+        if (window.showNotification) {
+            window.showNotification(message, type);
+        } else {
+            window.showAlertModal(message, type, { title });
+        }
     });
 
     // Message unread sound

@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import 'package:go_router/go_router.dart';
 import '../../core/auth_provider.dart';
 import '../../core/database_helper.dart';
 import '../../core/mobile_layout.dart';
+import '../../core/constants.dart';
+import '../../core/toast_utility.dart';
 
 class TeacherScoresScreen extends StatefulWidget {
   const TeacherScoresScreen({super.key});
@@ -56,27 +60,36 @@ class _TeacherScoresScreenState extends State<TeacherScoresScreen> {
 
   Future<void> _loadClasses() async {
     final auth = context.read<AuthProvider>();
+    if (!mounted) return;
     setState(() => _loading = true);
     try {
       final data = await auth.apiService.getWithCache('/teacher/classes');
-      setState(() => _classes = (data['data'] as List).cast<Map<String, dynamic>>());
+      if (mounted) {
+        setState(() => _classes = (data['data'] as List).cast<Map<String, dynamic>>());
+      }
     } catch (_) {}
-    setState(() => _loading = false);
+    if (mounted) setState(() => _loading = false);
   }
 
   Future<void> _onClassChanged(int classId) async {
     final auth = context.read<AuthProvider>();
-    setState(() { _selectedClassId = classId; _selectedSubjectId = null; _students = []; _subjects = []; });
+    setState(() {
+      _selectedClassId = classId;
+      _selectedSubjectId = null;
+      _students = [];
+      _subjects = [];
+      _controllers.clear();
+    });
 
     // Load subjects
     try {
       final data = await auth.apiService.getWithCache('/teacher/classes/$classId/subjects');
       final list = (data['data'] as List).cast<Map<String, dynamic>>();
       await _db.upsertSubjects(classId, list);
-      setState(() => _subjects = list);
+      if (mounted) setState(() => _subjects = list);
     } catch (_) {
       final list = await _db.getSubjectsByClass(classId);
-      setState(() => _subjects = list);
+      if (mounted) setState(() => _subjects = list);
     }
 
     // Load students
@@ -84,10 +97,10 @@ class _TeacherScoresScreenState extends State<TeacherScoresScreen> {
       final data = await auth.apiService.getWithCache('/teacher/classes/$classId/students');
       final list = (data['data'] as List).cast<Map<String, dynamic>>();
       await _db.upsertStudents(list);
-      setState(() => _students = list);
+      if (mounted) setState(() => _students = list);
     } catch (_) {
       final list = await _db.getStudentsByClass(classId);
-      setState(() => _students = list);
+      if (mounted) setState(() => _students = list);
     }
   }
 
@@ -136,32 +149,43 @@ class _TeacherScoresScreenState extends State<TeacherScoresScreen> {
     await auth.syncService.notifyDirty();
     await auth.syncService.syncNow();
 
-    setState(() => _saving = false);
     if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Scores saved'), backgroundColor: Color(0xFF10B981)),
+      setState(() => _saving = false);
+      CustomToast.show(
+        context: context,
+        message: 'Student scores saved successfully',
+        type: 'success',
       );
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final auth = context.watch<AuthProvider>();
+    final accent = auth.tenantPrimaryColor;
+
     return MobileLayout(
       title: 'Score Entry',
-      child: Column(
-        children: [
-          _buildFilters(),
-          if (_loading) const LinearProgressIndicator(color: Color(0xFF3B82F6)),
-          Expanded(child: _buildContent()),
-          if (_students.isNotEmpty && _selectedSubjectId != null) _buildSaveButton(),
-        ],
+      child: Container(
+        color: AppColors.background,
+        child: Column(
+          children: [
+            _buildFilters(accent),
+            if (_loading) LinearProgressIndicator(color: accent, minHeight: 2),
+            Expanded(child: _buildContent(accent)),
+            if (_students.isNotEmpty && _selectedSubjectId != null) _buildSaveButton(),
+          ],
+        ),
       ),
     );
   }
 
-  Widget _buildFilters() {
+  Widget _buildFilters(Color accent) {
     return Container(
-      color: Colors.white,
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        border: Border(bottom: BorderSide(color: AppColors.borderLight)),
+      ),
       padding: const EdgeInsets.all(16),
       child: Column(
         children: [
@@ -170,8 +194,13 @@ class _TeacherScoresScreenState extends State<TeacherScoresScreen> {
               Expanded(
                 child: DropdownButtonFormField<int>(
                   decoration: _inputDecoration('Class'),
+                  dropdownColor: AppColors.surface2,
                   initialValue: _selectedClassId,
-                  items: _classes.map((c) => DropdownMenuItem<int>(value: c['id'] as int, child: Text(c['name'] as String))).toList(),
+                  style: GoogleFonts.spaceGrotesk(color: AppColors.textPrimary, fontSize: 14),
+                  items: _classes.map((c) => DropdownMenuItem<int>(
+                    value: c['id'] as int,
+                    child: Text(c['name'] as String, style: GoogleFonts.spaceGrotesk(color: AppColors.textPrimary)),
+                  )).toList(),
                   onChanged: (v) { if (v != null) _onClassChanged(v); },
                 ),
               ),
@@ -179,11 +208,13 @@ class _TeacherScoresScreenState extends State<TeacherScoresScreen> {
               Expanded(
                 child: DropdownButtonFormField<int>(
                   decoration: _inputDecoration('Term'),
+                  dropdownColor: AppColors.surface2,
                   initialValue: _term,
-                  items: const [
-                    DropdownMenuItem(value: 1, child: Text('Term 1')),
-                    DropdownMenuItem(value: 2, child: Text('Term 2')),
-                    DropdownMenuItem(value: 3, child: Text('Term 3')),
+                  style: GoogleFonts.spaceGrotesk(color: AppColors.textPrimary, fontSize: 14),
+                  items: [
+                    DropdownMenuItem(value: 1, child: Text('Term 1', style: TextStyle(color: AppColors.textPrimary))),
+                    DropdownMenuItem(value: 2, child: Text('Term 2', style: TextStyle(color: AppColors.textPrimary))),
+                    DropdownMenuItem(value: 3, child: Text('Term 3', style: TextStyle(color: AppColors.textPrimary))),
                   ],
                   onChanged: (v) => setState(() => _term = v ?? 1),
                 ),
@@ -194,9 +225,39 @@ class _TeacherScoresScreenState extends State<TeacherScoresScreen> {
             const SizedBox(height: 12),
             DropdownButtonFormField<int>(
               decoration: _inputDecoration('Subject'),
+              dropdownColor: AppColors.surface2,
               initialValue: _selectedSubjectId,
-              items: _subjects.map((s) => DropdownMenuItem<int>(value: s['id'] as int, child: Text(s['name'] as String))).toList(),
+              style: GoogleFonts.spaceGrotesk(color: AppColors.textPrimary, fontSize: 14),
+              items: _subjects.map((s) => DropdownMenuItem<int>(
+                value: s['id'] as int,
+                child: Text(s['name'] as String, style: GoogleFonts.spaceGrotesk(color: AppColors.textPrimary)),
+              )).toList(),
               onChanged: (v) { if (v != null) _onSubjectChanged(v); },
+            ),
+          ],
+          if (_selectedClassId != null && _selectedSubjectId != null) ...[
+            const SizedBox(height: 12),
+            SizedBox(
+              width: double.infinity,
+              height: 38,
+              child: OutlinedButton.icon(
+                onPressed: () {
+                  final clsName = _classes.firstWhere((c) => c['id'] == _selectedClassId)['name'] ?? 'Class';
+                  final subName = _subjects.firstWhere((s) => s['id'] == _selectedSubjectId)['name'] ?? 'Subject';
+                  context.push('/csv-import', extra: {
+                    'classId': _selectedClassId,
+                    'subjectId': _selectedSubjectId,
+                    'className': clsName,
+                    'subjectName': subName,
+                  });
+                },
+                icon: Icon(Icons.upload_file, size: 16, color: accent),
+                label: Text('Import Scores from CSV', style: GoogleFonts.spaceGrotesk(fontSize: 12, fontWeight: FontWeight.bold, color: accent)),
+                style: OutlinedButton.styleFrom(
+                  side: BorderSide(color: accent),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                ),
+              ),
             ),
           ],
         ],
@@ -204,15 +265,27 @@ class _TeacherScoresScreenState extends State<TeacherScoresScreen> {
     );
   }
 
-  Widget _buildContent() {
+  Widget _buildContent(Color accent) {
     if (_selectedSubjectId == null || _students.isEmpty) {
-      return const Center(child: Text('Select a class and subject', style: TextStyle(color: Color(0xFF64748B))));
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.edit_note_rounded, size: 48, color: AppColors.textMuted),
+            const SizedBox(height: 12),
+            Text(
+              'Select a class and subject to enter grades',
+              style: GoogleFonts.spaceGrotesk(color: AppColors.textSecondary, fontSize: 14),
+            ),
+          ],
+        ),
+      );
     }
 
     return ListView.separated(
       padding: const EdgeInsets.all(16),
       itemCount: _students.length,
-      separatorBuilder: (_, _) => const SizedBox(height: 8),
+      separatorBuilder: (_, _) => const SizedBox(height: 10),
       itemBuilder: (context, i) {
         final s = _students[i];
         final id = s['id'] as int;
@@ -220,18 +293,19 @@ class _TeacherScoresScreenState extends State<TeacherScoresScreen> {
         if (c == null) return const SizedBox.shrink();
 
         return Container(
-          padding: const EdgeInsets.all(12),
+          padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: const Color(0xFFF1F5F9)),
+            color: AppColors.surface,
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: AppColors.borderLight),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('${s['first_name']} ${s['last_name']}', style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
-              Text(s['admission_number'] ?? '', style: const TextStyle(fontSize: 12, color: Color(0xFF64748B))),
-              const SizedBox(height: 10),
+              Text('${s['first_name'] ?? ''} ${s['last_name'] ?? ''}', style: GoogleFonts.spaceGrotesk(fontWeight: FontWeight.bold, fontSize: 14, color: AppColors.textPrimary)),
+              const SizedBox(height: 2),
+              Text(s['admission_number'] ?? '', style: GoogleFonts.spaceGrotesk(fontSize: 11, color: AppColors.textSecondary)),
+              const SizedBox(height: 14),
               Row(
                 children: [
                   _scoreField(c['ca1']!, 'CA1'),
@@ -239,7 +313,7 @@ class _TeacherScoresScreenState extends State<TeacherScoresScreen> {
                   _scoreField(c['ca2']!, 'CA2'),
                   const SizedBox(width: 8),
                   _scoreField(c['exam']!, 'Exam'),
-                  const SizedBox(width: 8),
+                  const SizedBox(width: 12),
                   // Live total
                   ValueListenableBuilder(
                     valueListenable: c['ca1']!,
@@ -251,11 +325,19 @@ class _TeacherScoresScreenState extends State<TeacherScoresScreen> {
                           final total = (int.tryParse(c['ca1']!.text) ?? 0) +
                               (int.tryParse(c['ca2']!.text) ?? 0) +
                               (int.tryParse(c['exam']!.text) ?? 0);
-                          return Column(
-                            children: [
-                              Text('$total', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: Color(0xFF3B82F6))),
-                              const Text('Total', style: TextStyle(fontSize: 10, color: Color(0xFF64748B))),
-                            ],
+                          return Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                            decoration: BoxDecoration(
+                              color: AppColors.info.withValues(alpha: 0.12),
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(color: AppColors.info.withValues(alpha: 0.25)),
+                            ),
+                            child: Column(
+                              children: [
+                                Text('$total', style: GoogleFonts.spaceGrotesk(fontWeight: FontWeight.bold, fontSize: 16, color: AppColors.info)),
+                                Text('Total', style: GoogleFonts.spaceGrotesk(fontSize: 9, color: AppColors.textSecondary)),
+                              ],
+                            ),
                           );
                         },
                       ),
@@ -276,11 +358,17 @@ class _TeacherScoresScreenState extends State<TeacherScoresScreen> {
         controller: controller,
         keyboardType: TextInputType.number,
         textAlign: TextAlign.center,
+        style: GoogleFonts.spaceGrotesk(color: AppColors.textPrimary, fontSize: 14, fontWeight: FontWeight.bold),
         decoration: InputDecoration(
           labelText: label,
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+          labelStyle: GoogleFonts.spaceGrotesk(color: AppColors.textSecondary, fontSize: 11),
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: AppColors.borderLight)),
+          enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: AppColors.borderLight)),
+          focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: AppColors.primary, width: 1.5)),
           contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
           isDense: true,
+          fillColor: AppColors.surface2,
+          filled: true,
         ),
       ),
     );
@@ -291,16 +379,27 @@ class _TeacherScoresScreenState extends State<TeacherScoresScreen> {
       padding: const EdgeInsets.all(16),
       child: SizedBox(
         width: double.infinity,
+        height: 52,
         child: ElevatedButton(
           onPressed: _saving ? null : _save,
           style: ElevatedButton.styleFrom(
-            backgroundColor: const Color(0xFF10B981),
-            padding: const EdgeInsets.symmetric(vertical: 14),
+            backgroundColor: AppColors.teacherAccent,
+            foregroundColor: Colors.black,
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           ),
           child: _saving
-              ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-              : const Text('Save Scores', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+              ? const SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(
+                    color: Colors.black,
+                    strokeWidth: 2,
+                  ),
+                )
+              : Text(
+                  'Save Scores',
+                  style: GoogleFonts.spaceGrotesk(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 15),
+                ),
         ),
       ),
     );
@@ -308,8 +407,22 @@ class _TeacherScoresScreenState extends State<TeacherScoresScreen> {
 
   InputDecoration _inputDecoration(String label) => InputDecoration(
         labelText: label,
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+        labelStyle: GoogleFonts.spaceGrotesk(color: AppColors.textSecondary, fontSize: 12),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: BorderSide(color: AppColors.borderLight),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: BorderSide(color: AppColors.borderLight),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: BorderSide(color: AppColors.borderLight),
+        ),
         contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
         isDense: true,
+        fillColor: AppColors.surface2,
+        filled: true,
       );
 }
