@@ -9,5 +9,9 @@ void main() {
 
     // Verify that the App builds successfully.
     expect(find.byType(AcademyHubApp), findsOneWidget);
+
+    // Pump frames to allow the post-frame callback navigation to run and route to resolve
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
   });
 }

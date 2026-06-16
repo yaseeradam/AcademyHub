@@ -1,11 +1,12 @@
-import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'dart:ui';
+
 import 'dart:convert';
 import 'constants.dart';
 import 'api_service.dart';
 import 'sync_service.dart';
+export 'sync_service.dart';
 
 class User {
   final int id;
@@ -14,6 +15,8 @@ class User {
   final String role;
   final bool? isSuperAdmin;
   final String? profilePhotoUrl;
+  bool? whatsappSubscribed;
+  final bool? isClassTeacher;
 
   User({
     required this.id,
@@ -22,6 +25,8 @@ class User {
     required this.role,
     this.isSuperAdmin,
     this.profilePhotoUrl,
+    this.whatsappSubscribed,
+    this.isClassTeacher,
   });
 
   factory User.fromJson(Map<String, dynamic> json) => User(
@@ -31,6 +36,8 @@ class User {
         role: json['role'] ?? 'student',
         isSuperAdmin: json['is_super_admin'] == 1 || json['is_super_admin'] == true,
         profilePhotoUrl: json['profile_photo_url'],
+        whatsappSubscribed: json['whatsapp_subscribed'] == 1 || json['whatsapp_subscribed'] == true,
+        isClassTeacher: json['is_class_teacher'] == 1 || json['is_class_teacher'] == true,
       );
 
   Map<String, dynamic> toJson() => {
@@ -40,6 +47,8 @@ class User {
         'role': role,
         'is_super_admin': isSuperAdmin,
         'profile_photo_url': profilePhotoUrl,
+        'whatsapp_subscribed': whatsappSubscribed,
+        'is_class_teacher': isClassTeacher,
       };
 }
 
@@ -58,6 +67,7 @@ class AuthProvider extends ChangeNotifier {
   String? _error;
   List<String> _activePlugins = [];
   List<Map<String, dynamic>> _allPlugins = [];
+  ThemeMode _themeMode = ThemeMode.light;
 
   // School Tenant branding properties
   String? _tenantSlug;
@@ -70,8 +80,31 @@ class AuthProvider extends ChangeNotifier {
   bool    get isAuthenticated  => _token != null && _user != null;
   bool    get isLoading        => _isLoading;
   bool    get initialSyncDone  => _initialSyncDone;
+  bool    get hasTenant        => _tenantSlug != null;
   String? get error            => _error;
   Dio     get dio              => _dio;
+  ThemeMode get themeMode      => _themeMode;
+  String get tenantApiUrl      => _dio.options.baseUrl;
+
+  String? getReachableUrl(String? path) {
+    if (path == null || path.trim().isEmpty) return null;
+    if (!path.startsWith('http://') && !path.startsWith('https://')) {
+      final base = tenantApiUrl.replaceAll('/api/', '').replaceAll('/api', '');
+      final cleanPath = path.startsWith('/') ? path : '/$path';
+      return '$base$cleanPath';
+    }
+    if (path.contains('localhost') || path.contains('127.0.0.1')) {
+      final uri = Uri.tryParse(path);
+      final baseUri = Uri.tryParse(tenantApiUrl);
+      if (uri != null && baseUri != null) {
+        final portString = baseUri.hasPort ? ':${baseUri.port}' : '';
+        final newBase = '${baseUri.scheme}://${baseUri.host}$portString';
+        final relativePath = uri.path + (uri.hasQuery ? '?${uri.query}' : '');
+        return '$newBase$relativePath';
+      }
+    }
+    return path;
+  }
 
   String? get tenantSlug            => _tenantSlug;
   String? get tenantName            => _tenantName;
@@ -102,6 +135,12 @@ class AuthProvider extends ChangeNotifier {
 
   Future<void> _init() async {
     final prefs = await SharedPreferences.getInstance();
+    
+    // Restore theme mode (defaults to light)
+    final savedTheme = prefs.getString('theme_mode');
+    _themeMode = (savedTheme == 'dark') ? ThemeMode.dark : ThemeMode.light;
+    AppColors.isDark = _themeMode == ThemeMode.dark;
+
     _token = prefs.getString('auth_token');
     _tenantSlug = prefs.getString('tenant_slug');
     _tenantName = prefs.getString('tenant_name');
@@ -110,6 +149,11 @@ class AuthProvider extends ChangeNotifier {
 
     if (_tenantSlug != null) {
       _dio.options.headers['X-Tenant-Slug'] = _tenantSlug;
+      // Restore tenant-specific API base URL if saved
+      final savedUrl = prefs.getString('tenant_api_url');
+      if (savedUrl != null && savedUrl.isNotEmpty) {
+        _dio.options.baseUrl = savedUrl;
+      }
     }
 
     if (_token != null) {
@@ -193,11 +237,47 @@ class AuthProvider extends ChangeNotifier {
       _tenantLogoUrl = data['logo_url'];
       _tenantPrimaryColorHex = data['primary_color'];
 
+      // If the API response provides a dedicated server URL, switch baseUrl.
+      // Otherwise, reconstruct it dynamically using the tenant's resolved domain,
+      // but only if we are not in a local development network setup (where the physical 
+      // device cannot resolve the laptop's custom subdomain).
+      final tenantApiUrl = data['api_url'] as String?;
+      if (tenantApiUrl != null && tenantApiUrl.isNotEmpty) {
+        _dio.options.baseUrl = tenantApiUrl.endsWith('/') ? tenantApiUrl : '$tenantApiUrl/';
+      } else {
+        final tenantDomain = data['domain'] as String?;
+        if (tenantDomain != null && tenantDomain.isNotEmpty) {
+          try {
+            final uri = Uri.parse(_dio.options.baseUrl);
+            final host = uri.host;
+            
+            // Check if current host is a local network IP or localhost
+            final isLocal = host == 'localhost' || 
+                            host == '127.0.0.1' || 
+                            host.startsWith('192.168.') || 
+                            host.startsWith('10.') || 
+                            host.startsWith('172.');
+                            
+            if (!isLocal) {
+              final scheme = uri.scheme.isNotEmpty ? uri.scheme : 'http';
+              final portString = uri.hasPort ? ':${uri.port}' : '';
+              _dio.options.baseUrl = '$scheme://$tenantDomain$portString/api/';
+            } else {
+              debugPrint('Local development detected ($host). Keeping base URL as ${_dio.options.baseUrl} and relying on X-Tenant-Slug header.');
+            }
+          } catch (e) {
+            debugPrint('Error parsing baseUrl: $e');
+            _dio.options.baseUrl = 'http://$tenantDomain/api/';
+          }
+        }
+      }
+
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString('tenant_slug', _tenantSlug!);
       await prefs.setString('tenant_name', _tenantName ?? '');
       await prefs.setString('tenant_logo_url', _tenantLogoUrl ?? '');
       await prefs.setString('tenant_primary_color', _tenantPrimaryColorHex ?? '#F59E0B');
+      await prefs.setString('tenant_api_url', _dio.options.baseUrl);
 
       _dio.options.headers['X-Tenant-Slug'] = _tenantSlug;
 
@@ -206,12 +286,14 @@ class AuthProvider extends ChangeNotifier {
       return true;
     } on DioException catch (de) {
       _isLoading = false;
+      debugPrint('DioException during resolveTenant: ${de.message}, response: ${de.response?.data}');
       final msg = de.response?.data?['message'];
       _error = msg ?? 'School domain not found. Please double-check spelling.';
       notifyListeners();
       return false;
-    } catch (e) {
+    } catch (e, stack) {
       _isLoading = false;
+      debugPrint('Unexpected error during resolveTenant: $e\n$stack');
       _error = 'Failed to verify school. Please try again.';
       notifyListeners();
       return false;
@@ -234,6 +316,7 @@ class AuthProvider extends ChangeNotifier {
     await prefs.remove('tenant_name');
     await prefs.remove('tenant_logo_url');
     await prefs.remove('tenant_primary_color');
+    await prefs.remove('tenant_api_url');
     await prefs.remove('auth_token');
     await prefs.remove('initial_sync_done');
     await prefs.remove('cached_user');
@@ -241,6 +324,9 @@ class AuthProvider extends ChangeNotifier {
     await prefs.remove('student_id');
     await prefs.remove('tenant_active_plugins');
     await prefs.remove('tenant_all_plugins');
+
+    // Reset baseUrl back to default
+    _dio.options.baseUrl = ApiConstants.baseUrl;
 
     _dio.options.headers.remove('X-Tenant-Slug');
     _dio.options.headers.remove('Authorization');
@@ -311,12 +397,14 @@ class AuthProvider extends ChangeNotifier {
       return true;
     } on DioException catch (de) {
       _isLoading = false;
+      debugPrint('DioException during login: ${de.message}, response: ${de.response?.data}');
       final msg = de.response?.data?['message'];
       _error = msg ?? 'Authentication failed. Please verify credentials.';
       notifyListeners();
       return false;
-    } catch (e) {
+    } catch (e, stack) {
       _isLoading = false;
+      debugPrint('Unexpected error during login: $e\n$stack');
       _error = 'Login failed. Please try again.';
       notifyListeners();
       return false;
@@ -341,16 +429,21 @@ class AuthProvider extends ChangeNotifier {
     } catch (_) {}
   }
 
-  void markSyncDone() {
+  void markSyncDone() async {
     _initialSyncDone = true;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('initial_sync_done', true);
     notifyListeners();
   }
 
   bool get isReady => !_isLoading;
 
-  Future<bool> isFirstTime() async {
+  Future<void> toggleTheme() async {
+    _themeMode = _themeMode == ThemeMode.dark ? ThemeMode.light : ThemeMode.dark;
+    AppColors.isDark = _themeMode == ThemeMode.dark;
     final prefs = await SharedPreferences.getInstance();
-    return !(prefs.getBool('onboarding_completed') ?? false);
+    await prefs.setString('theme_mode', _themeMode == ThemeMode.dark ? 'dark' : 'light');
+    notifyListeners();
   }
 
   Future<void> logout() async {

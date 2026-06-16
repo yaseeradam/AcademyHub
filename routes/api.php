@@ -82,6 +82,7 @@ Route::middleware(['auth:sanctum', 'active'])->group(function () {
         Route::get('/classes/{classId}/attendance',     [TeacherController::class, 'attendance']);
         Route::post('/attendance',                      [TeacherController::class, 'saveAttendance']);
         Route::post('/scores',                          [TeacherController::class, 'saveScores']);
+        Route::post('/scores/import',                   [\App\Http\Controllers\Api\MobileFeatureParityController::class, 'importScores']);
     });
 
     // Offline batch sync
@@ -89,6 +90,43 @@ Route::middleware(['auth:sanctum', 'active'])->group(function () {
 
     // Media upload (teachers/admins/students)
     Route::post('/media/upload', [MediaUploadController::class, 'upload'])->middleware('throttle:media_uploads');
+
+    // Parent portal custom API endpoints
+    Route::get('/parent/attendance', [\App\Http\Controllers\Api\MobileFeatureParityController::class, 'getAttendance']);
+    Route::get('/parent/billing/receipts/{id}', [\App\Http\Controllers\Api\MobileFeatureParityController::class, 'getBillingReceipt']);
+    Route::post('/parent/whatsapp/toggle', [\App\Http\Controllers\Api\MobileFeatureParityController::class, 'toggleWhatsApp']);
+
+    // Direct Parent-Teacher messaging
+    Route::get('/conversations', [\App\Http\Controllers\Api\MobileFeatureParityController::class, 'getConversations']);
+    Route::post('/conversations', [\App\Http\Controllers\Api\MobileFeatureParityController::class, 'startConversation']);
+    Route::get('/conversations/{id}/messages', [\App\Http\Controllers\Api\MobileFeatureParityController::class, 'getMessages']);
+    Route::post('/conversations/{id}/messages', [\App\Http\Controllers\Api\MobileFeatureParityController::class, 'postMessage']);
+
+    // General In-App Notifications (for Parents, Teachers, Admins, Bursars)
+    Route::get('/notifications', [\App\Http\Controllers\Api\MobileFeatureParityController::class, 'getNotifications']);
+    Route::post('/notifications/{id}/read', [\App\Http\Controllers\Api\MobileFeatureParityController::class, 'markNotificationRead']);
+    Route::post('/notifications/read-all', [\App\Http\Controllers\Api\MobileFeatureParityController::class, 'markAllNotificationsRead']);
+
+    // Admin dashboard manager settings
+    Route::get('/admin/sessions', [\App\Http\Controllers\Api\MobileFeatureParityController::class, 'listSessions']);
+    Route::post('/admin/sessions', [\App\Http\Controllers\Api\MobileFeatureParityController::class, 'createSession']);
+    Route::put('/admin/sessions/{id}', [\App\Http\Controllers\Api\MobileFeatureParityController::class, 'updateSession']);
+    Route::delete('/admin/sessions/{id}', [\App\Http\Controllers\Api\MobileFeatureParityController::class, 'deleteSession']);
+
+    Route::get('/admin/terms', [\App\Http\Controllers\Api\MobileFeatureParityController::class, 'listTerms']);
+    Route::post('/admin/terms', [\App\Http\Controllers\Api\MobileFeatureParityController::class, 'createTerm']);
+    Route::put('/admin/terms/{id}', [\App\Http\Controllers\Api\MobileFeatureParityController::class, 'updateTerm']);
+    Route::delete('/admin/terms/{id}', [\App\Http\Controllers\Api\MobileFeatureParityController::class, 'deleteTerm']);
+
+    Route::get('/admin/users', [\App\Http\Controllers\Api\MobileFeatureParityController::class, 'listUsers']);
+    Route::post('/admin/users', [\App\Http\Controllers\Api\MobileFeatureParityController::class, 'createUser']);
+    Route::put('/admin/users/{id}', [\App\Http\Controllers\Api\MobileFeatureParityController::class, 'updateUser']);
+    Route::delete('/admin/users/{id}', [\App\Http\Controllers\Api\MobileFeatureParityController::class, 'deleteUser']);
+
+    Route::get('/admin/backups', [\App\Http\Controllers\Api\MobileFeatureParityController::class, 'listBackups']);
+    Route::post('/admin/backups', [\App\Http\Controllers\Api\MobileFeatureParityController::class, 'triggerBackup']);
+    Route::get('/admin/backups/download/{filename}', [\App\Http\Controllers\Api\MobileFeatureParityController::class, 'downloadBackup']);
+    Route::post('/admin/broadcast', [\App\Http\Controllers\Api\MobileFeatureParityController::class, 'dispatchBroadcast']);
 
     // Student portal API group
     Route::prefix('student')
@@ -106,6 +144,9 @@ Route::middleware(['auth:sanctum', 'active'])->group(function () {
         Route::get('/notifications',            [StudentNotificationController::class, 'index']);
         Route::post('/notifications/{id}/read',  [StudentNotificationController::class, 'markAsRead']);
         Route::post('/notifications/read-all',   [StudentNotificationController::class, 'markAllAsRead']);
+        Route::get('/notes/{id}/comments',      [\App\Http\Controllers\Api\MobileFeatureParityController::class, 'getNoteComments']);
+        Route::post('/notes/{id}/comments',     [\App\Http\Controllers\Api\MobileFeatureParityController::class, 'postNoteComment']);
+        Route::post('/homework/{id}/submit-file', [\App\Http\Controllers\Api\MobileFeatureParityController::class, 'submitHomeworkFile']);
     });
 });
 

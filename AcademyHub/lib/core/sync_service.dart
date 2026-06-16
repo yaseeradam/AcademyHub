@@ -144,6 +144,14 @@ class SyncService {
 
     _emit('Downloading timetable...', 0.85);
     await _fetchTimetable();
+
+    _emit('Downloading notifications...', 0.95);
+    await _tryFetch(() async {
+      final r = await dio.get('/notifications?per_page=100');
+      final listData = r.data['notifications'] ?? r.data['data'];
+      final list = (listData as List?)?.cast<Map<String, dynamic>>() ?? [];
+      await _db.upsertNotifications(list);
+    });
   }
 
   Future<void> _syncStudentData(int term, String session) async {
@@ -225,7 +233,8 @@ class SyncService {
     _emit('Downloading notifications feed...', 0.95);
     await _tryFetch(() async {
       final r = await dio.get('/student/notifications');
-      final list = (r.data['data'] as List?)?.cast<Map<String, dynamic>>() ?? [];
+      final listData = r.data['notifications'] ?? r.data['data'];
+      final list = (listData as List?)?.cast<Map<String, dynamic>>() ?? [];
       await _db.upsertNotifications(list);
     });
   }
@@ -258,6 +267,14 @@ class SyncService {
 
     _emit('Downloading announcements...', 0.9);
     await _fetchAnnouncements();
+
+    _emit('Downloading notifications...', 0.95);
+    await _tryFetch(() async {
+      final r = await dio.get('/notifications?per_page=100');
+      final listData = r.data['notifications'] ?? r.data['data'];
+      final list = (listData as List?)?.cast<Map<String, dynamic>>() ?? [];
+      await _db.upsertNotifications(list);
+    });
   }
 
   Future<void> _fetchHomework() async {
@@ -309,6 +326,16 @@ class SyncService {
     _statusController.add(SyncStatus.syncing);
     bool hasError = false;
 
+    String? role;
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final userJson = prefs.getString('cached_user');
+      if (userJson != null) {
+        final Map<String, dynamic> userMap = jsonDecode(userJson);
+        role = userMap['role'] as String?;
+      }
+    } catch (_) {}
+
     Future<void> runStep(Future<void> Function() step) async {
       try {
         await step();
@@ -325,6 +352,11 @@ class SyncService {
       await runStep(_uploadCbtAttempts);
       await runStep(_uploadNotifications);
       
+      // Also download fresh updates after uploads are complete
+      if (role != null) {
+        await runStep(() => backgroundRefresh(role!));
+      }
+
       if (hasError) {
         _statusController.add(SyncStatus.error);
       } else {
@@ -446,12 +478,32 @@ class SyncService {
     }
   }
 
+  Future<String> _getUserRole() async {
+    final prefs = await SharedPreferences.getInstance();
+    final cachedUserJson = prefs.getString('cached_user');
+    if (cachedUserJson != null) {
+      try {
+        final decoded = jsonDecode(cachedUserJson);
+        return decoded['role'] ?? 'student';
+      } catch (_) {}
+    }
+    return 'student';
+  }
+
   Future<void> _uploadNotifications() async {
     final dirty = await _db.getDirtyNotifications();
+    if (dirty.isEmpty) return;
+
+    final role = await _getUserRole();
+    final isStudent = role == 'student';
+
     for (final n in dirty) {
       try {
         final id = n['id'] as int;
-        final res = await dio.post('/student/notifications/$id/read');
+        final endpoint = isStudent 
+            ? '/student/notifications/$id/read' 
+            : '/notifications/$id/read';
+        final res = await dio.post(endpoint);
         if ((res.statusCode ?? 0) < 300) {
           await _db.markNotificationSynced(id);
         }

@@ -21,6 +21,8 @@ class AcademyHubApp extends StatelessWidget {
           return MaterialApp.router(
             title: 'AcademyHub',
             theme: AppTheme.lightTheme(authProvider.tenantPrimaryColor),
+            darkTheme: AppTheme.darkTheme(authProvider.tenantPrimaryColor),
+            themeMode: authProvider.themeMode,
             routerConfig: AppRouter.router(authProvider),
             debugShowCheckedModeBanner: false,
           );

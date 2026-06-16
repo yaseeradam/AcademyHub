@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/auth_provider.dart';
 import '../../core/database_helper.dart';
+import '../../core/constants.dart';
 
 class StudentsListScreen extends StatefulWidget {
   const StudentsListScreen({super.key});
@@ -24,7 +26,7 @@ class _StudentsListScreenState extends State<StudentsListScreen> {
   }
 
   Future<void> _loadStudents() async {
-    setState(() => _loading = true);
+    if (mounted) setState(() => _loading = true);
     try {
       final auth = context.read<AuthProvider>();
       List<Map<String, dynamic>> list = [];
@@ -35,12 +37,14 @@ class _StudentsListScreenState extends State<StudentsListScreen> {
       } catch (_) {
         list = await _db.getAllStudents();
       }
-      setState(() {
-        _students = list;
-        _loading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _students = list;
+          _loading = false;
+        });
+      }
     } catch (_) {
-      setState(() => _loading = false);
+      if (mounted) setState(() => _loading = false);
     }
   }
 
@@ -58,15 +62,16 @@ class _StudentsListScreenState extends State<StudentsListScreen> {
     }).toList();
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
+      backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text('Students Directory', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-        backgroundColor: Colors.white,
-        foregroundColor: const Color(0xFF0F172A),
+        title: Text('Students Directory', style: GoogleFonts.spaceGrotesk(fontWeight: FontWeight.bold, fontSize: 16, color: AppColors.textPrimary)),
+        backgroundColor: AppColors.surface,
+        foregroundColor: AppColors.textPrimary,
         elevation: 0,
+        shape: Border(bottom: BorderSide(color: AppColors.borderLight)),
         actions: [
           IconButton(
-            icon: const Icon(Icons.refresh),
+            icon: const Icon(Icons.refresh_rounded),
             onPressed: _loadStudents,
           ),
         ],
@@ -75,31 +80,38 @@ class _StudentsListScreenState extends State<StudentsListScreen> {
         children: [
           // Search Bar
           Container(
-            color: Colors.white,
+            color: AppColors.surface,
             padding: const EdgeInsets.all(16),
             child: TextField(
+              style: GoogleFonts.spaceGrotesk(color: AppColors.textPrimary, fontSize: 14),
               decoration: InputDecoration(
                 hintText: 'Search by student name or admission number...',
-                prefixIcon: const Icon(Icons.search),
+                hintStyle: GoogleFonts.spaceGrotesk(color: AppColors.textSecondary, fontSize: 14),
+                prefixIcon: Icon(Icons.search_rounded, color: AppColors.textSecondary),
                 contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide(color: AppColors.borderLight)),
+                enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide(color: AppColors.borderLight)),
+                focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide(color: primary, width: 1.5)),
+                fillColor: AppColors.surface2,
+                filled: true,
               ),
               onChanged: (val) => setState(() => _searchQuery = val),
             ),
           ),
-          if (_loading) LinearProgressIndicator(color: primary),
+          if (_loading) LinearProgressIndicator(color: primary, minHeight: 2),
           Expanded(
             child: filteredStudents.isEmpty
-                ? const Center(child: Text('No students found.', style: TextStyle(color: Color(0xFF64748B))))
+                ? Center(child: Text('No students found.', style: GoogleFonts.spaceGrotesk(color: AppColors.textSecondary, fontSize: 14)))
                 : ListView.separated(
                     padding: const EdgeInsets.all(16),
                     itemCount: filteredStudents.length,
                     separatorBuilder: (_, index) => const SizedBox(height: 10),
                     itemBuilder: (context, i) {
                       final s = filteredStudents[i];
-                      final name = '${s['first_name'] ?? ''} ${s['last_name'] ?? ''}';
+                      final name = '${s['first_name'] ?? ''} ${s['last_name'] ?? ''}'.trim();
                       final admNo = s['admission_number'] ?? '';
                       final cls = s['school_class']?['name'] ?? s['section']?['name'] ?? 'Class info cached';
+                      final initial = name.isNotEmpty ? name[0].toUpperCase() : '?';
 
                       return GestureDetector(
                         onTap: () {
@@ -112,19 +124,18 @@ class _StudentsListScreenState extends State<StudentsListScreen> {
                         child: Container(
                           padding: const EdgeInsets.all(16),
                           decoration: BoxDecoration(
-                            color: Colors.white,
+                            color: AppColors.surface,
                             borderRadius: BorderRadius.circular(14),
-                            border: Border.all(color: const Color(0xFFF1F5F9)),
-                            boxShadow: const [BoxShadow(color: Color(0x05000000), blurRadius: 4, offset: Offset(0, 2))],
+                            border: Border.all(color: AppColors.borderLight),
                           ),
                           child: Row(
                             children: [
                               CircleAvatar(
                                 radius: 22,
-                                backgroundColor: primary.withValues(alpha: 0.1),
+                                backgroundColor: primary.withValues(alpha: 0.12),
                                 child: Text(
-                                  name.isNotEmpty ? name[0].toUpperCase() : '?',
-                                  style: TextStyle(color: primary, fontWeight: FontWeight.bold, fontSize: 18),
+                                  initial,
+                                  style: GoogleFonts.spaceGrotesk(color: primary, fontWeight: FontWeight.bold, fontSize: 18),
                                 ),
                               ),
                               const SizedBox(width: 14),
@@ -132,10 +143,10 @@ class _StudentsListScreenState extends State<StudentsListScreen> {
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Text(name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Color(0xFF0F172A))),
+                                    Text(name, style: GoogleFonts.spaceGrotesk(fontWeight: FontWeight.bold, fontSize: 14, color: AppColors.textPrimary)),
                                     const SizedBox(height: 4),
-                                    Text(cls, style: const TextStyle(fontSize: 12, color: Color(0xFF64748B))),
-                                    Text(admNo, style: const TextStyle(fontSize: 11, color: Color(0xFF94A3B8))),
+                                    Text(cls, style: GoogleFonts.spaceGrotesk(fontSize: 12, color: AppColors.textSecondary)),
+                                    Text(admNo, style: GoogleFonts.spaceGrotesk(fontSize: 11, color: AppColors.textSecondary)),
                                   ],
                                 ),
                               ),

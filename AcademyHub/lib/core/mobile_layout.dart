@@ -1,14 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'auth_provider.dart';
 import 'sync_status_widget.dart';
 import 'toast_utility.dart';
+import 'constants.dart';
 
-class MobileLayout extends StatefulWidget {
+// ─── MobileLayout ─────────────────────────────────────────────────────────────
+// Thin wrapper — each role manages its own bottom-nav internally.
+// This shell just provides a safe-area scaffold and a top mini-bar.
+class MobileLayout extends StatelessWidget {
   final Widget child;
   final String title;
-  
+
   const MobileLayout({
     super.key,
     required this.child,
@@ -16,42 +22,41 @@ class MobileLayout extends StatefulWidget {
   });
 
   @override
-  State<MobileLayout> createState() => _MobileLayoutState();
+  Widget build(BuildContext context) {
+    // If the current screen is a sub-page (can pop), show a simple back-only header.
+    final canPop = Navigator.of(context).canPop();
+    if (canPop) {
+      return _SubPageScaffold(title: title, child: child);
+    }
+    // Otherwise the role home screen renders its own layout (bottom nav etc.).
+    return child;
+  }
 }
 
-class _MobileLayoutState extends State<MobileLayout> {
-  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+// ─── Sub-page scaffold (used for attendance / scores / homework etc.) ──────────
+class _SubPageScaffold extends StatelessWidget {
+  final String title;
+  final Widget child;
+  const _SubPageScaffold({required this.title, required this.child});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      key: _scaffoldKey,
-      backgroundColor: const Color(0xFFF8FAFC),
-      drawer: const MobileSidebar(),
-      body: Column(
-        children: [
-          MobileHeader(
-            title: widget.title,
-            onMenuTap: () => _scaffoldKey.currentState?.openDrawer(),
-          ),
-          Expanded(
-            child: widget.child,
-          ),
-        ],
+      backgroundColor: AppColors.background,
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(64),
+        child: _DarkAppBar(title: title, showBack: true),
       ),
+      body: child,
     );
   }
 }
 
-class MobileHeader extends StatelessWidget {
+// ─── Dark App Bar ──────────────────────────────────────────────────────────────
+class _DarkAppBar extends StatelessWidget {
   final String title;
-  final VoidCallback onMenuTap;
-
-  const MobileHeader({
-    super.key,
-    required this.title,
-    required this.onMenuTap,
-  });
+  final bool showBack;
+  const _DarkAppBar({required this.title, this.showBack = false});
 
   @override
   Widget build(BuildContext context) {
@@ -59,205 +64,154 @@ class MobileHeader extends StatelessWidget {
     final userInitial = (user != null && user.name.trim().isNotEmpty)
         ? user.name.trim().substring(0, 1).toUpperCase()
         : 'U';
-    final isWide = MediaQuery.of(context).size.width > 480;
-    
+    final auth = context.watch<AuthProvider>();
+
     return Container(
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Color(0x0F000000),
-            blurRadius: 8,
-            offset: Offset(0, 2),
-          ),
-        ],
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        border: Border(bottom: BorderSide(color: AppColors.borderLight)),
       ),
       child: SafeArea(
-        child: Column(
-          children: [
-            // Header content
-            Container(
-              height: 64,
-              padding: const EdgeInsets.symmetric(horizontal: 24),
-              child: Row(
-                children: [
-                  // Menu / Back button
-                  GestureDetector(
-                    onTap: Navigator.of(context).canPop()
-                        ? () => Navigator.of(context).pop()
-                        : onMenuTap,
-                    child: Container(
-                      padding: const EdgeInsets.all(10),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(12),
-                        boxShadow: const [
-                          BoxShadow(
-                            color: Color(0x0A000000),
-                            blurRadius: 4,
-                            offset: Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                      child: Icon(
-                        Navigator.of(context).canPop()
-                            ? Icons.arrow_back
-                            : Icons.menu,
-                        color: const Color(0xFF6B7280),
-                        size: 24,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  // Title and date
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          title,
-                          style: const TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w900,
-                            color: Color(0xFF0F172A),
-                          ),
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        Text(
-                          _formatDate(DateTime.now()),
-                          style: const TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                            color: Color(0xFF64748B),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  // Sync dot
-                  const SyncDot(),
-                  const SizedBox(width: 8),
-                  // Notification bell
+        child: SizedBox(
+          height: 64,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Row(
+              children: [
+                if (showBack)
+                  _IconBtn(
+                    icon: Icons.arrow_back_rounded,
+                    onTap: () => Navigator.of(context).pop(),
+                  )
+                else
                   Container(
-                    padding: const EdgeInsets.all(8),
+                    width: 36,
+                    height: 36,
                     decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: const Color(0xFFE5E7EB)),
+                      color: AppColors.surface2,
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: AppColors.borderLight),
                     ),
-                    child: const Icon(
-                      Icons.notifications_outlined,
-                      color: Color(0xFF6B7280),
-                      size: 20,
+                    child: Padding(
+                      padding: const EdgeInsets.all(4),
+                      child: Image.asset('lib/Alogo.png'),
                     ),
                   ),
-                  const SizedBox(width: 12),
-                  // Profile
-                  GestureDetector(
-                    onTap: onMenuTap,
-                    child: Container(
-                      padding: const EdgeInsets.all(6),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(12),
-                        boxShadow: const [
-                          BoxShadow(
-                            color: Color(0x0A000000),
-                            blurRadius: 4,
-                            offset: Offset(0, 1),
-                          ),
-                        ],
-                        border: Border.all(color: const Color(0xFFE5E7EB)),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          CircleAvatar(
-                            radius: 18,
-                            backgroundColor: const Color(0xFF374151),
-                            backgroundImage: (user?.profilePhotoUrl != null && user!.profilePhotoUrl!.trim().isNotEmpty)
-                                ? NetworkImage(user.profilePhotoUrl!)
-                                : null,
-                            child: (user?.profilePhotoUrl != null && user!.profilePhotoUrl!.trim().isNotEmpty)
-                                ? null
-                                : Text(
-                                    userInitial,
-                                    style: const TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                          ),
-                          if (isWide) ...[
-                            const SizedBox(width: 8),
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Text(
-                                  user?.name ?? 'User',
-                                  style: const TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.bold,
-                                    color: Color(0xFF111827),
-                                  ),
-                                ),
-                                Text(
-                                  user?.role.toUpperCase() ?? 'USER',
-                                  style: const TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w600,
-                                    color: Color(0xFF6B7280),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ],
-                      ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    title,
+                    style: GoogleFonts.spaceGrotesk(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.textPrimary,
+                      letterSpacing: -0.3,
                     ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                const SyncDot(),
+                const SizedBox(width: 8),
+                _IconBtn(
+                  icon: auth.themeMode == ThemeMode.dark
+                      ? Icons.light_mode_outlined
+                      : Icons.dark_mode_outlined,
+                  onTap: () => auth.toggleTheme(),
+                ),
+                const SizedBox(width: 8),
+                // In-App Notifications
+                _IconBtn(
+                  icon: Icons.notifications_outlined,
+                  onTap: () => context.push('/notifications'),
+                ),
+                if (user?.role != 'student') ...[
+                  const SizedBox(width: 8),
+                  // Direct Chat Messaging
+                  _IconBtn(
+                    icon: Icons.chat_bubble_outline_rounded,
+                    onTap: () => context.push('/chat'),
                   ),
                 ],
-              ),
+                const SizedBox(width: 8),
+                // Profile avatar
+                GestureDetector(
+                  onTap: () => _showProfileSheet(context, auth),
+                  child: CircleAvatar(
+                    radius: 18,
+                    backgroundColor: auth.tenantPrimaryColor.withValues(alpha: 0.15),
+                    backgroundImage: auth.getReachableUrl(user?.profilePhotoUrl) != null
+                        ? NetworkImage(auth.getReachableUrl(user?.profilePhotoUrl)!)
+                        : null,
+                    child: auth.getReachableUrl(user?.profilePhotoUrl) != null
+                        ? null
+                        : Text(
+                            userInitial,
+                            style: TextStyle(
+                              color: auth.tenantPrimaryColor,
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                  ),
+                ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );
   }
 
-  String _formatDate(DateTime date) {
-    const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
-    const months = ['January', 'February', 'March', 'April', 'May', 'June', 
-                   'July', 'August', 'September', 'October', 'November', 'December'];
-    
-    return '${days[date.weekday - 1]}, ${months[date.month - 1]} ${date.day}, ${date.year}';
+  void _showProfileSheet(BuildContext context, AuthProvider auth) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: AppColors.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) => _ProfileSheet(auth: auth),
+    );
   }
 }
 
-class MobileSidebar extends StatefulWidget {
-  const MobileSidebar({super.key});
+class _IconBtn extends StatelessWidget {
+  final IconData icon;
+  final VoidCallback onTap;
+  const _IconBtn({required this.icon, required this.onTap});
 
   @override
-  State<MobileSidebar> createState() => _MobileSidebarState();
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          color: AppColors.surface2,
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: AppColors.borderLight),
+        ),
+        child: Icon(icon, color: AppColors.textSecondary, size: 20),
+      ),
+    );
+  }
 }
 
-class _MobileSidebarState extends State<MobileSidebar> {
+// ─── Profile / Settings Bottom Sheet ─────────────────────────────────────────
+class _ProfileSheet extends StatefulWidget {
+  final AuthProvider auth;
+  const _ProfileSheet({required this.auth});
+
+  @override
+  State<_ProfileSheet> createState() => _ProfileSheetState();
+}
+
+class _ProfileSheetState extends State<_ProfileSheet> {
   bool _isSyncing = false;
 
   Future<void> _handleSync() async {
     setState(() => _isSyncing = true);
-    CustomToast.show(
-      context: context,
-      message: 'Syncing offline changes...',
-      type: 'warning',
-    );
-
     try {
-      final auth = context.read<AuthProvider>();
-      await auth.syncService.syncNow();
+      await widget.auth.syncService.syncNow();
       if (!mounted) return;
       CustomToast.show(
         context: context,
@@ -268,359 +222,511 @@ class _MobileSidebarState extends State<MobileSidebar> {
       if (!mounted) return;
       CustomToast.show(
         context: context,
-        message: 'Sync failed: Please check connection.',
+        message: 'Sync failed. Check your connection.',
         type: 'error',
       );
     } finally {
-      if (mounted) {
-        setState(() => _isSyncing = false);
-      }
+      if (mounted) setState(() => _isSyncing = false);
     }
   }
 
-  void _showLogoutDialog(BuildContext context) {
+  void _showLogout() {
+    Navigator.pop(context);
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Confirm Logout'),
-        content: const Text('Are you sure you want to logout?'),
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AppColors.surface,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Text('Confirm Logout',
+            style: GoogleFonts.spaceGrotesk(
+                color: AppColors.textPrimary, fontWeight: FontWeight.bold)),
+        content: Text('Are you sure you want to logout?',
+            style: GoogleFonts.spaceGrotesk(color: AppColors.textSecondary)),
         actions: [
           TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancel'),
+            onPressed: () => Navigator.pop(ctx),
+            child: Text('Cancel',
+                style: GoogleFonts.spaceGrotesk(color: AppColors.textSecondary)),
           ),
           ElevatedButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              _logout(context);
+            onPressed: () async {
+              final router = GoRouter.of(ctx);
+              Navigator.pop(ctx);
+              await widget.auth.logout();
+              router.go('/login');
             },
-            child: const Text('Logout'),
+            style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.error,
+                foregroundColor: Colors.white),
+            child: Text('Logout',
+                style: GoogleFonts.spaceGrotesk(fontWeight: FontWeight.bold)),
           ),
         ],
       ),
     );
   }
 
-  void _logout(BuildContext context) async {
-    await context.read<AuthProvider>().logout();
-    if (context.mounted) context.go('/login');
-  }
-
   @override
   Widget build(BuildContext context) {
-    final user = context.watch<AuthProvider>().user;
-    
-    return Drawer(
-      width: 320,
-      backgroundColor: Colors.white,
+    final user = widget.auth.user;
+    final primary = widget.auth.tenantPrimaryColor;
+    final userInitial = (user != null && user.name.trim().isNotEmpty)
+        ? user.name.trim().substring(0, 1).toUpperCase()
+        : 'U';
+    final plugins = widget.auth.allPlugins.where((p) {
+      final slug = p['slug'] as String? ?? '';
+      return widget.auth.isPluginActive(slug);
+    }).toList();
+
+    return SingleChildScrollView(
+      padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: const BoxDecoration(
-              border: Border(
-                bottom: BorderSide(color: Color(0xFFF3F4F6)),
-              ),
-            ),
-            child: SafeArea(
-              child: Row(
-                children: [
-                  // School logo
-                  Container(
-                    width: 40,
-                    height: 40,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFDBEAFE),
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: const Color(0xFFBFDBFE)),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(6),
-                      child: Image.asset('assets/images/Alogo.png'),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  const Expanded(
-                    child: Text(
-                      'AcademyHub',
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: Color(0xFF0F172A),
-                      ),
-                    ),
-                  ),
-                  IconButton(
-                    onPressed: () => Navigator.of(context).pop(),
-                    icon: const Icon(
-                      Icons.close,
-                      color: Color(0xFF9CA3AF),
-                      size: 24,
-                    ),
-                  ),
-                ],
+          // Drag handle
+          Center(
+            child: Container(
+              width: 36,
+              height: 4,
+              margin: const EdgeInsets.only(bottom: 20),
+              decoration: BoxDecoration(
+                color: AppColors.borderLight,
+                borderRadius: BorderRadius.circular(2),
               ),
             ),
           ),
-          // Navigation grid
-          Expanded(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  NavigationGrid(userRole: user?.role ?? 'user'),
-                  const SizedBox(height: 24),
-                  const Divider(color: Color(0xFFE2E8F0)),
-                  const SizedBox(height: 16),
-                  const Text(
-                    'MARKETPLACE PLUGINS',
-                    style: TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w900,
-                      color: Color(0xFF94A3B8),
-                      letterSpacing: 1.0,
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  const PluginsListWidget(),
-                ],
-              ),
-            ),
-          ),
-          // Sidebar Actions (Sync & Logout)
+          // User profile card
           Container(
             padding: const EdgeInsets.all(16),
-            decoration: const BoxDecoration(
-              border: Border(
-                top: BorderSide(color: Color(0xFFF3F4F6)),
-              ),
+            decoration: BoxDecoration(
+              color: AppColors.surface2,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: AppColors.borderLight),
             ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
+            child: Row(
               children: [
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: _isSyncing ? null : _handleSync,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF10B981), // Emerald 500
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        _isSyncing
-                            ? const SizedBox(
-                                width: 20,
-                                height: 20,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                                ),
-                              )
-                            : const Icon(Icons.sync, size: 20),
-                        const SizedBox(width: 8),
-                        Text(
-                          _isSyncing ? 'Syncing...' : 'Sync Data',
-                          style: const TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 12),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: () => _showLogoutDialog(context),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF374151),
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                    child: const Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.logout, size: 20),
-                        SizedBox(width: 8),
-                        Text(
-                          'Logout',
+                CircleAvatar(
+                  radius: 28,
+                  backgroundColor: primary.withValues(alpha: 0.15),
+                  backgroundImage: widget.auth.getReachableUrl(user?.profilePhotoUrl) != null
+                      ? NetworkImage(widget.auth.getReachableUrl(user?.profilePhotoUrl)!)
+                      : null,
+                  child: widget.auth.getReachableUrl(user?.profilePhotoUrl) != null
+                      ? null
+                      : Text(
+                          userInitial,
                           style: TextStyle(
-                            fontSize: 14,
+                            color: primary,
+                            fontSize: 20,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                      ],
-                    ),
+                ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        user?.name ?? 'User',
+                        style: GoogleFonts.spaceGrotesk(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 8, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: primary.withValues(alpha: 0.12),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: Text(
+                          (user?.role ?? 'user').toUpperCase(),
+                          style: GoogleFonts.spaceGrotesk(
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                            color: primary,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],
             ),
           ),
+          const SizedBox(height: 20),
+
+          // Actions
+          _sheetAction(
+            Icons.sync_rounded,
+            _isSyncing ? 'Syncing...' : 'Sync Data',
+            AppColors.success,
+            _isSyncing ? null : _handleSync,
+          ),
+          const SizedBox(height: 8),
+          _sheetAction(
+            Icons.logout_rounded,
+            'Sign Out',
+            AppColors.error,
+            _showLogout,
+          ),
+
+          // Plugins section
+          if (plugins.isNotEmpty) ...[
+            const SizedBox(height: 24),
+            Text(
+              'MARKETPLACE PLUGINS',
+              style: GoogleFonts.spaceGrotesk(
+                fontSize: 10,
+                fontWeight: FontWeight.bold,
+                color: AppColors.textMuted,
+                letterSpacing: 1.2,
+              ),
+            ),
+            const SizedBox(height: 12),
+            ...plugins.map((p) {
+              final slug = p['slug'] as String? ?? '';
+              final isActive = widget.auth.isPluginActive(slug);
+              return Container(
+                margin: const EdgeInsets.only(bottom: 8),
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: AppColors.surface2,
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(
+                    color: isActive
+                        ? AppColors.success.withValues(alpha: 0.3)
+                        : AppColors.borderLight,
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(6),
+                      decoration: BoxDecoration(
+                        color: isActive
+                            ? AppColors.success.withValues(alpha: 0.1)
+                            : AppColors.surface3,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Icon(
+                        slug == 'cbt'
+                            ? Icons.computer_rounded
+                            : slug == 'e-learning'
+                                ? Icons.book_online_rounded
+                                : Icons.people_outline_rounded,
+                        color: isActive ? AppColors.success : AppColors.textSecondary,
+                        size: 16,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            p['name'] ?? 'Plugin',
+                            style: GoogleFonts.spaceGrotesk(
+                              fontSize: 13,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.textPrimary,
+                            ),
+                          ),
+                          Text(
+                            p['description'] ?? '',
+                            style: GoogleFonts.spaceGrotesk(
+                              fontSize: 11,
+                              color: AppColors.textSecondary,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                      ),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: isActive
+                            ? AppColors.success.withValues(alpha: 0.1)
+                            : AppColors.error.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: Text(
+                        isActive ? 'ACTIVE' : 'LOCKED',
+                        style: GoogleFonts.spaceGrotesk(
+                          fontSize: 9,
+                          fontWeight: FontWeight.w900,
+                          color: isActive ? AppColors.success : AppColors.error,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            }),
+          ],
         ],
       ),
     );
   }
+
+  Widget _sheetAction(
+      IconData icon, String label, Color color, VoidCallback? onTap) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: AppColors.surface2,
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: AppColors.borderLight),
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(6),
+              decoration: BoxDecoration(
+                color: color.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Icon(icon, color: color, size: 18),
+            ),
+            const SizedBox(width: 14),
+            Text(
+              label,
+              style: GoogleFonts.spaceGrotesk(
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+                color: color,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }
 
-class NavigationGrid extends StatelessWidget {
-  final String userRole;
-
-  const NavigationGrid({super.key, required this.userRole});
+// ─── Role Shell — wraps a role's content with top bar + no drawer ─────────────
+class RoleShell extends StatelessWidget {
+  final String title;
+  final Widget body;
+  final Widget? floatingActionButton;
+  const RoleShell({super.key, required this.title, required this.body, this.floatingActionButton});
 
   @override
   Widget build(BuildContext context) {
-    final items = _getNavigationItems(context, userRole);
-    
-    return GridView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        crossAxisSpacing: 12,
-        mainAxisSpacing: 12,
-        childAspectRatio: 1.0,
+    final isDark = context.watch<AuthProvider>().themeMode == ThemeMode.dark;
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
       ),
-      itemCount: items.length,
-      itemBuilder: (context, index) {
-        final item = items[index];
-        return NavigationCard(
-          icon: item.icon,
-          label: item.label,
-          color: item.color,
-          onTap: () => item.onTap(context),
-          isLocked: item.isLocked,
-        );
-      },
+      child: Scaffold(
+        backgroundColor: AppColors.background,
+        appBar: PreferredSize(
+          preferredSize: const Size.fromHeight(64),
+          child: _DarkAppBar(title: title),
+        ),
+        body: body,
+        floatingActionButton: floatingActionButton,
+      ),
     );
-  }
-
-  List<NavigationItem> _getNavigationItems(BuildContext context, String role) {
-    final baseItems = [
-      NavigationItem(
-        icon: Icons.home,
-        label: 'Home',
-        color: const Color(0xFF6366F1),
-        onTap: (context) { Navigator.of(context).pop(); context.go('/'); },
-      ),
-    ];
-
-    if (role == 'admin' || role == 'teacher') {
-      baseItems.addAll([
-        NavigationItem(
-          icon: Icons.how_to_reg,
-          label: 'Attendance',
-          color: const Color(0xFF3B82F6),
-          onTap: (context) { Navigator.of(context).pop(); context.push('/attendance'); },
-        ),
-        NavigationItem(
-          icon: Icons.edit_note,
-          label: 'Scores',
-          color: const Color(0xFF10B981),
-          onTap: (context) { Navigator.of(context).pop(); context.push('/scores'); },
-        ),
-        NavigationItem(
-          icon: Icons.assignment,
-          label: 'Homework',
-          color: const Color(0xFF8B5CF6),
-          onTap: (context) { Navigator.of(context).pop(); context.push('/homework'); },
-        ),
-      ]);
-    }
-
-    return baseItems;
   }
 }
 
-class NavigationCard extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final Color color;
-  final VoidCallback onTap;
-  final bool isLocked;
+// ─── Bottom Nav Item ──────────────────────────────────────────────────────────
+class AHBottomNav extends StatelessWidget {
+  final List<AHNavItem> items;
+  final int selectedIndex;
+  final ValueChanged<int> onTap;
+  final Color accentColor;
 
-  const NavigationCard({
+  const AHBottomNav({
     super.key,
-    required this.icon,
-    required this.label,
-    required this.color,
+    required this.items,
+    required this.selectedIndex,
     required this.onTap,
-    this.isLocked = false,
+    required this.accentColor,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        border: Border(top: BorderSide(color: AppColors.borderLight)),
+      ),
+      child: SafeArea(
+        top: false,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+          child: Row(
+            children: List.generate(items.length, (i) {
+              final item = items[i];
+              final selected = i == selectedIndex;
+              return Expanded(
+                child: GestureDetector(
+                  onTap: () => onTap(i),
+                  behavior: HitTestBehavior.opaque,
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 200),
+                    curve: Curves.easeInOut,
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    decoration: BoxDecoration(
+                      color: selected
+                          ? accentColor.withValues(alpha: 0.12)
+                          : Colors.transparent,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          selected ? item.activeIcon : item.icon,
+                          color: selected ? accentColor : AppColors.textSecondary,
+                          size: 22,
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          item.label,
+                          style: GoogleFonts.spaceGrotesk(
+                            fontSize: 10,
+                            fontWeight: selected ? FontWeight.bold : FontWeight.w500,
+                            color: selected ? accentColor : AppColors.textSecondary,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              );
+            }),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class AHNavItem {
+  final IconData icon;
+  final IconData activeIcon;
+  final String label;
+  const AHNavItem(
+      {required this.icon,
+      required this.activeIcon,
+      required this.label});
+}
+
+// ─── Glassmorphism Hero Card ──────────────────────────────────────────────────
+class GlassHeroCard extends StatelessWidget {
+  final Widget child;
+  final List<Color> gradientColors;
+  final double borderRadius;
+
+  const GlassHeroCard({
+    super.key,
+    required this.child,
+    required this.gradientColors,
+    this.borderRadius = 20,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: gradientColors,
+        ),
+        borderRadius: BorderRadius.circular(borderRadius),
+        boxShadow: [
+          BoxShadow(
+            color: gradientColors.first.withValues(alpha: 0.3),
+            blurRadius: 24,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: child,
+    );
+  }
+}
+
+// ─── Dark Stat Card ───────────────────────────────────────────────────────────
+class DarkStatCard extends StatelessWidget {
+  final String label;
+  final String value;
+  final IconData icon;
+  final Color color;
+  final VoidCallback? onTap;
+
+  const DarkStatCard({
+    super.key,
+    required this.label,
+    required this.value,
+    required this.icon,
+    required this.color,
+    this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: isLocked ? null : onTap,
+      onTap: onTap,
       child: Container(
+        padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: const [
-            BoxShadow(
-              color: Color(0x0A000000),
-              blurRadius: 4,
-              offset: Offset(0, 2),
-            ),
-          ],
-          border: Border.all(color: const Color(0xFFF1F5F9)),
+          color: AppColors.surface,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: AppColors.borderLight),
         ),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Container(
-              width: 48,
-              height: 48,
-              decoration: BoxDecoration(
-                color: color.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Icon(
-                icon,
-                color: color,
-                size: 24,
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(7),
+                  decoration: BoxDecoration(
+                    color: color.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Icon(icon, color: color, size: 18),
+                ),
+                if (onTap != null)
+                  Icon(Icons.arrow_forward_ios_rounded,
+                      color: AppColors.textMuted, size: 11),
+              ],
+            ),
+            const Spacer(),
+            Text(
+              value,
+              style: GoogleFonts.spaceGrotesk(
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+                color: AppColors.textPrimary,
               ),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 2),
             Text(
               label,
-              style: const TextStyle(
-                fontSize: 12,
+              style: GoogleFonts.spaceGrotesk(
+                fontSize: 11,
                 fontWeight: FontWeight.w600,
-                color: Color(0xFF374151),
+                color: AppColors.textSecondary,
               ),
-              textAlign: TextAlign.center,
             ),
-            if (isLocked) ...[
-              const SizedBox(height: 4),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFFEF3C7),
-                  borderRadius: BorderRadius.circular(4),
-                ),
-                child: const Text(
-                  'LOCKED',
-                  style: TextStyle(
-                    fontSize: 10,
-                    fontWeight: FontWeight.w900,
-                    color: Color(0xFFD97706),
-                  ),
-                ),
-              ),
-            ],
           ],
         ),
       ),
@@ -628,192 +734,181 @@ class NavigationCard extends StatelessWidget {
   }
 }
 
-class NavigationItem {
-  final IconData icon;
-  final String label;
-  final Color color;
-  final Function(BuildContext) onTap;
-  final bool isLocked;
+// ─── Section Header ───────────────────────────────────────────────────────────
+class SectionHeader extends StatelessWidget {
+  final String title;
+  final String? actionLabel;
+  final VoidCallback? onAction;
 
-  NavigationItem({
-    required this.icon,
-    required this.label,
-    required this.color,
-    required this.onTap,
-    this.isLocked = false,
+  const SectionHeader({
+    super.key,
+    required this.title,
+    this.actionLabel,
+    this.onAction,
   });
-}
-
-class PluginsListWidget extends StatelessWidget {
-  const PluginsListWidget({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final auth = context.watch<AuthProvider>();
-    final plugins = auth.allPlugins;
-
-    if (plugins.isEmpty) {
-      return Container(
-        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-        decoration: BoxDecoration(
-          color: const Color(0xFFF1F5F9),
-          borderRadius: BorderRadius.circular(12),
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          title,
+          style: GoogleFonts.spaceGrotesk(
+            fontSize: 14,
+            fontWeight: FontWeight.bold,
+            color: AppColors.textPrimary,
+          ),
         ),
-        child: const Row(
-          children: [
-            Icon(Icons.info_outline, size: 16, color: Color(0xFF64748B)),
-            SizedBox(width: 8),
-            Text(
-              'No plugins found',
-              style: TextStyle(fontSize: 12, color: Color(0xFF64748B), fontWeight: FontWeight.w500),
-            ),
-          ],
-        ),
-      );
-    }
-
-    return ListView.separated(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      itemCount: plugins.length,
-      separatorBuilder: (context, index) => const SizedBox(height: 8),
-      itemBuilder: (context, index) {
-        final p = plugins[index];
-        final slug = p['slug'] as String? ?? '';
-        final isActive = auth.isPluginActive(slug);
-
-        final widgetContent = Container(
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: const Color(0xFFF8FAFC),
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: isActive ? const Color(0xFFD1FAE5) : const Color(0xFFE2E8F0),
-              width: 1,
+        if (actionLabel != null && onAction != null)
+          GestureDetector(
+            onTap: onAction,
+            child: Text(
+              actionLabel!,
+              style: GoogleFonts.spaceGrotesk(
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
+                color: AppColors.primary,
+              ),
             ),
           ),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: isActive ? const Color(0xFFD1FAE5) : const Color(0xFFF1F5F9),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Icon(
-                  slug == 'cbt'
-                      ? Icons.computer
-                      : slug == 'e-learning'
-                          ? Icons.book_online
-                          : Icons.people_outline,
-                  color: isActive ? const Color(0xFF065F46) : const Color(0xFF64748B),
-                  size: 20,
-                ),
+      ],
+    );
+  }
+}
+
+// ─── Action Row Item ──────────────────────────────────────────────────────────
+class DarkActionRow extends StatelessWidget {
+  final String title;
+  final String subtitle;
+  final IconData icon;
+  final Color color;
+  final VoidCallback onTap;
+
+  const DarkActionRow({
+    super.key,
+    required this.title,
+    required this.subtitle,
+    required this.icon,
+    required this.color,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: color.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(8),
               ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      p['name'] ?? 'Plugin',
-                      style: const TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.bold,
-                        color: Color(0xFF1E293B),
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      p['description'] ?? '',
-                      style: const TextStyle(
-                        fontSize: 11,
-                        color: Color(0xFF64748B),
-                      ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(width: 8),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
+              child: Icon(icon, color: color, size: 18),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  if (isActive)
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFD1FAE5),
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      child: const Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(Icons.check, size: 10, color: Color(0xFF065F46)),
-                          SizedBox(width: 2),
-                          Text(
-                            'ACTIVE',
-                            style: TextStyle(
-                              fontSize: 9,
-                              fontWeight: FontWeight.w900,
-                              color: Color(0xFF065F46),
-                            ),
-                          ),
-                        ],
-                      ),
-                    )
-                  else ...[
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFFEE2E2),
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      child: const Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(Icons.lock_outline, size: 10, color: Color(0xFF991B1B)),
-                          SizedBox(width: 2),
-                          Text(
-                            'LOCKED',
-                            style: TextStyle(
-                              fontSize: 9,
-                              fontWeight: FontWeight.w900,
-                              color: Color(0xFF991B1B),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      '₦${p['price'] ?? '0'}',
-                      style: const TextStyle(
-                        fontSize: 10,
-                        fontWeight: FontWeight.w800,
-                        color: Color(0xFF64748B),
-                      ),
-                    ),
-                  ],
+                  Text(title,
+                      style: GoogleFonts.spaceGrotesk(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 13,
+                          color: AppColors.textPrimary)),
+                  const SizedBox(height: 2),
+                  Text(subtitle,
+                      style: GoogleFonts.spaceGrotesk(
+                          fontSize: 11,
+                          color: AppColors.textSecondary)),
                 ],
               ),
-            ],
-          ),
-        );
+            ),
+            Icon(Icons.arrow_forward_ios_rounded,
+                color: AppColors.textMuted, size: 11),
+          ],
+        ),
+      ),
+    );
+  }
+}
 
-        if (isActive && slug == 'cbt') {
-          return GestureDetector(
-            onTap: () {
-              Navigator.of(context).pop(); // Close drawer
-              context.push('/cbt');
-            },
-            child: widgetContent,
-          );
-        }
-        return widgetContent;
-      },
+// ─── AHLoadingButton ──────────────────────────────────────────────────────────
+// Reusable action button with built-in loading state for ALL action CTAs.
+// Usage: AHLoadingButton(label: 'Save', isLoading: _saving, onTap: _save)
+class AHLoadingButton extends StatelessWidget {
+  final String label;
+  final bool isLoading;
+  final VoidCallback? onTap;
+  final Color? color;
+  final Color? foregroundColor;
+  final IconData? icon;
+  final double height;
+  final double? width;
+  final double borderRadius;
+
+  const AHLoadingButton({
+    super.key,
+    required this.label,
+    required this.isLoading,
+    required this.onTap,
+    this.color,
+    this.foregroundColor,
+    this.icon,
+    this.height = 48,
+    this.width,
+    this.borderRadius = 12,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final bg = color ?? AppColors.primary;
+    final fg = foregroundColor ?? Colors.black;
+
+    return SizedBox(
+      height: height,
+      width: width ?? double.infinity,
+      child: ElevatedButton(
+        onPressed: isLoading ? null : onTap,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: bg,
+          foregroundColor: fg,
+          disabledBackgroundColor: bg.withValues(alpha: 0.5),
+          elevation: 0,
+          shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(borderRadius)),
+        ),
+        child: isLoading
+            ? SizedBox(
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  valueColor: AlwaysStoppedAnimation<Color>(fg.withValues(alpha: 0.7)),
+                ),
+              )
+            : Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (icon != null) ...[
+                    Icon(icon, size: 18),
+                    const SizedBox(width: 8),
+                  ],
+                  Text(
+                    label,
+                    style: GoogleFonts.spaceGrotesk(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+      ),
     );
   }
 }

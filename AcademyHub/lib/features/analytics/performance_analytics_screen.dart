@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../core/auth_provider.dart';
 import '../../core/database_helper.dart';
+import '../../core/constants.dart';
 
 class PerformanceAnalyticsScreen extends StatefulWidget {
   final int? studentId;
@@ -55,7 +57,7 @@ class _PerformanceAnalyticsScreenState extends State<PerformanceAnalyticsScreen>
   }
 
   Future<void> _loadPerformanceData() async {
-    setState(() => _loading = true);
+    if (mounted) setState(() => _loading = true);
 
     try {
       final auth = context.read<AuthProvider>();
@@ -110,7 +112,7 @@ class _PerformanceAnalyticsScreenState extends State<PerformanceAnalyticsScreen>
       List<Map<String, dynamic>> subjectList = [];
 
       for (final s in studentScores) {
-        final total = (s['total'] as num?)?.toDouble() ?? 0.0;
+        final total = _parseNum(s['total']);
         totalAcademic += total;
         scoresCount++;
 
@@ -138,7 +140,7 @@ class _PerformanceAnalyticsScreenState extends State<PerformanceAnalyticsScreen>
         final lateCount = localAttendance.where((a) => a['status'] == 'late').length;
         attRate = ((present + lateCount) / localAttendance.length) * 100.0;
       } else if (_studentStats != null) {
-        attRate = (_studentStats!['attendance_rate'] as num?)?.toDouble() ?? 100.0;
+        attRate = _parseNum(_studentStats!['attendance_rate'], 100.0);
       }
 
       // Homework completion
@@ -149,26 +151,28 @@ class _PerformanceAnalyticsScreenState extends State<PerformanceAnalyticsScreen>
       int cbtCount = cbtAttempts.length;
       double cbtSum = 0.0;
       for (final attempt in cbtAttempts) {
-        cbtSum += (attempt['score'] as num?)?.toDouble() ?? 0.0;
+        cbtSum += _parseNum(attempt['score']);
       }
 
-      setState(() {
-        _averageScore = scoresCount > 0 ? (totalAcademic / scoresCount) : ((_studentStats?['average_score'] as num?)?.toDouble() ?? 0.0);
-        _attendanceRate = attRate;
-        _completedHomeworkCount = completedHw;
-        _totalHomeworkCount = totalHw > completedHw ? totalHw : completedHw;
-        _cbtExamsCount = cbtCount;
-        _cbtAverage = cbtCount > 0 ? (cbtSum / cbtCount) : 0.0;
-        _strengths = strengthsList;
-        _weaknesses = weaknessesList;
-        _allSubjects = subjectList;
-        if (sessions.isNotEmpty) {
-          _sessionsList = sessions;
-        }
-        _loading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _averageScore = scoresCount > 0 ? (totalAcademic / scoresCount) : _parseNum(_studentStats?['average_score']);
+          _attendanceRate = attRate;
+          _completedHomeworkCount = completedHw;
+          _totalHomeworkCount = totalHw > completedHw ? totalHw : completedHw;
+          _cbtExamsCount = cbtCount;
+          _cbtAverage = cbtCount > 0 ? (cbtSum / cbtCount) : 0.0;
+          _strengths = strengthsList;
+          _weaknesses = weaknessesList;
+          _allSubjects = subjectList;
+          if (sessions.isNotEmpty) {
+            _sessionsList = sessions;
+          }
+          _loading = false;
+        });
+      }
     } catch (_) {
-      setState(() => _loading = false);
+      if (mounted) setState(() => _loading = false);
     }
   }
 
@@ -179,15 +183,16 @@ class _PerformanceAnalyticsScreenState extends State<PerformanceAnalyticsScreen>
     final displayName = widget.studentName ?? (auth.user?.role == 'student' ? auth.user?.name : 'Student Performance');
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
+      backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: Text(displayName!, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-        backgroundColor: Colors.white,
-        foregroundColor: const Color(0xFF0F172A),
+        title: Text(displayName!, style: GoogleFonts.spaceGrotesk(fontWeight: FontWeight.bold, fontSize: 16, color: AppColors.textPrimary)),
+        backgroundColor: AppColors.surface,
+        foregroundColor: AppColors.textPrimary,
         elevation: 0,
+        shape: Border(bottom: BorderSide(color: AppColors.borderLight)),
         actions: [
           IconButton(
-            icon: const Icon(Icons.sync),
+            icon: const Icon(Icons.sync_rounded),
             onPressed: _loadPerformanceData,
           ),
         ],
@@ -198,20 +203,18 @@ class _PerformanceAnalyticsScreenState extends State<PerformanceAnalyticsScreen>
               children: [
                 // Term / Session Selector
                 Container(
-                  color: Colors.white,
+                  color: AppColors.surface,
                   padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                   child: Row(
                     children: [
                       Expanded(
                         child: DropdownButtonFormField<String>(
                           initialValue: _selectedSession,
-                          decoration: const InputDecoration(
-                            labelText: 'Academic Session',
-                            contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                            border: OutlineInputBorder(),
-                          ),
+                          dropdownColor: AppColors.surface2,
+                          style: GoogleFonts.spaceGrotesk(color: AppColors.textPrimary, fontSize: 13),
+                          decoration: _inputDecoration('Academic Session'),
                           items: _sessionsList
-                              .map((s) => DropdownMenuItem(value: s, child: Text(s)))
+                              .map((s) => DropdownMenuItem(value: s, child: Text(s, style: GoogleFonts.spaceGrotesk(color: AppColors.textPrimary))))
                               .toList(),
                           onChanged: (val) {
                             if (val != null) {
@@ -225,15 +228,13 @@ class _PerformanceAnalyticsScreenState extends State<PerformanceAnalyticsScreen>
                       Expanded(
                         child: DropdownButtonFormField<int>(
                           initialValue: _selectedTerm,
-                          decoration: const InputDecoration(
-                            labelText: 'Term',
-                            contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                            border: OutlineInputBorder(),
-                          ),
-                          items: const [
-                            DropdownMenuItem(value: 1, child: Text('1st Term')),
-                            DropdownMenuItem(value: 2, child: Text('2nd Term')),
-                            DropdownMenuItem(value: 3, child: Text('3rd Term')),
+                          dropdownColor: AppColors.surface2,
+                          style: GoogleFonts.spaceGrotesk(color: AppColors.textPrimary, fontSize: 13),
+                          decoration: _inputDecoration('Term'),
+                          items: [
+                            DropdownMenuItem(value: 1, child: Text('1st Term', style: TextStyle(color: AppColors.textPrimary))),
+                            DropdownMenuItem(value: 2, child: Text('2nd Term', style: TextStyle(color: AppColors.textPrimary))),
+                            DropdownMenuItem(value: 3, child: Text('3rd Term', style: TextStyle(color: AppColors.textPrimary))),
                           ],
                           onChanged: (val) {
                             if (val != null) {
@@ -269,7 +270,7 @@ class _PerformanceAnalyticsScreenState extends State<PerformanceAnalyticsScreen>
                               title: 'Attendance',
                               value: '${_attendanceRate.toStringAsFixed(1)}%',
                               progress: _attendanceRate / 100.0,
-                              color: const Color(0xFF10B981),
+                              color: AppColors.success,
                               subtitle: _attendanceRate >= 85 ? 'Excellent' : 'Risk of Lockout',
                             ),
                           ),
@@ -282,27 +283,27 @@ class _PerformanceAnalyticsScreenState extends State<PerformanceAnalyticsScreen>
                         Container(
                           padding: const EdgeInsets.all(16),
                           decoration: BoxDecoration(
-                            color: const Color(0xFFFEE2E2),
+                            color: AppColors.error.withValues(alpha: 0.12),
                             borderRadius: BorderRadius.circular(16),
-                            border: Border.all(color: const Color(0xFFFCA5A5)),
+                            border: Border.all(color: AppColors.error.withValues(alpha: 0.25)),
                           ),
-                          child: const Row(
+                          child: Row(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Icon(Icons.warning_amber_rounded, color: Color(0xFFEF4444)),
-                              SizedBox(width: 12),
+                              const Icon(Icons.warning_amber_rounded, color: AppColors.error),
+                              const SizedBox(width: 12),
                               Expanded(
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
                                       'Attendance Impact Warning',
-                                      style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF991B1B)),
+                                      style: GoogleFonts.spaceGrotesk(fontWeight: FontWeight.bold, color: AppColors.error),
                                     ),
-                                    SizedBox(height: 4),
+                                    const SizedBox(height: 4),
                                     Text(
                                       'Low attendance is negatively impacting this student\'s academic performance. Immediate classroom presence is advised.',
-                                      style: TextStyle(fontSize: 12, color: Color(0xFFB91C1C)),
+                                      style: GoogleFonts.spaceGrotesk(fontSize: 12, color: AppColors.textPrimary),
                                     ),
                                   ],
                                 ),
@@ -314,27 +315,27 @@ class _PerformanceAnalyticsScreenState extends State<PerformanceAnalyticsScreen>
                         Container(
                           padding: const EdgeInsets.all(16),
                           decoration: BoxDecoration(
-                            color: const Color(0xFFD1FAE5),
+                            color: AppColors.success.withValues(alpha: 0.12),
                             borderRadius: BorderRadius.circular(16),
-                            border: Border.all(color: const Color(0xFF6EE7B7)),
+                            border: Border.all(color: AppColors.success.withValues(alpha: 0.25)),
                           ),
                           child: Row(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Icon(Icons.star_rounded, color: const Color(0xFF059669)),
+                              const Icon(Icons.star_rounded, color: AppColors.success),
                               const SizedBox(width: 12),
-                              const Expanded(
+                              Expanded(
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
                                       'Honor Roll Status',
-                                      style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF065F46)),
+                                      style: GoogleFonts.spaceGrotesk(fontWeight: FontWeight.bold, color: AppColors.success),
                                     ),
-                                    SizedBox(height: 4),
+                                    const SizedBox(height: 4),
                                     Text(
                                       'Exceptional performance! Outstanding understanding demonstrated across subjects.',
-                                      style: TextStyle(fontSize: 12, color: Color(0xFF047857)),
+                                      style: GoogleFonts.spaceGrotesk(fontSize: 12, color: AppColors.textPrimary),
                                     ),
                                   ],
                                 ),
@@ -349,20 +350,20 @@ class _PerformanceAnalyticsScreenState extends State<PerformanceAnalyticsScreen>
                         children: [
                           Expanded(
                             child: _buildMetricCard(
-                              title: 'Homework Submissions',
+                              title: 'Homework',
                               value: '$_completedHomeworkCount/$_totalHomeworkCount',
                               icon: Icons.assignment_turned_in_rounded,
-                              color: const Color(0xFF8B5CF6),
-                              subtitle: 'Completion rate: ${((_totalHomeworkCount > 0 ? _completedHomeworkCount / _totalHomeworkCount : 1.0) * 100.0).toStringAsFixed(0)}%',
+                              color: AppColors.parentAccent,
+                              subtitle: 'Completion: ${((_totalHomeworkCount > 0 ? _completedHomeworkCount / _totalHomeworkCount : 1.0) * 100.0).toStringAsFixed(0)}%',
                             ),
                           ),
                           const SizedBox(width: 16),
                           Expanded(
                             child: _buildMetricCard(
-                              title: 'CBT Exam Average',
+                              title: 'CBT Exam Avg',
                               value: _cbtExamsCount > 0 ? '${_cbtAverage.toStringAsFixed(1)}%' : 'N/A',
                               icon: Icons.computer_rounded,
-                              color: const Color(0xFFF59E0B),
+                              color: AppColors.primary,
                               subtitle: '$_cbtExamsCount exam attempts',
                             ),
                           ),
@@ -371,9 +372,9 @@ class _PerformanceAnalyticsScreenState extends State<PerformanceAnalyticsScreen>
                       const SizedBox(height: 24),
 
                       // Subject Strengths & Weaknesses
-                      const Text(
+                      Text(
                         'Strengths & Improvement Areas',
-                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF0F172A)),
+                        style: GoogleFonts.spaceGrotesk(fontSize: 15, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
                       ),
                       const SizedBox(height: 12),
                       Row(
@@ -383,8 +384,8 @@ class _PerformanceAnalyticsScreenState extends State<PerformanceAnalyticsScreen>
                             child: _buildListCard(
                               title: 'Strengths (70%+)',
                               items: _strengths,
-                              color: const Color(0xFF10B981),
-                              icon: Icons.trending_up,
+                              color: AppColors.success,
+                              icon: Icons.trending_up_rounded,
                             ),
                           ),
                           const SizedBox(width: 16),
@@ -392,8 +393,8 @@ class _PerformanceAnalyticsScreenState extends State<PerformanceAnalyticsScreen>
                             child: _buildListCard(
                               title: 'Needs Work (<60%)',
                               items: _weaknesses,
-                              color: const Color(0xFFEF4444),
-                              icon: Icons.trending_down,
+                              color: AppColors.error,
+                              icon: Icons.trending_down_rounded,
                             ),
                           ),
                         ],
@@ -401,27 +402,27 @@ class _PerformanceAnalyticsScreenState extends State<PerformanceAnalyticsScreen>
                       const SizedBox(height: 24),
 
                       // Subject Scores List
-                      const Text(
+                      Text(
                         'Subject Score Details',
-                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF0F172A)),
+                        style: GoogleFonts.spaceGrotesk(fontSize: 15, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
                       ),
                       const SizedBox(height: 12),
                       _allSubjects.isEmpty
-                          ? const Center(child: Padding(
-                              padding: EdgeInsets.symmetric(vertical: 20),
-                              child: Text('No subject scores loaded for this term.', style: TextStyle(color: Color(0xFF64748B))),
+                          ? Center(child: Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 20),
+                              child: Text('No subject scores loaded for this term.', style: GoogleFonts.spaceGrotesk(color: AppColors.textSecondary, fontSize: 13)),
                             ))
                           : Container(
                               decoration: BoxDecoration(
-                                color: Colors.white,
+                                color: AppColors.surface,
                                 borderRadius: BorderRadius.circular(16),
-                                border: Border.all(color: const Color(0xFFF1F5F9)),
+                                border: Border.all(color: AppColors.borderLight),
                               ),
                               child: ListView.separated(
                                 shrinkWrap: true,
                                 physics: const NeverScrollableScrollPhysics(),
                                 itemCount: _allSubjects.length,
-                                separatorBuilder: (_, index) => const Divider(height: 1, color: Color(0xFFF1F5F9)),
+                                separatorBuilder: (_, index) => Divider(height: 1, color: AppColors.borderLight),
                                 itemBuilder: (context, i) {
                                   final s = _allSubjects[i];
                                   final total = s['total'] ?? 0;
@@ -436,23 +437,24 @@ class _PerformanceAnalyticsScreenState extends State<PerformanceAnalyticsScreen>
                                           child: Column(
                                             crossAxisAlignment: CrossAxisAlignment.start,
                                             children: [
-                                              Text(s['subject_name'] ?? 'Subject', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                                              Text(s['subject_name'] ?? 'Subject', style: GoogleFonts.spaceGrotesk(fontWeight: FontWeight.bold, fontSize: 13, color: AppColors.textPrimary)),
                                               const SizedBox(height: 4),
-                                              Text('CA1: ${s['ca1']} | CA2: ${s['ca2']} | Exam: ${s['exam']}', style: const TextStyle(fontSize: 11, color: Color(0xFF64748B))),
+                                              Text('CA1: ${s['ca1']} | CA2: ${s['ca2']} | Exam: ${s['exam']}', style: GoogleFonts.spaceGrotesk(fontSize: 11, color: AppColors.textSecondary)),
                                             ],
                                           ),
                                         ),
                                         Column(
+                                          crossAxisAlignment: CrossAxisAlignment.end,
                                           children: [
                                             Text(
                                               '$total%',
-                                              style: TextStyle(
+                                              style: GoogleFonts.spaceGrotesk(
                                                 fontWeight: FontWeight.bold,
-                                                color: isGood ? const Color(0xFF10B981) : isBad ? const Color(0xFFEF4444) : const Color(0xFF64748B),
-                                                fontSize: 15,
+                                                color: isGood ? AppColors.success : isBad ? AppColors.error : AppColors.textSecondary,
+                                                fontSize: 14,
                                               ),
                                             ),
-                                            Text(grade, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Color(0xFF94A3B8))),
+                                            Text(grade, style: GoogleFonts.spaceGrotesk(fontSize: 10, fontWeight: FontWeight.bold, color: AppColors.textMuted)),
                                           ],
                                         ),
                                       ],
@@ -479,14 +481,13 @@ class _PerformanceAnalyticsScreenState extends State<PerformanceAnalyticsScreen>
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFF1F5F9)),
-        boxShadow: const [BoxShadow(color: Color(0x05000000), blurRadius: 10, offset: Offset(0, 4))],
+        border: Border.all(color: AppColors.borderLight),
       ),
       child: Column(
         children: [
-          Text(title, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Color(0xFF64748B))),
+          Text(title, style: GoogleFonts.spaceGrotesk(fontSize: 11, fontWeight: FontWeight.bold, color: AppColors.textSecondary)),
           const SizedBox(height: 16),
           Stack(
             alignment: Alignment.center,
@@ -496,19 +497,19 @@ class _PerformanceAnalyticsScreenState extends State<PerformanceAnalyticsScreen>
                 height: 76,
                 child: CircularProgressIndicator(
                   value: progress.isNaN || progress.isInfinite ? 0.0 : progress,
-                  backgroundColor: const Color(0xFFF1F5F9),
+                  backgroundColor: AppColors.surface2,
                   color: color,
                   strokeWidth: 8,
                 ),
               ),
               Text(
                 value,
-                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF0F172A)),
+                style: GoogleFonts.spaceGrotesk(fontSize: 15, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
               ),
             ],
           ),
           const SizedBox(height: 16),
-          Text(subtitle, style: TextStyle(fontSize: 11, color: color, fontWeight: FontWeight.w600)),
+          Text(subtitle, style: GoogleFonts.spaceGrotesk(fontSize: 11, color: color, fontWeight: FontWeight.w600)),
         ],
       ),
     );
@@ -524,10 +525,9 @@ class _PerformanceAnalyticsScreenState extends State<PerformanceAnalyticsScreen>
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFF1F5F9)),
-        boxShadow: const [BoxShadow(color: Color(0x05000000), blurRadius: 10, offset: Offset(0, 4))],
+        border: Border.all(color: AppColors.borderLight),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -535,21 +535,21 @@ class _PerformanceAnalyticsScreenState extends State<PerformanceAnalyticsScreen>
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Icon(icon, color: color, size: 22),
+              Icon(icon, color: color, size: 20),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(color: color.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(8)),
+                decoration: BoxDecoration(color: color.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(8)),
                 child: Text(
-                  title.split(' ')[0],
-                  style: TextStyle(color: color, fontSize: 10, fontWeight: FontWeight.bold),
+                  title,
+                  style: GoogleFonts.spaceGrotesk(color: color, fontSize: 9, fontWeight: FontWeight.bold),
                 ),
               ),
             ],
           ),
           const SizedBox(height: 14),
-          Text(value, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFF0F172A))),
+          Text(value, style: GoogleFonts.spaceGrotesk(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
           const SizedBox(height: 4),
-          Text(subtitle, style: const TextStyle(fontSize: 10, color: Color(0xFF64748B))),
+          Text(subtitle, style: GoogleFonts.spaceGrotesk(fontSize: 10, color: AppColors.textSecondary)),
         ],
       ),
     );
@@ -564,9 +564,9 @@ class _PerformanceAnalyticsScreenState extends State<PerformanceAnalyticsScreen>
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFF1F5F9)),
+        border: Border.all(color: AppColors.borderLight),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -578,7 +578,7 @@ class _PerformanceAnalyticsScreenState extends State<PerformanceAnalyticsScreen>
               Expanded(
                 child: Text(
                   title,
-                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: color),
+                  style: GoogleFonts.spaceGrotesk(fontSize: 11, fontWeight: FontWeight.bold, color: color),
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
@@ -586,7 +586,7 @@ class _PerformanceAnalyticsScreenState extends State<PerformanceAnalyticsScreen>
           ),
           const SizedBox(height: 12),
           items.isEmpty
-              ? const Text('None recorded', style: TextStyle(fontSize: 11, color: Color(0xFF94A3B8)))
+              ? Text('None recorded', style: GoogleFonts.spaceGrotesk(fontSize: 11, color: AppColors.textMuted))
               : Column(
                   children: items.map((itm) => Padding(
                     padding: const EdgeInsets.only(bottom: 6),
@@ -596,13 +596,13 @@ class _PerformanceAnalyticsScreenState extends State<PerformanceAnalyticsScreen>
                         Expanded(
                           child: Text(
                             itm['subject_name'] ?? '',
-                            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
+                            style: GoogleFonts.spaceGrotesk(fontSize: 12, fontWeight: FontWeight.w500, color: AppColors.textPrimary),
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
                         Text(
                           '${itm['total'].toStringAsFixed(0)}%',
-                          style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: color),
+                          style: GoogleFonts.spaceGrotesk(fontSize: 12, fontWeight: FontWeight.bold, color: color),
                         ),
                       ],
                     ),
@@ -612,4 +612,23 @@ class _PerformanceAnalyticsScreenState extends State<PerformanceAnalyticsScreen>
       ),
     );
   }
+
+  InputDecoration _inputDecoration(String label) => InputDecoration(
+        labelText: label,
+        labelStyle: GoogleFonts.spaceGrotesk(color: AppColors.textSecondary, fontSize: 11),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: AppColors.borderLight)),
+        enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: AppColors.borderLight)),
+        focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: AppColors.borderLight)),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+        isDense: true,
+        fillColor: AppColors.surface2,
+        filled: true,
+      );
+}
+
+double _parseNum(dynamic val, [double defaultVal = 0.0]) {
+  if (val == null) return defaultVal;
+  if (val is num) return val.toDouble();
+  if (val is String) return double.tryParse(val) ?? defaultVal;
+  return defaultVal;
 }

@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../../core/auth_provider.dart';
 import '../../core/database_helper.dart';
 import '../../core/mobile_layout.dart';
+import '../../core/constants.dart';
+import '../../core/toast_utility.dart';
 
 class TeacherAttendanceScreen extends StatefulWidget {
   const TeacherAttendanceScreen({super.key});
@@ -43,16 +46,19 @@ class _TeacherAttendanceScreenState extends State<TeacherAttendanceScreen> {
 
   Future<void> _loadClasses() async {
     final auth = context.read<AuthProvider>();
+    if (!mounted) return;
     setState(() => _loading = true);
     try {
       final data = await auth.apiService.getWithCache('/teacher/classes');
       final list = (data['data'] as List).cast<Map<String, dynamic>>();
       await _db.upsertStudents([]); // ensure db ready
-      setState(() => _classes = list);
+      if (mounted) {
+        setState(() => _classes = list);
+      }
     } catch (_) {
       // offline — classes list stays empty, user picks from cache
     } finally {
-      setState(() => _loading = false);
+      if (mounted) setState(() => _loading = false);
     }
   }
 
@@ -65,10 +71,10 @@ class _TeacherAttendanceScreenState extends State<TeacherAttendanceScreen> {
       final data = await auth.apiService.getWithCache('/teacher/classes/$classId/students');
       final list = (data['data'] as List).cast<Map<String, dynamic>>();
       await _db.upsertStudents(list);
-      setState(() => _students = list);
+      if (mounted) setState(() => _students = list);
     } catch (_) {
       final local = await _db.getStudentsByClass(classId);
-      setState(() => _students = local);
+      if (mounted) setState(() => _students = local);
     }
 
     // Load existing attendance for today
@@ -81,7 +87,9 @@ class _TeacherAttendanceScreenState extends State<TeacherAttendanceScreen> {
     for (final s in _students) {
       marksMap.putIfAbsent(s['id'] as int, () => 'present');
     }
-    setState(() { _marks = marksMap; _loading = false; });
+    if (mounted) {
+      setState(() { _marks = marksMap; _loading = false; });
+    }
   }
 
   Future<void> _save() async {
@@ -102,32 +110,43 @@ class _TeacherAttendanceScreenState extends State<TeacherAttendanceScreen> {
     // Try immediate sync
     await auth.syncService.syncNow();
 
-    setState(() => _saving = false);
     if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Attendance saved'), backgroundColor: Color(0xFF10B981)),
+      setState(() => _saving = false);
+      CustomToast.show(
+        context: context,
+        message: 'Attendance saved successfully',
+        type: 'success',
       );
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final auth = context.watch<AuthProvider>();
+    final accent = auth.tenantPrimaryColor;
+
     return MobileLayout(
-      title: 'Attendance',
-      child: Column(
-        children: [
-          _buildFilters(),
-          if (_loading) const LinearProgressIndicator(color: Color(0xFF3B82F6)),
-          Expanded(child: _students.isEmpty ? _buildEmpty() : _buildList()),
-          if (_students.isNotEmpty) _buildSaveButton(),
-        ],
+      title: 'Class Attendance',
+      child: Container(
+        color: AppColors.background,
+        child: Column(
+          children: [
+            _buildFilters(accent),
+            if (_loading) LinearProgressIndicator(color: accent, minHeight: 2),
+            Expanded(child: _students.isEmpty ? _buildEmpty() : _buildList(accent)),
+            if (_students.isNotEmpty) _buildSaveButton(accent),
+          ],
+        ),
       ),
     );
   }
 
-  Widget _buildFilters() {
+  Widget _buildFilters(Color accent) {
     return Container(
-      color: Colors.white,
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        border: Border(bottom: BorderSide(color: AppColors.borderLight)),
+      ),
       padding: const EdgeInsets.all(16),
       child: Column(
         children: [
@@ -136,8 +155,13 @@ class _TeacherAttendanceScreenState extends State<TeacherAttendanceScreen> {
               Expanded(
                 child: DropdownButtonFormField<int>(
                   decoration: _inputDecoration('Class'),
+                  dropdownColor: AppColors.surface2,
                   initialValue: _selectedClassId,
-                  items: _classes.map((c) => DropdownMenuItem<int>(value: c['id'] as int, child: Text(c['name'] as String))).toList(),
+                  style: GoogleFonts.spaceGrotesk(color: AppColors.textPrimary, fontSize: 14),
+                  items: _classes.map((c) => DropdownMenuItem<int>(
+                    value: c['id'] as int,
+                    child: Text(c['name'] as String, style: GoogleFonts.spaceGrotesk(color: AppColors.textPrimary)),
+                  )).toList(),
                   onChanged: (v) {
                     setState(() => _selectedClassId = v);
                     if (v != null) _loadStudents(v);
@@ -153,6 +177,19 @@ class _TeacherAttendanceScreenState extends State<TeacherAttendanceScreen> {
                       initialDate: DateTime.now(),
                       firstDate: DateTime(2020),
                       lastDate: DateTime.now(),
+                      builder: (context, child) {
+                        return Theme(
+                          data: Theme.of(context).copyWith(
+                            colorScheme: ColorScheme.dark(
+                              primary: accent,
+                              onPrimary: Colors.black,
+                              surface: AppColors.surface,
+                              onSurface: AppColors.textPrimary,
+                            ),
+                          ),
+                          child: child!,
+                        );
+                      },
                     );
                     if (picked != null) {
                       setState(() => _selectedDate = picked.toIso8601String().substring(0, 10));
@@ -161,7 +198,13 @@ class _TeacherAttendanceScreenState extends State<TeacherAttendanceScreen> {
                   },
                   child: InputDecorator(
                     decoration: _inputDecoration('Date'),
-                    child: Text(_selectedDate, style: const TextStyle(fontSize: 14)),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(_selectedDate, style: GoogleFonts.spaceGrotesk(color: AppColors.textPrimary, fontSize: 14)),
+                        Icon(Icons.calendar_today_rounded, size: 16, color: accent),
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -172,7 +215,7 @@ class _TeacherAttendanceScreenState extends State<TeacherAttendanceScreen> {
     );
   }
 
-  Widget _buildList() {
+  Widget _buildList(Color accent) {
     return ListView.separated(
       padding: const EdgeInsets.all(16),
       itemCount: _students.length,
@@ -180,35 +223,38 @@ class _TeacherAttendanceScreenState extends State<TeacherAttendanceScreen> {
       itemBuilder: (context, i) {
         final s = _students[i];
         final id = s['id'] as int;
+        final name = '${s['first_name'] ?? ''} ${s['last_name'] ?? ''}'.trim();
+        final initial = name.isNotEmpty ? name[0].toUpperCase() : '?';
+
         return Container(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: AppColors.surface,
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: const Color(0xFFF1F5F9)),
+            border: Border.all(color: AppColors.borderLight),
           ),
           child: Row(
             children: [
               CircleAvatar(
                 radius: 18,
-                backgroundColor: const Color(0xFF3B82F6).withValues(alpha: 0.1),
-                child: Text('${s['first_name']?[0] ?? '?'}', style: const TextStyle(color: Color(0xFF3B82F6), fontWeight: FontWeight.bold)),
+                backgroundColor: AppColors.teacherAccent.withValues(alpha: 0.12),
+                child: Text(initial, style: GoogleFonts.spaceGrotesk(color: AppColors.teacherAccent, fontWeight: FontWeight.bold)),
               ),
               const SizedBox(width: 12),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('${s['first_name']} ${s['last_name']}', style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
-                    Text(s['admission_number'] ?? '', style: const TextStyle(fontSize: 12, color: Color(0xFF64748B))),
+                    Text(name, style: GoogleFonts.spaceGrotesk(fontWeight: FontWeight.w600, fontSize: 14, color: AppColors.textPrimary)),
+                    Text(s['admission_number'] ?? '', style: GoogleFonts.spaceGrotesk(fontSize: 11, color: AppColors.textSecondary)),
                   ],
                 ),
               ),
-              _statusChip('P', 'present', id, const Color(0xFF10B981)),
-              const SizedBox(width: 6),
-              _statusChip('A', 'absent', id, const Color(0xFFEF4444)),
-              const SizedBox(width: 6),
-              _statusChip('L', 'late', id, const Color(0xFFF59E0B)),
+              _statusChip('P', 'present', id, AppColors.success),
+              const SizedBox(width: 8),
+              _statusChip('A', 'absent', id, AppColors.error),
+              const SizedBox(width: 8),
+              _statusChip('L', 'late', id, AppColors.warning),
             ],
           ),
         );
@@ -224,32 +270,63 @@ class _TeacherAttendanceScreenState extends State<TeacherAttendanceScreen> {
         width: 32,
         height: 32,
         decoration: BoxDecoration(
-          color: selected ? color : color.withValues(alpha: 0.1),
+          color: selected ? color : color.withValues(alpha: 0.12),
           borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: selected ? color : color.withValues(alpha: 0.25), width: 1),
         ),
         alignment: Alignment.center,
-        child: Text(label, style: TextStyle(color: selected ? Colors.white : color, fontWeight: FontWeight.bold, fontSize: 13)),
+        child: Text(
+          label,
+          style: GoogleFonts.spaceGrotesk(
+            color: selected ? Colors.black : color,
+            fontWeight: FontWeight.bold,
+            fontSize: 13,
+          ),
+        ),
       ),
     );
   }
 
-  Widget _buildEmpty() => const Center(child: Text('Select a class to take attendance', style: TextStyle(color: Color(0xFF64748B))));
+  Widget _buildEmpty() => Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.how_to_reg_rounded, size: 48, color: AppColors.textMuted),
+            const SizedBox(height: 12),
+            Text(
+              'Select a class to take attendance',
+              style: GoogleFonts.spaceGrotesk(color: AppColors.textSecondary, fontSize: 14),
+            ),
+          ],
+        ),
+      );
 
-  Widget _buildSaveButton() {
+  Widget _buildSaveButton(Color accent) {
     return Padding(
       padding: const EdgeInsets.all(16),
       child: SizedBox(
         width: double.infinity,
+        height: 52,
         child: ElevatedButton(
           onPressed: _saving ? null : _save,
           style: ElevatedButton.styleFrom(
-            backgroundColor: const Color(0xFF3B82F6),
-            padding: const EdgeInsets.symmetric(vertical: 14),
+            backgroundColor: AppColors.teacherAccent,
+            foregroundColor: Colors.black,
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           ),
           child: _saving
-              ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-              : const Text('Save Attendance', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+              ? const SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(
+                    color: Colors.black,
+                    strokeWidth: 2,
+                  ),
+                )
+              : Text(
+                  'Save Attendance',
+                  style: GoogleFonts.spaceGrotesk(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 15),
+                ),
         ),
       ),
     );
@@ -257,8 +334,22 @@ class _TeacherAttendanceScreenState extends State<TeacherAttendanceScreen> {
 
   InputDecoration _inputDecoration(String label) => InputDecoration(
         labelText: label,
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+        labelStyle: GoogleFonts.spaceGrotesk(color: AppColors.textSecondary, fontSize: 12),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: BorderSide(color: AppColors.borderLight),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: BorderSide(color: AppColors.borderLight),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: BorderSide(color: AppColors.borderLight),
+        ),
         contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
         isDense: true,
+        fillColor: AppColors.surface2,
+        filled: true,
       );
 }

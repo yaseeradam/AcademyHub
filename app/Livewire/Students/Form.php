@@ -311,22 +311,20 @@ class Form extends Component
         $student->parents()->sync($parentIds);
 
         $isNew = !$this->student;
-        $this->dispatch('student-saved', [
-            'isNew' => $isNew,
-            'name' => $student->full_name,
-            'admission' => $student->admission_number,
-            'downloadUrl' => route('students.admission-form', $student),
-            'parentCreated' => $parentUser ? true : false,
-            'parentEmail' => $parentUser?->email,
-            'parentPassword' => $this->create_parent_account ? $this->parent_password : null,
-        ]);
 
-        if (!$isNew) {
-            session()->flash('status', 'Student profile updated successfully.');
-            return $this->redirect(route('students.index'), navigate: true);
+        if ($isNew) {
+            session()->flash('success', 'Student profile created successfully.');
+            if ($parentUser) {
+                session()->flash('parent_credentials', [
+                    'email' => $parentUser->email,
+                    'password' => $this->parent_password,
+                ]);
+            }
+            return $this->redirect(route('students.show', $student), navigate: true);
+        } else {
+            session()->flash('success', 'Student profile updated successfully.');
+            return $this->redirect(route('students.show', $student), navigate: true);
         }
-
-        return null;
     }
 
     public function render()

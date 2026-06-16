@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../../core/auth_provider.dart';
 import '../../core/database_helper.dart';
+import '../../core/constants.dart';
 
 class CbtManagementScreen extends StatefulWidget {
   const CbtManagementScreen({super.key});
@@ -32,14 +34,13 @@ class _CbtManagementScreenState extends State<CbtManagementScreen> with SingleTi
   }
 
   Future<void> _loadCbtData() async {
-    setState(() => _loading = true);
+    if (mounted) setState(() => _loading = true);
     try {
       final auth = context.read<AuthProvider>();
 
       // 1. Fetch CBT Exams
       try {
         await auth.apiService.getWithCache('/homework'); // CBT relies on standard caching
-        // In real backend, CBT endpoints are queried. Let's load from sqlite database
         _exams = await _db.getCbtExams();
       } catch (_) {
         _exams = await _db.getCbtExams();
@@ -52,9 +53,9 @@ class _CbtManagementScreenState extends State<CbtManagementScreen> with SingleTi
         );
       } catch (_) {}
 
-      setState(() => _loading = false);
+      if (mounted) setState(() => _loading = false);
     } catch (_) {
-      setState(() => _loading = false);
+      if (mounted) setState(() => _loading = false);
     }
   }
 
@@ -64,25 +65,27 @@ class _CbtManagementScreenState extends State<CbtManagementScreen> with SingleTi
     final primary = auth.tenantPrimaryColor;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
+      backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text('CBT Exam Management', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-        backgroundColor: Colors.white,
-        foregroundColor: const Color(0xFF0F172A),
+        title: Text('CBT Exam Management', style: GoogleFonts.spaceGrotesk(fontWeight: FontWeight.bold, fontSize: 16, color: AppColors.textPrimary)),
+        backgroundColor: AppColors.surface,
+        foregroundColor: AppColors.textPrimary,
         elevation: 0,
+        shape: Border(bottom: BorderSide(color: AppColors.borderLight)),
         bottom: TabBar(
           controller: _tabController,
           labelColor: primary,
-          unselectedLabelColor: const Color(0xFF64748B),
+          unselectedLabelColor: AppColors.textSecondary,
           indicatorColor: primary,
+          dividerColor: AppColors.borderLight,
           tabs: const [
-            Tab(icon: Icon(Icons.computer), text: 'Active Exams'),
-            Tab(icon: Icon(Icons.history_edu), text: 'Student Attempts'),
+            Tab(icon: Icon(Icons.computer_rounded), text: 'Active Exams'),
+            Tab(icon: Icon(Icons.history_edu_rounded), text: 'Student Attempts'),
           ],
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.refresh),
+            icon: const Icon(Icons.refresh_rounded),
             onPressed: _loadCbtData,
           ),
         ],
@@ -101,7 +104,7 @@ class _CbtManagementScreenState extends State<CbtManagementScreen> with SingleTi
 
   Widget _buildActiveExamsTab(Color primary) {
     if (_exams.isEmpty) {
-      return const Center(child: Text('No active computer-based exams found.', style: TextStyle(color: Color(0xFF64748B))));
+      return Center(child: Text('No active computer-based exams found.', style: GoogleFonts.spaceGrotesk(color: AppColors.textSecondary, fontSize: 14)));
     }
     return ListView.separated(
       padding: const EdgeInsets.all(16),
@@ -116,39 +119,38 @@ class _CbtManagementScreenState extends State<CbtManagementScreen> with SingleTi
         return Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: AppColors.surface,
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: const Color(0xFFF1F5F9)),
-            boxShadow: const [BoxShadow(color: Color(0x05000000), blurRadius: 4, offset: Offset(0, 2))],
+            border: Border.all(color: AppColors.borderLight),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
                 exam['title'] ?? 'Exam',
-                style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Color(0xFF0F172A)),
+                style: GoogleFonts.spaceGrotesk(fontSize: 15, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
               ),
               const SizedBox(height: 8),
               Row(
                 children: [
                   Icon(Icons.timer_outlined, size: 14, color: primary),
                   const SizedBox(width: 4),
-                  Text('$duration mins', style: const TextStyle(fontSize: 12, color: Color(0xFF64748B))),
+                  Text('$duration mins', style: GoogleFonts.spaceGrotesk(fontSize: 12, color: AppColors.textSecondary)),
                   const SizedBox(width: 16),
-                  Icon(Icons.help_outline, size: 14, color: primary),
+                  Icon(Icons.help_outline_rounded, size: 14, color: primary),
                   const SizedBox(width: 4),
-                  Text('$totalQuestions questions', style: const TextStyle(fontSize: 12, color: Color(0xFF64748B))),
+                  Text('$totalQuestions questions', style: GoogleFonts.spaceGrotesk(fontSize: 12, color: AppColors.textSecondary)),
                   const SizedBox(width: 16),
                   Icon(Icons.emoji_events_outlined, size: 14, color: primary),
                   const SizedBox(width: 4),
-                  Text('Pass: $passPercentage%', style: const TextStyle(fontSize: 12, color: Color(0xFF64748B))),
+                  Text('Pass: $passPercentage%', style: GoogleFonts.spaceGrotesk(fontSize: 12, color: AppColors.textSecondary)),
                 ],
               ),
               if ((exam['instructions'] as String?)?.isNotEmpty == true) ...[
                 const SizedBox(height: 10),
                 Text(
                   exam['instructions'],
-                  style: const TextStyle(fontSize: 11, color: Color(0xFF94A3B8)),
+                  style: GoogleFonts.spaceGrotesk(fontSize: 11, color: AppColors.textSecondary),
                 ),
               ],
             ],
@@ -160,7 +162,7 @@ class _CbtManagementScreenState extends State<CbtManagementScreen> with SingleTi
 
   Widget _buildAttemptsTab(Color primary) {
     if (_attempts.isEmpty) {
-      return const Center(child: Text('No student exam attempts found.', style: TextStyle(color: Color(0xFF64748B))));
+      return Center(child: Text('No student exam attempts found.', style: GoogleFonts.spaceGrotesk(color: AppColors.textSecondary, fontSize: 14)));
     }
     return ListView.separated(
       padding: const EdgeInsets.all(16),
@@ -168,16 +170,26 @@ class _CbtManagementScreenState extends State<CbtManagementScreen> with SingleTi
       separatorBuilder: (_, index) => const SizedBox(height: 10),
       itemBuilder: (context, i) {
         final attempt = _attempts[i];
-        final score = (attempt['score'] as num?)?.toDouble() ?? 0.0;
+        final rawScore = attempt['score'];
+        double score = 0.0;
+        if (rawScore != null) {
+          if (rawScore is num) {
+            score = rawScore.toDouble();
+          } else if (rawScore is String) {
+            score = double.tryParse(rawScore) ?? 0.0;
+          }
+        }
         final date = (attempt['started_at'] as String?)?.substring(0, 16).replaceFirst('T', ' ') ?? '';
         final isDirty = (attempt['is_dirty'] as int? ?? 0) == 1;
+
+        final passed = score >= 50.0;
 
         return Container(
           padding: const EdgeInsets.all(14),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: AppColors.surface,
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: const Color(0xFFF1F5F9)),
+            border: Border.all(color: AppColors.borderLight),
           ),
           child: Row(
             children: [
@@ -185,15 +197,15 @@ class _CbtManagementScreenState extends State<CbtManagementScreen> with SingleTi
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Attempt ID: #${attempt['id']}', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                    Text('Attempt ID: #${attempt['id']}', style: GoogleFonts.spaceGrotesk(fontWeight: FontWeight.bold, fontSize: 13, color: AppColors.textPrimary)),
                     const SizedBox(height: 4),
-                    Text('Started: $date', style: const TextStyle(fontSize: 11, color: Color(0xFF64748B))),
+                    Text('Started: $date', style: GoogleFonts.spaceGrotesk(fontSize: 11, color: AppColors.textSecondary)),
                     if (isDirty)
-                      const Row(
+                      Row(
                         children: [
-                          Icon(Icons.cloud_off, size: 12, color: Color(0xFFF59E0B)),
-                          SizedBox(width: 4),
-                          Text('Pending sync', style: TextStyle(fontSize: 10, color: Color(0xFFF59E0B), fontWeight: FontWeight.bold)),
+                          const Icon(Icons.cloud_off_rounded, size: 12, color: AppColors.warning),
+                          const SizedBox(width: 4),
+                          Text('Pending sync', style: GoogleFonts.spaceGrotesk(fontSize: 10, color: AppColors.warning, fontWeight: FontWeight.bold)),
                         ],
                       ),
                   ],
@@ -202,14 +214,21 @@ class _CbtManagementScreenState extends State<CbtManagementScreen> with SingleTi
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 decoration: BoxDecoration(
-                  color: score >= 50 ? const Color(0xFFD1FAE5) : const Color(0xFFFEE2E2),
+                  color: passed 
+                      ? AppColors.success.withValues(alpha: 0.12) 
+                      : AppColors.error.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(20),
+                  border: Border.all(
+                    color: passed 
+                        ? AppColors.success.withValues(alpha: 0.25) 
+                        : AppColors.error.withValues(alpha: 0.25),
+                  ),
                 ),
                 child: Text(
                   '${score.toStringAsFixed(1)}%',
-                  style: TextStyle(
+                  style: GoogleFonts.spaceGrotesk(
                     fontWeight: FontWeight.bold,
-                    color: score >= 50 ? const Color(0xFF065F46) : const Color(0xFF991B1B),
+                    color: passed ? AppColors.success : AppColors.error,
                     fontSize: 13,
                   ),
                 ),

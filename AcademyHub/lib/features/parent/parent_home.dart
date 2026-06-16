@@ -1,10 +1,15 @@
+import 'dart:async';
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import '../../core/auth_provider.dart';
 import '../../core/database_helper.dart';
 import '../../core/mobile_layout.dart';
+import '../../core/constants.dart';
 
 class ParentHome extends StatefulWidget {
   const ParentHome({super.key});
@@ -13,37 +18,115 @@ class ParentHome extends StatefulWidget {
   State<ParentHome> createState() => _ParentHomeState();
 }
 
-class _ParentHomeState extends State<ParentHome> with SingleTickerProviderStateMixin {
+class _ParentHomeState extends State<ParentHome> {
   final _db = DatabaseHelper();
-  late TabController _tabs;
+  StreamSubscription? _syncSub;
 
-  List<Map<String, dynamic>> _children      = [];
-  List<Map<String, dynamic>> _homework      = [];
-  List<Map<String, dynamic>> _announcements = [];
-  List<dynamic>              _billing       = [];
-  bool _loading = true;
+  // Static cache to preserve data across page reconstructions
+  static List<Map<String, dynamic>> _cachedChildren = [];
+  static List<Map<String, dynamic>> _cachedHomework = [];
+  static List<Map<String, dynamic>> _cachedAnnouncements = [];
+  static List<dynamic>              _cachedBilling = [];
+  static bool                       _wasLoaded = false;
+  static String                     _lastUserKey = '';
+
+  List<Map<String, dynamic>> _children      = _cachedChildren;
+  List<Map<String, dynamic>> _homework      = _cachedHomework;
+  List<Map<String, dynamic>> _announcements = _cachedAnnouncements;
+  List<dynamic>              _billing       = _cachedBilling;
+  late bool _loading = !_wasLoaded;
   bool _isOnline = false;
   int? _checkoutLoadingStudentId;
+  int _selectedTab = 0;
+
+  static const _tabs = [
+    AHNavItem(
+        icon: Icons.dashboard_outlined,
+        activeIcon: Icons.dashboard_rounded,
+        label: 'Overview'),
+    AHNavItem(
+        icon: Icons.people_outline,
+        activeIcon: Icons.people_rounded,
+        label: 'Children'),
+    AHNavItem(
+        icon: Icons.receipt_long_outlined,
+        activeIcon: Icons.receipt_long_rounded,
+        label: 'Fees'),
+    AHNavItem(
+        icon: Icons.campaign_outlined,
+        activeIcon: Icons.campaign_rounded,
+        label: 'Updates'),
+  ];
 
   @override
   void initState() {
     super.initState();
-    _tabs = TabController(length: 4, vsync: this);
     _load();
+    final auth = context.read<AuthProvider>();
+    _syncSub = auth.syncService.syncStatusStream.listen((status) {
+      if (status == SyncStatus.synced && mounted) {
+        _load();
+      }
+    });
   }
 
   @override
-  void dispose() { _tabs.dispose(); super.dispose(); }
+  void dispose() {
+    _syncSub?.cancel();
+    super.dispose();
+  }
 
   Future<void> _load() async {
     final auth = context.read<AuthProvider>();
-    setState(() { _loading = true; });
-
     _isOnline = await auth.apiService.isOnline;
-    // Refresh plugins in the background (shows newly purchased plugins immediately)
     auth.refreshPlugins();
 
-    // Try network first, fall back to cache/local
+    final currentUserKey = '${auth.user?.id}_${auth.tenantSlug}';
+    if (_lastUserKey != currentUserKey) {
+      _cachedChildren = [];
+      _cachedHomework = [];
+      _cachedAnnouncements = [];
+      _cachedBilling = [];
+      _wasLoaded = false;
+      _lastUserKey = currentUserKey;
+      _children = [];
+      _homework = [];
+      _announcements = [];
+      _billing = [];
+      _loading = true;
+    }
+
+    final isFirstLoad = !_wasLoaded;
+    if (isFirstLoad) {
+      final cachedChildren = await _db.getAllStudents();
+      final cachedHomework = await _db.getAllHomework();
+      final cachedAnnouncements = await _db.getAnnouncements();
+      List<dynamic> cachedBilling = [];
+      try {
+        final cachedBillingData = await auth.apiService.dbHelper.getCache('/billing');
+        if (cachedBillingData != null) {
+          final decoded = jsonDecode(cachedBillingData);
+          cachedBilling = (decoded['data'] as List?) ?? [];
+        }
+      } catch (_) {}
+
+      if (mounted) {
+        setState(() {
+          _children = cachedChildren;
+          _homework = cachedHomework;
+          _announcements = cachedAnnouncements;
+          _billing = cachedBilling;
+          _loading = _children.isEmpty && _billing.isEmpty && _homework.isEmpty && _announcements.isEmpty;
+          
+          _cachedChildren = _children;
+          _cachedHomework = _homework;
+          _cachedAnnouncements = _announcements;
+          _cachedBilling = _billing;
+          _wasLoaded = !_loading;
+        });
+      }
+    }
+
     try {
       final r = await auth.apiService.getWithCache('/students');
       final list = ((r['data'] as List?) ?? []).cast<Map<String, dynamic>>();
@@ -61,194 +144,632 @@ class _ParentHomeState extends State<ParentHome> with SingleTickerProviderStateM
     _homework      = await _db.getAllHomework();
     _announcements = await _db.getAnnouncements();
 
-    setState(() => _loading = false);
+    _cachedChildren = _children;
+    _cachedHomework = _homework;
+    _cachedAnnouncements = _announcements;
+    _cachedBilling = _billing;
+    _wasLoaded = true;
+
+    if (mounted) {
+      setState(() => _loading = false);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    final user = context.watch<AuthProvider>().user;
-    return MobileLayout(
+    final primary = context.read<AuthProvider>().tenantPrimaryColor;
+    const accent  = AppColors.parentAccent;
+
+    final pages = [
+      _buildOverview(primary),
+      _buildChildren(primary),
+      _buildBilling(primary),
+      _buildAnnouncements(),
+    ];
+
+    return RoleShell(
       title: 'Parent Portal',
-      child: Column(
+      body: Column(
         children: [
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(colors: [Color(0xFF10B981), Color(0xFF059669)]),
-            ),
-            child: Text('Welcome, ${user?.name ?? 'Parent'}!',
-                style: const TextStyle(color: Colors.white, fontSize: 17, fontWeight: FontWeight.bold)),
-          ),
-          Container(
-            color: Colors.white,
-            child: TabBar(
-              controller: _tabs,
-              labelColor: const Color(0xFF10B981),
-              unselectedLabelColor: const Color(0xFF64748B),
-              indicatorColor: const Color(0xFF10B981),
-              labelStyle: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600),
-              tabs: const [
-                Tab(icon: Icon(Icons.people, size: 18), text: 'Children'),
-                Tab(icon: Icon(Icons.assignment, size: 18), text: 'Homework'),
-                Tab(icon: Icon(Icons.receipt_long, size: 18), text: 'Fees'),
-                Tab(icon: Icon(Icons.campaign, size: 18), text: 'News'),
-              ],
-            ),
-          ),
-          if (_loading) const LinearProgressIndicator(color: Color(0xFF10B981)),
+          if (_loading) LinearProgressIndicator(color: primary, minHeight: 2),
           Expanded(
-            child: TabBarView(
-              controller: _tabs,
-              children: [_buildChildren(), _buildHomework(), _buildBilling(), _buildAnnouncements()],
+            child: RefreshIndicator(
+              onRefresh: _load,
+              color: primary,
+              child: pages[_selectedTab],
             ),
+          ),
+          AHBottomNav(
+            items: _tabs,
+            selectedIndex: _selectedTab,
+            onTap: (i) => setState(() => _selectedTab = i),
+            accentColor: accent,
           ),
         ],
       ),
     );
   }
 
-  // ── Children ─────────────────────────────────────────────────────────────────
+  // ─── Overview Tab ──────────────────────────────────────────────────────────
+  Widget _buildSkeleton(Color primary) {
+    return ListView(
+      physics: const NeverScrollableScrollPhysics(),
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+      children: [
+        // Hero skeleton card
+        Container(
+          height: 140,
+          decoration: BoxDecoration(
+            color: AppColors.surface,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: AppColors.borderLight),
+          ),
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(width: 100, height: 14, decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(4))),
+              const SizedBox(height: 10),
+              Container(width: 160, height: 22, decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.15), borderRadius: BorderRadius.circular(6))),
+              const Spacer(),
+              Row(
+                children: [
+                  Container(width: 100, height: 32, decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(20))),
+                  const SizedBox(width: 10),
+                  Container(width: 100, height: 32, decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(20))),
+                ],
+              )
+            ],
+          ),
+        ),
+        const SizedBox(height: 24),
 
-  Widget _buildChildren() {
-    return RefreshIndicator(
-      onRefresh: _load,
-      color: const Color(0xFF10B981),
-      child: _children.isEmpty
-          ? ListView(
-              physics: const AlwaysScrollableScrollPhysics(),
-              children: [
-                const SizedBox(height: 100),
-                Center(child: _empty('No children linked to this account.')),
-              ],
-            )
-          : ListView.separated(
-              physics: const AlwaysScrollableScrollPhysics(),
-              padding: const EdgeInsets.all(16),
-              itemCount: _children.length,
-              separatorBuilder: (_, _) => const SizedBox(height: 10),
-              itemBuilder: (_, i) {
-                final c    = _children[i];
-                final name = '${c['first_name'] ?? ''} ${c['last_name'] ?? ''}';
-                final cls  = c['school_class']?['name'] ?? c['section']?['name'] ?? '';
-                return GestureDetector(
-                  onTap: () {
-                    context.push('/performance', extra: {
-                      'studentId': c['id'],
-                      'studentName': name,
-                      'admissionNumber': c['admission_number'],
-                    });
-                  },
-                  child: Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(14),
-                      border: Border.all(color: const Color(0xFFF1F5F9)),
-                      boxShadow: const [BoxShadow(color: Color(0x0A000000), blurRadius: 4, offset: Offset(0, 2))],
-                    ),
-                    child: Row(children: [
-                      CircleAvatar(
-                        radius: 22,
-                        backgroundColor: const Color(0xFF10B981).withValues(alpha: 0.1),
-                        child: Text(name.isNotEmpty ? name[0] : '?',
-                            style: const TextStyle(color: Color(0xFF10B981), fontWeight: FontWeight.bold, fontSize: 18)),
-                      ),
-                      const SizedBox(width: 14),
-                      Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                        Text(name, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15)),
-                        Text(cls, style: const TextStyle(fontSize: 13, color: Color(0xFF64748B))),
-                        Text(c['admission_number'] ?? '', style: const TextStyle(fontSize: 12, color: Color(0xFF9CA3AF))),
-                      ])),
-                      const Icon(Icons.chevron_right, color: Color(0xFF9CA3AF)),
-                    ]),
-                  ),
-                );
-              },
+        // Section header skeleton
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Container(width: 120, height: 18, decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(4))),
+            Container(width: 60, height: 14, decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(4))),
+          ],
+        ),
+        const SizedBox(height: 12),
+
+        // Children list items skeleton
+        Column(
+          children: List.generate(2, (_) => Container(
+            margin: const EdgeInsets.only(bottom: 12),
+            height: 80,
+            decoration: BoxDecoration(
+              color: AppColors.surface,
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(color: AppColors.borderLight),
             ),
-    );
+            padding: const EdgeInsets.all(14),
+            child: Row(
+              children: [
+                Container(width: 44, height: 44, decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.1), shape: BoxShape.circle)),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Container(width: 130, height: 14, decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.15), borderRadius: BorderRadius.circular(4))),
+                      const SizedBox(height: 6),
+                      Container(width: 90, height: 10, decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(3))),
+                    ],
+                  ),
+                ),
+                Container(width: 24, height: 24, decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.1), shape: BoxShape.circle)),
+              ],
+            ),
+          )),
+        ),
+        const SizedBox(height: 24),
+
+        // Announcement / News card skeleton
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Container(width: 140, height: 18, decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(4))),
+          ],
+        ),
+        const SizedBox(height: 12),
+
+        Container(
+          height: 100,
+          decoration: BoxDecoration(
+            color: AppColors.surface,
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: AppColors.borderLight),
+          ),
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(width: 200, height: 14, decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.15), borderRadius: BorderRadius.circular(4))),
+              const SizedBox(height: 8),
+              Container(width: double.infinity, height: 10, decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(3))),
+              const SizedBox(height: 6),
+              Container(width: 150, height: 10, decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(3))),
+            ],
+          ),
+        ),
+      ],
+    )
+    .animate(onPlay: (controller) => controller.repeat())
+    .shimmer(duration: 1500.ms, color: Colors.white.withValues(alpha: 0.05));
   }
 
-  // ── Homework ─────────────────────────────────────────────────────────────────
-
-  Widget _buildHomework() {
-    final now = DateTime.now().toIso8601String().substring(0, 10);
-    return RefreshIndicator(
-      onRefresh: _load,
-      color: const Color(0xFF10B981),
-      child: _homework.isEmpty
-          ? ListView(
-              physics: const AlwaysScrollableScrollPhysics(),
-              children: [
-                const SizedBox(height: 100),
-                Center(child: _empty('No homework assigned yet.')),
-              ],
-            )
-          : ListView.separated(
-              physics: const AlwaysScrollableScrollPhysics(),
-              padding: const EdgeInsets.all(16),
-              itemCount: _homework.length,
-              separatorBuilder: (_, _) => const SizedBox(height: 8),
-              itemBuilder: (_, i) {
-                final h       = _homework[i];
-                final due     = h['due_date'] as String? ?? '';
-                final overdue = due.isNotEmpty && due.compareTo(now) < 0;
-                return Container(
-                  padding: const EdgeInsets.all(14),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: overdue ? const Color(0xFFFECACA) : const Color(0xFFF1F5F9)),
+  Widget _buildOverview(Color primary) {
+    if (_loading) {
+      return _buildSkeleton(primary);
+    }
+    final user = context.watch<AuthProvider>().user;
+    return ListView(
+      physics: const AlwaysScrollableScrollPhysics(),
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+      children: [
+        // Hero
+        GlassHeroCard(
+          gradientColors: [
+            AppColors.parentAccent.withValues(alpha: 0.85),
+            const Color(0xFF6B21A8),
+          ],
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Welcome back,',
+                          style: GoogleFonts.spaceGrotesk(
+                              fontSize: 12, color: Colors.white60)),
+                      Text(user?.name ?? 'Parent',
+                          style: GoogleFonts.spaceGrotesk(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white)),
+                    ],
                   ),
-                  child: Row(children: [
-                    Container(
-                      padding: const EdgeInsets.all(10),
+                  GestureDetector(
+                    onTap: _load,
+                    child: Container(
+                      padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        color: const Color(0xFF8B5CF6).withValues(alpha: 0.1),
+                        color: Colors.white.withValues(alpha: 0.15),
                         borderRadius: BorderRadius.circular(10),
                       ),
-                      child: const Icon(Icons.assignment, color: Color(0xFF8B5CF6), size: 20),
+                      child: const Icon(Icons.sync_rounded,
+                          color: Colors.white, size: 18),
                     ),
-                    const SizedBox(width: 12),
-                    Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                      Text(h['title'] ?? '', style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
-                      Text(h['subject_name'] ?? '', style: const TextStyle(fontSize: 12, color: Color(0xFF64748B))),
-                      Text('Due: $due',
-                          style: TextStyle(fontSize: 11, color: overdue ? const Color(0xFFEF4444) : const Color(0xFF9CA3AF))),
-                    ])),
-                  ]),
-                );
-              },
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  _heroPill('${_children.length}', 'Children',
+                      Icons.people_rounded),
+                  const SizedBox(width: 10),
+                  _heroPill('${_homework.length}', 'Homework',
+                      Icons.assignment_rounded),
+                  const SizedBox(width: 10),
+                  _heroPill(
+                      _isOnline ? 'Online' : 'Offline',
+                      'Status',
+                      _isOnline
+                          ? Icons.wifi_rounded
+                          : Icons.wifi_off_rounded),
+                ],
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 12),
+        Row(
+          children: [
+            Expanded(
+              child: _overviewCard(
+                'Homework',
+                '${_homework.length} assigned',
+                Icons.assignment_rounded,
+                AppColors.parentAccent,
+                () => setState(() => _selectedTab = 3),
+              ),
             ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: _overviewCard(
+                'Updates',
+                '${_announcements.length} news',
+                Icons.campaign_rounded,
+                AppColors.warning,
+                () => setState(() => _selectedTab = 3),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        Row(
+          children: [
+            Expanded(
+              child: _overviewCard(
+                'Chats',
+                'Message teachers',
+                Icons.chat_bubble_outline,
+                AppColors.primary,
+                () => context.push('/chat'),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: _overviewCard(
+                'Attendance Logs',
+                'Detailed record',
+                Icons.calendar_month,
+                AppColors.info,
+                () => context.push('/parent-attendance'),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 16),
+        // WhatsApp Alert Switch Card
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          decoration: BoxDecoration(
+            color: AppColors.surface,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: AppColors.borderLight),
+          ),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: AppColors.success.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Icon(Icons.notifications_active_outlined, color: AppColors.success, size: 18),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('WhatsApp Alerts',
+                        style: GoogleFonts.spaceGrotesk(
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.textPrimary)),
+                    Text('Subscribe to automated student updates.',
+                        style: GoogleFonts.spaceGrotesk(
+                            fontSize: 9,
+                            color: AppColors.textSecondary)),
+                  ],
+                ),
+              ),
+              Switch(
+                value: user?.whatsappSubscribed == true,
+                activeThumbColor: AppColors.success,
+                onChanged: (val) async {
+                  final auth = context.read<AuthProvider>();
+                  try {
+                    final response = await auth.apiService.dio.post('/parent/whatsapp/toggle');
+                    auth.user?.whatsappSubscribed = response.data['whatsapp_subscribed'] == true;
+                    setState(() {});
+                  } catch (_) {}
+                },
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 24),
+
+        // Guide
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: AppColors.surface,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: AppColors.borderLight),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('Quick Guidelines',
+                  style: GoogleFonts.spaceGrotesk(
+                      fontSize: 13,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.textPrimary)),
+              const SizedBox(height: 10),
+              _guideline(
+                  "• Tap \"Performance\" on any child's card to view academic records and analytics."),
+              _guideline(
+                  '• Switch to "Children" tab to see all linked child profiles.'),
+              _guideline(
+                  '• To pay school fees online, switch to the "Fees" tab.'),
+            ],
+          ),
+        ),
+      ],
     );
   }
 
-  // ── Fees ─────────────────────────────────────────────────────────────────────
+  Widget _heroPill(String value, String label, IconData icon) {
+    return Expanded(
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
+        decoration: BoxDecoration(
+          color: Colors.white.withValues(alpha: 0.12),
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon(icon, color: Colors.white70, size: 14),
+            const SizedBox(height: 4),
+            Text(value,
+                style: GoogleFonts.spaceGrotesk(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white)),
+            Text(label,
+                style: GoogleFonts.spaceGrotesk(
+                    fontSize: 9, color: Colors.white60)),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _overviewCard(String title, String subtitle, IconData icon,
+      Color color, VoidCallback onTap) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: AppColors.surface,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: AppColors.borderLight),
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: color.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Icon(icon, color: color, size: 18),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(title,
+                      style: GoogleFonts.spaceGrotesk(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.textPrimary)),
+                  Text(subtitle,
+                      style: GoogleFonts.spaceGrotesk(
+                          fontSize: 10,
+                          color: AppColors.textSecondary)),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _guideline(String text) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 6),
+      child: Text(text,
+          style: GoogleFonts.spaceGrotesk(
+              fontSize: 12,
+              color: AppColors.textSecondary,
+              height: 1.4)),
+    );
+  }
+
+  // ─── Children Tab ──────────────────────────────────────────────────────────
+  Widget _buildChildren(Color primary) {
+    if (_children.isEmpty) {
+      return ListView(physics: const AlwaysScrollableScrollPhysics(), children: [
+        const SizedBox(height: 80),
+        _empty('No children linked to this account.'),
+      ]);
+    }
+
+    return ListView(
+      physics: const AlwaysScrollableScrollPhysics(),
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+      children: [
+        const SectionHeader(title: 'Associated Child Profiles'),
+        const SizedBox(height: 14),
+        // Horizontal scroll
+        SizedBox(
+          height: 200,
+          child: ListView.separated(
+            scrollDirection: Axis.horizontal,
+            itemCount: _children.length,
+            separatorBuilder: (_, _) => const SizedBox(width: 12),
+            itemBuilder: (ctx, i) {
+              final c    = _children[i];
+              final name = '${c['first_name'] ?? ''} ${c['last_name'] ?? ''}'.trim();
+              final cls  = c['school_class']?['name'] ??
+                  c['section']?['name'] ??
+                  'General';
+              return Container(
+                width: 200,
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      AppColors.parentAccent.withValues(alpha: 0.12),
+                      AppColors.surface,
+                    ],
+                  ),
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(
+                      color: AppColors.parentAccent.withValues(alpha: 0.25)),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        CircleAvatar(
+                          radius: 20,
+                          backgroundColor:
+                              AppColors.parentAccent.withValues(alpha: 0.15),
+                          child: Text(
+                            name.isNotEmpty ? name[0].toUpperCase() : '?',
+                            style: const TextStyle(
+                                color: AppColors.parentAccent,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16),
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(name.isEmpty ? 'Unknown' : name,
+                                  style: GoogleFonts.spaceGrotesk(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 13,
+                                      color: AppColors.textPrimary),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis),
+                              Text(cls,
+                                  style: GoogleFonts.spaceGrotesk(
+                                      fontSize: 11,
+                                      color: AppColors.textSecondary),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                    const Spacer(),
+                    Text('Adm: ${c['admission_number'] ?? 'N/A'}',
+                        style: GoogleFonts.spaceGrotesk(
+                            fontSize: 10,
+                            color: AppColors.textMuted,
+                            fontWeight: FontWeight.w500)),
+                    const SizedBox(height: 10),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: SizedBox(
+                            height: 36,
+                            child: ElevatedButton(
+                              onPressed: () {
+                                context.push('/performance', extra: {
+                                  'studentId': c['id'],
+                                  'studentName': name,
+                                  'admissionNumber': c['admission_number'],
+                                });
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: AppColors.parentAccent,
+                                foregroundColor: Colors.white,
+                                elevation: 0,
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8)),
+                              ),
+                              child: Text('Performance',
+                                  style: GoogleFonts.spaceGrotesk(
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.bold)),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: SizedBox(
+                            height: 36,
+                            child: OutlinedButton(
+                              onPressed: () {
+                                context.push('/parent-attendance');
+                              },
+                              style: OutlinedButton.styleFrom(
+                                foregroundColor: AppColors.parentAccent,
+                                side: const BorderSide(color: AppColors.parentAccent),
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8)),
+                              ),
+                              child: Text('Attendance',
+                                  style: GoogleFonts.spaceGrotesk(
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.bold)),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  // ─── Fees Tab ──────────────────────────────────────────────────────────────
+  Future<void> _downloadReceipt(int transactionId) async {
+    final auth = context.read<AuthProvider>();
+    final urlString = '${auth.tenantApiUrl.replaceAll('/api', '')}/api/parent/billing/receipts/$transactionId';
+    try {
+      final uri = Uri.parse(urlString);
+      if (await canLaunchUrl(uri)) {
+        await launchUrl(uri, mode: LaunchMode.externalApplication);
+      } else {
+        throw Exception('Could not launch receipt URL.');
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Failed to download receipt: $e'),
+                backgroundColor: AppColors.error));
+      }
+    }
+  }
 
   Future<void> _launchCheckout(int studentId, String studentName) async {
     final auth = context.read<AuthProvider>();
-    
     if (!(await auth.apiService.isOnline)) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Offline: Check connection to pay fees online.'),
-          backgroundColor: Color(0xFFEF4444),
-        ),
-      );
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text('Offline: Check connection to pay fees online.'),
+        backgroundColor: AppColors.error,
+      ));
       return;
     }
-    
+
     setState(() => _checkoutLoadingStudentId = studentId);
-    
     try {
-      final response = await auth.apiService.dio.get('/billing/checkout-url', queryParameters: {
-        'student_id': studentId,
-      });
-      
+      final response = await auth.apiService.dio.get('/billing/checkout-url',
+          queryParameters: {'student_id': studentId});
       final checkoutUrl = response.data['checkout_url'] as String;
       final uri = Uri.parse(checkoutUrl);
-      
       if (await canLaunchUrl(uri)) {
         await launchUrl(uri, mode: LaunchMode.externalApplication);
       } else {
@@ -257,215 +778,254 @@ class _ParentHomeState extends State<ParentHome> with SingleTickerProviderStateM
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Failed to initiate checkout: ${e.toString()}'),
-            backgroundColor: const Color(0xFFEF4444),
-          ),
-        );
+            SnackBar(content: Text('Failed to initiate checkout: $e'),
+                backgroundColor: AppColors.error));
       }
     } finally {
-      if (mounted) {
-        setState(() => _checkoutLoadingStudentId = null);
-      }
+      if (mounted) setState(() => _checkoutLoadingStudentId = null);
     }
   }
 
-  Widget _buildBilling() {
-    final auth = context.watch<AuthProvider>();
-    final isGatewayActive = auth.isPluginActive('payment-gateway');
-    
+  Widget _buildBilling(Color primary) {
+    final auth             = context.watch<AuthProvider>();
+    final isGatewayActive  = auth.isPluginActive('payment-gateway');
+
     if (_billing.isEmpty && !isGatewayActive) {
-      return _empty('No fee transactions found.');
+      return ListView(children: [
+        const SizedBox(height: 80),
+        _empty('No fee transactions found.'),
+      ]);
     }
-    
-    return RefreshIndicator(
-      onRefresh: _load,
-      color: const Color(0xFF10B981),
-      child: ListView(
-        padding: const EdgeInsets.all(16),
-        physics: const AlwaysScrollableScrollPhysics(),
-        children: [
-          if (isGatewayActive && _children.isNotEmpty) ...[
-            const Text(
-              'Online Fee Payments',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF0F172A)),
-            ),
-            const SizedBox(height: 10),
-            ..._children.map((c) {
-              final name = '${c['first_name'] ?? ''} ${c['last_name'] ?? ''}';
-              final cls  = c['school_class']?['name'] ?? c['section']?['name'] ?? 'General';
-              final isCurrentLoading = _checkoutLoadingStudentId == c['id'];
-              
-              return Container(
-                margin: const EdgeInsets.only(bottom: 12),
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: const Color(0xFFF1F5F9)),
-                  boxShadow: const [BoxShadow(color: Color(0x05000000), blurRadius: 10, offset: Offset(0, 4))],
-                ),
-                child: Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(10),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF10B981).withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: const Icon(Icons.payment, color: Color(0xFF10B981), size: 20),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
-                          Text('Class: $cls', style: const TextStyle(fontSize: 12, color: Color(0xFF64748B))),
-                          if (!_isOnline)
-                            const Padding(
-                              padding: EdgeInsets.only(top: 4),
-                              child: Text(
-                                'Check connection to pay fees online',
-                                style: TextStyle(fontSize: 11, color: Color(0xFFEF4444), fontWeight: FontWeight.w500),
-                              ),
-                            ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    ElevatedButton(
-                      onPressed: isCurrentLoading
-                          ? null
-                          : () => _launchCheckout(c['id'] as int, name),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: _isOnline ? const Color(0xFF10B981) : Colors.grey[300],
-                        foregroundColor: Colors.white,
-                        elevation: _isOnline ? 2 : 0,
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                      ),
-                      child: isCurrentLoading
-                          ? const SizedBox(
-                              width: 16,
-                              height: 16,
-                              child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
-                            )
-                          : Text(
-                              'Pay Fees',
-                              style: TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.bold,
-                                color: _isOnline ? Colors.white : Colors.grey[500],
-                              ),
-                            ),
-                    ),
-                  ],
-                ),
-              );
-            }),
-            const SizedBox(height: 16),
-            const Divider(height: 1, color: Color(0xFFE2E8F0)),
-            const SizedBox(height: 16),
-          ],
-          if (_billing.isNotEmpty) ...[
-            const Text(
-              'Transaction History',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF0F172A)),
-            ),
-            const SizedBox(height: 10),
-            ..._billing.take(20).map((tx) {
-              final isIn    = tx['type'] == 'Income';
-              final color   = isIn ? const Color(0xFF10B981) : const Color(0xFFEF4444);
-              final date    = (tx['date'] as String?)?.split('T').first ?? '';
-              return Container(
-                margin: const EdgeInsets.only(bottom: 8),
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: const Color(0xFFF1F5F9)),
-                ),
-                child: Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(color: color.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(8)),
-                      child: Icon(isIn ? Icons.arrow_downward : Icons.arrow_upward, color: color, size: 18),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(tx['category'] ?? 'Fee Payment', style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
-                          Text(date, style: const TextStyle(fontSize: 12, color: Color(0xFF9CA3AF))),
-                        ],
-                      ),
-                    ),
-                    Text('₦${tx['amount_paid']}', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: color)),
-                  ],
-                ),
-              );
-            }),
-          ] else if (_billing.isEmpty)
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 24),
-              child: _empty('No transaction history found.'),
-            ),
-        ],
-      ),
-    );
-  }
 
-  // ── Announcements ─────────────────────────────────────────────────────────────
-
-  Widget _buildAnnouncements() {
-    return RefreshIndicator(
-      onRefresh: _load,
-      color: const Color(0xFF10B981),
-      child: _announcements.isEmpty
-          ? ListView(
-              physics: const AlwaysScrollableScrollPhysics(),
-              children: [
-                const SizedBox(height: 100),
-                Center(child: _empty('No announcements.')),
-              ],
-            )
-          : ListView.separated(
-              physics: const AlwaysScrollableScrollPhysics(),
-              padding: const EdgeInsets.all(16),
-              itemCount: _announcements.length,
-              separatorBuilder: (_, _) => const SizedBox(height: 8),
-              itemBuilder: (_, i) {
-                final a    = _announcements[i];
-                final date = (a['published_at'] as String?)?.substring(0, 10) ?? '';
-                return Container(
-                  padding: const EdgeInsets.all(14),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: const Color(0xFFF1F5F9)),
+    return ListView(
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+      physics: const AlwaysScrollableScrollPhysics(),
+      children: [
+        if (isGatewayActive && _children.isNotEmpty) ...[
+          const SectionHeader(title: 'Online Fee Checkout'),
+          const SizedBox(height: 12),
+          ..._children.map((c) {
+            final name            = '${c['first_name'] ?? ''} ${c['last_name'] ?? ''}'.trim();
+            final cls             = c['school_class']?['name'] ?? c['section']?['name'] ?? 'General';
+            final isCurrentLoading = _checkoutLoadingStudentId == c['id'];
+            return Container(
+              margin: const EdgeInsets.only(bottom: 10),
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                color: AppColors.surface,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: AppColors.borderLight),
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: AppColors.success.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: const Icon(Icons.payment_rounded,
+                        color: AppColors.success, size: 18),
                   ),
-                  child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                    Row(children: [
-                      Expanded(child: Text(a['title'] ?? '', style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14))),
-                      Text(date, style: const TextStyle(fontSize: 11, color: Color(0xFF9CA3AF))),
-                    ]),
-                    const SizedBox(height: 6),
-                    Text(a['body'] ?? '', style: const TextStyle(fontSize: 13, color: Color(0xFF374151))),
-                    if ((a['author_name'] as String?)?.isNotEmpty == true) ...[ 
-                      const SizedBox(height: 4),
-                      Text('— ${a['author_name']}', style: const TextStyle(fontSize: 11, color: Color(0xFF9CA3AF))),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(name.isEmpty ? 'Unknown' : name,
+                            style: GoogleFonts.spaceGrotesk(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 13,
+                                color: AppColors.textPrimary)),
+                        Text('Class: $cls',
+                            style: GoogleFonts.spaceGrotesk(
+                                fontSize: 11,
+                                color: AppColors.textSecondary)),
+                        if (!_isOnline)
+                          Text('No connection',
+                              style: GoogleFonts.spaceGrotesk(
+                                  fontSize: 10,
+                                  color: AppColors.error)),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  ElevatedButton(
+                    onPressed: isCurrentLoading
+                        ? null
+                        : () => _launchCheckout(c['id'] as int, name),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: _isOnline
+                          ? AppColors.success
+                          : AppColors.surface2,
+                      foregroundColor:
+                          _isOnline ? Colors.white : AppColors.textSecondary,
+                      elevation: 0,
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 14, vertical: 8),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8)),
+                    ),
+                    child: isCurrentLoading
+                        ? const SizedBox(
+                            width: 14,
+                            height: 14,
+                            child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: Colors.white))
+                        : Text('Pay Fees',
+                            style: GoogleFonts.spaceGrotesk(
+                                fontSize: 11,
+                                fontWeight: FontWeight.bold)),
+                  ),
+                ],
+              ),
+            );
+          }),
+          const SizedBox(height: 16),
+        ],
+        if (_billing.isNotEmpty) ...[
+          const SectionHeader(title: 'Transaction History'),
+          const SizedBox(height: 12),
+          Container(
+            decoration: BoxDecoration(
+              color: AppColors.surface,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: AppColors.borderLight),
+            ),
+            child: ListView.separated(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: _billing.length > 20 ? 20 : _billing.length,
+              separatorBuilder: (_, _) =>
+                  Divider(height: 1, color: AppColors.borderLight),
+              itemBuilder: (ctx, idx) {
+                final tx         = _billing[idx];
+                final isIn       = tx['type'] == 'Income';
+                final badgeColor = isIn ? AppColors.success : AppColors.error;
+                final date       = (tx['date'] as String?)?.split('T').first ?? '';
+                return Padding(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 16, vertical: 12),
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(6),
+                        decoration: BoxDecoration(
+                          color: badgeColor.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: Icon(
+                          isIn
+                              ? Icons.arrow_downward_rounded
+                              : Icons.arrow_upward_rounded,
+                          color: badgeColor,
+                          size: 16,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(tx['category'] ?? 'Fee Payment',
+                                style: GoogleFonts.spaceGrotesk(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 13,
+                                    color: AppColors.textPrimary)),
+                            Text(date,
+                                style: GoogleFonts.spaceGrotesk(
+                                    fontSize: 11,
+                                    color: AppColors.textMuted)),
+                          ],
+                        ),
+                      ),
+                      Text('₦${tx['amount_paid']}',
+                          style: GoogleFonts.spaceGrotesk(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14,
+                              color: badgeColor)),
+                      if (isIn && tx['receipt_number'] != null) ...[
+                        const SizedBox(width: 8),
+                        GestureDetector(
+                          onTap: () => _downloadReceipt(tx['id'] as int),
+                          child: Icon(Icons.download_rounded, color: primary, size: 18),
+                        ),
+                      ],
                     ],
-                  ]),
+                  ),
                 );
               },
             ),
+          ),
+        ],
+      ],
     );
   }
 
+  // ─── Announcements Tab ─────────────────────────────────────────────────────
+  Widget _buildAnnouncements() {
+    return _announcements.isEmpty
+        ? ListView(physics: const AlwaysScrollableScrollPhysics(), children: [
+            const SizedBox(height: 80),
+            _empty('No announcements.'),
+          ])
+        : ListView.separated(
+            physics: const AlwaysScrollableScrollPhysics(),
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+            itemCount: _announcements.length,
+            separatorBuilder: (_, _) => const SizedBox(height: 8),
+            itemBuilder: (_, i) {
+              final a    = _announcements[i];
+              final date = (a['published_at'] as String?)?.substring(0, 10) ?? '';
+              return Container(
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  color: AppColors.surface,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: AppColors.borderLight),
+                ),
+                child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  Row(children: [
+                    Expanded(
+                      child: Text(a['title'] ?? '',
+                          style: GoogleFonts.spaceGrotesk(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 13,
+                              color: AppColors.textPrimary)),
+                    ),
+                    Text(date,
+                        style: GoogleFonts.spaceGrotesk(
+                            fontSize: 11, color: AppColors.textMuted)),
+                  ]),
+                  const SizedBox(height: 6),
+                  Text(a['body'] ?? '',
+                      style: GoogleFonts.spaceGrotesk(
+                          fontSize: 12,
+                          color: AppColors.textSecondary,
+                          height: 1.4)),
+                  if ((a['author_name'] as String?)?.isNotEmpty == true) ...[
+                    const SizedBox(height: 6),
+                    Text('— ${a['author_name']}',
+                        style: GoogleFonts.spaceGrotesk(
+                            fontSize: 11, color: AppColors.textMuted)),
+                  ],
+                ]),
+              );
+            },
+          );
+  }
+
   Widget _empty(String msg) => Center(
-        child: Text(msg, style: const TextStyle(color: Color(0xFF64748B))),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.inbox_outlined, size: 40, color: AppColors.textMuted),
+            const SizedBox(height: 12),
+            Text(msg,
+                style: GoogleFonts.spaceGrotesk(
+                    color: AppColors.textSecondary, fontSize: 13)),
+          ],
+        ),
       );
 }

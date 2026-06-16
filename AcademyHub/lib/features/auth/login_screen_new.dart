@@ -1,8 +1,10 @@
-import 'dart:ui';
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../../core/auth_provider.dart';
 import '../../core/toast_utility.dart';
+import '../../core/constants.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -11,7 +13,8 @@ class LoginScreen extends StatefulWidget {
   State<LoginScreen> createState() => _LoginScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _LoginScreenState extends State<LoginScreen>
+    with TickerProviderStateMixin {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
@@ -19,23 +22,34 @@ class _LoginScreenState extends State<LoginScreen> {
   bool _isLoading = false;
   bool _obscurePassword = true;
 
+  late final AnimationController _blobController;
+
+  @override
+  void initState() {
+    super.initState();
+    _blobController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 8),
+    )..repeat();
+  }
+
   @override
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
+    _blobController.dispose();
     super.dispose();
   }
 
   Future<void> _handleLogin() async {
     if (!_formKey.currentState!.validate()) return;
-
     setState(() => _isLoading = true);
 
     try {
       final success = await context.read<AuthProvider>().login(
-        _emailController.text.trim(),
-        _passwordController.text,
-      );
+            _emailController.text.trim(),
+            _passwordController.text,
+          );
       if (success && mounted) {
         CustomToast.show(
           context: context,
@@ -45,7 +59,8 @@ class _LoginScreenState extends State<LoginScreen> {
       } else if (!success && mounted) {
         CustomToast.show(
           context: context,
-          message: context.read<AuthProvider>().error ?? 'Login failed. Please verify credentials.',
+          message: context.read<AuthProvider>().error ??
+              'Login failed. Please verify credentials.',
           type: 'error',
         );
       }
@@ -65,292 +80,175 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     final auth = context.watch<AuthProvider>();
-    final primaryColor = auth.tenantPrimaryColor;
+    final primary = auth.tenantPrimaryColor;
 
     return Scaffold(
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              primaryColor.withValues(alpha: 0.85),
-              primaryColor.withValues(alpha: 0.5),
-              const Color(0xFF0F172A), // Slate 900
-            ],
-            stops: const [0.0, 0.5, 1.0],
-          ),
-        ),
-        child: Stack(
-          children: [
-            SafeArea(
-              child: Center(
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.all(24),
-                  child: ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 400),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        _buildLoginCard(auth),
-                        const SizedBox(height: 24),
-                        _buildFooter(),
-                      ],
-                    ),
+      backgroundColor: AppColors.background,
+      body: Stack(
+        children: [
+          // Animated ambient gradient blobs
+          _AmbientBlobs(controller: _blobController, primary: primary),
+          // Main content
+          SafeArea(
+            child: Center(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(24),
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 400),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      _buildHeader(auth, primary),
+                      const SizedBox(height: 32),
+                      _buildFormCard(auth, primary),
+                      const SizedBox(height: 24),
+                      _buildFooter(),
+                    ],
                   ),
                 ),
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
 
-  Widget _buildLoginCard(AuthProvider auth) {
+  Widget _buildHeader(AuthProvider auth, Color primary) {
+    return Column(
+      children: [
+        // School logo with glow
+        Container(
+          width: 80,
+          height: 80,
+          decoration: BoxDecoration(
+            color: AppColors.surface,
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+                color: primary.withValues(alpha: 0.4), width: 1.5),
+            boxShadow: [
+              BoxShadow(
+                color: primary.withValues(alpha: 0.2),
+                blurRadius: 20,
+                spreadRadius: 0,
+              ),
+            ],
+          ),
+          child: auth.tenantLogoUrl != null && auth.tenantLogoUrl!.isNotEmpty
+              ? ClipRRect(
+                  borderRadius: BorderRadius.circular(20),
+                  child: Image.network(
+                    auth.tenantLogoUrl!,
+                    fit: BoxFit.contain,
+                    errorBuilder: (_, _, _) => ClipRRect(
+                      borderRadius: BorderRadius.circular(20),
+                      child: Padding(
+                        padding: const EdgeInsets.all(8),
+                        child: Image.asset('lib/Alogo.png',
+                            fit: BoxFit.contain),
+                      ),
+                    ),
+                  ),
+                )
+              : Padding(
+                  padding: const EdgeInsets.all(12),
+                  child: Image.asset('lib/Alogo.png', fit: BoxFit.contain),
+                ),
+        ),
+        const SizedBox(height: 20),
+        Text(
+          auth.tenantName ?? 'AcademyHub',
+          textAlign: TextAlign.center,
+          style: GoogleFonts.spaceGrotesk(
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+            color: AppColors.textPrimary,
+            letterSpacing: -0.5,
+          ),
+        ),
+        const SizedBox(height: 6),
+        Text(
+          'Academic Portal Access',
+          style: GoogleFonts.spaceGrotesk(
+            fontSize: 14,
+            color: AppColors.textSecondary,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildFormCard(AuthProvider auth, Color primary) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(
-          color: Colors.white.withValues(alpha: 0.2),
-          width: 1,
-        ),
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: AppColors.borderLight),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.3),
-            blurRadius: 20,
-            offset: const Offset(0, 10),
+            blurRadius: 24,
+            offset: const Offset(0, 8),
           ),
         ],
       ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(24),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
-          child: Column(
-            children: [
-              _buildHeader(auth),
-              _buildForm(auth),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildHeader(AuthProvider auth) {
-    final primaryColor = auth.tenantPrimaryColor;
-    return Container(
-      padding: const EdgeInsets.all(32),
-      decoration: BoxDecoration(
-        border: Border(
-          bottom: BorderSide(
-            color: Colors.white.withValues(alpha: 0.1),
-            width: 1,
-          ),
-        ),
-      ),
-      child: Column(
-        children: [
-          // School logo
-          Container(
-            width: 64,
-            height: 64,
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  primaryColor,
-                  primaryColor.withValues(alpha: 0.7),
-                ],
-              ),
-              borderRadius: BorderRadius.circular(16),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.2),
-                  blurRadius: 8,
-                  offset: const Offset(0, 4),
-                ),
-              ],
-            ),
-            child: auth.tenantLogoUrl != null && auth.tenantLogoUrl!.isNotEmpty
-                ? ClipRRect(
-                    borderRadius: BorderRadius.circular(16),
-                    child: Image.network(
-                      auth.tenantLogoUrl!,
-                      fit: BoxFit.cover,
-                      errorBuilder: (_, _, _) => ClipRRect(
-                        borderRadius: BorderRadius.circular(16),
-                        child: Image.asset(
-                          'assets/images/Alogo.png',
-                          fit: BoxFit.cover,
-                        ),
-                      ),
-                    ),
-                  )
-                : ClipRRect(
-                    borderRadius: BorderRadius.circular(16),
-                    child: Image.asset(
-                      'assets/images/Alogo.png',
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-          ),
-          const SizedBox(height: 16),
-          // Dynamic School Name
-          Text(
-            auth.tenantName ?? 'AcademyHub',
-            textAlign: TextAlign.center,
-            style: const TextStyle(
-              fontSize: 22,
-              fontWeight: FontWeight.w900,
-              color: Colors.white,
-              letterSpacing: -0.5,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            'Academic Portal Access',
-            style: TextStyle(
-              fontSize: 13,
-              color: Colors.white.withValues(alpha: 0.7),
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildForm(AuthProvider auth) {
-    final primaryColor = auth.tenantPrimaryColor;
-    return Padding(
-      padding: const EdgeInsets.all(32),
+      padding: const EdgeInsets.all(24),
       child: Form(
         key: _formKey,
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text(
-              'Username / Admission No.',
-              style: TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-                color: Colors.white.withValues(alpha: 0.9),
-              ),
-            ),
+            _fieldLabel('Username / Admission No.'),
             const SizedBox(height: 8),
             TextFormField(
               controller: _emailController,
               keyboardType: TextInputType.text,
-              style: const TextStyle(
-                color: Colors.white,
+              style: GoogleFonts.spaceGrotesk(
+                color: AppColors.textPrimary,
                 fontSize: 14,
+                fontWeight: FontWeight.w600,
               ),
               decoration: InputDecoration(
                 hintText: 'Email or Admission number',
-                hintStyle: TextStyle(
-                  color: Colors.white.withValues(alpha: 0.4),
-                ),
-                filled: true,
-                fillColor: Colors.white.withValues(alpha: 0.1),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(
-                    color: Colors.white.withValues(alpha: 0.2),
-                  ),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(
-                    color: Colors.white.withValues(alpha: 0.2),
-                  ),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(
-                    color: primaryColor,
-                    width: 2,
-                  ),
-                ),
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 12,
-                ),
+                prefixIcon: Icon(Icons.person_outline_rounded,
+                    color: AppColors.textSecondary, size: 20),
               ),
-              validator: (value) {
-                if (value?.isEmpty ?? true) {
-                  return 'Username is required';
-                }
-                return null;
-              },
+              validator: (v) =>
+                  (v == null || v.trim().isEmpty) ? 'Username is required' : null,
             ),
             const SizedBox(height: 20),
-            Text(
-              'Password',
-              style: TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-                color: Colors.white.withValues(alpha: 0.9),
-              ),
-            ),
+            _fieldLabel('Password'),
             const SizedBox(height: 8),
             TextFormField(
               controller: _passwordController,
               obscureText: _obscurePassword,
-              style: const TextStyle(
-                color: Colors.white,
+              style: GoogleFonts.spaceGrotesk(
+                color: AppColors.textPrimary,
                 fontSize: 14,
+                fontWeight: FontWeight.w600,
               ),
               decoration: InputDecoration(
                 hintText: '••••••••',
-                hintStyle: TextStyle(
-                  color: Colors.white.withValues(alpha: 0.4),
-                ),
-                filled: true,
-                fillColor: Colors.white.withValues(alpha: 0.1),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(
-                    color: Colors.white.withValues(alpha: 0.2),
-                  ),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(
-                    color: Colors.white.withValues(alpha: 0.2),
-                  ),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(
-                    color: primaryColor,
-                    width: 2,
-                  ),
-                ),
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 12,
-                ),
+                prefixIcon: Icon(Icons.lock_outline_rounded,
+                    color: AppColors.textSecondary, size: 20),
                 suffixIcon: IconButton(
-                  onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+                  onPressed: () =>
+                      setState(() => _obscurePassword = !_obscurePassword),
                   icon: Icon(
-                    _obscurePassword ? Icons.visibility : Icons.visibility_off,
-                    color: Colors.white.withValues(alpha: 0.7),
+                    _obscurePassword
+                        ? Icons.visibility_outlined
+                        : Icons.visibility_off_outlined,
+                    color: AppColors.textSecondary,
                     size: 20,
                   ),
                 ),
               ),
-              validator: (value) {
-                if (value?.isEmpty ?? true) {
-                  return 'Password is required';
-                }
-                return null;
-              },
+              validator: (v) =>
+                  (v == null || v.trim().isEmpty) ? 'Password is required' : null,
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 16),
+            // Remember me
             Row(
               children: [
                 SizedBox(
@@ -358,97 +256,71 @@ class _LoginScreenState extends State<LoginScreen> {
                   height: 20,
                   child: Checkbox(
                     value: _rememberMe,
-                    onChanged: (value) => setState(() => _rememberMe = value ?? false),
+                    onChanged: (v) =>
+                        setState(() => _rememberMe = v ?? false),
                     fillColor: WidgetStateProperty.resolveWith((states) {
                       if (states.contains(WidgetState.selected)) {
-                        return primaryColor;
+                        return primary;
                       }
-                      return Colors.white.withValues(alpha: 0.1);
+                      return Colors.transparent;
                     }),
-                    checkColor: Colors.white,
+                    checkColor: Colors.black,
                     side: BorderSide(
-                      color: Colors.white.withValues(alpha: 0.3),
-                      width: 1.5,
-                    ),
+                        color: AppColors.borderLight, width: 1.5),
                   ),
                 ),
-                const SizedBox(width: 8),
+                const SizedBox(width: 10),
                 Text(
                   'Keep me signed in',
-                  style: TextStyle(
+                  style: GoogleFonts.spaceGrotesk(
                     fontSize: 13,
-                    color: Colors.white.withValues(alpha: 0.8),
+                    color: AppColors.textSecondary,
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
               ],
             ),
             const SizedBox(height: 24),
+            // Sign In button
             SizedBox(
-              width: double.infinity,
+              height: 52,
               child: ElevatedButton(
                 onPressed: _isLoading ? null : _handleLogin,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.transparent,
-                  foregroundColor: Colors.white,
-                  padding: EdgeInsets.zero,
+                  backgroundColor: primary,
+                  foregroundColor: Colors.black,
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
+                      borderRadius: BorderRadius.circular(12)),
                   elevation: 0,
                 ),
-                child: Ink(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        primaryColor,
-                        primaryColor.withValues(alpha: 0.8),
-                      ],
-                    ),
-                    borderRadius: BorderRadius.circular(12),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.2),
-                        blurRadius: 8,
-                        offset: const Offset(0, 4),
+                child: _isLoading
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor:
+                              AlwaysStoppedAnimation<Color>(Colors.black),
+                        ),
+                      )
+                    : Text(
+                        'Sign In',
+                        style: GoogleFonts.spaceGrotesk(
+                          fontSize: 15,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
-                    ],
-                  ),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    alignment: Alignment.center,
-                    child: _isLoading
-                        ? const SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                            ),
-                          )
-                        : const Text(
-                            'Sign In',
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                            ),
-                          ),
-                  ),
-                ),
               ),
             ),
-            const SizedBox(height: 16),
-            Align(
-              alignment: Alignment.center,
-              child: TextButton(
-                onPressed: () => auth.clearTenant(),
-                child: Text(
-                  'Change School',
-                  style: TextStyle(
-                    color: Colors.white.withValues(alpha: 0.65),
-                    fontWeight: FontWeight.bold,
-                    fontSize: 13,
-                  ),
+            const SizedBox(height: 12),
+            TextButton(
+              onPressed: () => auth.clearTenant(),
+              child: Text(
+                'Change School',
+                style: GoogleFonts.spaceGrotesk(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 13,
+                  color: AppColors.textSecondary,
                 ),
               ),
             ),
@@ -458,15 +330,82 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
+  Widget _fieldLabel(String label) {
+    return Text(
+      label,
+      style: GoogleFonts.spaceGrotesk(
+        fontSize: 12,
+        fontWeight: FontWeight.bold,
+        color: AppColors.textSecondary,
+        letterSpacing: 0.3,
+      ),
+    );
+  }
+
   Widget _buildFooter() {
     return Text(
       'AcademyHub Gateway Client',
-      style: TextStyle(
+      style: GoogleFonts.spaceGrotesk(
         fontSize: 12,
-        fontWeight: FontWeight.w600,
-        color: Colors.white.withValues(alpha: 0.5),
+        fontWeight: FontWeight.w500,
+        color: AppColors.textMuted,
       ),
       textAlign: TextAlign.center,
     );
   }
+}
+
+// ─── Animated ambient blobs ───────────────────────────────────────────────────
+class _AmbientBlobs extends StatelessWidget {
+  final AnimationController controller;
+  final Color primary;
+
+  const _AmbientBlobs({required this.controller, required this.primary});
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: controller,
+      builder: (_, _) {
+        final t = controller.value;
+        return CustomPaint(
+          size: MediaQuery.of(context).size,
+          painter: _BlobPainter(t: t, primary: primary),
+        );
+      },
+    );
+  }
+}
+
+class _BlobPainter extends CustomPainter {
+  final double t;
+  final Color primary;
+
+  _BlobPainter({required this.t, required this.primary});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()..blendMode = BlendMode.screen;
+
+    // Blob 1 — top-left amber glow
+    final x1 = size.width * 0.1 + math.sin(t * math.pi * 2) * 40;
+    final y1 = size.height * 0.15 + math.cos(t * math.pi * 2) * 30;
+    paint.shader = RadialGradient(
+      colors: [primary.withValues(alpha: 0.25), Colors.transparent],
+    ).createShader(Rect.fromCircle(
+        center: Offset(x1, y1), radius: size.width * 0.45));
+    canvas.drawCircle(Offset(x1, y1), size.width * 0.45, paint);
+
+    // Blob 2 — bottom-right indigo glow
+    final x2 = size.width * 0.85 + math.cos(t * math.pi * 2 + 1) * 50;
+    final y2 = size.height * 0.75 + math.sin(t * math.pi * 2 + 1) * 40;
+    paint.shader = RadialGradient(
+      colors: [AppColors.studentAccent.withValues(alpha: 0.18), Colors.transparent],
+    ).createShader(Rect.fromCircle(
+        center: Offset(x2, y2), radius: size.width * 0.55));
+    canvas.drawCircle(Offset(x2, y2), size.width * 0.55, paint);
+  }
+
+  @override
+  bool shouldRepaint(_BlobPainter old) => old.t != t;
 }
