@@ -1,0 +1,35 @@
+{
+  "_auto-CFNrZGOd.js": {
+    "file": "assets/auto-CFNrZGOd.js",
+    "name": "auto"
+  },
+  "resources/css/app.css": {
+    "file": "assets/app-DBoPtdrm.css",
+    "src": "resources/css/app.css",
+    "isEntry": true
+  },
+  "resources/js/app.js": {
+    "file": "assets/app-BvInHqds.js",
+    "name": "app",
+    "src": "resources/js/app.js",
+    "isEntry": true
+  },
+  "resources/js/pages/dashboard-bursar.js": {
+    "file": "assets/dashboard-bursar-BbnM13VO.js",
+    "name": "dashboard-bursar",
+    "src": "resources/js/pages/dashboard-bursar.js",
+    "isEntry": true,
+    "imports": [
+      "_auto-CFNrZGOd.js"
+    ]
+  },
+  "resources/js/pages/dashboard.js": {
+    "file": "assets/dashboard-JMpkCkRB.js",
+    "name": "dashboard",
+    "src": "resources/js/pages/dashboard.js",
+    "isEntry": true,
+    "imports": [
+      "_auto-CFNrZGOd.js"
+    ]
+  }
+}
