@@ -110,7 +110,7 @@ $activeShadow = "shadow-{$accent}-200";
      x-init="$watch('sidebarCollapsed', val => localStorage.setItem('sidebarCollapsed', val))">
 
     {{-- Mobile overlay --}}
-    <div x-show="mobileSidebarOpen" 
+    <div x-cloak x-show="mobileSidebarOpen" 
          x-transition:enter="transition ease-out duration-300"
          x-transition:enter-start="opacity-0"
          x-transition:enter-end="opacity-100"
@@ -124,7 +124,7 @@ $activeShadow = "shadow-{$accent}-200";
          MOBILE SIDEBAR
     ══════════════════════════════════════ --}}
     <aside id="mobileSidebar"
-           x-show="mobileSidebarOpen"
+           x-cloak x-show="mobileSidebarOpen"
            x-transition:enter="transition ease-out duration-300 transform"
            x-transition:enter-start="-translate-x-full"
            x-transition:enter-end="translate-x-0"
