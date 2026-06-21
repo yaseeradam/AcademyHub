@@ -468,3 +468,24 @@ Route::prefix('superadmin')->name('superadmin.')->group(function () {
 // Impersonation entry/return routes (accessible globally on any subdomain)
 Route::get('/impersonate/login', [\App\Http\Controllers\SuperAdmin\ImpersonationController::class, 'login'])->name('impersonate.login');
 Route::get('/impersonate/return', [\App\Http\Controllers\SuperAdmin\ImpersonationController::class, 'stop'])->name('impersonate.stop');
+
+// ── Deploy Cache Clear (no auth, secret key only) ──
+Route::get('/deploy-clear-cache/{key}', function (string $key) {
+    if ($key !== 'AcHub2026DeployX9k') {
+        abort(403);
+    }
+
+    \Illuminate\Support\Facades\Artisan::call('view:clear');
+    \Illuminate\Support\Facades\Artisan::call('cache:clear');
+    \Illuminate\Support\Facades\Artisan::call('config:clear');
+    \Illuminate\Support\Facades\Artisan::call('route:clear');
+    \Illuminate\Support\Facades\Artisan::call('optimize:clear');
+    \Illuminate\Support\Facades\Artisan::call('optimize');
+    \Illuminate\Support\Facades\Artisan::call('view:cache');
+
+    return response()->json([
+        'status' => 'done',
+        'message' => 'All caches cleared and rebuilt successfully.',
+        'time' => now()->toDateTimeString(),
+    ]);
+})->withoutMiddleware(\App\Http\Middleware\TenantDiscovery::class);
