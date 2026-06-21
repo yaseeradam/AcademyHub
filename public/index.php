@@ -1,5 +1,23 @@
 <?php
 
+// ── Deploy Cache Clear (runs BEFORE Laravel boots, bypasses route cache) ──
+if (isset($_GET['deploy_key']) && $_GET['deploy_key'] === 'AcHub2026DeployX9k') {
+    header('Content-Type: application/json');
+    $base = dirname(__DIR__);
+    $artisan = $base . '/artisan';
+    $commands = [
+        'php ' . $artisan . ' optimize:clear 2>&1',
+        'php ' . $artisan . ' optimize 2>&1',
+        'php ' . $artisan . ' view:cache 2>&1',
+    ];
+    $results = [];
+    foreach ($commands as $cmd) {
+        $results[] = ['cmd' => $cmd, 'out' => shell_exec($cmd)];
+    }
+    echo json_encode(['status' => 'done', 'results' => $results], JSON_PRETTY_PRINT);
+    exit;
+}
+
 use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Http\Request;
 
