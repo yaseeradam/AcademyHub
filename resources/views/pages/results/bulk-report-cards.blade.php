@@ -14,6 +14,7 @@
         students: [], 
         selectedStudents: [], 
         loading: false,
+        generating: false,
         
         async fetchStudents() {
             if (!this.classId) {
@@ -99,7 +100,7 @@
                         Configuration
                     </h3>
 
-                    <form method="POST" action="{{ route('results.bulk-report-cards.generate') }}" id="bulkForm" class="space-y-6">
+                    <form method="POST" action="{{ route('results.bulk-report-cards.generate') }}" id="bulkForm" class="space-y-6" @submit="generating = true">
                         @csrf
                         
                         <div class="space-y-4">
@@ -253,6 +254,44 @@
                             </template>
                         </div>
                     </div>
+                </div>
+            </div>
+        </div>
+
+        {{-- Centered Modal Loader --}}
+        <div x-show="generating" 
+            class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm"
+            x-transition:enter="transition ease-out duration-300"
+            x-transition:enter-start="opacity-0"
+            x-transition:enter-end="opacity-100"
+            x-transition:leave="transition ease-in duration-200"
+            x-transition:leave-start="opacity-100"
+            x-transition:leave-end="opacity-0"
+            style="display: none;">
+            <div class="bg-white rounded-[2.5rem] p-10 max-w-sm w-full mx-4 shadow-2xl flex flex-col items-center text-center border border-gray-50 transform transition-all"
+                x-transition:enter="transition ease-out duration-300"
+                x-transition:enter-start="scale-95 translate-y-4"
+                x-transition:enter-end="scale-100 translate-y-0"
+                x-transition:leave="transition ease-in duration-200"
+                x-transition:leave-start="scale-100 translate-y-0"
+                x-transition:leave-end="scale-95 translate-y-4">
+                <div class="relative w-20 h-20 mb-6 flex items-center justify-center">
+                    <div class="absolute inset-0 border-4 border-indigo-50 rounded-full"></div>
+                    <div class="absolute inset-0 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
+                    <div class="w-6 h-6 bg-indigo-100 rounded-full animate-ping opacity-75"></div>
+                </div>
+                <h3 class="text-xl font-black text-gray-900 mb-2">Generating Report Cards</h3>
+                <p class="text-sm font-semibold text-gray-500 mb-6 leading-relaxed">
+                    We are compiling student records, rendering visual templates, and archiving PDFs into a ZIP file.
+                </p>
+                <div class="flex flex-col gap-2 w-full">
+                    <div class="text-[10px] font-black uppercase tracking-widest text-indigo-600 animate-pulse mb-2">
+                        Processing, please wait...
+                    </div>
+                    <button @click="generating = false" type="button" 
+                        class="w-full rounded-2xl bg-gray-50 hover:bg-gray-100 py-3 text-xs font-bold text-gray-700 transition-colors focus:outline-none">
+                        Close Loader
+                    </button>
                 </div>
             </div>
         </div>

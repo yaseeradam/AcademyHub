@@ -118,10 +118,10 @@
                     <th class="px-6 py-5 text-right text-[11px] font-black uppercase tracking-widest text-gray-700">Action</th>
                 </tr>
             </thead>
-            <tbody class="divide-y divide-gray-100">
+<tbody class="divide-y divide-gray-100 bg-white/60">
                 @forelse ($rows as $row)
-                    <tr class="group hover:bg-indigo-50/30 transition-colors">
-                        <td class="sticky left-0 z-10 bg-white group-hover:bg-indigo-50/30 px-6 py-4 shadow-[2px_0_10px_rgba(0,0,0,0.03)] transition-colors">
+                    <tr class="group transition-colors hover:bg-indigo-50/30 even:bg-slate-50/60 odd:bg-white">
+                        <td class="sticky left-0 z-10 bg-white/90 group-hover:bg-indigo-50/60 px-6 py-4 shadow-[2px_0_10px_rgba(0,0,0,0,0.03)] transition-colors">
                             <div class="text-sm font-black text-gray-900">{{ $row['student']->full_name }}</div>
                             <div class="mt-0.5 text-[10px] font-bold text-gray-400 uppercase tracking-widest">{{ $row['student']->admission_number }}</div>
                         </td>
