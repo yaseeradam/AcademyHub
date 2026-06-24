@@ -32,37 +32,60 @@ class WhatsAppService
             }
         }
 
-        $botUrl = env('WHATSAPP_BOT_WEBHOOK_URL', 'http://localhost:3000/webhook/send');
-        $apiKey = config('services.whatsapp.api_key') ?: env('WHATSAPP_API_KEY', 'dev-local-whatsapp-key-change-in-production');
-
         try {
-            $response = Http::withHeaders([
-                'X-WhatsApp-Api-Key' => $apiKey,
-                'Content-Type' => 'application/json',
-            ])
-            ->timeout(5)
-            ->post($botUrl, [
-                'phone' => preg_replace('/\D/', '', $phone),
-                'message' => $message,
-                'mediaUrl' => $mediaUrl,
-                'filename' => $filename,
-                'caption' => $caption,
-            ]);
+            $token = config('services.whatsapp.token') ?: env('WHATSAPP_TOKEN');
+            $phoneNumberId = config('services.whatsapp.phone_number_id') ?: env('WHATSAPP_PHONE_NUMBER_ID');
 
-            if ($response->successful()) {
-                return true;
+            if (empty($token) || empty($phoneNumberId)) {
+                Log::warning('WhatsAppService (Meta Cloud API): Token or Phone Number ID not configured.');
+                return false;
             }
 
-            Log::error('WhatsApp Webhook delivery failed', [
-                'status' => $response->status(),
-                'body' => $response->body()
-            ]);
+            $url = "https://graph.facebook.com/v19.0/{$phoneNumberId}/messages";
+            $toPhone = preg_replace('/\D/', '', $phone);
+
+            $payload = [
+                'messaging_product' => 'whatsapp',
+                'recipient_type' => 'individual',
+                'to' => $toPhone,
+            ];
+
+            if ($mediaUrl) {
+                $payload['type'] = 'document';
+                $payload['document'] = [
+                    'link' => $mediaUrl,
+                    'filename' => $filename ?: 'document.pdf',
+                    'caption' => $message ?: $caption
+                ];
+            } else {
+                $payload['type'] = 'text';
+                $payload['text'] = [
+                    'preview_url' => false,
+                    'body' => $message
+                ];
+            }
+
+            $response = Http::withOptions(['verify' => false])
+                ->withHeaders([
+                    'Authorization' => 'Bearer ' . $token,
+                    'Content-Type' => 'application/json'
+                ])
+                ->post($url, $payload);
+
+            if ($response->failed()) {
+                Log::error('WhatsAppService (Meta Cloud API): Failed to send message', [
+                    'status' => $response->status(),
+                    'body' => $response->body()
+                ]);
+                return false;
+            }
+
+            return true;
         } catch (\Exception $e) {
-            Log::error('WhatsApp Webhook exception occurred', [
+            Log::error('WhatsAppService (Meta Cloud API): Exception during message send', [
                 'error' => $e->getMessage()
             ]);
+            return false;
         }
-
-        return false;
     }
 }
