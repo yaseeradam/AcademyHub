@@ -19,8 +19,8 @@ jobs:
           script: |
             cd /var/www/academyhub
             
-            # Fetch latest changes
-            git pull origin main
+            # Fetch latest changes as www-data user to preserve folder ownership
+            sudo -u www-data git pull origin main
             
             # Install production Composer dependencies
             composer install --no-dev --optimize-autoloader
