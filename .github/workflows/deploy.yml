@@ -1,26 +1,35 @@
-name: Deploy to VPS
+name: Deploy AcademyHub
 
 on:
   push:
-    branches:
-      - main
+    branches: [ "main" ]
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
-
-      - name: Execute Remote SSH Deployment Script
+      - name: Execute remote SSH commands to deploy
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          port: ${{ secrets.SSH_PORT || 22 }}
+          port: 22
           script: |
-            echo "Successfully connected to VPS. Triggering deployment script..."
-            chmod +x /var/www/myacademy/scripts/vps/vps-deploy.sh
-            /var/www/myacademy/scripts/vps/vps-deploy.sh
+            cd /var/www/academyhub
+            
+            # Fetch latest changes
+            git pull origin main
+            
+            # Install production Composer dependencies
+            composer install --no-dev --optimize-autoloader
+            
+            # Run database migrations
+            php artisan migrate --force
+            
+            # Clear and rebuild application caches
+            php artisan optimize
+            
+            # Restart supervisor queue worker to pick up code changes
+            supervisorctl restart academyhub-worker:*
