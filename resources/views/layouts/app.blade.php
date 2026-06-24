@@ -167,6 +167,15 @@ $activeShadow = "shadow-{$accent}-200";
             @include('layouts.partials.app-nav', ['mobile' => true])
         </nav>
 
+        <div class="p-3 border-t border-slate-200/50 bg-white/50">
+            <button type="button" onclick="doLogout('logoutForm')" class="w-full flex items-center justify-center gap-2 rounded-xl bg-red-50 hover:bg-red-100 text-red-600 font-bold text-xs py-2.5 transition-colors">
+                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+                </svg>
+                Logout
+            </button>
+        </div>
+
     </aside>
 
     {{-- ══════════════════════════════════════
@@ -219,12 +228,12 @@ $activeShadow = "shadow-{$accent}-200";
                     </svg>
                 </button>
                 <div class="min-w-0 overflow-hidden">
-                    <h1 class="truncate text-base font-extrabold tracking-tight text-slate-900 sm:text-lg">{{ $schoolName }}</h1>
-                    <p class="truncate text-[10px] font-medium text-slate-400 sm:text-xs">{{ now()->format('l, F j, Y') }}</p>
+                    <h1 class="truncate text-sm sm:text-lg font-extrabold tracking-tight text-slate-900">{{ $schoolName }}</h1>
+                    <p class="hidden sm:block truncate text-[10px] font-medium text-slate-400 sm:text-xs">{{ now()->format('l, F j, Y') }}</p>
                 </div>
             </div>
 
-            <div class="flex items-center gap-3">
+            <div class="flex items-center gap-1.5 sm:gap-3">
 
                 {{-- Bell --}}
                 <div class="relative flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500 hover:bg-slate-50 transition-colors">
@@ -250,7 +259,7 @@ $activeShadow = "shadow-{$accent}-200";
 
                 {{-- Header Logout Button --}}
                 <button type="button" onclick="doLogout('logoutForm')" title="Logout"
-                        class="flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500 hover:bg-red-50 hover:text-red-600 transition-colors shadow-sm flex-shrink-0">
+                        class="hidden sm:flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500 hover:bg-red-50 hover:text-red-600 transition-colors shadow-sm flex-shrink-0">
                     <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
                     </svg>
@@ -601,6 +610,15 @@ $activeShadow = "shadow-{$accent}-200";
         }
     });
     document.addEventListener('livewire:init', () => {
+        Livewire.hook('request', ({ fail }) => {
+            fail(({ status, preventDefault }) => {
+                if (status === 403) {
+                    preventDefault();
+                    showSubscriptionModal();
+                }
+            })
+        });
+
         Livewire.on('browser-notification', (event) => {
             const d = event[0] || event;
             sendBrowserNotification(d.title || 'AcademyHub', d.message || 'New notification', d.url || '/');
