@@ -33,7 +33,7 @@
     <div class="grid grid-cols-2 gap-4 sm:grid-cols-4">
 
         {{-- Attendance Rate Ring --}}
-        <div class="col-span-2 sm:col-span-1 relative overflow-hidden rounded-xl bg-white border border-slate-100 p-4 shadow-sm flex flex-col items-center justify-center">
+        <div class="col-span-2 sm:col-span-1 relative overflow-hidden rounded-xl bg-white border border-slate-100 p-3 shadow-sm flex flex-col items-center justify-center">
             <div class="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-2">Attendance Rate</div>
             <div class="relative">
                 <svg width="70" height="70" viewBox="0 0 100 100" class="-rotate-90">
@@ -52,21 +52,21 @@
         </div>
 
         {{-- Present --}}
-        <div class="relative overflow-hidden rounded-xl bg-white border border-slate-100 p-4 shadow-sm border-l-4 border-l-emerald-500">
+        <div class="relative overflow-hidden rounded-xl bg-white border border-slate-100 p-3 shadow-sm border-l-4 border-l-emerald-500">
             <div class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Present</div>
             <div class="mt-1 text-2xl font-black text-slate-800">{{ $present }}</div>
             <div class="text-[10px] font-medium text-slate-400">of {{ $total }} days</div>
         </div>
 
         {{-- Absent --}}
-        <div class="relative overflow-hidden rounded-xl bg-white border border-slate-100 p-4 shadow-sm border-l-4 border-l-rose-500">
+        <div class="relative overflow-hidden rounded-xl bg-white border border-slate-100 p-3 shadow-sm border-l-4 border-l-rose-500">
             <div class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Absent</div>
             <div class="mt-1 text-2xl font-black text-slate-800">{{ $absent }}</div>
             <div class="text-[10px] font-medium text-slate-400">day{{ $absent !== 1 ? 's' : '' }} missed</div>
         </div>
 
         {{-- Late + Streak --}}
-        <div class="relative overflow-hidden rounded-xl bg-white border border-slate-100 p-4 shadow-sm border-l-4 border-l-amber-500">
+        <div class="relative overflow-hidden rounded-xl bg-white border border-slate-100 p-3 shadow-sm border-l-4 border-l-amber-500">
             <div class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Late</div>
             <div class="mt-1 text-2xl font-black text-slate-800">{{ $late }}</div>
             <div class="text-[10px] font-medium text-slate-400">arrival{{ $late !== 1 ? 's' : '' }}</div>
@@ -259,3 +259,4 @@
     @endif
 
 </div>
+

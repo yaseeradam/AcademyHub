@@ -14,8 +14,11 @@ class CertificatePdf
     {
         $html = view($view, $data)->render();
 
-        $width = $orientation === 'landscape' ? 1123 : 794;
-        $height = $orientation === 'landscape' ? 794 : 1123;
+        $width = $orientation === 'landscape' ? 842 : 595;
+        $height = $orientation === 'landscape' ? 595 : 842;
+
+        $widthMm = $orientation === 'landscape' ? 297 : 210;
+        $heightMm = $orientation === 'landscape' ? 210 : 297;
 
         $pageSize = $orientation === 'landscape' ? 'A4 landscape' : 'A4 portrait';
         $fullPageCss = "<style>
@@ -76,6 +79,7 @@ class CertificatePdf
         $browsershot
             ->windowSize($width, $height)
             ->emulateMedia('screen')
+            ->preferCssPageSize()
             ->format('A4')
             ->landscape($orientation === 'landscape')
             ->showBackground()

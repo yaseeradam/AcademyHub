@@ -3,7 +3,7 @@
     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div class="flex items-center gap-4">
             <a href="{{ route('more-features') }}"
-                class="inline-flex items-center px-4 py-2 bg-white/80 border border-slate-200 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-50">
+                class="inline-flex items-center px-4 py-2 bg-white/80 border border-slate-200 rounded-lg text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-colors shadow-sm">
                 <svg class="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M10 19l-7-7m0 0l7-7m-7 7h18" />
@@ -12,198 +12,158 @@
             </a>
             <div>
                 <h2 class="text-2xl font-bold text-slate-900">Certificate Generator</h2>
-                <p class="text-slate-500 text-sm mt-1">Design and issue official certificates to students</p>
+                <p class="text-slate-500 text-sm mt-0.5">Design and issue official certificates to students</p>
             </div>
         </div>
-        <button wire:click="bulkGenerate" wire:loading.attr="disabled" @disabled(!$classId || $this->filteredStudents->isEmpty())
-            class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-yellow-500 to-amber-600 hover:from-yellow-600 hover:to-amber-700 text-white rounded-lg font-medium disabled:opacity-50">
-            <svg class="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-            </svg>
-            <span wire:loading.remove wire:target="bulkGenerate">Bulk Generate
-                ({{ $this->filteredStudents->count() }})</span>
-            <span wire:loading wire:target="bulkGenerate">Generating...</span>
-        </button>
     </div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <!-- Settings Panel -->
-        <div class="lg:col-span-1">
-            <div class="rounded-2xl border border-slate-200/80 bg-white/80 backdrop-blur-xl shadow-lg">
-                <div class="p-6 border-b border-slate-100">
-                    <h3 class="text-lg font-bold text-slate-800">Certificate Settings</h3>
+    <!-- 3-Step Guided Workflow Dashboard Layout -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        
+        <!-- Left Column: Steps 1 & 2 -->
+        <div class="lg:col-span-5 space-y-6">
+            
+            <!-- Step 1: Choose Roster (Class & Students) -->
+            <div class="rounded-2xl border border-slate-200/80 bg-white/90 backdrop-blur-xl shadow-md p-6 space-y-4">
+                <div class="flex items-center gap-3">
+                    <span class="flex items-center justify-center w-8 h-8 rounded-full bg-amber-500 text-white font-bold text-sm shadow-sm">1</span>
+                    <div>
+                        <h3 class="font-bold text-slate-800 text-base">Select Class & Student</h3>
+                        <p class="text-xs text-slate-500">Pick a class to load the student list</p>
+                    </div>
                 </div>
-                <div class="p-6 space-y-4">
-                    <div class="space-y-2">
-                        <label class="text-xs font-semibold uppercase tracking-wider text-slate-600">Certificate
-                            Type</label>
-                        <select wire:model.live="type"
-                            class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                            <option value="Achievement">Academic Merit</option>
-                            <option value="Attendance">Perfect Attendance</option>
-                            <option value="Excellence">Sports Excellence</option>
-                            <option value="Graduation">Graduation</option>
+
+                <div class="space-y-3">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1">Class</label>
+                        <select wire:model.live="classId"
+                            class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm font-medium focus:ring-2 focus:ring-amber-500 focus:border-transparent">
+                            <option value="">-- Choose Class --</option>
+                            @foreach ($this->classes as $class)
+                                <option value="{{ $class->id }}">{{ $class->name }}</option>
+                            @endforeach
                         </select>
                     </div>
 
-                    <div class="space-y-2">
-                        <label class="text-xs font-semibold uppercase tracking-wider text-slate-600">Issue Date</label>
-                        <input wire:model.live="issueDate" type="date"
-                            class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
-                    </div>
-
-                    <div class="space-y-2">
-                        <label class="text-xs font-semibold uppercase tracking-wider text-slate-600">Title</label>
-                        <input wire:model.live="title" placeholder="Certificate of Achievement"
-                            class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
-                    </div>
-
-                    <div class="space-y-2">
-                        <label class="text-xs font-semibold uppercase tracking-wider text-slate-600">Reason /
-                            Description</label>
-                        <input wire:model.live="description" placeholder="e.g. Outstanding Performance in Math"
-                            class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
-                    </div>
-
-                    <div class="pt-4 border-t border-slate-100">
-                        <label
-                            class="text-xs font-semibold uppercase tracking-wider text-slate-600 mb-2 block">Filters</label>
-                        <div class="space-y-3">
-                            <select wire:model.live="classId"
-                                class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                                <option value="">All Classes</option>
-                                @foreach ($this->classes as $class)
-                                    <option value="{{ $class->id }}">{{ $class->name }}</option>
-                                @endforeach
-                            </select>
-
-                            <div class="relative">
-                                <svg class="absolute left-3 top-2.5 h-4 w-4 text-slate-400" fill="none"
-                                    stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                                </svg>
-                                <input wire:model.live.debounce.250ms="search" placeholder="Search students..."
-                                    class="w-full pl-9 pr-3 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
-                            </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1">Search Student (Optional)</label>
+                        <div class="relative">
+                            <svg class="absolute left-3 top-2.5 h-4 w-4 text-slate-400" fill="none"
+                                stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                            </svg>
+                            <input wire:model.live.debounce.250ms="search" placeholder="Type student's name or ID..."
+                                class="w-full pl-9 pr-3 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-amber-500 focus:border-transparent" />
                         </div>
+                    </div>
+                </div>
+
+                <!-- Student Roster List -->
+                <div class="border border-slate-100 rounded-xl overflow-hidden bg-slate-50/30">
+                    <div class="px-4 py-2 bg-slate-50 border-b border-slate-100 flex justify-between items-center">
+                        <span class="text-xs font-bold text-slate-600">Student Roster</span>
+                        <span class="text-[10px] text-slate-500 font-bold tabular-nums">{{ $classId ? $this->filteredStudents->count() : 0 }} active</span>
+                    </div>
+                    <div class="max-h-60 overflow-y-auto divide-y divide-slate-100">
+                        @if(!$classId)
+                            <div class="p-8 text-center text-slate-400 text-xs">
+                                <svg class="h-8 w-8 text-slate-300 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                </svg>
+                                Please select a class above
+                            </div>
+                        @else
+                            @forelse ($this->filteredStudents as $student)
+                                <div class="flex items-center justify-between px-4 py-2.5 bg-white hover:bg-slate-50/50 transition-colors">
+                                    <div class="flex items-center gap-2.5">
+                                        <div class="h-8 w-8 rounded-full bg-amber-50 border border-amber-100 flex items-center justify-center text-xs font-bold text-amber-700 shadow-sm">
+                                            {{ substr($student->first_name, 0, 1) }}{{ substr($student->last_name, 0, 1) }}
+                                        </div>
+                                        <div class="min-w-0">
+                                            <p class="text-sm font-semibold text-slate-700 leading-snug truncate">{{ $student->full_name }}</p>
+                                            <p class="text-[10px] text-slate-400 font-medium">{{ $student->admission_number ?: 'No ID' }}</p>
+                                        </div>
+                                    </div>
+                                    <button wire:click="issueForStudent({{ $student->id }})"
+                                        class="inline-flex items-center px-3 py-1.5 text-xs font-bold text-amber-600 bg-amber-50 border border-amber-200/60 rounded-lg hover:bg-amber-500 hover:text-white hover:border-amber-500 transition-all shadow-sm shrink-0">
+                                        <svg class="h-3.5 w-3.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                                        </svg>
+                                        Download
+                                    </button>
+                                </div>
+                            @empty
+                                <div class="p-8 text-center text-slate-400 text-xs">No matching students found</div>
+                            @endforelse
+                        @endif
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 2: Certificate Information -->
+            <div class="rounded-2xl border border-slate-200/80 bg-white/90 backdrop-blur-xl shadow-md p-6 space-y-4">
+                <div class="flex items-center gap-3">
+                    <span class="flex items-center justify-center w-8 h-8 rounded-full bg-amber-500 text-white font-bold text-sm shadow-sm">2</span>
+                    <div>
+                        <h3 class="font-bold text-slate-800 text-base">Certificate Information</h3>
+                        <p class="text-xs text-slate-500">Customize the certificate's text</p>
+                    </div>
+                </div>
+
+                <div class="space-y-4">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="space-y-1">
+                            <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider">Certificate Type</label>
+                            <select wire:model.live="type"
+                                class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm font-medium focus:ring-2 focus:ring-amber-500 focus:border-transparent">
+                                <option value="Achievement">Academic Merit</option>
+                                <option value="Attendance">Perfect Attendance</option>
+                                <option value="Excellence">Sports Excellence</option>
+                                <option value="Graduation">Graduation</option>
+                            </select>
+                        </div>
+
+                        <div class="space-y-1">
+                            <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider">Issue Date</label>
+                            <input wire:model.live="issueDate" type="date"
+                                class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm font-medium focus:ring-2 focus:ring-amber-500 focus:border-transparent" />
+                        </div>
+                    </div>
+
+                    <div class="space-y-1">
+                        <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider">Title on Certificate</label>
+                        <input wire:model.live.debounce.500ms="title" placeholder="Certificate of Achievement"
+                            class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm font-medium focus:ring-2 focus:ring-amber-500 focus:border-transparent" />
+                    </div>
+
+                    <div class="space-y-1">
+                        <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider">Reason / Description</label>
+                        <textarea wire:model.live.debounce.500ms="description" placeholder="e.g. Outstanding performance and academic excellence in all subjects." rows="3"
+                            class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm font-medium focus:ring-2 focus:ring-amber-500 focus:border-transparent resize-none"></textarea>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Preview & Students Panel -->
-        <div class="lg:col-span-2 space-y-4">
-            <!-- Preview Card with Template Navigation -->
-            <div class="rounded-2xl border border-slate-200/80 bg-white/80 backdrop-blur-xl shadow-lg overflow-hidden">
-                <div class="px-6 py-4 bg-slate-50/50 border-b border-slate-100">
-                    <div class="flex items-center justify-between">
-                        <h3 class="text-sm font-medium text-slate-500 flex items-center gap-2">
-                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                            Live Design Preview
-                        </h3>
-                        <div class="flex items-center gap-2">
-                            {{-- Previous Arrow --}}
-                            <button wire:click="prevTemplate" type="button"
-                                class="inline-flex items-center justify-center w-8 h-8 rounded-lg border border-slate-200 bg-white text-slate-500 hover:bg-slate-100 hover:text-slate-700 transition-colors"
-                                title="Previous template">
-                                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M15 19l-7-7 7-7" />
-                                </svg>
-                            </button>
-
-                            {{-- Template Label & Counter --}}
-                            <span
-                                class="text-xs font-bold text-slate-600 bg-slate-100 px-3 py-1 rounded-full">{{ $this->templateLabel }}</span>
-                            <span class="text-xs text-slate-400 tabular-nums">{{ $previewIndex + 1 }} /
-                                {{ $this->templateCount }}</span>
-
-                            {{-- Next Arrow --}}
-                            <button wire:click="nextTemplate" type="button"
-                                class="inline-flex items-center justify-center w-8 h-8 rounded-lg border border-slate-200 bg-white text-slate-500 hover:bg-slate-100 hover:text-slate-700 transition-colors"
-                                title="Next template">
-                                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M9 5l7 7-7 7" />
-                                </svg>
-                            </button>
-
-                            {{-- Divider --}}
-                            <div class="w-px h-6 bg-slate-200 mx-1"></div>
-
-                            {{-- Show All Button --}}
-                            <button wire:click="toggleShowAll" type="button"
-                                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors {{ $showAllTemplates ? 'bg-amber-500 text-white hover:bg-amber-600' : 'border border-slate-200 bg-white text-slate-600 hover:bg-slate-100' }}">
-                                <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
-                                </svg>
-                                {{ $showAllTemplates ? 'Hide All' : 'Show All' }}
-                            </button>
-                        </div>
-                    </div>
+        <!-- Right Column: Live Design Preview & Step 3 Selection -->
+        <div class="lg:col-span-7 space-y-6">
+            
+            <!-- Live Design Preview Card -->
+            <div class="rounded-2xl border border-slate-200/80 bg-white shadow-lg overflow-hidden">
+                <div class="px-6 py-4 bg-slate-50/50 border-b border-slate-100 flex items-center justify-between">
+                    <h3 class="text-sm font-bold text-slate-700 flex items-center gap-2">
+                        <svg class="h-4.5 w-4.5 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                        </svg>
+                        Live Design Preview
+                    </h3>
+                    <span class="text-xs font-bold text-amber-600 bg-amber-50 px-3 py-1 rounded-full shadow-sm">{{ $this->templateLabel }} Design</span>
                 </div>
-
-                {{-- Grid View: Show All Templates --}}
-                @if($showAllTemplates)
-                    <div class="p-6 bg-slate-50/30">
-                        <div class="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 gap-3">
-                            @foreach($availableTemplates as $i => $tpl)
-                                <button wire:click="setTemplate({{ $i }})" type="button"
-                                    class="group relative rounded-xl border-2 p-3 text-center transition-all hover:shadow-md {{ $previewIndex === $i ? 'border-amber-500 bg-amber-50 shadow-md ring-2 ring-amber-200' : 'border-slate-200 bg-white hover:border-slate-300' }}">
-                                    {{-- Template icon/preview --}}
-                                    <div class="w-full aspect-[1.414/1] rounded-lg mb-2 flex items-center justify-center overflow-hidden {{ $previewIndex === $i ? 'ring-1 ring-amber-300' : '' }}"
-                                        @php
-                                            $bgStyles = [
-                                                'modern' => 'background: linear-gradient(135deg, #f8fafc, #e2e8f0);',
-                                                'classic' => 'background: #fff; border: 3px solid #3b82f6;',
-                                                'elegant' => 'background: linear-gradient(135deg, #fffef5, #fef9e7); border: 3px solid #d4af37;',
-                                                'vibrant' => 'background: linear-gradient(135deg, #6c5ce7, #a855f7, #ec4899);',
-                                                'minimal' => 'background: #fff; border-top: 3px solid #0ea5e9;',
-                                                'royal' => 'background: linear-gradient(180deg, #581c87, #7c3aed, #a855f7);',
-                                                'prestige' => 'background: linear-gradient(160deg, #0a1628, #0f2241, #162d50);',
-                                                'botanical' => 'background: linear-gradient(170deg, #f7faf4, #eef5e8);',
-                                                'aurora' => 'background: linear-gradient(135deg, #0d9488, #7c3aed, #ec4899);',
-                                                'heritage' => 'background: linear-gradient(150deg, #fdf6ec, #f5e8d0); border: 3px solid #8b1a1a;',
-                                                'obsidian' => 'background: linear-gradient(145deg, #1a1a1a, #2d2d2d);',
-                                                'sahara' => 'background: linear-gradient(155deg, #faf3e6, #e8d5b0);',
-                                                'oceanic' => 'background: linear-gradient(165deg, #e8f4f8, #c0e6f0);',
-                                                'crimson' => 'background: linear-gradient(145deg, #1a0a0a, #2d1515);',
-                                                'ivory' => 'background: #fffef9; border: 2px solid rgba(183,110,121,0.3);',
-                                            ];
-                                        @endphp
-                                        style="{{ $bgStyles[$tpl['key']] ?? 'background: #f1f5f9;' }}">
-                                        <svg class="h-5 w-5 {{ in_array($tpl['key'], ['vibrant', 'royal', 'prestige', 'aurora', 'obsidian', 'crimson']) ? 'text-white/60' : 'text-slate-300' }}"
-                                            fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                                                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                        </svg>
-                                    </div>
-                                    <span
-                                        class="text-[11px] font-semibold {{ $previewIndex === $i ? 'text-amber-700' : 'text-slate-600 group-hover:text-slate-900' }}">
-                                        {{ $tpl['label'] }}
-                                    </span>
-                                    @if($previewIndex === $i)
-                                        <div
-                                            class="absolute -top-1 -right-1 w-5 h-5 bg-amber-500 rounded-full flex items-center justify-center">
-                                            <svg class="h-3 w-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3"
-                                                    d="M5 13l4 4L19 7" />
-                                            </svg>
-                                        </div>
-                                    @endif
-                                </button>
-                            @endforeach
-                        </div>
-                    </div>
-                @endif
-
-                <div class="p-8">
+                <div class="p-6 bg-slate-50/20 flex items-center justify-center">
+                    <div class="w-full overflow-x-auto">
 
                     {{-- Modern --}}
                     @if($template === 'modern')
@@ -1035,60 +995,102 @@
                             </div>
                         </div>
                     @endif
-
-                    <!-- Template Dots Navigation -->
-                    <div class="flex items-center justify-center gap-2 mt-4">
-                        @foreach($availableTemplates as $i => $tpl)
-                            <button wire:click="setTemplate({{ $i }})"
-                                class="w-2.5 h-2.5 rounded-full transition-all {{ $previewIndex === $i ? 'bg-amber-500 scale-125' : 'bg-slate-300 hover:bg-slate-400' }}"
-                                title="{{ $tpl['label'] }}"></button>
-                        @endforeach
-                    </div>
-                </div>
-            </div>
-
-            <!-- Student List -->
-            <div class="rounded-2xl border border-slate-200/80 bg-white/80 backdrop-blur-xl shadow-lg">
-                <div class="px-6 py-4 border-b border-slate-100">
-                    <div class="flex items-center justify-between">
-                        <h3 class="text-sm font-medium">Select Students ({{ $this->filteredStudents->count() }})</h3>
-                        <span class="text-xs font-normal text-slate-400">Click download to generate individual
-                            certificate</span>
-                    </div>
-                </div>
-                <div class="p-0 max-h-64 overflow-y-auto">
-                    <div class="divide-y divide-slate-50">
-                        @forelse ($this->filteredStudents as $student)
-                            <div
-                                class="flex items-center justify-between px-6 py-3 hover:bg-slate-50/50 group transition-colors">
-                                <div class="flex items-center gap-3">
-                                    <div
-                                        class="h-8 w-8 rounded-full bg-slate-100 flex items-center justify-center text-xs font-bold text-slate-500">
-                                        {{ substr($student->first_name, 0, 1) }}{{ substr($student->last_name, 0, 1) }}
-                                    </div>
-                                    <div>
-                                        <p class="text-sm font-medium text-slate-700">{{ $student->full_name }}</p>
-                                        <p class="text-xs text-slate-400">{{ $student->admission_number ?: 'No ID' }}</p>
-                                    </div>
-                                </div>
-                                <button wire:click="issueForStudent({{ $student->id }})"
-                                    class="opacity-0 group-hover:opacity-100 transition-opacity inline-flex items-center px-3 py-1 text-xs font-medium text-blue-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg">
-                                    <svg class="h-3.5 w-3.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                                    </svg>
-                                    Download
-                                </button>
-                            </div>
-                        @empty
-                            <div class="p-8 text-center text-slate-400 text-sm">No students match your criteria</div>
-                        @endforelse
-                    </div>
                 </div>
             </div>
         </div>
+
+        <!-- Step 3: Select Design & Export -->
+        <div class="rounded-2xl border border-slate-200/80 bg-white/90 backdrop-blur-xl shadow-md p-6 space-y-4">
+            <div class="flex items-center gap-3">
+                <span class="flex items-center justify-center w-8 h-8 rounded-full bg-amber-500 text-white font-bold text-sm shadow-sm">3</span>
+                <div>
+                    <h3 class="font-bold text-slate-800 text-base">Select Template Design</h3>
+                    <p class="text-xs text-slate-500">Choose a layout style. The preview will update instantly</p>
+                </div>
+            </div>
+
+            <!-- Gorgeous Visual Grid of Templates -->
+            <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3">
+                @foreach($availableTemplates as $i => $tpl)
+                    <button wire:click="setTemplate({{ $i }})" type="button"
+                        class="group relative rounded-xl border-2 p-2.5 text-center transition-all duration-200 hover:shadow-md {{ $previewIndex === $i ? 'border-amber-500 bg-amber-50 shadow-md ring-2 ring-amber-200' : 'border-slate-200 bg-white hover:border-slate-300' }}">
+                        
+                        <div class="w-full aspect-[1.414/1] rounded-lg mb-2 flex items-center justify-center overflow-hidden {{ $previewIndex === $i ? 'ring-1 ring-amber-300' : '' }}"
+                            @php
+                                $bgStyles = [
+                                    'modern' => 'background: linear-gradient(135deg, #f8fafc, #e2e8f0);',
+                                    'classic' => 'background: #fff; border: 3px solid #3b82f6;',
+                                    'elegant' => 'background: linear-gradient(135deg, #fffef5, #fef9e7); border: 3px solid #d4af37;',
+                                    'vibrant' => 'background: linear-gradient(135deg, #6c5ce7, #a855f7, #ec4899);',
+                                    'minimal' => 'background: #fff; border-top: 3px solid #0ea5e9;',
+                                    'royal' => 'background: linear-gradient(180deg, #581c87, #7c3aed, #a855f7);',
+                                    'prestige' => 'background: linear-gradient(160deg, #0a1628, #0f2241, #162d50);',
+                                    'botanical' => 'background: linear-gradient(170deg, #f7faf4, #eef5e8);',
+                                    'aurora' => 'background: linear-gradient(135deg, #0d9488, #7c3aed, #ec4899);',
+                                    'heritage' => 'background: linear-gradient(150deg, #fdf6ec, #f5e8d0); border: 3px solid #8b1a1a;',
+                                    'obsidian' => 'background: linear-gradient(145deg, #1a1a1a, #2d2d2d);',
+                                    'sahara' => 'background: linear-gradient(155deg, #faf3e6, #e8d5b0);',
+                                    'oceanic' => 'background: linear-gradient(165deg, #e8f4f8, #c0e6f0);',
+                                    'crimson' => 'background: linear-gradient(145deg, #1a0a0a, #2d1515);',
+                                    'ivory' => 'background: #fffef9; border: 2px solid rgba(183,110,121,0.3);',
+                                ];
+                            @endphp
+                            style="{{ $bgStyles[$tpl['key']] ?? 'background: #f1f5f9;' }}">
+                            <svg class="h-5 w-5 {{ in_array($tpl['key'], ['vibrant', 'royal', 'prestige', 'aurora', 'obsidian', 'crimson']) ? 'text-white/60' : 'text-slate-300' }}"
+                                fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                        </div>
+                        <span class="text-[11px] font-bold block truncate {{ $previewIndex === $i ? 'text-amber-800' : 'text-slate-600 group-hover:text-slate-900' }}">
+                            {{ $tpl['label'] }}
+                        </span>
+                        @if($previewIndex === $i)
+                            <div class="absolute -top-1.5 -right-1.5 w-5 h-5 bg-amber-500 rounded-full flex items-center justify-center shadow-sm">
+                                <svg class="h-3 w-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3"
+                                        d="M5 13l4 4L19 7" />
+                                </svg>
+                            </div>
+                        @endif
+                    </button>
+                @endforeach
+            </div>
+
+            <!-- Bulk Actions Area -->
+            <div class="pt-4 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div class="text-left">
+                    <h4 class="text-sm font-bold text-slate-800">Bulk Actions</h4>
+                    <p class="text-xs text-slate-500 font-medium">Download certificates for all matching students in a ZIP</p>
+                </div>
+                <button wire:click="bulkGenerate" wire:loading.attr="disabled" @disabled(!$classId || $this->filteredStudents->isEmpty())
+                    class="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3 bg-gradient-to-r from-amber-500 to-yellow-600 hover:from-amber-600 hover:to-yellow-700 text-white font-bold rounded-xl shadow-lg hover:shadow-xl transition-all disabled:opacity-50 disabled:shadow-none">
+                    <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                            d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                    </svg>
+                    <span wire:loading.remove wire:target="bulkGenerate">
+                        Bulk Download ZIP ({{ $classId ? $this->filteredStudents->count() : 0 }})
+                    </span>
+                    <span wire:loading wire:target="bulkGenerate">Generating ZIP...</span>
+                </button>
+            </div>
+        </div>
+    </div> <!-- Close Right Column -->
+</div> <!-- Close Main Grid -->
+
+<!-- Centered Modal Loader Overlay -->
+<div wire:loading wire:target="bulkGenerate, issueForStudent" class="fixed inset-0 z-[999] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm">
+    <div class="bg-white rounded-2xl p-6 shadow-2xl flex flex-col items-center max-w-sm mx-4 text-center border border-slate-100">
+        <div class="relative w-16 h-16 mb-4">
+            <div class="absolute inset-0 rounded-full border-4 border-slate-100"></div>
+            <div class="absolute inset-0 rounded-full border-4 border-amber-500 border-t-transparent animate-spin"></div>
+        </div>
+        <h4 class="text-lg font-bold text-slate-800 font-sans">Generating Certificate(s)</h4>
+        <p class="text-xs text-slate-500 mt-1 font-medium">Please wait while we compile the PDF. This might take a few seconds...</p>
     </div>
 </div>
+</div> <!-- Close Root Div -->
 
 @once
     @push('scripts')
