@@ -13,7 +13,9 @@ return new class extends Migration
     public function up(): void
     {
         // Alter enum column to include 'basic'
-        DB::statement("ALTER TABLE tenants MODIFY COLUMN plan ENUM('free', 'basic', 'pro', 'enterprise') NOT NULL DEFAULT 'basic'");
+        if (DB::getDriverName() !== 'sqlite') {
+            DB::statement("ALTER TABLE tenants MODIFY COLUMN plan ENUM('free', 'basic', 'pro', 'enterprise') NOT NULL DEFAULT 'basic'");
+        }
     }
 
     /**
@@ -21,6 +23,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        DB::statement("ALTER TABLE tenants MODIFY COLUMN plan ENUM('free', 'pro', 'enterprise') NOT NULL DEFAULT 'free'");
+        if (DB::getDriverName() !== 'sqlite') {
+            DB::statement("ALTER TABLE tenants MODIFY COLUMN plan ENUM('free', 'pro', 'enterprise') NOT NULL DEFAULT 'free'");
+        }
     }
 };

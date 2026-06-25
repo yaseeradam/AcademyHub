@@ -94,6 +94,14 @@ class AuthenticatedSessionController extends Controller
                     ]);
                 }
 
+                // Check if subscription is expired
+                if ($user->tenant && $user->tenant->isSubscriptionExpired()) {
+                    Auth::logout();
+                    throw ValidationException::withMessages([
+                        'email' => 'Your school\'s subscription has expired. Please contact school administration.',
+                    ]);
+                }
+
                 // Check if Parent Portal plugin is active/installed for this school
                 if (! $user->tenant || ! $user->tenant->activeMarketplaceComponents()->where('slug', 'parent-portal')->exists()) {
                     Auth::logout();
@@ -224,6 +232,13 @@ class AuthenticatedSessionController extends Controller
                 ]);
             }
 
+            // Check if school's subscription is expired
+            if ($tenant->isSubscriptionExpired()) {
+                throw ValidationException::withMessages([
+                    'admission_number' => 'Your school\'s subscription has expired. Please contact school administration.',
+                ]);
+            }
+
             $request->validate([
                 'admission_number' => ['required', 'string'],
                 'password'         => ['required', 'string'],
@@ -242,6 +257,21 @@ class AuthenticatedSessionController extends Controller
                 throw ValidationException::withMessages([
                     'admission_number' => 'Student not found or account is inactive. Please check your admission number.',
                 ]);
+            }
+
+            // Verify class target eligibility
+            $pivot = $tenant->activeMarketplaceComponents()->where('slug', 'student-dashboard')->first();
+            if ($pivot && $pivot->pivot) {
+                $allowedClassIds = $pivot->pivot->allowed_class_ids;
+                if (is_string($allowedClassIds)) {
+                    $allowedClassIds = json_decode($allowedClassIds, true) ?: [];
+                }
+                $allowedClassIds = is_array($allowedClassIds) ? $allowedClassIds : [];
+                if (!in_array($student->class_id, $allowedClassIds)) {
+                    throw ValidationException::withMessages([
+                        'admission_number' => 'Your class is not authorized to access the Student Dashboard.',
+                    ]);
+                }
             }
 
             // Verify password. If a hashed password is stored, use Hash::check().

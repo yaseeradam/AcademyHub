@@ -64,23 +64,6 @@ class DatabaseSeeder extends Seeder
 
         $provisioner->provision($tenant);
 
-        // Sync default marketplace plugins for the demo tenant
-        $allowedSlugs = ['cbt', 'homework', 'e-learning', 'whatsapp-bot', 'student-dashboard', 'parent-portal', 'payment-gateway', 'savings-loan', 'messages'];
-        $components = \App\Models\MarketplaceComponent::whereIn('slug', $allowedSlugs)->get();
-        foreach ($components as $component) {
-            $tenant->marketplaceComponents()->syncWithoutDetaching([
-                $component->id => [
-                    'installed_at'             => now(),
-                    'uninstalled_at'           => null,
-                    'status'                   => 'active',
-                    'setup_fee'                => $component->setup_fee,
-                    'usage_fee_per_student'    => $component->usage_fee_per_student,
-                    'price_paid'               => $component->setup_fee,
-                    'student_count_at_install' => 0,
-                    'allowed_class_ids'        => [],
-                ]
-            ]);
-        }
 
         // Tenant demo users
         User::query()->updateOrCreate(
@@ -128,6 +111,26 @@ class DatabaseSeeder extends Seeder
                     'name' => $sectionName,
                 ]);
             }
+        }
+
+        $classIds = SchoolClass::query()->where('tenant_id', $tenant->id)->pluck('id')->toArray();
+
+        // Sync default marketplace plugins for the demo tenant
+        $allowedSlugs = ['cbt', 'homework', 'e-learning', 'whatsapp-bot', 'student-dashboard', 'parent-portal', 'payment-gateway', 'savings-loan', 'messages'];
+        $components = \App\Models\MarketplaceComponent::whereIn('slug', $allowedSlugs)->get();
+        foreach ($components as $component) {
+            $tenant->marketplaceComponents()->syncWithoutDetaching([
+                $component->id => [
+                    'installed_at'             => now(),
+                    'uninstalled_at'           => null,
+                    'status'                   => 'active',
+                    'setup_fee'                => $component->setup_fee,
+                    'usage_fee_per_student'    => $component->usage_fee_per_student,
+                    'price_paid'               => $component->setup_fee,
+                    'student_count_at_install' => 0,
+                    'allowed_class_ids'        => $classIds,
+                ]
+            ]);
         }
 
         $subjects = [

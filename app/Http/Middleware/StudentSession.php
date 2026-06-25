@@ -81,15 +81,37 @@ class StudentSession
             return redirect()->route('login')->with('warning', 'Student Dashboard is not active for this school.');
         }
 
-        $studentExists = Student::query()
+        // Check if school's subscription is expired
+        if ($tenant->isSubscriptionExpired()) {
+            $request->session()->forget(['tenant_id', 'student_id', 'student_name', 'student_admission', 'student_class', 'login_type', 'student_must_reset_password']);
+            $request->session()->regenerateToken();
+            return redirect()->route('login')->with('warning', 'Your school\'s subscription has expired. Please contact school administration.');
+        }
+
+        $student = Student::query()
             ->where('id', $studentId)
             ->where('status', 'Active')
-            ->exists();
+            ->first();
 
-        if (! $studentExists) {
-            $request->session()->forget(['student_id', 'student_name', 'student_admission', 'student_class', 'login_type']);
+        if (! $student) {
+            $request->session()->forget(['tenant_id', 'student_id', 'student_name', 'student_admission', 'student_class', 'login_type']);
             $request->session()->regenerateToken();
             return redirect()->route('login');
+        }
+
+        // Check class target eligibility
+        $pivot = $tenant->activeMarketplaceComponents()->where('slug', 'student-dashboard')->first();
+        if ($pivot && $pivot->pivot) {
+            $allowedClassIds = $pivot->pivot->allowed_class_ids;
+            if (is_string($allowedClassIds)) {
+                $allowedClassIds = json_decode($allowedClassIds, true) ?: [];
+            }
+            $allowedClassIds = is_array($allowedClassIds) ? $allowedClassIds : [];
+            if (!in_array($student->class_id, $allowedClassIds)) {
+                $request->session()->forget(['tenant_id', 'student_id', 'student_name', 'student_admission', 'student_class', 'login_type', 'student_must_reset_password']);
+                $request->session()->regenerateToken();
+                return redirect()->route('login')->with('warning', 'Student Dashboard is not active for your class.');
+            }
         }
 
         if (session('student_must_reset_password') === true && !$request->is('student/profile', 'student/logout')) {

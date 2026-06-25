@@ -27,6 +27,11 @@ class Dashboard extends Component
 
     public function mount(): void
     {
+        $tenant = auth()->user()?->tenant;
+        if ($tenant && $tenant->isSubscriptionExpired()) {
+            abort(403, 'Your school\'s subscription has expired. Access to Parent Portal is disabled.');
+        }
+
         $this->term    = AcademicTerm::activeTermNumber();
         $this->session = AcademicSession::activeName() ?? $this->defaultSession();
 
@@ -39,7 +44,24 @@ class Dashboard extends Component
     #[Computed]
     public function children(): Collection
     {
+        $tenant = auth()->user()?->tenant;
+        if (!$tenant) {
+            return collect();
+        }
+
+        $dbComponent = $tenant->activeMarketplaceComponents()->where('slug', 'student-dashboard')->first();
+        if (!$dbComponent) {
+            return collect();
+        }
+
+        $allowedClassIds = $dbComponent->pivot->allowed_class_ids ?? [];
+        if (is_string($allowedClassIds)) {
+            $allowedClassIds = json_decode($allowedClassIds, true) ?: [];
+        }
+        $allowedClassIds = is_array($allowedClassIds) ? $allowedClassIds : [];
+
         return auth()->user()->students()
+            ->whereIn('class_id', $allowedClassIds)
             ->with(['schoolClass', 'section'])
             ->orderBy('first_name')
             ->get();

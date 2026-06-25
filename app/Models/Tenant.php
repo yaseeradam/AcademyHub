@@ -103,4 +103,16 @@ class Tenant extends Model
     {
         return $query->where('slug', $slug);
     }
+
+    public function isSubscriptionExpired(): bool
+    {
+        $dueDateRaw = config('academyhub.subscription_due_date');
+        if (!empty($dueDateRaw)) {
+            return \Carbon\Carbon::parse($dueDateRaw)->isPast();
+        }
+        if ($this->expires_at) {
+            return $this->expires_at->isPast();
+        }
+        return false;
+    }
 }

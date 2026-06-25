@@ -55,7 +55,21 @@ class Performance extends Component
         }
 
         if ($user?->role === 'parent') {
-            return $user->students()->first();
+            $tenant = $user->tenant;
+            if (!$tenant || $tenant->isSubscriptionExpired()) {
+                return null;
+            }
+            $dbComponent = $tenant->activeMarketplaceComponents()->where('slug', 'student-dashboard')->first();
+            if (!$dbComponent) {
+                return null;
+            }
+            $allowedClassIds = $dbComponent->pivot->allowed_class_ids ?? [];
+            if (is_string($allowedClassIds)) {
+                $allowedClassIds = json_decode($allowedClassIds, true) ?: [];
+            }
+            $allowedClassIds = is_array($allowedClassIds) ? $allowedClassIds : [];
+
+            return $user->students()->whereIn('class_id', $allowedClassIds)->first();
         }
 
         return null;

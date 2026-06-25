@@ -17,9 +17,28 @@ class ReportCardController extends Controller
     public function download(Request $request, Student $student): Response
     {
         $user = $request->user();
+        $tenant = $user ? $user->tenant : null;
+
+        if ($tenant && $tenant->isSubscriptionExpired()) {
+            abort(403, 'Your school\'s subscription has expired. Please contact school administration.');
+        }
 
         if ($user->role === 'parent') {
             abort_unless($user->students()->where('students.id', $student->id)->exists(), 403);
+
+            // Check if child's class is allowed by student-dashboard
+            if ($tenant) {
+                $dbComponent = $tenant->activeMarketplaceComponents()->where('slug', 'student-dashboard')->first();
+                if (!$dbComponent) {
+                    abort(403, 'Student Dashboard is not active.');
+                }
+                $allowedClassIds = $dbComponent->pivot->allowed_class_ids ?? [];
+                if (is_string($allowedClassIds)) {
+                    $allowedClassIds = json_decode($allowedClassIds, true) ?: [];
+                }
+                $allowedClassIds = is_array($allowedClassIds) ? $allowedClassIds : [];
+                abort_unless(in_array($student->class_id, $allowedClassIds), 403, 'Student Dashboard is not active for your child\'s class.');
+            }
         } else {
             abort_unless($user && $user->hasPermission('results.broadsheet'), 403);
 

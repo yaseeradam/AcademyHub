@@ -28,12 +28,37 @@ class RequiresPlugin
             abort(403, 'No tenant context.');
         }
 
-        $installed = $tenant
+        if ($tenant->isSubscriptionExpired()) {
+            if ($request->expectsJson() || $request->header('X-Livewire')) {
+                return response()->json([
+                    'message' => 'Your school\'s subscription has expired. Access to plugins is disabled.',
+                ], 403);
+            }
+
+            if (session()->has('student_id')) {
+                return redirect()
+                    ->route('student.dashboard')
+                    ->with('warning', 'Your school\'s subscription has expired. Please contact school administration.');
+            }
+
+            $user = $request->user();
+            if ($user && ($user->role === 'admin' || $user->is_super_admin)) {
+                return redirect()
+                    ->route('settings.subscription')
+                    ->with('warning', 'Your school\'s subscription has expired. Please renew your subscription to access plugins.');
+            }
+
+            return redirect()
+                ->route('dashboard')
+                ->with('warning', 'Your school\'s subscription has expired. Please contact school administration.');
+        }
+
+        $plugin = $tenant
             ->activeMarketplaceComponents()
             ->where('slug', $slug)
-            ->exists();
+            ->first();
 
-        if (! $installed) {
+        if (! $plugin) {
             // If it's an AJAX / Livewire request, return JSON
             if ($request->expectsJson() || $request->header('X-Livewire')) {
                 return response()->json([
@@ -68,6 +93,28 @@ class RequiresPlugin
             return redirect()
                 ->route('dashboard')
                 ->with('warning', 'This feature is not active for your school.');
+        }
+
+        // If a student is logged in, check class targeting restrictions for this plugin
+        if (session()->has('student_id')) {
+            $student = \App\Models\Student::find(session('student_id'));
+            if ($student) {
+                $allowedClassIds = $plugin->pivot->allowed_class_ids ?? [];
+                if (is_string($allowedClassIds)) {
+                    $allowedClassIds = json_decode($allowedClassIds, true) ?: [];
+                }
+                $allowedClassIds = is_array($allowedClassIds) ? $allowedClassIds : [];
+                if (!in_array($student->class_id, $allowedClassIds)) {
+                    if ($request->expectsJson() || $request->header('X-Livewire')) {
+                        return response()->json([
+                            'message' => 'This feature is not active for your class.',
+                        ], 403);
+                    }
+                    return redirect()
+                        ->route('student.dashboard')
+                        ->with('warning', 'This feature is not active for your class.');
+                }
+            }
         }
 
         return $next($request);
