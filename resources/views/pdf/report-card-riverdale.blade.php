@@ -215,16 +215,6 @@
             <div class="header-cell logo-wrap">
                 @if($logoExists)
                     <img class="logo" src="{{ $logoPath }}" alt="Logo">
-                @else
-                    {{-- CSS Logo Crest Fallback --}}
-                    <div style="width: 55px; height: 60px; background: #0d2c54; border-bottom-left-radius: 20px; border-bottom-right-radius: 20px; border-top-left-radius: 5px; border-top-right-radius: 5px; border: 2px solid #c5a059; position: relative; padding: 2px; box-sizing: border-box;">
-                        <div style="position: absolute; left: 50%; top: 5%; bottom: 5%; width: 1px; background: #c5a059; margin-left: -0.5px;"></div>
-                        <div style="position: absolute; top: 50%; left: 5%; right: 5%; height: 1px; background: #c5a059; margin-top: -0.5px;"></div>
-                        <div style="position: absolute; top: 8px; left: 8px; width: 10px; height: 6px; border: 1px solid #ffffff; border-top: none;"></div>
-                        <div style="position: absolute; top: 6px; right: 8px; font-size: 6px; color: #ffffff;">★</div>
-                        <div style="position: absolute; bottom: 8px; left: 8px; width: 8px; height: 6px; border-radius: 50%; border: 1px solid #c5a059; border-top: none;"></div>
-                        <div style="position: absolute; bottom: 8px; right: 8px; font-size: 7px; color: #c5a059;">★</div>
-                    </div>
                 @endif
             </div>
             <div class="header-cell school-info">
