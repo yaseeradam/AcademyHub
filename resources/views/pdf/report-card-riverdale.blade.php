@@ -1,3 +1,25 @@
+@php
+    $activeTemplate = request()->input('template') ?? config('academyhub.report_card_template', 'riverdale');
+    
+    // Theme Colors
+    $themeColor = '#0d2c54'; // Navy (default)
+    $accentColor = '#c5a059'; // Gold
+    $bgLight = '#f0f4f8';
+    
+    if ($activeTemplate === 'riverdale-burgundy') {
+        $themeColor = '#5c061b'; // Burgundy
+        $accentColor = '#d4af37'; // Gold
+        $bgLight = '#faf0f2';
+    } elseif ($activeTemplate === 'riverdale-emerald') {
+        $themeColor = '#064e3b'; // Emerald
+        $accentColor = '#d4af37'; // Gold
+        $bgLight = '#f0fdf4';
+    } elseif ($activeTemplate === 'riverdale-purple') {
+        $themeColor = '#4c1d95'; // Purple
+        $accentColor = '#c5a059'; // Gold
+        $bgLight = '#f5f3ff';
+    }
+@endphp
 <!doctype html>
 <html lang="en">
 <head>
@@ -9,27 +31,27 @@
         body { font-family: DejaVu Sans, Arial, sans-serif; font-size: 8.5px; color: #1e293b; background: #fff; line-height: 1.25; }
 
         /* Outer borders */
-        .page { border: 3px solid #0d2c54; padding: 6px; background: #fff; }
-        .page-inner { border: 1px solid #c5a059; padding: 12px; position: relative; }
+        .page { border: 3px solid {{ $themeColor }}; padding: 6px; background: #fff; }
+        .page-inner { border: 1px solid {{ $accentColor }}; padding: 12px; position: relative; }
 
         /* Header Layout */
-        .header-table { display: table; width: 100%; border-bottom: 2.5px solid #0d2c54; padding-bottom: 10px; margin-bottom: 12px; }
+        .header-table { display: table; width: 100%; border-bottom: 2.5px solid {{ $themeColor }}; padding-bottom: 10px; margin-bottom: 12px; }
         .header-cell { display: table-cell; vertical-align: middle; }
         
         /* Logo (Crest) */
         .logo-wrap { width: 75px; text-align: left; }
-        .logo { width: 55px; height: 55px; object-fit: contain; border: 1.5px solid #c5a059; border-radius: 6px; padding: 3px; background: #fff; }
+        .logo { width: 55px; height: 55px; object-fit: contain; border: 1.5px solid {{ $accentColor }}; border-radius: 6px; padding: 3px; background: #fff; }
         
         /* School Info Centered */
         .school-info { text-align: center; padding: 0 10px; }
-        .school-name { font-size: 18px; font-weight: 900; color: #0d2c54; letter-spacing: 0.5px; text-transform: uppercase; margin-bottom: 2px; }
-        .school-tagline { font-size: 9px; font-weight: bold; font-style: italic; color: #c5a059; margin-top: 4px; letter-spacing: 0.25px; }
+        .school-name { font-size: 18px; font-weight: 900; color: {{ $themeColor }}; letter-spacing: 0.5px; text-transform: uppercase; margin-bottom: 2px; }
+        .school-tagline { font-size: 9px; font-weight: bold; font-style: italic; color: {{ $accentColor }}; margin-top: 4px; letter-spacing: 0.25px; }
         .school-meta { font-size: 8px; color: #475569; font-weight: 600; margin-top: 1px; }
 
         /* Report Card Ribbon */
         .ribbon-wrap { width: 150px; text-align: right; vertical-align: top; }
-        .ribbon { background: #0d2c54; color: #ffffff; padding: 6px 10px; font-weight: bold; font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; text-align: center; border-radius: 4px; }
-        .ribbon-sub { background: #f0f4f8; color: #0d2c54; padding: 4px; font-size: 8.5px; font-weight: 800; text-align: center; margin-top: 4px; border-radius: 4px; border: 1px solid #b9d5fd; }
+        .ribbon { background: {{ $themeColor }}; color: #ffffff; padding: 6px 10px; font-weight: bold; font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; text-align: center; border-radius: 4px; }
+        .ribbon-sub { background: {{ $bgLight }}; color: {{ $themeColor }}; padding: 4px; font-size: 8.5px; font-weight: 800; text-align: center; margin-top: 4px; border-radius: 4px; border: 1px solid {{ $themeColor }}; }
         .ribbon-sub span { font-size: 7px; font-weight: normal; color: #475569; display: block; margin-top: 1px; }
 
         /* Student & Class Details block */
@@ -40,20 +62,20 @@
         .meta-cell:last-child { padding-left: 15px; }
         
         .field-group { display: table; width: 100%; margin-bottom: 6px; border-bottom: 1px solid #e2e8f0; padding-bottom: 3px; }
-        .field-label { display: table-cell; width: 35%; font-weight: bold; color: #0d2c54; font-size: 8px; text-transform: uppercase; }
+        .field-label { display: table-cell; width: 35%; font-weight: bold; color: {{ $themeColor }}; font-size: 8px; text-transform: uppercase; }
         .field-value { display: table-cell; width: 65%; font-weight: 600; color: #334155; padding-left: 6px; font-size: 8.5px; }
 
         /* Section Headings */
-        .section-header { background: #0d2c54; color: #ffffff; padding: 4px 8px; font-weight: bold; font-size: 8.5px; letter-spacing: 0.5px; border-radius: 3px 3px 0 0; text-transform: uppercase; }
+        .section-header { background: {{ $themeColor }}; color: #ffffff; padding: 4px 8px; font-weight: bold; font-size: 8.5px; letter-spacing: 0.5px; border-radius: 3px 3px 0 0; text-transform: uppercase; }
 
         /* Academic Scores Table */
-        .scores-table { width: 100%; border-collapse: collapse; margin-bottom: 12px; border: 1px solid #c5a059; }
-        .scores-table th { background: #0d2c54; color: #ffffff; padding: 5px 6px; font-size: 8px; font-weight: bold; text-transform: uppercase; text-align: center; border: 1px solid #0d2c54; }
+        .scores-table { width: 100%; border-collapse: collapse; margin-bottom: 12px; border: 1px solid {{ $accentColor }}; }
+        .scores-table th { background: {{ $themeColor }}; color: #ffffff; padding: 5px 6px; font-size: 8px; font-weight: bold; text-transform: uppercase; text-align: center; border: 1px solid {{ $themeColor }}; }
         .scores-table td { padding: 4.5px 6px; border: 1px solid #e2e8f0; text-align: center; font-size: 8px; }
         .scores-table tr:nth-child(even) td { background: #f8fafc; }
-        .scores-table td.subject-name { text-align: left; font-weight: bold; color: #0d2c54; }
+        .scores-table td.subject-name { text-align: left; font-weight: bold; color: {{ $themeColor }}; }
         .scores-table td.bold { font-weight: bold; }
-        .scores-table td.performance-cell { font-weight: bold; color: #0d2c54; }
+        .scores-table td.performance-cell { font-weight: bold; color: {{ $themeColor }}; }
 
         /* Bottom Row Columns: Behavior, Attendance, Remarks */
         .bottom-table { display: table; width: 100%; margin-bottom: 12px; table-layout: fixed; }
@@ -66,13 +88,13 @@
         .footer-blocks-cell { display: table-cell; vertical-align: top; }
 
         /* Parent Signatures & Footer */
-        .bottom-sigs-table { display: table; width: 100%; margin-top: 15px; border-bottom: 2px solid #0d2c54; padding-bottom: 8px; }
+        .bottom-sigs-table { display: table; width: 100%; margin-top: 15px; border-bottom: 2px solid {{ $themeColor }}; padding-bottom: 8px; }
         .bottom-sigs-row { display: table-row; }
         .bottom-sigs-cell { display: table-cell; width: 50%; vertical-align: bottom; }
         .bottom-sigs-cell:last-child { text-align: right; }
-        .sig-line { width: 220px; border-bottom: 1.5px solid #0d2c54; display: inline-block; }
+        .sig-line { width: 220px; border-bottom: 1.5px solid {{ $themeColor }}; display: inline-block; }
         
-        .footer-tagline { text-align: center; font-size: 8px; font-weight: bold; color: #0d2c54; margin-top: 6px; letter-spacing: 0.5px; }
+        .footer-tagline { text-align: center; font-size: 8px; font-weight: bold; color: {{ $themeColor }}; margin-top: 6px; letter-spacing: 0.5px; }
 
         .watermark { position: fixed; top: 50%; left: 50%; transform: translate(-50%,-50%); z-index: -1; opacity: 0.03; width: 320px; height: 320px; }
     </style>
@@ -325,7 +347,7 @@
                             <td class="bold">{{ $r['total'] ? $r['total'] . '%' : '-' }}</td>
                             <td class="performance-cell">
                                 @if($r['total'])
-                                    <span style="color: #c5a059;">★</span> {{ $perfText }}
+                                    <span style="color: {{ $accentColor }};">★</span> {{ $perfText }}
                                 @else
                                     -
                                 @endif
@@ -353,9 +375,9 @@
                     {{-- Behavior & Work Habits block --}}
                     @if($showPsychomotor)
                         <div class="bottom-cell" style="width: {{ $colWidth }}; padding-right: 8px;">
-                            <table style="width: 100%; border-collapse: collapse; border: 1px solid #c5a059;">
+                            <table style="width: 100%; border-collapse: collapse; border: 1px solid {{ $accentColor }};">
                                 <thead>
-                                    <tr style="background: #0d2c54; color: #ffffff;">
+                                    <tr style="background: {{ $themeColor }}; color: #ffffff;">
                                         <th style="text-align: left; padding: 4.5px 6px; font-size: 8px; font-weight: bold; text-transform: uppercase;">Behavior & Work Habits</th>
                                         <th style="width: 20%; text-align: center; padding: 4.5px 6px; font-size: 8px; font-weight: bold; text-transform: uppercase;">Grade</th>
                                     </tr>
@@ -363,27 +385,27 @@
                                 <tbody>
                                     <tr>
                                         <td style="padding: 4px 6px; border: 1px solid #e2e8f0; font-size: 8px; font-weight: bold; color: #475569;">Attitude</td>
-                                        <td style="text-align: center; border: 1px solid #e2e8f0; font-size: 8.5px; font-weight: bold; color: #0d2c54;">{{ $getTraitGrade('Attitude', $average) }}</td>
+                                        <td style="text-align: center; border: 1px solid #e2e8f0; font-size: 8.5px; font-weight: bold; color: {{ $themeColor }};">{{ $getTraitGrade('Attitude', $average) }}</td>
                                     </tr>
                                     <tr>
                                         <td style="padding: 4px 6px; border: 1px solid #e2e8f0; font-size: 8px; font-weight: bold; color: #475569;">Class Participation</td>
-                                        <td style="text-align: center; border: 1px solid #e2e8f0; font-size: 8.5px; font-weight: bold; color: #0d2c54;">{{ $getTraitGrade('Participation', $average) }}</td>
+                                        <td style="text-align: center; border: 1px solid #e2e8f0; font-size: 8.5px; font-weight: bold; color: {{ $themeColor }};">{{ $getTraitGrade('Participation', $average) }}</td>
                                     </tr>
                                     <tr>
                                         <td style="padding: 4px 6px; border: 1px solid #e2e8f0; font-size: 8px; font-weight: bold; color: #475569;">Completes Assignments</td>
-                                        <td style="text-align: center; border: 1px solid #e2e8f0; font-size: 8.5px; font-weight: bold; color: #0d2c54;">{{ $getTraitGrade('Assignments', $average) }}</td>
+                                        <td style="text-align: center; border: 1px solid #e2e8f0; font-size: 8.5px; font-weight: bold; color: {{ $themeColor }};">{{ $getTraitGrade('Assignments', $average) }}</td>
                                     </tr>
                                     <tr>
                                         <td style="padding: 4px 6px; border: 1px solid #e2e8f0; font-size: 8px; font-weight: bold; color: #475569;">Follows Directions</td>
-                                        <td style="text-align: center; border: 1px solid #e2e8f0; font-size: 8.5px; font-weight: bold; color: #0d2c54;">{{ $getTraitGrade('Directions', $average) }}</td>
+                                        <td style="text-align: center; border: 1px solid #e2e8f0; font-size: 8.5px; font-weight: bold; color: {{ $themeColor }};">{{ $getTraitGrade('Directions', $average) }}</td>
                                     </tr>
                                     <tr>
                                         <td style="padding: 4px 6px; border: 1px solid #e2e8f0; font-size: 8px; font-weight: bold; color: #475569;">Works Independently</td>
-                                        <td style="text-align: center; border: 1px solid #e2e8f0; font-size: 8.5px; font-weight: bold; color: #0d2c54;">{{ $getTraitGrade('Works Independently', $average) }}</td>
+                                        <td style="text-align: center; border: 1px solid #e2e8f0; font-size: 8.5px; font-weight: bold; color: {{ $themeColor }};">{{ $getTraitGrade('Works Independently', $average) }}</td>
                                     </tr>
                                     <tr>
                                         <td style="padding: 4px 6px; border: 1px solid #e2e8f0; font-size: 8px; font-weight: bold; color: #475569;">Shows Respect</td>
-                                        <td style="text-align: center; border: 1px solid #e2e8f0; font-size: 8.5px; font-weight: bold; color: #0d2c54;">{{ $getTraitGrade('Respect', $average) }}</td>
+                                        <td style="text-align: center; border: 1px solid #e2e8f0; font-size: 8.5px; font-weight: bold; color: {{ $themeColor }};">{{ $getTraitGrade('Respect', $average) }}</td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -393,36 +415,36 @@
                     {{-- Attendance block --}}
                     @if($showAttendance)
                         <div class="bottom-cell" style="width: {{ $colWidth }}; padding-right: 8px; padding-left: 8px;">
-                            <table style="width: 100%; border-collapse: collapse; border: 1px solid #c5a059;">
+                            <table style="width: 100%; border-collapse: collapse; border: 1px solid {{ $accentColor }};">
                                 <thead>
-                                    <tr style="background: #0d2c54; color: #ffffff;">
+                                    <tr style="background: {{ $themeColor }}; color: #ffffff;">
                                         <th colspan="2" style="text-align: center; padding: 4.5px 6px; font-size: 8px; font-weight: bold; text-transform: uppercase;">Attendance</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     <tr>
                                         <td style="padding: 4.5px 6px; border: 1px solid #e2e8f0; font-size: 8px; font-weight: bold; color: #475569;">Days Enrolled</td>
-                                        <td style="text-align: right; padding-right: 6px; border: 1px solid #e2e8f0; font-size: 8.5px; font-weight: bold; color: #0d2c54;">{{ $enrolled }}</td>
+                                        <td style="text-align: right; padding-right: 6px; border: 1px solid #e2e8f0; font-size: 8.5px; font-weight: bold; color: {{ $themeColor }};">{{ $enrolled }}</td>
                                     </tr>
                                     <tr>
                                         <td style="padding: 4.5px 6px; border: 1px solid #e2e8f0; font-size: 8px; font-weight: bold; color: #475569;">Days Present</td>
-                                        <td style="text-align: right; padding-right: 6px; border: 1px solid #e2e8f0; font-size: 8.5px; font-weight: bold; color: #0d2c54;">{{ $present }}</td>
+                                        <td style="text-align: right; padding-right: 6px; border: 1px solid #e2e8f0; font-size: 8.5px; font-weight: bold; color: {{ $themeColor }};">{{ $present }}</td>
                                     </tr>
                                     <tr>
                                         <td style="padding: 4.5px 6px; border: 1px solid #e2e8f0; font-size: 8px; font-weight: bold; color: #475569;">Days Absent</td>
-                                        <td style="text-align: right; padding-right: 6px; border: 1px solid #e2e8f0; font-size: 8.5px; font-weight: bold; color: #0d2c54;">{{ $absent }}</td>
+                                        <td style="text-align: right; padding-right: 6px; border: 1px solid #e2e8f0; font-size: 8.5px; font-weight: bold; color: {{ $themeColor }};">{{ $absent }}</td>
                                     </tr>
                                     <tr>
                                         <td style="padding: 4.5px 6px; border: 1px solid #e2e8f0; font-size: 8px; font-weight: bold; color: #475569;">Days Tardy</td>
-                                        <td style="text-align: right; padding-right: 6px; border: 1px solid #e2e8f0; font-size: 8.5px; font-weight: bold; color: #0d2c54;">{{ $tardy }}</td>
+                                        <td style="text-align: right; padding-right: 6px; border: 1px solid #e2e8f0; font-size: 8.5px; font-weight: bold; color: {{ $themeColor }};">{{ $tardy }}</td>
                                     </tr>
                                 </tbody>
                             </table>
                             
                             {{-- Attendance Rate Summary --}}
-                            <div style="margin-top: 6px; background: #f0f4f8; border: 1.5px solid #b9d5fd; border-radius: 5px; padding: 6px; text-align: center;">
-                                <div style="font-size: 7px; font-weight: bold; color: #0d2c54; text-transform: uppercase; letter-spacing: 0.5px;">Attendance Rate</div>
-                                <div style="font-size: 15px; font-weight: 900; color: #0d2c54; margin-top: 1px;">{{ $attendanceRate }}%</div>
+                            <div style="margin-top: 6px; background: {{ $bgLight }}; border: 1.5px solid {{ $themeColor }}; border-radius: 5px; padding: 6px; text-align: center;">
+                                <div style="font-size: 7px; font-weight: bold; color: {{ $themeColor }}; text-transform: uppercase; letter-spacing: 0.5px;">Attendance Rate</div>
+                                <div style="font-size: 15px; font-weight: 900; color: {{ $themeColor }}; margin-top: 1px;">{{ $attendanceRate }}%</div>
                             </div>
                         </div>
                     @endif
@@ -430,8 +452,8 @@
                     {{-- Teacher Comments block --}}
                     @if($showTeacherRemarks)
                         <div class="bottom-cell" style="width: {{ $colWidth }}; padding-left: 8px;">
-                            <div style="border: 1px solid #c5a059; min-height: 147px; background: #ffffff; position: relative;">
-                                <div style="background: #0d2c54; color: #ffffff; padding: 4.5px 6px; font-size: 8px; font-weight: bold; text-align: center; text-transform: uppercase;">
+                            <div style="border: 1px solid {{ $accentColor }}; min-height: 147px; background: #ffffff; position: relative;">
+                                <div style="background: {{ $themeColor }}; color: #ffffff; padding: 4.5px 6px; font-size: 8px; font-weight: bold; text-align: center; text-transform: uppercase;">
                                     Teacher Comments
                                 </div>
                                 <div style="padding: 8px; font-size: 8px; line-height: 1.35; color: #334155; padding-bottom: 35px;">
@@ -440,15 +462,15 @@
                                 
                                 {{-- Trophy illustration --}}
                                 <div style="position: absolute; bottom: 6px; left: 0; right: 0; text-align: center;">
-                                    <div style="border-top: 1px solid #c5a059; width: 60%; margin: 0 auto 4px auto;"></div>
+                                    <div style="border-top: 1px solid {{ $accentColor }}; width: 60%; margin: 0 auto 4px auto;"></div>
                                     <div style="display: inline-block; width: 20px; height: 22px; position: relative;">
-                                        <div style="width: 12px; height: 9px; border: 1.5px solid #0d2c54; border-top: none; border-bottom-left-radius: 6px; border-bottom-right-radius: 6px; margin: 0 auto; background: #fff; position: relative;">
-                                            <div style="position: absolute; left: -3.5px; top: 0; width: 2px; height: 5px; border: 1.5px solid #0d2c54; border-right: none; border-radius: 2px 0 0 2px;"></div>
-                                            <div style="position: absolute; right: -3.5px; top: 0; width: 2px; height: 5px; border: 1.5px solid #0d2c54; border-left: none; border-radius: 0 2px 2px 0;"></div>
-                                            <div style="font-size: 5px; color: #c5a059; text-align: center; line-height: 7px;">★</div>
+                                        <div style="width: 12px; height: 9px; border: 1.5px solid {{ $themeColor }}; border-top: none; border-bottom-left-radius: 6px; border-bottom-right-radius: 6px; margin: 0 auto; background: #fff; position: relative;">
+                                            <div style="position: absolute; left: -3.5px; top: 0; width: 2px; height: 5px; border: 1.5px solid {{ $themeColor }}; border-right: none; border-radius: 2px 0 0 2px;"></div>
+                                            <div style="position: absolute; right: -3.5px; top: 0; width: 2px; height: 5px; border: 1.5px solid {{ $themeColor }}; border-left: none; border-radius: 0 2px 2px 0;"></div>
+                                            <div style="font-size: 5px; color: {{ $accentColor }}; text-align: center; line-height: 7px;">★</div>
                                         </div>
-                                        <div style="width: 2px; height: 4px; background: #0d2c54; margin: 0 auto;"></div>
-                                        <div style="width: 8px; height: 2px; background: #0d2c54; margin: 0 auto; border-radius: 1px;"></div>
+                                        <div style="width: 2px; height: 4px; background: {{ $themeColor }}; margin: 0 auto;"></div>
+                                        <div style="width: 8px; height: 2px; background: {{ $themeColor }}; margin: 0 auto; border-radius: 1px;"></div>
                                     </div>
                                 </div>
                             </div>
@@ -475,8 +497,8 @@
                     {{-- Grading Scale --}}
                     @if($showGradingKey)
                         <div class="footer-blocks-cell" style="width: {{ $footerColWidth }}; padding-right: 8px;">
-                            <div style="border: 1px solid #c5a059; border-radius: 4px; overflow: hidden; background: #ffffff;">
-                                <div style="background: #0d2c54; color: #ffffff; padding: 4px 8px; font-size: 8px; font-weight: bold; text-transform: uppercase;">
+                            <div style="border: 1px solid {{ $accentColor }}; border-radius: 4px; overflow: hidden; background: #ffffff;">
+                                <div style="background: {{ $themeColor }}; color: #ffffff; padding: 4px 8px; font-size: 8px; font-weight: bold; text-transform: uppercase;">
                                     Grading Scale
                                 </div>
                                 <div style="padding: 6px 8px;">
@@ -510,8 +532,8 @@
                     {{-- Principal's Remarks --}}
                     @if($showPrincipalRemarks)
                         <div class="footer-blocks-cell" style="width: {{ $footerColWidth }}; padding-left: 8px; position: relative;">
-                            <div style="border: 1px solid #c5a059; border-radius: 4px; overflow: hidden; background: #ffffff; min-height: 80px; position: relative;">
-                                <div style="background: #0d2c54; color: #ffffff; padding: 4px 8px; font-size: 8px; font-weight: bold; text-transform: uppercase;">
+                            <div style="border: 1px solid {{ $accentColor }}; border-radius: 4px; overflow: hidden; background: #ffffff; min-height: 80px; position: relative;">
+                                <div style="background: {{ $themeColor }}; color: #ffffff; padding: 4px 8px; font-size: 8px; font-weight: bold; text-transform: uppercase;">
                                     Principal's Remarks
                                 </div>
                                 <div style="padding: 8px; font-size: 8px; line-height: 1.35; color: #334155; width: 62%; float: left; padding-bottom: 25px;">
@@ -521,9 +543,9 @@
                                     @if(($signatureImages['principal'] ?? null) && file_exists($signatureImages['principal']))
                                         <img src="{{ $signatureImages['principal'] }}" style="max-height: 25px; max-width: 90px; object-fit: contain; display: block; margin: 0 auto;" />
                                     @else
-                                        <div style="font-family: 'Times New Roman', Times, serif; font-size: 13px; font-style: italic; color: #0d2c54; font-weight: bold; letter-spacing: 0.5px; line-height: 1;">Rebecca Carter</div>
+                                        <div style="font-family: 'Times New Roman', Times, serif; font-size: 13px; font-style: italic; color: {{ $themeColor }}; font-weight: bold; letter-spacing: 0.5px; line-height: 1;">Rebecca Carter</div>
                                     @endif
-                                    <div style="border-top: 1px solid #0d2c54; width: 100%; margin-top: 1px; padding-top: 1px; font-size: 7px; font-weight: bold; color: #0d2c54; text-transform: uppercase;">Dr. Rebecca Carter</div>
+                                    <div style="border-top: 1px solid {{ $themeColor }}; width: 100%; margin-top: 1px; padding-top: 1px; font-size: 7px; font-weight: bold; color: {{ $themeColor }}; text-transform: uppercase;">Dr. Rebecca Carter</div>
                                     <div style="font-size: 6px; color: #64748b; margin-top: 0.5px;">Principal</div>
                                 </div>
                             </div>
@@ -536,7 +558,7 @@
 
         {{-- School Fees Panel --}}
         @if($showSchoolFees && isset($schoolFees))
-            <div style="border: 1px solid #c5a059; border-radius: 4px; background: #fffbeb; padding: 8px; margin-bottom: 12px;">
+            <div style="border: 1px solid {{ $accentColor }}; border-radius: 4px; background: #fffbeb; padding: 8px; margin-bottom: 12px;">
                 <div style="font-size: 8.5px; font-weight: bold; color: #92400e; text-transform: uppercase; margin-bottom: 4px;">Outstanding / Next Term Fees Information</div>
                 <table style="width: 100%; font-size: 8px; color: #78350f;">
                     <tr>
@@ -550,7 +572,7 @@
 
         {{-- Next Term Dates block --}}
         @if($showNextTermDate && isset($nextTermDate))
-            <div style="background: #0d2c54; color: #ffffff; text-align: center; padding: 4.5px; font-size: 8px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px; border-radius: 3px;">
+            <div style="background: {{ $themeColor }}; color: #ffffff; text-align: center; padding: 4.5px; font-size: 8px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px; border-radius: 3px;">
                 Next Term Begins: {{ $nextTermDate }}
             </div>
         @endif
@@ -560,11 +582,11 @@
             <div class="bottom-sigs-table">
                 <div class="bottom-sigs-row">
                     <div class="bottom-sigs-cell">
-                        <span style="font-size: 8px; font-weight: bold; color: #0d2c54; text-transform: uppercase;">Parent/Guardian Signature:</span>
+                        <span style="font-size: 8px; font-weight: bold; color: {{ $themeColor }}; text-transform: uppercase;">Parent/Guardian Signature:</span>
                         <span class="sig-line"></span>
                     </div>
                     <div class="bottom-sigs-cell">
-                        <span style="font-size: 8px; font-weight: bold; color: #0d2c54; text-transform: uppercase;">Date:</span>
+                        <span style="font-size: 8px; font-weight: bold; color: {{ $themeColor }}; text-transform: uppercase;">Date:</span>
                         <span class="sig-line" style="width: 120px;"></span>
                     </div>
                 </div>
@@ -575,8 +597,8 @@
         <div class="footer-tagline">
             THANK YOU FOR YOUR SUPPORT!
             <div style="text-align: center; margin-top: 6px;">
-                <div style="display: inline-block; width: 12px; height: 8px; border: 1.5px solid #0d2c54; border-top: none; position: relative;">
-                    <div style="position: absolute; left: 0; right: 50%; top: 0; bottom: 0; border-right: 1px solid #0d2c54;"></div>
+                <div style="display: inline-block; width: 12px; height: 8px; border: 1.5px solid {{ $themeColor }}; border-top: none; position: relative;">
+                    <div style="position: absolute; left: 0; right: 50%; top: 0; bottom: 0; border-right: 1px solid {{ $themeColor }};"></div>
                 </div>
             </div>
         </div>

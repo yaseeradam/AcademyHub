@@ -162,6 +162,34 @@
                                 'preview' => route('settings.templates.preview', ['type' => 'report-card', 'template' => 'riverdale']),
                                 'free' => true,
                             ],
+                            [
+                                'key' => 'riverdale-burgundy',
+                                'title' => 'Riverdale (Burgundy)',
+                                'desc' => 'Classic Riverdale template styled with deep burgundy and bright gold accents.',
+                                'preview' => route('settings.templates.preview', ['type' => 'report-card', 'template' => 'riverdale-burgundy']),
+                                'free' => true,
+                            ],
+                            [
+                                'key' => 'riverdale-emerald',
+                                'title' => 'Riverdale (Emerald)',
+                                'desc' => 'Classic Riverdale template styled with rich forest emerald green and bright gold accents.',
+                                'preview' => route('settings.templates.preview', ['type' => 'report-card', 'template' => 'riverdale-emerald']),
+                                'free' => true,
+                            ],
+                            [
+                                'key' => 'riverdale-purple',
+                                'title' => 'Riverdale (Purple)',
+                                'desc' => 'Classic Riverdale template styled with royal dark purple and warm gold accents.',
+                                'preview' => route('settings.templates.preview', ['type' => 'report-card', 'template' => 'riverdale-purple']),
+                                'free' => true,
+                            ],
+                            [
+                                'key' => 'greenwood',
+                                'title' => 'Greenwood',
+                                'desc' => 'Premium left-sidebar report card layout matching Greenwood High School design with dark green/gold themes.',
+                                'preview' => route('settings.templates.preview', ['type' => 'report-card', 'template' => 'greenwood']),
+                                'free' => true,
+                            ],
                         ];
                     @endphp
 
@@ -227,6 +255,22 @@
                                 @elseif($t['key'] === 'riverdale')
                                     <div class="h-8 rounded-md bg-sky-950 border-b-2 border-yellow-500 flex items-center justify-between px-2 text-[6px] text-yellow-500 font-serif">
                                         <span>RIVERDALE HIGH</span> <div class="w-3.5 h-3.5 rounded-sm bg-yellow-500/20 border border-yellow-500/40"></div>
+                                    </div>
+                                @elseif($t['key'] === 'riverdale-burgundy')
+                                    <div class="h-8 rounded-md bg-red-950 border-b-2 border-yellow-500 flex items-center justify-between px-2 text-[6px] text-yellow-500 font-serif">
+                                        <span>RIVERDALE BURG</span> <div class="w-3.5 h-3.5 rounded-sm bg-yellow-500/20 border border-yellow-500/40"></div>
+                                    </div>
+                                @elseif($t['key'] === 'riverdale-emerald')
+                                    <div class="h-8 rounded-md bg-emerald-950 border-b-2 border-yellow-500 flex items-center justify-between px-2 text-[6px] text-yellow-500 font-serif">
+                                        <span>RIVERDALE EMER</span> <div class="w-3.5 h-3.5 rounded-sm bg-yellow-500/20 border border-yellow-500/40"></div>
+                                    </div>
+                                @elseif($t['key'] === 'riverdale-purple')
+                                    <div class="h-8 rounded-md bg-purple-950 border-b-2 border-yellow-500 flex items-center justify-between px-2 text-[6px] text-yellow-500 font-serif">
+                                        <span>RIVERDALE PURP</span> <div class="w-3.5 h-3.5 rounded-sm bg-yellow-500/20 border border-yellow-500/40"></div>
+                                    </div>
+                                @elseif($t['key'] === 'greenwood')
+                                    <div class="h-8 rounded-md bg-teal-950 border-b-2 border-yellow-500 flex items-center justify-between px-2 text-[6px] text-yellow-500 font-serif">
+                                        <span>GREENWOOD HIGH</span> <div class="w-3.5 h-3.5 rounded-sm bg-yellow-500/20 border border-yellow-500/40"></div>
                                     </div>
                                 @else {{-- compact --}}
                                     <div class="h-8 rounded-md bg-slate-800 flex items-center justify-between px-2 text-[6px] text-slate-100 font-bold">
