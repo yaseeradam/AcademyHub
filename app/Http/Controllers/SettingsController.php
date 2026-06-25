@@ -17,7 +17,7 @@ use Illuminate\Support\Fluent;
 class SettingsController extends Controller
 {
     private const CERTIFICATE_TEMPLATES = ['modern', 'classic', 'elegant', 'vibrant', 'minimal', 'royal', 'obsidian', 'sahara', 'oceanic', 'crimson', 'ivory'];
-    private const REPORT_CARD_TEMPLATES = ['compact', 'elegant', 'modern', 'classic', 'aurora', 'heritage', 'nordic', 'vanguard', 'signature'];
+    private const REPORT_CARD_TEMPLATES = ['compact', 'elegant', 'modern', 'classic', 'aurora', 'heritage', 'nordic', 'vanguard', 'signature', 'riverdale'];
 
     private function settingsPath(): string
     {
@@ -482,6 +482,7 @@ class SettingsController extends Controller
                 'nordic' => 'pdf.report-card-nordic',
                 'vanguard' => 'pdf.report-card-vanguard',
                 'signature' => 'pdf.report-card-signature',
+                'riverdale' => 'pdf.report-card-riverdale',
                 default => 'pdf.report-card-compact',
             };
 

@@ -124,6 +124,7 @@ class BulkReportCardsController extends Controller
                     'nordic' => 'pdf.report-card-nordic',
                     'vanguard' => 'pdf.report-card-vanguard',
                     'signature' => 'pdf.report-card-signature',
+                    'riverdale' => 'pdf.report-card-riverdale',
                     default => 'pdf.report-card-compact',
                 };
 
@@ -199,6 +200,7 @@ class BulkReportCardsController extends Controller
             'nordic' => 'pdf.report-card-nordic',
             'vanguard' => 'pdf.report-card-vanguard',
             'signature' => 'pdf.report-card-signature',
+            'riverdale' => 'pdf.report-card-riverdale',
             default => 'pdf.report-card-compact',
         };
 

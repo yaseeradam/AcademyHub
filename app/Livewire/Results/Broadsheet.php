@@ -211,6 +211,7 @@ class Broadsheet extends Component
                     'nordic' => 'pdf.report-card-nordic',
                     'vanguard' => 'pdf.report-card-vanguard',
                     'signature' => 'pdf.report-card-signature',
+                    'riverdale' => 'pdf.report-card-riverdale',
                     default => 'pdf.report-card-compact',
                 };
                 $pdf = Pdf::loadView($view, $payload)->setPaper('a4');

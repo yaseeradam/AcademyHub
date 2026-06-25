@@ -155,6 +155,13 @@
                                 'preview' => route('settings.templates.preview', ['type' => 'report-card', 'template' => 'signature']),
                                 'free' => true,
                             ],
+                            [
+                                'key' => 'riverdale',
+                                'title' => 'Riverdale',
+                                'desc' => 'Exact replica of the Riverdale High School layout featuring navy/gold header themes, student metadata boxes, behavior metrics, and principal remarks.',
+                                'preview' => route('settings.templates.preview', ['type' => 'report-card', 'template' => 'riverdale']),
+                                'free' => true,
+                            ],
                         ];
                     @endphp
 
@@ -216,6 +223,10 @@
                                 @elseif($t['key'] === 'signature')
                                     <div class="h-8 rounded-md bg-red-950 border-b-2 border-amber-600 flex items-center justify-between px-2 text-[6px] text-amber-500 font-serif">
                                         <span>SIGNATURE PORTAL</span> <div class="w-3.5 h-3.5 rounded-full bg-amber-500/20 border border-amber-500/40"></div>
+                                    </div>
+                                @elseif($t['key'] === 'riverdale')
+                                    <div class="h-8 rounded-md bg-sky-950 border-b-2 border-yellow-500 flex items-center justify-between px-2 text-[6px] text-yellow-500 font-serif">
+                                        <span>RIVERDALE HIGH</span> <div class="w-3.5 h-3.5 rounded-sm bg-yellow-500/20 border border-yellow-500/40"></div>
                                     </div>
                                 @else {{-- compact --}}
                                     <div class="h-8 rounded-md bg-slate-800 flex items-center justify-between px-2 text-[6px] text-slate-100 font-bold">

@@ -91,5 +91,14 @@ class CertificatesCustomizationTest extends TestCase
         $report->assertOk();
         $report->assertHeader('Content-Type', 'application/pdf');
         $this->assertStringStartsWith('%PDF', (string) $report->getContent());
+
+        $riverdale = $this->actingAs($admin)->get(route('settings.templates.preview', [
+            'type' => 'report-card',
+            'template' => 'riverdale',
+        ]));
+
+        $riverdale->assertOk();
+        $riverdale->assertHeader('Content-Type', 'application/pdf');
+        $this->assertStringStartsWith('%PDF', (string) $riverdale->getContent());
     }
 }
