@@ -54,24 +54,51 @@
                 <div class="text-sm font-semibold text-slate-900">Profile Photo</div>
                 <div class="mt-1 text-sm text-slate-600">Upload your photo to show on your dashboard and in messages.</div>
 
-                <form method="POST" action="{{ route('profile.photo') }}" enctype="multipart/form-data" class="mt-5 space-y-4">
+                <form id="profile-photo-form" method="POST" action="{{ route('profile.photo') }}" enctype="multipart/form-data" class="mt-5 space-y-4">
                     @csrf
                     <div>
                         <label class="text-xs font-semibold uppercase tracking-wider text-slate-600">Choose photo</label>
                         <input
+                            id="photo-input"
                             type="file"
                             name="photo"
                             accept="image/*"
                             class="mt-2 block w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 shadow-sm focus:border-brand-400 focus:ring-brand-300"
                             required
                         />
-                        <div class="mt-2 text-xs text-slate-500">JPG/PNG up to 2MB.</div>
+                        <div id="photo-error" class="mt-2 text-xs text-slate-500">JPG/PNG up to 2MB.</div>
                     </div>
 
                     <div class="flex flex-wrap items-center gap-2">
-                        <button type="submit" class="btn-primary">Upload</button>
+                        <button type="submit" id="photo-submit-btn" class="btn-primary">Upload</button>
                     </div>
                 </form>
+
+                <script>
+                    document.getElementById('photo-input').addEventListener('change', function() {
+                        const file = this.files[0];
+                        const errorDiv = document.getElementById('photo-error');
+                        const submitBtn = document.getElementById('photo-submit-btn');
+                        
+                        if (file) {
+                            const fileSizeInMB = file.size / (1024 * 1024);
+                            if (fileSizeInMB > 2) {
+                                errorDiv.innerHTML = '<span class="text-red-600 font-medium">⚠️ This file is too large (' + fileSizeInMB.toFixed(2) + ' MB). Please choose a photo smaller than 2 MB.</span>';
+                                this.value = ''; // Clear file input
+                                submitBtn.disabled = true;
+                                submitBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                            } else {
+                                errorDiv.innerHTML = '<span class="text-green-600 font-medium">✓ File size is okay (' + fileSizeInMB.toFixed(2) + ' MB).</span>';
+                                submitBtn.disabled = false;
+                                submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                            }
+                        } else {
+                            errorDiv.textContent = 'JPG/PNG up to 2MB.';
+                            submitBtn.disabled = false;
+                            submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                        }
+                    });
+                </script>
 
                 @if ($user->profile_photo_url)
                     <form

@@ -155,6 +155,7 @@
 
                     @if ($user?->role === 'admin')
                         <form
+                            id="teacher-photo-form"
                             method="POST"
                             action="{{ route('teachers.photo', $teacher) }}"
                             enctype="multipart/form-data"
@@ -162,14 +163,42 @@
                         >
                             @csrf
                             <input
+                                id="teacher-photo-input"
                                 name="photo"
                                 type="file"
                                 accept="image/*"
                                 class="block w-full text-sm text-gray-700 file:mr-4 file:rounded-lg file:border-0 file:bg-gray-100 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-gray-700 hover:file:bg-gray-200"
                                 required
                             />
-                            <button type="submit" class="btn-primary w-full justify-center">Upload Photo</button>
+                            <div id="teacher-photo-error" class="mt-2 text-xs text-slate-500">JPG/PNG up to 2MB.</div>
+                            <button type="submit" id="teacher-photo-submit-btn" class="btn-primary w-full justify-center">Upload Photo</button>
                         </form>
+
+                        <script>
+                            document.getElementById('teacher-photo-input').addEventListener('change', function() {
+                                const file = this.files[0];
+                                const errorDiv = document.getElementById('teacher-photo-error');
+                                const submitBtn = document.getElementById('teacher-photo-submit-btn');
+                                
+                                if (file) {
+                                    const fileSizeInMB = file.size / (1024 * 1024);
+                                    if (fileSizeInMB > 2) {
+                                        errorDiv.innerHTML = '<span class="text-red-600 font-medium">⚠️ This file is too large (' + fileSizeInMB.toFixed(2) + ' MB). Please choose a photo smaller than 2 MB.</span>';
+                                        this.value = ''; // Clear file input
+                                        submitBtn.disabled = true;
+                                        submitBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                                    } else {
+                                        errorDiv.innerHTML = '<span class="text-green-600 font-medium">✓ File size is okay (' + fileSizeInMB.toFixed(2) + ' MB).</span>';
+                                        submitBtn.disabled = false;
+                                        submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                                    }
+                                } else {
+                                    errorDiv.textContent = 'JPG/PNG up to 2MB.';
+                                    submitBtn.disabled = false;
+                                    submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                                }
+                            });
+                        </script>
                     @else
                         <div class="mt-4 text-xs text-slate-500">Only admins can upload profile photos.</div>
                     @endif
