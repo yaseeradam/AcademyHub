@@ -85,6 +85,11 @@
     $logoPath = $logo ? public_path('uploads/'.str_replace('\\', '/', $logo)) : null;
     $logoExists = $logoPath && file_exists($logoPath);
     
+    if (!$logoExists) {
+        $logoPath = public_path('academy.png');
+        $logoExists = $logoPath && file_exists($logoPath);
+    }
+    
     $opts = $rcOptions ?? [];
     $showPosition         = $opts['show_position'] ?? true;
     $showAttendance         = $opts['show_attendance'] ?? true;
