@@ -47,8 +47,122 @@
             ->whereHas('sheet', fn($q) => $q->whereMonth('date', now()->month)->whereYear('date', now()->year))
             ->get();
         if ($marks->isEmpty()) return 0;
-        $present = $marks->where('status', 'Present')->count();
+        $present = $marks->whereIn('status', ['Present', 'Late'])->count();
         return round(($present / $marks->count()) * 100);
+    });
+
+    // Calculate Monthly Class Attendance Statistics
+    $classStats = \Illuminate\Support\Facades\Cache::remember('dashboard_class_attendance_stats', \DateInterval::createFromDateString('5 minutes'), function () {
+        $sheets = \App\Models\AttendanceSheet::query()
+            ->whereMonth('date', now()->month)
+            ->whereYear('date', now()->year)
+            ->with(['marks', 'schoolClass'])
+            ->get();
+
+        if ($sheets->isEmpty()) {
+            $sheets = \App\Models\AttendanceSheet::query()
+                ->with(['marks', 'schoolClass'])
+                ->get();
+        }
+
+        if ($sheets->isEmpty()) {
+            return [
+                'best_class_name' => 'N/A',
+                'best_class_rate' => 0,
+                'worst_class_name' => 'N/A',
+                'worst_class_rate' => 0,
+            ];
+        }
+
+        $byClass = $sheets->groupBy('class_id');
+        $rates = [];
+
+        foreach ($byClass as $classId => $classSheets) {
+            $total = 0;
+            $present = 0;
+            foreach ($classSheets as $sheet) {
+                foreach ($sheet->marks as $mark) {
+                    $total++;
+                    if ($mark->status === 'Present' || $mark->status === 'Late') {
+                        $present++;
+                    }
+                }
+            }
+
+            $className = $classSheets->first()->schoolClass->name ?? 'Class #' . $classId;
+            $rates[] = [
+                'name' => $className,
+                'rate' => $total > 0 ? round(($present / $total) * 100) : 0,
+            ];
+        }
+
+        usort($rates, fn($a, $b) => $b['rate'] <=> $a['rate']);
+
+        return [
+            'best_class_name' => $rates[0]['name'] ?? 'N/A',
+            'best_class_rate' => $rates[0]['rate'] ?? 0,
+            'worst_class_name' => end($rates)['name'] ?? 'N/A',
+            'worst_class_rate' => end($rates)['rate'] ?? 0,
+        ];
+    });
+
+    // Calculate Current Streak
+    $currentStreak = \Illuminate\Support\Facades\Cache::remember('dashboard_attendance_streak', \DateInterval::createFromDateString('15 minutes'), function () {
+        $dates = \App\Models\AttendanceSheet::query()
+            ->orderBy('date', 'desc')
+            ->pluck('date')
+            ->map(fn($d) => $d->format('Y-m-d'))
+            ->unique()
+            ->values();
+
+        if ($dates->isEmpty()) {
+            return 0;
+        }
+
+        $streak = 0;
+        $currentDate = now();
+
+        $firstDate = \Carbon\Carbon::parse($dates[0]);
+        if ($currentDate->diffInDays($firstDate) > 1) {
+            return 0;
+        }
+
+        $checkDate = $firstDate;
+        $dateSet = collect($dates);
+
+        while (true) {
+            $dateStr = $checkDate->format('Y-m-d');
+            if ($dateSet->contains($dateStr)) {
+                $streak++;
+                $checkDate->subDay();
+                
+                while ($checkDate->isSunday() || ($checkDate->isSaturday() && !$dateSet->contains($checkDate->format('Y-m-d')))) {
+                    $checkDate->subDay();
+                }
+            } else {
+                break;
+            }
+        }
+
+        return $streak;
+    });
+
+    // Calculate Last Month Attendance for comparison
+    $attendanceChange = \Illuminate\Support\Facades\Cache::remember('dashboard_attendance_change', \DateInterval::createFromDateString('15 minutes'), function () use ($monthlyAttendance) {
+        $lastMonth = now()->subMonth();
+        $marks = \App\Models\AttendanceMark::query()
+            ->whereHas('sheet', fn($q) => $q->whereMonth('date', $lastMonth->month)->whereYear('date', $lastMonth->year))
+            ->get();
+            
+        if ($marks->isEmpty()) {
+            return '+0%';
+        }
+        
+        $present = $marks->whereIn('status', ['Present', 'Late'])->count();
+        $lastMonthRate = round(($present / $marks->count()) * 100);
+        
+        $diff = $monthlyAttendance - $lastMonthRate;
+        return ($diff >= 0 ? '+' : '') . $diff . '%';
     });
 
     // Real functioning Weekly Bar Chart Data (Mon-Sat presence)
@@ -361,7 +475,11 @@
                     <p class="text-[9px] font-bold text-slate-400 mb-0.5">This month</p>
                     <div class="flex items-center gap-1.5">
                         <span class="text-xl font-black text-slate-800 leading-none">{{ collect([$monthlyAttendance, 100])->min() }}%</span>
-                        <span class="inline-flex items-center rounded-md bg-[#10b981]/10 px-1 py-0.5 text-[9px] font-black text-[#10b981] leading-none">+6%</span>
+                        @php
+                            $isPositive = !str_starts_with($attendanceChange, '-');
+                            $colorClass = $isPositive ? 'bg-[#10b981]/10 text-[#10b981]' : 'bg-rose-500/10 text-rose-500';
+                        @endphp
+                        <span class="inline-flex items-center rounded-md {{ $colorClass }} px-1 py-0.5 text-[9px] font-black leading-none">{{ $attendanceChange }}</span>
                     </div>
                 </div>
             </div>
@@ -373,8 +491,8 @@
                 </div>
                 <div>
                     <h4 class="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-0.5">Best Class</h4>
-                    <span class="text-lg font-black text-[#10b981] block mb-0.5 leading-none">Class 6A</span>
-                    <p class="text-[9px] font-bold text-slate-400 uppercase tracking-wide">95% Attendance</p>
+                    <span class="text-lg font-black text-[#10b981] block mb-0.5 leading-none">{{ $classStats['best_class_name'] }}</span>
+                    <p class="text-[9px] font-bold text-slate-400 uppercase tracking-wide">{{ $classStats['best_class_rate'] }}% Attendance</p>
                 </div>
             </div>
 
@@ -385,8 +503,8 @@
                 </div>
                 <div>
                     <h4 class="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-0.5">Needs Attention</h4>
-                    <span class="text-lg font-black text-slate-800 block mb-0.5 leading-none">Class 4B</span>
-                    <p class="text-[9px] font-bold text-slate-400 uppercase tracking-wide">72% Attendance</p>
+                    <span class="text-lg font-black text-rose-600 block mb-0.5 leading-none">{{ $classStats['worst_class_name'] }}</span>
+                    <p class="text-[9px] font-bold text-slate-400 uppercase tracking-wide">{{ $classStats['worst_class_rate'] }}% Attendance</p>
                 </div>
             </div>
 
@@ -397,8 +515,14 @@
                 </div>
                 <div class="relative z-10">
                     <h4 class="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-0.5">Current Streak</h4>
-                    <span class="text-lg font-black text-slate-800 block mb-0.5 leading-none">12 days</span>
-                    <p class="text-[9px] font-bold text-slate-400 flex items-center gap-1 uppercase tracking-wide">Keep it up! <span class="bg-[#ffedd5] text-[#ea580c] px-1 py-0.5 rounded leading-none">🔥</span></p>
+                    <span class="text-lg font-black text-slate-800 block mb-0.5 leading-none">{{ $currentStreak }} {{ \Illuminate\Support\Str::plural('day', $currentStreak) }}</span>
+                    <p class="text-[9px] font-bold text-slate-400 flex items-center gap-1 uppercase tracking-wide">
+                        @if($currentStreak > 0)
+                            Keep it up! <span class="bg-[#ffedd5] text-[#ea580c] px-1 py-0.5 rounded leading-none">🔥</span>
+                        @else
+                            No data yet
+                        @endif
+                    </p>
                 </div>
                 
                 {{-- Fire avatar placeholder --}}
