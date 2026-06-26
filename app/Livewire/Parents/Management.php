@@ -169,6 +169,7 @@ class Management extends Component
         return $balances;
     }
 
+    #[Computed]
     public function availableStudents(): Collection
     {
         return Student::query()
