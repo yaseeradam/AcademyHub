@@ -62,19 +62,24 @@ class AppColors {
 
 class ApiConstants {
   static String get baseUrl {
+    // Production VPS endpoint (SSL secured)
+    return 'https://academyhub.com.ng/api';
+    
+    // Fallback Production VPS raw IP (in case SSL is not yet active)
+    // return 'http://150.75.248.123/api';
+
+    /* Local development fallback:
     if (kIsWeb) {
       return 'http://localhost:8000/api';
     }
 
-    // For desktop platform (Linux, macOS, Windows) or local host development
     if (defaultTargetPlatform == TargetPlatform.linux ||
         defaultTargetPlatform == TargetPlatform.macOS ||
         defaultTargetPlatform == TargetPlatform.windows) {
       return 'http://10.142.155.125:8000/api';
     }
 
-    // Default to Android emulator loopback redirection port 8000,
-    // or change to http://[IP_ADDRESS]/api for physical devices on local network
     return 'http://10.142.155.125:8000/api';
+    */
   }
 }

@@ -12,6 +12,7 @@ use App\Traits\DispatchesModals;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Hash;
+use App\Support\TenantSettings;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
@@ -178,7 +179,7 @@ class Form extends Component
         // Add parent account validation if creating parent
         if ($this->create_parent_account) {
             $rules['parent_name'] = ['required', 'string', 'max:255'];
-            $rules['parent_email'] = ['required', 'email', Rule::unique('users', 'email')->where('tenant_id', \App\Support\TenantSettings::tenantId())];
+            $rules['parent_email'] = ['required', 'email', Rule::unique('users', 'email')->where('tenant_id', TenantSettings::tenantId())];
             $rules['parent_phone'] = ['nullable', 'string', 'max:20'];
             $rules['parent_password'] = ['required', 'string', 'min:6'];
         }
@@ -219,7 +220,9 @@ class Form extends Component
                 'required',
                 'string',
                 'max:255',
-                Rule::unique('students', 'admission_number')->ignore($id),
+                Rule::unique('students', 'admission_number')
+                    ->where('tenant_id', TenantSettings::tenantId())
+                    ->ignore($id),
             ];
         } else {
             $this->admission_number = $this->generateAdmissionNumber();
@@ -311,6 +314,16 @@ class Form extends Component
         $student->parents()->sync($parentIds);
 
         $isNew = !$this->student;
+
+        $this->dispatch('student-saved', [
+            'isNew' => $isNew,
+            'name' => $student->full_name,
+            'admission' => $student->admission_number,
+            'downloadUrl' => route('students.admission-form', $student),
+            'parentCreated' => $parentUser ? true : false,
+            'parentEmail' => $parentUser?->email,
+            'parentPassword' => $this->create_parent_account ? $this->parent_password : null,
+        ]);
 
         if ($isNew) {
             session()->flash('success', 'Student profile created successfully.');

@@ -170,7 +170,7 @@
                                 class="block w-full text-sm text-gray-700 file:mr-4 file:rounded-lg file:border-0 file:bg-gray-100 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-gray-700 hover:file:bg-gray-200"
                                 required
                             />
-                            <div id="teacher-photo-error" class="mt-2 text-xs text-slate-500">JPG/PNG up to 2MB.</div>
+                            <div id="teacher-photo-error" class="mt-2 text-xs text-slate-500">JPG/PNG up to 5MB.</div>
                             <button type="submit" id="teacher-photo-submit-btn" class="btn-primary w-full justify-center">Upload Photo</button>
                         </form>
 
@@ -182,8 +182,8 @@
                                 
                                 if (file) {
                                     const fileSizeInMB = file.size / (1024 * 1024);
-                                    if (fileSizeInMB > 2) {
-                                        errorDiv.innerHTML = '<span class="text-red-600 font-medium">⚠️ This file is too large (' + fileSizeInMB.toFixed(2) + ' MB). Please choose a photo smaller than 2 MB.</span>';
+                                    if (fileSizeInMB > 5) {
+                                        errorDiv.innerHTML = '<span class="text-red-600 font-medium">⚠️ This file is too large (' + fileSizeInMB.toFixed(2) + ' MB). Please choose a photo smaller than 5 MB.</span>';
                                         this.value = ''; // Clear file input
                                         submitBtn.disabled = true;
                                         submitBtn.classList.add('opacity-50', 'cursor-not-allowed');
@@ -193,7 +193,7 @@
                                         submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
                                     }
                                 } else {
-                                    errorDiv.textContent = 'JPG/PNG up to 2MB.';
+                                    errorDiv.textContent = 'JPG/PNG up to 5MB.';
                                     submitBtn.disabled = false;
                                     submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
                                 }

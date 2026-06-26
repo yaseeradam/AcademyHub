@@ -161,6 +161,7 @@ Route::prefix('whatsapp')
         Route::get('attendance/{parentId}', [WhatsAppController::class, 'getAttendance']);
         Route::get('results/{parentId}',    [WhatsAppController::class, 'getResults']);
         Route::get('report-card/{studentId}', [WhatsAppController::class, 'getReportCardPDF'])->name('whatsapp.report-card');
+        Route::get('receipt/{transaction}', [WhatsAppController::class, 'getReceiptPDF'])->name('whatsapp.receipt');
         Route::get('fees/{parentId}',       [WhatsAppController::class, 'getFees']);
         Route::get('contact',               [WhatsAppController::class, 'getContact']);
         Route::get('classes',               [WhatsAppController::class, 'getClasses']);

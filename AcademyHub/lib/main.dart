@@ -3,9 +3,11 @@ import 'package:provider/provider.dart';
 import 'core/theme.dart';
 import 'core/auth_provider.dart';
 import 'core/router.dart';
+import 'core/notification_service.dart';
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await NotificationService.init();
   runApp(const AcademyHubApp());
 }
 

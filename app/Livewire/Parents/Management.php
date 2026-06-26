@@ -12,6 +12,8 @@ use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
 use Livewire\WithPagination;
+use Illuminate\Validation\Rule;
+use App\Support\TenantSettings;
 
 #[Layout('layouts.app')]
 #[Title('Parent Management')]
@@ -167,7 +169,6 @@ class Management extends Component
         return $balances;
     }
 
-    #[Computed]
     public function availableStudents(): Collection
     {
         return Student::query()
@@ -300,7 +301,7 @@ class Management extends Component
     {
         $this->validate([
             'name' => 'required|string|max:255',
-            'email' => ['required', 'email', \Illuminate\Validation\Rule::unique('users', 'email')->where('tenant_id', \App\Support\TenantSettings::tenantId())],
+            'email' => ['required', 'email', Rule::unique('users', 'email')->where('tenant_id', TenantSettings::tenantId())],
             'password' => 'required|string|min:6',
             'phone' => 'nullable|string|max:20',
         ]);
@@ -409,9 +410,9 @@ class Management extends Component
             'editEmail' => [
                 'required',
                 'email',
-                \Illuminate\Validation\Rule::unique('users', 'email')
+                Rule::unique('users', 'email')
                     ->ignore($this->editParentId)
-                    ->where('tenant_id', \App\Support\TenantSettings::tenantId())
+                    ->where('tenant_id', TenantSettings::tenantId())
             ],
             'editPhone' => 'nullable|string|max:20',
             'editPassword' => 'nullable|string|min:6',

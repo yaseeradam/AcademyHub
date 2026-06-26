@@ -102,7 +102,7 @@ class ReportCardController extends Controller
             'nordic' => 'pdf.report-card-nordic',
             'vanguard' => 'pdf.report-card-vanguard',
             'signature' => 'pdf.report-card-signature',
-            'riverdale', 'riverdale-burgundy', 'riverdale-emerald', 'riverdale-purple' => 'pdf.report-card-riverdale',
+            'riverdale' => 'pdf.report-card-riverdale',
             'greenwood' => 'pdf.report-card-greenwood',
             default => 'pdf.report-card-compact',
         };

@@ -89,7 +89,7 @@ class Profile extends Component
 
     public function uploadPhoto(): void
     {
-        $this->validate(['photo' => ['required', 'image', 'max:2048']]);
+        $this->validate(['photo' => ['required', 'image', 'max:5120']]);
 
         File::ensureDirectoryExists(public_path('uploads/passports'));
 

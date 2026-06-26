@@ -66,7 +66,7 @@
                             class="mt-2 block w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 shadow-sm focus:border-brand-400 focus:ring-brand-300"
                             required
                         />
-                        <div id="photo-error" class="mt-2 text-xs text-slate-500">JPG/PNG up to 2MB.</div>
+                        <div id="photo-error" class="mt-2 text-xs text-slate-500">JPG/PNG up to 5MB.</div>
                     </div>
 
                     <div class="flex flex-wrap items-center gap-2">
@@ -82,8 +82,8 @@
                         
                         if (file) {
                             const fileSizeInMB = file.size / (1024 * 1024);
-                            if (fileSizeInMB > 2) {
-                                errorDiv.innerHTML = '<span class="text-red-600 font-medium">⚠️ This file is too large (' + fileSizeInMB.toFixed(2) + ' MB). Please choose a photo smaller than 2 MB.</span>';
+                            if (fileSizeInMB > 5) {
+                                errorDiv.innerHTML = '<span class="text-red-600 font-medium">⚠️ This file is too large (' + fileSizeInMB.toFixed(2) + ' MB). Please choose a photo smaller than 5 MB.</span>';
                                 this.value = ''; // Clear file input
                                 submitBtn.disabled = true;
                                 submitBtn.classList.add('opacity-50', 'cursor-not-allowed');
@@ -93,7 +93,7 @@
                                 submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
                             }
                         } else {
-                            errorDiv.textContent = 'JPG/PNG up to 2MB.';
+                            errorDiv.textContent = 'JPG/PNG up to 5MB.';
                             submitBtn.disabled = false;
                             submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
                         }

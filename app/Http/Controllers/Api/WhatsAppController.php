@@ -267,22 +267,35 @@ class WhatsAppController extends Controller
                 });
             },
             'students.scores' => function ($q) {
-                $q->latest()->limit(5)->with('subject');
+                $q->with('subject');
             },
         ]);
+
+        $phone = preg_replace('/\D/', '', $parent->whatsapp_phone ?: '');
+        $activeStudentId = null;
+        if (!empty($phone)) {
+            $activeStudentId = \Illuminate\Support\Facades\Cache::get("whatsapp_active_student_{$phone}");
+        }
 
         $dayOfWeek = now()->dayOfWeekIso;
 
         $events = \App\Models\SchoolEvent::where('starts_at', '>=', today())
             ->orderBy('starts_at')
             ->limit(5)
-            ->get(['title', 'description', 'starts_at', 'location'])
-            ->map(fn($e) => [
-                'title' => $e->title,
-                'description' => $e->description,
-                'date' => $e->starts_at?->toDateString(),
-                'location' => $e->location
-            ])->all();
+            ->get()
+            ->map(function($e) use ($parent) {
+                $rsvp = \App\Models\EventRsvp::where('event_id', $e->id)
+                    ->where('user_id', $parent->id)
+                    ->first();
+                return [
+                    'id' => $e->id,
+                    'title' => $e->title,
+                    'description' => $e->description,
+                    'date' => $e->starts_at?->toDateString(),
+                    'location' => $e->location,
+                    'your_rsvp_status' => $rsvp ? $rsvp->status : 'no response yet'
+                ];
+            })->all();
 
         $announcements = \App\Models\Announcement::whereIn('audience', ['parent', 'all'])
             ->where('published_at', '<=', now())
@@ -302,6 +315,7 @@ class WhatsAppController extends Controller
                 'whatsapp_phone' => $parent->whatsapp_phone,
                 'whatsapp_subscribed' => (bool) $parent->whatsapp_subscribed,
             ],
+            'active_session_student_id' => $activeStudentId,
             'academic_system' => [
                 'active_term' => \App\Models\AcademicTerm::activeTermNumber(),
                 'active_term_name' => \App\Models\AcademicTerm::active() ? \App\Models\AcademicTerm::active()->name : 'First Term',
@@ -363,6 +377,23 @@ class WhatsAppController extends Controller
                         'room' => $t->room
                     ])->all();
 
+                $publishedResults = \App\Models\ResultPublication::where('class_id', $student->class_id)
+                    ->get()
+                    ->map(fn($pub) => [
+                        'term' => $pub->term,
+                        'session' => $pub->session,
+                        'published_at' => $pub->published_at?->toDateString(),
+                    ])->all();
+
+                $homework = $student->getHomeworkForStudent()->map(function ($hw) {
+                    return [
+                        'subject' => $hw->subject?->name,
+                        'title' => $hw->title,
+                        'due_date' => $hw->due_date,
+                        'is_submitted' => $hw->submissions->isNotEmpty(),
+                    ];
+                })->values()->all();
+
                 return [
                     'id' => $student->id,
                     'name' => $student->full_name,
@@ -377,10 +408,12 @@ class WhatsAppController extends Controller
                         'payment_checkout_url'=> $outstandingBalance > 0 ? $paymentUrl : 'PAID',
                     ],
                     'today_timetable' => $timetable,
+                    'published_results' => $publishedResults,
+                    'active_homework' => $homework,
                     'recent_scores' => $student->scores->map(function ($score) {
                         return [
                             'subject' => $score->subject?->name,
-                            'total_score' => $score->total_score,
+                            'total_score' => $score->total,
                             'term' => $score->term ?? null,
                             'session' => $score->session ?? null,
                         ];
@@ -439,13 +472,22 @@ class WhatsAppController extends Controller
         $events = \App\Models\SchoolEvent::where('starts_at', '>=', today())
             ->orderBy('starts_at')
             ->limit(5)
-            ->get(['title', 'description', 'starts_at', 'location'])
-            ->map(fn($e) => [
-                'title' => $e->title,
-                'description' => $e->description,
-                'date' => $e->starts_at?->toDateString(),
-                'location' => $e->location
-            ])->all();
+            ->get()
+            ->map(function($e) {
+                $yesCount = \App\Models\EventRsvp::where('event_id', $e->id)->where('status', 'yes')->count();
+                $noCount = \App\Models\EventRsvp::where('event_id', $e->id)->where('status', 'no')->count();
+                return [
+                    'id' => $e->id,
+                    'title' => $e->title,
+                    'description' => $e->description,
+                    'date' => $e->starts_at?->toDateString(),
+                    'location' => $e->location,
+                    'rsvp_summary' => [
+                        'attending' => $yesCount,
+                        'not_attending' => $noCount,
+                    ]
+                ];
+            })->all();
 
         $announcements = \App\Models\Announcement::whereIn('audience', ['staff', 'all'])
             ->where('published_at', '<=', now())
@@ -471,6 +513,21 @@ class WhatsAppController extends Controller
                 'room' => $t->room
             ])->all();
 
+        $financials = [];
+        if (in_array($staff->role, ['admin', 'superadmin', 'bursar'])) {
+            $activeTermNumber = \App\Models\AcademicTerm::activeTermNumber();
+            $activeSessionName = \App\Models\AcademicTerm::activeSessionName() ?: date('Y') . '/' . (date('Y') + 1);
+            $totalFeesCollected = (float) \App\Models\Transaction::where('type', 'Income')
+                ->where('term', $activeTermNumber)
+                ->where('session', $activeSessionName)
+                ->where('is_void', false)
+                ->sum('amount_paid');
+            $financials = [
+                'term_fees_collected' => $totalFeesCollected,
+                'currency_symbol' => config('academyhub.currency_symbol', '₦'),
+            ];
+        }
+
         return [
             'user' => [
                 'name' => $staff->name,
@@ -492,6 +549,7 @@ class WhatsAppController extends Controller
                 'total_staff' => $totalStaff,
                 'today_present_students' => $presentToday,
                 'today_absent_students' => $absentToday,
+                'financials' => $financials,
             ],
             'classes' => $classesBreakdown,
             'teaching_schedule_today' => $teachingSchedule,
@@ -560,16 +618,22 @@ class WhatsAppController extends Controller
             })
             ->first();
 
+        $publishedResults = \App\Models\ResultPublication::where('class_id', $student->class_id)
+            ->get()
+            ->map(fn($pub) => [
+                'term' => $pub->term,
+                'session' => $pub->session,
+                'published_at' => $pub->published_at?->toDateString(),
+            ])->all();
+
         // Fetch recent scores/results
         $scores = $student->scores()
-            ->latest()
-            ->limit(5)
             ->with('subject')
             ->get()
             ->map(function ($score) {
                 return [
                     'subject' => $score->subject?->name,
-                    'total_score' => $score->total_score,
+                    'total_score' => $score->total,
                     'term' => $score->term,
                     'session' => $score->session,
                 ];
@@ -601,6 +665,7 @@ class WhatsAppController extends Controller
                 'active_session' => \App\Models\AcademicTerm::activeSessionName() ?: date('Y') . '/' . (date('Y') + 1),
             ],
             'homework' => $homework,
+            'published_results' => $publishedResults,
             'recent_scores' => $scores,
             'today_timetable' => $timetable,
             'upcoming_events' => $events,
@@ -784,7 +849,9 @@ class WhatsAppController extends Controller
                   "   - Resolve the <term_number> strictly as a digit: 1, 2, or 3. If a previous term is requested (e.g. 'first term', 'term 2'), resolve it to the correct digit. If no term is specified, default to the current active term from the academic_system metadata.\n" .
                   "   - Resolve the <academic_session> in YYYY/YYYY format (e.g. '2026/2027'). If a previous session is mentioned (e.g. 'last year', '2025/2026'), resolve it. If no session is specified, default to the active session from the academic_system metadata.\n" .
                   "   - You can output multiple SEND_PDF tags if they request report cards for multiple children or multiple terms in a single prompt.\n" .
-                  "11. INTENT DETECTION & SUPPORT TICKETS: If the user indicates they want to report an issue, log a complaint, offer feedback, report missing grades/attendance, or request a call back from the school administration, you MUST append a hidden tag at the very end of your response: '[SUPPORT_TICKET_DETECTED: <message>]' where <message> is a clear, concise 1-sentence summary of the user's actual problem or concern. Do not include this tag for standard information questions (e.g. asking for grades, schedules, or events).";
+                  "11. INTENT DETECTION & SUPPORT TICKETS: If the user indicates they want to report an issue, log a complaint, offer feedback, report missing grades/attendance, or request a call back from the school administration, you MUST append a hidden tag at the very end of your response: '[SUPPORT_TICKET_DETECTED: <message>]' where <message> is a clear, concise 1-sentence summary of the user's actual problem or concern. Do not include this tag for standard information questions (e.g. asking for grades, schedules, or events).\n" .
+                  "12. HANDLING STUDENT RESULTS: If asked about student results, academic performance, report cards, or scores: Check if the child name or admission number is specified in the question. If not, and there are multiple children listed in the context, ask the user to specify which student they are asking about. If the student is identified, verify if the results for the requested term and session are officially published (existence of a record matching that term and session in the student's `published_results` list). If the results are NOT published, you MUST politely inform the user that the academic results for that term/session have not been officially published yet by the school administration, instead of saying you don't have access to this information. If the results ARE published, list the scores from the `recent_scores` data matching the requested term/session, always listing the subject name and score (e.g., Mathematics: 85/100).\n" .
+                  "13. ACTIVE SESSION STUDENT: If 'active_session_student_id' is set in the context (not null), this indicates the student the parent has been actively chatting about or selected recently. Prioritize this student in your answers unless the user names a different child. Additionally, if your answer resolves to or discusses a specific single student from the context, you MUST append a hidden tag at the very end of your response: '[ACTIVE_STUDENT_SELECTED: <student_id>]' where <student_id> is that student's ID from the context. Do not append this tag if you are talking about multiple children or general school information.";
 
         // Use Groq API exclusively
         $answer = $this->tryGroqAPI($prompt);
@@ -880,6 +947,16 @@ class WhatsAppController extends Controller
                 $answer = trim(preg_replace('/\[SEND_PDF:\s*.*?\]/i', '', $answer));
             }
             
+            // Parse [ACTIVE_STUDENT_SELECTED: student_id] tags
+            if (preg_match('/\[ACTIVE_STUDENT_SELECTED:\s*(\d+)\]/i', $answer, $matches)) {
+                $selStudentId = (int) $matches[1];
+                $phone = preg_replace('/\D/', '', $user->whatsapp_phone ?: '');
+                if (!empty($phone)) {
+                    \Illuminate\Support\Facades\Cache::put("whatsapp_active_student_{$phone}", $selStudentId, now()->addMinutes(30));
+                }
+                $answer = trim(preg_replace('/\[ACTIVE_STUDENT_SELECTED:\s*.*?\]/i', '', $answer));
+            }
+
             return response()->json([
                 'success' => true,
                 'answer'  => $answer,
@@ -965,6 +1042,36 @@ class WhatsAppController extends Controller
         ]);
     }
 
+    public function getReceiptPDF(Request $request, $transactionId)
+    {
+        $transaction = \App\Models\Transaction::findOrFail($transactionId);
+        abort_unless($transaction->type === 'Income', 404);
+
+        $student = $transaction->student;
+        if ($student) {
+            $tenant = \App\Models\Tenant::find($student->tenant_id);
+            if ($tenant) {
+                app()->instance('currentTenant', $tenant);
+                $this->loadTenantSettings($tenant);
+            }
+        }
+
+        $transaction->load('student');
+
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('pdf.receipt', [
+            'transaction' => $transaction,
+        ])->setPaper('a4');
+
+        $filename = "receipt-{$transaction->receipt_number}.pdf";
+
+        return response($pdf->output(), 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => "inline; filename=\"{$filename}\"",
+            'Cache-Control' => 'no-cache, no-store, must-revalidate',
+            'Pragma' => 'no-cache',
+            'Expires' => '0',
+        ]);
+    }
 
     public function checkout(Request $request)
     {
@@ -1059,7 +1166,7 @@ class WhatsAppController extends Controller
     }
 
 
-    private function tryGroqAPI(string $prompt): ?string
+    private function tryGroqAPI(string $prompt, array $history = []): ?string
     {
         try {
             $raw = config('services.groq.key') ?: env('GROQ_API_KEY');
@@ -1069,6 +1176,21 @@ class WhatsAppController extends Controller
             if (empty($keys)) return null;
             $apiKey = $keys[array_rand($keys)];
 
+            $messages = [
+                ['role' => 'system', 'content' => 'You are HubGenie, the official school coordinator assistant. You MUST strictly use the verified, real-time context provided in the user prompt to answer questions. Keep your responses highly focused and straight to the point (maximum 1-3 sentences). NEVER use robotic or AI terms (like AI, bot, database, context, system, model). Speak like a human administrator checking records. Format bold text with single asterisks (e.g., *bold*) and lists with literal bullets (•). NEVER use double asterisks (**) or markdown headings.'],
+            ];
+
+            foreach ($history as $msg) {
+                if (isset($msg['role']) && isset($msg['content'])) {
+                    $messages[] = [
+                        'role'    => $msg['role'],
+                        'content' => $msg['content']
+                    ];
+                }
+            }
+
+            $messages[] = ['role' => 'user', 'content' => $prompt];
+
             $response = \Illuminate\Support\Facades\Http::withOptions(['verify' => false])
                 ->timeout(30)
                 ->withHeaders([
@@ -1076,10 +1198,7 @@ class WhatsAppController extends Controller
                     'Content-Type'  => 'application/json',
                 ])->post('https://api.groq.com/openai/v1/chat/completions', [
                     'model'       => 'llama-3.3-70b-versatile',
-                    'messages'    => [
-                        ['role' => 'system', 'content' => 'You are HubGenie, the official school coordinator assistant. You MUST strictly use the verified, real-time context provided in the user prompt to answer questions. Keep your responses highly focused and straight to the point (maximum 1-3 sentences). NEVER use robotic or AI terms (like AI, bot, database, context, system, model). Speak like a human administrator checking records. Format bold text with single asterisks (e.g., *bold*) and lists with literal bullets (•). NEVER use double asterisks (**) or markdown headings.'],
-                        ['role' => 'user',   'content' => $prompt],
-                    ],
+                    'messages'    => $messages,
                     'temperature' => 0.7,
                     'max_tokens'  => 1000,
                 ]);
@@ -1089,6 +1208,104 @@ class WhatsAppController extends Controller
                 : null;
         } catch (\Exception $e) {
             \Illuminate\Support\Facades\Log::error('WhatsApp AI: Groq API error', ['error' => $e->getMessage()]);
+            return null;
+        }
+    }
+
+    private function transcribeAudio(string $mediaId): ?string
+    {
+        try {
+            $token = config('services.whatsapp.token');
+            if (empty($token)) {
+                \Illuminate\Support\Facades\Log::warning('transcribeAudio: WhatsApp token not configured.');
+                return null;
+            }
+
+            // 1. Get media URL
+            $url = "https://graph.facebook.com/v19.0/{$mediaId}";
+            $response = \Illuminate\Support\Facades\Http::withOptions(['verify' => false])
+                ->withHeaders(['Authorization' => 'Bearer ' . $token])
+                ->get($url);
+
+            if ($response->failed()) {
+                \Illuminate\Support\Facades\Log::error('transcribeAudio: Failed to fetch media URL', [
+                    'media_id' => $mediaId,
+                    'status'   => $response->status(),
+                    'body'     => $response->body()
+                ]);
+                return null;
+            }
+
+            $mediaData = $response->json();
+            $downloadUrl = $mediaData['url'] ?? null;
+            if (empty($downloadUrl)) {
+                \Illuminate\Support\Facades\Log::warning('transcribeAudio: No download URL found in Meta response.');
+                return null;
+            }
+
+            // 2. Download the audio file
+            $downloadResponse = \Illuminate\Support\Facades\Http::withOptions(['verify' => false])
+                ->withHeaders(['Authorization' => 'Bearer ' . $token])
+                ->get($downloadUrl);
+
+            if ($downloadResponse->failed()) {
+                \Illuminate\Support\Facades\Log::error('transcribeAudio: Failed to download audio content', [
+                    'url'    => $downloadUrl,
+                    'status' => $downloadResponse->status()
+                ]);
+                return null;
+            }
+
+            $audioContent = $downloadResponse->body();
+            $tempDir = storage_path('app');
+            if (!file_exists($tempDir)) {
+                mkdir($tempDir, 0755, true);
+            }
+            $tempFilePath = $tempDir . DIRECTORY_SEPARATOR . 'temp_whatsapp_' . $mediaId . '.ogg';
+            file_put_contents($tempFilePath, $audioContent);
+
+            // 3. Send to Groq Whisper
+            $raw = config('services.groq.key') ?: env('GROQ_API_KEY');
+            if (empty($raw)) {
+                \Illuminate\Support\Facades\Log::warning('transcribeAudio: Groq API key not configured.');
+                unlink($tempFilePath);
+                return null;
+            }
+            $keys = array_filter(array_map('trim', explode(',', $raw)));
+            if (empty($keys)) {
+                unlink($tempFilePath);
+                return null;
+            }
+            $groqApiKey = $keys[array_rand($keys)];
+
+            $groqResponse = \Illuminate\Support\Facades\Http::withOptions(['verify' => false])
+                ->withHeaders([
+                    'Authorization' => 'Bearer ' . $groqApiKey,
+                ])
+                ->attach('file', fopen($tempFilePath, 'r'), 'audio.ogg')
+                ->post('https://api.groq.com/openai/v1/audio/transcriptions', [
+                    'model' => 'whisper-large-v3',
+                    'temperature' => '0.0'
+                ]);
+
+            // Clean up
+            unlink($tempFilePath);
+
+            if ($groqResponse->failed()) {
+                \Illuminate\Support\Facades\Log::error('transcribeAudio: Groq transcription failed', [
+                    'status' => $groqResponse->status(),
+                    'body'   => $groqResponse->body()
+                ]);
+                return null;
+            }
+
+            $result = $groqResponse->json();
+            return $result['text'] ?? null;
+
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('transcribeAudio: Exception during transcription', [
+                'error' => $e->getMessage()
+            ]);
             return null;
         }
     }
@@ -1129,6 +1346,19 @@ class WhatsAppController extends Controller
                 } elseif ($messageData['type'] === 'interactive') {
                     $text = trim($messageData['interactive']['button_reply']['title'] ?? '');
                     $buttonId = trim($messageData['interactive']['button_reply']['id'] ?? '');
+                } elseif ($messageData['type'] === 'audio') {
+                    $mediaId = $messageData['audio']['id'] ?? null;
+                    if ($mediaId) {
+                        $this->sendMetaMessage($from, "🎙️ _Processing voice note, please wait..._");
+                        $transcribedText = $this->transcribeAudio($mediaId);
+                        if (!empty($transcribedText)) {
+                            $this->sendMetaMessage($from, "🗣️ *You said:* \"{$transcribedText}\"");
+                            $text = $transcribedText;
+                        } else {
+                            $this->sendMetaMessage($from, "⚠️ Sorry, I couldn't transcribe that voice note. Please try typing your request.");
+                            return response()->json(['status' => 'success']);
+                        }
+                    }
                 }
 
                 if (!empty($text)) {
@@ -1163,10 +1393,24 @@ class WhatsAppController extends Controller
     {
         $textLower = strtolower(trim($text));
 
+        if ($buttonId) {
+            if ($buttonId === 'menu_attendance') {
+                $textLower = 'attendance';
+            } elseif ($buttonId === 'menu_results') {
+                $textLower = 'results';
+            } elseif ($buttonId === 'menu_fees') {
+                $textLower = 'fees';
+            }
+        }
+
         // Check if button click is a direct report card request
         if ($buttonId && str_starts_with($buttonId, 'rc_std_')) {
             $parts = explode('|', substr($buttonId, 7));
             $studentId = (int) $parts[0];
+            $phoneClean = preg_replace('/\D/', '', $phone);
+            if (!empty($phoneClean)) {
+                \Illuminate\Support\Facades\Cache::put("whatsapp_active_student_{$phoneClean}", $studentId, now()->addMinutes(30));
+            }
             $term = isset($parts[1]) ? (int) $parts[1] : 1;
             $session = isset($parts[2]) ? $parts[2] : '';
 
@@ -1496,6 +1740,77 @@ class WhatsAppController extends Controller
         $userId = $user->id;
         $userRole = $user->role;
 
+        // 4.3 Handle Event RSVPs from Buttons
+        if ($buttonId && str_starts_with($buttonId, 'rsvp_evt_')) {
+            $parts = explode('|', substr($buttonId, 9));
+            $eventId = (int) $parts[0];
+            $status = isset($parts[1]) ? $parts[1] : 'yes';
+
+            $event = \App\Models\SchoolEvent::find($eventId);
+            if ($event) {
+                \App\Models\EventRsvp::updateOrCreate([
+                    'tenant_id' => $event->tenant_id,
+                    'event_id'  => $event->id,
+                    'user_id'   => $userId,
+                ], [
+                    'status'    => $status,
+                ]);
+
+                $statusText = $status === 'yes' ? 'Attending 🙋' : 'Not Attending 🙅';
+                $reply = "✅ *RSVP Recorded!*\n\nThank you, *{$user->name}*. Your response for *{$event->title}* has been set to: *{$statusText}*.\n\nWe have updated the guest list on the school servers.";
+                $this->sendMetaMessage($phone, $reply);
+                return;
+            }
+        }
+
+        // 4.6 Handle School Stats/Summary keyword for Admins
+        if (in_array($textLower, ['stats', 'summary']) && in_array($userRole, ['admin', 'superadmin'])) {
+            $activeStudents = \App\Models\Student::where('status', 'Active')->count();
+            $activeStaff = \App\Models\User::where('is_active', true)
+                ->whereIn('role', ['teacher', 'bursar', 'admin'])
+                ->count();
+
+            $todaySheetIds = \App\Models\AttendanceSheet::whereDate('date', today())->pluck('id')->toArray();
+            $todayMarksCount = 0;
+            $presentMarksCount = 0;
+            if (!empty($todaySheetIds)) {
+                $todayMarks = \App\Models\AttendanceMark::whereIn('sheet_id', $todaySheetIds)->get();
+                $todayMarksCount = $todayMarks->count();
+                $presentMarksCount = $todayMarks->filter(fn($m) => in_array($m->status, ['P', 'L']))->count();
+            }
+
+            if ($todayMarksCount > 0) {
+                $rate = round(($presentMarksCount / $todayMarksCount) * 100);
+                $attendanceRateText = "*{$rate}%*";
+            } else {
+                $attendanceRateText = "_No sheets recorded today_";
+            }
+
+            $activeTermNumber = \App\Models\AcademicTerm::activeTermNumber();
+            $activeSessionName = \App\Models\AcademicTerm::activeSessionName() ?: date('Y') . '/' . (date('Y') + 1);
+            $currency = config('academyhub.currency_symbol', '₦');
+
+            $totalFeesCollected = (float) \App\Models\Transaction::where('type', 'Income')
+                ->where('term', $activeTermNumber)
+                ->where('session', $activeSessionName)
+                ->where('is_void', false)
+                ->sum('amount_paid');
+
+            $todayDate = today()->format('d M Y');
+
+            $reply = "📊 *SCHOOL DASHBOARD SUMMARY*\n\n" .
+                     "💼 *Overview:*\n" .
+                     "• Active Students: *{$activeStudents}*\n" .
+                     "• Active Staff: *{$activeStaff}*\n\n" .
+                     "📅 *Today's Attendance ({$todayDate}):*\n" .
+                     "• Rate: {$attendanceRateText}" . ($todayMarksCount > 0 ? " ({$presentMarksCount}/{$todayMarksCount} present)" : "") . "\n\n" .
+                     "💰 *Financials (Term {$activeTermNumber} - {$activeSessionName}):*\n" .
+                     "• Total Fees Collected: *{$currency}" . number_format($totalFeesCollected, 2) . "*";
+
+            $this->sendMetaMessage($phone, $reply);
+            return;
+        }
+
         // 5. Handle Logout
         if ($textLower === 'logout') {
             $user->whatsapp_phone = null;
@@ -1557,18 +1872,132 @@ class WhatsAppController extends Controller
             }
 
             if ($textLower === 'results') {
-                $user->load(['students.scores' => function($q) {
-                    $q->latest()->limit(5)->with('subject');
+                $activeTermNumber = \App\Models\AcademicTerm::activeTermNumber();
+                $activeSessionName = \App\Models\AcademicTerm::activeSessionName() ?: date('Y') . '/' . (date('Y') + 1);
+
+                $user->load(['students' => function($q) use ($activeTermNumber, $activeSessionName) {
+                    $q->with(['scores' => function($sq) use ($activeTermNumber, $activeSessionName) {
+                        $sq->where('term', $activeTermNumber)
+                           ->where('session', $activeSessionName)
+                           ->with('subject');
+                    }]);
                 }]);
-                $reply = "📊 *Latest Academic Results*\n\n";
+
+                $reply = "📊 *Latest Academic Results (Term {$activeTermNumber})*\n\n";
                 foreach ($user->students as $s) {
                     $reply .= "👨‍🎓 *{$s->full_name}*\n";
+                    
+                    // Check if published for this student's class
+                    $isPublished = \App\Models\ResultPublication::where('class_id', $s->class_id)
+                        ->where('term', $activeTermNumber)
+                        ->where('session', $activeSessionName)
+                        ->exists();
+                        
+                    if (!$isPublished) {
+                        $reply .= "⚠️ Results have not been officially published yet by the school administration.\n\n";
+                        continue;
+                    }
+
                     if ($s->scores->isNotEmpty()) {
                         foreach ($s->scores as $score) {
-                            $reply .= "• {$score->subject?->name}: *{$score->total_score}/100*\n";
+                            $reply .= "• {$score->subject?->name}: *{$score->total}/100*\n";
                         }
                     } else {
                         $reply .= "No recent scores available.\n";
+                    }
+                    $reply .= "\n";
+                }
+                $this->sendMetaMessage($phone, trim($reply));
+                return;
+            }
+
+            if ($textLower === 'fees') {
+                $activeTermNumber = \App\Models\AcademicTerm::activeTermNumber();
+                $activeSessionName = \App\Models\AcademicTerm::activeSessionName() ?: date('Y') . '/' . (date('Y') + 1);
+                $apiKey = config('services.whatsapp.api_key');
+
+                $reply = "💰 *Outstanding Tuition Fees (Term {$activeTermNumber} - {$activeSessionName})*\n\n";
+                foreach ($user->students as $s) {
+                    $feeStructure = \App\Models\FeeStructure::where('class_id', $s->class_id)
+                        ->where('term', $activeTermNumber)
+                        ->where('session', $activeSessionName)
+                        ->first();
+
+                    $amountDue = $feeStructure ? (float) $feeStructure->amount_due : 0.0;
+
+                    $amountPaid = (float) \App\Models\Transaction::where('student_id', $s->id)
+                        ->where('type', 'Income')
+                        ->where('term', $activeTermNumber)
+                        ->where('session', $activeSessionName)
+                        ->where('is_void', false)
+                        ->sum('amount_paid');
+
+                    $outstandingBalance = max(0.0, $amountDue - $amountPaid);
+
+                    $reply .= "👨‍🎓 *{$s->full_name}*\n" .
+                              "• Amount Due: *₦" . number_format($amountDue, 2) . "*\n" .
+                              "• Amount Paid: *₦" . number_format($amountPaid, 2) . "*\n" .
+                              "• Outstanding Balance: *₦" . number_format($outstandingBalance, 2) . "*\n";
+
+                    if ($outstandingBalance > 0) {
+                        $paymentUrl = route('whatsapp.pay', [
+                            'studentId' => $s->id,
+                            'term'      => $activeTermNumber,
+                            'session'   => $activeSessionName,
+                            'amount'    => $outstandingBalance,
+                            'key'       => $apiKey
+                        ]);
+                        $reply .= "🔗 *Pay Online:* {$paymentUrl}\n";
+                    } else {
+                        $reply .= "✅ *Status:* Fully Paid\n";
+                    }
+                    $reply .= "\n";
+                }
+                $this->sendMetaMessage($phone, trim($reply));
+                return;
+            }
+
+            if ($textLower === 'homework') {
+                $reply = "📝 *Active Assignments*\n\n";
+                foreach ($user->students as $s) {
+                    $reply .= "👨‍🎓 *{$s->full_name}*\n";
+                    $homework = $s->getHomeworkForStudent();
+                    if ($homework->isNotEmpty()) {
+                        foreach ($homework as $hw) {
+                            $status = $hw->submissions->isNotEmpty() ? '✅ Submitted' : '⏳ Pending';
+                            $reply .= "• *{$hw->subject?->name}*: {$hw->title}\n" .
+                                      "  - Due Date: {$hw->due_date}\n" .
+                                      "  - Status: {$status}\n";
+                        }
+                    } else {
+                        $reply .= "No active assignments.\n";
+                    }
+                    $reply .= "\n";
+                }
+                $this->sendMetaMessage($phone, trim($reply));
+                return;
+            }
+
+            if ($textLower === 'timetable') {
+                $dayOfWeek = now()->dayOfWeekIso;
+                $days = [1 => 'Monday', 2 => 'Tuesday', 3 => 'Wednesday', 4 => 'Thursday', 5 => 'Friday', 6 => 'Saturday', 7 => 'Sunday'];
+                $dayName = $days[$dayOfWeek] ?? 'Today';
+
+                $reply = "📅 *Timetable ({$dayName})*\n\n";
+                foreach ($user->students as $s) {
+                    $reply .= "👨‍🎓 *{$s->full_name}*\n";
+                    $timetable = \App\Models\TimetableEntry::where('class_id', $s->class_id)
+                        ->where('day_of_week', $dayOfWeek)
+                        ->with('subject')
+                        ->orderBy('starts_at')
+                        ->get();
+
+                    if ($timetable->isNotEmpty()) {
+                        foreach ($timetable as $t) {
+                            $reply .= "• *{$t->starts_at} - {$t->ends_at}*: {$t->subject?->name} (Room: {$t->room})\n";
+                        }
+                    } else {
+                        $reply .= "No classes scheduled for today.\n";
                     }
                     $reply .= "\n";
                 }
@@ -1581,6 +2010,16 @@ class WhatsAppController extends Controller
         // 9. Standard Menu / Help
         if ($textLower === 'menu' || $textLower === 'help') {
             $schoolName = config('academyhub.school_name') ?: 'AcademyHub';
+            if ($userRole === 'parent') {
+                $messageText = "👋 Welcome to the *{$schoolName}* WhatsApp Portal!\n\nPlease select one of the quick options below, or chat with me naturally:";
+                $buttons = [
+                    ['id' => 'menu_attendance', 'title' => '📅 Attendance'],
+                    ['id' => 'menu_results', 'title' => '📊 Term Results'],
+                    ['id' => 'menu_fees', 'title' => '💰 Fees & Invoices'],
+                ];
+                $this->sendMetaMessage($phone, $messageText, null, null, $buttons);
+                return;
+            }
             $reply = "====================================\n" .
                      "       🎒  *{$schoolName}*      \n" .
                      "====================================\n\n" .
@@ -1590,13 +2029,16 @@ class WhatsAppController extends Controller
             if ($userRole === 'parent') {
                 $reply .= "📅 *attendance* - View today's child attendance\n" .
                           "📊 *results*    - View latest term scores\n" .
-                          "📄 *report*     - Download Official PDF Report Card for any term (e.g. \"send Aisha's term 2 report card\")\n" .
-                          "☎️ *contact*     - Get school address and details\n" .
+                          "💰 *fees*       - View outstanding tuition balance & checkout links\n" .
+                          "📝 *homework*   - View active child assignments & status\n" .
+                          "📅 *timetable*  - View today's class schedule for children\n" .
+                          "📄 *report*     - Download Official PDF Report Card for any term\n" .
+                          "☎️ *contact*     - Get school contact and details\n" .
                           "🔔 *subscribe*   - Opt-in to automatic notifications\n" .
                           "🔕 *unsubscribe* - Opt-out of notifications\n" .
                           "🔒 *logout*      - Disconnect your account\n\n" .
                           "------------------------------------\n" .
-                          "💡 _E.g., try asking: \"Is Abdullahi Bala in school today?\"_";
+                          "💡 _E.g., try asking: \"What homework does Abdullahi Bala have due?\"_";
             } elseif (in_array($userRole, ['admin', 'superadmin'])) {
                 $reply .= "📢 *broadcast*   - Send announcement to Parents/Staff\n" .
                           "🔔 *subscribe*   - Opt-in to automated alerts\n" .
@@ -1658,11 +2100,27 @@ class WhatsAppController extends Controller
                   "   - Resolve the <term_number> strictly as a digit: 1, 2, or 3. If a previous term is requested (e.g. 'first term', 'term 2'), resolve it to the correct digit. If no term is specified, default to the current active term from the academic_system metadata.\n" .
                   "   - Resolve the <academic_session> in YYYY/YYYY format (e.g. '2026/2027'). If a previous session is mentioned (e.g. 'last year', '2025/2026'), resolve it. If no session is specified, default to the active session from the academic_system metadata.\n" .
                   "   - You can output multiple SEND_PDF tags if they request report cards for multiple children or multiple terms in a single prompt.\n" .
-                  "11. INTENT DETECTION & SUPPORT TICKETS: If the user indicates they want to report an issue, log a complaint, offer feedback, report missing grades/attendance, or request a call back from the school administration, you MUST append a hidden tag at the very end of your response: '[SUPPORT_TICKET_DETECTED: <message>]' where <message> is a clear, concise 1-sentence summary of the user's actual problem or concern. Do not include this tag for standard information questions (e.g. asking for grades, schedules, or events).";
+                  "11. INTENT DETECTION & SUPPORT TICKETS: If the user indicates they want to report an issue, log a complaint, offer feedback, report missing grades/attendance, or request a call back from the school administration, you MUST append a hidden tag at the very end of your response: '[SUPPORT_TICKET_DETECTED: <message>]' where <message> is a clear, concise 1-sentence summary of the user's actual problem or concern. Do not include this tag for standard information questions (e.g. asking for grades, schedules, or events).\n" .
+                  "12. HANDLING STUDENT RESULTS: If asked about student results, academic performance, report cards, or scores: Check if the child name or admission number is specified in the question. If not, and there are multiple children listed in the context, ask the user to specify which student they are asking about. If the student is identified, verify if the results for the requested term and session are officially published (existence of a record matching that term and session in the student's `published_results` list). If the results are NOT published, you MUST politely inform the user that the academic results for that term/session have not been officially published yet by the school administration, instead of saying you don't have access to this information. If the results ARE published, list the scores from the `recent_scores` data matching the requested term/session, always listing the subject name and score (e.g., Mathematics: 85/100).\n" .
+                  "13. ACTIVE SESSION STUDENT: If 'active_session_student_id' is set in the context (not null), this indicates the student the parent has been actively chatting about or selected recently. Prioritize this student in your answers unless the user names a different child. Additionally, if your answer resolves to or discusses a specific single student from the context, you MUST append a hidden tag at the very end of your response: '[ACTIVE_STUDENT_SELECTED: <student_id>]' where <student_id> is that student's ID from the context. Do not append this tag if you are talking about multiple children or general school information.";
 
-        $answer = $this->tryGroqAPI($prompt);
+        $phoneClean = preg_replace('/\D/', '', $user->whatsapp_phone ?: '');
+        $historyKey = "whatsapp_chat_history_{$phoneClean}";
+        $history = \Illuminate\Support\Facades\Cache::get($historyKey, []);
+
+        $answer = $this->tryGroqAPI($prompt, $history);
 
         if ($answer) {
+            // Parse [ACTIVE_STUDENT_SELECTED: student_id] tags
+            if (preg_match('/\[ACTIVE_STUDENT_SELECTED:\s*(\d+)\]/i', $answer, $matches)) {
+                $selStudentId = (int) $matches[1];
+                $phone = preg_replace('/\D/', '', $user->whatsapp_phone ?: '');
+                if (!empty($phone)) {
+                    \Illuminate\Support\Facades\Cache::put("whatsapp_active_student_{$phone}", $selStudentId, now()->addMinutes(30));
+                }
+                $answer = trim(preg_replace('/\[ACTIVE_STUDENT_SELECTED:\s*.*?\]/i', '', $answer));
+            }
+
             $ticketDetected = false;
             $ticketMessage = '';
 
@@ -1724,6 +2182,15 @@ class WhatsAppController extends Controller
                         'title' => $s->first_name . ' ' . substr($s->last_name, 0, 1) . '.'
                     ];
                 }
+
+                // Save to history before early return
+                $history[] = ['role' => 'user', 'content' => $text];
+                $history[] = ['role' => 'assistant', 'content' => $answer];
+                if (count($history) > 10) {
+                    $history = array_slice($history, -10);
+                }
+                \Illuminate\Support\Facades\Cache::put($historyKey, $history, now()->addMinutes(30));
+
                 // Send body text first with child quick-reply buttons (up to 3 is supported by Meta)
                 $this->sendMetaMessage($phone, $answer, null, null, $buttons);
                 return;
@@ -1749,6 +2216,14 @@ class WhatsAppController extends Controller
                 // Strip all SEND_PDF tags from final response text
                 $answer = trim(preg_replace('/\[SEND_PDF:\s*.*?\]/i', '', $answer));
             }
+
+            // Save to history before text response
+            $history[] = ['role' => 'user', 'content' => $text];
+            $history[] = ['role' => 'assistant', 'content' => $answer];
+            if (count($history) > 10) {
+                $history = array_slice($history, -10);
+            }
+            \Illuminate\Support\Facades\Cache::put($historyKey, $history, now()->addMinutes(30));
 
             // Send the text answer first
             $this->sendMetaMessage($phone, $answer);

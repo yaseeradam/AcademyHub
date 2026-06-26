@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\SchoolClass;
 use App\Models\SubjectAllocation;
+use App\Support\TenantSettings;
 use Illuminate\Http\Request;
 use Illuminate\Database\QueryException;
 use Illuminate\Validation\Rule;
@@ -56,7 +57,12 @@ class SchoolClassController extends Controller
     public function store(Request $request)
     {
         $data = $request->validate([
-            'name' => ['required', 'string', 'max:255', Rule::unique('classes', 'name')],
+            'name' => [
+                'required',
+                'string',
+                'max:255',
+                Rule::unique('classes', 'name')->where('tenant_id', TenantSettings::tenantId())
+            ],
             'level' => ['required', 'integer', 'min:1', 'max:30'],
         ]);
 
@@ -71,7 +77,14 @@ class SchoolClassController extends Controller
     public function update(Request $request, SchoolClass $class)
     {
         $data = $request->validate([
-            'name' => ['required', 'string', 'max:255', Rule::unique('classes', 'name')->ignore($class->id)],
+            'name' => [
+                'required',
+                'string',
+                'max:255',
+                Rule::unique('classes', 'name')
+                    ->where('tenant_id', TenantSettings::tenantId())
+                    ->ignore($class->id)
+            ],
             'level' => ['required', 'integer', 'min:1', 'max:30'],
         ]);
 

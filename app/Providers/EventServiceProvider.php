@@ -28,6 +28,7 @@ class EventServiceProvider extends ServiceProvider
         \App\Models\AttendanceMark::observe(\App\Observers\AttendanceMarkObserver::class);
         \App\Models\Score::observe(\App\Observers\ScoreObserver::class);
         \App\Models\Transaction::observe(\App\Observers\TransactionObserver::class);
+        \App\Models\SchoolEvent::observe(\App\Observers\SchoolEventObserver::class);
     }
 
     /**

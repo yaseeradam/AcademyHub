@@ -15,9 +15,10 @@ class WhatsAppService
      * @param string|null $mediaUrl
      * @param string|null $filename
      * @param string|null $caption
+     * @param array|null $buttons
      * @return bool
      */
-    public static function sendMessage(string $phone, string $message, ?string $mediaUrl = null, ?string $filename = null, ?string $caption = null): bool
+    public static function sendMessage(string $phone, string $message, ?string $mediaUrl = null, ?string $filename = null, ?string $caption = null, ?array $buttons = null): bool
     {
         if (app()->bound('currentTenant')) {
             $tenant = app('currentTenant');
@@ -48,9 +49,27 @@ class WhatsAppService
                 'messaging_product' => 'whatsapp',
                 'recipient_type' => 'individual',
                 'to' => $toPhone,
+                'type' => 'text',
             ];
 
-            if ($mediaUrl) {
+            if ($buttons) {
+                $payload['type'] = 'interactive';
+                $payload['interactive'] = [
+                    'type' => 'button',
+                    'body' => [
+                        'text' => $message
+                    ],
+                    'action' => [
+                        'buttons' => array_map(fn($btn) => [
+                            'type' => 'reply',
+                            'reply' => [
+                                'id' => $btn['id'],
+                                'title' => substr($btn['title'], 0, 20)
+                            ]
+                        ], $buttons)
+                    ]
+                ];
+            } elseif ($mediaUrl) {
                 $payload['type'] = 'document';
                 $payload['document'] = [
                     'link' => $mediaUrl,

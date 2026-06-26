@@ -47,7 +47,7 @@
                         <th class="px-6 py-4 font-semibold text-gray-900">Contact</th>
                         <th class="px-6 py-4 font-semibold text-gray-900">WhatsApp</th>
                         <th class="px-6 py-4 font-semibold text-gray-900">Children</th>
-                        <th class="px-6 py-4 text-center font-semibold text-gray-900">Outstanding Tuition</th>
+
                         <th class="px-6 py-4 text-right font-semibold text-gray-900">Actions</th>
                     </tr>
                 </thead>
@@ -116,20 +116,7 @@
                                     <span class="text-xs text-gray-400 italic">No linked children</span>
                                 @endif
                             </td>
-                            <td class="px-6 py-4 text-center">
-                                @php
-                                    $balance = $this->parentBalances[$parent->id] ?? 0.0;
-                                @endphp
-                                @if($balance > 0)
-                                    <span class="inline-flex items-center rounded-full bg-red-50 border border-red-200 px-3 py-1 text-xs font-bold text-red-700 shadow-sm">
-                                        {{ config('academyhub.currency_symbol', '₦') }}{{ number_format($balance, 2) }}
-                                    </span>
-                                @else
-                                    <span class="inline-flex items-center rounded-full bg-emerald-50 border border-emerald-200 px-3 py-1 text-xs font-bold text-emerald-700 shadow-sm">
-                                        Cleared
-                                    </span>
-                                @endif
-                            </td>
+
                             <td class="px-6 py-4 text-right">
                                 <div class="flex items-center justify-end gap-2">
                                     <button wire:click="openEditModal({{ $parent->id }})" class="text-gray-400 transition-colors hover:text-brand-600" title="Edit Profile">
@@ -157,7 +144,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="6" class="py-12 text-center text-sm text-gray-500">
+                            <td colspan="5" class="py-12 text-center text-sm text-gray-500">
                                 No parents found. Create the first parent account to get started.
                             </td>
                         </tr>

@@ -136,6 +136,12 @@ class Index extends Component
     public function downloadNote($id)
     {
         $note = ClassNote::findOrFail($id);
+
+        if (empty($note->file_path) || !Storage::disk('public')->exists($note->file_path)) {
+            $this->dispatch('alert', message: 'The file could not be found on the server.', type: 'error');
+            return;
+        }
+
         $note->increment('downloads');
         return Storage::disk('public')->download($note->file_path, $note->file_name);
     }

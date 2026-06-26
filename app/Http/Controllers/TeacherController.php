@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use App\Support\TenantSettings;
 use Illuminate\Validation\Rule;
 
 class TeacherController extends Controller
@@ -24,11 +25,11 @@ class TeacherController extends Controller
     {
         $data = $request->validate([
             'name'      => ['required', 'string', 'max:255'],
-            'email'     => ['required', 'string', 'email', 'max:255', Rule::unique('users', 'email')->where('tenant_id', \App\Support\TenantSettings::tenantId())],
+            'email'     => ['required', 'string', 'email', 'max:255', Rule::unique('users', 'email')->where('tenant_id', TenantSettings::tenantId())],
             'password'  => ['required', 'string', 'min:8', 'confirmed'],
             'is_active' => ['nullable', 'boolean'],
             'is_class_teacher' => ['nullable', 'boolean'],
-            'photo'     => ['nullable', 'image', 'max:2048'],
+            'photo'     => ['nullable', 'image', 'max:5120'],
         ]);
 
         $profilePhotoPath = null;
@@ -86,7 +87,7 @@ class TeacherController extends Controller
 
         $data = $request->validate([
             'name'             => ['required', 'string', 'max:255'],
-            'email'            => ['required', 'string', 'email', 'max:255', Rule::unique('users', 'email')->where('tenant_id', \App\Support\TenantSettings::tenantId())->ignore($teacher->id)],
+            'email'            => ['required', 'string', 'email', 'max:255', Rule::unique('users', 'email')->where('tenant_id', TenantSettings::tenantId())->ignore($teacher->id)],
             'password'         => ['nullable', 'string', 'min:8', 'confirmed'],
             'is_active'        => ['nullable', 'boolean'],
             'is_class_teacher' => ['nullable', 'boolean'],
@@ -113,7 +114,7 @@ class TeacherController extends Controller
         abort_unless($teacher->role === 'teacher', 404);
 
         $data = $request->validate([
-            'photo' => ['required', 'image', 'max:2048'],
+            'photo' => ['required', 'image', 'max:5120'],
         ]);
 
         $file = $data['photo'];

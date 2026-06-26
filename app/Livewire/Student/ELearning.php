@@ -41,6 +41,13 @@ class ELearning extends Component
         abort_unless($student, 403);
 
         $note = ClassNote::where('class_id', $student->class_id)->findOrFail($id);
+
+        if (empty($note->file_path) || !Storage::disk('public')->exists($note->file_path)) {
+            session()->flash('error', 'The file could not be found on the server.');
+            $this->dispatch('alert', message: 'The file could not be found on the server.', type: 'error');
+            return;
+        }
+
         $note->increment('downloads');
         return Storage::disk('public')->download($note->file_path, $note->file_name);
     }

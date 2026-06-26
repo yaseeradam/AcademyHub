@@ -31,4 +31,9 @@ class SchoolEvent extends Model
     {
         return $this->belongsTo(User::class, 'created_by');
     }
+
+    public function rsvps(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(EventRsvp::class, 'event_id');
+    }
 }

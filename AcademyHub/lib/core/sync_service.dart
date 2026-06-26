@@ -4,6 +4,7 @@ import 'package:dio/dio.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'database_helper.dart';
+import 'notification_service.dart';
 
 enum SyncStatus { synced, syncing, offline, error }
 
@@ -150,7 +151,7 @@ class SyncService {
       final r = await dio.get('/notifications?per_page=100');
       final listData = r.data['notifications'] ?? r.data['data'];
       final list = (listData as List?)?.cast<Map<String, dynamic>>() ?? [];
-      await _db.upsertNotifications(list);
+      await _processNewNotifications(list);
     });
   }
 
@@ -235,7 +236,7 @@ class SyncService {
       final r = await dio.get('/student/notifications');
       final listData = r.data['notifications'] ?? r.data['data'];
       final list = (listData as List?)?.cast<Map<String, dynamic>>() ?? [];
-      await _db.upsertNotifications(list);
+      await _processNewNotifications(list);
     });
   }
 
@@ -273,7 +274,7 @@ class SyncService {
       final r = await dio.get('/notifications?per_page=100');
       final listData = r.data['notifications'] ?? r.data['data'];
       final list = (listData as List?)?.cast<Map<String, dynamic>>() ?? [];
-      await _db.upsertNotifications(list);
+      await _processNewNotifications(list);
     });
   }
 
@@ -281,8 +282,42 @@ class SyncService {
     await _tryFetch(() async {
       final r    = await dio.get('/homework');
       final list = (r.data['data'] as List).cast<Map<String, dynamic>>();
+
+      try {
+        final existingHomework = await _db.getAllHomework();
+        final existingIds = existingHomework.map((h) => h['id'] as int).toSet();
+        for (final hw in list) {
+          final id = hw['id'] as int;
+          if (existingIds.isNotEmpty && !existingIds.contains(id)) {
+            await NotificationService.showNotification(
+              id: id,
+              title: 'New Assignment Assigned',
+              body: '${hw['title']} - ${hw['subject_name'] ?? ""}',
+            );
+          }
+        }
+      } catch (_) {}
+
       await _db.upsertHomework(list);
     });
+  }
+
+  Future<void> _processNewNotifications(List<Map<String, dynamic>> list) async {
+    try {
+      final existingNotifs = await _db.getNotifications();
+      final existingIds = existingNotifs.map((n) => n['id'] as int).toSet();
+      for (final n in list) {
+        final id = n['id'] as int;
+        if (existingIds.isNotEmpty && !existingIds.contains(id)) {
+          await NotificationService.showNotification(
+            id: id + 100000,
+            title: n['title'] ?? 'New Notification',
+            body: n['body'] ?? '',
+          );
+        }
+      }
+    } catch (_) {}
+    await _db.upsertNotifications(list);
   }
 
   Future<void> _fetchTimetable() async {

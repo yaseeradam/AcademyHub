@@ -8,6 +8,7 @@ use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
+use App\Support\TenantSettings;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
@@ -101,7 +102,7 @@ class Index extends Component
 
         $rules = [
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users', 'email')->where('tenant_id', \App\Support\TenantSettings::tenantId())],
+            'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users', 'email')->where('tenant_id', TenantSettings::tenantId())],
             'role' => ['required', Rule::in(['admin', 'bursar', 'teacher', 'parent'])],
             'isActive' => ['required', 'in:0,1'],
             'password' => ['nullable', 'string', 'min:8'],

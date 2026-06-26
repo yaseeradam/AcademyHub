@@ -1,24 +1,8 @@
 @php
-    $activeTemplate = request()->input('template') ?? config('academyhub.report_card_template', 'riverdale');
-    
     // Theme Colors
     $themeColor = '#0d2c54'; // Navy (default)
     $accentColor = '#c5a059'; // Gold
     $bgLight = '#f0f4f8';
-    
-    if ($activeTemplate === 'riverdale-burgundy') {
-        $themeColor = '#5c061b'; // Burgundy
-        $accentColor = '#d4af37'; // Gold
-        $bgLight = '#faf0f2';
-    } elseif ($activeTemplate === 'riverdale-emerald') {
-        $themeColor = '#064e3b'; // Emerald
-        $accentColor = '#d4af37'; // Gold
-        $bgLight = '#f0fdf4';
-    } elseif ($activeTemplate === 'riverdale-purple') {
-        $themeColor = '#4c1d95'; // Purple
-        $accentColor = '#c5a059'; // Gold
-        $bgLight = '#f5f3ff';
-    }
 @endphp
 <!doctype html>
 <html lang="en">
@@ -249,12 +233,8 @@
                 @if(config('academyhub.school_address'))
                     <div class="school-meta">{{ config('academyhub.school_address') }}</div>
                 @endif
-                @if(config('academyhub.school_phone') || config('academyhub.school_email'))
-                    <div class="school-meta">
-                        {{ config('academyhub.school_phone') }} 
-                        @if(config('academyhub.school_phone') && config('academyhub.school_email')) • @endif 
-                        {{ config('academyhub.school_email') }}
-                    </div>
+                @if(config('academyhub.school_phone'))
+                    <div class="school-meta">{{ config('academyhub.school_phone') }}</div>
                 @endif
                 <div class="school-tagline">Learn Today, Lead Tomorrow</div>
             </div>
@@ -270,7 +250,7 @@
         {{-- Student Details Block --}}
         <div class="meta-table">
             <div class="meta-row">
-                <div class="meta-cell">
+                <div class="meta-cell" style="width: 34%; padding-right: 10px;">
                     <div class="field-group">
                         <span class="field-label">Student Name:</span>
                         <span class="field-value">{{ $student->full_name }}</span>
@@ -284,19 +264,40 @@
                         <span class="field-value">{{ $student->admission_number }}</span>
                     </div>
                 </div>
-                <div class="meta-cell">
-                    <div class="field-group">
-                        <span class="field-label">Homeroom Teacher:</span>
-                        <span class="field-value">{{ $homeroomTeacher }}</span>
-                    </div>
+                <div class="meta-cell" style="width: 33%; padding-left: 10px; padding-right: 10px;">
                     <div class="field-group">
                         <span class="field-label">Reporting Period:</span>
                         <span class="field-value">Term {{ $term }}</span>
                     </div>
                     <div class="field-group">
+                        <span class="field-label">Academic Year:</span>
+                        <span class="field-value">{{ $session }}</span>
+                    </div>
+                    <div class="field-group">
                         <span class="field-label">Dates:</span>
                         <span class="field-value">{{ $dates }}</span>
                     </div>
+                </div>
+                <div class="meta-cell" style="width: 33%; padding-left: 10px;">
+                    <div class="field-group">
+                        <span class="field-label">Total Score:</span>
+                        <span class="field-value">{{ $grandTotal }}</span>
+                    </div>
+                    <div class="field-group">
+                        <span class="field-label">Average Score:</span>
+                        <span class="field-value">{{ number_format($average, 1) }}%</span>
+                    </div>
+                    @if($showPosition)
+                        <div class="field-group">
+                            <span class="field-label">Class Position:</span>
+                            <span class="field-value">{{ $position }}</span>
+                        </div>
+                    @else
+                        <div class="field-group" style="border-bottom: none; padding-bottom: 0;">
+                            <span class="field-label">&nbsp;</span>
+                            <span class="field-value">&nbsp;</span>
+                        </div>
+                    @endif
                 </div>
             </div>
         </div>
@@ -308,25 +309,17 @@
                 <thead>
                     <tr>
                         <th style="width: 32%; text-align: left; padding-left: 8px;">Subject</th>
-                        <th style="width: 25%;">Teacher</th>
+                        <th style="width: 10%;">CA1</th>
+                        <th style="width: 10%;">CA2</th>
+                        <th style="width: 10%;">Exam</th>
+                        <th style="width: 10%;">Total</th>
                         <th style="width: 10%;">Grade</th>
-                        <th style="width: 15%;">Percentage</th>
                         <th style="width: 18%;">Performance</th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach($rows as $r)
                         @php
-                            $subjectId = $r['subject']->id;
-                            $subjectTeacher = '-';
-                            $allocation = \App\Models\SubjectAllocation::where('class_id', $student->class_id)
-                                ->where('subject_id', $subjectId)
-                                ->with('teacher')
-                                ->first();
-                            if ($allocation && $allocation->teacher) {
-                                $subjectTeacher = $allocation->teacher->name;
-                            }
-
                             $totalScore = $r['total'] ?? 0;
                             if ($totalScore >= 90) {
                                 $perfText = 'Excellent';
@@ -342,9 +335,11 @@
                         @endphp
                         <tr>
                             <td class="subject-name" style="padding-left: 8px;">{{ $r['subject']?->name ?? '-' }}</td>
-                            <td style="text-align: left; padding-left: 6px;">{{ $subjectTeacher }}</td>
+                            <td>{{ $r['ca1'] ?? '-' }}</td>
+                            <td>{{ $r['ca2'] ?? '-' }}</td>
+                            <td>{{ $r['exam'] ?? '-' }}</td>
+                            <td class="bold">{{ $r['total'] ?? '-' }}</td>
                             <td class="bold">{{ $r['grade'] ?? '-' }}</td>
-                            <td class="bold">{{ $r['total'] ? $r['total'] . '%' : '-' }}</td>
                             <td class="performance-cell">
                                 @if($r['total'])
                                     <span style="color: {{ $accentColor }};">★</span> {{ $perfText }}
@@ -456,22 +451,17 @@
                                 <div style="background: {{ $themeColor }}; color: #ffffff; padding: 4.5px 6px; font-size: 8px; font-weight: bold; text-align: center; text-transform: uppercase;">
                                     Teacher Comments
                                 </div>
-                                <div style="padding: 8px; font-size: 8px; line-height: 1.35; color: #334155; padding-bottom: 35px;">
+                                <div style="padding: 8px; font-size: 8px; line-height: 1.35; color: #334155; width: 62%; float: left; padding-bottom: 25px;">
                                     {{ $teacherRemarks ?? 'No remarks provided.' }}
                                 </div>
-                                
-                                {{-- Trophy illustration --}}
-                                <div style="position: absolute; bottom: 6px; left: 0; right: 0; text-align: center;">
-                                    <div style="border-top: 1px solid {{ $accentColor }}; width: 60%; margin: 0 auto 4px auto;"></div>
-                                    <div style="display: inline-block; width: 20px; height: 22px; position: relative;">
-                                        <div style="width: 12px; height: 9px; border: 1.5px solid {{ $themeColor }}; border-top: none; border-bottom-left-radius: 6px; border-bottom-right-radius: 6px; margin: 0 auto; background: #fff; position: relative;">
-                                            <div style="position: absolute; left: -3.5px; top: 0; width: 2px; height: 5px; border: 1.5px solid {{ $themeColor }}; border-right: none; border-radius: 2px 0 0 2px;"></div>
-                                            <div style="position: absolute; right: -3.5px; top: 0; width: 2px; height: 5px; border: 1.5px solid {{ $themeColor }}; border-left: none; border-radius: 0 2px 2px 0;"></div>
-                                            <div style="font-size: 5px; color: {{ $accentColor }}; text-align: center; line-height: 7px;">★</div>
-                                        </div>
-                                        <div style="width: 2px; height: 4px; background: {{ $themeColor }}; margin: 0 auto;"></div>
-                                        <div style="width: 8px; height: 2px; background: {{ $themeColor }}; margin: 0 auto; border-radius: 1px;"></div>
-                                    </div>
+                                <div style="position: absolute; right: 10px; bottom: 6px; text-align: center; width: 110px;">
+                                    @if(($signatureImages['teacher'] ?? null) && file_exists($signatureImages['teacher']))
+                                        <img src="{{ $signatureImages['teacher'] }}" style="max-height: 25px; max-width: 90px; object-fit: contain; display: block; margin: 0 auto;" />
+                                    @else
+                                        <div style="font-family: 'Times New Roman', Times, serif; font-size: 13px; font-style: italic; color: {{ $themeColor }}; font-weight: bold; letter-spacing: 0.5px; line-height: 1;">Emily Johnson</div>
+                                    @endif
+                                    <div style="border-top: 1px solid {{ $themeColor }}; width: 100%; margin-top: 1px; padding-top: 1px; font-size: 7px; font-weight: bold; color: {{ $themeColor }}; text-transform: uppercase;">{{ $homeroomTeacher }}</div>
+                                    <div style="font-size: 6px; color: #64748b; margin-top: 0.5px;">Class Teacher</div>
                                 </div>
                             </div>
                         </div>

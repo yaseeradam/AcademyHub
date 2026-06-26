@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Support\Audit;
+use App\Support\TenantSettings;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Storage;
@@ -32,7 +33,7 @@ class ProfileController extends Controller
                 'string',
                 'email',
                 'max:255',
-                Rule::unique('users', 'email')->where('tenant_id', \App\Support\TenantSettings::tenantId())->ignore($user->id),
+                Rule::unique('users', 'email')->where('tenant_id', TenantSettings::tenantId())->ignore($user->id),
             ],
         ]);
 
@@ -71,7 +72,7 @@ class ProfileController extends Controller
         abort_unless($user, 403);
 
         $data = $request->validate([
-            'photo' => ['required', 'image', 'max:2048'],
+            'photo' => ['required', 'image', 'max:5120'],
         ]);
 
         $file = $data['photo'];

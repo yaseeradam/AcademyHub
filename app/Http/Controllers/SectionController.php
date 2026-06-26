@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\SchoolClass;
 use App\Models\Section;
+use App\Support\TenantSettings;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -17,7 +18,9 @@ class SectionController extends Controller
                 'required',
                 'string',
                 'max:50',
-                Rule::unique('sections', 'name')->where(fn ($q) => $q->where('class_id', $class->id)),
+                Rule::unique('sections', 'name')->where(fn ($q) => $q
+                    ->where('class_id', $class->id)
+                    ->where('tenant_id', TenantSettings::tenantId())),
             ],
         ]);
 
@@ -39,7 +42,9 @@ class SectionController extends Controller
                 'string',
                 'max:50',
                 Rule::unique('sections', 'name')
-                    ->where(fn ($q) => $q->where('class_id', $class->id))
+                    ->where(fn ($q) => $q
+                        ->where('class_id', $class->id)
+                        ->where('tenant_id', TenantSettings::tenantId()))
                     ->ignore($section->id),
             ],
         ]);

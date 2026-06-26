@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
+import 'dart:async';
 import 'dart:convert';
 import 'constants.dart';
 import 'api_service.dart';
@@ -191,6 +191,7 @@ class AuthProvider extends ChangeNotifier {
 
         if (_initialSyncDone && _user != null) {
           _syncService.backgroundRefresh(_user!.role);
+          _startPeriodicSync();
         }
       } catch (_) {
         _activePlugins = prefs.getStringList('tenant_active_plugins') ?? [];
@@ -206,6 +207,9 @@ class AuthProvider extends ChangeNotifier {
           try {
             _user = User.fromJson(jsonDecode(cachedUserJson));
             _initialSyncDone = prefs.getBool('initial_sync_done') ?? false;
+            if (_initialSyncDone) {
+              _startPeriodicSync();
+            }
           } catch (_) {
             _token = null;
             await prefs.remove('auth_token');
@@ -391,6 +395,7 @@ class AuthProvider extends ChangeNotifier {
       }
 
       _initialSyncDone = prefs.getBool('initial_sync_done') ?? false;
+      _startPeriodicSync();
 
       _isLoading = false;
       notifyListeners();
@@ -454,6 +459,7 @@ class AuthProvider extends ChangeNotifier {
       }
     } catch (_) {}
 
+    _stopPeriodicSync();
     _token           = null;
     _user            = null;
     _initialSyncDone = false;
@@ -471,5 +477,21 @@ class AuthProvider extends ChangeNotifier {
     _dio.options.headers.remove('Authorization');
 
     notifyListeners();
+  }
+
+  Timer? _syncTimer;
+
+  void _startPeriodicSync() {
+    _syncTimer?.cancel();
+    _syncTimer = Timer.periodic(const Duration(seconds: 15), (timer) {
+      if (_token != null && _user != null && _initialSyncDone) {
+        _syncService.syncNow();
+      }
+    });
+  }
+
+  void _stopPeriodicSync() {
+    _syncTimer?.cancel();
+    _syncTimer = null;
   }
 }

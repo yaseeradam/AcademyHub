@@ -46,7 +46,7 @@
         .logo-wrap { width: 60px; text-align: left; }
         .logo { width: 50px; height: 50px; object-fit: contain; }
         
-        .school-info { text-align: left; padding-left: 10px; }
+        .school-info { text-align: left; padding-left: 0; }
         .school-name { font-size: 16px; font-weight: 900; color: #004b49; text-transform: uppercase; }
         .school-tagline { font-size: 8.5px; font-weight: bold; color: #c5a059; font-style: italic; margin-top: 2px; }
         .school-meta { font-size: 7.5px; color: #475569; margin-top: 1px; }
@@ -229,11 +229,43 @@
         if ($rating >= 2) return 'Fair';
         return 'Poor';
     };
+
+    // 5. Resolve Passport Photo
+    $photoSrc = null;
+    if ($student->passport_photo) {
+        if (filter_var($student->passport_photo, FILTER_VALIDATE_URL)) {
+            // Convert Dicebear SVG to PNG for DomPDF compatibility
+            $photoSrc = str_replace('/svg?', '/png?', $student->passport_photo);
+        } else {
+            $cleaned = str_replace('\\', '/', $student->passport_photo);
+            if (str_starts_with($cleaned, 'uploads/')) {
+                $cleaned = substr($cleaned, 8);
+            }
+            $localPath = public_path('uploads/' . $cleaned);
+            if (file_exists($localPath)) {
+                $photoSrc = $localPath;
+            }
+        }
+    }
+
+    if (!$photoSrc) {
+        $gender = strtolower($student->gender ?? '');
+        if ($gender === 'female' || $gender === 'f') {
+            $defaultFile = public_path('avatars/girl student pink.png');
+        } else {
+            $defaultFile = public_path('avatars/studentblue.png');
+        }
+        if (file_exists($defaultFile)) {
+            $photoSrc = $defaultFile;
+        } else {
+            $photoSrc = public_path('avatars/students.png');
+        }
+    }
 @endphp
 
-@if($logoExists && $showWatermark)
+{{-- @if($logoExists && $showWatermark)
     <div class="watermark"><img src="{{ $logoPath }}" alt="" style="width:100%;height:100%;object-fit:contain;" /></div>
-@endif
+@endif --}}
 
 <div class="page">
     <div class="page-inner">
@@ -245,8 +277,8 @@
                 <div class="sidebar">
                     <div class="avatar-wrap">
                         <div class="avatar-circle">
-                            @if($student->passport_photo)
-                                <img src="{{ public_path('uploads/' . str_replace('\\', '/', $student->passport_photo)) }}" class="avatar-img" alt="Photo" />
+                            @if($photoSrc)
+                                <img src="{{ $photoSrc }}" class="avatar-img" alt="Photo" />
                             @else
                                 <div class="avatar-placeholder">👤</div>
                             @endif
@@ -313,11 +345,11 @@
                     
                     {{-- Header Section --}}
                     <div class="header-table">
-                        <div class="header-cell logo-wrap">
+                        {{-- <div class="header-cell logo-wrap">
                             @if($logoExists)
                                 <img class="logo" src="{{ $logoPath }}" alt="Logo">
                             @endif
-                        </div>
+                        </div> --}}
                         <div class="header-cell school-info">
                             <div class="school-name">{{ $schoolName }}</div>
                             @if(config('academyhub.school_address'))
@@ -492,11 +524,18 @@
                                     <div class="remarks-cell" style="width: {{ $remWidth }};">
                                         <div class="remarks-box">
                                             <div class="remarks-header">Teacher's Remark</div>
-                                            <div class="remarks-content">
+                                            <div class="remarks-content" style="margin-bottom: 8px;">
                                                 {{ $teacherRemarks ?? 'A bright and respectful student. She demonstrates potential and should continue to put in more effort.' }}
                                             </div>
-                                            <div style="border-top: 1px solid #e2e8f0; margin-top: 10px; padding-top: 2px; font-size: 6px; color: #64748b; font-weight: bold;">
-                                                CLASS TEACHER
+                                            <div style="margin-top: 10px; text-align: center;">
+                                                @if(($signatureImages['teacher'] ?? null) && file_exists($signatureImages['teacher']))
+                                                    <img src="{{ $signatureImages['teacher'] }}" style="max-height: 25px; max-width: 90px; object-fit: contain; display: block; margin: 0 auto 2px auto;" />
+                                                @else
+                                                    <div style="font-family: 'Times New Roman', Times, serif; font-size: 11px; font-style: italic; color: #004b49; font-weight: bold; line-height: 1; margin-bottom: 2px;">Emily Johnson</div>
+                                                @endif
+                                            </div>
+                                            <div style="border-top: 1px solid #e2e8f0; padding-top: 2px; font-size: 6px; color: #64748b; font-weight: bold; text-transform: uppercase;">
+                                                Class Teacher: {{ $homeroomTeacher }}
                                             </div>
                                         </div>
                                     </div>
@@ -507,11 +546,18 @@
                                     <div class="remarks-cell" style="width: {{ $remWidth }};">
                                         <div class="remarks-box">
                                             <div class="remarks-header">Principal's Comment</div>
-                                            <div class="remarks-content">
+                                            <div class="remarks-content" style="margin-bottom: 8px;">
                                                 {{ $principalRemarks ?? 'Keep up the good work. Consistency, discipline and focus will lead you to excellence.' }}
                                             </div>
-                                            <div style="border-top: 1px solid #e2e8f0; margin-top: 10px; padding-top: 2px; font-size: 6px; color: #64748b; font-weight: bold;">
-                                                PRINCIPAL
+                                            <div style="margin-top: 10px; text-align: center;">
+                                                @if(($signatureImages['principal'] ?? null) && file_exists($signatureImages['principal']))
+                                                    <img src="{{ $signatureImages['principal'] }}" style="max-height: 25px; max-width: 90px; object-fit: contain; display: block; margin: 0 auto 2px auto;" />
+                                                @else
+                                                    <div style="font-family: 'Times New Roman', Times, serif; font-size: 11px; font-style: italic; color: #004b49; font-weight: bold; line-height: 1; margin-bottom: 2px;">Rebecca Carter</div>
+                                                @endif
+                                            </div>
+                                            <div style="border-top: 1px solid #e2e8f0; padding-top: 2px; font-size: 6px; color: #64748b; font-weight: bold; text-transform: uppercase;">
+                                                Principal: Dr. Rebecca Carter
                                             </div>
                                         </div>
                                     </div>

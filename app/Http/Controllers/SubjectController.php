@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Subject;
+use App\Support\TenantSettings;
 use Illuminate\Http\Request;
 use Illuminate\Database\QueryException;
 use Illuminate\Validation\Rule;
@@ -37,7 +38,12 @@ class SubjectController extends Controller
     {
         $data = $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'code' => ['required', 'string', 'max:50', Rule::unique('subjects', 'code')],
+            'code' => [
+                'required',
+                'string',
+                'max:50',
+                Rule::unique('subjects', 'code')->where('tenant_id', TenantSettings::tenantId())
+            ],
         ]);
 
         Subject::query()->create([
@@ -52,7 +58,14 @@ class SubjectController extends Controller
     {
         $data = $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'code' => ['required', 'string', 'max:50', Rule::unique('subjects', 'code')->ignore($subject->id)],
+            'code' => [
+                'required',
+                'string',
+                'max:50',
+                Rule::unique('subjects', 'code')
+                    ->where('tenant_id', TenantSettings::tenantId())
+                    ->ignore($subject->id)
+            ],
         ]);
 
         $subject->update([

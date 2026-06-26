@@ -101,42 +101,58 @@
         <div class="rounded-2xl bg-white p-8 text-center shadow-lg">
             <div class="text-lg font-semibold text-gray-900">No subjects</div>
             <div class="mt-2 text-sm text-gray-600">Allocate subjects to this class to populate the broadsheet.</div>
-        </div>
-    @else
+        </div>    @else
         <div class="overflow-x-auto rounded-[2rem] bg-white shadow-2xl ring-1 ring-gray-100" 
              wire:key="broadsheet-table-{{ $classId }}-{{ $term }}-{{ $session }}">
             <table class="min-w-full text-xs">
-                <thead class="bg-gray-50/80 backdrop-blur-md border-b border-gray-100">
+                <thead class="bg-slate-50 border-b-2 border-slate-100">
                 <tr>
-                    <th class="sticky left-0 z-20 bg-gray-50 px-6 py-5 text-left text-[11px] font-black uppercase tracking-widest text-gray-500 shadow-[2px_0_10px_rgba(0,0,0,0.03)]">Student</th>
+                    <th class="sticky left-0 z-20 bg-slate-50/95 backdrop-blur-sm px-6 py-5 text-left text-[11px] font-black uppercase tracking-widest text-slate-500 shadow-[2px_0_10px_rgba(0,0,0,0.03)] border-r border-slate-100/50">Student</th>
                     @foreach ($subjects as $subject)
-                        <th class="px-4 py-5 text-right whitespace-nowrap text-[11px] font-black uppercase tracking-widest text-indigo-700">{{ $subject->code }}</th>
+                        <th class="px-4 py-5 text-right whitespace-nowrap text-[11px] font-black uppercase tracking-widest text-indigo-600/90 border-b border-slate-100">{{ $subject->code }}</th>
                     @endforeach
-                    <th class="px-4 py-5 text-right text-[11px] font-black uppercase tracking-widest text-gray-700">Total</th>
-                    <th class="px-4 py-5 text-right text-[11px] font-black uppercase tracking-widest text-gray-700">Avg</th>
-                    <th class="px-4 py-5 text-right text-[11px] font-black uppercase tracking-widest text-gray-700">Pos</th>
-                    <th class="px-6 py-5 text-right text-[11px] font-black uppercase tracking-widest text-gray-700">Action</th>
+                    <th class="px-4 py-5 text-right text-[11px] font-black uppercase tracking-widest text-slate-700 border-b border-slate-100">Total</th>
+                    <th class="px-4 py-5 text-right text-[11px] font-black uppercase tracking-widest text-slate-700 border-b border-slate-100">Avg</th>
+                    <th class="px-4 py-5 text-right text-[11px] font-black uppercase tracking-widest text-slate-700 border-b border-slate-100">Pos</th>
+                    <th class="px-6 py-5 text-right text-[11px] font-black uppercase tracking-widest text-slate-700 border-b border-slate-100">Action</th>
                 </tr>
             </thead>
-<tbody class="divide-y divide-gray-100 bg-white/60">
+            <tbody class="divide-y divide-slate-100">
                 @forelse ($rows as $row)
-                    <tr class="group transition-colors hover:bg-indigo-50/30 even:bg-slate-50/60 odd:bg-white">
-                        <td class="sticky left-0 z-10 bg-white/90 group-hover:bg-indigo-50/60 px-6 py-4 shadow-[2px_0_10px_rgba(0,0,0,0,0.03)] transition-colors">
-                            <div class="text-sm font-black text-gray-900">{{ $row['student']->full_name }}</div>
-                            <div class="mt-0.5 text-[10px] font-bold text-gray-400 uppercase tracking-widest">{{ $row['student']->admission_number }}</div>
+                    @php
+                        $rankClass = '';
+                        if ($row['position'] == 1) {
+                            $rankClass = 'rank-gold bg-amber-50/30 hover:bg-amber-100/50';
+                        } elseif ($row['position'] == 2) {
+                            $rankClass = 'rank-silver bg-slate-100/30 hover:bg-slate-200/40';
+                        } elseif ($row['position'] == 3) {
+                            $rankClass = 'rank-bronze bg-orange-50/20 hover:bg-orange-100/40';
+                        } else {
+                            $rankClass = $loop->even ? 'even bg-slate-50/40 hover:bg-indigo-50/40' : 'odd bg-white hover:bg-indigo-50/40';
+                        }
+                    @endphp
+                    <tr class="group transition-all duration-150 {{ $rankClass }}">
+                        <td class="sticky left-0 z-10 px-6 py-4 shadow-[3px_0_8px_-2px_rgba(0,0,0,0.05)] border-r border-slate-100/60 transition-colors duration-150
+                                   group-hover:bg-indigo-50/80
+                                   {{ $loop->even ? 'bg-slate-50' : 'bg-white' }}
+                                   group-[.rank-gold]:bg-amber-50/90 group-[.rank-gold]:group-hover:bg-amber-100/70
+                                   group-[.rank-silver]:bg-slate-100/90 group-[.rank-silver]:group-hover:bg-slate-200/70
+                                   group-[.rank-bronze]:bg-orange-50/90 group-[.rank-bronze]:group-hover:bg-orange-100/70">
+                            <div class="text-sm font-black text-slate-800">{{ $row['student']->full_name }}</div>
+                            <div class="mt-0.5 text-[10px] font-bold text-slate-400 uppercase tracking-widest">{{ $row['student']->admission_number }}</div>
                         </td>
 
                         @foreach ($subjects as $subject)
                             @php($val = $row['subjectTotals'][$subject->id] ?? null)
-                            <td class="px-4 py-4 text-right text-sm font-bold {{ $val === null ? 'text-gray-300' : 'text-gray-900' }}">
+                            <td class="px-4 py-4 text-right text-sm font-bold {{ $val === null ? 'text-slate-300' : 'text-slate-800' }}">
                                 {{ $val ?? '—' }}
                             </td>
                         @endforeach
 
-                        <td class="px-4 py-4 text-right text-sm font-black text-gray-900">{{ $row['grandTotal'] }}</td>
-                        <td class="px-4 py-4 text-right text-sm font-bold text-indigo-600">{{ number_format($row['average'], 1) }}%</td>
+                        <td class="px-4 py-4 text-right text-sm font-black text-slate-900">{{ $row['grandTotal'] }}</td>
+                        <td class="px-4 py-4 text-right text-sm font-black text-indigo-600">{{ number_format($row['average'], 1) }}%</td>
                         <td class="px-4 py-4 text-right">
-                            <span class="inline-flex items-center justify-center rounded-lg {{ $row['position'] <= 3 ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 text-gray-700' }} px-2 py-1 text-[10px] font-black min-w-[32px]">
+                            <span class="inline-flex items-center justify-center rounded-lg {{ $row['position'] <= 3 ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-100 text-slate-700' }} px-2 py-1 text-[10px] font-black min-w-[32px]">
                                 #{{ $row['position'] }}
                             </span>
                         </td>
@@ -151,10 +167,10 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="{{ 1 + $subjects->count() + 4 }}" class="px-6 py-12 text-center">
+                        <td colspan="{{ 1 + $subjects->count() + 4 }}" class="px-6 py-12 text-center bg-white">
                             <div class="flex flex-col items-center">
-                                <svg class="h-12 w-12 text-gray-200" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
-                                <p class="mt-4 text-sm font-bold text-gray-400">No students found for this class.</p>
+                                <svg class="h-12 w-12 text-slate-200" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
+                                <p class="mt-4 text-sm font-bold text-slate-400">No students found for this class.</p>
                             </div>
                         </td>
                     </tr>

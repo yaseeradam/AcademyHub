@@ -101,7 +101,7 @@ class CertificatesCustomizationTest extends TestCase
         $riverdale->assertHeader('Content-Type', 'application/pdf');
         $this->assertStringStartsWith('%PDF', (string) $riverdale->getContent());
 
-        foreach (['riverdale-burgundy', 'riverdale-emerald', 'riverdale-purple', 'greenwood'] as $tmpl) {
+        foreach (['greenwood'] as $tmpl) {
             $resp = $this->actingAs($admin)->get(route('settings.templates.preview', [
                 'type' => 'report-card',
                 'template' => $tmpl,

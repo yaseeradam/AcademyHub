@@ -97,6 +97,10 @@ class Student extends Model
             return null;
         }
 
+        if (filter_var($this->passport_photo, FILTER_VALIDATE_URL)) {
+            return $this->passport_photo;
+        }
+
         // Handle both forward and backward slashes
         $path = str_replace(['\\', '\\\\'], '/', $this->passport_photo);
         

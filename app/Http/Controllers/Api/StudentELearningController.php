@@ -77,11 +77,12 @@ class StudentELearningController extends Controller
         }
 
         $note = ClassNote::where('class_id', $student->class_id)->findOrFail($id);
-        $note->increment('downloads');
 
-        if (!Storage::disk('public')->exists($note->file_path)) {
+        if (empty($note->file_path) || !Storage::disk('public')->exists($note->file_path)) {
             return response()->json(['message' => 'File not found on server.'], 404);
         }
+
+        $note->increment('downloads');
 
         return Storage::disk('public')->download($note->file_path, $note->file_name);
     }

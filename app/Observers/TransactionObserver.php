@@ -15,10 +15,6 @@ class TransactionObserver
      */
     public function saved(Transaction $transaction): void
     {
-        // =========================================================================
-        // COMMENTED OUT FOR NOW - parents cannot make payments through our app yet
-        // =========================================================================
-        /*
         if ($transaction->type !== 'Income') {
             return;
         }
@@ -28,6 +24,14 @@ class TransactionObserver
             return;
         }
 
+        $tenant = $transaction->tenant;
+        if ($tenant) {
+            if (!app()->bound('currentTenant')) {
+                app()->instance('currentTenant', $tenant);
+            }
+            \App\Support\TenantSettings::loadToConfig();
+        }
+
         $parents = $student->parents()
             ->where('whatsapp_subscribed', true)
             ->whereNotNull('whatsapp_phone')
@@ -35,12 +39,16 @@ class TransactionObserver
 
         foreach ($parents as $parent) {
             $apiKey = config('services.whatsapp.api_key');
-            $host = request()->schemeAndHttpHost();
+            $currency = config('academyhub.currency_symbol', '₦');
             
-            // Webhook payload to send the PDF invoice receipt
-            $receiptUrl = "{$host}/api/whatsapp/receipt/{$transaction->id}?key={$apiKey}";
+            // Generate full absolute URL to our endpoint
+            $receiptUrl = route('whatsapp.receipt', [
+                'transaction' => $transaction->id,
+                'key'         => $apiKey
+            ]);
             
-            $message = "🧾 *Payment Confirmed:* A payment of *NGN " . number_format($transaction->amount_paid, 2) . "* has been confirmed for *{$student->full_name}* ( tuition/fee category: *{$transaction->category}* ). Your official receipt is attached below.";
+            $message = "🧾 *Payment Confirmed:*\n\n" .
+                       "A payment of *{$currency}" . number_format($transaction->amount_paid, 2) . "* has been confirmed for *{$student->full_name}* ( tuition/fee category: *{$transaction->category}* ). Your official receipt is attached below.";
             
             WhatsAppService::sendMessage(
                 $parent->whatsapp_phone, 
@@ -50,6 +58,5 @@ class TransactionObserver
                 "Receipt #{$transaction->receipt_number}"
             );
         }
-        */
     }
 }
