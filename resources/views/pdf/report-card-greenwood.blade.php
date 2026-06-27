@@ -410,15 +410,17 @@
                     </table>
 
                     {{-- Horizontal Scale Bar --}}
-                    <div class="inline-scale-bar">
-                        <strong>GRADE SCALE:</strong> 
-                        A (70-100) Excellent | 
-                        B (60-69) Very Good | 
-                        C (50-59) Good | 
-                        D (40-49) Fair | 
-                        E (30-39) Poor | 
-                        F (0-29) Fail
-                    </div>
+                    @if($showGradingKey)
+                        <div class="inline-scale-bar">
+                            <strong>GRADE SCALE:</strong> 
+                            A (70-100) Excellent | 
+                            B (60-69) Very Good | 
+                            C (50-59) Good | 
+                            D (40-49) Fair | 
+                            E (30-39) Poor | 
+                            F (0-29) Fail
+                        </div>
+                    @endif
 
                     {{-- Attendance & Psychomotor --}}
                     @php
