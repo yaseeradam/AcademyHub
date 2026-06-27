@@ -1168,46 +1168,116 @@ class WhatsAppController extends Controller
 
     private function tryGroqAPI(string $prompt, array $history = []): ?string
     {
-        try {
-            $raw = config('services.groq.key') ?: env('GROQ_API_KEY');
-            if (empty($raw)) return null;
+        $attempts = 3;
+        for ($i = 0; $i < $attempts; $i++) {
+            try {
+                $raw = config('services.groq.key') ?: env('GROQ_API_KEY');
+                if (empty($raw)) break;
 
-            $keys = array_filter(array_map('trim', explode(',', $raw)));
-            if (empty($keys)) return null;
-            $apiKey = $keys[array_rand($keys)];
+                $keys = array_filter(array_map('trim', explode(',', $raw)));
+                if (empty($keys)) break;
+                $apiKey = $keys[array_rand($keys)];
 
-            $messages = [
-                ['role' => 'system', 'content' => 'You are HubGenie, the official school coordinator assistant. You MUST strictly use the verified, real-time context provided in the user prompt to answer questions. Keep your responses highly focused and straight to the point (maximum 1-3 sentences). NEVER use robotic or AI terms (like AI, bot, database, context, system, model). Speak like a human administrator checking records. Format bold text with single asterisks (e.g., *bold*) and lists with literal bullets (•). NEVER use double asterisks (**) or markdown headings.'],
-            ];
+                $messages = [
+                    ['role' => 'system', 'content' => 'You are HubGenie, the official school coordinator assistant. You MUST strictly use the verified, real-time context provided in the user prompt to answer questions. Keep your responses highly focused and straight to the point (maximum 1-3 sentences). NEVER use robotic or AI terms (like AI, bot, database, context, system, model). Speak like a human administrator checking records. Format bold text with single asterisks (e.g., *bold*) and lists with literal bullets (•). NEVER use double asterisks (**) or markdown headings.'],
+                ];
 
-            foreach ($history as $msg) {
-                if (isset($msg['role']) && isset($msg['content'])) {
-                    $messages[] = [
-                        'role'    => $msg['role'],
-                        'content' => $msg['content']
-                    ];
+                foreach ($history as $msg) {
+                    if (isset($msg['role']) && isset($msg['content'])) {
+                        $messages[] = [
+                            'role'    => $msg['role'],
+                            'content' => $msg['content']
+                        ];
+                    }
                 }
+
+                $messages[] = ['role' => 'user', 'content' => $prompt];
+
+                $response = \Illuminate\Support\Facades\Http::withOptions(['verify' => false])
+                    ->timeout(15)
+                    ->withHeaders([
+                        'Authorization' => 'Bearer ' . $apiKey,
+                        'Content-Type'  => 'application/json',
+                    ])->post('https://api.groq.com/openai/v1/chat/completions', [
+                        'model'       => 'llama-3.3-70b-versatile',
+                        'messages'    => $messages,
+                        'temperature' => 0.7,
+                        'max_tokens'  => 1000,
+                    ]);
+
+                if ($response->successful()) {
+                    $content = $response->json()['choices'][0]['message']['content'] ?? null;
+                    if ($content) {
+                        return $content;
+                    }
+                }
+
+                \Illuminate\Support\Facades\Log::warning("WhatsApp AI: Groq API attempt " . ($i + 1) . " failed.", [
+                    'status' => $response->status(),
+                    'body' => $response->body()
+                ]);
+            } catch (\Exception $e) {
+                \Illuminate\Support\Facades\Log::error("WhatsApp AI: Groq API attempt " . ($i + 1) . " error", ['error' => $e->getMessage()]);
             }
 
-            $messages[] = ['role' => 'user', 'content' => $prompt];
+            if ($i < $attempts - 1) {
+                sleep(1);
+            }
+        }
+
+        // Fallback to Gemini if Groq fails
+        \Illuminate\Support\Facades\Log::info("WhatsApp AI: Falling back to Gemini API.");
+        return $this->tryGeminiAPI($prompt, $history);
+    }
+
+    private function tryGeminiAPI(string $prompt, array $history = []): ?string
+    {
+        try {
+            $apiKey = env('GEMINI_API_KEY');
+            if (empty($apiKey)) {
+                \Illuminate\Support\Facades\Log::warning('WhatsApp AI: Gemini API key not configured.');
+                return null;
+            }
+
+            $contents = [];
+            foreach ($history as $msg) {
+                $role = ($msg['role'] ?? 'user') === 'assistant' ? 'model' : 'user';
+                $contents[] = [
+                    'role' => $role,
+                    'parts' => [['text' => $msg['content'] ?? '']]
+                ];
+            }
+            $contents[] = [
+                'role' => 'user',
+                'parts' => [['text' => $prompt]]
+            ];
 
             $response = \Illuminate\Support\Facades\Http::withOptions(['verify' => false])
-                ->timeout(30)
+                ->timeout(20)
                 ->withHeaders([
-                    'Authorization' => 'Bearer ' . $apiKey,
-                    'Content-Type'  => 'application/json',
-                ])->post('https://api.groq.com/openai/v1/chat/completions', [
-                    'model'       => 'llama-3.3-70b-versatile',
-                    'messages'    => $messages,
-                    'temperature' => 0.7,
-                    'max_tokens'  => 1000,
+                    'Content-Type' => 'application/json',
+                ])->post("https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" . $apiKey, [
+                    'contents' => $contents,
+                    'systemInstruction' => [
+                        'parts' => [['text' => 'You are HubGenie, the official school coordinator assistant. You MUST strictly use the verified, real-time context provided in the user prompt to answer questions. Keep your responses highly focused and straight to the point (maximum 1-3 sentences). NEVER use robotic or AI terms (like AI, bot, database, context, system, model). Speak like a human administrator checking records. Format bold text with single asterisks (e.g., *bold*) and lists with literal bullets (•). NEVER use double asterisks (**) or markdown headings.']]
+                    ],
+                    'generationConfig' => [
+                        'temperature' => 0.7,
+                        'maxOutputTokens' => 1000,
+                    ]
                 ]);
 
-            return $response->successful()
-                ? ($response->json()['choices'][0]['message']['content'] ?? null)
-                : null;
+            if ($response->successful()) {
+                return $response->json()['candidates'][0]['content']['parts'][0]['text'] ?? null;
+            }
+
+            \Illuminate\Support\Facades\Log::error('WhatsApp AI: Gemini API failed', [
+                'status' => $response->status(),
+                'body' => $response->body()
+            ]);
+            return null;
         } catch (\Exception $e) {
-            \Illuminate\Support\Facades\Log::error('WhatsApp AI: Groq API error', ['error' => $e->getMessage()]);
+            \Illuminate\Support\Facades\Log::error('WhatsApp AI: Gemini API error', ['error' => $e->getMessage()]);
             return null;
         }
     }
