@@ -1268,16 +1268,119 @@ class WhatsAppController extends Controller
                 ]);
 
             if ($response->successful()) {
-                return $response->json()['candidates'][0]['content']['parts'][0]['text'] ?? null;
+                $ans = $response->json()['candidates'][0]['content']['parts'][0]['text'] ?? null;
+                if ($ans) return $ans;
             }
 
             \Illuminate\Support\Facades\Log::error('WhatsApp AI: Gemini API failed', [
                 'status' => $response->status(),
                 'body' => $response->body()
             ]);
-            return null;
         } catch (\Exception $e) {
             \Illuminate\Support\Facades\Log::error('WhatsApp AI: Gemini API error', ['error' => $e->getMessage()]);
+        }
+
+        // Fallback to OpenRouter
+        \Illuminate\Support\Facades\Log::info("WhatsApp AI: Falling back to OpenRouter API.");
+        return $this->tryOpenRouterAPI($prompt, $history);
+    }
+
+    private function tryOpenRouterAPI(string $prompt, array $history = []): ?string
+    {
+        try {
+            $apiKey = env('OPENROUTER_API_KEY');
+            if (empty($apiKey)) {
+                \Illuminate\Support\Facades\Log::warning('WhatsApp AI: OpenRouter API key not configured.');
+                return $this->tryCohereAPI($prompt, $history);
+            }
+
+            $messages = [
+                ['role' => 'system', 'content' => 'You are HubGenie, the official school coordinator assistant. You MUST strictly use the verified, real-time context provided in the user prompt to answer questions. Keep your responses highly focused and straight to the point (maximum 1-3 sentences). NEVER use robotic or AI terms (like AI, bot, database, context, system, model). Speak like a human administrator checking records. Format bold text with single asterisks (e.g., *bold*) and lists with literal bullets (•). NEVER use double asterisks (**) or markdown headings.'],
+            ];
+
+            foreach ($history as $msg) {
+                if (isset($msg['role']) && isset($msg['content'])) {
+                    $messages[] = [
+                        'role'    => $msg['role'],
+                        'content' => $msg['content']
+                    ];
+                }
+            }
+
+            $messages[] = ['role' => 'user', 'content' => $prompt];
+
+            $response = \Illuminate\Support\Facades\Http::withOptions(['verify' => false])
+                ->timeout(20)
+                ->withHeaders([
+                    'Authorization' => 'Bearer ' . $apiKey,
+                    'Content-Type'  => 'application/json',
+                ])->post('https://openrouter.ai/api/v1/chat/completions', [
+                    'model'       => 'google/gemma-2-9b-it:free',
+                    'messages'    => $messages,
+                    'temperature' => 0.7,
+                    'max_tokens'  => 1000,
+                ]);
+
+            if ($response->successful()) {
+                $content = $response->json()['choices'][0]['message']['content'] ?? null;
+                if ($content) {
+                    return $content;
+                }
+            }
+
+            \Illuminate\Support\Facades\Log::error('WhatsApp AI: OpenRouter API failed', [
+                'status' => $response->status(),
+                'body' => $response->body()
+            ]);
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('WhatsApp AI: OpenRouter API error', ['error' => $e->getMessage()]);
+        }
+
+        // Fallback to Cohere
+        \Illuminate\Support\Facades\Log::info("WhatsApp AI: Falling back to Cohere API.");
+        return $this->tryCohereAPI($prompt, $history);
+    }
+
+    private function tryCohereAPI(string $prompt, array $history = []): ?string
+    {
+        try {
+            $apiKey = env('COHERE_API_KEY');
+            if (empty($apiKey)) {
+                \Illuminate\Support\Facades\Log::warning('WhatsApp AI: Cohere API key not configured.');
+                return null;
+            }
+
+            $chatHistory = [];
+            foreach ($history as $msg) {
+                $role = ($msg['role'] ?? 'user') === 'assistant' ? 'CHATBOT' : 'USER';
+                $chatHistory[] = [
+                    'role' => $role,
+                    'message' => $msg['content'] ?? ''
+                ];
+            }
+
+            $response = \Illuminate\Support\Facades\Http::withOptions(['verify' => false])
+                ->timeout(20)
+                ->withHeaders([
+                    'Authorization' => 'Bearer ' . $apiKey,
+                    'Content-Type'  => 'application/json',
+                ])->post('https://api.cohere.com/v1/chat', [
+                    'message' => $prompt,
+                    'preamble' => 'You are HubGenie, the official school coordinator assistant. You MUST strictly use the verified, real-time context provided in the user prompt to answer questions. Keep your responses highly focused and straight to the point (maximum 1-3 sentences). NEVER use robotic or AI terms (like AI, bot, database, context, system, model). Speak like a human administrator checking records. Format bold text with single asterisks (e.g., *bold*) and lists with literal bullets (•). NEVER use double asterisks (**) or markdown headings.',
+                    'chat_history' => $chatHistory,
+                ]);
+
+            if ($response->successful()) {
+                return $response->json()['text'] ?? null;
+            }
+
+            \Illuminate\Support\Facades\Log::error('WhatsApp AI: Cohere API failed', [
+                'status' => $response->status(),
+                'body' => $response->body()
+            ]);
+            return null;
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('WhatsApp AI: Cohere API error', ['error' => $e->getMessage()]);
             return null;
         }
     }
