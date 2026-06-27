@@ -172,7 +172,7 @@ class Index extends Component
         abort_unless($user?->role === 'admin', 403);
 
         $rules = [
-            'entryDay' => ['required', 'integer', 'between:1,5'],
+            'entryDay' => ['required', 'integer', 'between:1,6'],
             'startsAt' => ['required', 'date_format:H:i'],
             'endsAt' => ['required', 'date_format:H:i'],
             'isBreak' => ['required', 'boolean'],
@@ -205,7 +205,7 @@ class Index extends Component
 
         $daysToSave = [$data['entryDay']];
         if ($this->applyToAllDays && ! $this->editingId) {
-            $daysToSave = [1, 2, 3, 4, 5];
+            $daysToSave = [1, 2, 3, 4, 5, 6];
         }
 
         // 1. Conflict Check
@@ -409,7 +409,7 @@ class Index extends Component
                 ->get()
             : collect();
 
-        $days = collect([1, 2, 3, 4, 5])->map(fn ($day) => [
+        $days = collect([1, 2, 3, 4, 5, 6])->map(fn ($day) => [
             'day' => $day,
             'label' => $this->dayLabel($day),
         ])->all();

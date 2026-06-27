@@ -1,6 +1,7 @@
 <div class="space-y-6">
-    <div class="relative overflow-hidden rounded-2xl shadow-xl" style="background-color: #1a2e4a;">
-        <div class="absolute inset-0" style="background: radial-gradient(ellipse at top left, #1e3a5f 0%, transparent 60%);"></div>
+    {{-- Header Banner --}}
+    <div class="relative overflow-hidden rounded-2xl shadow-xl" style="background: linear-gradient(135deg, #1a2e4a 0%, #2a4a7f 50%, #1e3a5f 100%);">
+        <div class="absolute inset-0" style="background: radial-gradient(ellipse at top left, rgba(147,197,253,0.15) 0%, transparent 60%);"></div>
         <div class="absolute right-0 top-0 bottom-0 w-48 opacity-10">
             <svg viewBox="0 0 200 200" fill="none" class="w-full h-full">
                 <circle cx="160" cy="100" r="130" stroke="white" stroke-width="0.5"/>
@@ -14,8 +15,8 @@
                     <span class="h-2.5 w-2.5 rounded-full bg-cyan-400 animate-pulse"></span>
                     <span class="text-sm font-semibold uppercase tracking-widest" style="color:#93c5fd;">Weekly Schedule</span>
                 </div>
-                <h2 class="text-4xl font-bold text-white tracking-tight">Timetable</h2>
-                <p class="mt-2 text-base font-medium" style="color:#93c5fd;">Manage class schedules and time slots</p>
+                <h2 class="text-4xl font-bold text-white tracking-tight">🏫 School Timetable</h2>
+                <p class="mt-2 text-base font-medium" style="color:#93c5fd;">Stay Organized, Stay Successful!</p>
             </div>
             <a href="{{ route('more-features') }}"
                class="inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold text-white transition hover:bg-white/10"
@@ -26,6 +27,7 @@
         </div>
     </div>
 
+    {{-- Class Selector --}}
     <div class="rounded-2xl bg-white p-6 shadow-lg">
         <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
@@ -52,170 +54,195 @@
     </div>
 
     @if($classId)
-        <div wire:key="timetable-grid-{{ $classId }}" class="rounded-2xl bg-white p-6 shadow-lg">
-            <h3 class="text-lg font-black text-slate-900">Weekly Schedule</h3>
-            <p class="mt-1 text-sm text-slate-600">Click a time slot to add or edit an entry</p>
+        <div wire:key="timetable-grid-{{ $classId }}" class="rounded-2xl bg-white shadow-lg overflow-hidden">
+            {{-- Timetable Grid — Transposed: Time rows × Day columns --}}
+            <div class="overflow-x-auto">
+                @php
+                    $dayColors = [
+                        1 => ['bg' => 'bg-green-500',  'text' => 'text-white', 'lightBg' => 'bg-green-50',  'border' => 'border-green-200'],
+                        2 => ['bg' => 'bg-blue-500',   'text' => 'text-white', 'lightBg' => 'bg-blue-50',   'border' => 'border-blue-200'],
+                        3 => ['bg' => 'bg-purple-500',  'text' => 'text-white', 'lightBg' => 'bg-purple-50',  'border' => 'border-purple-200'],
+                        4 => ['bg' => 'bg-pink-500',   'text' => 'text-white', 'lightBg' => 'bg-pink-50',   'border' => 'border-pink-200'],
+                        5 => ['bg' => 'bg-indigo-500',  'text' => 'text-white', 'lightBg' => 'bg-indigo-50',  'border' => 'border-indigo-200'],
+                        6 => ['bg' => 'bg-orange-500',  'text' => 'text-white', 'lightBg' => 'bg-orange-50',  'border' => 'border-orange-200'],
+                    ];
+                @endphp
 
-            <div class="mt-6 overflow-x-auto">
-                <table class="min-w-full border-2 border-slate-200">
+                <table class="w-full border-collapse" style="min-width: 800px;">
+                    {{-- Header Row: TIME / DAY + Day names --}}
                     <thead>
-                        <tr class="bg-blue-600">
-                            <th class="border-r-2 border-white px-4 py-3 text-center text-xs font-bold uppercase text-white min-w-[100px]">Time / Date</th>
-                            @foreach($timeSlots as $slot)
-                                <th class="border-r-2 border-white px-4 py-3 text-center text-xs font-bold uppercase text-white min-w-[120px]">{{ $slot['label'] }}</th>
+                        <tr>
+                            <th class="bg-slate-700 text-white px-5 py-4 text-xs font-black uppercase tracking-wider text-center border-r border-slate-600" style="min-width: 130px;">
+                                <div class="flex items-center justify-center gap-2">
+                                    <svg class="h-4 w-4 opacity-80" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                    Time / Day
+                                </div>
+                            </th>
+                            @foreach($days as $d)
+                                @php $dc = $dayColors[$d['day']] ?? $dayColors[1]; @endphp
+                                <td class="{{ $dc['bg'] }} {{ $dc['text'] }} px-4 py-4 text-center text-sm font-black uppercase tracking-wider border-r border-white/30 last:border-r-0" style="min-width: 120px;">
+                                    {{ $d['label'] }}
+                                </td>
                             @endforeach
                         </tr>
                     </thead>
+
+                    {{-- Body: One row per time slot --}}
                     <tbody>
                         @php
-                            $rendered = [];
+                            // Group consecutive break slots to detect full-width break rows
+                            $renderedBreakSlots = [];
                         @endphp
-                        @foreach($days as $d)
-                            <tr class="border-b-2 border-slate-200">
-                                <td class="border-r-2 border-slate-200 bg-slate-50 px-4 py-3 text-center text-xs font-bold text-slate-700">
-                                    {{ $d['label'] }}
-                                </td>
-                                @foreach($timeSlots as $slot)
-                                    @php
-                                        // Skip if already rendered as part of a rowspan
-                                        if (isset($rendered[$d['day']][$slot['key']])) {
-                                            continue;
-                                        }
 
-                                        $entry = $slotMap[$d['day']][$slot['key']] ?? null;
-                                    @endphp
+                        @foreach($timeSlots as $slotIndex => $slot)
+                            @php
+                                // Check if this slot is a break across ALL days
+                                $allBreak = true;
+                                $breakText = null;
+                                $breakEntry = null;
+                                foreach ($days as $d) {
+                                    $entry = $slotMap[$d['day']][$slot['key']] ?? null;
+                                    if (!$entry || !$entry->is_break) {
+                                        $allBreak = false;
+                                        break;
+                                    }
+                                    if ($breakText === null) {
+                                        $breakText = trim($entry->break_text ?? 'BREAK');
+                                        $breakEntry = $entry;
+                                    }
+                                }
+                            @endphp
 
-                                    @if($entry && $entry->is_break)
-                                        @php
-                                            $rowspan = 1;
-                                            $targetText = trim($entry->break_text ?? 'BREAK');
-                                            
-                                            for ($dayVal = $d['day'] + 1; $dayVal <= 5; $dayVal++) {
-                                                $nextEntry = $slotMap[$dayVal][$slot['key']] ?? null;
-                                                if ($nextEntry && $nextEntry->is_break && strcasecmp(trim($nextEntry->break_text ?? 'BREAK'), $targetText) === 0) {
-                                                    $rowspan++;
-                                                } else {
-                                                    break;
-                                                }
-                                            }
-
-                                            // Mark subsequent days as rendered
-                                            for ($offset = 1; $offset < $rowspan; $offset++) {
-                                                $rendered[$d['day'] + $offset][$slot['key']] = true;
-                                            }
-
-                                            $c = $entry->color ?? 'slate';
-                                            $colorClasses = match($c) {
-                                                'blue'     => 'bg-blue-50 border-blue-200 hover:bg-blue-100/70 text-blue-900 border-l-4 border-l-blue-500',
-                                                'indigo'   => 'bg-indigo-50 border-indigo-200 hover:bg-indigo-100/70 text-indigo-900 border-l-4 border-l-indigo-500',
-                                                'violet'   => 'bg-violet-50 border-violet-200 hover:bg-violet-100/70 text-violet-900 border-l-4 border-l-violet-500',
-                                                'purple'   => 'bg-purple-50 border-purple-200 hover:bg-purple-100/70 text-purple-900 border-l-4 border-l-purple-500',
-                                                'pink'     => 'bg-pink-50 border-pink-200 hover:bg-pink-100/70 text-pink-900 border-l-4 border-l-pink-500',
-                                                'red'      => 'bg-red-50 border-red-200 hover:bg-red-100/70 text-red-900 border-l-4 border-l-red-500',
-                                                'orange'   => 'bg-orange-50 border-orange-200 hover:bg-orange-100/70 text-orange-900 border-l-4 border-l-orange-500',
-                                                'amber'    => 'bg-amber-50 border-amber-200 hover:bg-amber-100/70 text-amber-900 border-l-4 border-l-amber-500',
-                                                'yellow'   => 'bg-yellow-50 border-yellow-200 hover:bg-yellow-100/70 text-yellow-900 border-l-4 border-l-yellow-500',
-                                                'green'    => 'bg-green-50 border-green-200 hover:bg-green-100/70 text-green-900 border-l-4 border-l-green-500',
-                                                'emerald'  => 'bg-emerald-50 border-emerald-200 hover:bg-emerald-100/70 text-emerald-900 border-l-4 border-l-emerald-500',
-                                                'teal'     => 'bg-teal-50 border-teal-200 hover:bg-teal-100/70 text-teal-900 border-l-4 border-l-teal-500',
-                                                'cyan'     => 'bg-cyan-50 border-cyan-200 hover:bg-cyan-100/70 text-cyan-900 border-l-4 border-l-cyan-500',
-                                                'sky'      => 'bg-sky-50 border-sky-200 hover:bg-sky-100/70 text-sky-900 border-l-4 border-l-sky-500',
-                                                default    => 'bg-slate-100 border-slate-200 hover:bg-slate-200/70 text-slate-900 border-l-4 border-l-slate-400',
-                                            };
-                                        @endphp
-                                        <td rowspan="{{ $rowspan }}" class="border-r-2 border-slate-200 p-1 text-center align-middle {{ $colorClasses }}" style="height: 1px;">
+                            @if($allBreak && $breakText)
+                                {{-- BREAK ROW spanning all day columns --}}
+                                <tr>
+                                    <td class="bg-slate-100 px-5 py-3 text-center text-xs font-bold text-slate-600 border-r border-slate-200 border-b border-b-slate-200">
+                                        {{ $slot['start'] }} – {{ $slot['end'] }}
+                                    </td>
+                                    <td colspan="{{ count($days) }}" class="border-b border-slate-200 text-center py-3" style="background: linear-gradient(135deg, #fef9c3 0%, #d9f99d 100%);">
+                                        <div class="flex items-center justify-center gap-3">
+                                            @if(str_contains(strtolower($breakText), 'lunch'))
+                                                <span class="text-xl">🍴</span>
+                                            @else
+                                                <span class="text-xl">☕</span>
+                                            @endif
                                             @if($isAdmin)
-                                                <button type="button" wire:click="edit({{ $entry->id }})" x-data x-on:click="$dispatch('open-modal', 'timetable-form')" class="w-full h-full min-h-[80px] flex flex-col items-center justify-center font-black uppercase tracking-wider text-xs leading-none text-current hover:opacity-85 focus:outline-none">
-                                                    @if($rowspan > 1)
-                                                        @foreach(mb_str_split($targetText) as $char)
-                                                            @if($char === ' ')
-                                                                <span class="my-1"></span>
-                                                            @else
-                                                                <span>{{ $char }}</span>
-                                                            @endif
-                                                        @endforeach
-                                                    @else
-                                                        <span>{{ $targetText }}</span>
-                                                    @endif
+                                                <button type="button" wire:click="edit({{ $breakEntry->id }})" x-data x-on:click="$dispatch('open-modal', 'timetable-form')" class="text-sm font-black uppercase tracking-widest text-slate-700 hover:text-slate-900 transition-colors">
+                                                    {{ $breakText }}
                                                 </button>
                                             @else
-                                                <div class="w-full h-full min-h-[80px] flex flex-col items-center justify-center font-black uppercase tracking-wider text-xs leading-none">
-                                                    @if($rowspan > 1)
-                                                        @foreach(mb_str_split($targetText) as $char)
-                                                            @if($char === ' ')
-                                                                <span class="my-1"></span>
-                                                            @else
-                                                                <span>{{ $char }}</span>
-                                                            @endif
-                                                        @endforeach
-                                                    @else
-                                                        <span>{{ $targetText }}</span>
-                                                    @endif
-                                                </div>
+                                                <span class="text-sm font-black uppercase tracking-widest text-slate-700">{{ $breakText }}</span>
                                             @endif
-                                        </td>
-                                    @else
+                                            @if(str_contains(strtolower($breakText), 'lunch'))
+                                                <span class="text-xl">🍴</span>
+                                            @else
+                                                <span class="text-xl">☕</span>
+                                            @endif
+                                        </div>
+                                    </td>
+                                </tr>
+                            @else
+                                {{-- Normal subject row --}}
+                                <tr class="group">
+                                    {{-- Time label --}}
+                                    <td class="bg-slate-50 px-5 py-4 text-center border-r border-slate-200 border-b border-b-slate-200">
+                                        <span class="text-sm font-bold text-slate-700">{{ $slot['start'] }} – {{ $slot['end'] }}</span>
+                                    </td>
+
+                                    {{-- Each day cell --}}
+                                    @foreach($days as $d)
                                         @php
-                                            $colorClasses = '';
-                                            if ($entry) {
-                                                $c = $entry->color ?? 'slate';
-                                                $colorClasses = match($c) {
-                                                    'blue'     => 'bg-blue-50 border-blue-200 hover:bg-blue-100/70 text-blue-900 border-l-4 border-l-blue-500',
-                                                    'indigo'   => 'bg-indigo-50 border-indigo-200 hover:bg-indigo-100/70 text-indigo-900 border-l-4 border-l-indigo-500',
-                                                    'violet'   => 'bg-violet-50 border-violet-200 hover:bg-violet-100/70 text-violet-900 border-l-4 border-l-violet-500',
-                                                    'purple'   => 'bg-purple-50 border-purple-200 hover:bg-purple-100/70 text-purple-900 border-l-4 border-l-purple-500',
-                                                    'pink'     => 'bg-pink-50 border-pink-200 hover:bg-pink-100/70 text-pink-900 border-l-4 border-l-pink-500',
-                                                    'red'      => 'bg-red-50 border-red-200 hover:bg-red-100/70 text-red-900 border-l-4 border-l-red-500',
-                                                    'orange'   => 'bg-orange-50 border-orange-200 hover:bg-orange-100/70 text-orange-900 border-l-4 border-l-orange-500',
-                                                    'amber'    => 'bg-amber-50 border-amber-200 hover:bg-amber-100/70 text-amber-900 border-l-4 border-l-amber-500',
-                                                    'yellow'   => 'bg-yellow-50 border-yellow-200 hover:bg-yellow-100/70 text-yellow-900 border-l-4 border-l-yellow-500',
-                                                    'green'    => 'bg-green-50 border-green-200 hover:bg-green-100/70 text-green-900 border-l-4 border-l-green-500',
-                                                    'emerald'  => 'bg-emerald-50 border-emerald-200 hover:bg-emerald-100/70 text-emerald-900 border-l-4 border-l-emerald-500',
-                                                    'teal'     => 'bg-teal-50 border-teal-200 hover:bg-teal-100/70 text-teal-900 border-l-4 border-l-teal-500',
-                                                    'cyan'     => 'bg-cyan-50 border-cyan-200 hover:bg-cyan-100/70 text-cyan-900 border-l-4 border-l-cyan-500',
-                                                    'sky'      => 'bg-sky-50 border-sky-200 hover:bg-sky-100/70 text-sky-900 border-l-4 border-l-sky-500',
-                                                    default    => 'bg-slate-100 border-slate-200 hover:bg-slate-200/70 text-slate-900 border-l-4 border-l-slate-400',
-                                                };
-                                            }
+                                            $entry = $slotMap[$d['day']][$slot['key']] ?? null;
+                                            $dc = $dayColors[$d['day']] ?? $dayColors[1];
                                         @endphp
-                                        <td class="border-r-2 border-slate-200 p-2">
+
+                                        <td class="px-2 py-2 border-r border-slate-100 border-b border-b-slate-200 last:border-r-0 {{ $dc['lightBg'] }}">
                                             @if($entry)
-                                                @if($isAdmin)
-                                                    <button type="button" wire:click="edit({{ $entry->id }})" x-data x-on:click="$dispatch('open-modal', 'timetable-form')" class="w-full rounded-lg border-2 p-3 text-left transition-all {{ $colorClasses }}">
-                                                        <div class="text-sm font-bold leading-tight">{{ $entry->subject?->name }}</div>
-                                                        <div class="mt-1 text-xs opacity-80 leading-none">{{ $entry->teacher?->name ?? 'No teacher' }}</div>
-                                                        @if($entry->room)
-                                                            <div class="mt-1 text-[11px] opacity-75 font-semibold">Room: {{ $entry->room }}</div>
-                                                        @endif
-                                                    </button>
+                                                @if($entry->is_break)
+                                                    {{-- Individual break cell (not spanning full row) --}}
+                                                    @if($isAdmin)
+                                                        <button type="button" wire:click="edit({{ $entry->id }})" x-data x-on:click="$dispatch('open-modal', 'timetable-form')" class="w-full rounded-lg px-3 py-3 text-center transition-all hover:shadow-md" style="background: linear-gradient(135deg, #fef9c3 0%, #d9f99d 100%);">
+                                                            <span class="text-xs font-black uppercase tracking-wider text-slate-600">{{ trim($entry->break_text ?? 'BREAK') }}</span>
+                                                        </button>
+                                                    @else
+                                                        <div class="w-full rounded-lg px-3 py-3 text-center" style="background: linear-gradient(135deg, #fef9c3 0%, #d9f99d 100%);">
+                                                            <span class="text-xs font-black uppercase tracking-wider text-slate-600">{{ trim($entry->break_text ?? 'BREAK') }}</span>
+                                                        </div>
+                                                    @endif
                                                 @else
-                                                    <div class="rounded-lg border-2 p-3 {{ $colorClasses }}">
-                                                        <div class="text-sm font-bold leading-tight">{{ $entry->subject?->name }}</div>
-                                                        <div class="mt-1 text-xs opacity-80 leading-none">{{ $entry->teacher?->name ?? 'No teacher' }}</div>
-                                                        @if($entry->room)
-                                                            <div class="mt-1 text-[11px] opacity-75 font-semibold">Room: {{ $entry->room }}</div>
-                                                        @endif
-                                                    </div>
+                                                    {{-- Subject cell --}}
+                                                    @php
+                                                        $c = $entry->color ?? 'slate';
+                                                        $cellStyles = match($c) {
+                                                            'blue'    => 'background: linear-gradient(135deg, #dbeafe, #eff6ff); border-color: #93c5fd;',
+                                                            'indigo'  => 'background: linear-gradient(135deg, #e0e7ff, #eef2ff); border-color: #a5b4fc;',
+                                                            'violet'  => 'background: linear-gradient(135deg, #ede9fe, #f5f3ff); border-color: #c4b5fd;',
+                                                            'purple'  => 'background: linear-gradient(135deg, #f3e8ff, #faf5ff); border-color: #d8b4fe;',
+                                                            'pink'    => 'background: linear-gradient(135deg, #fce7f3, #fdf2f8); border-color: #f9a8d4;',
+                                                            'red'     => 'background: linear-gradient(135deg, #fee2e2, #fef2f2); border-color: #fca5a5;',
+                                                            'orange'  => 'background: linear-gradient(135deg, #ffedd5, #fff7ed); border-color: #fdba74;',
+                                                            'amber'   => 'background: linear-gradient(135deg, #fef3c7, #fffbeb); border-color: #fcd34d;',
+                                                            'yellow'  => 'background: linear-gradient(135deg, #fef9c3, #fefce8); border-color: #fde047;',
+                                                            'green'   => 'background: linear-gradient(135deg, #dcfce7, #f0fdf4); border-color: #86efac;',
+                                                            'emerald' => 'background: linear-gradient(135deg, #d1fae5, #ecfdf5); border-color: #6ee7b7;',
+                                                            'teal'    => 'background: linear-gradient(135deg, #ccfbf1, #f0fdfa); border-color: #5eead4;',
+                                                            'cyan'    => 'background: linear-gradient(135deg, #cffafe, #ecfeff); border-color: #67e8f9;',
+                                                            'sky'     => 'background: linear-gradient(135deg, #e0f2fe, #f0f9ff); border-color: #7dd3fc;',
+                                                            default   => 'background: linear-gradient(135deg, #f1f5f9, #f8fafc); border-color: #cbd5e1;',
+                                                        };
+                                                    @endphp
+
+                                                    @if($isAdmin)
+                                                        <button type="button" wire:click="edit({{ $entry->id }})" x-data x-on:click="$dispatch('open-modal', 'timetable-form')" class="w-full rounded-xl border-2 px-3 py-3 text-center transition-all hover:shadow-lg hover:scale-[1.02] active:scale-[0.98]" style="{{ $cellStyles }}">
+                                                            <div class="text-sm font-bold text-slate-800 leading-tight">{{ $entry->subject?->name }}</div>
+                                                            @if($entry->teacher?->name)
+                                                                <div class="mt-1.5 text-[11px] text-slate-500 font-medium">{{ $entry->teacher->name }}</div>
+                                                            @endif
+                                                            @if($entry->room)
+                                                                <div class="mt-1 text-[10px] text-slate-400 font-semibold">📍 {{ $entry->room }}</div>
+                                                            @endif
+                                                        </button>
+                                                    @else
+                                                        <div class="w-full rounded-xl border-2 px-3 py-3 text-center" style="{{ $cellStyles }}">
+                                                            <div class="text-sm font-bold text-slate-800 leading-tight">{{ $entry->subject?->name }}</div>
+                                                            @if($entry->teacher?->name)
+                                                                <div class="mt-1.5 text-[11px] text-slate-500 font-medium">{{ $entry->teacher->name }}</div>
+                                                            @endif
+                                                            @if($entry->room)
+                                                                <div class="mt-1 text-[10px] text-slate-400 font-semibold">📍 {{ $entry->room }}</div>
+                                                            @endif
+                                                        </div>
+                                                    @endif
                                                 @endif
                                             @else
+                                                {{-- Empty cell --}}
                                                 @if($isAdmin)
-                                                    <button type="button" wire:click="selectSlot({{ $d['day'] }}, @js($slot['start']), @js($slot['end']))" x-data x-on:click="$dispatch('open-modal', 'timetable-form')" class="w-full rounded-lg border-2 border-dashed border-slate-300 bg-slate-50 p-3 text-xs text-slate-400 hover:border-blue-400 hover:bg-blue-50 hover:text-blue-600 transition-colors">
-                                                        + Add
+                                                    <button type="button" wire:click="selectSlot({{ $d['day'] }}, @js($slot['start']), @js($slot['end']))" x-data x-on:click="$dispatch('open-modal', 'timetable-form')" class="w-full rounded-xl border-2 border-dashed border-slate-200/80 bg-white/50 px-3 py-4 text-xs text-slate-400 hover:border-blue-400 hover:bg-blue-50/50 hover:text-blue-600 transition-all hover:shadow-sm">
+                                                        <svg class="mx-auto h-5 w-5 opacity-40 mb-1" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M12 4.5v15m7.5-7.5h-15"/></svg>
+                                                        Add
                                                     </button>
                                                 @else
-                                                    <div class="p-3 text-center text-xs text-slate-300">—</div>
+                                                    <div class="px-3 py-4 text-center text-xs text-slate-300">—</div>
                                                 @endif
                                             @endif
                                         </td>
-                                    @endif
-                                @endforeach
-                            </tr>
+                                    @endforeach
+                                </tr>
+                            @endif
                         @endforeach
                     </tbody>
                 </table>
             </div>
+
+            {{-- Motivational Footer --}}
+            <div class="px-6 py-4 text-center border-t border-slate-100" style="background: linear-gradient(135deg, #fef9c3 0%, #fde68a 50%, #fed7aa 100%);">
+                <p class="text-sm font-bold text-slate-700 tracking-wide">
+                    ⭐ Be on Time, Be Prepared, Be Your Best! ⭐
+                </p>
+            </div>
         </div>
 
+        {{-- Admin Form Modal --}}
         @if($isAdmin)
             <div x-data="{ open: false }" x-on:open-modal.window="if ($event.detail === 'timetable-form') open = true" x-on:close.window="open = false" x-show="open" x-cloak class="fixed inset-0 z-50 overflow-y-auto" style="display: none;">
                 <div class="flex min-h-screen items-center justify-center px-4 py-6">
@@ -234,6 +261,7 @@
                                     <option value="3">Wednesday</option>
                                     <option value="4">Thursday</option>
                                     <option value="5">Friday</option>
+                                    <option value="6">Saturday</option>
                                 </select>
                                 @error('entryDay') <div class="mt-1 text-xs text-red-600">{{ $message }}</div> @enderror
                             </div>
@@ -328,7 +356,7 @@
                                 <div class="md:col-span-2 mt-2">
                                     <label class="flex items-center gap-3 cursor-pointer select-none">
                                         <input type="checkbox" wire:model="applyToAllDays" class="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500/20">
-                                        <span class="text-sm font-semibold text-slate-600">Apply this slot/break to all days of the week (Mon-Fri)</span>
+                                        <span class="text-sm font-semibold text-slate-600">Apply this slot/break to all days of the week (Mon-Sat)</span>
                                     </label>
                                 </div>
                             @endif
