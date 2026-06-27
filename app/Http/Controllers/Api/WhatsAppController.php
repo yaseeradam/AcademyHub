@@ -2348,7 +2348,12 @@ class WhatsAppController extends Controller
                   "   - You can output multiple SEND_PDF tags if they request report cards for multiple children or multiple terms in a single prompt.\n" .
                   "11. INTENT DETECTION & SUPPORT TICKETS: If the user indicates they want to report an issue, log a complaint, offer feedback, report missing grades/attendance, or request a call back from the school administration, you MUST append a hidden tag at the very end of your response: '[SUPPORT_TICKET_DETECTED: <message>]' where <message> is a clear, concise 1-sentence summary of the user's actual problem or concern. Do not include this tag for standard information questions (e.g. asking for grades, schedules, or events).\n" .
                   "12. HANDLING STUDENT RESULTS: If asked about student results, academic performance, report cards, or scores: Check if the child name or admission number is specified in the question. If not, and there are multiple children listed in the context, ask the user to specify which student they are asking about. If the student is identified, verify if the results for the requested term and session are officially published (existence of a record matching that term and session in the student's `published_results` list). If the results are NOT published, you MUST politely inform the user that the academic results for that term/session have not been officially published yet by the school administration, instead of saying you don't have access to this information. If the results ARE published, list the scores from the `recent_scores` data matching the requested term/session, always listing the subject name and score (e.g., Mathematics: 85/100).\n" .
-                  "13. ACTIVE SESSION STUDENT: If 'active_session_student_id' is set in the context (not null), this indicates the student the parent has been actively chatting about or selected recently. Prioritize this student in your answers unless the user names a different child. Additionally, if your answer resolves to or discusses a specific single student from the context, you MUST append a hidden tag at the very end of your response: '[ACTIVE_STUDENT_SELECTED: <student_id>]' where <student_id> is that student's ID from the context. Do not append this tag if you are talking about multiple children or general school information.";
+                  "13. ACTIVE SESSION STUDENT: If 'active_session_student_id' is set in the context (not null), this indicates the student the parent has been actively chatting about or selected recently. Prioritize this student in your answers unless the user names a different child. Additionally, if your answer resolves to or discusses a specific single student from the context, you MUST append a hidden tag at the very end of your response: '[ACTIVE_STUDENT_SELECTED: <student_id>]' where <student_id> is that student's ID from the context. Do not append this tag if you are talking about multiple children or general school information.\n" .
+                  "14. BROADCASTS & ANNOUNCEMENTS: If the user is an admin or superadmin and explicitly requests to send a broadcast, post a notice, publish an announcement, or notify a group of users (students, parents, staff, or everyone) about a message, you MUST append a hidden tag at the very end of your response: '[CREATE_ANNOUNCEMENT: <audience>|<title>|<body_text>]' where:\n" .
+                  "    - <audience> MUST be one of: 'all', 'student', 'parent', 'staff'.\n" .
+                  "    - <title> is a short (2-6 words) title for the announcement.\n" .
+                  "    - <body_text> is the message content to broadcast.\n" .
+                  "Politely confirm in your conversational response that you have published the announcement to the school portal.";
 
         $phoneClean = preg_replace('/\D/', '', $user->whatsapp_phone ?: '');
         $historyKey = "whatsapp_chat_history_{$phoneClean}";
@@ -2407,6 +2412,19 @@ class WhatsAppController extends Controller
                                   "💡 _Reply to this user to assist them._";
                     $this->sendMetaMessage($admin->whatsapp_phone, $adminAlert);
                 }
+            }
+
+            // Parse [CREATE_ANNOUNCEMENT: audience|title|body] tags
+            if (preg_match('/\[CREATE_ANNOUNCEMENT:\s*(.*?)\|(.*?)\|(.*?)\]/is', $answer, $matches)) {
+                $annAudience = trim($matches[1]);
+                $annTitle = trim($matches[2]);
+                $annBody = trim($matches[3]);
+
+                if (in_array($annAudience, ['all', 'student', 'parent', 'staff'])) {
+                    $this->createAnnouncement($annAudience, $annTitle, $annBody, $user);
+                }
+
+                $answer = trim(preg_replace('/\[CREATE_ANNOUNCEMENT:\s*.*?\]/is', '', $answer));
             }
 
             // Parse [AMBIGUOUS_REPORT_CARD: term|session] tags
@@ -2496,6 +2514,53 @@ class WhatsAppController extends Controller
             }
         } else {
             $this->sendMetaMessage($phone, "🤷 I'm sorry, I'm currently having trouble connecting to the school servers. Please try again in a few moments.");
+        }
+    }
+
+    private function createAnnouncement(string $audience, string $title, string $body, \App\Models\User $user): void
+    {
+        $announcement = \App\Models\Announcement::create([
+            'title' => $title,
+            'body' => $body,
+            'audience' => $audience,
+            'published_at' => now(),
+            'created_by' => $user->id,
+        ]);
+
+        // 1. Notify parents/staff in-app if targeted
+        $query = \App\Models\User::query()->where('tenant_id', $user->tenant_id)->where('is_active', true);
+
+        if ($audience === 'staff') {
+            $query->whereIn('role', ['admin', 'teacher', 'bursar']);
+        } elseif ($audience !== 'all' && $audience !== 'student') {
+            $query->where('role', $audience);
+        }
+
+        if ($audience !== 'student') {
+            $users = $query->get(['id']);
+            foreach ($users as $u) {
+                \App\Models\InAppNotification::create([
+                    'user_id' => $u->id,
+                    'title' => 'New announcement: ' . $title,
+                    'body' => $body,
+                    'link' => route('announcements'),
+                ]);
+            }
+        }
+
+        // 2. Notify students in-app if targeted (student or all)
+        if ($audience === 'student' || $audience === 'all') {
+            $students = \App\Models\Student::where('tenant_id', $user->tenant_id)->get(['id']);
+            foreach ($students as $s) {
+                \App\Models\StudentNotification::create([
+                    'tenant_id' => $user->tenant_id,
+                    'student_id' => $s->id,
+                    'title' => 'New Announcement: ' . $title,
+                    'body' => $body,
+                    'type' => 'general',
+                    'link' => null,
+                ]);
+            }
         }
     }
 
