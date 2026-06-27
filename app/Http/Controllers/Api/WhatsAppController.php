@@ -423,7 +423,7 @@ class WhatsAppController extends Controller
         ];
     }
 
-    private function buildStaffContext(\App\Models\User $staff): array
+    private function buildStaffContext(\App\Models\User $staff, ?string $queryText = null): array
     {
         // 1. Get school details
         $school = [
@@ -528,6 +528,72 @@ class WhatsAppController extends Controller
             ];
         }
 
+        // Active student lookup based on queryText
+        $students = [];
+        if (!empty($queryText)) {
+            $cleanText = preg_replace('/[^\w\s]/', '', $queryText);
+            $words = array_filter(explode(' ', $cleanText));
+            $searchWords = array_filter($words, fn($w) => strlen(trim($w)) >= 3);
+
+            if (!empty($searchWords)) {
+                $studentQuery = \App\Models\Student::where('status', 'Active');
+                $studentQuery->where(function($q) use ($searchWords) {
+                    foreach ($searchWords as $word) {
+                        $q->orWhere('first_name', 'like', "%{$word}%")
+                          ->orWhere('last_name', 'like', "%{$word}%")
+                          ->orWhere('middle_name', 'like', "%{$word}%")
+                          ->orWhere('admission_number', 'like', "%{$word}%");
+                    }
+                });
+
+                $matched = $studentQuery->with(['schoolClass', 'attendanceMarks' => function($q) {
+                    $q->whereDate('date', today());
+                }, 'scores' => function($q) {
+                    $q->with('subject');
+                }])->limit(5)->get();
+
+                $apiKey = config('services.whatsapp.api_key');
+                $activeTermNumber = \App\Models\AcademicTerm::activeTermNumber();
+                $activeSessionName = \App\Models\AcademicTerm::activeSessionName() ?: date('Y') . '/' . (date('Y') + 1);
+
+                $students = $matched->map(function($student) use ($apiKey, $activeTermNumber, $activeSessionName) {
+                    $attendance = $student->attendanceMarks->first();
+                    $reportCardUrl = route('whatsapp.report-card', [
+                        'studentId' => $student->id,
+                        'key'       => $apiKey,
+                        'term'      => $activeTermNumber,
+                        'session'   => $activeSessionName
+                    ]);
+
+                    $publishedResults = \App\Models\ResultPublication::where('class_id', $student->class_id)
+                        ->get()
+                        ->map(fn($pub) => [
+                            'term' => $pub->term,
+                            'session' => $pub->session,
+                            'published_at' => $pub->published_at?->toDateString(),
+                        ])->all();
+
+                    return [
+                        'id' => $student->id,
+                        'name' => $student->full_name,
+                        'admission_number' => $student->admission_number,
+                        'class' => $student->schoolClass?->name,
+                        'attendance_today' => $attendance ? $attendance->status : null,
+                        'report_card_url' => $reportCardUrl,
+                        'published_results' => $publishedResults,
+                        'recent_scores' => $student->scores->map(function ($score) {
+                            return [
+                                'subject' => $score->subject?->name,
+                                'total_score' => $score->total,
+                                'term' => $score->term ?? null,
+                                'session' => $score->session ?? null,
+                            ];
+                        })->values()->all(),
+                    ];
+                })->all();
+            }
+        }
+
         return [
             'user' => [
                 'name' => $staff->name,
@@ -555,6 +621,7 @@ class WhatsAppController extends Controller
             'teaching_schedule_today' => $teachingSchedule,
             'upcoming_events' => $events,
             'recent_announcements' => $announcements,
+            'students' => $students,
         ];
     }
 
@@ -796,6 +863,12 @@ class WhatsAppController extends Controller
 
         $user = \App\Models\User::findOrFail($request->parent_id);
         
+        $tenant = $user->tenant;
+        if ($tenant) {
+            app()->instance('currentTenant', $tenant);
+            $this->loadTenantSettings($tenant);
+        }
+        
         if ($user->role === 'parent') {
             $context = $this->buildParentContext($user);
             $roleLabel = 'parent';
@@ -803,7 +876,7 @@ class WhatsAppController extends Controller
             $context = $this->buildStudentContext($user);
             $roleLabel = 'student';
         } else {
-            $context = $this->buildStaffContext($user);
+            $context = $this->buildStaffContext($user, $request->question);
             $roleLabel = "staff member ({$user->role})";
         }
         
@@ -2240,7 +2313,7 @@ class WhatsAppController extends Controller
             $context = $this->buildStudentContext($user);
             $roleLabel = 'student';
         } else {
-            $context = $this->buildStaffContext($user);
+            $context = $this->buildStaffContext($user, $text);
             $roleLabel = "staff member ({$user->role})";
         }
 
