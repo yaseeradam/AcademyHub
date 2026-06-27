@@ -114,29 +114,26 @@
                             @endphp
 
                             @if($allBreak && $breakText)
-                                {{-- BREAK ROW spanning all day columns --}}
+                                {{-- BREAK ROW spanning full table width --}}
                                 <tr>
-                                    <td class="bg-slate-100 px-5 py-3 text-center text-xs font-bold text-slate-600 border-r border-slate-200 border-b border-b-slate-200">
-                                        {{ $slot['start'] }} – {{ $slot['end'] }}
-                                    </td>
-                                    <td colspan="{{ count($days) }}" class="border-b border-slate-200 text-center py-3" style="background: linear-gradient(135deg, #fef9c3 0%, #d9f99d 100%);">
-                                        <div class="flex items-center justify-center gap-3">
+                                    <td colspan="{{ count($days) + 1 }}" class="border-b border-slate-200 text-center py-4" style="background: linear-gradient(135deg, #fef9c3 0%, #d9f99d 50%, #fef9c3 100%);">
+                                        <div class="flex items-center justify-center gap-4">
                                             @if(str_contains(strtolower($breakText), 'lunch'))
-                                                <span class="text-xl">🍴</span>
+                                                <span class="text-2xl">🍴</span>
                                             @else
-                                                <span class="text-xl">☕</span>
+                                                <span class="text-2xl">☕</span>
                                             @endif
                                             @if($isAdmin)
-                                                <button type="button" wire:click="edit({{ $breakEntry->id }})" x-data x-on:click="$dispatch('open-modal', 'timetable-form')" class="text-sm font-black uppercase tracking-widest text-slate-700 hover:text-slate-900 transition-colors">
+                                                <button type="button" wire:click="edit({{ $breakEntry->id }})" x-data x-on:click="$dispatch('open-modal', 'timetable-form')" class="text-base font-black uppercase tracking-[0.2em] text-slate-700 hover:text-slate-900 transition-colors">
                                                     {{ $breakText }}
                                                 </button>
                                             @else
-                                                <span class="text-sm font-black uppercase tracking-widest text-slate-700">{{ $breakText }}</span>
+                                                <span class="text-base font-black uppercase tracking-[0.2em] text-slate-700">{{ $breakText }}</span>
                                             @endif
                                             @if(str_contains(strtolower($breakText), 'lunch'))
-                                                <span class="text-xl">🍴</span>
+                                                <span class="text-2xl">🍴</span>
                                             @else
-                                                <span class="text-xl">☕</span>
+                                                <span class="text-2xl">☕</span>
                                             @endif
                                         </div>
                                     </td>
