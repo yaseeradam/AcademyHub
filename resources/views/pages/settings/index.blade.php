@@ -125,6 +125,20 @@
                             </div>
                         </div>
 
+                        <div class="sm:col-span-2">
+                            <label class="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-slate-500">School Motto</label>
+                            <div class="relative">
+                                <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5">
+                                    <svg class="h-4 w-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138z" />
+                                    </svg>
+                                </div>
+                                <input name="school_motto" placeholder="e.g. Discipline • Knowledge • Excellence"
+                                    class="w-full rounded-xl border border-slate-300 bg-slate-50 py-2.5 pl-10 pr-4 text-sm text-slate-800 placeholder-slate-400 transition focus:border-orange-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-orange-100"
+                                    value="{{ old('school_motto', config('academyhub.school_motto')) }}" />
+                            </div>
+                        </div>
+
                         <div>
                             <label class="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-slate-500">Phone</label>
                             <div class="relative">

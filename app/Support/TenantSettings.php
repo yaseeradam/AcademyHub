@@ -68,6 +68,7 @@ class TenantSettings
                 'school_phone',
                 'school_email',
                 'school_logo',
+                'school_motto',
                 'currency_symbol',
                 'current_week',
                 'tagline',

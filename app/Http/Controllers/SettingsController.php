@@ -59,6 +59,7 @@ class SettingsController extends Controller
             'school_phone' => ['nullable', 'string', 'max:50'],
             'school_email' => ['nullable', 'email', 'max:255'],
             'school_logo' => ['nullable', 'image', 'max:2048'],
+            'school_motto' => ['nullable', 'string', 'max:255'],
         ]);
 
         $settingsPath = $this->settingsPath();
@@ -68,6 +69,7 @@ class SettingsController extends Controller
         $settings['school_address'] = $data['school_address'] ?? null;
         $settings['school_phone'] = $data['school_phone'] ?? null;
         $settings['school_email'] = $data['school_email'] ?? null;
+        $settings['school_motto'] = $data['school_motto'] ?? null;
 
         if ($request->hasFile('school_logo')) {
             $file = $request->file('school_logo');

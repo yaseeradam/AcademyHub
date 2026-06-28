@@ -625,7 +625,7 @@
 
         {{-- bottom tagline bar --}}
         <div class="tagline-bar">
-            DISCIPLINE • KNOWLEDGE • EXCELLENCE
+            {{ config('academyhub.school_motto') ?: 'DISCIPLINE • KNOWLEDGE • EXCELLENCE' }}
         </div>
 
     </div>
