@@ -1092,20 +1092,7 @@ class WhatsAppController extends Controller
             $data = app(\App\Support\ReportCardService::class)->build($student, $term, $session);
 
             $template = (string) config('academyhub.report_card_template', 'compact');
-            $view = match ($template) {
-                'compact' => 'pdf.report-card-compact',
-                'elegant' => 'pdf.report-card-elegant',
-                'modern' => 'pdf.report-card-modern',
-                'classic' => 'pdf.report-card-classic',
-                'aurora' => 'pdf.report-card-aurora',
-                'heritage' => 'pdf.report-card-heritage',
-                'nordic' => 'pdf.report-card-nordic',
-                'vanguard' => 'pdf.report-card-vanguard',
-                'signature' => 'pdf.report-card-signature',
-                'riverdale', 'riverdale-burgundy', 'riverdale-emerald', 'riverdale-purple' => 'pdf.report-card-riverdale',
-                'greenwood' => 'pdf.report-card-greenwood',
-                default => 'pdf.report-card-compact',
-            };
+            $view = \App\Support\ReportCardService::viewForTemplate($template);
 
             $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView($view, [
                 ...$data,

@@ -114,20 +114,7 @@ class BulkReportCardsController extends Controller
                 $payload = $service->build($student, $term, $session, $optionsOverrides);
 
                 $template = $request->filled('template') ? $request->input('template') : (string) config('academyhub.report_card_template', 'compact');
-                $view = match ($template) {
-                    'compact' => 'pdf.report-card-compact',
-                    'elegant' => 'pdf.report-card-elegant',
-                    'modern' => 'pdf.report-card-modern',
-                    'classic' => 'pdf.report-card-classic',
-                    'aurora' => 'pdf.report-card-aurora',
-                    'heritage' => 'pdf.report-card-heritage',
-                    'nordic' => 'pdf.report-card-nordic',
-                    'vanguard' => 'pdf.report-card-vanguard',
-                    'signature' => 'pdf.report-card-signature',
-                    'riverdale' => 'pdf.report-card-riverdale',
-                    'greenwood' => 'pdf.report-card-greenwood',
-                    default => 'pdf.report-card-compact',
-                };
+                $view = ReportCardService::viewForTemplate($template);
 
                 $pdf = Pdf::loadView($view, [
                     ...$payload,
@@ -191,20 +178,7 @@ class BulkReportCardsController extends Controller
         $payload = $service->build($student, $term, $session, $optionsOverrides);
 
         $template = $request->filled('template') ? $request->input('template') : (string) config('academyhub.report_card_template', 'compact');
-        $view = match ($template) {
-            'compact' => 'pdf.report-card-compact',
-            'elegant' => 'pdf.report-card-elegant',
-            'modern' => 'pdf.report-card-modern',
-            'classic' => 'pdf.report-card-classic',
-            'aurora' => 'pdf.report-card-aurora',
-            'heritage' => 'pdf.report-card-heritage',
-            'nordic' => 'pdf.report-card-nordic',
-            'vanguard' => 'pdf.report-card-vanguard',
-            'signature' => 'pdf.report-card-signature',
-            'riverdale' => 'pdf.report-card-riverdale',
-            'greenwood' => 'pdf.report-card-greenwood',
-            default => 'pdf.report-card-compact',
-        };
+        $view = ReportCardService::viewForTemplate($template);
 
         $pdf = Pdf::loadView($view, [
             ...$payload,

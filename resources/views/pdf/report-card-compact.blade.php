@@ -115,8 +115,8 @@
                 <div class="header-cell">
                     <div class="school-name">{{ $schoolName }}</div>
                     @if(config('academyhub.school_address'))<div class="school-meta">{{ config('academyhub.school_address') }}</div>@endif
-                    @if(config('academyhub.school_phone') || config('academyhub.school_email'))
-                        <div class="school-meta">{{ config('academyhub.school_phone') }}@if(config('academyhub.school_phone') && config('academyhub.school_email')) • @endif{{ config('academyhub.school_email') }}</div>
+                    @if(config('academyhub.school_phone'))
+                        <div class="school-meta">Phone: {{ config('academyhub.school_phone') }}</div>
                     @endif
                     <div class="badge">Student Report Card</div>
                 </div>

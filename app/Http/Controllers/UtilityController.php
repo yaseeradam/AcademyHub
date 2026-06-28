@@ -87,20 +87,7 @@ class UtilityController extends Controller
         $data = $reportCardService->build($student, $term, $session);
 
         $template = (string) config('academyhub.report_card_template', 'compact');
-        $view = match ($template) {
-            'compact' => 'pdf.report-card-compact',
-            'elegant' => 'pdf.report-card-elegant',
-            'modern' => 'pdf.report-card-modern',
-            'classic' => 'pdf.report-card-classic',
-            'aurora' => 'pdf.report-card-aurora',
-            'heritage' => 'pdf.report-card-heritage',
-            'nordic' => 'pdf.report-card-nordic',
-            'vanguard' => 'pdf.report-card-vanguard',
-            'signature' => 'pdf.report-card-signature',
-            'riverdale' => 'pdf.report-card-riverdale',
-            'greenwood' => 'pdf.report-card-greenwood',
-            default => 'pdf.report-card-compact',
-        };
+        $view = ReportCardService::viewForTemplate($template);
 
         $pdf = Pdf::loadView($view, $data)->setPaper('a4');
         $filename = 'report-card-' . $student->admission_number . '-' . $session . '-T' . $term . '.pdf';

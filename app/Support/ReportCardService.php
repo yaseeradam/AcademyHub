@@ -18,6 +18,27 @@ class ReportCardService
     protected array $subjectsCache = [];
     protected array $studentCountCache = [];
 
+    /**
+     * Resolve the report card Blade view name for a template key.
+     *
+     * Keeps template-to-view mapping in one place so WhatsApp, web, bulk
+     * and preview controllers all render the same view for the same key.
+     */
+    public static function viewForTemplate(string $template): string
+    {
+        return match ($template) {
+            'elegant' => 'pdf.report-card-elegant',
+            'classic' => 'pdf.report-card-classic',
+            'heritage' => 'pdf.report-card-heritage',
+            'nordic' => 'pdf.report-card-nordic',
+            'signature' => 'pdf.report-card-signature',
+            'riverdale', 'riverdale-burgundy', 'riverdale-emerald', 'riverdale-purple' => 'pdf.report-card-riverdale',
+            'greenwood' => 'pdf.report-card-greenwood',
+            'compact', 'standard' => 'pdf.report-card-compact',
+            default => 'pdf.report-card-compact',
+        };
+    }
+
     protected function getClassScores(int $classId, int $term, string $session, Collection $subjectIds): Collection
     {
         $cacheKey = "{$classId}-{$term}-{$session}";
@@ -51,14 +72,25 @@ class ReportCardService
     {
         $student->load(['schoolClass', 'section']);
 
-        $subjects = $this->subjectsForClass($student->class_id);
+        // Scores are recorded against the class the student was in at the time of
+        // result entry. If the student has since been moved to another class, we
+        // must still find those scores and use the original class context for
+        // subjects, class averages and positions.
+        $scoreClassId = Score::query()
+            ->where('student_id', $student->id)
+            ->where('term', $term)
+            ->where('session', $session)
+            ->value('class_id');
+
+        $classId = (int) ($scoreClassId ?: $student->class_id);
+
+        $subjects = $this->subjectsForClass($classId);
         $subjectIds = $subjects->pluck('id');
         $subjectCount = max(1, (int) $subjectIds->count());
 
         $scores = Score::query()
             ->with('subject')
             ->where('student_id', $student->id)
-            ->where('class_id', $student->class_id)
             ->where('term', $term)
             ->where('session', $session)
             ->whereIn('subject_id', $subjectIds)

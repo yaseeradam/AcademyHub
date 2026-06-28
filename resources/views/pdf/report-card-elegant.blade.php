@@ -384,11 +384,9 @@
                             @if(config('academyhub.school_address'))
                                 <div class="school-info">{{ config('academyhub.school_address') }}</div>
                             @endif
-                            @if(config('academyhub.school_phone') || config('academyhub.school_email'))
+                            @if(config('academyhub.school_phone'))
                                 <div class="school-info">
-                                    {{ config('academyhub.school_phone') }}
-                                    @if(config('academyhub.school_phone') && config('academyhub.school_email')) | @endif
-                                    {{ config('academyhub.school_email') }}
+                                    Phone: {{ config('academyhub.school_phone') }}
                                 </div>
                             @endif
                             <div class="report-badge">Report Card</div>

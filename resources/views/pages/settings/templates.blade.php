@@ -107,24 +107,10 @@
                                 'free' => true,
                             ],
                             [
-                                'key' => 'modern',
-                                'title' => 'Modern',
-                                'desc' => 'Bold dark mode design with cyan accents and card-based layout.',
-                                'preview' => route('settings.templates.preview', ['type' => 'report-card', 'template' => 'modern']),
-                                'free' => true,
-                            ],
-                            [
                                 'key' => 'classic',
                                 'title' => 'Classic',
                                 'desc' => 'Traditional black and white formal layout with maximum readability.',
                                 'preview' => route('settings.templates.preview', ['type' => 'report-card', 'template' => 'classic']),
-                                'free' => true,
-                            ],
-                            [
-                                'key' => 'aurora',
-                                'title' => 'Aurora',
-                                'desc' => 'Vibrant, neon pink/violet/indigo gradient header cards, rounded elements, clean spacing, and modern progress rating bars.',
-                                'preview' => route('settings.templates.preview', ['type' => 'report-card', 'template' => 'aurora']),
                                 'free' => true,
                             ],
                             [
@@ -139,13 +125,6 @@
                                 'title' => 'Nordic',
                                 'desc' => 'Scandinavian minimalist design using clean slate borders, spacious margins, stark high-contrast typography, and light gray stats panels.',
                                 'preview' => route('settings.templates.preview', ['type' => 'report-card', 'template' => 'nordic']),
-                                'free' => true,
-                            ],
-                            [
-                                'key' => 'vanguard',
-                                'title' => 'Vanguard',
-                                'desc' => 'Futuristic panel-based tech layout with dark graphite aesthetics, cyber cyan/teal accents, and precise monospace data structures.',
-                                'preview' => route('settings.templates.preview', ['type' => 'report-card', 'template' => 'vanguard']),
                                 'free' => true,
                             ],
                             [
@@ -199,17 +178,9 @@
                                 </div>
 
                                 {{-- Header block --}}
-                                @if($t['key'] === 'aurora')
-                                    <div class="h-8 rounded-lg bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500 flex items-center justify-between px-2 text-[6px] text-white font-bold">
-                                        <span>AURORA REPORT</span> <div class="w-3.5 h-3.5 rounded-full bg-white/20"></div>
-                                    </div>
-                                @elseif($t['key'] === 'elegant')
+                                @if($t['key'] === 'elegant')
                                     <div class="h-8 rounded-md bg-indigo-950 border-b-2 border-amber-400 flex items-center justify-between px-2 text-[6px] text-amber-400 font-serif">
                                         <span>ELEGANT ACADEMY</span> <div class="w-3.5 h-3.5 rounded-full border border-amber-400/40"></div>
-                                    </div>
-                                @elseif($t['key'] === 'modern')
-                                    <div class="h-8 rounded-md bg-slate-900 flex items-center justify-between px-2 text-[6px] text-cyan-400 font-sans font-bold">
-                                        <span>MODERN PROFILE</span> <div class="w-3.5 h-3.5 rounded-full bg-cyan-450"></div>
                                     </div>
                                 @elseif($t['key'] === 'classic')
                                     <div class="h-8 border-2 border-slate-950 flex items-center justify-between px-2 text-[6px] text-slate-950 font-mono font-bold">
@@ -222,10 +193,6 @@
                                 @elseif($t['key'] === 'nordic')
                                     <div class="h-8 rounded-md bg-slate-250 flex items-center justify-between px-2 text-[6px] text-slate-700 font-mono">
                                         <span>NORDIC GRADES</span> <div class="w-3.5 h-3.5 bg-slate-400/30"></div>
-                                    </div>
-                                @elseif($t['key'] === 'vanguard')
-                                    <div class="h-8 rounded-md bg-zinc-900 border border-teal-500/50 flex items-center justify-between px-2 text-[6px] text-teal-400 font-mono">
-                                        <span>[VANGUARD_CORE]</span> <div class="w-3.5 h-3.5 bg-teal-400/80"></div>
                                     </div>
                                 @elseif($t['key'] === 'signature')
                                     <div class="h-8 rounded-md bg-red-950 border-b-2 border-amber-600 flex items-center justify-between px-2 text-[6px] text-amber-500 font-serif">
