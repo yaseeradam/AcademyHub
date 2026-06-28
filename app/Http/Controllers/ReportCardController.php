@@ -78,7 +78,51 @@ class ReportCardController extends Controller
         $filename = 'report-card-' . $student->admission_number . '-' . $sessionSlug . '-T' . $term . '.pdf';
         $fullPath = "{$storageDir}/{$filename}";
 
+        // Cache invalidation: regenerate when scores, settings, student details, or attendance change.
+        $lastScoreAt = \App\Models\Score::where('student_id', $student->id)
+            ->where('term', $term)
+            ->where('session', $session)
+            ->max('updated_at');
+        $lastScoreTimestamp = $lastScoreAt ? \Carbon\Carbon::parse($lastScoreAt)->timestamp : null;
+
+        $lastAttendanceAt = \App\Models\AttendanceMark::where('student_id', $student->id)->max('updated_at');
+        $lastAttendanceTimestamp = $lastAttendanceAt ? \Carbon\Carbon::parse($lastAttendanceAt)->timestamp : null;
+
+        $settingsPath = storage_path('app/academyhub/tenants/' . $student->tenant_id . '/settings.json');
+        if (!file_exists($settingsPath)) {
+            $settingsPath = storage_path('app/academyhub/settings.json');
+        }
+        $settingsTimestamp = file_exists($settingsPath) ? filemtime($settingsPath) : null;
+
+        $studentTimestamp = $student->updated_at ? $student->updated_at->timestamp : null;
+
+        $useCache = false;
         if (file_exists($fullPath) && app()->environment() !== 'testing') {
+            $cacheTimestamp = filemtime($fullPath);
+            $stale = false;
+
+            if ($lastScoreTimestamp !== null && $cacheTimestamp < $lastScoreTimestamp) {
+                $stale = true;
+            }
+
+            if ($lastAttendanceTimestamp !== null && $cacheTimestamp < $lastAttendanceTimestamp) {
+                $stale = true;
+            }
+
+            if ($settingsTimestamp !== null && $cacheTimestamp < $settingsTimestamp) {
+                $stale = true;
+            }
+
+            if ($studentTimestamp !== null && $cacheTimestamp < $studentTimestamp) {
+                $stale = true;
+            }
+
+            if (!$stale) {
+                $useCache = true;
+            }
+        }
+
+        if ($useCache) {
             Audit::log('results.report_card_downloaded_from_cache', $student, [
                 'term' => $term,
                 'session' => $session,

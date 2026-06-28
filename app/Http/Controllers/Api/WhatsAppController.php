@@ -1109,12 +1109,15 @@ class WhatsAppController extends Controller
         $cachedFilename = "report-card-{$studentId}-T{$term}-{$sessionSlug}-{$safeTemplate}.pdf";
         $cachedPath = "{$cacheDir}/{$cachedFilename}";
 
-        // Cache invalidation: regenerate when scores or settings change.
+        // Cache invalidation: regenerate when scores, settings, student details, or attendance change.
         $lastScoreAt = \App\Models\Score::where('student_id', $studentId)
             ->where('term', $term)
             ->where('session', $session)
             ->max('updated_at');
         $lastScoreTimestamp = $lastScoreAt ? \Carbon\Carbon::parse($lastScoreAt)->timestamp : null;
+
+        $lastAttendanceAt = \App\Models\AttendanceMark::where('student_id', $studentId)->max('updated_at');
+        $lastAttendanceTimestamp = $lastAttendanceAt ? \Carbon\Carbon::parse($lastAttendanceAt)->timestamp : null;
 
         $settingsPath = $tenant
             ? storage_path('app/academyhub/tenants/' . $tenant->id . '/settings.json')
@@ -1122,6 +1125,8 @@ class WhatsAppController extends Controller
         $settingsTimestamp = \Illuminate\Support\Facades\File::exists($settingsPath)
             ? \Illuminate\Support\Facades\File::lastModified($settingsPath)
             : null;
+
+        $studentTimestamp = $student->updated_at ? $student->updated_at->timestamp : null;
 
         $useCache = false;
         if (\Illuminate\Support\Facades\File::exists($cachedPath)) {
@@ -1132,7 +1137,15 @@ class WhatsAppController extends Controller
                 $stale = true;
             }
 
+            if ($lastAttendanceTimestamp !== null && $cacheTimestamp < $lastAttendanceTimestamp) {
+                $stale = true;
+            }
+
             if ($settingsTimestamp !== null && $cacheTimestamp < $settingsTimestamp) {
+                $stale = true;
+            }
+
+            if ($studentTimestamp !== null && $cacheTimestamp < $studentTimestamp) {
                 $stale = true;
             }
 
