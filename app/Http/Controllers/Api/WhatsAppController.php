@@ -541,7 +541,6 @@ class WhatsAppController extends Controller
                     foreach ($searchWords as $word) {
                         $q->orWhere('first_name', 'like', "%{$word}%")
                           ->orWhere('last_name', 'like', "%{$word}%")
-                          ->orWhere('middle_name', 'like', "%{$word}%")
                           ->orWhere('admission_number', 'like', "%{$word}%");
                     }
                 });
