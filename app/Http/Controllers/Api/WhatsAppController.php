@@ -338,7 +338,8 @@ class WhatsAppController extends Controller
                     'studentId' => $student->id,
                     'key'       => $apiKey,
                     'term'      => $activeTermNumber,
-                    'session'   => $activeSessionName
+                    'session'   => $activeSessionName,
+                    't'         => time()
                 ]);
 
                 // Calculate Tuition billing balances dynamically
@@ -563,7 +564,8 @@ class WhatsAppController extends Controller
                         'studentId' => $student->id,
                         'key'       => $apiKey,
                         'term'      => $activeTermNumber,
-                        'session'   => $activeSessionName
+                        'session'   => $activeSessionName,
+                        't'         => time()
                     ]);
 
                     $publishedResults = \App\Models\ResultPublication::where('class_id', $student->class_id)
@@ -983,7 +985,8 @@ class WhatsAppController extends Controller
                         'studentId' => $studentId, 
                         'key'       => $apiKey, 
                         'term'      => $ambiguousTerm, 
-                        'session'   => $ambiguousSession
+                        'session'   => $ambiguousSession,
+                        't'         => time()
                     ]);
                     $answer .= "• [{$studentName}]({$reportUrl}) (Term {$ambiguousTerm} - {$ambiguousSession})\n";
                 }
@@ -1004,7 +1007,8 @@ class WhatsAppController extends Controller
                             'studentId' => $studentObj->id, 
                             'key'       => $apiKey, 
                             'term'      => $pdfTerm, 
-                            'session'   => $pdfSession
+                            'session'   => $pdfSession,
+                            't'         => time()
                         ]);
                         
                         $pdfs[] = [
@@ -1657,6 +1661,7 @@ class WhatsAppController extends Controller
                 continue;
             }
             config(["academyhub.{$key}" => $value]);
+            config(["myacademy.{$key}" => $value]);
         }
     }
 
@@ -1709,7 +1714,8 @@ class WhatsAppController extends Controller
                     'studentId' => $studentObj->id,
                     'key'       => $apiKey,
                     'term'      => $term,
-                    'session'   => $session
+                    'session'   => $session,
+                    't'         => time()
                 ]);
 
                 $filename = "report-card-{$studentObj->first_name}-{$studentObj->last_name}-Term{$term}-" . str_replace('/', '-', $session) . ".pdf";
@@ -2529,7 +2535,8 @@ class WhatsAppController extends Controller
                         'studentId' => $studentObj->id,
                         'key'       => $apiKey,
                         'term'      => $pdfTerm,
-                        'session'   => $pdfSession
+                        'session'   => $pdfSession,
+                        't'         => time()
                     ]);
 
                     $filename = "report-card-{$studentObj->first_name}-{$studentObj->last_name}-Term{$pdfTerm}-" . str_replace('/', '-', $pdfSession) . ".pdf";
