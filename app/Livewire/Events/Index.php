@@ -127,7 +127,7 @@ class Index extends Component
                     'user_id' => $u->id,
                     'title' => 'New event scheduled',
                     'body' => $event->title,
-                    'link' => route('events'),
+                    'link' => '/events',
                 ]);
             }
         });

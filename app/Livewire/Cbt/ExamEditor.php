@@ -1194,7 +1194,7 @@ class ExamEditor extends Component
                 'user_id' => $admin->id,
                 'title' => 'CBT Approval Requested',
                 'body' => "Teacher {$user->name} requested approval for CBT exam: {$exam->title}.",
-                'link' => route('cbt.exams.edit', $exam),
+                'link' => '/cbt/exams/' . $exam->id,
             ]);
         }
 
@@ -1524,13 +1524,13 @@ class ExamEditor extends Component
             'user_id' => (int) $this->forwardTeacherId,
             'title' => 'Theory marking assigned',
             'body' => "Mark theory questions for {$attempt->student?->full_name} in {$attempt->exam->title}.",
-            'link' => route('cbt.exams.edit', $this->exam),
+            'link' => '/cbt/exams/' . $this->exam->id,
         ]);
 
         $this->dispatch('browser-notification', 
             title: 'Theory marking assigned',
             message: "Mark theory for {$attempt->student?->full_name}",
-            url: route('cbt.exams.edit', $this->exam)
+            url: '/cbt/exams/' . $this->exam->id
         );
 
         $this->cancelForward();

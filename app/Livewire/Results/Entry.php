@@ -651,7 +651,7 @@ class Entry extends Component
                 'user_id' => $adminId,
                 'title' => 'Score submission',
                 'body' => "{$user->name} submitted scores for {$className} / {$subjectName} ({$this->session} T{$this->term}).",
-                'link' => route('results.entry', [
+                'link' => '/results/entry?' . http_build_query([
                     'class' => $submission->class_id,
                     'subject' => $submission->subject_id,
                     'term' => $submission->term,
@@ -690,12 +690,12 @@ class Entry extends Component
             'user_id' => $submission->teacher_id,
             'title' => 'Score submission approved',
             'body' => "Your score submission was approved ({$submission->session} T{$submission->term}).",
-            'link' => route('results.entry', [
+            'link' => '/results/entry?' . http_build_query([
                 'class' => $submission->class_id,
                 'subject' => $submission->subject_id,
                 'term' => $submission->term,
                 'session' => $submission->session,
-            ]),
+                ]),
         ]);
 
         if ($this->rejectingId === $id) {
@@ -771,7 +771,7 @@ class Entry extends Component
             'user_id' => $submission->teacher_id,
             'title' => 'Score submission rejected',
             'body' => "Your score submission was rejected: {$submission->note}",
-            'link' => route('results.entry', [
+            'link' => '/results/entry?' . http_build_query([
                 'class' => $submission->class_id,
                 'subject' => $submission->subject_id,
                 'term' => $submission->term,

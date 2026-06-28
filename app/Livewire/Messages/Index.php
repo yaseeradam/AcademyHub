@@ -356,7 +356,7 @@ class Index extends Component
                         'user_id' => (int) $rid,
                         'title' => 'New message',
                         'body' => $user->name.': '.mb_strimwidth($m->body !== '' ? $m->body : ($m->attachment_name ?: 'Attachment'), 0, 120, '...'),
-                        'link' => route('messages', ['c' => $this->conversationId]),
+                        'link' => '/messages?c=' . $this->conversationId,
                     ]);
                 }
 

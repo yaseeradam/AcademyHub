@@ -2575,7 +2575,7 @@ class WhatsAppController extends Controller
                     'user_id' => $u->id,
                     'title' => 'New announcement: ' . $title,
                     'body' => $body,
-                    'link' => route('announcements'),
+                    'link' => '/announcements',
                 ]);
             }
         }

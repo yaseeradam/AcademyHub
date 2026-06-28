@@ -139,7 +139,7 @@ class Index extends Component
                     'user_id' => $u->id,
                     'title' => 'New announcement',
                     'body' => $announcement->title,
-                    'link' => route('announcements'),
+                    'link' => '/announcements',
                 ]);
             }
         });

@@ -117,7 +117,7 @@ class Homework extends Component
             'user_id' => $hw->teacher_id,
             'title'   => 'Homework Submission',
             'body'    => $this->student->full_name . ' submitted "' . $hw->title . '" (' . $hw->subject->name . ')',
-            'link'    => route('homework.index'),
+            'link'    => '/homework',
         ]);
 
         session()->flash('success', 'Homework submitted successfully!');
