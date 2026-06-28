@@ -1048,6 +1048,13 @@ class WhatsAppController extends Controller
     {
         $student = \App\Models\Student::findOrFail($studentId);
 
+        // Resolve tenant context
+        $tenant = \App\Models\Tenant::find($student->tenant_id);
+        if ($tenant) {
+            app()->instance('currentTenant', $tenant);
+            $this->loadTenantSettings($tenant);
+        }
+
         $term = (int) $request->query('term', 1);
         $session = (string) $request->query('session');
         
