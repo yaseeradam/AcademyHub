@@ -80,12 +80,31 @@ class Index extends Component
     public function classes()
     {
         $user = auth()->user();
+        abort_unless($user, 403);
 
-        if ($user?->role === 'admin') {
-            return SchoolClass::query()->orderBy('level')->get();
+        $tenant = app()->bound('currentTenant') ? app('currentTenant') : $user->tenant;
+        $allowedClassIds = [];
+        if ($tenant) {
+            $plugin = $tenant->activeMarketplaceComponents()->where('slug', 'cbt')->first();
+            if ($plugin && $plugin->pivot) {
+                $ids = $plugin->pivot->allowed_class_ids ?? [];
+                if (is_string($ids)) {
+                    $allowedClassIds = json_decode($ids, true) ?: [];
+                } else {
+                    $allowedClassIds = is_array($ids) ? $ids : [];
+                }
+            }
+        }
+
+        if ($user->role === 'admin') {
+            return SchoolClass::query()
+                ->whereIn('id', $allowedClassIds)
+                ->orderBy('level')
+                ->get();
         }
 
         return SchoolClass::query()
+            ->whereIn('id', $allowedClassIds)
             ->whereIn('id', SubjectAllocation::query()->where('teacher_id', $user->id)->pluck('class_id'))
             ->orderBy('level')
             ->get();
