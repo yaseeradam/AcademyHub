@@ -23,6 +23,9 @@ class Index extends Component
     public $sectionId = null;
     public ?int $day = null;
     public $debugPing = null;
+    
+    public string $viewMode = 'grid'; // 'grid' or 'daily'
+    public int $activeDayTab = 1;
 
     public ?int $editingId = null;
     public ?int $entryClassId = null;
@@ -97,10 +100,12 @@ class Index extends Component
         $user = auth()->user();
         abort_unless($user, 403);
 
-        $this->entryDay = (int) now()->isoWeekday();
-        if ($this->entryDay > 5) {
-            $this->entryDay = 1;
+        $day = (int) now()->isoWeekday();
+        if ($day > 6) {
+            $day = 1;
         }
+        $this->activeDayTab = $day;
+        $this->entryDay = $day;
     }
 
     public function updatedClassId(): void
@@ -433,6 +438,7 @@ class Index extends Component
             'days' => $days,
             'timeSlots' => $timeSlots,
             'slotMap' => $slotMap,
+            'entries' => $entries,
         ]);
     }
 }
