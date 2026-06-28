@@ -53,7 +53,6 @@ use App\Livewire\Timetable\Index as TimetableIndex;
 use App\Livewire\Users\Index as UsersIndex;
 use App\Livewire\Imports\Index as ImportsIndex;
 use App\Livewire\Imports\Students as ImportsStudents;
-use App\Livewire\Imports\Subjects as ImportsSubjects;
 use App\Livewire\Imports\Teachers as ImportsTeachers;
 use App\Livewire\Settings\CustomFields;
 
@@ -219,7 +218,6 @@ Route::middleware(['auth', 'active'])->group(function () {
         Route::get('/imports', ImportsIndex::class)->name('imports.index');
         Route::get('/imports/students', ImportsStudents::class)->name('imports.students');
         Route::get('/imports/teachers', ImportsTeachers::class)->name('imports.teachers');
-        Route::get('/imports/subjects', ImportsSubjects::class)->name('imports.subjects');
 
         Route::get('/results/bulk-report-cards', [BulkReportCardsController::class, 'index'])
             ->middleware('permission:results.publish')
