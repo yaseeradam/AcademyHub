@@ -1991,6 +1991,32 @@ class WhatsAppController extends Controller
             ->first();
 
         if ($user) {
+            // Resolve Dynamic Tenant Config & Check Active Status / Plugin Activation first!
+            $tenant = $user->tenant;
+            if ($tenant) {
+                // Check if tenant is suspended/inactive or subscription expired
+                $tenantActive = ($tenant->status === 'active') && (!$tenant->expires_at || !$tenant->expires_at->isPast());
+                // Check if whatsapp-bot component is active
+                $botActive = $tenant->activeMarketplaceComponents()->where('slug', 'whatsapp-bot')->exists();
+
+                if (!$tenantActive || !$botActive) {
+                    // Deactivate user session on WhatsApp to prevent further loops
+                    $user->whatsapp_phone = null;
+                    $user->whatsapp_verified = false;
+                    $user->whatsapp_subscribed = false;
+                    $user->save();
+
+                    \Illuminate\Support\Facades\Cache::forget($cacheKey);
+
+                    $reason = !$tenantActive ? "suspended or expired" : "uninstalled or deactivated";
+                    $this->sendMetaMessage($phone, "⚠️ *Service Unavailable*\n\nThis school's WhatsApp integration has been {$reason}. All automated interactions have been stopped. Please contact your school administrator.");
+                    return;
+                }
+
+                app()->instance('currentTenant', $tenant);
+                $this->loadTenantSettings($tenant);
+            }
+
             // Verify that the User account itself is active
             if (!$user->is_active) {
                 $user->whatsapp_phone = null;
@@ -2026,32 +2052,6 @@ class WhatsAppController extends Controller
             }
             $this->sendMetaMessage($phone, "You are not logged in. Type *login* to connect your account.");
             return;
-        }
-
-        // 4. Resolve Dynamic Tenant Config & Check Active Status / Plugin Activation
-        $tenant = $user->tenant;
-        if ($tenant) {
-            // Check if tenant is suspended/inactive or subscription expired
-            $tenantActive = ($tenant->status === 'active') && (!$tenant->expires_at || !$tenant->expires_at->isPast());
-            // Check if whatsapp-bot component is active
-            $botActive = $tenant->activeMarketplaceComponents()->where('slug', 'whatsapp-bot')->exists();
-
-            if (!$tenantActive || !$botActive) {
-                // Deactivate user session on WhatsApp to prevent further loops
-                $user->whatsapp_phone = null;
-                $user->whatsapp_verified = false;
-                $user->whatsapp_subscribed = false;
-                $user->save();
-
-                \Illuminate\Support\Facades\Cache::forget($cacheKey);
-
-                $reason = !$tenantActive ? "suspended or expired" : "uninstalled or deactivated";
-                $this->sendMetaMessage($phone, "⚠️ *Service Unavailable*\n\nThis school's WhatsApp integration has been {$reason}. All automated interactions have been stopped. Please contact your school administrator.");
-                return;
-            }
-
-            app()->instance('currentTenant', $tenant);
-            $this->loadTenantSettings($tenant);
         }
 
         $userId = $user->id;
