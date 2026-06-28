@@ -546,7 +546,9 @@ class WhatsAppController extends Controller
                 });
 
                 $matched = $studentQuery->with(['schoolClass', 'attendanceMarks' => function($q) {
-                    $q->whereDate('date', today());
+                    $q->whereHas('sheet', function ($sq) {
+                        $sq->whereDate('date', today());
+                    });
                 }, 'scores' => function($q) {
                     $q->with('subject');
                 }])->limit(5)->get();
