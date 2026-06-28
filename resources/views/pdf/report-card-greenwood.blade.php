@@ -572,19 +572,7 @@
                 
                 {{-- Grading Scale General --}}
                 <div class="bottom-boxes-cell" style="width: 35%; text-align: left;">
-                    @if($showGradingKey)
-                        <div style="border: 1px solid #c5a059; border-radius: 4px; padding: 6px; background: #ffffff; width: 92%;">
-                            <div style="font-size: 7px; font-weight: bold; text-transform: uppercase; color: #004b49; margin-bottom: 4px; border-bottom: 1px solid rgba(197, 160, 89, 0.2); padding-bottom: 2px;">Grading Scale (General)</div>
-                            <table style="width: 100%; font-size: 6.5px; color: #475569; line-height: 1.25;">
-                                <tr><td><strong>A</strong> &nbsp;70 - 100</td><td>(Excellent)</td></tr>
-                                <tr><td><strong>B</strong> &nbsp;60 - 69</td><td>(Very Good)</td></tr>
-                                <tr><td><strong>C</strong> &nbsp;50 - 59</td><td>(Good)</td></tr>
-                                <tr><td><strong>D</strong> &nbsp;40 - 49</td><td>(Fair)</td></tr>
-                                <tr><td><strong>E</strong> &nbsp;30 - 39</td><td>(Poor)</td></tr>
-                                <tr><td><strong>F</strong> &nbsp;0 - 29</td><td>(Fail)</td></tr>
-                            </table>
-                        </div>
-                    @endif
+                    {{-- General Grading Scale removed (already shown at top of the page) --}}
                 </div>
 
                 {{-- Next Term Resumes Resumes Box --}}
