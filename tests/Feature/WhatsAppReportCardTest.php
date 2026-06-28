@@ -359,4 +359,79 @@ class WhatsAppReportCardTest extends TestCase
         $this->assertSame(1, substr_count($text, 'Mathematics'), 'Mathematics subject duplicated in PDF');
         $this->assertSame(1, substr_count($text, 'English'), 'English subject duplicated in PDF');
     }
+
+    public function test_build_staff_context_student_search_and_caching(): void
+    {
+        $tenant = Tenant::query()->create([
+            'name' => 'Test School',
+            'slug' => 'test-school',
+        ]);
+
+        $class = SchoolClass::query()->create([
+            'tenant_id' => $tenant->id,
+            'name' => 'JSS 1A',
+            'level' => 1,
+        ]);
+        $section = Section::query()->create([
+            'tenant_id' => $tenant->id,
+            'class_id' => $class->id,
+            'name' => 'A',
+        ]);
+
+        $studentA = Student::query()->create([
+            'tenant_id' => $tenant->id,
+            'admission_number' => 'YIS/2026/001',
+            'first_name' => 'Jane',
+            'last_name' => 'Doe',
+            'class_id' => $class->id,
+            'section_id' => $section->id,
+            'gender' => 'Female',
+            'status' => 'Active',
+        ]);
+
+        $studentB = Student::query()->create([
+            'tenant_id' => $tenant->id,
+            'admission_number' => 'YIS/2026/002',
+            'first_name' => 'John',
+            'last_name' => 'Smith',
+            'class_id' => $class->id,
+            'section_id' => $section->id,
+            'gender' => 'Male',
+            'status' => 'Active',
+        ]);
+
+        $staff = User::factory()->create([
+            'tenant_id' => $tenant->id,
+            'role' => 'admin',
+            'whatsapp_phone' => '1234567890',
+        ]);
+
+        $controller = new \App\Http\Controllers\Api\WhatsAppController();
+        $reflector = new \ReflectionMethod($controller, 'buildStaffContext');
+        $reflector->setAccessible(true);
+
+        // 1. Search by name "Jane"
+        $context = $reflector->invoke($controller, $staff, 'Jane');
+        $this->assertCount(1, $context['students']);
+        $this->assertSame('Jane Doe', $context['students'][0]['name']);
+
+        // 2. Search by admission number with symbols "YIS/2026/001"
+        $context = $reflector->invoke($controller, $staff, 'YIS/2026/001');
+        $this->assertCount(1, $context['students']);
+        $this->assertSame('Jane Doe', $context['students'][0]['name']);
+
+        // 3. Search by short fragment "002"
+        $context = $reflector->invoke($controller, $staff, '002');
+        $this->assertCount(1, $context['students']);
+        $this->assertSame('John Smith', $context['students'][0]['name']);
+
+        // 4. Inject Student A as the active student in cache, and search for something unrelated
+        $phoneClean = preg_replace('/\D/', '', $staff->whatsapp_phone);
+        \Illuminate\Support\Facades\Cache::put("whatsapp_active_student_{$phoneClean}", $studentA->id, 30);
+
+        $context = $reflector->invoke($controller, $staff, 'unrelated-query-text');
+        $this->assertCount(1, $context['students']);
+        $this->assertSame('Jane Doe', $context['students'][0]['name']);
+        $this->assertSame($studentA->id, $context['active_session_student_id']);
+    }
 }

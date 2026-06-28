@@ -529,20 +529,26 @@ class WhatsAppController extends Controller
             ];
         }
 
-        // Active student lookup based on queryText
-        $students = [];
+        // Active student lookup based on queryText or active session selection
+        $matched = collect();
         if (!empty($queryText)) {
             $cleanText = preg_replace('/[^\w\s]/', '', $queryText);
             $words = array_filter(explode(' ', $cleanText));
-            $searchWords = array_filter($words, fn($w) => strlen(trim($w)) >= 3);
+            $rawWords = array_filter(explode(' ', $queryText));
+            
+            $searchWords = array_filter($words, fn($w) => strlen(trim($w)) >= 2);
+            $rawSearchWords = array_filter($rawWords, fn($w) => strlen(trim($w)) >= 2);
 
-            if (!empty($searchWords)) {
+            if (!empty($searchWords) || !empty($rawSearchWords)) {
                 $studentQuery = \App\Models\Student::where('status', 'Active');
-                $studentQuery->where(function($q) use ($searchWords) {
+                $studentQuery->where(function($q) use ($searchWords, $rawSearchWords) {
                     foreach ($searchWords as $word) {
                         $q->orWhere('first_name', 'like', "%{$word}%")
                           ->orWhere('last_name', 'like', "%{$word}%")
                           ->orWhere('admission_number', 'like', "%{$word}%");
+                    }
+                    foreach ($rawSearchWords as $rawWord) {
+                        $q->orWhere('admission_number', 'like', "%{$rawWord}%");
                     }
                 });
 
@@ -553,49 +559,69 @@ class WhatsAppController extends Controller
                 }, 'scores' => function($q) {
                     $q->with('subject');
                 }])->limit(5)->get();
-
-                $apiKey = config('services.whatsapp.api_key');
-                $activeTermNumber = \App\Models\AcademicTerm::activeTermNumber();
-                $activeSessionName = \App\Models\AcademicTerm::activeSessionName() ?: date('Y') . '/' . (date('Y') + 1);
-
-                $students = $matched->map(function($student) use ($apiKey, $activeTermNumber, $activeSessionName) {
-                    $attendance = $student->attendanceMarks->first();
-                    $reportCardUrl = route('whatsapp.report-card', [
-                        'studentId' => $student->id,
-                        'key'       => $apiKey,
-                        'term'      => $activeTermNumber,
-                        'session'   => $activeSessionName,
-                        't'         => time()
-                    ]);
-
-                    $publishedResults = \App\Models\ResultPublication::where('class_id', $student->class_id)
-                        ->get()
-                        ->map(fn($pub) => [
-                            'term' => $pub->term,
-                            'session' => $pub->session,
-                            'published_at' => $pub->published_at?->toDateString(),
-                        ])->all();
-
-                    return [
-                        'id' => $student->id,
-                        'name' => $student->full_name,
-                        'admission_number' => $student->admission_number,
-                        'class' => $student->schoolClass?->name,
-                        'attendance_today' => $attendance ? $attendance->status : null,
-                        'report_card_url' => $reportCardUrl,
-                        'published_results' => $publishedResults,
-                        'recent_scores' => $student->scores->map(function ($score) {
-                            return [
-                                'subject' => $score->subject?->name,
-                                'total_score' => $score->total,
-                                'term' => $score->term ?? null,
-                                'session' => $score->session ?? null,
-                            ];
-                        })->values()->all(),
-                    ];
-                })->all();
             }
         }
+
+        // Always include the active cached student if not already matched
+        $phoneClean = preg_replace('/\D/', '', $staff->whatsapp_phone ?: '');
+        $activeStudentId = !empty($phoneClean) ? \Illuminate\Support\Facades\Cache::get("whatsapp_active_student_{$phoneClean}") : null;
+        if ($activeStudentId) {
+            $alreadyMatched = $matched->contains('id', $activeStudentId);
+            if (!$alreadyMatched) {
+                $activeStudent = \App\Models\Student::with(['schoolClass', 'attendanceMarks' => function($q) {
+                    $q->whereHas('sheet', function ($sq) {
+                        $sq->whereDate('date', today());
+                    });
+                }, 'scores' => function($q) {
+                    $q->with('subject');
+                }])->find($activeStudentId);
+
+                if ($activeStudent && $activeStudent->status === 'Active') {
+                    $matched->push($activeStudent);
+                }
+            }
+        }
+
+        $apiKey = config('services.whatsapp.api_key');
+        $activeTermNumber = \App\Models\AcademicTerm::activeTermNumber();
+        $activeSessionName = \App\Models\AcademicTerm::activeSessionName() ?: date('Y') . '/' . (date('Y') + 1);
+
+        $students = $matched->map(function($student) use ($apiKey, $activeTermNumber, $activeSessionName) {
+            $attendance = $student->attendanceMarks->first();
+            $reportCardUrl = route('whatsapp.report-card', [
+                'studentId' => $student->id,
+                'key'       => $apiKey,
+                'term'      => $activeTermNumber,
+                'session'   => $activeSessionName,
+                't'         => time()
+            ]);
+
+            $publishedResults = \App\Models\ResultPublication::where('class_id', $student->class_id)
+                ->get()
+                ->map(fn($pub) => [
+                    'term' => $pub->term,
+                    'session' => $pub->session,
+                    'published_at' => $pub->published_at?->toDateString(),
+                ])->all();
+
+            return [
+                'id' => $student->id,
+                'name' => $student->full_name,
+                'admission_number' => $student->admission_number,
+                'class' => $student->schoolClass?->name,
+                'attendance_today' => $attendance ? $attendance->status : null,
+                'report_card_url' => $reportCardUrl,
+                'published_results' => $publishedResults,
+                'recent_scores' => $student->scores->map(function ($score) {
+                    return [
+                        'subject' => $score->subject?->name,
+                        'total_score' => $score->total,
+                        'term' => $score->term ?? null,
+                        'session' => $score->session ?? null,
+                    ];
+                })->values()->all(),
+            ];
+        })->all();
 
         return [
             'user' => [
@@ -603,6 +629,7 @@ class WhatsAppController extends Controller
                 'email' => $staff->email,
                 'role' => $staff->role,
             ],
+            'active_session_student_id' => $activeStudentId,
             'academic_system' => [
                 'active_term' => \App\Models\AcademicTerm::activeTermNumber(),
                 'active_term_name' => \App\Models\AcademicTerm::active() ? \App\Models\AcademicTerm::active()->name : 'First Term',
