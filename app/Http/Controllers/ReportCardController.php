@@ -71,8 +71,10 @@ class ReportCardController extends Controller
 
         $student->load(['schoolClass', 'section']);
 
+        $template = (string) config('academyhub.report_card_template', 'compact');
+        $safeTemplate = preg_replace('/[^a-z0-9_-]/i', '', $template) ?: 'compact';
         $sessionSlug = str_replace('/', '-', $session);
-        $storageDir = storage_path("app/public/report-cards/{$sessionSlug}/T{$term}");
+        $storageDir = storage_path("app/public/report-cards/{$sessionSlug}/T{$term}/{$safeTemplate}");
         $filename = 'report-card-' . $student->admission_number . '-' . $sessionSlug . '-T' . $term . '.pdf';
         $fullPath = "{$storageDir}/{$filename}";
 
@@ -91,7 +93,6 @@ class ReportCardController extends Controller
 
         $data = app(ReportCardService::class)->build($student, $term, $session);
 
-        $template = (string) config('academyhub.report_card_template', 'compact');
         $view = ReportCardService::viewForTemplate($template);
 
         $pdf = Pdf::loadView($view, [

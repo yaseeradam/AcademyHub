@@ -82,9 +82,12 @@ class ReportCardService
             ->where('session', $session)
             ->value('class_id');
 
-        $classId = (int) ($scoreClassId ?: $student->class_id);
+        // Use the class recorded on the score records (the class the student was
+        // in when the results were entered) for all class-scoped lookups.
+        $student->class_id = (int) ($scoreClassId ?: $student->class_id);
+        $student->load(['schoolClass', 'section']);
 
-        $subjects = $this->subjectsForClass($classId);
+        $subjects = $this->subjectsForClass($student->class_id);
         $subjectIds = $subjects->pluck('id');
         $subjectCount = max(1, (int) $subjectIds->count());
 
@@ -296,14 +299,16 @@ class ReportCardService
 
         $ids = SubjectAllocation::query()
             ->where('class_id', $classId)
+            ->distinct()
             ->pluck('subject_id')
-            ->unique();
+            ->unique()
+            ->values();
 
         $subjects = $ids->isEmpty()
             ? Subject::query()->orderBy('name')->get()
             : Subject::query()->whereIn('id', $ids)->orderBy('name')->get();
 
-        return $this->subjectsCache[$classId] = $subjects;
+        return $this->subjectsCache[$classId] = $subjects->unique('id')->values();
     }
 
     /**

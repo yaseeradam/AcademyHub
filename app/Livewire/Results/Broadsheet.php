@@ -201,20 +201,7 @@ class Broadsheet extends Component
             foreach ($students as $student) {
                 $payload = $service->build($student, $this->term, $this->session);
                 $template = (string) config('academyhub.report_card_template', 'compact');
-                $view = match ($template) {
-                    'compact' => 'pdf.report-card-compact',
-                    'elegant' => 'pdf.report-card-elegant',
-                    'modern' => 'pdf.report-card-modern',
-                    'classic' => 'pdf.report-card-classic',
-                    'aurora' => 'pdf.report-card-aurora',
-                    'heritage' => 'pdf.report-card-heritage',
-                    'nordic' => 'pdf.report-card-nordic',
-                    'vanguard' => 'pdf.report-card-vanguard',
-                    'signature' => 'pdf.report-card-signature',
-                    'riverdale' => 'pdf.report-card-riverdale',
-                    'greenwood' => 'pdf.report-card-greenwood',
-                    default => 'pdf.report-card-compact',
-                };
+                $view = ReportCardService::viewForTemplate($template);
                 $pdf = Pdf::loadView($view, $payload)->setPaper('a4');
                 $safeAdm = preg_replace('/[^A-Za-z0-9\\-_.]+/', '-', (string) $student->admission_number) ?: (string) $student->id;
                 $filename = "report-card-{$safeAdm}-{$safeSession}-T{$this->term}.pdf";

@@ -1048,39 +1048,64 @@ class WhatsAppController extends Controller
     {
         $student = \App\Models\Student::findOrFail($studentId);
 
-        // Resolve tenant context
+        // Resolve tenant context and load the latest settings so the school
+        // selected report card template and display options are always used.
         $tenant = \App\Models\Tenant::find($student->tenant_id);
         if ($tenant) {
             app()->instance('currentTenant', $tenant);
-            $this->loadTenantSettings($tenant);
+            $this->loadTenantSettings($tenant, forceRefresh: true);
         }
 
         $term = (int) $request->query('term', 1);
         $session = (string) $request->query('session');
-        
+
         if (empty($session)) {
             $active = \App\Models\AcademicSession::activeName();
             $session = $active ?: date('Y') . '/' . (date('Y') + 1);
         }
 
-        // zero-maintenance invalidation strategy
-        $lastScore = \App\Models\Score::where('student_id', $studentId)
-            ->where('term', $term)
-            ->where('session', $session)
-            ->max('updated_at');
+        $template = (string) config('academyhub.report_card_template', 'compact');
+        $safeTemplate = preg_replace('/[^a-z0-9_-]/i', '', $template) ?: 'compact';
+        $sessionSlug = str_replace('/', '-', $session);
 
         $cacheDir = storage_path('app/public/report-cards');
         if (!\Illuminate\Support\Facades\File::exists($cacheDir)) {
             \Illuminate\Support\Facades\File::makeDirectory($cacheDir, 0755, true);
         }
 
-        $sessionSlug = str_replace('/', '-', $session);
-        $cachedFilename = "report-card-{$studentId}-T{$term}-{$sessionSlug}.pdf";
+        // Include the selected template in the cache key so switching templates
+        // does not serve a stale PDF generated with the old design.
+        $cachedFilename = "report-card-{$studentId}-T{$term}-{$sessionSlug}-{$safeTemplate}.pdf";
         $cachedPath = "{$cacheDir}/{$cachedFilename}";
+
+        // Cache invalidation: regenerate when scores or settings change.
+        $lastScoreAt = \App\Models\Score::where('student_id', $studentId)
+            ->where('term', $term)
+            ->where('session', $session)
+            ->max('updated_at');
+        $lastScoreTimestamp = $lastScoreAt ? \Carbon\Carbon::parse($lastScoreAt)->timestamp : null;
+
+        $settingsPath = $tenant
+            ? storage_path('app/academyhub/tenants/' . $tenant->id . '/settings.json')
+            : storage_path('app/academyhub/settings.json');
+        $settingsTimestamp = \Illuminate\Support\Facades\File::exists($settingsPath)
+            ? \Illuminate\Support\Facades\File::lastModified($settingsPath)
+            : null;
 
         $useCache = false;
         if (\Illuminate\Support\Facades\File::exists($cachedPath)) {
-            if ($lastScore === null || filemtime($cachedPath) >= strtotime($lastScore)) {
+            $cacheTimestamp = filemtime($cachedPath);
+            $stale = false;
+
+            if ($lastScoreTimestamp !== null && $cacheTimestamp < $lastScoreTimestamp) {
+                $stale = true;
+            }
+
+            if ($settingsTimestamp !== null && $cacheTimestamp < $settingsTimestamp) {
+                $stale = true;
+            }
+
+            if (! $stale) {
                 $useCache = true;
             }
         }
@@ -1091,7 +1116,6 @@ class WhatsAppController extends Controller
             $student->load(['schoolClass', 'section']);
             $data = app(\App\Support\ReportCardService::class)->build($student, $term, $session);
 
-            $template = (string) config('academyhub.report_card_template', 'compact');
             $view = \App\Support\ReportCardService::viewForTemplate($template);
 
             $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView($view, [
@@ -1611,9 +1635,15 @@ class WhatsAppController extends Controller
         }
     }
 
-    private function loadTenantSettings(\App\Models\Tenant $tenant): void
+    private function loadTenantSettings(\App\Models\Tenant $tenant, bool $forceRefresh = false): void
     {
-        $settings = \Illuminate\Support\Facades\Cache::rememberForever(\App\Support\TenantSettings::settingsCacheKey($tenant), function () use ($tenant) {
+        $cacheKey = \App\Support\TenantSettings::settingsCacheKey($tenant);
+
+        if ($forceRefresh) {
+            \Illuminate\Support\Facades\Cache::forget($cacheKey);
+        }
+
+        $settings = \Illuminate\Support\Facades\Cache::rememberForever($cacheKey, function () use ($tenant) {
             $path = storage_path('app/academyhub/tenants/' . $tenant->id . '/settings.json');
             if (! \Illuminate\Support\Facades\File::exists($path)) {
                 return [];

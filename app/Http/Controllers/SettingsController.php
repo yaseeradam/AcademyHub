@@ -17,7 +17,7 @@ use Illuminate\Support\Fluent;
 class SettingsController extends Controller
 {
     private const CERTIFICATE_TEMPLATES = ['modern', 'classic', 'elegant', 'vibrant', 'minimal', 'royal', 'obsidian', 'sahara', 'oceanic', 'crimson', 'ivory'];
-    private const REPORT_CARD_TEMPLATES = ['compact', 'elegant', 'modern', 'classic', 'aurora', 'heritage', 'nordic', 'vanguard', 'signature', 'riverdale', 'greenwood'];
+    private const REPORT_CARD_TEMPLATES = ['compact', 'elegant', 'classic', 'heritage', 'nordic', 'signature', 'riverdale', 'greenwood'];
 
     private function settingsPath(): string
     {
@@ -399,7 +399,8 @@ class SettingsController extends Controller
             // Clear cached report card PDFs so new configuration takes effect immediately
             $cacheDir = storage_path('app/public/report-cards');
             if (File::exists($cacheDir)) {
-                File::cleanDirectory($cacheDir);
+                File::deleteDirectory($cacheDir);
+                File::makeDirectory($cacheDir, 0755, true);
             }
 
             return back()->with('status', 'Report card settings saved.');
@@ -474,20 +475,7 @@ class SettingsController extends Controller
         if ($type === 'report-card') {
             abort_unless(in_array($template, self::REPORT_CARD_TEMPLATES, true), 404);
 
-            $view = match ($template) {
-                'compact' => 'pdf.report-card-compact',
-                'elegant' => 'pdf.report-card-elegant',
-                'modern' => 'pdf.report-card-modern',
-                'classic' => 'pdf.report-card-classic',
-                'aurora' => 'pdf.report-card-aurora',
-                'heritage' => 'pdf.report-card-heritage',
-                'nordic' => 'pdf.report-card-nordic',
-                'vanguard' => 'pdf.report-card-vanguard',
-                'signature' => 'pdf.report-card-signature',
-                'riverdale' => 'pdf.report-card-riverdale',
-                'greenwood' => 'pdf.report-card-greenwood',
-                default => 'pdf.report-card-compact',
-            };
+            $view = \App\Support\ReportCardService::viewForTemplate($template);
 
             $student = new Fluent([
                 'full_name' => 'Jane Doe',

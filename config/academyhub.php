@@ -42,7 +42,7 @@ return [
     'certificate_default_body' => env('MYACADEMY_CERTIFICATE_DEFAULT_BODY'),
     'certificate_template' => env('MYACADEMY_CERTIFICATE_TEMPLATE', 'modern'),
 
-    'report_card_template' => env('MYACADEMY_REPORT_CARD_TEMPLATE', 'standard'),
+    'report_card_template' => env('MYACADEMY_REPORT_CARD_TEMPLATE', 'compact'),
 
     // Report Card display options
     'rc_show_position' => true,
