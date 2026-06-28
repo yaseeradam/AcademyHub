@@ -67,6 +67,16 @@ class Start extends Component
             return;
         }
 
+        $tenant = app()->bound('currentTenant') ? app('currentTenant') : null;
+        $cbtPlugin = null;
+        if ($tenant) {
+            $cbtPlugin = $tenant->activeMarketplaceComponents()->where('slug', 'cbt')->first();
+            if (! $cbtPlugin) {
+                $this->addError('examCode', 'The CBT feature is not active for this school.');
+                return;
+            }
+        }
+
         $ip = (string) request()->ip();
         $allowedCidrs = trim((string) ($exam->allowed_cidrs ?? ''));
         if ($allowedCidrs !== '') {
@@ -193,6 +203,18 @@ class Start extends Component
         if (! $student || $student->status !== 'Active') {
             $this->addError('admissionNumber', 'Student not found or inactive.');
             return;
+        }
+
+        if ($tenant && $cbtPlugin) {
+            $allowedClassIds = $cbtPlugin->pivot->allowed_class_ids ?? [];
+            if (is_string($allowedClassIds)) {
+                $allowedClassIds = json_decode($allowedClassIds, true) ?: [];
+            }
+            $allowedClassIds = is_array($allowedClassIds) ? $allowedClassIds : [];
+            if (!in_array($student->class_id, $allowedClassIds)) {
+                $this->addError('admissionNumber', 'The CBT feature is not active for your class.');
+                return;
+            }
         }
 
         if ($surname !== '' && strcasecmp(trim((string) $student->last_name), $surname) !== 0) {
