@@ -169,9 +169,9 @@
     }
 
     // 3. Attendance summaries
-    $enrolled = $timesOpened ?? 90;
-    $present = $timesPresent ?? 84;
-    $absent = $timesAbsent ?? 6;
+    $enrolled = $timesOpened ?? 0;
+    $present = $timesPresent ?? 0;
+    $absent = $timesAbsent ?? 0;
     $tardy = 0;
     
     if (isset($student) && isset($term) && isset($session)) {
@@ -189,13 +189,7 @@
         }
     }
     
-    if ($enrolled == 0) {
-        $enrolled = 90;
-        $present = 84;
-        $absent = 6;
-        $tardy = 2;
-    }
-    $attendanceRate = $enrolled > 0 ? round(($present / $enrolled) * 100) : 93;
+    $attendanceRate = $enrolled > 0 ? round(($present / $enrolled) * 100) : 0;
 
     // 4. Psychomotor Trait mapping
     $pt = get_defined_vars()['psychomotorTraits'] ?? [];
@@ -247,20 +241,6 @@
             }
         }
     }
-
-    if (!$photoSrc) {
-        $gender = strtolower($student->gender ?? '');
-        if ($gender === 'female' || $gender === 'f') {
-            $defaultFile = public_path('avatars/girl student pink.png');
-        } else {
-            $defaultFile = public_path('avatars/studentblue.png');
-        }
-        if (file_exists($defaultFile)) {
-            $photoSrc = $defaultFile;
-        } else {
-            $photoSrc = public_path('avatars/students.png');
-        }
-    }
 @endphp
 
 {{-- @if($logoExists && $showWatermark)
@@ -275,15 +255,13 @@
                 
                 {{-- LEFT SIDEBAR PANEL --}}
                 <div class="sidebar">
-                    <div class="avatar-wrap">
-                        <div class="avatar-circle">
-                            @if($photoSrc)
+                    @if($photoSrc)
+                        <div class="avatar-wrap">
+                            <div class="avatar-circle">
                                 <img src="{{ $photoSrc }}" class="avatar-img" alt="Photo" />
-                            @else
-                                <div class="avatar-placeholder">👤</div>
-                            @endif
+                            </div>
                         </div>
-                    </div>
+                    @endif
                     
                     <div class="side-meta">
                         <div class="side-group">
@@ -304,7 +282,7 @@
                         </div>
                         <div class="side-group">
                             <span class="side-label">Date of Birth:</span>
-                            <span class="side-value">{{ $student->dob ? \Carbon\Carbon::parse($student->dob)->format('d M, Y') : ($student->date_of_birth ? \Carbon\Carbon::parse($student->date_of_birth)->format('d M, Y') : 'N/A') }}</span>
+                            <span class="side-value">{{ $student->dob ? ($student->dob instanceof \Carbon\Carbon ? $student->dob->format('d M, Y') : \Carbon\Carbon::parse((string)$student->dob)->format('d M, Y')) : 'N/A' }}</span>
                         </div>
                         <div class="side-group" style="border-bottom: none;">
                             <span class="side-label">No. in Class:</span>
@@ -355,11 +333,9 @@
                             @if(config('academyhub.school_address'))
                                 <div class="school-meta">{{ config('academyhub.school_address') }}</div>
                             @endif
-                            @if(config('academyhub.school_phone') || config('academyhub.school_email'))
+                            @if(config('academyhub.school_phone'))
                                 <div class="school-meta">
-                                    {{ config('academyhub.school_phone') }} 
-                                    @if(config('academyhub.school_phone') && config('academyhub.school_email')) • @endif 
-                                    {{ config('academyhub.school_email') }}
+                                    Phone: {{ config('academyhub.school_phone') }}
                                 </div>
                             @endif
                             <div class="school-tagline">Raising Leaders, Building Futures</div>
