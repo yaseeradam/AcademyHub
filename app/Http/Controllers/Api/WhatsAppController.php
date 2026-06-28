@@ -1854,20 +1854,41 @@ class WhatsAppController extends Controller
                         return;
                     }
 
+                    $user = null;
                     if ($student->user_id) {
                         $user = \App\Models\User::find($student->user_id);
-                        if ($user && $user->whatsapp_phone && $user->whatsapp_phone !== $phone) {
-                            \Illuminate\Support\Facades\Cache::forget($cacheKey);
-                            $this->sendMetaMessage($phone, "❌ This account is already linked to another WhatsApp number. Please contact your school administrator.");
-                            return;
-                        }
-                        if ($user) {
-                            $user->whatsapp_phone = $phone;
-                            $user->whatsapp_verified = true;
-                            $user->whatsapp_subscribed = true;
-                            $user->save();
-                        }
                     }
+
+                    if (!$user) {
+                        // Check if a shadow user already exists for this email
+                        $email = strtolower($student->admission_number) . '@academyhub.whatsapp';
+                        $user = \App\Models\User::where('email', $email)->first();
+                        
+                        if (!$user) {
+                            $user = \App\Models\User::create([
+                                'tenant_id' => $student->tenant_id,
+                                'name' => $student->full_name,
+                                'email' => $email,
+                                'password' => \Illuminate\Support\Facades\Hash::make(\Illuminate\Support\Str::random(16)),
+                                'role' => 'student',
+                                'is_active' => true,
+                            ]);
+                        }
+                        
+                        $student->user_id = $user->id;
+                        $student->save();
+                    }
+
+                    if ($user->whatsapp_phone && $user->whatsapp_phone !== $phone) {
+                        \Illuminate\Support\Facades\Cache::forget($cacheKey);
+                        $this->sendMetaMessage($phone, "❌ This account is already linked to another WhatsApp number. Please contact your school administrator.");
+                        return;
+                    }
+
+                    $user->whatsapp_phone = $phone;
+                    $user->whatsapp_verified = true;
+                    $user->whatsapp_subscribed = true;
+                    $user->save();
 
                     \Illuminate\Support\Facades\Cache::forget($cacheKey);
                     $this->sendMetaMessage($phone, "✅ *Logged in successfully!*\n\nWelcome, {$student->first_name}! You can now check your timetable, grades, homework, and upcoming events.");
