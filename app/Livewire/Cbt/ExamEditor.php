@@ -1359,7 +1359,10 @@ class ExamEditor extends Component
             ->get();
 
         if ($inProgressAttempts->isEmpty()) {
-            $this->dispatch('alert', message: 'No active exams to end.', type: 'warning');
+            $exam->forceFill(['status' => 'ended'])->save();
+            \App\Models\Audit::log('cbt.all_exams_ended', $exam, ['count' => 0]);
+            $this->dispatch('alert', message: 'Exam ended successfully (no active attempts were running).', type: 'success');
+            $this->dispatch('refresh');
             return;
         }
 
