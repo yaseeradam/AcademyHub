@@ -1290,16 +1290,20 @@ class ExamEditor extends Component
             return;
         }
 
-        // Block if any active student hasn't finished
-        $totalStudents = Student::where('class_id', $exam->class_id)->where('status', 'Active')->count();
-        $finishedCount = CbtAttempt::where('exam_id', $exam->id)
-            ->where(function ($q) {
-                $q->whereNotNull('submitted_at')->orWhereNotNull('terminated_at');
-            })->count();
+        // Block if the exam is not ended yet or has active attempts in progress
+        if ($exam->status !== 'ended') {
+            $inProgressCount = CbtAttempt::where('exam_id', $exam->id)
+                ->whereNotNull('started_at')
+                ->whereNull('submitted_at')
+                ->whereNull('terminated_at')
+                ->count();
 
-        if ($finishedCount < $totalStudents) {
-            $remaining = $totalStudents - $finishedCount;
-            $this->dispatch('alert', message: "{$remaining} student(s) have not finished the exam yet. End the exam first or wait for all to submit.", type: 'warning');
+            if ($inProgressCount > 0) {
+                $this->dispatch('alert', message: "{$inProgressCount} student(s) are still actively taking the exam. End the exam first or wait for them to submit.", type: 'warning');
+                return;
+            }
+
+            $this->dispatch('alert', message: "Please end the exam first before releasing results.", type: 'warning');
             return;
         }
 

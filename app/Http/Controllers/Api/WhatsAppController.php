@@ -1128,53 +1128,27 @@ class WhatsAppController extends Controller
 
         $studentTimestamp = $student->updated_at ? $student->updated_at->timestamp : null;
 
-        $useCache = false;
-        if (\Illuminate\Support\Facades\File::exists($cachedPath)) {
-            $cacheTimestamp = filemtime($cachedPath);
-            $stale = false;
+        $useCache = false; // Bypass local caching to guarantee latest data
 
-            if ($lastScoreTimestamp !== null && $cacheTimestamp < $lastScoreTimestamp) {
-                $stale = true;
-            }
+        $student->load(['schoolClass', 'section']);
+        $data = app(\App\Support\ReportCardService::class)->build($student, $term, $session);
 
-            if ($lastAttendanceTimestamp !== null && $cacheTimestamp < $lastAttendanceTimestamp) {
-                $stale = true;
-            }
+        $view = \App\Support\ReportCardService::viewForTemplate($template);
 
-            if ($settingsTimestamp !== null && $cacheTimestamp < $settingsTimestamp) {
-                $stale = true;
-            }
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView($view, [
+            ...$data,
+        ])->setPaper('a4');
 
-            if ($studentTimestamp !== null && $cacheTimestamp < $studentTimestamp) {
-                $stale = true;
-            }
-
-            if (! $stale) {
-                $useCache = true;
-            }
-        }
-
-        if ($useCache) {
-            $pdfOutput = \Illuminate\Support\Facades\File::get($cachedPath);
-        } else {
-            $student->load(['schoolClass', 'section']);
-            $data = app(\App\Support\ReportCardService::class)->build($student, $term, $session);
-
-            $view = \App\Support\ReportCardService::viewForTemplate($template);
-
-            $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView($view, [
-                ...$data,
-            ])->setPaper('a4');
-
-            $pdfOutput = $pdf->output();
-            \Illuminate\Support\Facades\File::put($cachedPath, $pdfOutput);
-        }
+        $pdfOutput = $pdf->output();
 
         $filename = 'report-card-' . $student->admission_number . '-' . $sessionSlug . '-T' . $term . '.pdf';
 
         return response($pdfOutput, 200, [
             'Content-Type' => 'application/pdf',
             'Content-Disposition' => "inline; filename=\"{$filename}\"",
+            'Cache-Control' => 'no-cache, no-store, must-revalidate, max-age=0',
+            'Pragma' => 'no-cache',
+            'Expires' => 'Sat, 26 Jul 1997 05:00:00 GMT',
         ]);
     }
 
@@ -1644,6 +1618,16 @@ class WhatsAppController extends Controller
             if (isset($payload['entry'][0]['changes'][0]['value']['messages'][0])) {
                 $changeValue = $payload['entry'][0]['changes'][0]['value'];
                 $messageData = $changeValue['messages'][0];
+
+                $messageId = $messageData['id'] ?? null;
+                if ($messageId) {
+                    $cacheKey = "whatsapp_msg_{$messageId}";
+                    if (\Illuminate\Support\Facades\Cache::has($cacheKey)) {
+                        \Illuminate\Support\Facades\Log::warning("WhatsApp duplicate webhook message detected: {$messageId}. Skipping processing.");
+                        return response()->json(['status' => 'success']);
+                    }
+                    \Illuminate\Support\Facades\Cache::put($cacheKey, true, now()->addMinutes(10));
+                }
 
                 $fromRaw = $messageData['from'];
                 $from = preg_replace('/\D/', '', $fromRaw);
