@@ -107,7 +107,9 @@ class StudentSession
                 $allowedClassIds = json_decode($allowedClassIds, true) ?: [];
             }
             $allowedClassIds = is_array($allowedClassIds) ? $allowedClassIds : [];
-            if (!in_array($student->class_id, $allowedClassIds)) {
+            $studentClassId = (string) $student->class_id;
+            $allowedClassIds = array_map('strval', $allowedClassIds);
+            if (!in_array($studentClassId, $allowedClassIds, true)) {
                 $request->session()->forget(['tenant_id', 'student_id', 'student_name', 'student_admission', 'student_class', 'login_type', 'student_must_reset_password']);
                 $request->session()->regenerateToken();
                 return redirect()->route('login')->with('warning', 'Student Dashboard is not active for your class.');

@@ -104,7 +104,9 @@ class RequiresPlugin
                     $allowedClassIds = json_decode($allowedClassIds, true) ?: [];
                 }
                 $allowedClassIds = is_array($allowedClassIds) ? $allowedClassIds : [];
-                if (!in_array($student->class_id, $allowedClassIds)) {
+                $studentClassId = (string) $student->class_id;
+                $allowedClassIds = array_map('strval', $allowedClassIds);
+                if (!in_array($studentClassId, $allowedClassIds, true)) {
                     if ($request->expectsJson() || $request->header('X-Livewire')) {
                         return response()->json([
                             'message' => 'This feature is not active for your class.',

@@ -211,7 +211,9 @@ class Start extends Component
                 $allowedClassIds = json_decode($allowedClassIds, true) ?: [];
             }
             $allowedClassIds = is_array($allowedClassIds) ? $allowedClassIds : [];
-            if (!in_array($student->class_id, $allowedClassIds)) {
+            $studentClassId = (string) $student->class_id;
+            $allowedClassIds = array_map('strval', $allowedClassIds);
+            if (!in_array($studentClassId, $allowedClassIds, true)) {
                 $this->addError('admissionNumber', 'The CBT feature is not active for your class.');
                 return;
             }
