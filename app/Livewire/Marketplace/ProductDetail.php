@@ -19,6 +19,7 @@ class ProductDetail extends Component
 
     // New billing & class targeting state
     public array $selectedClasses = [];
+    public array $initiallySelectedClasses = [];
     public float $setupFee = 0;
     public float $usageFeePerStudent = 0;
     public int $calculatedStudentCount = 0;
@@ -114,6 +115,7 @@ class ProductDetail extends Component
                         $rawClasses = json_decode($rawClasses, true);
                     }
                     $this->selectedClasses = is_array($rawClasses) ? $rawClasses : [];
+                    $this->initiallySelectedClasses = array_map('strval', $this->selectedClasses);
                 }
             }
         }
@@ -279,7 +281,8 @@ class ProductDetail extends Component
 
     public function startUninstall(): void
     {
-        $this->confirmingUninstall = true;
+        // Blocked to prevent plugin uninstallation
+        abort(403, 'Uninstalling plugins is disabled.');
     }
 
     public function cancelUninstall(): void
@@ -289,37 +292,8 @@ class ProductDetail extends Component
 
     public function uninstall(): void
     {
-        $user = auth()->user();
-        abort_unless($user?->role === 'admin' || $user?->is_super_admin, 403);
-
-        $tenant = $user->tenant;
-        if (!$tenant) return;
-
-        $component = $this->getDbComponent();
-        if ($component) {
-            // Soft-uninstall: set uninstalled_at on pivot
-            $tenant->marketplaceComponents()
-                ->wherePivot('marketplace_component_id', $component->id)
-                ->updateExistingPivot($component->id, [
-                    'uninstalled_at' => now(),
-                ]);
-
-            // Decrement install count if greater than 0
-            if ($component->installs > 0) {
-                $component->decrement('installs');
-            }
-
-            // Audit log
-            \App\Models\AuditLog::create([
-                'user_id' => auth()->id(),
-                'action'  => 'plugin_uninstalled',
-                'model'   => 'MarketplaceComponent',
-                'model_id'=> $component->id,
-                'changes' => json_encode(['slug' => $this->product, 'uninstalled_at' => now()]),
-            ]);
-        }        $this->confirmingUninstall = false;
-        session()->flash('message', 'Plugin uninstalled successfully. You can reinstall it from the marketplace.');
-        $this->redirect(route('marketplace'), navigate: false);
+        // Blocked to prevent plugin uninstallation
+        abort(403, 'Uninstalling plugins is disabled.');
     }
 
     public function previewInstall(): void
@@ -476,11 +450,27 @@ class ProductDetail extends Component
         $dbComponent = $this->getDbComponent();
         abort_unless($dbComponent, 404);
 
+        // Enforce that initially selected classes cannot be removed
+        $removed = array_diff($this->initiallySelectedClasses, array_map('strval', $this->selectedClasses));
+        if (count($removed) > 0) {
+            $this->selectedClasses = array_unique(array_merge($this->selectedClasses, $this->initiallySelectedClasses));
+        }
+
+        // Verify that at least one new class is selected
+        $newClasses = array_diff(array_map('strval', $this->selectedClasses), $this->initiallySelectedClasses);
+        if (count($newClasses) === 0) {
+            session()->flash('error', 'You must select new classes to update targeting.');
+            return;
+        }
+
         // Update classes
         $tenant->marketplaceComponents()
             ->updateExistingPivot($dbComponent->id, [
                 'allowed_class_ids' => $this->selectedClasses,
             ]);
+
+        // Update initial state so they lock in immediately
+        $this->initiallySelectedClasses = array_map('strval', $this->selectedClasses);
 
         // Audit log
         \App\Models\AuditLog::create([
