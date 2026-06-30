@@ -27,6 +27,11 @@ class Start extends Component
         if ($code !== '') {
             $this->examCode = strtoupper($code);
         }
+
+        // Pre-fill admission number when a student is already logged in.
+        if (session('login_type') === 'student' && session('student_admission')) {
+            $this->admissionNumber = (string) session('student_admission');
+        }
     }
 
     #[Computed]

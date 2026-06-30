@@ -40,7 +40,7 @@ class StudentPortalLoginTest extends TestCase
             'login_type' => 'student',
             'admission_number' => $student->admission_number,
             'password' => $defaultPassword,
-        ])->assertRedirect('/student/dashboard');
+        ])->assertRedirect(route('student.exams'));
 
         $this->assertEquals($student->id, session('student_id'));
 
@@ -58,7 +58,38 @@ class StudentPortalLoginTest extends TestCase
             'login_type' => 'student',
             'admission_number' => $student->admission_number,
             'password' => 'NewPass123',
-        ])->assertRedirect('/student/dashboard');
+        ])->assertRedirect(route('student.exams'));
+    }
+
+    public function test_student_login_honors_intended_url(): void
+    {
+        $this->seed();
+
+        $class = SchoolClass::query()->firstOrFail();
+        $section = Section::query()->where('class_id', $class->id)->firstOrFail();
+        $tenant = Tenant::firstOrFail();
+        app()->instance('currentTenant', $tenant);
+
+        $student = Student::query()->create([
+            'tenant_id' => $tenant->id,
+            'admission_number' => 'ADM-2026-INTENDED',
+            'first_name' => 'Intended',
+            'last_name' => 'Student',
+            'class_id' => $class->id,
+            'section_id' => $section->id,
+            'gender' => 'Male',
+            'status' => 'Active',
+        ]);
+
+        $defaultPassword = 'intendedNDED';
+
+        session(['url.intended' => route('student.results')]);
+
+        $this->post('/login', [
+            'login_type' => 'student',
+            'admission_number' => $student->admission_number,
+            'password' => $defaultPassword,
+        ])->assertRedirect(route('student.results'));
     }
 
     public function test_student_cannot_login_if_student_dashboard_plugin_is_not_installed(): void

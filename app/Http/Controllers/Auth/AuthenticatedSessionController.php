@@ -337,7 +337,7 @@ class AuthenticatedSessionController extends Controller
                 'admission_number' => $student->admission_number,
             ]);
 
-            return redirect('/student/dashboard');
+            return redirect()->intended(route('student.exams'));
 
         } catch (ValidationException $e) {
             throw $e;
