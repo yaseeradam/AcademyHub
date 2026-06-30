@@ -1,178 +1,359 @@
-# AcademyHub Complete User Training Manual
+# AcademyHub: Ultimate ERP & School Management System Training Manual
 
-Welcome to the **AcademyHub** Complete User Training Manual. This document is a step-by-step guide designed to help Administrators, Teachers, and Staff members learn how to use the AcademyHub school management system.
+Welcome to the **AcademyHub** Ultimate ERP & School Management System Training Manual. This comprehensive documentation provides step-by-step instructions, feature explanations, and button-by-button guides for every single module in the system. Use this manual to train your administrative staff, teachers, and school managers.
 
 ---
 
 ## Table of Contents
-1. [System Roles & Access](#1-system-roles--access)
-2. [Administrator Guide](#2-administrator-guide)
-   - [Managing Students (Wizard Import)](#managing-students-wizard-import)
-   - [Managing Teachers & Staff](#managing-teachers--staff)
-   - [Plugin & Feature Management (Marketplace)](#plugin--feature-management-marketplace)
-3. [Teacher Guide](#3-teacher-guide)
-   - [Grade Entry & Broadsheets](#grade-entry--broadsheets)
-   - [Computer Based Testing (CBT) System](#computer-based-testing-cbt-system)
-   - [Theory Exam Marking & Result Release](#theory-exam-marking--result-release)
-4. [Student & Parent Experience](#4-student--parent-experience)
-   - [Student CBT Exam Portal](#student-cbt-exam-portal)
-   - [WhatsApp Interactive Assistant (Bot)](#whatsapp-interactive-assistant-bot)
+1. [Academics & General Setup](#1-academics--general-setup)
+2. [Administrator User Directory & Security](#2-administrator-user-directory--security)
+3. [Student Directory & Management](#3-student-directory--management)
+4. [Classrooms, Arms & Arm Placements](#4-classrooms-arms--arm-placements)
+5. [Teacher Dashboard & Subject Allocations](#5-teacher-dashboard--subject-allocations)
+6. [Student Attendance Tracker](#6-student-attendance-tracker)
+7. [Homework & Assignments Module](#7-homework--assignments-module)
+8. [E-Learning Portal](#8-e-learning-portal)
+9. [Results Management, Broadsheets & Report Cards](#9-results-management-broadsheets--report-cards)
+10. [Billing, Invoicing & Payments Ledger](#10-billing-invoicing--payments-ledger)
+11. [Student Promotion Manager](#11-student-promotion-manager)
+12. [Certificate Generator](#12-certificate-generator)
+13. [Announcements, Events & News Broadcasts](#13-announcements-events--news-broadcasts)
+14. [Plugin Marketplace & Licensing](#14-plugin-marketplace--licensing)
+15. [Savings & Loans Scheme](#15-savings--loans-scheme)
+16. [Data Collection Module](#16-data-collection-module)
+17. [Computer-Based Testing (CBT) System](#17-computer-based-testing-cbt-system)
+18. [Student Dashboard Portal](#18-student-dashboard-portal)
+19. [WhatsApp Integration Bot](#19-whatsapp-integration-bot)
 
 ---
 
-## 1. System Roles & Access
+## 1. Academics & General Setup
+This module configures the foundational timeline of the school, including sessions (academic years) and terms.
 
-AcademyHub uses domain-level routing and distinct roles to ensure security:
-* **Administrators (Admin/Superadmin):** Full control over configurations, imports, plugins, and billing.
-* **Teachers (Staff):** Manage classroom results, attendance, assignments, and CBT exams.
-* **Students/Parents:** Access exam portals, view academic dashboards, and query report cards via WhatsApp.
+#### How to manage academic sessions & terms:
+1. Navigate to **Academics** in the sidebar.
+2. **Adding a Session:**
+   - Click the **➕ Add Session** button.
+   - Enter the session format (e.g., `2026/2027`).
+   - Click **Save**.
+3. **Managing Terms:**
+   - Under the terms section, view active terms (First, Second, Third Term).
+   - Click **Activate** next to the term you want to set as the current active period for results entry and billing.
+4. **School Info & Settings:**
+   - Navigate to **Settings** in the sidebar.
+   - Enter your **School Name**, **Motto**, **Address**, **Phone Number**, and **Email**.
+   - Upload the **School Logo** (used for report cards and invoices).
+   - Select the default **Currency** (e.g. `₦` or `$`).
+   - Click **Save Settings**.
+
+---
+
+## 2. Administrator User Directory & Security
+Manage administrative accounts, role assignments, and track all actions using the built-in system audit logging.
+
+#### How to manage administrators:
+1. Go to **Users** from the sidebar.
+2. Click **➕ Add User** at the top right.
+3. Fill in the user profile: **Name**, **Email**, **Password**, and select their system role:
+   - **Admin:** Handles day-to-day operations, billing, and teacher/student directories.
+   - **Superadmin:** Full system access, including database operations and billing settings.
+   - **Bursar:** Restricted access focusing exclusively on billing, ledgers, payments, and receipts.
+4. Click **Create User**.
+
+#### How to view Audit Logs:
+1. Go to **Audit Logs** in the sidebar.
+2. View the table of logs recording the **User**, **Action** (e.g. `plugin_installed`, `marks_updated`), **Target Model**, **Timestamp**, and a detailed JSON payload of the **Changes** made.
+3. Use the filter fields to search logs by a specific user or action type.
+
+---
+
+## 3. Student Directory & Management
+The central directory for registering students, updating bio-data, and reviewing classroom placements.
+
+#### How to manage students:
+1. Navigate to **Students** from the sidebar.
+2. **Manual Creation:**
+   - Click **➕ Add Student**.
+   - Input **First Name**, **Last Name**, **Admission Number**, **Gender**, **Date of Birth**, and assign their **Class** (e.g., JSS 1).
+   - Click **Save Student**.
+3. **Importing Students via Wizard:**
+   - Click **📥 Import Students**.
+   - Upload your Excel/CSV template.
+   - Map spreadsheet headers (e.g. `adm_no` to *Admission Number*) using the dropdown menus.
+   - Click **Process Import**.
+4. **Student Statuses:**
+   - Click **Edit** on a student's profile.
+   - Toggle their status between **Active** (allowed in dashboards and CBT), **Suspended**, or **Graduated**. Click **Save**.
+
+---
+
+## 4. Classrooms, Arms & Arm Placements
+Schools often divide large classes (e.g. JSS 1) into smaller arms or divisions (e.g. JSS 1 Gold, JSS 1 Silver).
+
+#### How to manage classes & arms:
+1. Go to **Classes** from the sidebar.
+2. **Adding a Class:**
+   - Click **➕ Add Class**.
+   - Enter the name (e.g., `JSS 1`) and category (e.g., `Junior Secondary`). Click **Save**.
+3. **Creating Class Arms:**
+   - Under the class details, click **Manage Arms**.
+   - Click **➕ Add Arm** and enter the name (e.g., `Gold`). Click **Save**.
+4. **Assigning Students to Arms:**
+   - Click **Arm Placements** in the menu.
+   - Select the target class and arm.
+   - Check the boxes next to the students' names, then click **Assign to Arm**.
+
+---
+
+## 5. Teacher Dashboard & Subject Allocations
+Register teaching staff and delegate which subjects they teach for specific classes.
+
+#### How to allocate subjects:
+1. Navigate to **Academics** > **Subject Allocations** (or **Teacher Allocations**).
+2. Click **➕ New Allocation**.
+3. Select the **Teacher** from the dropdown.
+4. Select the **Class** (e.g. JSS 1) and the **Subject** (e.g. Mathematics).
+5. Click **Allocate**.
 
 > [!NOTE]
-> All student logins are session-based and do not require standard email credentials. Students log in using their **Admission Number** and password.
+> Teachers can only view, enter results, and set CBT exams for subjects they are explicitly allocated to.
 
 ---
 
-## 2. Administrator Guide
+## 6. Student Attendance Tracker
+Keep track of student presence daily or by individual subject blocks.
 
-### Managing Students (Wizard Import)
-Instead of typing student records manually one-by-one, admins can import entire class rosters at once using the robust Excel/CSV Upload Wizard.
+#### How to mark daily attendance:
+1. Navigate to **Attendance** in the sidebar.
+2. Select the **Class**, **Arm**, and the current **Date**. Click **Load roster**.
+3. A student list will load. By default, all students are marked **Present**.
+4. Click the toggle buttons next to a student's name to change their status to **Absent** or **Late**.
+5. Click **Save Attendance**.
 
-#### How to import students:
-1. Navigate to **Manage Students** from the sidebar menu.
-2. Click the **📥 Import Students** button at the top right.
-3. **Step 1 (Upload):** Drag & drop your `.xlsx`, `.csv`, `.ods`, or `.xls` file. Select the **Target Class** and specify if the sheet contains headers. Click **Continue**.
-4. **Step 2 (Mapping):** The system automatically maps your file columns to database fields (First Name, Last Name, Admission Number, Gender). If the automatic mapping is incorrect, use the dropdown menus to select the corresponding columns manually. Click **Process Import**.
-5. **Step 3 (Complete):** Review the import report. It shows the number of successful imports and any skipped or invalid records.
-
----
-
-### Managing Teachers & Staff
-Teachers must be registered in the system to access their dashboard, receive subject allocations, and set exams.
-
-#### How to manage teachers:
-1. Navigate to **Manage Teachers** from the sidebar.
-2. Click **➕ Add Teacher** to register manually, or click **📥 Import Teachers** to use the Excel/CSV Upload Wizard.
-3. For manually registered teachers:
-   - Enter their **Name**, **Email**, and **Password**.
-   - Ensure the account status is set to **Active**.
-4. **Allocating Subjects:**
-   - Go to **Subject Allocations** in the sidebar.
-   - Select a Teacher, select their Class (e.g. JSS 1), and select the Subject (e.g. Mathematics).
-   - Click **Save Allocation**. This authorizes the teacher to enter grades and set CBT exams for that specific class and subject.
+#### How to view attendance statistics:
+1. Under the **Attendance Report** tab, select the date range and class.
+2. Review the grid showing summary statistics (presence rate, total absences) for each student.
 
 ---
 
-### Plugin & Feature Management (Marketplace)
-Feature targeting allows the school to enable or disable specific features (like CBT, WhatsApp Bot, and Parent Dashboards) on a class-by-class basis.
+## 7. Homework & Assignments Module
+Create digital homework tasks, collect student uploads, and grade submissions online.
 
-#### How to configure plugins:
-1. Navigate to **Marketplace** (or **Installed Plugins**) from the sidebar.
-2. Click on the plugin card you wish to configure (e.g., **CBT / Online Exams** or **WhatsApp Bot**).
-3. **Allowed Class Targeting:**
-   - Scroll down to the **Plugin Class Target Audience** panel.
-   - Check the boxes next to the classes allowed to use this plugin (e.g. check **JSS 1** and **JSS 2**).
-   - Click **Save Changes**.
+#### How to assign homework:
+1. Go to **Homework** in the sidebar.
+2. Click **➕ Create Homework**.
+3. Enter the details:
+   - **Title & Description:** Detailed guidelines for the assignment.
+   - **Class & Subject:** Select the target audience.
+   - **Due Date:** Calendar date when submissions close.
+   - **Attachment (Optional):** Upload reference PDFs or worksheets.
+4. Click **Publish**.
+
+#### How to grade homework submissions:
+1. Open the homework card from your list and click **Submissions**.
+2. Click **Review** next to a student who has submitted.
+3. Review their typed text or click their attachment to download it.
+4. Input their **Grade/Score** and add **Teacher's Feedback**.
+5. Click **Save Grade**.
+
+---
+
+## 8. E-Learning Portal
+A digital locker where teachers can publish study guides, video lecture links, and learning materials.
+
+#### How to upload study materials:
+1. Go to **E-Learning** in the sidebar.
+2. Click **➕ Upload Resource**.
+3. Configure the resource:
+   - **Title:** e.g., *Intro to Algebra Lecture Notes*.
+   - **Category:** e.g., *Mathematics*, *Science*.
+   - **Target Class:** Select which class arm has access to download it.
+   - **Resource Type:** Select **File Upload** (PDFs, PPTs) or **Video Link** (YouTube/Vimeo urls).
+4. Click **Publish**.
+
+---
+
+## 9. Results Management, Broadsheets & Report Cards
+Compile student academic performances across continuous assessments (CAs) and exams to generate terminal report sheets.
+
+#### How to configure grade weights & boundaries:
+1. Go to **Results** > **Grade Settings** in the sidebar.
+2. **Grade Scales:** Configure score ranges and remarks (e.g., `75 - 100` is `A - Excellent`).
+3. **Assessment Weights:** Define weights for your continuous assessments (e.g. CA1 = 15%, CA2 = 15%, Exam = 70%). Click **Save Weights**.
+
+#### How to view the Class Broadsheet:
+1. Navigate to **Results** > **Broadsheet** in the sidebar.
+2. Select the **Class**, **Arm**, **Term**, and **Session**, then click **Generate Broadsheet**.
+3. The screen will load a complete grid displaying student names along one axis and subjects along the other.
+4. Review calculated totals, averages, class positions, and outcomes.
+5. Click **PDF Report Card** next to a student's row to download their individual report sheet, or click **Bulk Download** to export a ZIP folder containing reports for the entire class.
+
+---
+
+## 10. Billing, Invoicing & Payments Ledger
+Manage school fee structures, student ledgers, invoicing, manual payment logs, and online payment integrations.
+
+#### How to create billing structures & invoices:
+1. Navigate to **Billing** in the sidebar.
+2. Click **➕ Create Fee Template**.
+3. Define the template name (e.g. *JSS 1 Termly Fees*) and click **Add Item** to specify line charges (e.g., Tuition = ₦50,000, Development = ₦10,000). Click **Save Template**.
+4. **Generating Invoices:**
+   - Click the **Invoicing** tab.
+   - Select the target **Class** and the **Fee Template**.
+   - Click **Generate Invoices for Class**. This automatically creates unpaid bills in each student's ledger.
+
+#### How to log manual payments:
+1. Go to **Billing** > **Collect Payment** (or click a student's ledger).
+2. Search for the student by name or admission number.
+3. Input the **Amount Paid**, select the **Payment Method** (Cash, POS, Bank Transfer), and enter the transaction reference.
+4. Click **Confirm Payment**. The system will deduct this amount from the student's debt balance and automatically generate a **Payment Receipt** PDF.
+
+#### How to configure Online Payments (Paystack):
+1. Navigate to **Settings** > **Payment Gateway**.
+2. Input your **Paystack Live Public Key** and **Secret Key**.
+3. Toggle status to **Active** and click **Save configuration**. Parents can now pay invoices online directly from their dashboards.
+
+---
+
+## 11. Student Promotion Manager
+At the end of an academic session (year), use the Promotion Manager to transition student classes.
+
+#### How to promote students:
+1. Navigate to **Promotions** in the sidebar.
+2. Select the current **Source Class** (e.g. JSS 1) and target **Destination Class** (e.g. JSS 2).
+3. Click **Load Students**.
+4. Review the roster. For each student, select their action:
+   - **Promote:** Moves them to the selected destination class.
+   - **Repeat:** Retains them in their current class for the next session.
+   - **Graduate:** Mark them as finished with school.
+5. Click **Execute Promotions**.
+
+---
+
+## 12. Certificate Generator
+Design and print professional student graduation, merit, or performance certificates directly from the platform.
+
+#### How to generate certificates:
+1. Go to **Certificates** in the sidebar.
+2. Click **➕ Create Template**.
+3. Upload a **Background Frame Image** and a **Principal/Director's Signature image**.
+4. Design the layout using the drag-and-drop placeholder blocks (e.g., `{{student_name}}`, `{{class}}`, `{{date}}`, `{{certificate_title}}`). Click **Save Template**.
+5. To print, select a certificate template, select a **Class**, choose the students you wish to award, and click **Generate Certificates PDF**.
+
+---
+
+## 13. Announcements, Events & News Broadcasts
+Publish news updates and upcoming school events to student dashboards, parent feeds, and staff channels.
+
+#### How to publish announcements:
+1. Go to **Announcements** in the sidebar.
+2. Click **➕ Create Announcement**.
+3. Type your **Title** and **Body Content** (supports markdown formatting).
+4. Set the **Target Audience** (Staff, Students, Parents, or All).
+5. Click **Publish**.
+
+#### How to manage calendar events:
+1. Navigate to the **Events Calendar** tab.
+2. Click on a calendar date block.
+3. Input the **Event Title** (e.g., *Inter-house Sports* or *Midterm Break*), description, and start/end times.
+4. Click **Save Event**. This populates the calendar for all user portals.
+
+---
+
+## 14. Plugin Marketplace & Licensing
+Extend the features of your AcademyHub installation by enabling optional cloud plugins.
+
+#### How to target classes and save:
+1. Navigate to the **Marketplace** (or **Installed Plugins**) tab in the sidebar.
+2. Click on the plugin card you want to adjust (e.g. **CBT Portal**).
+3. Under the targeting section, select which classes have access and are billed under this plugin.
+4. Click **Save Changes** to activate.
 
 > [!IMPORTANT]
-> **Safety Restrictions:**
-> * **No Uninstalls:** Once a plugin is active and targeted, the system disables the Uninstall button to prevent data loss (displays `🔒 Plugin Active & Locked`).
-> * **Lock-in Protection:** Classes that were previously saved and active cannot be unchecked. They are marked as `🔒 Saved` and disabled. You can only select *new* classes to expand targeting.
-> * **Disabled Save:** The "Save Changes" button remains disabled unless you select new classes that weren't target-saved before.
+> **Licensing Safeguards:**
+> * **No Uninstalling:** Active plugins display `🔒 Plugin Active & Locked`. You cannot uninstall them to protect database data integrity.
+> * **Checkbox Locks:** Previously saved target classes are locked in the UI (`🔒 Saved`) and cannot be unchecked.
+> * **Additive Saves:** The **Save Changes** button remains disabled unless you select a *new* class that wasn't target-saved before.
 
 ---
 
-## 3. Teacher Guide
+## 15. Savings & Loans Scheme
+A welfare scheme module designed for staff groups to deposit monthly savings or take emergency loan advances.
 
-### Grade Entry & Broadsheets
-Teachers can input termly continuous assessment (CA) scores and exam marks directly.
-
-#### How to enter grades:
-1. Click **Results Entry** in the sidebar.
-2. Select your allocated **Class**, **Subject**, **Term**, and **Session**.
-3. A spreadsheet grid will load. Click on any student row to type their **CA 1**, **CA 2**, and **Exam** marks.
-4. Click **Save Marks** at the bottom of the page.
-5. **Broadsheet View:** Click **Broadsheet** from the sidebar to view a grid of all subjects and averages for a class. You can download the report card PDFs directly from this screen.
+#### How to manage staff welfare savings:
+1. Navigate to **Savings & Welfare** in the sidebar.
+2. **Log Deposit:** Select a staff member, input their monthly savings contribution, and click **Confirm Deposit**.
+3. **Requesting Loans:**
+   - Under the loan portal, click **Create Loan Application**.
+   - Input the applicant staff name, **Principal Amount**, and **Repayment Terms** (number of months). Click **Issue Loan**.
+4. **Repayments Log:** Click **Record Repayment** to post staff deductions against active loan balances.
 
 ---
 
-### Computer Based Testing (CBT) System
-Teachers can create online examinations, schedule them, monitor live candidate progress, and release scores.
+## 16. Data Collection Module
+Create customized digital registration forms to collect specific data (e.g. emergency contacts, health details) from parents.
+
+#### How to collect custom data:
+1. Navigate to **Data Collection** in the sidebar.
+2. Click **➕ Create Form Builder**.
+3. Enter the form title and click **Add Field** to build questions (Text fields, Checkboxes, File Uploads).
+4. Click **Publish & Share**.
+5. Copy the generated public link to send to parents.
+6. Under the **Responses** tab, click **Export Excel** to download all collected parent inputs in a spreadsheet.
+
+---
+
+## 17. Computer-Based Testing (CBT) System
+Build exams, schedule access windows, monitor live candidate progression, reset devices, and grade theory results.
 
 #### How to create a CBT Exam:
-1. Click **CBT Exams** in the sidebar.
+1. Go to **CBT Exams** in the sidebar.
 2. Click **➕ Create New Exam**.
-3. Configure the exam parameters:
-   - **Title:** e.g., *Third Term Mathematics Exam*.
-   - **Class & Subject:** Select the target class and allocated subject.
-   - **Exam Type:** Select **Academic** (standard students) or **Aptitude** (candidates).
-   - **Duration:** Specify in minutes (e.g. *60*).
-   - **Access Code:** A unique word (e.g., `MATH101`) students type to access the exam.
-   - **Exam PIN (Optional):** Add a secure pin if you want to require double-verification.
-   - **Network Restriction (Optional):** Input IP addresses or CIDR blocks if the exam must only be taken on the school WiFi network.
-4. Click **Create Exam**.
+3. Fill in the exam details:
+   - **Title:** e.g., *Term 2 Mathematics Examination*.
+   - **Class & Subject:** The class taking the test and the allocated subject.
+   - **Duration:** Specify test length in minutes.
+   - **Access Code:** The password students type to enter the test.
+   - **PIN Check (Optional):** Enable if you want to require individual student security PINs.
+   - **IP Address Lock (Optional):** Lock exam entries to a specific school computer lab IP address.
+4. Click **Save**.
 
-#### How to set questions:
-1. Open the created exam from your CBT list.
-2. Under the **Questions** tab, click **Add Question**.
-3. Select the question type:
-   - **MCQ (Multiple Choice):** Type the question prompt, set the mark weight, input the options (A, B, C, D), and click the circular radio button to select the **Correct Option**.
-   - **Theory (Free Text):** Type the prompt and set the maximum marks. Students will type their answers in a textbox.
-4. Click **Save Question**.
+#### How to add questions:
+1. Open the exam card and click the **Questions** tab.
+2. Click **Add Question**.
+3. Choose **MCQ** (Multiple Choice) or **Theory** (Written responses).
+4. Input the question prompt, points value, and options. Click the radio button for the correct option (MCQ).
+5. Click **Save Question**.
 
 #### How to monitor live exams:
-1. When the exam is live, click on **Monitor** next to the exam title.
-2. You will see a list of all students taking the exam in real-time.
-3. The table displays their **Name**, **Start Time**, **Last Activity**, and **Status** (*Taking*, *Submitted*, or *Terminated*).
-4. **Device Lock/IP Reset:** If a student's computer crashes or their IP changes, click the **Reset IP** button next to their name. This allows them to log back in from another device without losing their progress.
-5. **Terminating Attempts:** If a student is caught cheating, click **Terminate** to immediately lock them out of the test.
+1. While an exam is running, click **Monitor** next to the exam title.
+2. You will see a live dashboard showing taking students, timestamps, and active status.
+3. **Reset IP / Device Lock:** If a student's computer freezes or their internet disconnects, click the **Reset IP** button next to their name. This allows them to resume their attempt from another device immediately without locking them out.
 
-#### How to end the exam:
-1. Once the time limit has elapsed, go to the Exam details page.
-2. Click the orange **⏹️ End Exam** button.
-3. **What this does:**
-   - The system immediately stops all active student attempts.
-   - Any student papers that were still running are automatically submitted, and their MCQs are instantly graded.
-   - The exam status transitions to **Ended**, preventing any new logins.
+#### How to end exams & release results:
+1. To close the exam window, click **⏹️ End Exam** on the exam details page. This immediately stops all active student timers and submits their answers.
+2. If the exam includes theory questions, click the **Theory Review** tab, read student answers, award marks, and click **Submit Score**.
+3. Once all theory reviews are marked, click **📢 Release Results** on the exam main page. The scores will be published instantly to student dashboards.
 
 ---
 
-### Theory Exam Marking & Result Release
-If your exam contains theory questions, they must be marked manually before scores can be released.
+## 18. Student Dashboard Portal
+A private portal where students can log in to check their grades, download learning materials, submit homework, and take CBT exams.
 
-#### How to grade theory questions:
-1. Open the exam and click on the **Theory Review** tab.
-2. Select a student's attempt.
-3. Read the student's typed answer, and input their **Awarded Marks** (up to the maximum marks allowed).
-4. Click **Submit Score**.
-5. Repeat for all students. Once completed, the student's theory status will update to `Marked`.
-
-#### How to release results:
-1. Once all student papers are closed (the exam has ended) and all theory questions are marked, go to the Exam page.
-2. Click the green **📢 Release Results** button.
-3. Once clicked, the scores will be published. Students can now view their marked scripts, correct options, and scores in their dashboard.
+#### Student Portal Guide:
+1. Go to the student login page: `/login`.
+2. Enter the **Student Admission Number** (e.g. `FM-2026-1025`) and **Password**. Click **Login**.
+3. **Portal Features:**
+   - **My Results:** View published CAs, exam scores, positions, and teacher remarks.
+   - **Exams:** Links to the student CBT portal.
+   - **Homework:** View assigned homework, download materials, type responses, or upload file submissions.
+   - **E-Learning:** View and download uploaded study notes and watch video links.
+   - **Profile Settings:** Reset their default password to a new, secure password.
 
 ---
 
-## 4. Student & Parent Experience
-
-### Student CBT Exam Portal
-Students can log in to take their exams from any device or class computer.
-
-#### How a student takes an exam:
-1. Go to your school's exam portal page: `/cbt/portal`.
-2. Type the **Exam Access Code** provided by your teacher (e.g. `MATH101`) and click **Verify**.
-3. Enter your **Admission Number** (e.g. `FM-2026-1025`) and **Surname**.
-4. Click **Start Exam**.
-5. **Taking the Test:**
-   - The exam question sheet loads with a countdown timer at the top.
-   - Answers are saved automatically in the background as you click options or type.
-   - If the browser crashes, simply reopen the portal and re-enter your code to resume where you left off.
-6. Click **Submit Exam** at the bottom when finished.
-
----
-
-### WhatsApp Interactive Assistant (Bot)
-Parents can interact with the school's WhatsApp bot to query academic progress, attendance records, and pay school fees.
+## 19. WhatsApp Integration Bot
+A dynamic communication assistant allowing parents to check their children's progress, verify attendance, check outstanding bills, and fetch report cards via WhatsApp.
 
 #### Available WhatsApp triggers:
 * **`Attendance`** (or clicking attendance menu): Retrieves a summary of the student's presence and absence rate for the current term.
