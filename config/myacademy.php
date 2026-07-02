@@ -70,4 +70,5 @@ return [
     // Premium licensing (Ed25519)
     // Set this to the base64 encoded Ed25519 public key used to verify licenses.
     'license_public_key' => env('MYACADEMY_LICENSE_PUBLIC_KEY', ''),
+    'cbt_ip_lock' => (bool) env('CBT_IP_LOCK', true),
 ];

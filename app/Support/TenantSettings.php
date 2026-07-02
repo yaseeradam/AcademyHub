@@ -111,6 +111,7 @@ class TenantSettings
                 'rc_principal_signature_image',
                 'rc_teacher_signature_image',
                 'subscription_due_date',
+                'cbt_ip_lock',
             ];
 
             return \Illuminate\Support\Arr::only($data, $allowed);
@@ -127,6 +128,7 @@ class TenantSettings
                 'rc_show_class_average', 'rc_show_watermark', 'rc_show_next_term_date',
                 'rc_show_teacher_remarks', 'rc_show_principal_remarks',
                 'rc_show_psychomotor', 'rc_show_school_fees', 'rc_show_signatures',
+                'cbt_ip_lock',
             ], true)) {
                 $value = (bool) $value;
             }
