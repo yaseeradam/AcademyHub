@@ -188,8 +188,7 @@ class Start extends Component
 
             $lockedIp = trim((string) ($attempt->ip_address ?? ''));
             $allowedIp = trim((string) ($attempt->allowed_ip ?? ''));
-            $isLocalOrLoopback = !config('academyhub.cbt_ip_lock', true) ||
-                                app()->environment('local', 'testing') ||
+            $isLocalOrLoopback = app()->environment('local', 'testing') ||
                                 (($lockedIp === '127.0.0.1' || $lockedIp === '::1' || $lockedIp === '') &&
                                  ($ip === '127.0.0.1' || $ip === '::1'));
 
@@ -290,8 +289,7 @@ class Start extends Component
 
         $lockedIp = trim((string) ($attempt->ip_address ?? ''));
         $allowedIp = trim((string) ($attempt->allowed_ip ?? ''));
-        $isLocalOrLoopback = !config('academyhub.cbt_ip_lock', true) ||
-                            app()->environment('local', 'testing') ||
+        $isLocalOrLoopback = app()->environment('local', 'testing') ||
                             (($lockedIp === '127.0.0.1' || $lockedIp === '::1' || $lockedIp === '') &&
                              ($ip === '127.0.0.1' || $ip === '::1'));
 
