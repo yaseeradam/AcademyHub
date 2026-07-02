@@ -56,6 +56,11 @@ class RouteServiceProvider extends ServiceProvider
             return Limit::perMinute(20)->by($request->ip());
         });
 
+        RateLimiter::for('cbt_attempt', function (Request $request) {
+            $studentId = session('student_id') ?: $request->ip();
+            return Limit::perMinute(60)->by($studentId);
+        });
+
         RateLimiter::for('login_attempts', function (Request $request) {
             $key = $request->input('email') ?: $request->input('admission_no') ?: $request->ip();
             return Limit::perMinute(5)->by($key . '_' . $request->ip());

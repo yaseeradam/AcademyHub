@@ -78,7 +78,7 @@ Route::middleware(['plugin:cbt', 'throttle:cbt_portal'])->group(function () {
 });
 
 // CBT Portal Take Routes (student session required to take the exam)
-Route::middleware(['student.session', 'plugin:cbt'])->group(function () {
+Route::middleware(['student.session', 'plugin:cbt', 'throttle:cbt_attempt'])->group(function () {
     Route::get('/cbt/portal/{attempt}', CbtPortalTake::class)->name('cbt.portal.take');
     Route::get('/cbt/student/{attempt}', CbtPortalTake::class)->name('cbt.student.take');
 });
