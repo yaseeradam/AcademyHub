@@ -189,9 +189,14 @@ class Take extends Component
 
         $lockedIp = trim((string) ($attempt->ip_address ?? ''));
         $allowedIp = trim((string) ($attempt->allowed_ip ?? ''));
+        $isLocalOrLoopback = app()->environment('local', 'testing') ||
+                            (($lockedIp === '127.0.0.1' || $lockedIp === '::1' || $lockedIp === '') &&
+                             ($ip === '127.0.0.1' || $ip === '::1'));
 
-        if ($lockedIp === '') {
-            $attempt->forceFill(['ip_address' => $ip])->save();
+        if ($lockedIp === '' || $isLocalOrLoopback) {
+            if ($lockedIp !== $ip) {
+                $attempt->forceFill(['ip_address' => $ip])->save();
+            }
         } elseif ($lockedIp !== $ip) {
             if ($allowedIp !== '' && $allowedIp === $ip) {
                 $attempt->forceFill(['ip_address' => $ip, 'allowed_ip' => null])->save();

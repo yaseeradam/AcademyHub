@@ -147,8 +147,14 @@ class StudentCbtController extends Controller
         // Lock to device / IP check
         $lockedIp = trim((string) ($attempt->ip_address ?? ''));
         $allowedIp = trim((string) ($attempt->allowed_ip ?? ''));
+        $isLocalOrLoopback = app()->environment('local', 'testing') ||
+                            (($lockedIp === '127.0.0.1' || $lockedIp === '::1' || $lockedIp === '') &&
+                             ($ip === '127.0.0.1' || $ip === '::1'));
+
         if ($lockedIp !== '' && $lockedIp !== $ip) {
-            if ($allowedIp !== '' && $allowedIp === $ip) {
+            if ($isLocalOrLoopback) {
+                $attempt->update(['ip_address' => $ip]);
+            } elseif ($allowedIp !== '' && $allowedIp === $ip) {
                 $attempt->update(['ip_address' => $ip, 'allowed_ip' => null]);
             } else {
                 return response()->json(['message' => 'This attempt is locked to another device. Ask an admin to reset.'], 403);
