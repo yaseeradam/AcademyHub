@@ -42,6 +42,11 @@ class BulkReportCardsController extends Controller
         $user = $request->user();
         abort_unless($user?->hasPermission('results.publish'), 403);
 
+        if (!class_exists('ZipArchive')) {
+            return back()->withErrors(['class_id' => 'The PHP ZipArchive extension is not installed or enabled on this server. Please contact support.']);
+        }
+
+        ini_set('memory_limit', '1024M');
         set_time_limit(0);
 
         $data = $request->validate([
@@ -126,11 +131,18 @@ class BulkReportCardsController extends Controller
                 File::put($path, $pdf->output());
 
                 $zip->addFile($path, $filename);
+
+                // Free memory
+                unset($pdf);
+                gc_collect_cycles();
             }
 
             $zip->close();
         } catch (\Throwable $e) {
-            $zip->close();
+            @$zip->close();
+            if (File::exists($zipPath)) {
+                @unlink($zipPath);
+            }
             throw $e;
         } finally {
             File::deleteDirectory($tmpDir);

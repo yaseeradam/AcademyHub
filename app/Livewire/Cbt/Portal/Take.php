@@ -98,7 +98,9 @@ class Take extends Component
         if ($attempt->terminated_at) {
             session()->flash('error', 'Your exam attempt was terminated by an admin.');
             $isAptitude = $attempt->exam?->exam_type === 'aptitude';
-            if ($isAptitude) {
+            $tenant = app()->bound('currentTenant') ? app('currentTenant') : null;
+            $hasDashboard = $tenant && $tenant->activeMarketplaceComponents()->where('slug', 'student-dashboard')->exists();
+            if ($isAptitude || !$hasDashboard) {
                 $this->redirect(route('cbt.student', ['code' => $this->examCode]));
             } else {
                 $this->redirect(route('student.exams'));
@@ -144,7 +146,9 @@ class Take extends Component
         }
         if ($attempt->terminated_at) {
             session()->flash('error', 'Your exam attempt was terminated by an admin.');
-            if ($isAptitude) {
+            $tenant = app()->bound('currentTenant') ? app('currentTenant') : null;
+            $hasDashboard = $tenant && $tenant->activeMarketplaceComponents()->where('slug', 'student-dashboard')->exists();
+            if ($isAptitude || !$hasDashboard) {
                 redirect()->route('cbt.student', ['code' => $this->examCode]);
             } else {
                 redirect()->route('student.exams');

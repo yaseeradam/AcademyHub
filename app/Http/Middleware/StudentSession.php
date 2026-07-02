@@ -75,10 +75,22 @@ class StudentSession
             return $next($request);
         }
 
-        if (! $tenant || ! $tenant->activeMarketplaceComponents()->where('slug', 'student-dashboard')->exists()) {
-            $request->session()->forget(['tenant_id', 'student_id', 'student_name', 'student_admission', 'student_class', 'login_type', 'student_must_reset_password']);
-            $request->session()->regenerateToken();
-            return redirect()->route('login')->with('warning', 'Student Dashboard is not active for this school.');
+        $isCbtRoute = $request->is('cbt/*', 'cbt');
+
+        if ($isCbtRoute) {
+            // Verify CBT plugin is active
+            if (! $tenant || ! $tenant->activeMarketplaceComponents()->where('slug', 'cbt')->exists()) {
+                $request->session()->forget(['tenant_id', 'student_id', 'student_name', 'student_admission', 'student_class', 'login_type', 'student_must_reset_password']);
+                $request->session()->regenerateToken();
+                return redirect()->route('login')->with('warning', 'The CBT feature is not active for this school.');
+            }
+        } else {
+            // Verify Student Dashboard plugin is active
+            if (! $tenant || ! $tenant->activeMarketplaceComponents()->where('slug', 'student-dashboard')->exists()) {
+                $request->session()->forget(['tenant_id', 'student_id', 'student_name', 'student_admission', 'student_class', 'login_type', 'student_must_reset_password']);
+                $request->session()->regenerateToken();
+                return redirect()->route('login')->with('warning', 'Student Dashboard is not active for this school.');
+            }
         }
 
         // Check if school's subscription is expired
@@ -99,20 +111,22 @@ class StudentSession
             return redirect()->route('login');
         }
 
-        // Check class target eligibility
-        $pivot = $tenant->activeMarketplaceComponents()->where('slug', 'student-dashboard')->first();
-        if ($pivot && $pivot->pivot) {
-            $allowedClassIds = $pivot->pivot->allowed_class_ids;
-            if (is_string($allowedClassIds)) {
-                $allowedClassIds = json_decode($allowedClassIds, true) ?: [];
-            }
-            $allowedClassIds = is_array($allowedClassIds) ? $allowedClassIds : [];
-            $studentClassId = (string) $student->class_id;
-            $allowedClassIds = array_map('strval', $allowedClassIds);
-            if (!in_array($studentClassId, $allowedClassIds, true)) {
-                $request->session()->forget(['tenant_id', 'student_id', 'student_name', 'student_admission', 'student_class', 'login_type', 'student_must_reset_password']);
-                $request->session()->regenerateToken();
-                return redirect()->route('login')->with('warning', 'Student Dashboard is not active for your class.');
+        if (!$isCbtRoute) {
+            // Check class target eligibility for student-dashboard
+            $pivot = $tenant->activeMarketplaceComponents()->where('slug', 'student-dashboard')->first();
+            if ($pivot && $pivot->pivot) {
+                $allowedClassIds = $pivot->pivot->allowed_class_ids;
+                if (is_string($allowedClassIds)) {
+                    $allowedClassIds = json_decode($allowedClassIds, true) ?: [];
+                }
+                $allowedClassIds = is_array($allowedClassIds) ? $allowedClassIds : [];
+                $studentClassId = (string) $student->class_id;
+                $allowedClassIds = array_map('strval', $allowedClassIds);
+                if (!in_array($studentClassId, $allowedClassIds, true)) {
+                    $request->session()->forget(['tenant_id', 'student_id', 'student_name', 'student_admission', 'student_class', 'login_type', 'student_must_reset_password']);
+                    $request->session()->regenerateToken();
+                    return redirect()->route('login')->with('warning', 'Student Dashboard is not active for your class.');
+                }
             }
         }
 

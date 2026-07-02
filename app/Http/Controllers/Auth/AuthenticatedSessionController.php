@@ -206,6 +206,10 @@ class AuthenticatedSessionController extends Controller
     private function handleStudentLogin(Request $request): RedirectResponse
     {
         try {
+            if (Auth::check()) {
+                Auth::logout();
+            }
+
             $tenantId = TenantSettings::tenantId();
             if (! $tenantId) {
                 // Fallback for local development if host is localhost/127.0.0.1 or we are in local env
@@ -337,7 +341,30 @@ class AuthenticatedSessionController extends Controller
                 'admission_number' => $student->admission_number,
             ]);
 
-            return redirect()->intended(route('student.exams'));
+            $intended = redirect()->intended(route('student.exams'))->getTargetUrl();
+            $isStudentRoute = false;
+
+            $studentDashboardUrl = route('student.dashboard');
+            $studentExamsUrl = route('student.exams');
+            $cbtPortalUrl = route('cbt.portal');
+            $studentPrefix = url('/student');
+            $cbtPrefix = url('/cbt');
+
+            if (str_starts_with($intended, $studentDashboardUrl) ||
+                str_starts_with($intended, $studentExamsUrl) ||
+                str_starts_with($intended, $cbtPortalUrl) ||
+                str_starts_with($intended, $studentPrefix) ||
+                str_starts_with($intended, $cbtPrefix)) {
+                $isStudentRoute = true;
+            }
+
+            if (!$isStudentRoute) {
+                $intended = route('student.exams');
+            }
+
+            session()->forget('url.intended');
+
+            return redirect()->to($intended);
 
         } catch (ValidationException $e) {
             throw $e;

@@ -6,6 +6,9 @@ use App\Models\SchoolClass;
 use App\Models\Section;
 use App\Models\Student;
 use App\Models\Tenant;
+use App\Models\User;
+use App\Models\CbtExam;
+use App\Models\CbtAttempt;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -225,6 +228,77 @@ class StudentPortalLoginTest extends TestCase
         ])->assertSessionHasErrors('admission_number');
 
         $this->assertNull(session('student_id'));
+    }
+
+    public function test_student_can_access_cbt_routes_even_if_student_dashboard_is_disabled(): void
+    {
+        $this->seed();
+
+        $class = SchoolClass::query()->firstOrFail();
+        $section = Section::query()->where('class_id', $class->id)->firstOrFail();
+        $tenant = Tenant::firstOrFail();
+        app()->instance('currentTenant', $tenant);
+
+        // Deactivate student-dashboard plugin for the tenant
+        $component = \App\Models\MarketplaceComponent::where('slug', 'student-dashboard')->firstOrFail();
+        $tenant->marketplaceComponents()->updateExistingPivot($component->id, [
+            'uninstalled_at' => now(),
+        ]);
+
+        // Ensure cbt plugin is active
+        $cbtComponent = \App\Models\MarketplaceComponent::where('slug', 'cbt')->firstOrFail();
+        $tenant->marketplaceComponents()->updateExistingPivot($cbtComponent->id, [
+            'uninstalled_at' => null,
+        ]);
+
+        $student = Student::query()->create([
+            'tenant_id' => $tenant->id,
+            'admission_number' => 'ADM-2026-8888',
+            'first_name' => 'Cbt',
+            'last_name' => 'Test',
+            'class_id' => $class->id,
+            'section_id' => $section->id,
+            'gender' => 'Male',
+            'status' => 'Active',
+        ]);
+
+        // Create exam and attempt
+        $subject = \App\Models\Subject::query()->create(['tenant_id' => $tenant->id, 'name' => 'Physics', 'code' => 'PHY']);
+        $admin = User::withoutGlobalScope('tenant')->where('email', 'admin@academyhub.local')->firstOrFail();
+        $exam = CbtExam::query()->create([
+            'tenant_id' => $tenant->id,
+            'title' => 'Physics Test',
+            'subject_id' => $subject->id,
+            'class_id' => $class->id,
+            'duration_minutes' => 60,
+            'access_code' => 'PHY101',
+            'status' => 'live',
+            'published_at' => now(),
+            'created_by' => $admin->id,
+        ]);
+
+        $attempt = CbtAttempt::query()->create([
+            'uuid' => (string) \Illuminate\Support\Str::uuid(),
+            'exam_id' => $exam->id,
+            'student_id' => $student->id,
+            'started_at' => now(),
+            'last_activity_at' => now(),
+            'ip_address' => '127.0.0.1',
+        ]);
+
+        // Mock student session
+        session([
+            'tenant_id' => $tenant->id,
+            'student_id' => $student->id,
+            'student_name' => $student->full_name,
+            'student_admission' => $student->admission_number,
+            'student_class' => $class->name,
+            'login_type' => 'student',
+        ]);
+
+        // Access the cbt student take page -> Should be OK (not redirect to login)
+        $response = $this->get(route('cbt.student.take', ['attempt' => $attempt, 'code' => 'PHY101']));
+        $response->assertOk();
     }
 }
 
