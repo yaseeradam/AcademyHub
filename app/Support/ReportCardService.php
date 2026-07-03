@@ -297,6 +297,14 @@ class ReportCardService
             return $this->subjectsCache[$classId];
         }
 
+        $class = \App\Models\SchoolClass::find($classId);
+        if ($class) {
+            $defaultSubjects = $class->defaultSubjects()->orderBy('name')->get();
+            if ($defaultSubjects->isNotEmpty()) {
+                return $this->subjectsCache[$classId] = $defaultSubjects;
+            }
+        }
+
         $ids = SubjectAllocation::query()
             ->where('class_id', $classId)
             ->distinct()
