@@ -226,7 +226,15 @@ class ExamEditor extends Component
         $user = auth()->user();
         abort_unless($user, 403);
 
-        if ($user->role === 'admin') {
+        if ($user->role === 'admin' || $user->is_super_admin) {
+            $class = SchoolClass::find($this->classId);
+            if ($class) {
+                $defaultSubjects = $class->defaultSubjects()->orderBy('name')->get();
+                if ($defaultSubjects->isNotEmpty()) {
+                    return $defaultSubjects;
+                }
+            }
+
             $ids = SubjectAllocation::query()->where('class_id', $this->classId)->pluck('subject_id')->unique();
 
             return $ids->isNotEmpty()

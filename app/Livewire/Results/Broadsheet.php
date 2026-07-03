@@ -68,6 +68,14 @@ class Broadsheet extends Component
             return collect();
         }
 
+        $class = SchoolClass::find($this->classId);
+        if ($class) {
+            $defaultSubjects = $class->defaultSubjects()->orderBy('name')->get();
+            if ($defaultSubjects->isNotEmpty()) {
+                return $defaultSubjects;
+            }
+        }
+
         $ids = SubjectAllocation::query()
             ->where('class_id', $this->classId)
             ->pluck('subject_id')
