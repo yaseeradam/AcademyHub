@@ -51,10 +51,17 @@ class TeacherController extends Controller
         $this->authorizeClass($request, $classId);
 
         if ($request->user()->role === 'admin') {
-            $subjectIds = SubjectAllocation::where('class_id', $classId)
-                ->distinct()->pluck('subject_id');
-            $subjects = \App\Models\Subject::whereIn('id', $subjectIds)
-                ->get(['id', 'name', 'code']);
+            $class = \App\Models\SchoolClass::find($classId);
+            $classSubjects = $class ? $class->defaultSubjects()->orderBy('name')->get(['id', 'name', 'code']) : collect();
+
+            if ($classSubjects->isNotEmpty()) {
+                $subjects = $classSubjects;
+            } else {
+                $subjectIds = SubjectAllocation::where('class_id', $classId)
+                    ->distinct()->pluck('subject_id');
+                $subjects = \App\Models\Subject::whereIn('id', $subjectIds)
+                    ->get(['id', 'name', 'code']);
+            }
         } else {
             $subjects = SubjectAllocation::where('teacher_id', $request->user()->id)
                 ->where('class_id', $classId)
