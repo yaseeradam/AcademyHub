@@ -12,16 +12,27 @@ class StudentSession
 {
     public function handle(Request $request, Closure $next): Response
     {
+        // If an authenticated staff user hits a student route, clear any stale student session
+        // data (e.g. from previewing the portal) and redirect them to the staff area.
+        if (auth()->check()) {
+            $user = auth()->user();
+            if (in_array($user->role, ['admin', 'teacher', 'bursar'], true)) {
+                if (session()->has('student_id')) {
+                    // Clear lingering student session so it won't cause 403 IP-lock errors or
+                    // wrong redirects later when the staff member navigates to other pages.
+                    $request->session()->forget([
+                        'student_id', 'student_name', 'student_admission', 'student_class',
+                        'login_type', 'student_must_reset_password', 'aptitude_attempt_id',
+                    ]);
+                }
+                return redirect()
+                    ->route('cbt.index')
+                    ->with('warning', 'You are logged in as staff. To test or preview the exam from the student\'s perspective, please log in with a student account or use a private/incognito window.');
+            }
+        }
+
         $studentId = session('student_id');
         if (! $studentId) {
-            if (auth()->check()) {
-                $user = auth()->user();
-                if (in_array($user->role, ['admin', 'teacher', 'bursar'], true)) {
-                    return redirect()
-                        ->route('cbt.index')
-                        ->with('warning', 'You are logged in as staff. To test or preview the exam from the student\'s perspective, please log in with a student account or use a private/incognito window.');
-                }
-            }
             session(['url.intended' => $request->fullUrl()]);
             return redirect()->route('login');
         }

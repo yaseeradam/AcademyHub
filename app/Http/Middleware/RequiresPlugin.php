@@ -66,8 +66,12 @@ class RequiresPlugin
                 ], 403);
             }
 
-            // Student session redirection fallback
-            if (session()->has('student_id')) {
+            // If the request is from an authenticated staff member, never treat them as a student
+            $user = $request->user();
+            $isStaff = $user && in_array($user->role, ['admin', 'teacher', 'bursar'], true);
+
+            // Student session redirection fallback (only when not an authenticated staff user)
+            if (! $isStaff && session()->has('student_id')) {
                 // Prevent redirect loop if the missing plugin is student-dashboard itself
                 if ($slug === 'student-dashboard') {
                     $request->session()->forget(['tenant_id', 'student_id', 'student_name', 'student_admission', 'student_class', 'login_type', 'student_must_reset_password']);
@@ -83,7 +87,6 @@ class RequiresPlugin
             }
 
             // Staff/Parent fallback
-            $user = $request->user();
             if ($user && ($user->role === 'admin' || $user->is_super_admin)) {
                 return redirect()
                     ->route('marketplace')
@@ -95,8 +98,10 @@ class RequiresPlugin
                 ->with('warning', 'This feature is not active for your school.');
         }
 
-        // If a student is logged in, check class targeting restrictions for this plugin
-        if (session()->has('student_id')) {
+        // If a student is logged in (and not an authenticated staff user), check class targeting restrictions for this plugin
+        $currentUser = $request->user();
+        $isStaff = $currentUser && in_array($currentUser->role, ['admin', 'teacher', 'bursar'], true);
+        if (! $isStaff && session()->has('student_id')) {
             $student = \App\Models\Student::find(session('student_id'));
             if ($student) {
                 $allowedClassIds = $plugin->pivot->allowed_class_ids ?? [];

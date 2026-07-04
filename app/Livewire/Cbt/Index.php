@@ -121,14 +121,7 @@ class Index extends Component
         abort_unless((bool) $user, 403);
 
         if ($user->role === 'admin' || $user->is_super_admin) {
-            $class = SchoolClass::find($this->classId);
-            if ($class) {
-                $defaultSubjects = $class->defaultSubjects()->orderBy('name')->get();
-                if ($defaultSubjects->isNotEmpty()) {
-                    return $defaultSubjects;
-                }
-            }
-
+            // Always load from subject allocations so all subjects for this class are shown
             $ids = SubjectAllocation::query()->where('class_id', $this->classId)->pluck('subject_id')->unique();
 
             return $ids->isNotEmpty()
