@@ -43,6 +43,13 @@ class Results extends Component
         $sessions = Score::where('student_id', $student->id)
             ->distinct()->orderBy('session')->pluck('session');
 
+        // Ensure the active session is always in the dropdown list so it does not auto-fallback to old sessions
+        $activeSession = AcademicTerm::activeSessionName() ?? config('academyhub.current_session', '');
+        if ($activeSession && ! $sessions->contains($activeSession)) {
+            $sessions->push($activeSession);
+            $sessions = $sessions->unique()->values();
+        }
+
         // Check if results are published for this class/term/session
         $published = ResultPublication::where('class_id', $student->class_id)
             ->where('term', $this->selectedTerm)

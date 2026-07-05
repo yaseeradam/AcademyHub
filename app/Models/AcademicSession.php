@@ -38,6 +38,6 @@ class AcademicSession extends Model
             return null;
         }
 
-        return is_string($name) && preg_match('/^\\d{4}\\/\\d{4}$/', $name) === 1 ? $name : null;
+        return is_string($name) ? $name : null;
     }
 }
