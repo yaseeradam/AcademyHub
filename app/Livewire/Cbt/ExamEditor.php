@@ -1451,7 +1451,9 @@ class ExamEditor extends Component
         }
 
         $exam = $this->exam;
-        abort_unless($exam->status === 'approved', 403);
+        // Allow transfer when exam is in any post-live state (approved or ended).
+        // Previously this blocked 'ended' exams, which is the normal state after using "End Exam".
+        abort_unless(in_array($exam->status, ['approved', 'ended', 'live'], true), 403);
 
         $attempts = CbtAttempt::query()
             ->where('exam_id', $exam->id)
