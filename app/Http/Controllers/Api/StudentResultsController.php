@@ -23,20 +23,7 @@ class StudentResultsController extends Controller
         $term = (int) $request->query('term', AcademicTerm::activeTermNumber());
 
         // Get class subjects assigned or allocated
-        $class = \App\Models\SchoolClass::find($student->class_id);
-        $classSubjects = $class ? $class->defaultSubjects()->orderBy('name')->get() : collect();
-
-        if ($classSubjects->isNotEmpty()) {
-            $subjects = $classSubjects;
-        } else {
-            $allocatedSubjectIds = SubjectAllocation::where('class_id', $student->class_id)
-                ->pluck('subject_id')
-                ->unique();
-
-            $subjects = $allocatedSubjectIds->isEmpty()
-                ? Subject::orderBy('name')->get()
-                : Subject::whereIn('id', $allocatedSubjectIds)->orderBy('name')->get();
-        }
+        $subjects = \App\Models\SchoolClass::allSubjectsForClass($student->class_id);
 
         $scores = Score::with('subject')
             ->where('student_id', $student->id)

@@ -297,26 +297,7 @@ class ReportCardService
             return $this->subjectsCache[$classId];
         }
 
-        $class = \App\Models\SchoolClass::find($classId);
-        if ($class) {
-            $defaultSubjects = $class->defaultSubjects()->orderBy('name')->get();
-            if ($defaultSubjects->isNotEmpty()) {
-                return $this->subjectsCache[$classId] = $defaultSubjects;
-            }
-        }
-
-        $ids = SubjectAllocation::query()
-            ->where('class_id', $classId)
-            ->distinct()
-            ->pluck('subject_id')
-            ->unique()
-            ->values();
-
-        $subjects = $ids->isEmpty()
-            ? Subject::query()->orderBy('name')->get()
-            : Subject::query()->whereIn('id', $ids)->orderBy('name')->get();
-
-        return $this->subjectsCache[$classId] = $subjects->unique('id')->values();
+        return $this->subjectsCache[$classId] = \App\Models\SchoolClass::allSubjectsForClass($classId);
     }
 
     /**

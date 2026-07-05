@@ -50,4 +50,37 @@ class SchoolClass extends Model
             ->withTimestamps()
             ->orderBy('name');
     }
+
+    public static function allSubjectsForClass(int $classId): \Illuminate\Support\Collection
+    {
+        $class = self::find($classId);
+        if (!$class) {
+            return collect();
+        }
+
+        // Get subjects from default subjects (class_subject table)
+        $defaultSubjects = $class->defaultSubjects()->get();
+
+        // Get subjects from allocations (subject_allocations table)
+        $allocatedSubjects = $class->subjects()->get();
+
+        // Get subjects that have scores recorded for this class
+        $scoreSubjectIds = \App\Models\Score::query()
+            ->where('class_id', $classId)
+            ->distinct()
+            ->pluck('subject_id')
+            ->toArray();
+        $scoreSubjects = \App\Models\Subject::query()
+            ->whereIn('id', $scoreSubjectIds)
+            ->get();
+
+        // Combine all and make unique by ID
+        return collect()
+            ->concat($defaultSubjects)
+            ->concat($allocatedSubjects)
+            ->concat($scoreSubjects)
+            ->unique('id')
+            ->sortBy('name')
+            ->values();
+    }
 }

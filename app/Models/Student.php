@@ -131,7 +131,7 @@ class Student extends Model
             return collect();
         }
 
-        $classSubjects = $this->schoolClass->defaultSubjects->pluck('id');
+        $classSubjects = SchoolClass::allSubjectsForClass($this->class_id)->pluck('id');
         $overrides = $this->subjectOverrides;
         
         $removed = $overrides->where('pivot.action', 'remove')->pluck('id');
