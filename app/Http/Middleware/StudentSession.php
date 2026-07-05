@@ -141,9 +141,12 @@ class StudentSession
             }
         }
 
+        // Check if student is using the default password - Removed restriction to force change password
+        /*
         if (session('student_must_reset_password') === true && !$request->is('student/profile', 'student/logout')) {
             return redirect()->route('student.profile')->with('warning', '⚠️ Security Alert: You are using the default password. Please choose a new, secure password now.');
         }
+        */
 
         return $next($request);
     }
