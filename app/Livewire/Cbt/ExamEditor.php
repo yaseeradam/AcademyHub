@@ -1270,6 +1270,27 @@ class ExamEditor extends Component
         return 'CBT-'.strtoupper(\Illuminate\Support\Str::random(8));
     }
 
+    public function toggleShowScore(): void
+    {
+        $user = auth()->user();
+        abort_unless($user && in_array($user->role, ['admin', 'teacher'], true), 403);
+
+        $exam = $this->exam;
+
+        if ($user->role === 'teacher') {
+            $canAccess = (int) $exam->created_by === (int) $user->id
+                || (int) ($exam->assigned_teacher_id ?? 0) === (int) $user->id;
+            abort_unless($canAccess, 403);
+        }
+
+        $exam->forceFill(['show_score' => ! $exam->show_score])->save();
+        $this->showScore = (bool) $exam->show_score;
+
+        Audit::log('cbt.show_score_toggled', $exam, ['show_score' => $exam->show_score]);
+        $this->dispatch('refresh');
+        $this->dispatch('alert', message: 'Show Score is now ' . ($exam->show_score ? 'ON' : 'OFF') . '.', type: 'info');
+    }
+
     public function releaseResults(): void
     {
         $user = auth()->user();
