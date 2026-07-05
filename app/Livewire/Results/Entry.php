@@ -169,18 +169,8 @@ class Entry extends Component
         $user = auth()->user();
 
         if ($user?->role === 'admin' || $user?->is_super_admin) {
-            $class = SchoolClass::find($this->classId);
-            if ($class) {
-                $defaultSubjects = $class->defaultSubjects()->orderBy('name')->get();
-                if ($defaultSubjects->isNotEmpty()) {
-                    return $defaultSubjects;
-                }
-            }
-
-            $ids = SubjectAllocation::query()->where('class_id', $this->classId)->pluck('subject_id')->unique();
-            return $ids->isNotEmpty()
-                ? Subject::query()->whereIn('id', $ids)->orderBy('name')->get()
-                : Subject::query()->orderBy('name')->get();
+            // Admins see ALL subjects — not limited by class defaults
+            return Subject::query()->orderBy('name')->get();
         }
 
         $ids = SubjectAllocation::query()

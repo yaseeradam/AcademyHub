@@ -13,6 +13,7 @@ use App\Models\Student;
 use App\Models\StudentNotification;
 use App\Models\Subject;
 use App\Models\SubjectAllocation;
+use App\Models\Score;
 use App\Models\User;
 use App\Support\Audit;
 use App\Support\CbtQuestionImporter;
@@ -1451,9 +1452,13 @@ class ExamEditor extends Component
         }
 
         $exam = $this->exam;
-        // Allow transfer when exam is in any post-live state (approved or ended).
-        // Previously this blocked 'ended' exams, which is the normal state after using "End Exam".
+        // Allow transfer when exam is in any post-live state (approved, ended, or live).
         abort_unless(in_array($exam->status, ['approved', 'ended', 'live'], true), 403);
+
+        if (! $exam->subject_id || ! $exam->class_id || ! $exam->term || ! $exam->session) {
+            $this->dispatch('alert', message: 'This exam is missing subject, class, term, or session — cannot transfer to results.', type: 'warning');
+            return;
+        }
 
         $attempts = CbtAttempt::query()
             ->where('exam_id', $exam->id)
@@ -1466,28 +1471,45 @@ class ExamEditor extends Component
             return;
         }
 
-        $count = 0;
-        foreach ($attempts as $attempt) {
-            if (!$attempt->student) continue;
+        // Scale CBT raw score to the results exam max (e.g. CBT max 25 → results max 60)
+        $cbtMax = (int) ($attempts->max('max_score') ?: 0);
+        $resultsExamMax = max(1, (int) config('academyhub.results_exam_max', 60));
 
-            DB::table('scores')->updateOrInsert(
-                [
+        $count = 0;
+        DB::transaction(function () use ($exam, $attempts, $cbtMax, $resultsExamMax, &$count) {
+            foreach ($attempts as $attempt) {
+                if (! $attempt->student) {
+                    continue;
+                }
+
+                // Scale: if CBT max != results exam max, proportionally convert
+                $rawScore = (int) ($attempt->score ?? 0);
+                $scaledExamScore = $cbtMax > 0
+                    ? (int) round(($rawScore / $cbtMax) * $resultsExamMax)
+                    : $rawScore;
+                $scaledExamScore = max(0, min($scaledExamScore, $resultsExamMax));
+
+                // Use Eloquent so the booted() observer sets total, grade, and tenant_id automatically
+                $score = Score::firstOrNew([
                     'student_id' => $attempt->student_id,
                     'subject_id' => $exam->subject_id,
-                    'class_id' => $exam->class_id,
-                    'term' => $exam->term,
-                    'session' => $exam->session,
-                ],
-                [
-                    'exam' => $attempt->score,
-                    'updated_at' => now(),
-                ]
-            );
-            $count++;
-        }
+                    'class_id'   => $exam->class_id,
+                    'term'       => $exam->term,
+                    'session'    => $exam->session,
+                ]);
+
+                $score->exam = $scaledExamScore;
+                // Preserve existing CA scores if already entered manually
+                $score->ca1 = $score->ca1 ?? 0;
+                $score->ca2 = $score->ca2 ?? 0;
+                $score->save();
+
+                $count++;
+            }
+        });
 
         Audit::log('cbt.scores_transferred', $exam, ['count' => $count]);
-        $this->dispatch('alert', message: "Transferred {$count} CBT score(s) to scores.", type: 'success');
+        $this->dispatch('alert', message: "Transferred {$count} CBT score(s) to the results scoresheet.", type: 'success');
     }
 
     public function startForward(int $attemptId): void
