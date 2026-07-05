@@ -40,6 +40,9 @@
 .input-wrap input{width:100%;padding:12px 44px 12px 14px;border:1.5px solid #e2e8f0;border-radius:10px;font-size:14px;color:#1e293b;background:#fff;outline:none;transition:border-color .2s,box-shadow .2s;font-family:inherit}
 .input-wrap input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-light)}
 .input-wrap .input-icon{position:absolute;right:14px;top:50%;transform:translateY(-50%);width:18px;height:18px;color:#94a3b8}
+.input-wrap .password-toggle{position:absolute;right:14px;top:50%;transform:translateY(-50%);background:none;border:none;padding:0;cursor:pointer;color:#94a3b8;display:flex;align-items:center;transition:color .2s;outline:none}
+.input-wrap .password-toggle:hover{color:var(--accent)}
+.input-wrap .password-toggle svg{width:18px;height:18px}
 .remember{display:flex;align-items:center;gap:8px;margin-bottom:22px;font-size:13px;color:#475569;font-weight:500;cursor:pointer}
 .remember input[type=checkbox]{width:16px;height:16px;accent-color:var(--accent);cursor:pointer}
 .btn-login{width:100%;padding:14px;border:none;border-radius:12px;font-size:15px;font-weight:800;color:#fff;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:10px;letter-spacing:.3px}
@@ -169,7 +172,10 @@
             </div>
             <div class="input-wrap">
               <input id="staff-password" name="password" type="password" required placeholder="••••••••">
-              <svg class="input-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+              <button type="button" class="password-toggle" onclick="togglePassword('staff-password', this)">
+                <svg class="eye" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                <svg class="eye-off" style="display:none;" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88" /></svg>
+              </button>
             </div>
             @error('password')
               <div style="color:#ef4444; font-size:12px; margin-top:6px; font-weight:600; display:flex; align-items:center; gap:4px;">
@@ -211,7 +217,10 @@
             </div>
             <div class="input-wrap">
               <input id="parent-password" name="password" type="password" required placeholder="••••••••">
-              <svg class="input-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+              <button type="button" class="password-toggle" onclick="togglePassword('parent-password', this)">
+                <svg class="eye" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                <svg class="eye-off" style="display:none;" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88" /></svg>
+              </button>
             </div>
             @error('password')
               <div style="color:#ef4444; font-size:12px; margin-top:6px; font-weight:600; display:flex; align-items:center; gap:4px;">
@@ -253,7 +262,10 @@
             </div>
             <div class="input-wrap">
               <input id="student-password" name="password" type="password" required placeholder="••••••••">
-              <svg class="input-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+              <button type="button" class="password-toggle" onclick="togglePassword('student-password', this)">
+                <svg class="eye" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                <svg class="eye-off" style="display:none;" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88" /></svg>
+              </button>
             </div>
             @error('password')
               <div style="color:#ef4444; font-size:12px; margin-top:6px; font-weight:600; display:flex; align-items:center; gap:4px;">
@@ -338,6 +350,22 @@ function switchRole(role) {
   const targetSlide = document.getElementById('slide-' + role);
   if (targetSlide) {
     targetSlide.classList.add('active');
+  }
+}
+
+function togglePassword(inputId, button) {
+  const input = document.getElementById(inputId);
+  const eyeIcon = button.querySelector('.eye');
+  const eyeOffIcon = button.querySelector('.eye-off');
+  
+  if (input.type === 'password') {
+    input.type = 'text';
+    eyeIcon.style.display = 'none';
+    eyeOffIcon.style.display = 'block';
+  } else {
+    input.type = 'password';
+    eyeIcon.style.display = 'block';
+    eyeOffIcon.style.display = 'none';
   }
 }
 
