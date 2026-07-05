@@ -227,12 +227,8 @@ class ExamEditor extends Component
         abort_unless($user, 403);
 
         if ($user->role === 'admin' || $user->is_super_admin) {
-            // Always load from subject allocations so all subjects for this class are shown
-            $ids = SubjectAllocation::query()->where('class_id', $this->classId)->pluck('subject_id')->unique();
-
-            return $ids->isNotEmpty()
-                ? Subject::query()->whereIn('id', $ids)->orderBy('name')->get()
-                : Subject::query()->orderBy('name')->get();
+            // Admins see ALL subjects — not limited by teacher allocations or defaults
+            return Subject::query()->orderBy('name')->get();
         }
 
         $ids = SubjectAllocation::query()
