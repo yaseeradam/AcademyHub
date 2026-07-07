@@ -21,6 +21,13 @@ use App\Http\Controllers\Api\StudentNotificationController;
 use App\Http\Controllers\Api\MediaUploadController;
 
 // Public
+Route::get('/', function () {
+    return response()->json([
+        'status' => 'active',
+        'message' => 'AcademyHub API is running.'
+    ]);
+});
+
 Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:login_attempts');
 Route::post('/student/login', [StudentAuthController::class, 'login'])->middleware('throttle:login_attempts');
 Route::get('/tenant/{slug}', [TenantDiscoveryController::class, 'show']);
