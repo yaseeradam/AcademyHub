@@ -588,25 +588,24 @@ ANS: C</pre>
                                         <div class="text-sm font-semibold">{{ $student->full_name ?? trim($student->first_name.' '.$student->last_name) }}</div>
                                         <div class="text-xs text-gray-500">{{ $student->admission_number }}</div>
                                     </div>
-                                </div>
-                            <div class="flex items-center gap-3">
-                                @if ($state === 'submitted')
-                                    <span class="rounded bg-emerald-100 px-2 py-1 text-xs font-semibold text-emerald-800">Submitted</span>
-                                    @if ($exam->exam_type === 'aptitude' && $attempt)
-                                        <a href="{{ route('cbt.attempt.export-pdf', ['attempt' => $attempt->uuid]) }}" target="_blank" class="inline-flex items-center gap-1 rounded bg-teal-100 px-2.5 py-1 text-xs font-bold text-teal-800 hover:bg-teal-200 transition">
-                                            <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
-                                            </svg>
-                                            Download PDF
-                                        </a>
+                                <div class="flex items-center gap-3">
+                                    @if ($state === 'submitted')
+                                        <span class="rounded bg-emerald-100 px-2 py-1 text-xs font-semibold text-emerald-800">Submitted ({{ (int) $attempt?->score }}/{{ (int) $attempt?->max_score }})</span>
+                                        @if ($exam->exam_type === 'aptitude' && $attempt)
+                                            <a href="{{ route('cbt.attempt.export-pdf', ['attempt' => $attempt->uuid]) }}" target="_blank" class="inline-flex items-center gap-1 rounded bg-teal-100 px-2.5 py-1 text-xs font-bold text-teal-800 hover:bg-teal-200 transition">
+                                                <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                                                </svg>
+                                                Download PDF
+                                            </a>
+                                        @endif
+                                    @elseif ($state === 'in_progress')
+                                        <span class="rounded bg-blue-100 px-2 py-1 text-xs font-semibold text-blue-800">{{ $answered }}/{{ $totalQuestions }}</span>
+                                    @elseif ($state === 'terminated')
+                                        <span class="rounded bg-orange-100 px-2 py-1 text-xs font-semibold text-orange-800">Terminated ({{ (int) $attempt?->score }}/{{ (int) $attempt?->max_score }})</span>
+                                    @else
+                                        <span class="rounded bg-gray-100 px-2 py-1 text-xs font-semibold text-gray-800">Not Started</span>
                                     @endif
-                                @elseif ($state === 'in_progress')
-                                    <span class="rounded bg-blue-100 px-2 py-1 text-xs font-semibold text-blue-800">{{ $answered }}/{{ $totalQuestions }}</span>
-                                @elseif ($state === 'terminated')
-                                    <span class="rounded bg-orange-100 px-2 py-1 text-xs font-semibold text-orange-800">Terminated</span>
-                                @else
-                                    <span class="rounded bg-gray-100 px-2 py-1 text-xs font-semibold text-gray-800">Not Started</span>
-                                @endif
 
                                     @if ($hasTheory && $attempt && ($attempt->submitted_at || $attempt->terminated_at))
                                         @php
