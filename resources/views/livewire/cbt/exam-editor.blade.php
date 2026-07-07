@@ -689,9 +689,9 @@ ANS: C</pre>
                                         @else
                                             <span class="mt-1 inline-block rounded bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-800">Pending</span>
                                         @endif
-                                        <button wire:click="startReview({{ $a->id }})" class="mt-2 rounded bg-violet-100 px-2 py-1 text-xs font-semibold text-violet-700 hover:bg-violet-200">
+                                        <a href="{{ route('cbt.exams.theory', ['exam' => $exam, 'attempt' => $a->id]) }}" class="inline-block mt-2 rounded bg-violet-100 px-2 py-1 text-xs font-semibold text-violet-700 hover:bg-violet-200">
                                             {{ $theoryStatus === 'marked' ? 'View' : 'Mark' }}
-                                        </button>
+                                        </a>
                                     @endif
                                 </div>
                             </div>
@@ -704,64 +704,7 @@ ANS: C</pre>
         @endif
     </div>
 
-    @if ($hasTheory && $this->reviewAttempt)
-        @php
-            $reviewAttempt = $this->reviewAttempt;
-            $theoryQuestions = $exam->questions->where('type', 'theory');
-        @endphp
-        <div class="rounded-2xl bg-white p-6 shadow-lg">
-            <div class="flex flex-wrap items-center justify-between gap-3">
-                <div>
-                    <div class="text-sm font-semibold text-gray-900">Theory Review</div>
-                    <div class="text-xs text-gray-500">
-                        {{ $reviewAttempt->student?->full_name ?? 'Student' }} • {{ $reviewAttempt->student?->admission_number }}
-                    </div>
-                </div>
-                <button wire:click="cancelReview" class="btn-outline">Close</button>
-            </div>
 
-            <div class="mt-4 space-y-4">
-                @foreach ($theoryQuestions as $question)
-                    @php
-                        $answer = $reviewAttempt->answers->firstWhere('question_id', $question->id);
-                        $response = trim((string) ($answer?->text_answer ?? ''));
-                    @endphp
-                    <div class="rounded-lg border border-gray-200 bg-gray-50 p-4">
-                        <div class="text-sm font-semibold text-gray-900">{{ $question->prompt }}</div>
-                        <div class="mt-2 rounded-lg bg-white p-3 text-sm text-gray-700">
-                            {{ $response !== '' ? $response : 'No answer submitted.' }}
-                        </div>
-                        <div class="mt-3 flex items-center gap-3">
-                            <div>
-                                <label class="text-xs font-semibold uppercase text-gray-500">Marks ({{ (int) $question->marks }})</label>
-                                <input
-                                    type="number"
-                                    min="0"
-                                    max="{{ (int) $question->marks }}"
-                                    wire:model.defer="theoryMarks.{{ $question->id }}"
-                                    class="input w-24 text-sm mt-1"
-                                />
-                                @error("theoryMarks.{$question->id}") <div class="text-xs text-rose-600">{{ $message }}</div> @enderror
-                            </div>
-                            <div class="flex-1">
-                                <label class="text-xs font-semibold uppercase text-gray-500">Comment (Optional)</label>
-                                <input
-                                    type="text"
-                                    wire:model.defer="theoryComments.{{ $question->id }}"
-                                    placeholder="Add a short comment..."
-                                    class="input w-full text-sm mt-1"
-                                />
-                            </div>
-                        </div>
-                    </div>
-                @endforeach
-            </div>
-
-            <div class="mt-4 flex flex-wrap items-center justify-end gap-2">
-                <button wire:click="saveTheoryMarks" class="btn-primary">Save Marks</button>
-            </div>
-        </div>
-    @endif
 
     @php
         $maxObj = (float) $exam->questions->where('type', '!=', 'theory')->sum('marks');
