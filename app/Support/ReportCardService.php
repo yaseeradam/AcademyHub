@@ -169,7 +169,29 @@ class ReportCardService
 
         [$highestAverage, $lowestAverage] = $this->highestLowestAverage($student->class_id, $subjectIds, $term, $session);
 
-        $principalRemarks = $this->generatePrincipalRemarks($average, $position, $totalStudents);
+        $principalRemarks = $this->generateAIRemarks(
+            $student,
+            $rows,
+            $average,
+            $position,
+            $totalStudents,
+            $timesOpened,
+            $timesPresent,
+            $timesAbsent,
+            'principal'
+        ) ?? $this->generatePrincipalRemarks($average, $position, $totalStudents);
+
+        $teacherRemarks = $this->generateAIRemarks(
+            $student,
+            $rows,
+            $average,
+            $position,
+            $totalStudents,
+            $timesOpened,
+            $timesPresent,
+            $timesAbsent,
+            'teacher'
+        ) ?? $this->generateTeacherRemarksFallback($average, $position, $totalStudents);
 
         // Report card display options — read directly from settings.json to avoid
         // stale in-process config cache (config() is populated once at boot).
@@ -240,7 +262,7 @@ class ReportCardService
             'highestAverage' => $highestAverage,
             'lowestAverage' => $lowestAverage,
             'principalRemarks' => $principalRemarks,
-            'teacherRemarks' => null,
+            'teacherRemarks' => $teacherRemarks,
             'nextTermDate' => null,
             'rcOptions' => $rcOptions,
             'schoolFees' => $schoolFees,
@@ -441,5 +463,102 @@ class ReportCardService
         }
 
         return filter_var($value, FILTER_VALIDATE_BOOLEAN);
+    }
+
+    private function generateAIRemarks(
+        Student $student,
+        Collection $rows,
+        float $average,
+        int $position,
+        int $totalStudents,
+        ?int $timesOpened,
+        ?int $timesPresent,
+        ?int $timesAbsent,
+        string $role
+    ): ?string {
+        $raw = config('services.groq.key') ?: env('GROQ_API_KEY');
+        if (empty($raw)) {
+            return null;
+        }
+
+        $keys = array_filter(array_map('trim', explode(',', $raw)));
+        if (empty($keys)) {
+            return null;
+        }
+        $apiKey = $keys[array_rand($keys)];
+
+        // Format the subject grades list for the AI context
+        $subjectsList = $rows->map(function ($r) {
+            $name = $r['subject']?->name ?? 'Unknown Subject';
+            $score = $r['total'] ?? 'N/A';
+            $grade = $r['grade'] ?? 'N/A';
+            return "{$name}: {$score}/100 (Grade {$grade})";
+        })->implode(', ');
+
+        $opened = (int) $timesOpened;
+        $present = (int) $timesPresent;
+        $absent = (int) $timesAbsent;
+        $attendanceText = $opened > 0 ? "Present {$present} days out of {$opened} school days opened." : "Attendance not recorded.";
+
+        if ($role === 'teacher') {
+            $systemInstruction = "You are a professional class teacher. Write a concise, personalized, and encouraging comment (exactly 1-2 sentences) for a student's terminal report card. Identify their main strength (best subject) and area for improvement (lowest subject) based on their grades. Mention their attendance if they have been absent. Output ONLY the plain comment, no prefixes, no quotation marks.";
+            $prompt = "Student: {$student->full_name}\n" .
+                      "Grades: {$subjectsList}\n" .
+                      "Attendance: {$attendanceText}";
+        } else {
+            $systemInstruction = "You are a school principal. Write a concise, authoritative, and encouraging remark (exactly 1-2 sentences) for a student's terminal report card. Reference their overall academic performance (average score {$average}%, position {$position} out of {$totalStudents} students). Output ONLY the plain remark, no prefixes, no quotation marks.";
+            $prompt = "Student: {$student->full_name}\n" .
+                      "Overall Average: {$average}%\n" .
+                      "Class Position: {$position} out of {$totalStudents} students";
+        }
+
+        try {
+            $response = \Illuminate\Support\Facades\Http::withOptions(['verify' => false])
+                ->timeout(10)
+                ->withHeaders([
+                    'Authorization' => 'Bearer ' . $apiKey,
+                    'Content-Type'  => 'application/json',
+                ])->post('https://api.groq.com/openai/v1/chat/completions', [
+                    'model'       => 'llama-3.3-70b-versatile',
+                    'messages'    => [
+                        ['role' => 'system', 'content' => $systemInstruction],
+                        ['role' => 'user', 'content' => $prompt]
+                    ],
+                    'temperature' => 0.6,
+                    'max_tokens'  => 150,
+                ]);
+
+            if ($response->successful()) {
+                $content = $response->json()['choices'][0]['message']['content'] ?? null;
+                if ($content) {
+                    return trim(strip_tags($content), " \t\n\r\0\x0B\"'");
+                }
+            }
+        } catch (\Throwable) {
+            // Fall back to rule-based remarks
+        }
+
+        return null;
+    }
+
+    private function generateTeacherRemarksFallback(float $average, int $position, int $totalStudents): string
+    {
+        if ($average >= 70) {
+            return 'An exceptionally brilliant term. Has shown outstanding work ethic and active participation in class.';
+        }
+
+        if ($average >= 60) {
+            return 'A very good performance. Consistent and dedicated. Keep up the high standard.';
+        }
+
+        if ($average >= 50) {
+            return 'A satisfactory result. Shows good potential, but needs to be more consistent to achieve top grades.';
+        }
+
+        if ($average >= 40) {
+            return 'Fair performance. Needs to show more dedication and put in extra study hours next term.';
+        }
+
+        return 'Poor academic standing. Requires intensive home study and close monitoring to improve.';
     }
 }
