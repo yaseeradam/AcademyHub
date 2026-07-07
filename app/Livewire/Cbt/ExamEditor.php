@@ -555,7 +555,7 @@ class ExamEditor extends Component
         if (! $exam->class_id) {
             $attempts = CbtAttempt::query()
                 ->where('exam_id', $exam->id)
-                ->with(['student:id,admission_number,first_name,last_name,passport_photo'])
+                ->with(['student:id,admission_number,first_name,last_name,passport_photo', 'answers'])
                 ->get();
 
             $attemptIds = $attempts->pluck('id')->filter()->values();
@@ -570,7 +570,7 @@ class ExamEditor extends Component
                     ->pluck('answered', 'attempt_id')
                 : collect();
 
-            return $attempts->map(function ($attempt) use ($answeredCounts, $totalQuestions) {
+            return $attempts->map(function ($attempt) use ($answeredCounts, $totalQuestions, $exam) {
                 $state = 'not_started';
                 if ($attempt->terminated_at) $state = 'terminated';
                 elseif ($attempt->submitted_at) $state = 'submitted';
@@ -588,12 +588,31 @@ class ExamEditor extends Component
                     $student->passport_photo_url = null;
                 }
 
+                $objScore = null;
+                $theoryScore = null;
+                if ($attempt->submitted_at || $attempt->terminated_at) {
+                    $objScore = 0;
+                    $theoryScore = 0;
+                    foreach ($attempt->answers as $ans) {
+                        $q = $exam->questions->firstWhere('id', $ans->question_id);
+                        if ($q) {
+                            if ($q->type === 'theory') {
+                                $theoryScore += (float) $ans->awarded_marks;
+                            } else {
+                                $objScore += (float) $ans->awarded_marks;
+                            }
+                        }
+                    }
+                }
+
                 return [
                     'student' => $student,
                     'attempt' => $attempt,
                     'state' => $state,
                     'answered' => (int) ($answeredCounts[$attempt->id] ?? 0),
                     'remaining' => max(0, $totalQuestions - (int) ($answeredCounts[$attempt->id] ?? 0)),
+                    'objScore' => $objScore,
+                    'theoryScore' => $theoryScore,
                 ];
             })->values();
         }
@@ -607,6 +626,7 @@ class ExamEditor extends Component
 
         $attempts = CbtAttempt::query()
             ->where('exam_id', $exam->id)
+            ->with('answers')
             ->get()
             ->keyBy('student_id');
 
@@ -623,7 +643,7 @@ class ExamEditor extends Component
                 ->pluck('answered', 'attempt_id')
             : collect();
 
-        return $students->map(function (Student $student) use ($attempts, $answeredCounts, $totalQuestions) {
+        return $students->map(function (Student $student) use ($attempts, $answeredCounts, $totalQuestions, $exam) {
             /** @var ?CbtAttempt $attempt */
             $attempt = $attempts->get($student->id);
 
@@ -640,12 +660,31 @@ class ExamEditor extends Component
 
             $answered = $attempt ? (int) ($answeredCounts[$attempt->id] ?? 0) : 0;
 
+            $objScore = null;
+            $theoryScore = null;
+            if ($attempt && ($attempt->submitted_at || $attempt->terminated_at)) {
+                $objScore = 0;
+                $theoryScore = 0;
+                foreach ($attempt->answers as $ans) {
+                    $q = $exam->questions->firstWhere('id', $ans->question_id);
+                    if ($q) {
+                        if ($q->type === 'theory') {
+                            $theoryScore += (float) $ans->awarded_marks;
+                        } else {
+                            $objScore += (float) $ans->awarded_marks;
+                        }
+                    }
+                }
+            }
+
             return [
                 'student' => $student,
                 'attempt' => $attempt,
                 'state' => $state,
                 'answered' => $answered,
                 'remaining' => $attempt ? max(0, $totalQuestions - $answered) : $totalQuestions,
+                'objScore' => $objScore,
+                'theoryScore' => $theoryScore,
             ];
         });
     }

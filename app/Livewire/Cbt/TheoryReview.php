@@ -39,6 +39,11 @@ class TheoryReview extends Component
         abort_unless($exam->questions()->where('type', 'theory')->exists(), 404);
 
         $this->examId = $exam->id;
+
+        $attemptId = request()->query('attempt');
+        if ($attemptId) {
+            $this->openAttempt((int) $attemptId);
+        }
     }
 
     #[Computed]
@@ -166,6 +171,89 @@ class TheoryReview extends Component
 
         unset($this->attempts, $this->currentAttempt);
         $this->dispatch('alert', message: 'Marks saved.', type: 'success');
+    }
+
+    public function autoMarkQuestion(int $questionId): void
+    {
+        $attempt = $this->currentAttempt;
+        if (! $attempt) return;
+
+        $question = $this->theoryQuestions->firstWhere('id', $questionId);
+        if (! $question) return;
+
+        $answer = $attempt->answers->firstWhere('question_id', $questionId);
+        $studentAnswer = trim((string) ($answer?->text_answer ?? ''));
+
+        if ($studentAnswer === '') {
+            $this->theoryMarks[$questionId] = 0;
+            $this->theoryComments[$questionId] = 'No answer submitted.';
+            return;
+        }
+
+        $rawKeys = config('services.groq.key') ?: env('GROQ_API_KEY') ?: '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';
+        $keys = array_filter(array_map('trim', explode(',', $rawKeys)));
+
+        if (empty($keys)) {
+            $this->dispatch('alert', message: 'API key not configured.', type: 'error');
+            return;
+        }
+
+        $apiKey = $keys[array_rand($keys)];
+        $prompt = "You are an academic examiner grading a student's answer.\n" .
+                  "Question: {$question->prompt}\n" .
+                  "Maximum Marks: {$question->marks}\n" .
+                  "Student's Answer: \"{$studentAnswer}\"\n\n" .
+                  "Evaluate the student's answer and assign a score out of {$question->marks}.\n" .
+                  "Format your response EXACTLY as a JSON object with 'marks' (an integer from 0 to {$question->marks}) and 'comment' (a brief constructive remark, max 12 words) keys. Do not include markdown formatting or backticks around the JSON. Example:\n" .
+                  "{\"marks\": 3, \"comment\": \"Good effort, but missed key details.\"}\n" .
+                  "JSON Response:";
+
+        try {
+            $response = \Illuminate\Support\Facades\Http::withOptions(['verify' => false])
+                ->timeout(15)
+                ->withHeaders([
+                    'Authorization' => 'Bearer ' . $apiKey,
+                    'Content-Type'  => 'application/json',
+                ])
+                ->post('https://api.groq.com/openai/v1/chat/completions', [
+                    'model'    => 'llama-3.3-70b-versatile',
+                    'messages' => [
+                        ['role' => 'user', 'content' => $prompt]
+                    ],
+                    'temperature' => 0.2,
+                    'max_tokens'  => 100,
+                ]);
+
+            if ($response->successful()) {
+                $content = trim($response->json()['choices'][0]['message']['content'] ?? '');
+                if (str_starts_with($content, '```')) {
+                    $content = preg_replace('/^```(?:json)?\n?|```$/s', '', $content);
+                }
+                $json = json_decode(trim($content), true);
+
+                if (is_array($json) && isset($json['marks'])) {
+                    $this->theoryMarks[$questionId] = max(0, min((int) $json['marks'], (int) $question->marks));
+                    $this->theoryComments[$questionId] = trim((string) ($json['comment'] ?? ''));
+                    return;
+                }
+            }
+
+            $this->dispatch('alert', message: 'Failed to parse AI response.', type: 'error');
+        } catch (\Throwable $e) {
+            $this->dispatch('alert', message: 'AI marking error: ' . $e->getMessage(), type: 'error');
+        }
+    }
+
+    public function autoMarkAll(): void
+    {
+        $attempt = $this->currentAttempt;
+        if (! $attempt) return;
+
+        foreach ($this->theoryQuestions as $q) {
+            $this->autoMarkQuestion($q->id);
+        }
+
+        $this->dispatch('alert', message: 'AI marking completed for all questions.', type: 'success');
     }
 
     public function back(): void

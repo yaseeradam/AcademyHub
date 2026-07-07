@@ -286,6 +286,8 @@ Route::middleware(['auth', 'active'])->group(function () {
                 ->name('cbt.index');
             Route::get('/cbt/exams/{exam}', CbtExamEditor::class)
                 ->name('cbt.exams.edit');
+            Route::get('/cbt/exams/{exam}/theory', \App\Livewire\Cbt\TheoryReview::class)
+                ->name('cbt.exams.theory');
             Route::get('/cbt/exams/{exam}/pdf', [CbtExportController::class, 'examPdf'])
                 ->name('cbt.exams.pdf');
             Route::get('/cbt/sample-download', [UtilityController::class, 'cbtSampleDownload'])

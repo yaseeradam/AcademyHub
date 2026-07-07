@@ -125,6 +125,14 @@
                         </div>
                     </div>
                     <div class="flex flex-shrink-0 items-center gap-2">
+                        <button wire:click="autoMarkAll" wire:loading.attr="disabled"
+                            class="flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 px-3 py-2 text-xs font-bold text-white shadow-sm hover:from-amber-600 hover:to-orange-600 sm:px-5 sm:py-2.5 sm:text-sm disabled:opacity-50">
+                            <span wire:loading.remove wire:target="autoMarkAll">🪄 Auto-Mark All (AI)</span>
+                            <span wire:loading wire:target="autoMarkAll" class="flex items-center gap-1">
+                                <svg class="animate-spin h-3.5 w-3.5 text-white" viewBox="0 0 24 24" fill="none"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                                AI Marking...
+                            </span>
+                        </button>
                         <button wire:click="save"
                             class="rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 px-3 py-2 text-xs font-bold text-white shadow-sm hover:from-emerald-600 hover:to-teal-600 sm:px-5 sm:py-2.5 sm:text-sm">
                             Save
@@ -164,18 +172,28 @@
 
                         {{-- Marking Row --}}
                         <div class="flex flex-col gap-3 border-t border-gray-100 bg-violet-50/40 px-4 py-4 sm:flex-row sm:items-center sm:px-6">
-                            <div class="flex items-center gap-2">
-                                <label class="text-sm font-black text-gray-900 whitespace-nowrap">Marks</label>
-                                <input type="number"
-                                    wire:model.lazy="theoryMarks.{{ $question->id }}"
-                                    min="0" max="{{ $question->marks }}"
-                                    placeholder="0"
-                                    class="w-20 rounded-xl border-2 border-violet-300 bg-white px-3 py-2 text-center text-sm font-bold text-gray-900 shadow-sm focus:border-violet-500 focus:ring-4 focus:ring-violet-500/20" />
-                                <span class="text-sm text-gray-500 whitespace-nowrap">/ {{ $question->marks }}</span>
-                                @error("theoryMarks.{$question->id}")
-                                    <span class="text-xs font-bold text-red-600">{{ $message }}</span>
-                                @enderror
-                            </div>
+                             <div class="flex flex-wrap items-center gap-2">
+                                 <label class="text-sm font-black text-gray-900 whitespace-nowrap">Marks</label>
+                                 <input type="number"
+                                     wire:model.lazy="theoryMarks.{{ $question->id }}"
+                                     min="0" max="{{ $question->marks }}"
+                                     placeholder="0"
+                                     class="w-20 rounded-xl border-2 border-violet-300 bg-white px-3 py-2 text-center text-sm font-bold text-gray-900 shadow-sm focus:border-violet-500 focus:ring-4 focus:ring-violet-500/20" />
+                                 <span class="text-sm text-gray-500 whitespace-nowrap">/ {{ $question->marks }}</span>
+                                 
+                                 <button type="button" wire:click="autoMarkQuestion({{ $question->id }})" wire:loading.attr="disabled"
+                                     class="flex items-center gap-1 rounded-lg bg-amber-100 hover:bg-amber-200 px-2 py-1 text-xs font-bold text-amber-800 disabled:opacity-50 transition-colors">
+                                     <span wire:loading.remove wire:target="autoMarkQuestion({{ $question->id }})">🪄 AI Suggest</span>
+                                     <span wire:loading wire:target="autoMarkQuestion({{ $question->id }})" class="flex items-center gap-1">
+                                         <svg class="animate-spin h-3 w-3 text-amber-800" viewBox="0 0 24 24" fill="none"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                                         AI...
+                                     </span>
+                                 </button>
+                                 
+                                 @error("theoryMarks.{$question->id}")
+                                     <span class="text-xs font-bold text-red-600 block sm:inline">{{ $message }}</span>
+                                 @enderror
+                             </div>
                             <div class="flex-1">
                                 <input type="text"
                                     wire:model.lazy="theoryComments.{{ $question->id }}"

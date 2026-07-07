@@ -28,7 +28,11 @@
                 </div>
                 <div class="flex flex-wrap gap-2">
                     <a href="{{ route('cbt.index') }}" class="rounded-lg bg-white/20 px-4 py-2 text-sm font-semibold text-white backdrop-blur-sm hover:bg-white/30">Back</a>
-                    
+                    @if ($hasTheory)
+                        <a href="{{ route('cbt.exams.theory', $exam) }}" class="rounded-lg bg-gradient-to-r from-amber-500 to-orange-500 px-4 py-2 text-sm font-semibold text-white hover:from-amber-600 hover:to-orange-600 shadow-md">
+                            🪄 Mark Theory
+                        </a>
+                    @endif
                     @if ($canEdit)
                         <button wire:click="saveDetails" class="rounded-lg bg-white px-4 py-2 text-sm font-semibold text-violet-600 hover:bg-pink-50">Save Details</button>
                     @endif
@@ -93,6 +97,9 @@
                         @if($ongoingCount > 0)
                             <span class="ml-1 inline-flex h-5 w-5 items-center justify-center rounded-full bg-green-500 text-[10px] font-black text-white">{{ $ongoingCount }}</span>
                         @endif
+                    </button>
+                    <button @click="tab = 'results'" :class="tab === 'results' ? 'bg-white text-violet-600' : 'bg-white/10 text-white hover:bg-white/20'" class="rounded-lg px-4 py-2 text-sm font-semibold transition">
+                        Results Sheet
                     </button>
                 @endif
                 <button @click="tab = 'actions'" :class="tab === 'actions' ? 'bg-white text-violet-600' : 'bg-white/10 text-white hover:bg-white/20'" class="rounded-lg px-4 py-2 text-sm font-semibold transition">Actions</button>
@@ -618,9 +625,9 @@ ANS: C</pre>
                                         @else
                                             <span class="rounded bg-slate-100 px-2 py-1 text-xs font-semibold text-slate-800">Theory Pending</span>
                                         @endif
-                                        <button wire:click="startReview({{ $attempt->id }})" class="rounded bg-violet-100 px-2 py-1 text-xs font-semibold text-violet-700 hover:bg-violet-200">
+                                        <a href="{{ route('cbt.exams.theory', ['exam' => $exam, 'attempt' => $attempt->id]) }}" class="inline-block rounded bg-violet-100 px-2 py-1 text-xs font-semibold text-violet-700 hover:bg-violet-200">
                                             {{ $theoryStatus === 'marked' ? 'View' : 'Mark' }}
-                                        </button>
+                                        </a>
                                     @endif
                                     
                                     @if ($attempt && $me?->role === 'admin')
@@ -755,6 +762,138 @@ ANS: C</pre>
             </div>
         </div>
     @endif
+
+    @php
+        $maxObj = (float) $exam->questions->where('type', '!=', 'theory')->sum('marks');
+        $maxTheory = (float) $exam->questions->where('type', '==', 'theory')->sum('marks');
+    @endphp
+
+    <div x-show="tab === 'results'" class="rounded-2xl bg-white p-6 shadow-lg border border-gray-200 space-y-4">
+        <div class="flex items-center justify-between border-b border-gray-100 pb-4">
+            <div>
+                <h3 class="text-lg font-bold text-gray-900">CBT Scoresheet Grid</h3>
+                <p class="text-xs text-gray-500">Overview of student performances in Objective (OBJ) and Theory sections.</p>
+            </div>
+            <div class="flex gap-2">
+                @if ($me?->role === 'admin')
+                    <button wire:click="transferToResults" onclick="return confirm('Transfer CBT scores to academic results?')" class="inline-flex items-center gap-1.5 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-2 text-xs font-bold text-emerald-700 transition hover:bg-emerald-100">
+                        Transfer to Results
+                    </button>
+                @endif
+                <a href="{{ route('cbt.exams.export', $exam) }}" class="inline-flex items-center gap-1.5 rounded-lg border border-green-200 bg-green-50 px-4 py-2 text-xs font-bold text-green-700 transition hover:bg-green-100">
+                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                    </svg>
+                    Export CSV
+                </a>
+            </div>
+        </div>
+
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="bg-gray-50 text-xs font-bold uppercase tracking-wider text-gray-500 border-b border-gray-200">
+                        <th class="p-3">Student</th>
+                        <th class="p-3">Status</th>
+                        <th class="p-3 text-center">Objective (OBJ)</th>
+                        <th class="p-3 text-center">Theory</th>
+                        <th class="p-3 text-center">Total Score</th>
+                        <th class="p-3 text-center">Percentage</th>
+                        <th class="p-3 text-right">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100 text-sm">
+                    @forelse ($roster as $row)
+                        @php
+                            $student = $row['student'];
+                            $attempt = $row['attempt'];
+                            $state = (string) $row['state'];
+                            $objScore = $row['objScore'];
+                            $theoryScore = $row['theoryScore'];
+                        @endphp
+                        <tr class="hover:bg-gray-50 transition">
+                            <td class="p-3">
+                                <div class="flex items-center gap-3">
+                                    @if (!empty($student->passport_photo_url))
+                                        <img src="{{ $student->passport_photo_url }}" class="h-10 w-10 rounded-lg object-cover ring-1 ring-gray-200" />
+                                    @elseif (!empty($student->passport_photo))
+                                        <img src="/uploads/{{ $student->passport_photo }}" class="h-10 w-10 rounded-lg object-cover ring-1 ring-gray-200" />
+                                    @else
+                                        <div class="grid h-10 w-10 place-items-center rounded-lg bg-gray-200 text-sm font-bold text-gray-500">{{ mb_substr($student->first_name ?? 'S', 0, 1) }}</div>
+                                    @endif
+                                    <div>
+                                        <div class="font-bold text-gray-900">{{ $student->full_name }}</div>
+                                        <div class="text-xs text-gray-500">{{ $student->admission_number }}</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="p-3">
+                                @if ($state === 'submitted')
+                                    <span class="inline-flex items-center rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-semibold text-emerald-800">Submitted</span>
+                                @elseif ($state === 'in_progress')
+                                    <span class="inline-flex items-center rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-semibold text-blue-800">In Progress</span>
+                                @elseif ($state === 'terminated')
+                                    <span class="inline-flex items-center rounded-full bg-orange-100 px-2.5 py-0.5 text-xs font-semibold text-orange-800">Terminated</span>
+                                @else
+                                    <span class="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-semibold text-gray-800">Not Started</span>
+                                @endif
+                            </td>
+                            <td class="p-3 text-center font-semibold text-gray-800">
+                                @if ($attempt && ($attempt->submitted_at || $attempt->terminated_at))
+                                    {{ $objScore !== null ? (float) $objScore : 0 }} <span class="text-gray-400 font-normal">/ {{ $maxObj }}</span>
+                                @else
+                                    <span class="text-gray-300">-</span>
+                                @endif
+                            </td>
+                            <td class="p-3 text-center font-semibold text-gray-800">
+                                @if ($attempt && ($attempt->submitted_at || $attempt->terminated_at))
+                                    {{ $theoryScore !== null ? (float) $theoryScore : 0 }} <span class="text-gray-400 font-normal">/ {{ $maxTheory }}</span>
+                                @else
+                                    <span class="text-gray-300">-</span>
+                                @endif
+                            </td>
+                            <td class="p-3 text-center font-bold text-violet-700">
+                                @if ($attempt && ($attempt->submitted_at || $attempt->terminated_at))
+                                    {{ (float) $attempt->score }} <span class="text-violet-400 font-normal">/ {{ (float) $attempt->max_score }}</span>
+                                @else
+                                    <span class="text-gray-300">-</span>
+                                @endif
+                            </td>
+                            <td class="p-3 text-center font-semibold">
+                                @if ($attempt && ($attempt->submitted_at || $attempt->terminated_at))
+                                    <span class="{{ $attempt->percent >= 50 ? 'text-emerald-600' : 'text-rose-600' }}">
+                                        {{ number_format((float) $attempt->percent, 1) }}%
+                                    </span>
+                                @else
+                                    <span class="text-gray-300">-</span>
+                                @endif
+                            </td>
+                            <td class="p-3 text-right">
+                                <div class="flex justify-end gap-2">
+                                    @if ($attempt && ($attempt->submitted_at || $attempt->terminated_at))
+                                        @if ($hasTheory)
+                                            <button wire:click="startReview({{ $attempt->id }})" class="rounded-lg bg-violet-100 px-3 py-1.5 text-xs font-bold text-violet-700 hover:bg-violet-200 transition">
+                                                Review/Mark
+                                            </button>
+                                        @endif
+                                        @if ($me?->role === 'admin')
+                                            <button wire:click="resetAttempt({{ $attempt->id }})" class="rounded-lg bg-rose-50 px-3 py-1.5 text-xs font-bold text-rose-700 hover:bg-rose-100 transition">
+                                                Reset
+                                            </button>
+                                        @endif
+                                    @endif
+                                </div>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="7" class="p-8 text-center text-gray-500">No students registered in this class.</td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+    </div>
 
     <div x-show="tab === 'actions'" class="rounded-2xl bg-white p-6 shadow-lg">
         <div class="space-y-3">
