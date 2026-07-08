@@ -277,6 +277,11 @@ class WhatsAppController extends Controller
             $activeStudentId = \Illuminate\Support\Facades\Cache::get("whatsapp_active_student_{$phone}");
         }
 
+        $tenant = $parent->tenant;
+        $gatewayActive = $tenant ? $tenant->activeMarketplaceComponents()->where('slug', 'payment-gateway')->exists() : false;
+        $subaccountStatus = $tenant ? ($tenant->settings['payment_gateway']['subaccount_status'] ?? 'not_submitted') : 'not_submitted';
+        $onlinePaymentActive = $gatewayActive && ($subaccountStatus === 'approved');
+
         $dayOfWeek = now()->dayOfWeekIso;
 
         $events = \App\Models\SchoolEvent::where('starts_at', '>=', today())
@@ -328,7 +333,7 @@ class WhatsAppController extends Controller
             ],
             'upcoming_events' => $events,
             'recent_announcements' => $announcements,
-            'students' => $parent->students->map(function ($student) use ($dayOfWeek) {
+            'students' => $parent->students->map(function ($student) use ($dayOfWeek, $onlinePaymentActive) {
                 $attendance = $student->attendanceMarks->first();
                 $apiKey = config('services.whatsapp.api_key');
                 $activeTermNumber = \App\Models\AcademicTerm::activeTermNumber();
@@ -417,7 +422,8 @@ class WhatsAppController extends Controller
                         'amount_due'          => $amountDue,
                         'amount_paid'         => $amountPaid,
                         'outstanding_balance' => $outstandingBalance,
-                        'payment_checkout_url'=> $outstandingBalance > 0 ? $paymentUrl : 'PAID',
+                        'payment_checkout_url'=> ($outstandingBalance > 0 && $onlinePaymentActive) ? $paymentUrl : ($onlinePaymentActive ? 'PAID' : 'DISABLED'),
+                        'online_payment_enabled' => $onlinePaymentActive,
                     ],
                     'today_timetable' => $timetable,
                     'published_results' => $publishedResults,
@@ -1239,6 +1245,21 @@ class WhatsAppController extends Controller
         $key = (string) $request->query('key');
 
         $student = \App\Models\Student::findOrFail($studentId);
+        
+        $tenant = \App\Models\Tenant::find($student->tenant_id);
+        if ($tenant) {
+            app()->instance('currentTenant', $tenant);
+            $this->loadTenantSettings($tenant);
+        }
+
+        // Verify gateway status and plugin activation
+        $gatewayActive = $tenant->activeMarketplaceComponents()->where('slug', 'payment-gateway')->exists();
+        $subaccountStatus = $tenant->settings['payment_gateway']['subaccount_status'] ?? 'not_submitted';
+
+        if (!$gatewayActive || $subaccountStatus !== 'approved') {
+            abort(403, 'Online payments are currently disabled or pending admin verification for this school.');
+        }
+
         $parent = \App\Models\User::where('tenant_id', $student->tenant_id)
             ->where('role', 'parent')
             ->whereHas('students', function ($q) use ($studentId) {
@@ -1275,6 +1296,17 @@ class WhatsAppController extends Controller
         if ($tenant) {
             app()->instance('currentTenant', $tenant);
             $this->loadTenantSettings($tenant);
+        }
+
+        // Verify gateway status and plugin activation
+        $gatewayActive = $tenant->activeMarketplaceComponents()->where('slug', 'payment-gateway')->exists();
+        $subaccountStatus = $tenant->settings['payment_gateway']['subaccount_status'] ?? 'not_submitted';
+
+        if (!$gatewayActive || $subaccountStatus !== 'approved') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Online payments are currently disabled or pending admin verification for this school.'
+            ], 403);
         }
 
         // Verify that the amount matches the student's actual outstanding balance
@@ -2386,18 +2418,26 @@ class WhatsAppController extends Controller
                               "• Outstanding Balance: *₦" . number_format($outstandingBalance, 2) . "*\n";
 
                     if ($outstandingBalance > 0) {
-                        $paymentUrl = \Illuminate\Support\Facades\URL::temporarySignedRoute(
-                            'whatsapp.pay',
-                            now()->addHours(24),
-                            [
-                                'studentId' => $s->id,
-                                'term'      => $activeTermNumber,
-                                'session'   => $activeSessionName,
-                                'amount'    => $outstandingBalance,
-                                'key'       => $apiKey
-                            ]
-                        );
-                        $reply .= "🔗 *Pay Online:* {$paymentUrl}\n";
+                        $gatewayActive = $tenant->activeMarketplaceComponents()->where('slug', 'payment-gateway')->exists();
+                        $subaccountStatus = $tenant->settings['payment_gateway']['subaccount_status'] ?? 'not_submitted';
+                        $onlinePaymentActive = $gatewayActive && ($subaccountStatus === 'approved');
+
+                        if ($onlinePaymentActive) {
+                            $paymentUrl = \Illuminate\Support\Facades\URL::temporarySignedRoute(
+                                'whatsapp.pay',
+                                now()->addHours(24),
+                                [
+                                    'studentId' => $s->id,
+                                    'term'      => $activeTermNumber,
+                                    'session'   => $activeSessionName,
+                                    'amount'    => $outstandingBalance,
+                                    'key'       => $apiKey
+                                ]
+                            );
+                            $reply .= "🔗 *Pay Online:* {$paymentUrl}\n";
+                        } else {
+                            $reply .= "⚠️ *Status:* Online payment setup is pending. Please pay at the school finance office.\n";
+                        }
                     } else {
                         $reply .= "✅ *Status:* Fully Paid\n";
                     }
@@ -2562,7 +2602,7 @@ class WhatsAppController extends Controller
                   "        - <title> is a short (2-6 words) title for the announcement.\n" .
                   "        - <body_text> is the message content to broadcast.\n" .
                   "    - Politely confirm in your conversational response that you have published the announcement to the school portal.\n" .
-                  "15. PROACTIVE FEE ALERTS: When a parent asks about fees or outstanding balances and a student has an outstanding_balance greater than 0, add a polite, warm urgency note encouraging payment and include the exact outstanding amount. If the balance is 0, congratulate them warmly. Never be harsh or threatening — use empathetic, supportive language only.\n" .
+                  "15. PROACTIVE FEE ALERTS & GATEWAY RESILIENCY: When a parent asks about fees or outstanding balances and a student has an outstanding_balance greater than 0: Check if 'online_payment_enabled' is true in the child's `tuition_fees` context. If it is true, add a polite, warm urgency note encouraging online payment and mention that they can pay using the checkout link provided. If it is false or disabled, you MUST NOT offer or link to any online payment checkout; instead, politely state the outstanding balance, tell them that online payment setup is currently pending review by the school administration, and advise them to pay manually at the school finance office. If the balance is 0, congratulate them warmly. Never be harsh or threatening — use empathetic, supportive language only.\n" .
                   "16. HOMEWORK DEADLINE AWARENESS: When a parent or student asks about homework, check the due_date of each assignment against today's date. If any assignment's due date is today, flag it with '⚠️ *DUE TODAY*'. If the due date has already passed (overdue), flag it with '🔴 *OVERDUE*'. Never treat overdue assignments the same as regular pending ones.\n" .
                   "17. TYPO & LANGUAGE TOLERANCE: Users may send informal, broken English, Pidgin English, or messages with spelling mistakes (e.g. 'wats my pikin score', 'I wan see fee', 'wetin be attendance'). You MUST interpret the intent correctly, respond in standard English, and never ask the user to rephrase unless the message is completely ambiguous even after reasonable interpretation.\n" .
                   "18. ATTENDANCE PATTERN INSIGHT: If a parent asks about attendance and the student is marked Absent, proactively mention it with concern and suggest the parent contact the school if the absence is unexpected. If marked Present, acknowledge it positively. If Late, mention it gently. Always explain the status in plain language ('✅ Present', '⚠️ Late', '❌ Absent') — never return raw status codes like 'P', 'A', or 'L'.\n" .

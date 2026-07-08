@@ -64,6 +64,10 @@ class Index extends Component
         abort_unless($user?->role === 'admin' || $user?->role === 'bursar', 403);
 
         $tenant = $user->tenant;
+        
+        $gatewayActive = $tenant->activeMarketplaceComponents()->where('slug', 'payment-gateway')->exists();
+        abort_unless($gatewayActive, 403, 'Payment Gateway plugin is not active for this school.');
+
         $settings = $tenant->settings ?? [];
 
         // Load bank/payout credentials from Tenant settings

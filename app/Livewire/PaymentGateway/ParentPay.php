@@ -142,10 +142,11 @@ class ParentPay extends Component
         $tenantId = $student->tenant_id;
         $tenant   = $student->tenant;
 
-        // Verify gateway status
-        $this->isGatewayApproved = (
-            ($tenant->settings['payment_gateway']['subaccount_status'] ?? 'not_submitted') === 'approved'
-        );
+        // Verify gateway status and plugin activation
+        $gatewayActive = $tenant->activeMarketplaceComponents()->where('slug', 'payment-gateway')->exists();
+        $subaccountStatus = $tenant->settings['payment_gateway']['subaccount_status'] ?? 'not_submitted';
+
+        $this->isGatewayApproved = $gatewayActive && ($subaccountStatus === 'approved');
 
         // Fetch Fee Structure for this student's class
         $fee = FeeStructure::where('tenant_id', $tenantId)

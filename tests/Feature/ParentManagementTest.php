@@ -310,6 +310,12 @@ class ParentManagementTest extends TestCase
             ]
         ]);
 
+        $component = \App\Models\MarketplaceComponent::firstOrCreate(
+            ['slug' => 'payment-gateway'],
+            ['name' => 'Payment Gateway', 'price' => 0]
+        );
+        $tenant->marketplaceComponents()->attach($component->id, ['status' => 'active']);
+
         app()->instance('currentTenant', $tenant);
 
         $parent = User::query()->create([
