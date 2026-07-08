@@ -583,15 +583,7 @@
             </div>
         @endif
 
-        {{-- Footer center tagline --}}
-        <div class="footer-tagline">
-            THANK YOU FOR YOUR SUPPORT!
-            <div style="text-align: center; margin-top: 6px;">
-                <div style="display: inline-block; width: 12px; height: 8px; border: 1.5px solid {{ $themeColor }}; border-top: none; position: relative;">
-                    <div style="position: absolute; left: 0; right: 50%; top: 0; bottom: 0; border-right: 1px solid {{ $themeColor }};"></div>
-                </div>
-            </div>
-        </div>
+
 
     </div>
 </div>

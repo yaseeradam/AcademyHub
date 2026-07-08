@@ -181,6 +181,6 @@ Route::prefix('whatsapp')
         Route::post('verify',               [WhatsAppController::class, 'verifyOTP']);
         Route::post('staff/homework',       [WhatsAppController::class, 'staffHomework']);
         Route::post('admin/broadcast',      [WhatsAppController::class, 'adminBroadcast']);
-        Route::get('checkout',              [WhatsAppController::class, 'checkout'])->name('whatsapp.pay');
+        Route::get('checkout',              [WhatsAppController::class, 'checkout'])->name('whatsapp.pay')->middleware('signed');
         Route::post('checkout/process',     [WhatsAppController::class, 'processPayment'])->name('whatsapp.pay.process');
     });

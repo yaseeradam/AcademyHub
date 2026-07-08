@@ -359,13 +359,17 @@ class WhatsAppController extends Controller
 
                 $outstandingBalance = max(0.0, $amountDue - $amountPaid);
 
-                $paymentUrl = route('whatsapp.pay', [
-                    'studentId' => $student->id,
-                    'term'      => $activeTermNumber,
-                    'session'   => $activeSessionName,
-                    'amount'    => $outstandingBalance,
-                    'key'       => $apiKey
-                ]);
+                $paymentUrl = \Illuminate\Support\Facades\URL::temporarySignedRoute(
+                    'whatsapp.pay',
+                    now()->addHours(24),
+                    [
+                        'studentId' => $student->id,
+                        'term'      => $activeTermNumber,
+                        'session'   => $activeSessionName,
+                        'amount'    => $outstandingBalance,
+                        'key'       => $apiKey
+                    ]
+                );
                 
                 $timetable = \App\Models\TimetableEntry::where('class_id', $student->class_id)
                     ->where('day_of_week', $dayOfWeek)
@@ -378,7 +382,14 @@ class WhatsAppController extends Controller
                         'room' => $t->room
                     ])->all();
 
-                $publishedResults = \App\Models\ResultPublication::where('class_id', $student->class_id)
+                $studentClassIds = \App\Models\Score::where('student_id', $student->id)
+                    ->pluck('class_id')
+                    ->unique()
+                    ->filter()
+                    ->push($student->class_id)
+                    ->toArray();
+
+                $publishedResults = \App\Models\ResultPublication::whereIn('class_id', $studentClassIds)
                     ->get()
                     ->map(fn($pub) => [
                         'term' => $pub->term,
@@ -596,7 +607,14 @@ class WhatsAppController extends Controller
                 't'         => time()
             ]);
 
-            $publishedResults = \App\Models\ResultPublication::where('class_id', $student->class_id)
+            $studentClassIds = \App\Models\Score::where('student_id', $student->id)
+                ->pluck('class_id')
+                ->unique()
+                ->filter()
+                ->push($student->class_id)
+                ->toArray();
+
+            $publishedResults = \App\Models\ResultPublication::whereIn('class_id', $studentClassIds)
                 ->get()
                 ->map(fn($pub) => [
                     'term' => $pub->term,
@@ -715,7 +733,14 @@ class WhatsAppController extends Controller
             })
             ->first();
 
-        $publishedResults = \App\Models\ResultPublication::where('class_id', $student->class_id)
+        $studentClassIds = \App\Models\Score::where('student_id', $student->id)
+            ->pluck('class_id')
+            ->unique()
+            ->filter()
+            ->push($student->class_id)
+            ->toArray();
+
+        $publishedResults = \App\Models\ResultPublication::whereIn('class_id', $studentClassIds)
             ->get()
             ->map(fn($pub) => [
                 'term' => $pub->term,
@@ -1095,6 +1120,28 @@ class WhatsAppController extends Controller
             $session = $active ?: date('Y') . '/' . (date('Y') + 1);
         }
 
+        // Verify if results are officially published for the class(es) the student has scores in for this term/session
+        $scoreClassIds = \App\Models\Score::where('student_id', $student->id)
+            ->where('term', $term)
+            ->where('session', $session)
+            ->pluck('class_id')
+            ->unique()
+            ->filter()
+            ->toArray();
+
+        if (empty($scoreClassIds)) {
+            $scoreClassIds = [$student->class_id];
+        }
+
+        $isPublished = \App\Models\ResultPublication::whereIn('class_id', $scoreClassIds)
+            ->where('term', $term)
+            ->where('session', $session)
+            ->exists();
+
+        if (!$isPublished) {
+            abort(403, 'The report card for this term and session has not been officially published yet by the school administration.');
+        }
+
         $template = (string) config('academyhub.report_card_template', 'compact');
         $safeTemplate = preg_replace('/[^a-z0-9_-]/i', '', $template) ?: 'compact';
         $sessionSlug = str_replace('/', '-', $session);
@@ -1230,6 +1277,30 @@ class WhatsAppController extends Controller
             $this->loadTenantSettings($tenant);
         }
 
+        // Verify that the amount matches the student's actual outstanding balance
+        $feeStructure = \App\Models\FeeStructure::where('class_id', $student->class_id)
+            ->where('term', $term)
+            ->where('session', $session)
+            ->first();
+
+        $amountDue = $feeStructure ? (float) $feeStructure->amount_due : 0.0;
+
+        $amountPaid = (float) \App\Models\Transaction::where('student_id', $student->id)
+            ->where('type', 'Income')
+            ->where('term', $term)
+            ->where('session', $session)
+            ->where('is_void', false)
+            ->sum('amount_paid');
+
+        $outstandingBalance = max(0.0, $amountDue - $amountPaid);
+
+        if ($amount <= 0.0 || abs($amount - $outstandingBalance) > 0.01) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Payment validation failed: The payment amount does not match the current outstanding balance.'
+            ], 400);
+        }
+
         // Record a transaction
         $transaction = \App\Models\Transaction::create([
             'tenant_id'      => $student->tenant_id,
@@ -1303,13 +1374,16 @@ class WhatsAppController extends Controller
 
                 $messages[] = ['role' => 'user', 'content' => $prompt];
 
+                $models = ['llama-3.3-70b-versatile', 'llama-3.1-70b-versatile', 'llama3-8b-8192'];
+                $chosenModel = $models[$i % count($models)];
+
                 $response = \Illuminate\Support\Facades\Http::withOptions(['verify' => false])
                     ->timeout(15)
                     ->withHeaders([
                         'Authorization' => 'Bearer ' . $apiKey,
                         'Content-Type'  => 'application/json',
                     ])->post('https://api.groq.com/openai/v1/chat/completions', [
-                        'model'       => 'llama-3.3-70b-versatile',
+                        'model'       => $chosenModel,
                         'messages'    => $messages,
                         'temperature' => 0.7,
                         'max_tokens'  => 1000,
@@ -1761,13 +1835,35 @@ class WhatsAppController extends Controller
                 return;
             }
 
+            // Handle 'back' keyword to go one step back in the login flow
+            if ($textLower === 'back') {
+                if (isset($stateObj['step'])) {
+                    if ($stateObj['step'] === 'LOGIN_IDENTIFIER') {
+                        $stateObj['step'] = 'LOGIN_SCHOOL';
+                        unset($stateObj['data']['school']);
+                        $stateObj['attempts'] = 0;
+                        \Illuminate\Support\Facades\Cache::put($cacheKey, $stateObj, now()->addMinutes(20));
+                        $this->sendMetaMessage($phone, "↩️ No problem. Please re-enter your *School Code*:\n\n_(Type *cancel* to stop)_");
+                    } elseif ($stateObj['step'] === 'LOGIN_PASSWORD') {
+                        $stateObj['step'] = 'LOGIN_IDENTIFIER';
+                        unset($stateObj['data']['identifier']);
+                        $stateObj['attempts'] = 0;
+                        \Illuminate\Support\Facades\Cache::put($cacheKey, $stateObj, now()->addMinutes(20));
+                        $this->sendMetaMessage($phone, "↩️ Sure. Please re-enter your *login identifier*:\n\n• *Students:* Admission Number (e.g. STU20240001)\n• *Staff/Parents:* Email Address\n\n_(Type *cancel* to stop)_");
+                    } else {
+                        $this->sendMetaMessage($phone, "You're at the beginning of the process. Type *cancel* to stop, or continue.");
+                    }
+                    return;
+                }
+            }
+
             // Step A: Enter School Code
             if ($stateObj['step'] === 'LOGIN_SCHOOL') {
                 $schoolSlug = trim($textLower);
                 $tenant = \App\Models\Tenant::where('slug', $schoolSlug)->first();
 
                 if (!$tenant) {
-                    $this->sendMetaMessage($phone, "❌ School Code not found. Please try again or check spelling (e.g. `demo`, `yis`):\n\n_(Type *cancel* to stop)_");
+                    $this->sendMetaMessage($phone, "❌ School Code *{$schoolSlug}* not found. Please check the spelling and try again:\n\n_(Type *cancel* to stop)_");
                     return;
                 }
 
@@ -1784,9 +1880,10 @@ class WhatsAppController extends Controller
 
                 $stateObj['data']['school'] = $schoolSlug;
                 $stateObj['step'] = 'LOGIN_IDENTIFIER';
-                \Illuminate\Support\Facades\Cache::put($cacheKey, $stateObj, now()->addMinutes(10));
+                $stateObj['attempts'] = 0;
+                \Illuminate\Support\Facades\Cache::put($cacheKey, $stateObj, now()->addMinutes(20));
 
-                $this->sendMetaMessage($phone, "Got it. School Code: *{$schoolSlug}*\n\n👤 Now enter your *login identifier*:\n\n• *Students:* Admission Number (e.g. STU20240001)\n• *Staff/Parents:* Email Address");
+                $this->sendMetaMessage($phone, "Got it. School Code: *{$schoolSlug}*\n\n👤 Now enter your *login identifier*:\n\n• *Students:* Admission Number (e.g. STU20240001)\n• *Staff/Parents:* Email Address\n\n_(Type *back* to change school code, or *cancel* to stop)_");
                 return;
             }
 
@@ -1794,9 +1891,10 @@ class WhatsAppController extends Controller
             if ($stateObj['step'] === 'LOGIN_IDENTIFIER') {
                 $stateObj['data']['identifier'] = trim($text);
                 $stateObj['step'] = 'LOGIN_PASSWORD';
-                \Illuminate\Support\Facades\Cache::put($cacheKey, $stateObj, now()->addMinutes(10));
+                $stateObj['attempts'] = 0;
+                \Illuminate\Support\Facades\Cache::put($cacheKey, $stateObj, now()->addMinutes(20));
 
-                $this->sendMetaMessage($phone, "🔑 Now enter your *password*:");
+                $this->sendMetaMessage($phone, "🔑 Now enter your *password*:\n\n_(Type *back* to change your identifier, or *cancel* to stop)_");
                 return;
             }
 
@@ -1833,8 +1931,15 @@ class WhatsAppController extends Controller
                     }
 
                     if (!$valid) {
-                        \Illuminate\Support\Facades\Cache::forget($cacheKey);
-                        $this->sendMetaMessage($phone, "❌ *Login failed:* Invalid password. Type *login* to try again.");
+                        $stateObj['attempts'] = ($stateObj['attempts'] ?? 0) + 1;
+                        if ($stateObj['attempts'] >= 3) {
+                            \Illuminate\Support\Facades\Cache::forget($cacheKey);
+                            $this->sendMetaMessage($phone, "🔒 *Too many failed attempts.* Your session has been reset for security. Type *login* to try again.");
+                        } else {
+                            $remaining = 3 - $stateObj['attempts'];
+                            \Illuminate\Support\Facades\Cache::put($cacheKey, $stateObj, now()->addMinutes(20));
+                            $this->sendMetaMessage($phone, "❌ *Incorrect password.* Please try again ({$remaining} attempt" . ($remaining === 1 ? '' : 's') . " left):\n\n_(Type *cancel* to stop or *back* to change your identifier)_");
+                        }
                         return;
                     }
 
@@ -1885,14 +1990,25 @@ class WhatsAppController extends Controller
                     ->first();
 
                 if (!$user) {
-                    \Illuminate\Support\Facades\Cache::forget($cacheKey);
-                    $this->sendMetaMessage($phone, "❌ *Login failed:* Account not found. Type *login* to try again.");
+                    // Go back to identifier step so they can fix it — don't reset the whole session
+                    $stateObj['step'] = 'LOGIN_IDENTIFIER';
+                    $stateObj['attempts'] = 0;
+                    unset($stateObj['data']['identifier']);
+                    \Illuminate\Support\Facades\Cache::put($cacheKey, $stateObj, now()->addMinutes(20));
+                    $this->sendMetaMessage($phone, "❌ *Account not found.* Please check your email address or admission number and try again:\n\n_(Type *cancel* to stop)_");
                     return;
                 }
 
                 if (!\Illuminate\Support\Facades\Hash::check($password, $user->password)) {
-                    \Illuminate\Support\Facades\Cache::forget($cacheKey);
-                    $this->sendMetaMessage($phone, "❌ *Login failed:* Invalid password. Type *login* to try again.");
+                    $stateObj['attempts'] = ($stateObj['attempts'] ?? 0) + 1;
+                    if ($stateObj['attempts'] >= 3) {
+                        \Illuminate\Support\Facades\Cache::forget($cacheKey);
+                        $this->sendMetaMessage($phone, "🔒 *Too many failed attempts.* Your session has been reset for security. Type *login* to try again.");
+                    } else {
+                        $remaining = 3 - $stateObj['attempts'];
+                        \Illuminate\Support\Facades\Cache::put($cacheKey, $stateObj, now()->addMinutes(20));
+                        $this->sendMetaMessage($phone, "❌ *Incorrect password.* Please try again ({$remaining} attempt" . ($remaining === 1 ? '' : 's') . " left):\n\n_(Type *cancel* to stop or *back* to change your identifier)_");
+                    }
                     return;
                 }
 
@@ -1929,7 +2045,7 @@ class WhatsAppController extends Controller
 
                 $stateObj['data']['target'] = $target;
                 $stateObj['step'] = 'BROADCAST_MSG';
-                \Illuminate\Support\Facades\Cache::put($cacheKey, $stateObj, now()->addMinutes(10));
+                \Illuminate\Support\Facades\Cache::put($cacheKey, $stateObj, now()->addMinutes(20));
 
                 $this->sendMetaMessage($phone, "Got it. Target audience: *{$text}*.\n\nNow, please send the *Broadcast Message*.");
                 return;
@@ -1985,7 +2101,7 @@ class WhatsAppController extends Controller
 
         // 2. Entry Commands for Unregistered users
         if ($textLower === 'login') {
-            \Illuminate\Support\Facades\Cache::put($cacheKey, ['step' => 'LOGIN_SCHOOL', 'data' => []], now()->addMinutes(10));
+            \Illuminate\Support\Facades\Cache::put($cacheKey, ['step' => 'LOGIN_SCHOOL', 'data' => [], 'attempts' => 0], now()->addMinutes(20));
             $this->sendMetaMessage($phone, "👋 *Welcome to HubGenie!*\n\nPlease enter your *School Code* first (e.g. `demo`, `yis`):\n\n_(Type *cancel* anytime to stop)_");
             return;
         }
@@ -2170,7 +2286,7 @@ class WhatsAppController extends Controller
 
         // 7.5. Handle Admin Broadcast Entry Command
         if ($textLower === 'broadcast' && in_array($userRole, ['admin', 'superadmin'])) {
-            \Illuminate\Support\Facades\Cache::put($cacheKey, ['step' => 'BROADCAST_TARGET', 'data' => []], now()->addMinutes(10));
+            \Illuminate\Support\Facades\Cache::put($cacheKey, ['step' => 'BROADCAST_TARGET', 'data' => []], now()->addMinutes(20));
             $this->sendMetaMessage($phone, "📢 Let's send a broadcast!\n\nWho should receive this? (e.g. *Parents*, *Staff*, or *All*)\n\n_(Type *cancel* anytime to stop)_");
             return;
         }
@@ -2209,8 +2325,16 @@ class WhatsAppController extends Controller
                 foreach ($user->students as $s) {
                     $reply .= "👨‍🎓 *{$s->full_name}*\n";
                     
-                    // Check if published for this student's class
-                    $isPublished = \App\Models\ResultPublication::where('class_id', $s->class_id)
+                    $studentClassIds = \App\Models\Score::where('student_id', $s->id)
+                        ->where('term', $activeTermNumber)
+                        ->where('session', $activeSessionName)
+                        ->pluck('class_id')
+                        ->unique()
+                        ->filter()
+                        ->push($s->class_id)
+                        ->toArray();
+
+                    $isPublished = \App\Models\ResultPublication::whereIn('class_id', $studentClassIds)
                         ->where('term', $activeTermNumber)
                         ->where('session', $activeSessionName)
                         ->exists();
@@ -2262,13 +2386,17 @@ class WhatsAppController extends Controller
                               "• Outstanding Balance: *₦" . number_format($outstandingBalance, 2) . "*\n";
 
                     if ($outstandingBalance > 0) {
-                        $paymentUrl = route('whatsapp.pay', [
-                            'studentId' => $s->id,
-                            'term'      => $activeTermNumber,
-                            'session'   => $activeSessionName,
-                            'amount'    => $outstandingBalance,
-                            'key'       => $apiKey
-                        ]);
+                        $paymentUrl = \Illuminate\Support\Facades\URL::temporarySignedRoute(
+                            'whatsapp.pay',
+                            now()->addHours(24),
+                            [
+                                'studentId' => $s->id,
+                                'term'      => $activeTermNumber,
+                                'session'   => $activeSessionName,
+                                'amount'    => $outstandingBalance,
+                                'key'       => $apiKey
+                            ]
+                        );
                         $reply .= "🔗 *Pay Online:* {$paymentUrl}\n";
                     } else {
                         $reply .= "✅ *Status:* Fully Paid\n";
@@ -2415,7 +2543,9 @@ class WhatsAppController extends Controller
                   "   - HEADINGS: Do NOT use markdown `#`, `##` or `###`. Use simple bold capital letters for headers (e.g. *ATTENDANCE STATUS*).\n" .
                   "   - LINE BREAKS: Use clean single or double line breaks between paragraphs/points to make the text readable on a mobile screen.\n" .
                   "10. DYNAMIC REPORT CARDS (PDF Delivery):\n" .
-                  "   - If a parent or user asks to download, receive, view, or get a PDF report card for a student, you MUST check if they specified which student child they meant (if they have multiple children listed under students in the context).\n" .
+                  "   - If a parent or user asks to download, receive, view, or get a PDF report card for a student, you MUST first verify if the results for the requested term and session are officially published (by checking if a matching term and session exists in the student's `published_results` list).\n" .
+                  "   - If the results are NOT officially published, you MUST NOT generate any '[SEND_PDF]' tag or '[AMBIGUOUS_REPORT_CARD]' tag. Instead, politely inform the user that the report card for that term/session has not been officially published yet by the school administration.\n" .
+                  "   - If they are published, check if they specified which student child they meant (if they have multiple children listed under students in the context).\n" .
                   "   - If they have multiple children, and they did NOT explicitly name the child they want the report card for, you MUST output this exact hidden tag: '[AMBIGUOUS_REPORT_CARD: <term_number>|<academic_session>]' and politely ask them to choose.\n" .
                   "   - If the student is clearly identified (or they only have one child), you MUST generate and append this exact hidden tag: '[SEND_PDF: <student_id>|<term_number>|<academic_session>]'\n" .
                   "   - Resolve the <student_id> from the students in the context.\n" .
@@ -2425,11 +2555,25 @@ class WhatsAppController extends Controller
                   "11. INTENT DETECTION & SUPPORT TICKETS: If the user indicates they want to report an issue, log a complaint, offer feedback, report missing grades/attendance, or request a call back from the school administration, you MUST append a hidden tag at the very end of your response: '[SUPPORT_TICKET_DETECTED: <message>]' where <message> is a clear, concise 1-sentence summary of the user's actual problem or concern. Do not include this tag for standard information questions (e.g. asking for grades, schedules, or events).\n" .
                   "12. HANDLING STUDENT RESULTS: If asked about student results, academic performance, report cards, or scores: Check if the child name or admission number is specified in the question. If not, and there are multiple children listed in the context, ask the user to specify which student they are asking about. If the student is identified, verify if the results for the requested term and session are officially published (existence of a record matching that term and session in the student's `published_results` list). If the results are NOT published, you MUST politely inform the user that the academic results for that term/session have not been officially published yet by the school administration, instead of saying you don't have access to this information. If the results ARE published, list the scores from the `recent_scores` data matching the requested term/session, always listing the subject name and score (e.g., Mathematics: 85/100).\n" .
                   "13. ACTIVE SESSION STUDENT: If 'active_session_student_id' is set in the context (not null), this indicates the student the parent has been actively chatting about or selected recently. Prioritize this student in your answers unless the user names a different child. Additionally, if your answer resolves to or discusses a specific single student from the context, you MUST append a hidden tag at the very end of your response: '[ACTIVE_STUDENT_SELECTED: <student_id>]' where <student_id> is that student's ID from the context. Do not append this tag if you are talking about multiple children or general school information.\n" .
-                  "14. BROADCASTS & ANNOUNCEMENTS: If the user is an admin or superadmin and explicitly requests to send a broadcast, post a notice, publish an announcement, or notify a group of users (students, parents, staff, or everyone) about a message, you MUST append a hidden tag at the very end of your response: '[CREATE_ANNOUNCEMENT: <audience>|<title>|<body_text>]' where:\n" .
-                  "    - <audience> MUST be one of: 'all', 'student', 'parent', 'staff'.\n" .
-                  "    - <title> is a short (2-6 words) title for the announcement.\n" .
-                  "    - <body_text> is the message content to broadcast.\n" .
-                  "Politely confirm in your conversational response that you have published the announcement to the school portal.";
+                  "14. BROADCASTS & ANNOUNCEMENTS: If the user is an admin or superadmin and explicitly requests to send a broadcast, post a notice, publish an announcement, or notify a group of users (students, parents, staff, or everyone) about a message:\n" .
+                  "    - First check if the user has provided the actual content/body text of the broadcast/announcement. If they have NOT provided the message content yet, do NOT generate any '[CREATE_ANNOUNCEMENT]' tag. Instead, politely ask them what the message content is first.\n" .
+                  "    - Only when you have BOTH the target audience and the actual message content/body text, append a hidden tag at the very end of your response: '[CREATE_ANNOUNCEMENT: <audience>|<title>|<body_text>]' where:\n" .
+                  "        - <audience> MUST be one of: 'all', 'student', 'parent', 'staff'.\n" .
+                  "        - <title> is a short (2-6 words) title for the announcement.\n" .
+                  "        - <body_text> is the message content to broadcast.\n" .
+                  "    - Politely confirm in your conversational response that you have published the announcement to the school portal.\n" .
+                  "15. PROACTIVE FEE ALERTS: When a parent asks about fees or outstanding balances and a student has an outstanding_balance greater than 0, add a polite, warm urgency note encouraging payment and include the exact outstanding amount. If the balance is 0, congratulate them warmly. Never be harsh or threatening — use empathetic, supportive language only.\n" .
+                  "16. HOMEWORK DEADLINE AWARENESS: When a parent or student asks about homework, check the due_date of each assignment against today's date. If any assignment's due date is today, flag it with '⚠️ *DUE TODAY*'. If the due date has already passed (overdue), flag it with '🔴 *OVERDUE*'. Never treat overdue assignments the same as regular pending ones.\n" .
+                  "17. TYPO & LANGUAGE TOLERANCE: Users may send informal, broken English, Pidgin English, or messages with spelling mistakes (e.g. 'wats my pikin score', 'I wan see fee', 'wetin be attendance'). You MUST interpret the intent correctly, respond in standard English, and never ask the user to rephrase unless the message is completely ambiguous even after reasonable interpretation.\n" .
+                  "18. ATTENDANCE PATTERN INSIGHT: If a parent asks about attendance and the student is marked Absent, proactively mention it with concern and suggest the parent contact the school if the absence is unexpected. If marked Present, acknowledge it positively. If Late, mention it gently. Always explain the status in plain language ('✅ Present', '⚠️ Late', '❌ Absent') — never return raw status codes like 'P', 'A', or 'L'.\n" .
+                  "19. STAFF ROLE SENSITIVITY: When responding to a teacher, focus answers on their teaching schedule, the classes they manage, and student academic data relevant to them. When responding to a bursar or admin, include financial summaries where relevant. Do not show sensitive financial data to teachers. Do not show academic scores to bursars unless they specifically ask. Always respect the role boundary defined in the context.\n" .
+                  "20. AVOID REPETITION IN MULTI-CHILD RESPONSES: If a parent has multiple children and the answer is the same for all of them (e.g. 'No timetable today', 'All fees paid'), do NOT repeat the same line for each child separately. Instead, summarize once naturally (e.g. 'None of your children have classes today' or 'All your children's fees are fully paid').\n" .
+                  "21. SMART CLARIFICATION (NOT INTERROGATION): If you genuinely cannot determine the user's intent from their message, ask exactly ONE short, clear clarifying question. Never ask multiple questions at once. Identify the single most critical missing piece of information and ask only that.\n" .
+                  "22. UPCOMING EVENTS AWARENESS: If the context contains upcoming school events within the next 7 days and the user sends a general greeting or asks 'what's new', 'anything happening', or similar, proactively mention the upcoming event(s) as a helpful, natural heads-up — without being explicitly asked.\n" .
+                  "23. MULTI-INTENT HANDLING: If the user asks about multiple topics in one message (e.g. 'show me attendance and fees'), address ALL parts in a single structured reply. Use bold headings to separate each topic. Do not ignore any part of a multi-part question.\n" .
+                  "24. EMOTIONAL INTELLIGENCE: If the user's message expresses frustration, worry, or distress (e.g. 'I am worried about my child', 'this is not fair', 'nobody is helping me'), acknowledge their feeling briefly with one empathetic sentence FIRST, then provide the factual answer. Never jump straight into data when the user is clearly emotional or upset.\n" .
+                  "25. TIMETABLE WEEKEND HANDLING: If a parent or student asks about today's timetable and today is Saturday or Sunday, do NOT show an empty schedule or a blank list. Instead, respond naturally: 'It's the weekend — no classes are scheduled today. School resumes on Monday.'\n" .
+                  "26. SCORE SUMMARY WITH GRADE INSIGHT: When listing a student's academic scores, after showing all the scores, calculate and state the student's overall average percentage and attach a one-word performance label: *Excellent* (80%+), *Good* (65–79%), *Average* (50–64%), or *Needs Improvement* (below 50%). Keep the tone encouraging and constructive, never discouraging.";
 
         $phoneClean = preg_replace('/\D/', '', $user->whatsapp_phone ?: '');
         $historyKey = "whatsapp_chat_history_{$phoneClean}";
@@ -2496,7 +2640,7 @@ class WhatsAppController extends Controller
                 $annTitle = trim($matches[2]);
                 $annBody = trim($matches[3]);
 
-                if (in_array($annAudience, ['all', 'student', 'parent', 'staff'])) {
+                if (in_array($annAudience, ['all', 'student', 'parent', 'staff']) && !empty($annBody)) {
                     $this->createAnnouncement($annAudience, $annTitle, $annBody, $user);
                 }
 
@@ -2566,7 +2710,9 @@ class WhatsAppController extends Controller
             \Illuminate\Support\Facades\Cache::put($historyKey, $history, now()->addMinutes(30));
 
             // Send the text answer first
-            $this->sendMetaMessage($phone, $answer);
+            if (!empty($answer)) {
+                $this->sendMetaMessage($phone, $answer);
+            }
 
             // Natively dispatch each requested PDF report card
             if (!empty($pdfRequests)) {

@@ -591,10 +591,11 @@ ANS: C</pre>
                                     @else
                                         <div class="grid h-10 w-10 place-items-center rounded-lg bg-gray-200 text-sm font-bold">{{ mb_substr($student->first_name ?? 'S', 0, 1) }}</div>
                                     @endif
-                                    <div>
+                                     <div>
                                         <div class="text-sm font-semibold">{{ $student->full_name ?? trim($student->first_name.' '.$student->last_name) }}</div>
                                         <div class="text-xs text-gray-500">{{ $student->admission_number }}</div>
                                     </div>
+                                </div>
                                 <div class="flex items-center gap-3">
                                     @if ($state === 'submitted')
                                         <span class="rounded bg-emerald-100 px-2 py-1 text-xs font-semibold text-emerald-800">Submitted ({{ (int) $attempt?->score }}/{{ (int) $attempt?->max_score }})</span>

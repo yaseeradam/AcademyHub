@@ -68,13 +68,17 @@ class BillingController extends Controller
         $outstandingBalance = max(0.0, $amountDue - $amountPaid);
         $apiKey = config('services.whatsapp.api_key') ?: env('WHATSAPP_API_KEY');
 
-        $paymentUrl = route('whatsapp.pay', [
-            'studentId' => $student->id,
-            'term'      => $activeTermNumber,
-            'session'   => $activeSessionName,
-            'amount'    => $outstandingBalance,
-            'key'       => $apiKey
-        ]);
+        $paymentUrl = \Illuminate\Support\Facades\URL::temporarySignedRoute(
+            'whatsapp.pay',
+            now()->addHours(24),
+            [
+                'studentId' => $student->id,
+                'term'      => $activeTermNumber,
+                'session'   => $activeSessionName,
+                'amount'    => $outstandingBalance,
+                'key'       => $apiKey
+            ]
+        );
 
         return response()->json([
             'checkout_url' => $paymentUrl,
