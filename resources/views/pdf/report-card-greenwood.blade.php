@@ -153,20 +153,7 @@
     }
     $homeroomTeacher = $homeroomTeacher ?? 'Ms. Emily Johnson';
 
-    // 2. Resolve reporting period dates
-    $dates = 'January 15, 2024 - May 24, 2024';
-    if (isset($term) && isset($session)) {
-        $years = explode('/', $session);
-        $startYear = $years[0] ?? '2023';
-        $endYear = $years[1] ?? '2024';
-        if ($term == 1) {
-            $dates = "September 11, {$startYear} - December 15, {$startYear}";
-        } elseif ($term == 2) {
-            $dates = "January 15, {$endYear} - May 24, {$endYear}";
-        } else {
-            $dates = "April 29, {$endYear} - July 26, {$endYear}";
-        }
-    }
+    // 2. (Dates range removed as requested)
 
     // 3. Attendance summaries
     $enrolled = $timesOpened ?? 0;
