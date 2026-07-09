@@ -4,7 +4,7 @@
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <title>Report Card - {{ $student->admission_number }}</title>
     <style>
-        @page { margin: 10mm; }
+        @page { margin: {{ count($rows) > 12 ? '4mm' : '10mm' }}; }
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: "DejaVu Sans", Arial, sans-serif; font-size: 8.5px; color: #334155; background: #fff; line-height: 1.3; }
 
@@ -13,7 +13,7 @@
         .page-inner { padding: 4px; }
 
         /* Nordic Stark Header */
-        .header { border-bottom: 1.5px solid #475569; padding-bottom: 8px; margin-bottom: 12px; }
+        .header { border-bottom: 1.5px solid #475569; padding-bottom: {{ count($rows) > 12 ? '4px' : '8px' }}; margin-bottom: {{ count($rows) > 12 ? '6px' : '12px' }}; }
         .header-table { display: table; width: 100%; }
         .header-cell { display: table-cell; vertical-align: middle; }
         .logo-wrap { width: 60px; }
@@ -24,7 +24,7 @@
         .meta-right { font-size: 8px; color: #475569; font-weight: 500; text-align: right; line-height: 1.3; }
 
         /* Nordic Grid Stats */
-        .stats { display: table; width: 100%; margin-bottom: 12px; border-collapse: collapse; border: 1.5px solid #cbd5e1; border-radius: 4px; overflow: hidden; }
+        .stats { display: table; width: 100%; margin-bottom: {{ count($rows) > 12 ? '6px' : '12px' }}; border-collapse: collapse; border: 1.5px solid #cbd5e1; border-radius: 4px; overflow: hidden; }
         .stat { display: table-cell; text-align: center; border-right: 1.5px solid #cbd5e1; padding: 6px 4px; background: #f8fafc; }
         .stat:last-child { border-right: none; }
         .stat.highlight { background: #f1f5f9; }
@@ -32,39 +32,39 @@
         .stat-value { font-size: 12px; font-weight: bold; color: #0f172a; }
 
         /* Table */
-        table.scores { width: 100%; border-collapse: collapse; margin-bottom: 12px; border: 1.5px solid #cbd5e1; }
-        table.scores th { background: #f1f5f9; color: #334155; padding: 5px 4px; font-size: 7.5px; font-weight: bold; text-transform: uppercase; text-align: center; border: 1.5px solid #cbd5e1; border-bottom: 2px solid #94a3b8; }
-        table.scores td { padding: 4.5px 4px; border: 1px solid #cbd5e1; text-align: center; font-size: 8px; color: #334155; }
+        table.scores { width: 100%; border-collapse: collapse; margin-bottom: {{ count($rows) > 12 ? '6px' : '12px' }}; border: 1.5px solid #cbd5e1; }
+        table.scores th { background: #f1f5f9; color: #334155; padding: {{ count($rows) > 12 ? '2.5px 4px' : '5px 4px' }}; font-size: 7.5px; font-weight: bold; text-transform: uppercase; text-align: center; border: 1.5px solid #cbd5e1; border-bottom: 2px solid #94a3b8; }
+        table.scores td { padding: {{ count($rows) > 12 ? '2px 4px' : '4.5px 4px' }}; border: 1px solid #cbd5e1; text-align: center; font-size: 8px; color: #334155; }
         table.scores tr:nth-child(even) td { background: #fafafb; }
         .subj { text-align: left !important; font-weight: bold; color: #1e293b; padding-left: 8px !important; }
         .bold { font-weight: bold; color: #0f172a; }
 
         /* Grading Key */
-        .grading { display: table; width: 100%; border: 1.5px solid #cbd5e1; margin-bottom: 12px; border-radius: 3px; overflow: hidden; }
+        .grading { display: table; width: 100%; border: 1.5px solid #cbd5e1; margin-bottom: {{ count($rows) > 12 ? '6px' : '12px' }}; border-radius: 3px; overflow: hidden; }
         .gr-cell { display: table-cell; padding: 4px; text-align: center; font-size: 7px; font-weight: bold; color: #475569; border-right: 1px solid #cbd5e1; background: #f8fafc; }
         .gr-cell:last-child { border-right: none; }
         .gr-cell strong { color: #1e293b; font-size: 8px; }
 
         /* Attendance */
-        .att { display: table; width: 100%; margin-bottom: 12px; border: 1.5px solid #cbd5e1; border-radius: 3px; overflow: hidden; }
+        .att { display: table; width: 100%; margin-bottom: {{ count($rows) > 12 ? '6px' : '12px' }}; border: 1.5px solid #cbd5e1; border-radius: 3px; overflow: hidden; }
         .att-cell { display: table-cell; width: 33.33%; text-align: center; padding: 5px; border-right: 1px solid #cbd5e1; background: #f8fafc; }
         .att-cell:last-child { border-right: none; }
         .att-label { font-size: 7.5px; font-weight: bold; text-transform: uppercase; color: #475569; margin-bottom: 2px; }
         .att-value { font-size: 12px; font-weight: bold; color: #0f172a; }
 
         /* Remarks */
-        .remarks { border: 1.5px solid #cbd5e1; border-radius: 4px; padding: 6px 8px; margin-bottom: 6px; background: #f8fafc; }
+        .remarks { border: 1.5px solid #cbd5e1; border-radius: 4px; padding: {{ count($rows) > 12 ? '4px 6px' : '6px 8px' }}; margin-bottom: {{ count($rows) > 12 ? '4px' : '6px' }}; background: #f8fafc; }
         .remarks-label { font-size: 7.5px; font-weight: bold; color: #1e293b; text-transform: uppercase; letter-spacing: 0.3px; margin-bottom: 2px; border-bottom: 1px solid #cbd5e1; padding-bottom: 2px; }
         .remarks-text { font-size: 8px; color: #334155; min-height: 16px; line-height: 1.3; }
 
         /* Next Term */
-        .next-term { background: #475569; color: #fff; text-align: center; padding: 5px; font-size: 8px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px; border-radius: 3px; }
+        .next-term { background: #475569; color: #fff; text-align: center; padding: 5px; font-size: 8px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: {{ count($rows) > 12 ? '6px' : '12px' }}; border-radius: 3px; }
 
         /* Signatures */
-        .sigs { display: table; width: 100%; margin-top: 10px; }
+        .sigs { display: table; width: 100%; margin-top: {{ count($rows) > 12 ? '4px' : '10px' }}; }
         .sig { display: table-cell; width: 33.33%; text-align: center; padding: 4px; vertical-align: bottom; }
         .sig-img { max-height: 26px; max-width: 70px; object-fit: contain; margin-bottom: 2px; }
-        .sig-line { border-top: 1.5px solid #475569; margin-top: 20px; padding-top: 3px; font-size: 8px; font-weight: bold; color: #1e293b; }
+        .sig-line { border-top: 1.5px solid #475569; margin-top: {{ count($rows) > 12 ? '10px' : '20px' }}; padding-top: 3px; font-size: 8px; font-weight: bold; color: #1e293b; }
         .sig-line.has-img { margin-top: 2px; }
         .sig-sub { font-size: 6.5px; color: #64748b; font-style: italic; margin-top: 1px; }
 

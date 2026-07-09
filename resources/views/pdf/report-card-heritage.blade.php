@@ -4,16 +4,16 @@
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <title>Report Card - {{ $student->admission_number }}</title>
     <style>
-        @page { margin: 10mm; }
+        @page { margin: {{ count($rows) > 12 ? '4mm' : '10mm' }}; }
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: Georgia, Times, serif; font-size: 9px; color: #1e293b; background: #fff; }
 
         /* ─── Heritage Royal Academic Theme ─── */
         .page { border: 5px double #a16207; padding: 10px; background: #fff; }
-        .page-inner { border: 1.5px solid #1e3a8a; padding: 14px; }
+        .page-inner { border: 1.5px solid #1e3a8a; padding: {{ count($rows) > 12 ? '6px' : '14px' }}; }
 
         /* Traditional Classic Header */
-        .header { border-bottom: 3px double #a16207; padding-bottom: 8px; margin-bottom: 12px; }
+        .header { border-bottom: 3px double #a16207; padding-bottom: {{ count($rows) > 12 ? '4px' : '8px' }}; margin-bottom: {{ count($rows) > 12 ? '6px' : '12px' }}; }
         .header-table { display: table; width: 100%; }
         .header-cell { display: table-cell; vertical-align: middle; }
         .logo-wrap { width: 70px; }
@@ -24,7 +24,7 @@
         .meta-right { font-size: 8.5px; color: #334155; font-weight: bold; text-align: right; line-height: 1.4; }
 
         /* Stats Panel */
-        .stats { display: table; width: 100%; margin-bottom: 12px; border-collapse: separate; border-spacing: 2px; }
+        .stats { display: table; width: 100%; margin-bottom: {{ count($rows) > 12 ? '6px' : '12px' }}; border-collapse: separate; border-spacing: 2px; }
         .stat { display: table-cell; width: 16.66%; }
         .stat-inner { background: #fefcbf; border: 1.5px solid #d97706; border-radius: 3px; text-align: center; padding: 6px 4px; }
         .stat-inner.green { background: #f0fdf4; border-color: #16a34a; }
@@ -41,39 +41,39 @@
         .stat-value { font-size: 13px; font-weight: bold; color: #854d0e; }
 
         /* Score Table */
-        table.scores { width: 100%; border-collapse: collapse; margin-bottom: 12px; border: 1.5px solid #a16207; }
-        table.scores th { background: #1e3a8a; color: #fff; padding: 6px 4px; font-size: 8px; font-weight: bold; text-transform: uppercase; text-align: center; border: 1px solid #a16207; letter-spacing: 0.5px; }
-        table.scores td { padding: 5px 4px; border: 1px solid #a16207; text-align: center; font-size: 8.5px; color: #0f172a; }
+        table.scores { width: 100%; border-collapse: collapse; margin-bottom: {{ count($rows) > 12 ? '6px' : '12px' }}; border: 1.5px solid #a16207; }
+        table.scores th { background: #1e3a8a; color: #fff; padding: {{ count($rows) > 12 ? '3px 4px' : '6px 4px' }}; font-size: 8px; font-weight: bold; text-transform: uppercase; text-align: center; border: 1px solid #a16207; letter-spacing: 0.5px; }
+        table.scores td { padding: {{ count($rows) > 12 ? '2.5px 4px' : '5px 4px' }}; border: 1px solid #a16207; text-align: center; font-size: 8.5px; color: #0f172a; }
         table.scores tr:nth-child(even) td { background: #fafaf9; }
         .subj { text-align: left !important; font-weight: bold; color: #1e3a8a; padding-left: 8px !important; font-family: Georgia, serif; }
         .bold { font-weight: bold; color: #854d0e; }
 
         /* Grading Key */
-        .grading { display: table; width: 100%; border: 1.5px solid #a16207; margin-bottom: 12px; overflow: hidden; }
+        .grading { display: table; width: 100%; border: 1.5px solid #a16207; margin-bottom: {{ count($rows) > 12 ? '6px' : '12px' }}; overflow: hidden; }
         .gr-cell { display: table-cell; padding: 5px 4px; text-align: center; font-size: 7.5px; font-weight: bold; color: #334155; border-right: 1px solid #a16207; background: #fffbeb; }
         .gr-cell:last-child { border-right: none; }
         .gr-cell strong { color: #1e3a8a; font-size: 8.5px; }
 
         /* Attendance */
-        .att { display: table; width: 100%; margin-bottom: 12px; border: 1.5px solid #1e3a8a; overflow: hidden; }
+        .att { display: table; width: 100%; margin-bottom: {{ count($rows) > 12 ? '6px' : '12px' }}; border: 1.5px solid #1e3a8a; overflow: hidden; }
         .att-cell { display: table-cell; width: 33.33%; text-align: center; padding: 6px; border-right: 1px solid #1e3a8a; background: #eff6ff; }
         .att-cell:last-child { border-right: none; }
         .att-label { font-size: 8px; font-weight: bold; text-transform: uppercase; color: #1e3a8a; margin-bottom: 2px; }
         .att-value { font-size: 13px; font-weight: bold; color: #0f172a; }
 
         /* Remarks */
-        .remarks { border: 1.5px solid #a16207; padding: 8px 10px; margin-bottom: 8px; background: #fffbeb; }
+        .remarks { border: 1.5px solid #a16207; padding: {{ count($rows) > 12 ? '4px 6px' : '8px 10px' }}; margin-bottom: {{ count($rows) > 12 ? '4px' : '8px' }}; background: #fffbeb; }
         .remarks-label { font-size: 8px; font-weight: bold; color: #1e3a8a; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 3px; border-bottom: 1px solid #a16207; padding-bottom: 2px; }
         .remarks-text { font-size: 8.5px; color: #334155; min-height: 16px; line-height: 1.3; font-style: italic; }
 
         /* Next Term */
-        .next-term { background: #1e3a8a; border: 1.5px solid #a16207; color: #fef08a; text-align: center; padding: 6px; font-size: 8.5px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; }
+        .next-term { background: #1e3a8a; border: 1.5px solid #a16207; color: #fef08a; text-align: center; padding: 6px; font-size: 8.5px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; margin-bottom: {{ count($rows) > 12 ? '6px' : '12px' }}; }
 
         /* Signatures */
-        .sigs { display: table; width: 100%; margin-top: 12px; }
+        .sigs { display: table; width: 100%; margin-top: {{ count($rows) > 12 ? '6px' : '12px' }}; }
         .sig { display: table-cell; width: 33.33%; text-align: center; padding: 4px; vertical-align: bottom; }
         .sig-img { max-height: 30px; max-width: 80px; object-fit: contain; margin-bottom: 2px; }
-        .sig-line { border-top: 1.5px solid #1e3a8a; margin-top: 24px; padding-top: 3px; font-size: 8.5px; font-weight: bold; color: #1e3a8a; }
+        .sig-line { border-top: 1.5px solid #1e3a8a; margin-top: {{ count($rows) > 12 ? '10px' : '24px' }}; padding-top: 3px; font-size: 8.5px; font-weight: bold; color: #1e3a8a; }
         .sig-line.has-img { margin-top: 2px; }
         .sig-sub { font-size: 7px; color: #475569; font-style: italic; margin-top: 1px; }
 

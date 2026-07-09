@@ -10,16 +10,16 @@
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <title>Report Card - {{ $student->admission_number }}</title>
     <style>
-        @page { margin: 10mm; }
+        @page { margin: {{ count($rows) > 12 ? '4mm' : '10mm' }}; }
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: DejaVu Sans, Arial, sans-serif; font-size: 8.5px; color: #1e293b; background: #fff; line-height: 1.25; }
 
         /* Outer borders */
         .page { border: 3px solid {{ $themeColor }}; padding: 6px; background: #fff; }
-        .page-inner { border: 1px solid {{ $accentColor }}; padding: 12px; position: relative; }
+        .page-inner { border: 1px solid {{ $accentColor }}; padding: {{ count($rows) > 12 ? '6px' : '12px' }}; position: relative; }
 
         /* Header Layout */
-        .header-table { display: table; width: 100%; border-bottom: 2.5px solid {{ $themeColor }}; padding-bottom: 10px; margin-bottom: 12px; }
+        .header-table { display: table; width: 100%; border-bottom: 2.5px solid {{ $themeColor }}; padding-bottom: {{ count($rows) > 12 ? '5px' : '10px' }}; margin-bottom: {{ count($rows) > 12 ? '6px' : '12px' }}; }
         .header-cell { display: table-cell; vertical-align: middle; }
         
         /* Logo (Crest) */
@@ -39,13 +39,13 @@
         .ribbon-sub span { font-size: 7px; font-weight: normal; color: #475569; display: block; margin-top: 1px; }
 
         /* Student & Class Details block */
-        .meta-table { display: table; width: 100%; margin-bottom: 12px; border-collapse: collapse; }
+        .meta-table { display: table; width: 100%; margin-bottom: {{ count($rows) > 12 ? '6px' : '12px' }}; border-collapse: collapse; }
         .meta-row { display: table-row; }
         .meta-cell { display: table-cell; width: 50%; vertical-align: top; }
         .meta-cell:first-child { padding-right: 15px; }
         .meta-cell:last-child { padding-left: 15px; }
         
-        .field-group { display: table; width: 100%; margin-bottom: 6px; border-bottom: 1px solid #e2e8f0; padding-bottom: 3px; }
+        .field-group { display: table; width: 100%; margin-bottom: {{ count($rows) > 12 ? '3px' : '6px' }}; border-bottom: 1px solid #e2e8f0; padding-bottom: {{ count($rows) > 12 ? '1.5px' : '3px' }}; }
         .field-label { display: table-cell; width: 35%; font-weight: bold; color: {{ $themeColor }}; font-size: 8px; text-transform: uppercase; }
         .field-value { display: table-cell; width: 65%; font-weight: 600; color: #334155; padding-left: 6px; font-size: 8.5px; }
 
@@ -53,26 +53,26 @@
         .section-header { background: {{ $themeColor }}; color: #ffffff; padding: 4px 8px; font-weight: bold; font-size: 8.5px; letter-spacing: 0.5px; border-radius: 3px 3px 0 0; text-transform: uppercase; }
 
         /* Academic Scores Table */
-        .scores-table { width: 100%; border-collapse: collapse; margin-bottom: 12px; border: 1px solid {{ $accentColor }}; }
-        .scores-table th { background: {{ $themeColor }}; color: #ffffff; padding: 5px 6px; font-size: 8px; font-weight: bold; text-transform: uppercase; text-align: center; border: 1px solid {{ $themeColor }}; }
-        .scores-table td { padding: 4.5px 6px; border: 1px solid #e2e8f0; text-align: center; font-size: 8px; }
+        .scores-table { width: 100%; border-collapse: collapse; margin-bottom: {{ count($rows) > 12 ? '6px' : '12px' }}; border: 1px solid {{ $accentColor }}; }
+        .scores-table th { background: {{ $themeColor }}; color: #ffffff; padding: {{ count($rows) > 12 ? '2.5px 4px' : '5px 6px' }}; font-size: 8px; font-weight: bold; text-transform: uppercase; text-align: center; border: 1px solid {{ $themeColor }}; }
+        .scores-table td { padding: {{ count($rows) > 12 ? '2px 4px' : '4.5px 6px' }}; border: 1px solid #e2e8f0; text-align: center; font-size: 8px; }
         .scores-table tr:nth-child(even) td { background: #f8fafc; }
         .scores-table td.subject-name { text-align: left; font-weight: bold; color: {{ $themeColor }}; }
         .scores-table td.bold { font-weight: bold; }
         .scores-table td.performance-cell { font-weight: bold; color: {{ $themeColor }}; }
 
         /* Bottom Row Columns: Behavior, Attendance, Remarks */
-        .bottom-table { display: table; width: 100%; margin-bottom: 12px; table-layout: fixed; }
+        .bottom-table { display: table; width: 100%; margin-bottom: {{ count($rows) > 12 ? '6px' : '12px' }}; table-layout: fixed; }
         .bottom-row { display: table-row; }
         .bottom-cell { display: table-cell; vertical-align: top; }
 
         /* Principal & Grading Block Row */
-        .footer-blocks-table { display: table; width: 100%; margin-bottom: 12px; table-layout: fixed; }
+        .footer-blocks-table { display: table; width: 100%; margin-bottom: {{ count($rows) > 12 ? '6px' : '12px' }}; table-layout: fixed; }
         .footer-blocks-row { display: table-row; }
         .footer-blocks-cell { display: table-cell; vertical-align: top; }
 
         /* Parent Signatures & Footer */
-        .bottom-sigs-table { display: table; width: 100%; margin-top: 15px; border-bottom: 2px solid {{ $themeColor }}; padding-bottom: 8px; }
+        .bottom-sigs-table { display: table; width: 100%; margin-top: {{ count($rows) > 12 ? '8px' : '15px' }}; border-bottom: 2px solid {{ $themeColor }}; padding-bottom: {{ count($rows) > 12 ? '4px' : '8px' }}; }
         .bottom-sigs-row { display: table-row; }
         .bottom-sigs-cell { display: table-cell; width: 50%; vertical-align: bottom; }
         .bottom-sigs-cell:last-child { text-align: right; }
@@ -431,7 +431,7 @@
                     {{-- Teacher Comments block --}}
                     @if($showTeacherRemarks)
                         <div class="bottom-cell" style="width: {{ $colWidth }}; padding-left: 8px;">
-                            <div style="border: 1px solid {{ $accentColor }}; min-height: 147px; background: #ffffff; position: relative;">
+                            <div style="border: 1px solid {{ $accentColor }}; min-height: {{ count($rows) > 12 ? "105px" : "147px" }}; background: #ffffff; position: relative;">
                                 <div style="background: {{ $themeColor }}; color: #ffffff; padding: 4.5px 6px; font-size: 8px; font-weight: bold; text-align: center; text-transform: uppercase;">
                                     Teacher Comments
                                 </div>
@@ -506,7 +506,7 @@
                     {{-- Principal's Remarks --}}
                     @if($showPrincipalRemarks)
                         <div class="footer-blocks-cell" style="width: {{ $footerColWidth }}; padding-left: 8px; position: relative;">
-                            <div style="border: 1px solid {{ $accentColor }}; border-radius: 4px; overflow: hidden; background: #ffffff; min-height: 80px; position: relative;">
+                            <div style="border: 1px solid {{ $accentColor }}; border-radius: 4px; overflow: hidden; background: #ffffff; min-height: {{ count($rows) > 12 ? "60px" : "80px" }}; position: relative;">
                                 <div style="background: {{ $themeColor }}; color: #ffffff; padding: 4px 8px; font-size: 8px; font-weight: bold; text-transform: uppercase;">
                                     Principal's Remarks
                                 </div>

@@ -5,9 +5,7 @@
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <title>Report Card - {{ $student->admission_number }}</title>
     <style>
-        @page {
-            margin: 15mm;
-        }
+        @page { margin: {{ count($rows) > 12 ? '5mm' : '15mm' }}; }
 
         * {
             margin: 0;
@@ -31,13 +29,13 @@
 
         .page-inner {
             border: 1px solid #6b7280;
-            padding: 18px;
+            padding: {{ count($rows) > 12 ? '8px' : '18px' }};
         }
 
         .header {
             text-align: center;
-            padding-bottom: 12px;
-            margin-bottom: 14px;
+            padding-bottom: {{ count($rows) > 12 ? '6px' : '12px' }};
+            margin-bottom: {{ count($rows) > 12 ? '8px' : '14px' }};
             border-bottom: 3px double #111827;
         }
 
@@ -96,7 +94,7 @@
         .meta-row {
             display: table;
             width: 100%;
-            margin-bottom: 12px;
+            margin-bottom: {{ count($rows) > 12 ? '6px' : '12px' }};
         }
 
         .meta-cell {
@@ -196,14 +194,14 @@
         table.scores {
             width: 100%;
             border-collapse: collapse;
-            margin-bottom: 12px;
+            margin-bottom: {{ count($rows) > 12 ? '6px' : '12px' }};
             border: 1px solid #374151;
         }
 
         table.scores th {
             background: #111827;
             color: white;
-            padding: 7px 4px;
+            padding: {{ count($rows) > 12 ? '3.5px 4px' : '7px 4px' }};
             text-align: center;
             font-size: 8px;
             font-weight: 800;
@@ -213,7 +211,7 @@
         }
 
         table.scores td {
-            padding: 5px 4px;
+            padding: {{ count($rows) > 12 ? '2.5px 4px' : '5px 4px' }};
             text-align: center;
             font-size: 9px;
             border: 1px solid #d1d5db;
@@ -237,7 +235,7 @@
             display: table;
             width: 100%;
             border: 1px solid #d1d5db;
-            margin-bottom: 12px;
+            margin-bottom: {{ count($rows) > 12 ? '6px' : '12px' }};
         }
 
         .gr-cell {
@@ -262,7 +260,7 @@
         .att-row {
             display: table;
             width: 100%;
-            margin-bottom: 12px;
+            margin-bottom: {{ count($rows) > 12 ? '6px' : '12px' }};
             border: 1px solid #d1d5db;
         }
 
@@ -294,8 +292,8 @@
 
         .remarks-box {
             border: 1px solid #d1d5db;
-            padding: 8px 10px;
-            margin-bottom: 10px;
+            padding: {{ count($rows) > 12 ? '4px 6px' : '8px 10px' }};
+            margin-bottom: {{ count($rows) > 12 ? '6px' : '10px' }};
         }
 
         .remarks-label {
@@ -330,7 +328,7 @@
         .signatures {
             display: table;
             width: 100%;
-            margin-top: 16px;
+            margin-top: {{ count($rows) > 12 ? '6px' : '16px' }};
         }
 
         .sig {
@@ -342,7 +340,7 @@
 
         .sig-line {
             border-top: 1.5px solid #111827;
-            margin-top: 30px;
+            margin-top: {{ count($rows) > 12 ? '10px' : '30px' }};
             padding-top: 4px;
             font-size: 9px;
             font-weight: 800;

@@ -4,15 +4,15 @@
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <title>Report Card - {{ $student->admission_number }}</title>
     <style>
-        @page { margin: 10mm; }
+        @page { margin: {{ count($rows) > 12 ? '4mm' : '10mm' }}; }
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: DejaVu Sans, Arial, sans-serif; font-size: 9px; color: #0f172a; background: #fff; }
 
         /* ─── Compact Space-Saving Premium Style ─── */
         .page { border: 3px double #0284c7; padding: 8px; background: #fff; }
-        .page-inner { border: 1px solid #bae6fd; padding: 12px; }
+        .page-inner { border: 1px solid #bae6fd; padding: {{ count($rows) > 12 ? '6px' : '12px' }}; }
 
-        .header { border-bottom: 2px solid #0284c7; padding-bottom: 6px; margin-bottom: 8px; }
+        .header { border-bottom: 2px solid #0284c7; padding-bottom: {{ count($rows) > 12 ? '3px' : '6px' }}; margin-bottom: {{ count($rows) > 12 ? '4px' : '8px' }}; }
         .header-table { display: table; width: 100%; }
         .header-cell { display: table-cell; vertical-align: middle; }
         .logo-wrap { width: 65px; }
@@ -23,7 +23,7 @@
         .meta-right { font-size: 8px; color: #64748b; font-weight: 600; text-align: right; }
 
         /* Stats Block */
-        .stats { display: table; width: 100%; margin-bottom: 8px; }
+        .stats { display: table; width: 100%; margin-bottom: {{ count($rows) > 12 ? '4px' : '8px' }}; }
         .stat { display: table-cell; padding: 1.5px; }
         .stat-inner { background: #bae6fd; border: 1px solid #7dd3fc; border-radius: 4px; text-align: center; padding: 5px 3px; }
         .stat-inner.green { background: #dcfce7; border-color: #86efac; }
@@ -40,39 +40,39 @@
         .stat-value { font-size: 13px; font-weight: 900; color: #0c4a6e; }
 
         /* Table */
-        table.scores { width: 100%; border-collapse: collapse; margin-bottom: 8px; border: 1px solid #bae6fd; }
-        table.scores th { background: #0284c7; color: #fff; padding: 4px 3px; font-size: 7px; font-weight: 800; text-transform: uppercase; text-align: center; border: 1px solid #0284c7; }
-        table.scores td { padding: 4px 3px; border: 1px solid #e2e8f0; text-align: center; font-size: 8px; }
+        table.scores { width: 100%; border-collapse: collapse; margin-bottom: {{ count($rows) > 12 ? '4px' : '8px' }}; border: 1px solid #bae6fd; }
+        table.scores th { background: #0284c7; color: #fff; padding: {{ count($rows) > 12 ? '2px 3px' : '4px 3px' }}; font-size: 7px; font-weight: 800; text-transform: uppercase; text-align: center; border: 1px solid #0284c7; }
+        table.scores td { padding: {{ count($rows) > 12 ? '2px 3px' : '4px 3px' }}; border: 1px solid #e2e8f0; text-align: center; font-size: 8px; }
         table.scores tr:nth-child(even) td { background: #f8fafc; }
         .subj { text-align: left !important; font-weight: 700; color: #0369a1; padding-left: 6px !important; }
         .bold { font-weight: 800; color: #0f172a; }
 
         /* Grading Key */
-        .grading { display: table; width: 100%; border: 1px solid #bae6fd; margin-bottom: 8px; border-radius: 4px; overflow: hidden; }
+        .grading { display: table; width: 100%; border: 1px solid #bae6fd; margin-bottom: {{ count($rows) > 12 ? '4px' : '8px' }}; border-radius: 4px; overflow: hidden; }
         .gr-cell { display: table-cell; padding: 4px 3px; text-align: center; font-size: 7px; font-weight: 600; color: #475569; border-right: 1px solid #bae6fd; background: #f8fafc; }
         .gr-cell:last-child { border-right: none; }
         .gr-cell strong { color: #0369a1; font-size: 8px; }
 
         /* Attendance */
-        .att { display: table; width: 100%; margin-bottom: 8px; border: 1px solid #bae6fd; border-radius: 4px; overflow: hidden; }
+        .att { display: table; width: 100%; margin-bottom: {{ count($rows) > 12 ? '4px' : '8px' }}; border: 1px solid #bae6fd; border-radius: 4px; overflow: hidden; }
         .att-cell { display: table-cell; width: 33.33%; text-align: center; padding: 4px; border-right: 1px solid #bae6fd; background: #f0f9ff; }
         .att-cell:last-child { border-right: none; }
         .att-label { font-size: 7.5px; font-weight: 800; text-transform: uppercase; color: #0369a1; margin-bottom: 1px; }
         .att-value { font-size: 13px; font-weight: 900; color: #0f172a; }
 
         /* Remarks */
-        .remarks { border: 1px solid #bae6fd; border-radius: 4px; padding: 6px 8px; margin-bottom: 6px; background: #f0f9ff; }
+        .remarks { border: 1px solid #bae6fd; border-radius: 4px; padding: {{ count($rows) > 12 ? '4px 6px' : '6px 8px' }}; margin-bottom: {{ count($rows) > 12 ? '4px' : '6px' }}; background: #f0f9ff; }
         .remarks-label { font-size: 7.5px; font-weight: 850; color: #0369a1; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 2px; }
         .remarks-text { font-size: 8px; color: #334155; min-height: 16px; line-height: 1.2; }
 
         /* Next Term */
-        .next-term { background: linear-gradient(90deg, #0284c7 0%, #0369a1 100%); color: #fff; text-align: center; padding: 5px; font-size: 8.5px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; border-radius: 4px; }
+        .next-term { background: linear-gradient(90deg, #0284c7 0%, #0369a1 100%); color: #fff; text-align: center; padding: 5px; font-size: 8.5px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: {{ count($rows) > 12 ? '4px' : '8px' }}; border-radius: 4px; }
 
         /* Signatures */
-        .sigs { display: table; width: 100%; margin-top: 8px; }
+        .sigs { display: table; width: 100%; margin-top: {{ count($rows) > 12 ? '4px' : '8px' }}; }
         .sig { display: table-cell; width: 33.33%; text-align: center; padding: 4px; vertical-align: bottom; }
         .sig-img { max-height: 28px; max-width: 75px; object-fit: contain; margin-bottom: 2px; }
-        .sig-line { border-top: 1.5px solid #0284c7; margin-top: 20px; padding-top: 2px; font-size: 8px; font-weight: 800; color: #0369a1; }
+        .sig-line { border-top: 1.5px solid #0284c7; margin-top: {{ count($rows) > 12 ? '10px' : '20px' }}; padding-top: 2px; font-size: 8px; font-weight: 800; color: #0369a1; }
         .sig-line.has-img { margin-top: 2px; }
         .sig-sub { font-size: 6px; color: #64748b; font-style: italic; margin-top: 1px; }
 

@@ -4,7 +4,7 @@
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
         <title>Report Card - {{ $student->admission_number }}</title>
         <style>
-            @page { margin: 15mm; }
+            @page { margin: {{ count($rows) > 12 ? '5mm' : '15mm' }}; }
             * { margin: 0; padding: 0; box-sizing: border-box; }
             body {
                 font-family: DejaVu Sans, Arial, sans-serif;
@@ -21,13 +21,13 @@
             }
             .page-inner {
                 border: 1px solid #c4975a;
-                padding: 20px;
+                padding: {{ count($rows) > 12 ? '8px' : '20px' }};
             }
 
             .header {
                 text-align: center;
-                padding-bottom: 14px;
-                margin-bottom: 14px;
+                padding-bottom: {{ count($rows) > 12 ? '6px' : '14px' }};
+                margin-bottom: {{ count($rows) > 12 ? '8px' : '14px' }};
                 border-bottom: 2px solid #1e3a5f;
             }
             .header::after {
@@ -193,12 +193,12 @@
             table {
                 width: 100%;
                 border-collapse: collapse;
-                margin-bottom: 12px;
+                margin-bottom: {{ count($rows) > 12 ? '6px' : '12px' }};
             }
             th {
                 background: #1e3a5f;
                 color: #c4975a;
-                padding: 7px 4px;
+                padding: {{ count($rows) > 12 ? '3.5px 4px' : '7px 4px' }};
                 text-align: center;
                 font-size: 8px;
                 font-weight: 800;
@@ -207,7 +207,7 @@
                 border: 1px solid #1e3a5f;
             }
             td {
-                padding: 5px 4px;
+                padding: {{ count($rows) > 12 ? '2.5px 4px' : '5px 4px' }};
                 text-align: center;
                 font-size: 9px;
                 border: 1px solid #e2e8f0;
@@ -220,7 +220,7 @@
                 display: table;
                 width: 100%;
                 border: 1px solid #e2e8f0;
-                margin-bottom: 12px;
+                margin-bottom: {{ count($rows) > 12 ? '6px' : '12px' }};
             }
             .grading-cell {
                 display: table-cell;
@@ -237,14 +237,14 @@
             .attendance {
                 display: table;
                 width: 100%;
-                margin-bottom: 12px;
+                margin-bottom: {{ count($rows) > 12 ? '6px' : '12px' }};
                 border: 1px solid #e2e8f0;
             }
             .att-cell {
                 display: table-cell;
                 width: 33.33%;
                 text-align: center;
-                padding: 8px;
+                padding: {{ count($rows) > 12 ? '4px' : '8px' }};
                 border-right: 1px solid #e2e8f0;
             }
             .att-cell:last-child { border-right: none; }
@@ -259,8 +259,8 @@
 
             .remarks {
                 border: 1px solid #e2e8f0;
-                padding: 8px 10px;
-                margin-bottom: 10px;
+                padding: {{ count($rows) > 12 ? '4px 6px' : '8px 10px' }};
+                margin-bottom: {{ count($rows) > 12 ? '6px' : '10px' }};
             }
             .remarks-label {
                 font-size: 8px;
@@ -282,18 +282,18 @@
                 background: #1e3a5f;
                 color: #c4975a;
                 text-align: center;
-                padding: 7px;
+                padding: {{ count($rows) > 12 ? '4px' : '7px' }};
                 font-size: 10px;
                 font-weight: 800;
                 text-transform: uppercase;
                 letter-spacing: 2px;
-                margin-bottom: 10px;
+                margin-bottom: {{ count($rows) > 12 ? '6px' : '10px' }};
             }
 
             .signatures {
                 display: table;
                 width: 100%;
-                margin-top: 18px;
+                margin-top: {{ count($rows) > 12 ? '8px' : '18px' }};
             }
             .sig {
                 display: table-cell;
@@ -303,7 +303,7 @@
             }
             .sig-line {
                 border-top: 1.5px solid #1e3a5f;
-                margin-top: 32px;
+                margin-top: {{ count($rows) > 12 ? '10px' : '32px' }};
                 padding-top: 4px;
                 font-size: 9px;
                 font-weight: 800;
