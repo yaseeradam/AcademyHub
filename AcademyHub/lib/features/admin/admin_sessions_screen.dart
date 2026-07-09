@@ -75,22 +75,22 @@ class _AdminSessionsScreenState extends State<AdminSessionsScreen> {
         builder: (context, setDialogState) => AlertDialog(
           backgroundColor: AppColors.surface,
           title: Text(session == null ? 'Create Session' : 'Edit Session',
-              style: GoogleFonts.spaceGrotesk(fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
+              style: GoogleFonts.inter(fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               TextField(
                 controller: nameController,
-                style: GoogleFonts.spaceGrotesk(color: AppColors.textPrimary),
+                style: GoogleFonts.inter(color: AppColors.textPrimary),
                 decoration: InputDecoration(
                   labelText: 'Session Name (e.g. 2026/2027)',
-                  labelStyle: GoogleFonts.spaceGrotesk(color: AppColors.textSecondary),
+                  labelStyle: GoogleFonts.inter(color: AppColors.textSecondary),
                   enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: AppColors.borderLight)),
                 ),
               ),
               const SizedBox(height: 12),
               CheckboxListTile(
-                title: Text('Active Session?', style: GoogleFonts.spaceGrotesk(color: AppColors.textPrimary)),
+                title: Text('Active Session?', style: GoogleFonts.inter(color: AppColors.textPrimary)),
                 value: isActive,
                 onChanged: (val) {
                   if (val != null) {
@@ -103,12 +103,12 @@ class _AdminSessionsScreenState extends State<AdminSessionsScreen> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context, false),
-              child: Text('Cancel', style: GoogleFonts.spaceGrotesk(color: AppColors.textSecondary)),
+              child: Text('Cancel', style: GoogleFonts.inter(color: AppColors.textSecondary)),
             ),
             ElevatedButton(
               onPressed: () => Navigator.pop(context, true),
               style: ElevatedButton.styleFrom(backgroundColor: context.read<AuthProvider>().tenantPrimaryColor),
-              child: Text('Save', style: GoogleFonts.spaceGrotesk(color: Colors.black)),
+              child: Text('Save', style: GoogleFonts.inter(color: Colors.black)),
             ),
           ],
         ),
@@ -148,7 +148,7 @@ class _AdminSessionsScreenState extends State<AdminSessionsScreen> {
         backgroundColor: AppColors.background,
         appBar: AppBar(
           title: Text('Academic Settings',
-              style: GoogleFonts.spaceGrotesk(
+              style: GoogleFonts.inter(
                   fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
           backgroundColor: AppColors.surface,
           elevation: 0,
@@ -184,13 +184,13 @@ class _AdminSessionsScreenState extends State<AdminSessionsScreen> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text('Academic Sessions',
-                style: GoogleFonts.spaceGrotesk(
+                style: GoogleFonts.inter(
                     fontSize: 15, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
             ElevatedButton.icon(
               onPressed: () => _showSessionForm(),
               style: ElevatedButton.styleFrom(backgroundColor: primary, foregroundColor: Colors.black),
               icon: const Icon(Icons.add, size: 16),
-              label: Text('New Session', style: GoogleFonts.spaceGrotesk(fontSize: 12, fontWeight: FontWeight.bold)),
+              label: Text('New Session', style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.bold)),
             ),
           ],
         ),
@@ -214,10 +214,10 @@ class _AdminSessionsScreenState extends State<AdminSessionsScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(s['name'] ?? '',
-                          style: GoogleFonts.spaceGrotesk(
+                          style: GoogleFonts.inter(
                               fontWeight: FontWeight.bold, fontSize: 14, color: AppColors.textPrimary)),
                       Text(active ? 'Active' : 'Inactive',
-                          style: GoogleFonts.spaceGrotesk(fontSize: 11, color: active ? primary : AppColors.textMuted)),
+                          style: GoogleFonts.inter(fontSize: 11, color: active ? primary : AppColors.textMuted)),
                     ],
                   ),
                 ),
@@ -246,7 +246,7 @@ class _AdminSessionsScreenState extends State<AdminSessionsScreen> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text('Academic Terms',
-                style: GoogleFonts.spaceGrotesk(
+                style: GoogleFonts.inter(
                     fontSize: 15, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
           ],
         ),
@@ -270,10 +270,10 @@ class _AdminSessionsScreenState extends State<AdminSessionsScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(t['name'] ?? '',
-                          style: GoogleFonts.spaceGrotesk(
+                          style: GoogleFonts.inter(
                               fontWeight: FontWeight.bold, fontSize: 14, color: AppColors.textPrimary)),
                       Text('Session: ${t['academic_session']?['name'] ?? ''}',
-                          style: GoogleFonts.spaceGrotesk(fontSize: 11, color: AppColors.textSecondary)),
+                          style: GoogleFonts.inter(fontSize: 11, color: AppColors.textSecondary)),
                     ],
                   ),
                 ),
@@ -284,7 +284,7 @@ class _AdminSessionsScreenState extends State<AdminSessionsScreen> {
                     borderRadius: BorderRadius.circular(6),
                   ),
                   child: Text(active ? 'Active' : 'Inactive',
-                      style: GoogleFonts.spaceGrotesk(
+                      style: GoogleFonts.inter(
                           fontSize: 10, fontWeight: FontWeight.bold, color: active ? primary : AppColors.textMuted)),
                 ),
               ],

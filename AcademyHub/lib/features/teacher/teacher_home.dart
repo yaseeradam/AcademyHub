@@ -183,28 +183,40 @@ class _TeacherHomeState extends State<TeacherHome> {
 
     final activeTabs = <AHNavItem>[
       const AHNavItem(
-          icon: Icons.home_outlined,
-          activeIcon: Icons.home_rounded,
-          label: 'Today'),
+        icon: Icons.dashboard_outlined,
+        activeIcon: Icons.dashboard_rounded,
+        label: 'Today',
+        iconBg: Color(0xFFE0E7FF),
+        iconColor: Color(0xFF4F46E5),
+      ),
     ];
 
     if (isClassTeacher) {
       activeTabs.add(const AHNavItem(
-          icon: Icons.how_to_reg_outlined,
-          activeIcon: Icons.how_to_reg_rounded,
-          label: 'Attendance'));
+        icon: Icons.how_to_reg_outlined,
+        activeIcon: Icons.how_to_reg_rounded,
+        label: 'Attendance',
+        iconBg: Color(0xFFCCFBF1),
+        iconColor: Color(0xFF0D9488),
+      ));
     }
 
     activeTabs.add(const AHNavItem(
-        icon: Icons.edit_note_outlined,
-        activeIcon: Icons.edit_note_rounded,
-        label: 'Scores'));
+      icon: Icons.edit_note_outlined,
+      activeIcon: Icons.edit_note_rounded,
+      label: 'Scores',
+      iconBg: Color(0xFFE0F2FE),
+      iconColor: Color(0xFF0284C7),
+    ));
 
     if (hasHomework) {
       activeTabs.add(const AHNavItem(
-          icon: Icons.assignment_outlined,
-          activeIcon: Icons.assignment_rounded,
-          label: 'Homework'));
+        icon: Icons.assignment_outlined,
+        activeIcon: Icons.assignment_rounded,
+        label: 'Homework',
+        iconBg: Color(0xFFF3E8FF),
+        iconColor: Color(0xFF7C3AED),
+      ));
     }
 
     final activePages = <Widget>[
@@ -243,24 +255,13 @@ class _TeacherHomeState extends State<TeacherHome> {
 
     return RoleShell(
       title: 'Teacher Portal',
-      body: Column(
-        children: [
-          if (_loading) LinearProgressIndicator(color: primary, minHeight: 2),
-          Expanded(
-            child: RefreshIndicator(
-              onRefresh: _load,
-              color: primary,
-              child: activePages[currentTab],
-            ),
-          ),
-          AHBottomNav(
-            items: activeTabs,
-            selectedIndex: currentTab,
-            onTap: (i) => setState(() => _selectedTab = i),
-            accentColor: accent,
-          ),
-        ],
-      ),
+      navItems: activeTabs,
+      selectedIndex: currentTab,
+      onTabSelected: (i) => setState(() => _selectedTab = i),
+      accentColor: accent,
+      loading: _loading,
+      onRefresh: _load,
+      body: activePages[currentTab],
     );
   }
 
@@ -401,10 +402,10 @@ class _TeacherHomeState extends State<TeacherHome> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text('Welcome back,',
-                          style: GoogleFonts.spaceGrotesk(
+                          style: GoogleFonts.inter(
                               fontSize: 12, color: Colors.white60)),
                       Text(user?.name ?? 'Teacher',
-                          style: GoogleFonts.spaceGrotesk(
+                          style: GoogleFonts.inter(
                               fontSize: 20,
                               fontWeight: FontWeight.bold,
                               color: Colors.white)),
@@ -477,7 +478,7 @@ class _TeacherHomeState extends State<TeacherHome> {
                   children: [
                     Text(
                       'Analytics & KPI Console',
-                      style: GoogleFonts.spaceGrotesk(
+                      style: GoogleFonts.inter(
                         fontSize: 14,
                         fontWeight: FontWeight.bold,
                         color: AppColors.textPrimary,
@@ -486,7 +487,7 @@ class _TeacherHomeState extends State<TeacherHome> {
                     const SizedBox(height: 2),
                     Text(
                       'Explore detailed school averages, rankings, and CBT exam trends.',
-                      style: GoogleFonts.spaceGrotesk(
+                      style: GoogleFonts.inter(
                         fontSize: 11,
                         color: AppColors.textSecondary,
                       ),
@@ -508,7 +509,7 @@ class _TeacherHomeState extends State<TeacherHome> {
                   ),
                   child: Text(
                     'Analyze',
-                    style: GoogleFonts.spaceGrotesk(
+                    style: GoogleFonts.inter(
                       fontSize: 11,
                       fontWeight: FontWeight.bold,
                       color: primary,
@@ -554,7 +555,7 @@ class _TeacherHomeState extends State<TeacherHome> {
                     children: [
                       Text(
                         'CBT Exam Center',
-                        style: GoogleFonts.spaceGrotesk(
+                        style: GoogleFonts.inter(
                           fontSize: 14,
                           fontWeight: FontWeight.bold,
                           color: AppColors.textPrimary,
@@ -563,7 +564,7 @@ class _TeacherHomeState extends State<TeacherHome> {
                       const SizedBox(height: 2),
                       Text(
                         'Manage questions, view scores, and configure active online tests.',
-                        style: GoogleFonts.spaceGrotesk(
+                        style: GoogleFonts.inter(
                           fontSize: 11,
                           color: AppColors.textSecondary,
                         ),
@@ -585,7 +586,7 @@ class _TeacherHomeState extends State<TeacherHome> {
                     ),
                     child: Text(
                       'Manage',
-                      style: GoogleFonts.spaceGrotesk(
+                      style: GoogleFonts.inter(
                         fontSize: 11,
                         fontWeight: FontWeight.bold,
                         color: AppColors.success,
@@ -625,7 +626,7 @@ class _TeacherHomeState extends State<TeacherHome> {
                     Icon(Icons.campaign_outlined, size: 14, color: primary),
                     const SizedBox(width: 4),
                     Text('Publish News',
-                        style: GoogleFonts.spaceGrotesk(
+                        style: GoogleFonts.inter(
                             fontSize: 11,
                             fontWeight: FontWeight.bold,
                             color: primary)),
@@ -670,12 +671,12 @@ class _TeacherHomeState extends State<TeacherHome> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(value,
-                      style: GoogleFonts.spaceGrotesk(
+                      style: GoogleFonts.inter(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
                           color: Colors.white)),
                   Text(label,
-                      style: GoogleFonts.spaceGrotesk(
+                      style: GoogleFonts.inter(
                           fontSize: 9, color: Colors.white60)),
                 ],
               ),
@@ -707,7 +708,7 @@ class _TeacherHomeState extends State<TeacherHome> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(name,
-                    style: GoogleFonts.spaceGrotesk(
+                    style: GoogleFonts.inter(
                         fontSize: 15,
                         fontWeight: FontWeight.bold,
                         color: AppColors.textPrimary)),
@@ -720,7 +721,7 @@ class _TeacherHomeState extends State<TeacherHome> {
                     border: Border.all(color: AppColors.borderLight),
                   ),
                   child: Text('$studentCount students',
-                      style: GoogleFonts.spaceGrotesk(
+                      style: GoogleFonts.inter(
                           fontSize: 11,
                           fontWeight: FontWeight.bold,
                           color: AppColors.textSecondary)),
@@ -731,7 +732,7 @@ class _TeacherHomeState extends State<TeacherHome> {
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 0, 16, 14),
             child: Text('$subjectCount active curriculum subjects',
-                style: GoogleFonts.spaceGrotesk(
+                style: GoogleFonts.inter(
                     fontSize: 12, color: AppColors.textSecondary)),
           ),
           Container(
@@ -784,7 +785,7 @@ class _TeacherHomeState extends State<TeacherHome> {
             Icon(icon, color: color, size: 16),
             const SizedBox(height: 4),
             Text(label,
-                style: GoogleFonts.spaceGrotesk(
+                style: GoogleFonts.inter(
                     fontSize: 10,
                     fontWeight: FontWeight.bold,
                     color: color)),
@@ -815,14 +816,14 @@ class _TeacherHomeState extends State<TeacherHome> {
             ),
             const SizedBox(height: 20),
             Text(title,
-                style: GoogleFonts.spaceGrotesk(
+                style: GoogleFonts.inter(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
                     color: AppColors.textPrimary),
                 textAlign: TextAlign.center),
             const SizedBox(height: 8),
             Text(subtitle,
-                style: GoogleFonts.spaceGrotesk(
+                style: GoogleFonts.inter(
                     fontSize: 14, color: AppColors.textSecondary),
                 textAlign: TextAlign.center),
             const SizedBox(height: 32),
@@ -833,7 +834,7 @@ class _TeacherHomeState extends State<TeacherHome> {
                 onPressed: onTap,
                 icon: Icon(icon, size: 18),
                 label: Text('Open $title',
-                    style: GoogleFonts.spaceGrotesk(fontWeight: FontWeight.bold)),
+                    style: GoogleFonts.inter(fontWeight: FontWeight.bold)),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: color,
                   foregroundColor: Colors.black,
@@ -859,7 +860,7 @@ class _TeacherHomeState extends State<TeacherHome> {
             Icon(Icons.inbox_outlined, size: 40, color: AppColors.textMuted),
             const SizedBox(height: 12),
             Text(msg,
-                style: GoogleFonts.spaceGrotesk(
+                style: GoogleFonts.inter(
                     color: AppColors.textSecondary, fontSize: 13)),
           ],
         ),

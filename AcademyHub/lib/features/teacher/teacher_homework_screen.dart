@@ -112,7 +112,7 @@ class _TeacherHomeworkScreenState extends State<TeacherHomeworkScreen> {
         child: DropdownButtonFormField<int>(
           decoration: InputDecoration(
             labelText: 'Class',
-            labelStyle: GoogleFonts.spaceGrotesk(color: AppColors.textSecondary, fontSize: 12),
+            labelStyle: GoogleFonts.inter(color: AppColors.textSecondary, fontSize: 12),
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide(color: AppColors.borderLight)),
             enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide(color: AppColors.borderLight)),
             focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide(color: AppColors.borderLight)),
@@ -123,10 +123,10 @@ class _TeacherHomeworkScreenState extends State<TeacherHomeworkScreen> {
           ),
           dropdownColor: AppColors.surface2,
           initialValue: _selectedClassId,
-          style: GoogleFonts.spaceGrotesk(color: AppColors.textPrimary, fontSize: 14),
+          style: GoogleFonts.inter(color: AppColors.textPrimary, fontSize: 14),
           items: _classes.map((c) => DropdownMenuItem<int>(
             value: c['id'] as int,
-            child: Text(c['name'] as String, style: GoogleFonts.spaceGrotesk(color: AppColors.textPrimary)),
+            child: Text(c['name'] as String, style: GoogleFonts.inter(color: AppColors.textPrimary)),
           )).toList(),
           onChanged: (v) { if (v != null) _loadForClass(v); },
         ),
@@ -167,11 +167,11 @@ class _TeacherHomeworkScreenState extends State<TeacherHomeworkScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Row(children: [
-                        Expanded(child: Text(h['title'] ?? '', style: GoogleFonts.spaceGrotesk(fontWeight: FontWeight.w600, fontSize: 14, color: AppColors.textPrimary))),
+                        Expanded(child: Text(h['title'] ?? '', style: GoogleFonts.inter(fontWeight: FontWeight.w600, fontSize: 14, color: AppColors.textPrimary))),
                         if (isDirty) const Icon(Icons.cloud_off, size: 14, color: AppColors.warning),
                       ]),
-                      Text(h['subject_name'] ?? '', style: GoogleFonts.spaceGrotesk(fontSize: 11, color: AppColors.textSecondary)),
-                      Text('Due: $due', style: GoogleFonts.spaceGrotesk(fontSize: 11, color: AppColors.textSecondary)),
+                      Text(h['subject_name'] ?? '', style: GoogleFonts.inter(fontSize: 11, color: AppColors.textSecondary)),
+                      Text('Due: $due', style: GoogleFonts.inter(fontSize: 11, color: AppColors.textSecondary)),
                     ],
                   ),
                 ),
@@ -198,12 +198,12 @@ class _TeacherHomeworkScreenState extends State<TeacherHomeworkScreen> {
           children: [
             Icon(Icons.assignment_outlined, size: 48, color: AppColors.textMuted),
             const SizedBox(height: 12),
-            Text('No homework assignments yet', style: GoogleFonts.spaceGrotesk(color: AppColors.textSecondary, fontSize: 14)),
+            Text('No homework assignments yet', style: GoogleFonts.inter(color: AppColors.textSecondary, fontSize: 14)),
             const SizedBox(height: 8),
             if (_selectedClassId != null)
               TextButton(
                 onPressed: () => _showCreateSheet(context.read<AuthProvider>().tenantPrimaryColor),
-                child: Text('Create first homework', style: GoogleFonts.spaceGrotesk(fontWeight: FontWeight.bold, color: AppColors.parentAccent)),
+                child: Text('Create first homework', style: GoogleFonts.inter(fontWeight: FontWeight.bold, color: AppColors.parentAccent)),
               ),
           ],
         ),
@@ -217,7 +217,7 @@ class _TeacherHomeworkScreenState extends State<TeacherHomeworkScreen> {
           child: ElevatedButton.icon(
             onPressed: () => _showCreateSheet(accent),
             icon: const Icon(Icons.add, color: Colors.black, size: 18),
-            label: Text('New Homework', style: GoogleFonts.spaceGrotesk(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 15)),
+            label: Text('New Homework', style: GoogleFonts.inter(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 15)),
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.parentAccent,
               foregroundColor: Colors.black,
@@ -316,29 +316,29 @@ class _CreateHomeworkSheetState extends State<_CreateHomeworkSheet> {
                 decoration: BoxDecoration(color: AppColors.borderLight, borderRadius: BorderRadius.circular(2)),
               ),
             ),
-            Text('New Homework Assignment', style: GoogleFonts.spaceGrotesk(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
+            Text('New Homework Assignment', style: GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
             const SizedBox(height: 16),
             DropdownButtonFormField<int>(
               decoration: _dec('Subject'),
               dropdownColor: AppColors.surface2,
               initialValue: _subjectId,
-              style: GoogleFonts.spaceGrotesk(color: AppColors.textPrimary, fontSize: 14),
+              style: GoogleFonts.inter(color: AppColors.textPrimary, fontSize: 14),
               items: widget.subjects.map((s) => DropdownMenuItem<int>(
                 value: s['id'] as int,
-                child: Text(s['name'] as String, style: GoogleFonts.spaceGrotesk(color: AppColors.textPrimary)),
+                child: Text(s['name'] as String, style: GoogleFonts.inter(color: AppColors.textPrimary)),
               )).toList(),
               onChanged: (v) => setState(() => _subjectId = v),
             ),
             const SizedBox(height: 12),
             TextField(
               controller: _titleCtrl, 
-              style: GoogleFonts.spaceGrotesk(color: AppColors.textPrimary, fontSize: 14),
+              style: GoogleFonts.inter(color: AppColors.textPrimary, fontSize: 14),
               decoration: _dec('Title'),
             ),
             const SizedBox(height: 12),
             TextField(
               controller: _contentCtrl, 
-              style: GoogleFonts.spaceGrotesk(color: AppColors.textPrimary, fontSize: 14),
+              style: GoogleFonts.inter(color: AppColors.textPrimary, fontSize: 14),
               decoration: _dec('Instructions / Requirements'), 
               maxLines: 4,
             ),
@@ -371,7 +371,7 @@ class _CreateHomeworkSheetState extends State<_CreateHomeworkSheet> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(_dueDate, style: GoogleFonts.spaceGrotesk(color: AppColors.textPrimary, fontSize: 14)),
+                    Text(_dueDate, style: GoogleFonts.inter(color: AppColors.textPrimary, fontSize: 14)),
                     Icon(Icons.calendar_today_rounded, size: 16, color: widget.accentColor),
                   ],
                 ),
@@ -394,7 +394,7 @@ class _CreateHomeworkSheetState extends State<_CreateHomeworkSheet> {
                         height: 20,
                         child: CircularProgressIndicator(color: Colors.black, strokeWidth: 2),
                       )
-                    : Text('Save Homework', style: GoogleFonts.spaceGrotesk(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 15)),
+                    : Text('Save Homework', style: GoogleFonts.inter(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 15)),
               ),
             ),
             const SizedBox(height: 24),
@@ -406,7 +406,7 @@ class _CreateHomeworkSheetState extends State<_CreateHomeworkSheet> {
 
   InputDecoration _dec(String label) => InputDecoration(
         labelText: label,
-        labelStyle: GoogleFonts.spaceGrotesk(color: AppColors.textSecondary, fontSize: 12),
+        labelStyle: GoogleFonts.inter(color: AppColors.textSecondary, fontSize: 12),
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide(color: AppColors.borderLight)),
         enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide(color: AppColors.borderLight)),
         focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: const BorderSide(color: AppColors.parentAccent, width: 1.5)),
@@ -458,7 +458,7 @@ class _SubmissionsScreenState extends State<_SubmissionsScreen> {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: Text(widget.title, style: GoogleFonts.spaceGrotesk(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
+        title: Text(widget.title, style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
         backgroundColor: AppColors.surface,
         foregroundColor: AppColors.textPrimary,
         elevation: 0,
@@ -467,7 +467,7 @@ class _SubmissionsScreenState extends State<_SubmissionsScreen> {
       body: _loading
           ? Center(child: CircularProgressIndicator(color: accent))
           : _submissions.isEmpty
-              ? Center(child: Text('No submissions yet', style: GoogleFonts.spaceGrotesk(color: AppColors.textSecondary, fontSize: 14)))
+              ? Center(child: Text('No submissions yet', style: GoogleFonts.inter(color: AppColors.textSecondary, fontSize: 14)))
               : ListView.separated(
                   padding: const EdgeInsets.all(16),
                   itemCount: _submissions.length,
@@ -486,19 +486,19 @@ class _SubmissionsScreenState extends State<_SubmissionsScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Row(children: [
-                            Expanded(child: Text(name, style: GoogleFonts.spaceGrotesk(fontWeight: FontWeight.bold, fontSize: 14, color: AppColors.textPrimary))),
+                            Expanded(child: Text(name, style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 14, color: AppColors.textPrimary))),
                             if (s['grade'] != null)
                               Container(
                                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                                 decoration: BoxDecoration(color: AppColors.success.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(6)),
-                                child: Text(s['grade'], style: GoogleFonts.spaceGrotesk(color: AppColors.success, fontWeight: FontWeight.bold, fontSize: 11)),
+                                child: Text(s['grade'], style: GoogleFonts.inter(color: AppColors.success, fontWeight: FontWeight.bold, fontSize: 11)),
                               ),
                           ]),
                           const SizedBox(height: 6),
-                          Text(s['submission'] ?? '', style: GoogleFonts.spaceGrotesk(fontSize: 13, color: AppColors.textSecondary)),
+                          Text(s['submission'] ?? '', style: GoogleFonts.inter(fontSize: 13, color: AppColors.textSecondary)),
                           if (s['feedback'] != null) ...[
                             const SizedBox(height: 6),
-                            Text('Feedback: ${s['feedback']}', style: GoogleFonts.spaceGrotesk(fontSize: 12, color: AppColors.textSecondary, fontStyle: FontStyle.italic)),
+                            Text('Feedback: ${s['feedback']}', style: GoogleFonts.inter(fontSize: 12, color: AppColors.textSecondary, fontStyle: FontStyle.italic)),
                           ],
                         ],
                       ),

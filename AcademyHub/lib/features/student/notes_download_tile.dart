@@ -162,7 +162,7 @@ class _NotesDownloadTileState extends State<NotesDownloadTile> {
                   children: [
                     Text(
                       widget.note['subject_name'] ?? 'General',
-                      style: GoogleFonts.spaceGrotesk(
+                      style: GoogleFonts.inter(
                         fontSize: 11,
                         fontWeight: FontWeight.bold,
                         color: primary,
@@ -171,7 +171,7 @@ class _NotesDownloadTileState extends State<NotesDownloadTile> {
                     const SizedBox(height: 2),
                     Text(
                       widget.note['title'] ?? '',
-                      style: GoogleFonts.spaceGrotesk(
+                      style: GoogleFonts.inter(
                         fontSize: 14,
                         fontWeight: FontWeight.bold,
                         color: AppColors.textPrimary,
@@ -188,7 +188,7 @@ class _NotesDownloadTileState extends State<NotesDownloadTile> {
               widget.note['content'] as String,
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
-              style: GoogleFonts.spaceGrotesk(
+              style: GoogleFonts.inter(
                 fontSize: 13,
                 color: AppColors.textSecondary,
                 height: 1.4,
@@ -214,7 +214,7 @@ class _NotesDownloadTileState extends State<NotesDownloadTile> {
                     const SizedBox(width: 12),
                     Text(
                       '${(_progress * 100).toStringAsFixed(0)}%',
-                      style: GoogleFonts.spaceGrotesk(
+                      style: GoogleFonts.inter(
                         fontSize: 12,
                         fontWeight: FontWeight.bold,
                         color: primary,
@@ -237,7 +237,7 @@ class _NotesDownloadTileState extends State<NotesDownloadTile> {
                           },
                           icon: Icon(Icons.chat_bubble_outline, size: 16, color: primary),
                           label: Text('Discussion',
-                              style: GoogleFonts.spaceGrotesk(fontSize: 11, color: primary, fontWeight: FontWeight.bold)),
+                              style: GoogleFonts.inter(fontSize: 11, color: primary, fontWeight: FontWeight.bold)),
                           style: OutlinedButton.styleFrom(
                             side: BorderSide(color: primary.withValues(alpha: 0.5)),
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
@@ -260,7 +260,7 @@ class _NotesDownloadTileState extends State<NotesDownloadTile> {
                           ),
                           label: Text(
                             isDownloaded ? 'Open' : 'Download',
-                            style: GoogleFonts.spaceGrotesk(fontWeight: FontWeight.bold, color: Colors.black, fontSize: 11),
+                            style: GoogleFonts.inter(fontWeight: FontWeight.bold, color: Colors.black, fontSize: 11),
                           ),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: isDownloaded ? AppColors.success : primary,

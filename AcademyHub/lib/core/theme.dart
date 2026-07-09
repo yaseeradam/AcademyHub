@@ -40,19 +40,19 @@ class AppTheme {
           statusBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
         ),
         iconTheme: IconThemeData(color: AppColors.textPrimary),
-        titleTextStyle: GoogleFonts.spaceGrotesk(
+        titleTextStyle: GoogleFonts.inter(
           color: AppColors.textPrimary,
           fontSize: 20,
           fontWeight: FontWeight.bold,
         ),
       ),
-      textTheme: GoogleFonts.spaceGroteskTextTheme().copyWith(
-        displayLarge: GoogleFonts.spaceGrotesk(
+      textTheme: GoogleFonts.interTextTheme().copyWith(
+        displayLarge: GoogleFonts.inter(
             color: AppColors.textPrimary, fontWeight: FontWeight.bold),
-        titleLarge: GoogleFonts.spaceGrotesk(
+        titleLarge: GoogleFonts.inter(
             color: AppColors.textPrimary, fontWeight: FontWeight.bold),
-        bodyLarge: GoogleFonts.spaceGrotesk(color: AppColors.textPrimary),
-        bodyMedium: GoogleFonts.spaceGrotesk(color: AppColors.textSecondary),
+        bodyLarge: GoogleFonts.inter(color: AppColors.textPrimary),
+        bodyMedium: GoogleFonts.inter(color: AppColors.textSecondary),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
@@ -62,7 +62,7 @@ class AppTheme {
           padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
           shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(AppColors.radiusMedium)),
-          textStyle: GoogleFonts.spaceGrotesk(
+          textStyle: GoogleFonts.inter(
               fontWeight: FontWeight.bold, fontSize: 15),
         ),
       ),
@@ -90,8 +90,8 @@ class AppTheme {
           borderRadius: BorderRadius.circular(AppColors.radiusSmall),
           borderSide: BorderSide(color: primaryColor, width: 2),
         ),
-        hintStyle: GoogleFonts.spaceGrotesk(color: AppColors.textMuted),
-        labelStyle: GoogleFonts.spaceGrotesk(color: AppColors.textSecondary),
+        hintStyle: GoogleFonts.inter(color: AppColors.textMuted),
+        labelStyle: GoogleFonts.inter(color: AppColors.textSecondary),
       ),
       cardTheme: CardThemeData(
         color: AppColors.surface,
@@ -112,8 +112,8 @@ class AppTheme {
         unselectedItemColor: AppColors.textSecondary,
         elevation: 0,
         type: BottomNavigationBarType.fixed,
-        selectedLabelStyle: GoogleFonts.spaceGrotesk(fontWeight: FontWeight.bold, fontSize: 10),
-        unselectedLabelStyle: GoogleFonts.spaceGrotesk(fontWeight: FontWeight.w500, fontSize: 10),
+        selectedLabelStyle: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 10),
+        unselectedLabelStyle: GoogleFonts.inter(fontWeight: FontWeight.w500, fontSize: 10),
       ),
       progressIndicatorTheme: ProgressIndicatorThemeData(
         color: primaryColor,
@@ -124,21 +124,21 @@ class AppTheme {
         unselectedLabelColor: AppColors.textSecondary,
         indicatorColor: primaryColor,
         dividerColor: AppColors.borderLight,
-        labelStyle: GoogleFonts.spaceGrotesk(fontWeight: FontWeight.bold, fontSize: 11),
-        unselectedLabelStyle: GoogleFonts.spaceGrotesk(fontWeight: FontWeight.w500, fontSize: 11),
+        labelStyle: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 11),
+        unselectedLabelStyle: GoogleFonts.inter(fontWeight: FontWeight.w500, fontSize: 11),
       ),
       chipTheme: ChipThemeData(
         backgroundColor: AppColors.surface2,
-        labelStyle: GoogleFonts.spaceGrotesk(color: AppColors.textSecondary, fontSize: 11),
+        labelStyle: GoogleFonts.inter(color: AppColors.textSecondary, fontSize: 11),
         side: BorderSide(color: AppColors.borderLight),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       ),
       dialogTheme: DialogThemeData(
         backgroundColor: AppColors.surface,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppColors.radiusLarge)),
-        titleTextStyle: GoogleFonts.spaceGrotesk(
+        titleTextStyle: GoogleFonts.inter(
             color: AppColors.textPrimary, fontSize: 18, fontWeight: FontWeight.bold),
-        contentTextStyle: GoogleFonts.spaceGrotesk(color: AppColors.textSecondary, fontSize: 14),
+        contentTextStyle: GoogleFonts.inter(color: AppColors.textSecondary, fontSize: 14),
       ),
     );
   }

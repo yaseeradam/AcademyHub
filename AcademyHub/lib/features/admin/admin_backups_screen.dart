@@ -89,7 +89,7 @@ class _AdminBackupsScreenState extends State<AdminBackupsScreen> {
       backgroundColor: AppColors.background,
       appBar: AppBar(
         title: Text('Database Backups',
-            style: GoogleFonts.spaceGrotesk(
+            style: GoogleFonts.inter(
                 fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
         backgroundColor: AppColors.surface,
         elevation: 0,
@@ -111,8 +111,8 @@ class _AdminBackupsScreenState extends State<AdminBackupsScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('System Backups', style: GoogleFonts.spaceGrotesk(fontSize: 15, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
-                      Text('Create snapshot SQL databases archives.', style: GoogleFonts.spaceGrotesk(fontSize: 11, color: AppColors.textSecondary)),
+                      Text('System Backups', style: GoogleFonts.inter(fontSize: 15, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
+                      Text('Create snapshot SQL databases archives.', style: GoogleFonts.inter(fontSize: 11, color: AppColors.textSecondary)),
                     ],
                   ),
                 ),
@@ -120,7 +120,7 @@ class _AdminBackupsScreenState extends State<AdminBackupsScreen> {
                   onPressed: _triggering ? null : _triggerBackup,
                   style: ElevatedButton.styleFrom(backgroundColor: AppColors.success, foregroundColor: Colors.white),
                   icon: const Icon(Icons.backup_outlined, size: 16),
-                  label: Text('Trigger Backup', style: GoogleFonts.spaceGrotesk(fontSize: 12, fontWeight: FontWeight.bold)),
+                  label: Text('Trigger Backup', style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.bold)),
                 ),
               ],
             ),
@@ -129,7 +129,7 @@ class _AdminBackupsScreenState extends State<AdminBackupsScreen> {
             child: _loading
                 ? const Center(child: CircularProgressIndicator())
                 : _backups.isEmpty
-                    ? Center(child: Text('No backup archives recorded.', style: GoogleFonts.spaceGrotesk(color: AppColors.textMuted)))
+                    ? Center(child: Text('No backup archives recorded.', style: GoogleFonts.inter(color: AppColors.textMuted)))
                     : ListView.builder(
                         padding: const EdgeInsets.all(16),
                         itemCount: _backups.length,
@@ -155,8 +155,8 @@ class _AdminBackupsScreenState extends State<AdminBackupsScreen> {
                                   child: Column(
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
-                                      Text(filename, style: GoogleFonts.spaceGrotesk(fontWeight: FontWeight.bold, fontSize: 13, color: AppColors.textPrimary), maxLines: 1, overflow: TextOverflow.ellipsis),
-                                      Text('Size: $sizeKB KB • $created', style: GoogleFonts.spaceGrotesk(fontSize: 11, color: AppColors.textSecondary)),
+                                      Text(filename, style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 13, color: AppColors.textPrimary), maxLines: 1, overflow: TextOverflow.ellipsis),
+                                      Text('Size: $sizeKB KB • $created', style: GoogleFonts.inter(fontSize: 11, color: AppColors.textSecondary)),
                                     ],
                                   ),
                                 ),

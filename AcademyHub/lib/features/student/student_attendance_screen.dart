@@ -108,7 +108,7 @@ class _StudentAttendanceScreenState extends State<StudentAttendanceScreen> {
       appBar: AppBar(
         title: Text(
           'My Attendance',
-          style: GoogleFonts.spaceGrotesk(
+          style: GoogleFonts.inter(
             fontSize: 18,
             fontWeight: FontWeight.bold,
             color: AppColors.textPrimary,
@@ -178,7 +178,7 @@ class _StudentAttendanceScreenState extends State<StudentAttendanceScreen> {
                     ),
                     Text(
                       '${_attendanceRate.toStringAsFixed(0)}%',
-                      style: GoogleFonts.spaceGrotesk(
+                      style: GoogleFonts.inter(
                         fontSize: 14,
                         fontWeight: FontWeight.bold,
                         color: AppColors.textPrimary,
@@ -194,7 +194,7 @@ class _StudentAttendanceScreenState extends State<StudentAttendanceScreen> {
                   children: [
                     Text(
                       'Attendance Summary',
-                      style: GoogleFonts.spaceGrotesk(
+                      style: GoogleFonts.inter(
                         fontWeight: FontWeight.bold,
                         fontSize: 13,
                         color: AppColors.textPrimary,
@@ -203,7 +203,7 @@ class _StudentAttendanceScreenState extends State<StudentAttendanceScreen> {
                     const SizedBox(height: 2),
                     Text(
                       'Overall status: ${_attendanceRate >= 85 ? "Good Standings" : "At Risk of Lockout"}',
-                      style: GoogleFonts.spaceGrotesk(
+                      style: GoogleFonts.inter(
                         fontSize: 11,
                         color: _attendanceRate >= 85 ? AppColors.success : AppColors.error,
                         fontWeight: FontWeight.w600,
@@ -235,7 +235,7 @@ class _StudentAttendanceScreenState extends State<StudentAttendanceScreen> {
       children: [
         Text(
           value,
-          style: GoogleFonts.spaceGrotesk(
+          style: GoogleFonts.inter(
             fontSize: 12,
             fontWeight: FontWeight.bold,
             color: AppColors.textPrimary,
@@ -243,7 +243,7 @@ class _StudentAttendanceScreenState extends State<StudentAttendanceScreen> {
         ),
         Text(
           label,
-          style: GoogleFonts.spaceGrotesk(
+          style: GoogleFonts.inter(
             fontSize: 9,
             color: AppColors.textSecondary,
           ),
@@ -264,7 +264,7 @@ class _StudentAttendanceScreenState extends State<StudentAttendanceScreen> {
         children: [
           Text(
             'Presence Log',
-            style: GoogleFonts.spaceGrotesk(
+            style: GoogleFonts.inter(
               fontSize: 13,
               fontWeight: FontWeight.bold,
               color: AppColors.textPrimary,
@@ -281,11 +281,11 @@ class _StudentAttendanceScreenState extends State<StudentAttendanceScreen> {
               child: DropdownButton<String>(
                 value: _selectedStatus,
                 dropdownColor: AppColors.surface,
-                style: GoogleFonts.spaceGrotesk(color: AppColors.textPrimary, fontSize: 12),
+                style: GoogleFonts.inter(color: AppColors.textPrimary, fontSize: 12),
                 items: <String>['All', 'Present', 'Absent', 'Late', 'Excused'].map((String s) {
                   return DropdownMenuItem<String>(
                     value: s,
-                    child: Text(s, style: GoogleFonts.spaceGrotesk(color: AppColors.textPrimary)),
+                    child: Text(s, style: GoogleFonts.inter(color: AppColors.textPrimary)),
                   );
                 }).toList(),
                 onChanged: (val) {
@@ -355,7 +355,7 @@ class _StudentAttendanceScreenState extends State<StudentAttendanceScreen> {
                       const SizedBox(width: 8),
                       Text(
                         date,
-                        style: GoogleFonts.spaceGrotesk(
+                        style: GoogleFonts.inter(
                           fontSize: 13,
                           fontWeight: FontWeight.bold,
                           color: AppColors.textPrimary,
@@ -371,7 +371,7 @@ class _StudentAttendanceScreenState extends State<StudentAttendanceScreen> {
                     ),
                     child: Text(
                       statusStr.toString().toUpperCase(),
-                      style: GoogleFonts.spaceGrotesk(
+                      style: GoogleFonts.inter(
                         fontSize: 10,
                         fontWeight: FontWeight.bold,
                         color: badgeColor,
@@ -386,7 +386,7 @@ class _StudentAttendanceScreenState extends State<StudentAttendanceScreen> {
                 children: [
                   Text(
                     'Term $term • $session',
-                    style: GoogleFonts.spaceGrotesk(
+                    style: GoogleFonts.inter(
                       fontSize: 11,
                       color: AppColors.textSecondary,
                     ),
@@ -404,7 +404,7 @@ class _StudentAttendanceScreenState extends State<StudentAttendanceScreen> {
                   ),
                   child: Text(
                     'Remark: $note',
-                    style: GoogleFonts.spaceGrotesk(
+                    style: GoogleFonts.inter(
                       fontSize: 11,
                       color: AppColors.textSecondary,
                       fontStyle: FontStyle.italic,
@@ -432,7 +432,7 @@ class _StudentAttendanceScreenState extends State<StudentAttendanceScreen> {
               const SizedBox(height: 12),
               Text(
                 'No attendance logs recorded.',
-                style: GoogleFonts.spaceGrotesk(
+                style: GoogleFonts.inter(
                   fontSize: 13,
                   color: AppColors.textSecondary,
                 ),

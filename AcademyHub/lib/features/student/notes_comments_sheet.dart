@@ -134,7 +134,7 @@ class _NotesCommentsSheetState extends State<NotesCommentsSheet> {
               children: [
                 Expanded(
                   child: Text('Discussion: ${widget.noteTitle}',
-                      style: GoogleFonts.spaceGrotesk(
+                      style: GoogleFonts.inter(
                           fontSize: 15, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis),
@@ -154,7 +154,7 @@ class _NotesCommentsSheetState extends State<NotesCommentsSheet> {
                 : _comments.isEmpty
                     ? Center(
                         child: Text('No comments yet. Start the discussion!',
-                            style: GoogleFonts.spaceGrotesk(color: AppColors.textMuted)))
+                            style: GoogleFonts.inter(color: AppColors.textMuted)))
                     : ListView.builder(
                         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                         itemCount: _comments.length,
@@ -180,13 +180,13 @@ class _NotesCommentsSheetState extends State<NotesCommentsSheet> {
                                 children: [
                                   Text(
                                     author,
-                                    style: GoogleFonts.spaceGrotesk(
+                                    style: GoogleFonts.inter(
                                         fontSize: 11, fontWeight: FontWeight.bold, color: primary),
                                   ),
                                   const SizedBox(height: 4),
                                   Text(
                                     commentText,
-                                    style: GoogleFonts.spaceGrotesk(fontSize: 13, color: AppColors.textPrimary),
+                                    style: GoogleFonts.inter(fontSize: 13, color: AppColors.textPrimary),
                                   ),
                                 ],
                               ),
@@ -208,10 +208,10 @@ class _NotesCommentsSheetState extends State<NotesCommentsSheet> {
                 Expanded(
                   child: TextField(
                     controller: _commentController,
-                    style: GoogleFonts.spaceGrotesk(fontSize: 13, color: AppColors.textPrimary),
+                    style: GoogleFonts.inter(fontSize: 13, color: AppColors.textPrimary),
                     decoration: InputDecoration(
                       hintText: 'Add a comment...',
-                      hintStyle: GoogleFonts.spaceGrotesk(color: AppColors.textMuted),
+                      hintStyle: GoogleFonts.inter(color: AppColors.textMuted),
                       filled: true,
                       fillColor: AppColors.surface2,
                       border: OutlineInputBorder(

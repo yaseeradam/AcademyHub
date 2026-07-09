@@ -96,7 +96,7 @@ class _InitialSyncScreenState extends State<InitialSyncScreen>
               const SizedBox(height: 32),
               Text(
                 'Setting up for ${user?.name ?? 'you'}',
-                style: GoogleFonts.spaceGrotesk(
+                style: GoogleFonts.inter(
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
                   color: AppColors.textPrimary,
@@ -106,7 +106,7 @@ class _InitialSyncScreenState extends State<InitialSyncScreen>
               const SizedBox(height: 8),
               Text(
                 'Downloading your data so the app works offline too.',
-                style: GoogleFonts.spaceGrotesk(
+                style: GoogleFonts.inter(
                     fontSize: 14, color: AppColors.textSecondary),
                 textAlign: TextAlign.center,
               ),
@@ -126,14 +126,14 @@ class _InitialSyncScreenState extends State<InitialSyncScreen>
                 const SizedBox(height: 16),
                 Text(
                   _message,
-                  style: GoogleFonts.spaceGrotesk(
+                  style: GoogleFonts.inter(
                       fontSize: 13, color: AppColors.textSecondary),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 8),
                 Text(
                   '${(_progress * 100).toInt()}%',
-                  style: GoogleFonts.spaceGrotesk(
+                  style: GoogleFonts.inter(
                     fontSize: 13,
                     fontWeight: FontWeight.bold,
                     color: primary,
@@ -156,7 +156,7 @@ class _InitialSyncScreenState extends State<InitialSyncScreen>
                       const SizedBox(height: 12),
                       Text(
                         'Could not connect to server',
-                        style: GoogleFonts.spaceGrotesk(
+                        style: GoogleFonts.inter(
                           fontWeight: FontWeight.bold,
                           color: AppColors.textPrimary,
                         ),
@@ -164,7 +164,7 @@ class _InitialSyncScreenState extends State<InitialSyncScreen>
                       const SizedBox(height: 6),
                       Text(
                         'Check your internet connection and try again.',
-                        style: GoogleFonts.spaceGrotesk(
+                        style: GoogleFonts.inter(
                             fontSize: 13, color: AppColors.textSecondary),
                         textAlign: TextAlign.center,
                       ),
@@ -184,7 +184,7 @@ class _InitialSyncScreenState extends State<InitialSyncScreen>
                                     borderRadius: BorderRadius.circular(10)),
                               ),
                               child: Text('Skip for now',
-                                  style: GoogleFonts.spaceGrotesk(
+                                  style: GoogleFonts.inter(
                                       fontWeight: FontWeight.bold)),
                             ),
                           ),
@@ -209,7 +209,7 @@ class _InitialSyncScreenState extends State<InitialSyncScreen>
                                           strokeWidth: 2,
                                           color: Colors.black54))
                                   : Text('Retry',
-                                      style: GoogleFonts.spaceGrotesk(
+                                      style: GoogleFonts.inter(
                                           fontWeight: FontWeight.bold)),
                             ),
                           ),

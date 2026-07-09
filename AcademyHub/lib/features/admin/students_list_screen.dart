@@ -64,7 +64,7 @@ class _StudentsListScreenState extends State<StudentsListScreen> {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: Text('Students Directory', style: GoogleFonts.spaceGrotesk(fontWeight: FontWeight.bold, fontSize: 16, color: AppColors.textPrimary)),
+        title: Text('Students Directory', style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 16, color: AppColors.textPrimary)),
         backgroundColor: AppColors.surface,
         foregroundColor: AppColors.textPrimary,
         elevation: 0,
@@ -83,10 +83,10 @@ class _StudentsListScreenState extends State<StudentsListScreen> {
             color: AppColors.surface,
             padding: const EdgeInsets.all(16),
             child: TextField(
-              style: GoogleFonts.spaceGrotesk(color: AppColors.textPrimary, fontSize: 14),
+              style: GoogleFonts.inter(color: AppColors.textPrimary, fontSize: 14),
               decoration: InputDecoration(
                 hintText: 'Search by student name or admission number...',
-                hintStyle: GoogleFonts.spaceGrotesk(color: AppColors.textSecondary, fontSize: 14),
+                hintStyle: GoogleFonts.inter(color: AppColors.textSecondary, fontSize: 14),
                 prefixIcon: Icon(Icons.search_rounded, color: AppColors.textSecondary),
                 contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide(color: AppColors.borderLight)),
@@ -101,7 +101,7 @@ class _StudentsListScreenState extends State<StudentsListScreen> {
           if (_loading) LinearProgressIndicator(color: primary, minHeight: 2),
           Expanded(
             child: filteredStudents.isEmpty
-                ? Center(child: Text('No students found.', style: GoogleFonts.spaceGrotesk(color: AppColors.textSecondary, fontSize: 14)))
+                ? Center(child: Text('No students found.', style: GoogleFonts.inter(color: AppColors.textSecondary, fontSize: 14)))
                 : ListView.separated(
                     padding: const EdgeInsets.all(16),
                     itemCount: filteredStudents.length,
@@ -135,7 +135,7 @@ class _StudentsListScreenState extends State<StudentsListScreen> {
                                 backgroundColor: primary.withValues(alpha: 0.12),
                                 child: Text(
                                   initial,
-                                  style: GoogleFonts.spaceGrotesk(color: primary, fontWeight: FontWeight.bold, fontSize: 18),
+                                  style: GoogleFonts.inter(color: primary, fontWeight: FontWeight.bold, fontSize: 18),
                                 ),
                               ),
                               const SizedBox(width: 14),
@@ -143,10 +143,10 @@ class _StudentsListScreenState extends State<StudentsListScreen> {
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Text(name, style: GoogleFonts.spaceGrotesk(fontWeight: FontWeight.bold, fontSize: 14, color: AppColors.textPrimary)),
+                                    Text(name, style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 14, color: AppColors.textPrimary)),
                                     const SizedBox(height: 4),
-                                    Text(cls, style: GoogleFonts.spaceGrotesk(fontSize: 12, color: AppColors.textSecondary)),
-                                    Text(admNo, style: GoogleFonts.spaceGrotesk(fontSize: 11, color: AppColors.textSecondary)),
+                                    Text(cls, style: GoogleFonts.inter(fontSize: 12, color: AppColors.textSecondary)),
+                                    Text(admNo, style: GoogleFonts.inter(fontSize: 11, color: AppColors.textSecondary)),
                                   ],
                                 ),
                               ),

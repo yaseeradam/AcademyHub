@@ -41,7 +41,7 @@ class DashboardContent extends StatelessWidget {
               children: [
                 Text(
                   'Welcome back, ${user?.name ?? 'User'}!',
-                  style: GoogleFonts.spaceGrotesk(
+                  style: GoogleFonts.inter(
                     fontSize: 22,
                     fontWeight: FontWeight.bold,
                     color: Colors.white,
@@ -57,7 +57,7 @@ class DashboardContent extends StatelessWidget {
                   ),
                   child: Text(
                     (user?.role ?? 'user').toUpperCase(),
-                    style: GoogleFonts.spaceGrotesk(
+                    style: GoogleFonts.inter(
                       fontSize: 11,
                       fontWeight: FontWeight.bold,
                       color: Colors.white70,
@@ -67,7 +67,7 @@ class DashboardContent extends StatelessWidget {
                 const SizedBox(height: 6),
                 Text(
                   'AcademyHub Dashboard',
-                  style: GoogleFonts.spaceGrotesk(
+                  style: GoogleFonts.inter(
                     fontSize: 13,
                     color: Colors.white70,
                   ),
@@ -80,7 +80,7 @@ class DashboardContent extends StatelessWidget {
 
           Text(
             'Quick Overview',
-            style: GoogleFonts.spaceGrotesk(
+            style: GoogleFonts.inter(
               fontSize: 14,
               fontWeight: FontWeight.bold,
               color: AppColors.textPrimary,
@@ -127,7 +127,7 @@ class DashboardContent extends StatelessWidget {
 
           Text(
             'Recent Activity',
-            style: GoogleFonts.spaceGrotesk(
+            style: GoogleFonts.inter(
               fontSize: 14,
               fontWeight: FontWeight.bold,
               color: AppColors.textPrimary,
@@ -150,7 +150,7 @@ class DashboardContent extends StatelessWidget {
                 const SizedBox(height: 12),
                 Text(
                   'No recent activity',
-                  style: GoogleFonts.spaceGrotesk(
+                  style: GoogleFonts.inter(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
                     color: AppColors.textSecondary,
@@ -159,7 +159,7 @@ class DashboardContent extends StatelessWidget {
                 const SizedBox(height: 6),
                 Text(
                   'Activity will appear here as you use the system',
-                  style: GoogleFonts.spaceGrotesk(
+                  style: GoogleFonts.inter(
                     fontSize: 12,
                     color: AppColors.textMuted,
                   ),

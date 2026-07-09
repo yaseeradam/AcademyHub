@@ -147,7 +147,7 @@ class _CSVScoresImporterState extends State<CSVScoresImporter> {
       backgroundColor: AppColors.background,
       appBar: AppBar(
         title: Text('CSV Scores Importer',
-            style: GoogleFonts.spaceGrotesk(
+            style: GoogleFonts.inter(
                 fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
         backgroundColor: AppColors.surface,
         elevation: 0,
@@ -168,10 +168,10 @@ class _CSVScoresImporterState extends State<CSVScoresImporter> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(widget.className,
-                            style: GoogleFonts.spaceGrotesk(
+                            style: GoogleFonts.inter(
                                 fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
                         Text(widget.subjectName,
-                            style: GoogleFonts.spaceGrotesk(fontSize: 12, color: AppColors.textSecondary)),
+                            style: GoogleFonts.inter(fontSize: 12, color: AppColors.textSecondary)),
                       ],
                     ),
                     ElevatedButton.icon(
@@ -183,7 +183,7 @@ class _CSVScoresImporterState extends State<CSVScoresImporter> {
                       ),
                       icon: const Icon(Icons.upload_file, size: 16),
                       label: Text('Select CSV',
-                          style: GoogleFonts.spaceGrotesk(fontSize: 12, fontWeight: FontWeight.bold)),
+                          style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.bold)),
                     ),
                   ],
                 ),
@@ -194,7 +194,7 @@ class _CSVScoresImporterState extends State<CSVScoresImporter> {
             child: _records.isEmpty
                 ? Center(
                     child: Text('No CSV records loaded yet.',
-                        style: GoogleFonts.spaceGrotesk(color: AppColors.textMuted)),
+                        style: GoogleFonts.inter(color: AppColors.textMuted)),
                   )
                 : ListView.builder(
                     padding: const EdgeInsets.all(16),
@@ -213,10 +213,10 @@ class _CSVScoresImporterState extends State<CSVScoresImporter> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(record.studentName,
-                                style: GoogleFonts.spaceGrotesk(
+                                style: GoogleFonts.inter(
                                     fontSize: 14, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
                             Text('Admission: ${record.admissionNumber}',
-                                style: GoogleFonts.spaceGrotesk(fontSize: 11, color: AppColors.textSecondary)),
+                                style: GoogleFonts.inter(fontSize: 11, color: AppColors.textSecondary)),
                             const SizedBox(height: 12),
                             Row(
                               children: [
@@ -248,7 +248,7 @@ class _CSVScoresImporterState extends State<CSVScoresImporter> {
                   child: _importing
                       ? const CircularProgressIndicator(color: Colors.white)
                       : Text('Import Scores',
-                          style: GoogleFonts.spaceGrotesk(
+                          style: GoogleFonts.inter(
                               color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14)),
                 ),
               ),
@@ -263,12 +263,12 @@ class _CSVScoresImporterState extends State<CSVScoresImporter> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(label, style: GoogleFonts.spaceGrotesk(fontSize: 11, color: AppColors.textSecondary)),
+          Text(label, style: GoogleFonts.inter(fontSize: 11, color: AppColors.textSecondary)),
           const SizedBox(height: 4),
           TextFormField(
             initialValue: value.toString(),
             keyboardType: TextInputType.number,
-            style: GoogleFonts.spaceGrotesk(fontSize: 13, color: AppColors.textPrimary),
+            style: GoogleFonts.inter(fontSize: 13, color: AppColors.textPrimary),
             decoration: InputDecoration(
               filled: true,
               fillColor: AppColors.surface2,

@@ -48,17 +48,17 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: AppColors.surface,
-        title: Text('Delete User Account', style: GoogleFonts.spaceGrotesk(fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
-        content: Text('Are you sure you want to permanently delete this user?', style: GoogleFonts.spaceGrotesk(color: AppColors.textSecondary)),
+        title: Text('Delete User Account', style: GoogleFonts.inter(fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
+        content: Text('Are you sure you want to permanently delete this user?', style: GoogleFonts.inter(color: AppColors.textSecondary)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: Text('Cancel', style: GoogleFonts.spaceGrotesk(color: AppColors.textSecondary)),
+            child: Text('Cancel', style: GoogleFonts.inter(color: AppColors.textSecondary)),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
             style: ElevatedButton.styleFrom(backgroundColor: AppColors.error),
-            child: Text('Delete', style: GoogleFonts.spaceGrotesk(color: Colors.white)),
+            child: Text('Delete', style: GoogleFonts.inter(color: Colors.white)),
           ),
         ],
       ),
@@ -95,42 +95,42 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
         builder: (context, setDialogState) => AlertDialog(
           backgroundColor: AppColors.surface,
           title: Text(user == null ? 'Create User' : 'Edit User',
-              style: GoogleFonts.spaceGrotesk(fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
+              style: GoogleFonts.inter(fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
           content: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 TextField(
                   controller: nameController,
-                  style: GoogleFonts.spaceGrotesk(color: AppColors.textPrimary),
+                  style: GoogleFonts.inter(color: AppColors.textPrimary),
                   decoration: InputDecoration(
                     labelText: 'Full Name',
-                    labelStyle: GoogleFonts.spaceGrotesk(color: AppColors.textSecondary),
+                    labelStyle: GoogleFonts.inter(color: AppColors.textSecondary),
                   ),
                 ),
                 TextField(
                   controller: emailController,
-                  style: GoogleFonts.spaceGrotesk(color: AppColors.textPrimary),
+                  style: GoogleFonts.inter(color: AppColors.textPrimary),
                   decoration: InputDecoration(
                     labelText: 'Email Address',
-                    labelStyle: GoogleFonts.spaceGrotesk(color: AppColors.textSecondary),
+                    labelStyle: GoogleFonts.inter(color: AppColors.textSecondary),
                   ),
                 ),
                 TextField(
                   controller: phoneController,
-                  style: GoogleFonts.spaceGrotesk(color: AppColors.textPrimary),
+                  style: GoogleFonts.inter(color: AppColors.textPrimary),
                   decoration: InputDecoration(
                     labelText: 'WhatsApp Phone',
-                    labelStyle: GoogleFonts.spaceGrotesk(color: AppColors.textSecondary),
+                    labelStyle: GoogleFonts.inter(color: AppColors.textSecondary),
                   ),
                 ),
                 TextField(
                   controller: passController,
                   obscureText: true,
-                  style: GoogleFonts.spaceGrotesk(color: AppColors.textPrimary),
+                  style: GoogleFonts.inter(color: AppColors.textPrimary),
                   decoration: InputDecoration(
                     labelText: user == null ? 'Password' : 'Password (leave blank to keep current)',
-                    labelStyle: GoogleFonts.spaceGrotesk(color: AppColors.textSecondary),
+                    labelStyle: GoogleFonts.inter(color: AppColors.textSecondary),
                   ),
                 ),
                 const SizedBox(height: 14),
@@ -138,13 +138,13 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
                 DropdownButtonFormField<String>(
                   initialValue: role,
                   dropdownColor: AppColors.surface,
-                  style: GoogleFonts.spaceGrotesk(color: AppColors.textPrimary),
+                  style: GoogleFonts.inter(color: AppColors.textPrimary),
                   decoration: InputDecoration(
                     labelText: 'System Role',
-                    labelStyle: GoogleFonts.spaceGrotesk(color: AppColors.textSecondary),
+                    labelStyle: GoogleFonts.inter(color: AppColors.textSecondary),
                   ),
                   items: ['admin', 'teacher', 'parent', 'bursar'].map((r) {
-                    return DropdownMenuItem<String>(value: r, child: Text(r.toUpperCase(), style: GoogleFonts.spaceGrotesk(fontSize: 13, color: AppColors.textPrimary)));
+                    return DropdownMenuItem<String>(value: r, child: Text(r.toUpperCase(), style: GoogleFonts.inter(fontSize: 13, color: AppColors.textPrimary)));
                   }).toList(),
                   onChanged: (val) {
                     if (val != null) {
@@ -154,7 +154,7 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
                 ),
                 const SizedBox(height: 12),
                 CheckboxListTile(
-                  title: Text('Account Active?', style: GoogleFonts.spaceGrotesk(color: AppColors.textPrimary)),
+                  title: Text('Account Active?', style: GoogleFonts.inter(color: AppColors.textPrimary)),
                   value: isActive,
                   onChanged: (val) {
                     if (val != null) {
@@ -168,12 +168,12 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context, false),
-              child: Text('Cancel', style: GoogleFonts.spaceGrotesk(color: AppColors.textSecondary)),
+              child: Text('Cancel', style: GoogleFonts.inter(color: AppColors.textSecondary)),
             ),
             ElevatedButton(
               onPressed: () => Navigator.pop(context, true),
               style: ElevatedButton.styleFrom(backgroundColor: context.read<AuthProvider>().tenantPrimaryColor),
-              child: Text('Save', style: GoogleFonts.spaceGrotesk(color: Colors.black)),
+              child: Text('Save', style: GoogleFonts.inter(color: Colors.black)),
             ),
           ],
         ),
@@ -214,7 +214,7 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
       backgroundColor: AppColors.background,
       appBar: AppBar(
         title: Text('User Management',
-            style: GoogleFonts.spaceGrotesk(
+            style: GoogleFonts.inter(
                 fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
         backgroundColor: AppColors.surface,
         elevation: 0,
@@ -226,7 +226,7 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
       body: _loading
           ? const Center(child: CircularProgressIndicator())
           : _users.isEmpty
-              ? Center(child: Text('No accounts directory items found.', style: GoogleFonts.spaceGrotesk(color: AppColors.textMuted)))
+              ? Center(child: Text('No accounts directory items found.', style: GoogleFonts.inter(color: AppColors.textMuted)))
               : ListView.builder(
                   padding: const EdgeInsets.all(16),
                   itemCount: _users.length,
@@ -256,21 +256,21 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(name, style: GoogleFonts.spaceGrotesk(fontWeight: FontWeight.bold, fontSize: 13, color: AppColors.textPrimary)),
-                                Text(email, style: GoogleFonts.spaceGrotesk(fontSize: 11, color: AppColors.textSecondary)),
+                                Text(name, style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 13, color: AppColors.textPrimary)),
+                                Text(email, style: GoogleFonts.inter(fontSize: 11, color: AppColors.textSecondary)),
                                 const SizedBox(height: 4),
                                 Row(
                                   children: [
                                     Container(
                                       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                                       decoration: BoxDecoration(color: primary.withValues(alpha: 0.15), borderRadius: BorderRadius.circular(4)),
-                                      child: Text(role.toString().toUpperCase(), style: GoogleFonts.spaceGrotesk(fontSize: 9, color: primary, fontWeight: FontWeight.bold)),
+                                      child: Text(role.toString().toUpperCase(), style: GoogleFonts.inter(fontSize: 9, color: primary, fontWeight: FontWeight.bold)),
                                     ),
                                     const SizedBox(width: 6),
                                     Container(
                                       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                                       decoration: BoxDecoration(color: active ? AppColors.success.withValues(alpha: 0.12) : AppColors.error.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(4)),
-                                      child: Text(active ? 'ACTIVE' : 'SUSPENDED', style: GoogleFonts.spaceGrotesk(fontSize: 9, color: active ? AppColors.success : AppColors.error, fontWeight: FontWeight.bold)),
+                                      child: Text(active ? 'ACTIVE' : 'SUSPENDED', style: GoogleFonts.inter(fontSize: 9, color: active ? AppColors.success : AppColors.error, fontWeight: FontWeight.bold)),
                                     ),
                                   ],
                                 ),

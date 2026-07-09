@@ -79,13 +79,13 @@ class _HomeworkSubmitSheetState extends State<HomeworkSubmitSheet> {
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: AppColors.surface,
-        title: Text('Select File Attachment', style: GoogleFonts.spaceGrotesk(fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
+        title: Text('Select File Attachment', style: GoogleFonts.inter(fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: mockFiles.map((f) => ListTile(
             leading: Icon(Icons.insert_drive_file, color: context.read<AuthProvider>().tenantPrimaryColor),
-            title: Text(f.name, style: GoogleFonts.spaceGrotesk(fontSize: 13, color: AppColors.textPrimary)),
-            subtitle: Text('${(f.size / 1024).toStringAsFixed(0)} KB', style: GoogleFonts.spaceGrotesk(fontSize: 10, color: AppColors.textMuted)),
+            title: Text(f.name, style: GoogleFonts.inter(fontSize: 13, color: AppColors.textPrimary)),
+            subtitle: Text('${(f.size / 1024).toStringAsFixed(0)} KB', style: GoogleFonts.inter(fontSize: 10, color: AppColors.textMuted)),
             onTap: () => Navigator.pop(context, f),
           )).toList(),
         ),
@@ -203,7 +203,7 @@ class _HomeworkSubmitSheetState extends State<HomeworkSubmitSheet> {
                 Expanded(
                   child: Text(
                     widget.homework['title'] ?? 'Homework Details',
-                    style: GoogleFonts.spaceGrotesk(
+                    style: GoogleFonts.inter(
                         fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -236,13 +236,13 @@ class _HomeworkSubmitSheetState extends State<HomeworkSubmitSheet> {
                           children: [
                             Text(
                               widget.homework['subject_name'] ?? 'General',
-                              style: GoogleFonts.spaceGrotesk(
+                              style: GoogleFonts.inter(
                                   fontSize: 11, fontWeight: FontWeight.bold, color: primary),
                             ),
                             const SizedBox(height: 6),
                             Text(
                               widget.homework['content'] ?? widget.homework['description'] ?? '',
-                              style: GoogleFonts.spaceGrotesk(fontSize: 13, color: AppColors.textPrimary, height: 1.4),
+                              style: GoogleFonts.inter(fontSize: 13, color: AppColors.textPrimary, height: 1.4),
                             ),
                             const SizedBox(height: 12),
                             Row(
@@ -251,7 +251,7 @@ class _HomeworkSubmitSheetState extends State<HomeworkSubmitSheet> {
                                 const SizedBox(width: 4),
                                 Text(
                                   'Due Date: ${widget.homework['due_date'] ?? ''}',
-                                  style: GoogleFonts.spaceGrotesk(fontSize: 11, color: AppColors.textMuted),
+                                  style: GoogleFonts.inter(fontSize: 11, color: AppColors.textMuted),
                                 ),
                               ],
                             ),
@@ -266,17 +266,17 @@ class _HomeworkSubmitSheetState extends State<HomeworkSubmitSheet> {
                       if (!isSubmitted) ...[
                         Text(
                           'Your Submission',
-                          style: GoogleFonts.spaceGrotesk(
+                          style: GoogleFonts.inter(
                               fontSize: 14, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
                         ),
                         const SizedBox(height: 8),
                         TextField(
                           controller: _submissionController,
-                          style: GoogleFonts.spaceGrotesk(fontSize: 13, color: AppColors.textPrimary),
+                          style: GoogleFonts.inter(fontSize: 13, color: AppColors.textPrimary),
                           maxLines: 4,
                           decoration: InputDecoration(
                             hintText: 'Type your text response here (optional)...',
-                            hintStyle: GoogleFonts.spaceGrotesk(color: AppColors.textMuted),
+                            hintStyle: GoogleFonts.inter(color: AppColors.textMuted),
                             filled: true,
                             fillColor: AppColors.surface2,
                             border: OutlineInputBorder(
@@ -302,7 +302,7 @@ class _HomeworkSubmitSheetState extends State<HomeworkSubmitSheet> {
                                 Expanded(
                                   child: Text(
                                     _selectedFile != null ? _selectedFile!.name : 'Attach a Document/Photo (Simulated)',
-                                    style: GoogleFonts.spaceGrotesk(
+                                    style: GoogleFonts.inter(
                                       fontSize: 12,
                                       color: _selectedFile != null ? AppColors.textPrimary : AppColors.textMuted,
                                       fontWeight: _selectedFile != null ? FontWeight.bold : FontWeight.normal,
@@ -334,7 +334,7 @@ class _HomeworkSubmitSheetState extends State<HomeworkSubmitSheet> {
                                 ? const CircularProgressIndicator(color: Colors.white)
                                 : Text(
                                     'Submit Assignment',
-                                    style: GoogleFonts.spaceGrotesk(
+                                    style: GoogleFonts.inter(
                                         color: Colors.black, fontWeight: FontWeight.bold, fontSize: 13),
                                   ),
                           ),
@@ -370,7 +370,7 @@ class _HomeworkSubmitSheetState extends State<HomeworkSubmitSheet> {
               const SizedBox(width: 8),
               Text(
                 hasGrade ? 'Graded' : 'Submitted & Pending Review',
-                style: GoogleFonts.spaceGrotesk(
+                style: GoogleFonts.inter(
                   fontSize: 13,
                   fontWeight: FontWeight.bold,
                   color: hasGrade ? AppColors.success : AppColors.info,
@@ -381,13 +381,13 @@ class _HomeworkSubmitSheetState extends State<HomeworkSubmitSheet> {
           if (hasGrade) ...[
             const SizedBox(height: 10),
             Text('Grade: $grade',
-                style: GoogleFonts.spaceGrotesk(
+                style: GoogleFonts.inter(
                     fontSize: 14, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
           ],
           if (feedback != null && feedback.isNotEmpty) ...[
             const SizedBox(height: 6),
             Text('Feedback: $feedback',
-                style: GoogleFonts.spaceGrotesk(
+                style: GoogleFonts.inter(
                     fontSize: 12, color: AppColors.textSecondary, fontStyle: FontStyle.italic)),
           ],
         ],

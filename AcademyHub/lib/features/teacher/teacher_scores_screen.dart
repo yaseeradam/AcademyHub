@@ -196,10 +196,10 @@ class _TeacherScoresScreenState extends State<TeacherScoresScreen> {
                   decoration: _inputDecoration('Class'),
                   dropdownColor: AppColors.surface2,
                   initialValue: _selectedClassId,
-                  style: GoogleFonts.spaceGrotesk(color: AppColors.textPrimary, fontSize: 14),
+                  style: GoogleFonts.inter(color: AppColors.textPrimary, fontSize: 14),
                   items: _classes.map((c) => DropdownMenuItem<int>(
                     value: c['id'] as int,
-                    child: Text(c['name'] as String, style: GoogleFonts.spaceGrotesk(color: AppColors.textPrimary)),
+                    child: Text(c['name'] as String, style: GoogleFonts.inter(color: AppColors.textPrimary)),
                   )).toList(),
                   onChanged: (v) { if (v != null) _onClassChanged(v); },
                 ),
@@ -210,7 +210,7 @@ class _TeacherScoresScreenState extends State<TeacherScoresScreen> {
                   decoration: _inputDecoration('Term'),
                   dropdownColor: AppColors.surface2,
                   initialValue: _term,
-                  style: GoogleFonts.spaceGrotesk(color: AppColors.textPrimary, fontSize: 14),
+                  style: GoogleFonts.inter(color: AppColors.textPrimary, fontSize: 14),
                   items: [
                     DropdownMenuItem(value: 1, child: Text('Term 1', style: TextStyle(color: AppColors.textPrimary))),
                     DropdownMenuItem(value: 2, child: Text('Term 2', style: TextStyle(color: AppColors.textPrimary))),
@@ -227,10 +227,10 @@ class _TeacherScoresScreenState extends State<TeacherScoresScreen> {
               decoration: _inputDecoration('Subject'),
               dropdownColor: AppColors.surface2,
               initialValue: _selectedSubjectId,
-              style: GoogleFonts.spaceGrotesk(color: AppColors.textPrimary, fontSize: 14),
+              style: GoogleFonts.inter(color: AppColors.textPrimary, fontSize: 14),
               items: _subjects.map((s) => DropdownMenuItem<int>(
                 value: s['id'] as int,
-                child: Text(s['name'] as String, style: GoogleFonts.spaceGrotesk(color: AppColors.textPrimary)),
+                child: Text(s['name'] as String, style: GoogleFonts.inter(color: AppColors.textPrimary)),
               )).toList(),
               onChanged: (v) { if (v != null) _onSubjectChanged(v); },
             ),
@@ -252,7 +252,7 @@ class _TeacherScoresScreenState extends State<TeacherScoresScreen> {
                   });
                 },
                 icon: Icon(Icons.upload_file, size: 16, color: accent),
-                label: Text('Import Scores from CSV', style: GoogleFonts.spaceGrotesk(fontSize: 12, fontWeight: FontWeight.bold, color: accent)),
+                label: Text('Import Scores from CSV', style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.bold, color: accent)),
                 style: OutlinedButton.styleFrom(
                   side: BorderSide(color: accent),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
@@ -275,7 +275,7 @@ class _TeacherScoresScreenState extends State<TeacherScoresScreen> {
             const SizedBox(height: 12),
             Text(
               'Select a class and subject to enter grades',
-              style: GoogleFonts.spaceGrotesk(color: AppColors.textSecondary, fontSize: 14),
+              style: GoogleFonts.inter(color: AppColors.textSecondary, fontSize: 14),
             ),
           ],
         ),
@@ -302,9 +302,9 @@ class _TeacherScoresScreenState extends State<TeacherScoresScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('${s['first_name'] ?? ''} ${s['last_name'] ?? ''}', style: GoogleFonts.spaceGrotesk(fontWeight: FontWeight.bold, fontSize: 14, color: AppColors.textPrimary)),
+              Text('${s['first_name'] ?? ''} ${s['last_name'] ?? ''}', style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 14, color: AppColors.textPrimary)),
               const SizedBox(height: 2),
-              Text(s['admission_number'] ?? '', style: GoogleFonts.spaceGrotesk(fontSize: 11, color: AppColors.textSecondary)),
+              Text(s['admission_number'] ?? '', style: GoogleFonts.inter(fontSize: 11, color: AppColors.textSecondary)),
               const SizedBox(height: 14),
               Row(
                 children: [
@@ -334,8 +334,8 @@ class _TeacherScoresScreenState extends State<TeacherScoresScreen> {
                             ),
                             child: Column(
                               children: [
-                                Text('$total', style: GoogleFonts.spaceGrotesk(fontWeight: FontWeight.bold, fontSize: 16, color: AppColors.info)),
-                                Text('Total', style: GoogleFonts.spaceGrotesk(fontSize: 9, color: AppColors.textSecondary)),
+                                Text('$total', style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 16, color: AppColors.info)),
+                                Text('Total', style: GoogleFonts.inter(fontSize: 9, color: AppColors.textSecondary)),
                               ],
                             ),
                           );
@@ -358,10 +358,10 @@ class _TeacherScoresScreenState extends State<TeacherScoresScreen> {
         controller: controller,
         keyboardType: TextInputType.number,
         textAlign: TextAlign.center,
-        style: GoogleFonts.spaceGrotesk(color: AppColors.textPrimary, fontSize: 14, fontWeight: FontWeight.bold),
+        style: GoogleFonts.inter(color: AppColors.textPrimary, fontSize: 14, fontWeight: FontWeight.bold),
         decoration: InputDecoration(
           labelText: label,
-          labelStyle: GoogleFonts.spaceGrotesk(color: AppColors.textSecondary, fontSize: 11),
+          labelStyle: GoogleFonts.inter(color: AppColors.textSecondary, fontSize: 11),
           border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: AppColors.borderLight)),
           enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: AppColors.borderLight)),
           focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: AppColors.primary, width: 1.5)),
@@ -398,7 +398,7 @@ class _TeacherScoresScreenState extends State<TeacherScoresScreen> {
                 )
               : Text(
                   'Save Scores',
-                  style: GoogleFonts.spaceGrotesk(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 15),
+                  style: GoogleFonts.inter(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 15),
                 ),
         ),
       ),
@@ -407,7 +407,7 @@ class _TeacherScoresScreenState extends State<TeacherScoresScreen> {
 
   InputDecoration _inputDecoration(String label) => InputDecoration(
         labelText: label,
-        labelStyle: GoogleFonts.spaceGrotesk(color: AppColors.textSecondary, fontSize: 12),
+        labelStyle: GoogleFonts.inter(color: AppColors.textSecondary, fontSize: 12),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
           borderSide: BorderSide(color: AppColors.borderLight),

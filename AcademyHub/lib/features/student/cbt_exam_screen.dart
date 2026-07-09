@@ -136,17 +136,17 @@ class _CbtExamScreenState extends State<CbtExamScreen> {
       builder: (context) => AlertDialog(
         backgroundColor: AppColors.surface,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Text('Submit Exam', style: GoogleFonts.spaceGrotesk(color: AppColors.textPrimary, fontWeight: FontWeight.bold)),
-        content: Text('Are you sure you want to finish and submit your exam answers?', style: GoogleFonts.spaceGrotesk(color: AppColors.textSecondary)),
+        title: Text('Submit Exam', style: GoogleFonts.inter(color: AppColors.textPrimary, fontWeight: FontWeight.bold)),
+        content: Text('Are you sure you want to finish and submit your exam answers?', style: GoogleFonts.inter(color: AppColors.textSecondary)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: Text('Cancel', style: GoogleFonts.spaceGrotesk(color: AppColors.textSecondary)),
+            child: Text('Cancel', style: GoogleFonts.inter(color: AppColors.textSecondary)),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
             style: ElevatedButton.styleFrom(backgroundColor: AppColors.success, foregroundColor: Colors.black),
-            child: Text('Submit', style: GoogleFonts.spaceGrotesk(fontWeight: FontWeight.bold)),
+            child: Text('Submit', style: GoogleFonts.inter(fontWeight: FontWeight.bold)),
           ),
         ],
       ),
@@ -198,7 +198,7 @@ class _CbtExamScreenState extends State<CbtExamScreen> {
       builder: (context) => AlertDialog(
         backgroundColor: AppColors.surface,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Text(passed ? 'Congratulations!' : 'Exam Completed', style: GoogleFonts.spaceGrotesk(color: AppColors.textPrimary, fontWeight: FontWeight.bold)),
+        title: Text(passed ? 'Congratulations!' : 'Exam Completed', style: GoogleFonts.inter(color: AppColors.textPrimary, fontWeight: FontWeight.bold)),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -210,13 +210,13 @@ class _CbtExamScreenState extends State<CbtExamScreen> {
             const SizedBox(height: 16),
             Text(
               'Your Score: ${score.toStringAsFixed(1)}%',
-              style: GoogleFonts.spaceGrotesk(fontSize: 22, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+              style: GoogleFonts.inter(fontSize: 22, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
             ),
             const SizedBox(height: 8),
             Text(
               passed ? 'You passed the exam!' : 'You did not satisfy the pass percentage of $passingScore%.',
               textAlign: TextAlign.center,
-              style: GoogleFonts.spaceGrotesk(color: AppColors.textSecondary, fontSize: 13),
+              style: GoogleFonts.inter(color: AppColors.textSecondary, fontSize: 13),
             ),
           ],
         ),
@@ -224,7 +224,7 @@ class _CbtExamScreenState extends State<CbtExamScreen> {
           ElevatedButton(
             onPressed: () => Navigator.pop(context),
             style: ElevatedButton.styleFrom(backgroundColor: passed ? AppColors.success : AppColors.studentAccent),
-            child: Text('Close', style: GoogleFonts.spaceGrotesk(fontWeight: FontWeight.bold, color: Colors.black)),
+            child: Text('Close', style: GoogleFonts.inter(fontWeight: FontWeight.bold, color: Colors.black)),
           ),
         ],
       ),
@@ -256,7 +256,7 @@ class _CbtExamScreenState extends State<CbtExamScreen> {
         body: Center(
           child: Text(
             'No questions available in this exam.',
-            style: GoogleFonts.spaceGrotesk(color: AppColors.textSecondary),
+            style: GoogleFonts.inter(color: AppColors.textSecondary),
           ),
         ),
       );
@@ -280,20 +280,20 @@ class _CbtExamScreenState extends State<CbtExamScreen> {
           builder: (context) => AlertDialog(
             backgroundColor: AppColors.surface,
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-            title: Text('Pause Exam?', style: GoogleFonts.spaceGrotesk(color: AppColors.textPrimary, fontWeight: FontWeight.bold)),
+            title: Text('Pause Exam?', style: GoogleFonts.inter(color: AppColors.textPrimary, fontWeight: FontWeight.bold)),
             content: Text(
               'You can pause the exam. Your selected answers are saved locally. However, the exam duration timer will continue running.',
-              style: GoogleFonts.spaceGrotesk(color: AppColors.textSecondary),
+              style: GoogleFonts.inter(color: AppColors.textSecondary),
             ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context, false),
-                child: Text('Keep Working', style: GoogleFonts.spaceGrotesk(color: AppColors.textSecondary)),
+                child: Text('Keep Working', style: GoogleFonts.inter(color: AppColors.textSecondary)),
               ),
               ElevatedButton(
                 onPressed: () => Navigator.pop(context, true),
                 style: ElevatedButton.styleFrom(backgroundColor: AppColors.error, foregroundColor: Colors.white),
-                child: Text('Pause & Exit', style: GoogleFonts.spaceGrotesk(fontWeight: FontWeight.bold)),
+                child: Text('Pause & Exit', style: GoogleFonts.inter(fontWeight: FontWeight.bold)),
               ),
             ],
           ),
@@ -305,7 +305,7 @@ class _CbtExamScreenState extends State<CbtExamScreen> {
       child: Scaffold(
         backgroundColor: AppColors.background,
         appBar: AppBar(
-          title: Text(widget.exam['title'] ?? 'CBT Exam', style: GoogleFonts.spaceGrotesk(color: AppColors.textPrimary, fontWeight: FontWeight.bold, fontSize: 16)),
+          title: Text(widget.exam['title'] ?? 'CBT Exam', style: GoogleFonts.inter(color: AppColors.textPrimary, fontWeight: FontWeight.bold, fontSize: 16)),
           backgroundColor: AppColors.surface,
           foregroundColor: AppColors.textPrimary,
           elevation: 0,
@@ -339,7 +339,7 @@ class _CbtExamScreenState extends State<CbtExamScreen> {
                   const SizedBox(width: 4),
                   Text(
                     _formatDuration(_secondsRemaining),
-                    style: GoogleFonts.spaceGrotesk(
+                    style: GoogleFonts.inter(
                       fontSize: 13,
                       fontWeight: FontWeight.bold,
                       color: isTimeCritical ? AppColors.error : AppColors.textPrimary,
@@ -366,7 +366,7 @@ class _CbtExamScreenState extends State<CbtExamScreen> {
                 children: [
                   Text(
                     'Question ${_currentQuestionIndex + 1} of ${_questions.length}',
-                    style: GoogleFonts.spaceGrotesk(
+                    style: GoogleFonts.inter(
                       color: AppColors.textSecondary,
                       fontSize: 12,
                       fontWeight: FontWeight.bold,
@@ -376,7 +376,7 @@ class _CbtExamScreenState extends State<CbtExamScreen> {
                   const SizedBox(height: 12),
                   Text(
                     activeQuestion['question_text'] ?? '',
-                    style: GoogleFonts.spaceGrotesk(
+                    style: GoogleFonts.inter(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
                       color: AppColors.textPrimary,
@@ -419,7 +419,7 @@ class _CbtExamScreenState extends State<CbtExamScreen> {
                         ),
                         title: Text(
                           option,
-                          style: GoogleFonts.spaceGrotesk(
+                          style: GoogleFonts.inter(
                             fontSize: 14,
                             fontWeight: selected ? FontWeight.bold : FontWeight.normal,
                             color: selected ? AppColors.textPrimary : AppColors.textSecondary,
@@ -452,7 +452,7 @@ class _CbtExamScreenState extends State<CbtExamScreen> {
                       side: BorderSide(color: AppColors.borderLight),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                     ),
-                    child: Text('Previous', style: GoogleFonts.spaceGrotesk(color: AppColors.textPrimary)),
+                    child: Text('Previous', style: GoogleFonts.inter(color: AppColors.textPrimary)),
                   ),
                   // Next / Submit
                   _currentQuestionIndex < _questions.length - 1
@@ -464,7 +464,7 @@ class _CbtExamScreenState extends State<CbtExamScreen> {
                             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                           ),
-                          child: Text('Next', style: GoogleFonts.spaceGrotesk(fontWeight: FontWeight.bold)),
+                          child: Text('Next', style: GoogleFonts.inter(fontWeight: FontWeight.bold)),
                         )
                       : ElevatedButton(
                           onPressed: _submitAttempt,
@@ -474,7 +474,7 @@ class _CbtExamScreenState extends State<CbtExamScreen> {
                             padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 12),
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                           ),
-                          child: Text('Finish Exam', style: GoogleFonts.spaceGrotesk(fontWeight: FontWeight.bold)),
+                          child: Text('Finish Exam', style: GoogleFonts.inter(fontWeight: FontWeight.bold)),
                         ),
                 ],
               ),

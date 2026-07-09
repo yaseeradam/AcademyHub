@@ -64,7 +64,7 @@ class _AdminBroadcastScreenState extends State<AdminBroadcastScreen> {
       backgroundColor: AppColors.background,
       appBar: AppBar(
         title: Text('Announcement Broadcaster',
-            style: GoogleFonts.spaceGrotesk(
+            style: GoogleFonts.inter(
                 fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
         backgroundColor: AppColors.surface,
         elevation: 0,
@@ -86,19 +86,19 @@ class _AdminBroadcastScreenState extends State<AdminBroadcastScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text('Dispatch Channel',
-                      style: GoogleFonts.spaceGrotesk(
+                      style: GoogleFonts.inter(
                           fontSize: 14, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
                   const SizedBox(height: 4),
                   Text('Send instant automated WhatsApp broadcasts to parents and staff.',
-                      style: GoogleFonts.spaceGrotesk(fontSize: 11, color: AppColors.textSecondary)),
+                      style: GoogleFonts.inter(fontSize: 11, color: AppColors.textSecondary)),
                   const SizedBox(height: 16),
                   Text('Recipient Target Audience',
-                      style: GoogleFonts.spaceGrotesk(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.textSecondary)),
+                      style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.textSecondary)),
                   const SizedBox(height: 8),
                   DropdownButtonFormField<String>(
                     initialValue: _selectedTarget,
                     dropdownColor: AppColors.surface,
-                    style: GoogleFonts.spaceGrotesk(color: AppColors.textPrimary),
+                    style: GoogleFonts.inter(color: AppColors.textPrimary),
                     decoration: InputDecoration(
                       filled: true,
                       fillColor: AppColors.surface2,
@@ -121,16 +121,16 @@ class _AdminBroadcastScreenState extends State<AdminBroadcastScreen> {
             ),
             const SizedBox(height: 20),
             Text('Broadcast Message Body',
-                style: GoogleFonts.spaceGrotesk(
+                style: GoogleFonts.inter(
                     fontSize: 14, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
             const SizedBox(height: 8),
             TextField(
               controller: _msgController,
               maxLines: 6,
-              style: GoogleFonts.spaceGrotesk(fontSize: 13, color: AppColors.textPrimary),
+              style: GoogleFonts.inter(fontSize: 13, color: AppColors.textPrimary),
               decoration: InputDecoration(
                 hintText: 'Type broadcast message text here...',
-                hintStyle: GoogleFonts.spaceGrotesk(color: AppColors.textMuted),
+                hintStyle: GoogleFonts.inter(color: AppColors.textMuted),
                 filled: true,
                 fillColor: AppColors.surface,
                 border: OutlineInputBorder(
@@ -154,7 +154,7 @@ class _AdminBroadcastScreenState extends State<AdminBroadcastScreen> {
                 label: _sending
                     ? const CircularProgressIndicator(color: Colors.black)
                     : Text('Send Broadcast Notice',
-                        style: GoogleFonts.spaceGrotesk(
+                        style: GoogleFonts.inter(
                             fontWeight: FontWeight.bold, fontSize: 13)),
               ),
             ),

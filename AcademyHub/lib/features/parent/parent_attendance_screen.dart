@@ -77,7 +77,7 @@ class _ParentAttendanceScreenState extends State<ParentAttendanceScreen> {
       backgroundColor: AppColors.background,
       appBar: AppBar(
         title: Text('Attendance History',
-            style: GoogleFonts.spaceGrotesk(
+            style: GoogleFonts.inter(
                 fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
         backgroundColor: AppColors.surface,
         elevation: 0,
@@ -132,7 +132,7 @@ class _ParentAttendanceScreenState extends State<ParentAttendanceScreen> {
                         return DropdownMenuItem<String>(
                           value: student,
                           child: Text(student,
-                              style: GoogleFonts.spaceGrotesk(fontSize: 13, color: AppColors.textPrimary)),
+                              style: GoogleFonts.inter(fontSize: 13, color: AppColors.textPrimary)),
                         );
                       }).toList(),
                       onChanged: (val) {
@@ -165,7 +165,7 @@ class _ParentAttendanceScreenState extends State<ParentAttendanceScreen> {
                         return DropdownMenuItem<String>(
                           value: status,
                           child: Text(status,
-                              style: GoogleFonts.spaceGrotesk(fontSize: 13, color: AppColors.textPrimary)),
+                              style: GoogleFonts.inter(fontSize: 13, color: AppColors.textPrimary)),
                         );
                       }).toList(),
                       onChanged: (val) {
@@ -234,7 +234,7 @@ class _ParentAttendanceScreenState extends State<ParentAttendanceScreen> {
                 children: [
                   Expanded(
                     child: Text(name,
-                        style: GoogleFonts.spaceGrotesk(
+                        style: GoogleFonts.inter(
                             fontSize: 14, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
                   ),
                   Container(
@@ -244,7 +244,7 @@ class _ParentAttendanceScreenState extends State<ParentAttendanceScreen> {
                       borderRadius: BorderRadius.circular(6),
                     ),
                     child: Text(status,
-                        style: GoogleFonts.spaceGrotesk(
+                        style: GoogleFonts.inter(
                             fontSize: 11, fontWeight: FontWeight.bold, color: badgeColor)),
                   ),
                 ],
@@ -255,10 +255,10 @@ class _ParentAttendanceScreenState extends State<ParentAttendanceScreen> {
                   Icon(Icons.calendar_today_outlined, size: 12, color: AppColors.textMuted),
                   const SizedBox(width: 4),
                   Text(date,
-                      style: GoogleFonts.spaceGrotesk(fontSize: 12, color: AppColors.textSecondary)),
+                      style: GoogleFonts.inter(fontSize: 12, color: AppColors.textSecondary)),
                   const Spacer(),
                   Text('Term $term ($session)',
-                      style: GoogleFonts.spaceGrotesk(fontSize: 11, color: AppColors.textMuted)),
+                      style: GoogleFonts.inter(fontSize: 11, color: AppColors.textMuted)),
                 ],
               ),
               if (note != null && note.toString().trim().isNotEmpty) ...[
@@ -271,7 +271,7 @@ class _ParentAttendanceScreenState extends State<ParentAttendanceScreen> {
                     borderRadius: BorderRadius.circular(6),
                   ),
                   child: Text('Note: $note',
-                      style: GoogleFonts.spaceGrotesk(fontSize: 11, color: AppColors.textSecondary, fontStyle: FontStyle.italic)),
+                      style: GoogleFonts.inter(fontSize: 11, color: AppColors.textSecondary, fontStyle: FontStyle.italic)),
                 )
               ],
             ],
@@ -289,7 +289,7 @@ class _ParentAttendanceScreenState extends State<ParentAttendanceScreen> {
           Icon(Icons.calendar_today, size: 48, color: AppColors.textMuted),
           const SizedBox(height: 12),
           Text('No matching logs found.',
-              style: GoogleFonts.spaceGrotesk(fontSize: 14, color: AppColors.textSecondary)),
+              style: GoogleFonts.inter(fontSize: 14, color: AppColors.textSecondary)),
         ],
       ),
     );
@@ -306,12 +306,12 @@ class _ParentAttendanceScreenState extends State<ParentAttendanceScreen> {
             const SizedBox(height: 12),
             Text(_error ?? 'An error occurred',
                 textAlign: TextAlign.center,
-                style: GoogleFonts.spaceGrotesk(fontSize: 13, color: AppColors.textSecondary)),
+                style: GoogleFonts.inter(fontSize: 13, color: AppColors.textSecondary)),
             const SizedBox(height: 16),
             ElevatedButton(
               onPressed: _loadAttendance,
               style: ElevatedButton.styleFrom(backgroundColor: AppColors.parentAccent),
-              child: Text('Retry', style: GoogleFonts.spaceGrotesk(fontSize: 12, color: Colors.white)),
+              child: Text('Retry', style: GoogleFonts.inter(fontSize: 12, color: Colors.white)),
             )
           ],
         ),

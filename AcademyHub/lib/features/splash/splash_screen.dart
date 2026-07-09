@@ -125,7 +125,7 @@ class _SplashScreenState extends State<SplashScreen>
               if (_showText) ...[
                 Text(
                   'AcademyHub',
-                  style: GoogleFonts.spaceGrotesk(
+                  style: GoogleFonts.inter(
                     fontSize: 32,
                     fontWeight: FontWeight.bold,
                     color: AppColors.textPrimary,
@@ -135,7 +135,7 @@ class _SplashScreenState extends State<SplashScreen>
                 const SizedBox(height: 8),
                 Text(
                   'Smart School System',
-                  style: GoogleFonts.spaceGrotesk(
+                  style: GoogleFonts.inter(
                     fontSize: 14,
                     color: AppColors.textSecondary,
                     fontWeight: FontWeight.w500,

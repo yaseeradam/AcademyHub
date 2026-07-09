@@ -91,14 +91,18 @@ class _StudentHomeState extends State<StudentHome>
 
     final activeTabs = <AHNavItem>[
       const AHNavItem(
-        icon: Icons.home_outlined,
-        activeIcon: Icons.home_rounded,
+        icon: Icons.dashboard_outlined,
+        activeIcon: Icons.dashboard_rounded,
         label: 'Feed',
+        iconBg: Color(0xFFE0E7FF),
+        iconColor: Color(0xFF4F46E5),
       ),
       const AHNavItem(
         icon: Icons.bar_chart_outlined,
         activeIcon: Icons.bar_chart_rounded,
         label: 'Results',
+        iconBg: Color(0xFFE0F2FE),
+        iconColor: Color(0xFF0284C7),
       ),
     ];
 
@@ -112,6 +116,8 @@ class _StudentHomeState extends State<StudentHome>
         icon: Icons.menu_book_outlined,
         activeIcon: Icons.menu_book_rounded,
         label: 'Learn',
+        iconBg: Color(0xFFF3E8FF),
+        iconColor: Color(0xFF7C3AED),
       ));
       activePages.add(_buildELearning(primary));
     }
@@ -121,6 +127,8 @@ class _StudentHomeState extends State<StudentHome>
         icon: Icons.computer_outlined,
         activeIcon: Icons.computer_rounded,
         label: 'Exams',
+        iconBg: Color(0xFFFFE4E6),
+        iconColor: Color(0xFFE11D48),
       ));
       activePages.add(_buildCbtExams(primary));
     }
@@ -129,6 +137,8 @@ class _StudentHomeState extends State<StudentHome>
       icon: Icons.event_note_outlined,
       activeIcon: Icons.event_note_rounded,
       label: 'Schedule',
+      iconBg: Color(0xFFFEF9C3),
+      iconColor: Color(0xFFCA8A04),
     ));
     activePages.add(_buildSchedule(primary));
 
@@ -139,24 +149,13 @@ class _StudentHomeState extends State<StudentHome>
 
     return RoleShell(
       title: 'Student Portal',
-      body: Column(
-        children: [
-          if (_loading) LinearProgressIndicator(color: primary, minHeight: 2),
-          Expanded(
-            child: RefreshIndicator(
-              onRefresh: _triggerRefresh,
-              color: primary,
-              child: activePages[currentTab],
-            ),
-          ),
-          AHBottomNav(
-            items: activeTabs,
-            selectedIndex: currentTab,
-            onTap: (i) => setState(() => _selectedTab = i),
-            accentColor: accent,
-          ),
-        ],
-      ),
+      navItems: activeTabs,
+      selectedIndex: currentTab,
+      onTabSelected: (i) => setState(() => _selectedTab = i),
+      accentColor: accent,
+      loading: _loading,
+      onRefresh: _triggerRefresh,
+      body: activePages[currentTab],
     );
   }
 
@@ -225,11 +224,11 @@ class _StudentHomeState extends State<StudentHome>
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text('Good ${_timeGreeting()}',
-                          style: GoogleFonts.spaceGrotesk(
+                          style: GoogleFonts.inter(
                               fontSize: 12,
                               color: Colors.white70)),
                       Text(user?.name ?? 'Student',
-                          style: GoogleFonts.spaceGrotesk(
+                          style: GoogleFonts.inter(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
                               color: Colors.white)),
@@ -304,7 +303,7 @@ class _StudentHomeState extends State<StudentHome>
                 Expanded(
                   child: Text(
                     '${_cbtExams.length} active CBT exam${_cbtExams.length == 1 ? '' : 's'} pending completion.',
-                    style: GoogleFonts.spaceGrotesk(
+                    style: GoogleFonts.inter(
                         fontSize: 12,
                         fontWeight: FontWeight.bold,
                         color: AppColors.warning),
@@ -313,7 +312,7 @@ class _StudentHomeState extends State<StudentHome>
                 GestureDetector(
                   onTap: () => _selectTabByLabel(activeTabs, 'Exams'),
                   child: Text('View',
-                      style: GoogleFonts.spaceGrotesk(
+                      style: GoogleFonts.inter(
                           fontSize: 12,
                           fontWeight: FontWeight.bold,
                           color: AppColors.warning)),
@@ -373,20 +372,20 @@ class _StudentHomeState extends State<StudentHome>
                           children: [
                             Expanded(
                               child: Text(a['title'] ?? '',
-                                  style: GoogleFonts.spaceGrotesk(
+                                  style: GoogleFonts.inter(
                                       fontWeight: FontWeight.bold,
                                       fontSize: 13,
                                       color: AppColors.textPrimary)),
                             ),
                             Text(date,
-                                style: GoogleFonts.spaceGrotesk(
+                                style: GoogleFonts.inter(
                                     fontSize: 11,
                                     color: AppColors.textMuted)),
                           ],
                         ),
                         const SizedBox(height: 6),
                         Text(a['body'] ?? '',
-                            style: GoogleFonts.spaceGrotesk(
+                            style: GoogleFonts.inter(
                                 fontSize: 12,
                                 color: AppColors.textSecondary,
                                 height: 1.4)),
@@ -404,10 +403,10 @@ class _StudentHomeState extends State<StudentHome>
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(label,
-            style: GoogleFonts.spaceGrotesk(
+            style: GoogleFonts.inter(
                 fontSize: 10, color: Colors.white60)),
         Text(value,
-            style: GoogleFonts.spaceGrotesk(
+            style: GoogleFonts.inter(
                 fontSize: 15,
                 fontWeight: FontWeight.bold,
                 color: Colors.white)),
@@ -459,7 +458,7 @@ class _StudentHomeState extends State<StudentHome>
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(s['subject_name'] ?? 'Subject',
-                        style: GoogleFonts.spaceGrotesk(
+                        style: GoogleFonts.inter(
                             fontWeight: FontWeight.bold,
                             fontSize: 14,
                             color: AppColors.textPrimary)),
@@ -501,14 +500,14 @@ class _StudentHomeState extends State<StudentHome>
                     ),
                     alignment: Alignment.center,
                     child: Text(grade,
-                        style: GoogleFonts.spaceGrotesk(
+                        style: GoogleFonts.inter(
                             color: gradeColor,
                             fontWeight: FontWeight.bold,
                             fontSize: 18)),
                   ),
                   const SizedBox(height: 4),
                   Text('$total pts',
-                      style: GoogleFonts.spaceGrotesk(
+                      style: GoogleFonts.inter(
                           fontSize: 11,
                           fontWeight: FontWeight.bold,
                           color: AppColors.textSecondary)),
@@ -540,7 +539,7 @@ class _StudentHomeState extends State<StudentHome>
         border: Border.all(color: AppColors.borderLight),
       ),
       child: Text('$label: ${value ?? 0}',
-          style: GoogleFonts.spaceGrotesk(
+          style: GoogleFonts.inter(
               fontSize: 10,
               color: AppColors.textSecondary,
               fontWeight: FontWeight.w600)),
@@ -571,7 +570,7 @@ class _StudentHomeState extends State<StudentHome>
           child: Column(
             children: [
               TextField(
-                style: GoogleFonts.spaceGrotesk(
+                style: GoogleFonts.inter(
                     color: AppColors.textPrimary, fontSize: 14),
                 decoration: InputDecoration(
                   hintText: 'Search study resources...',
@@ -641,7 +640,7 @@ class _StudentHomeState extends State<StudentHome>
                     selected ? primary.withValues(alpha: 0.5) : AppColors.borderLight),
           ),
           child: Text(label,
-              style: GoogleFonts.spaceGrotesk(
+              style: GoogleFonts.inter(
                   fontSize: 11,
                   fontWeight: selected ? FontWeight.bold : FontWeight.w500,
                   color: selected ? primary : AppColors.textSecondary)),
@@ -703,7 +702,7 @@ class _StudentHomeState extends State<StudentHome>
                     const SizedBox(width: 12),
                     Expanded(
                       child: Text(exam['title'] ?? 'Exam',
-                          style: GoogleFonts.spaceGrotesk(
+                          style: GoogleFonts.inter(
                               fontSize: 14,
                               fontWeight: FontWeight.bold,
                               color: AppColors.textPrimary)),
@@ -727,7 +726,7 @@ class _StudentHomeState extends State<StudentHome>
                     if (instructions.isNotEmpty) ...[
                       const SizedBox(height: 10),
                       Text(instructions,
-                          style: GoogleFonts.spaceGrotesk(
+                          style: GoogleFonts.inter(
                               fontSize: 12,
                               color: AppColors.textSecondary,
                               height: 1.4)),
@@ -748,7 +747,7 @@ class _StudentHomeState extends State<StudentHome>
                         icon: const Icon(Icons.play_arrow_rounded,
                             size: 18),
                         label: Text('Start Offline Attempt',
-                            style: GoogleFonts.spaceGrotesk(
+                            style: GoogleFonts.inter(
                                 fontSize: 13,
                                 fontWeight: FontWeight.bold)),
                         style: ElevatedButton.styleFrom(
@@ -777,7 +776,7 @@ class _StudentHomeState extends State<StudentHome>
         Icon(icon, size: 13, color: AppColors.textSecondary),
         const SizedBox(width: 4),
         Text(label,
-            style: GoogleFonts.spaceGrotesk(
+            style: GoogleFonts.inter(
                 fontSize: 12, color: AppColors.textSecondary)),
       ],
     );
@@ -823,14 +822,14 @@ class _StudentHomeState extends State<StudentHome>
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(t['subject_name'] ?? 'Subject',
-                              style: GoogleFonts.spaceGrotesk(
+                              style: GoogleFonts.inter(
                                   fontWeight: FontWeight.bold,
                                   fontSize: 13,
                                   color: AppColors.textPrimary)),
                           const SizedBox(height: 2),
                           Text(
                               '${t['day'] ?? ''} • ${t['start_time'] ?? ''} – ${t['end_time'] ?? ''}',
-                              style: GoogleFonts.spaceGrotesk(
+                              style: GoogleFonts.inter(
                                   fontSize: 11,
                                   color: AppColors.textSecondary)),
                         ],
@@ -919,18 +918,18 @@ class _StudentHomeState extends State<StudentHome>
                                           CrossAxisAlignment.start,
                                       children: [
                                         Text(h['title'] ?? '',
-                                            style: GoogleFonts.spaceGrotesk(
+                                            style: GoogleFonts.inter(
                                                 fontWeight: FontWeight.bold,
                                                 fontSize: 13,
                                                 color: AppColors.textPrimary)),
                                         const SizedBox(height: 2),
                                         Text(h['subject_name'] ?? '',
-                                            style: GoogleFonts.spaceGrotesk(
+                                            style: GoogleFonts.inter(
                                                 fontSize: 11,
                                                 color: AppColors.textSecondary)),
                                         const SizedBox(height: 4),
                                         Text('Due: $due',
-                                            style: GoogleFonts.spaceGrotesk(
+                                            style: GoogleFonts.inter(
                                                 fontSize: 11,
                                                 fontWeight: overdue
                                                     ? FontWeight.bold
@@ -964,7 +963,7 @@ class _StudentHomeState extends State<StudentHome>
               size: 48, color: AppColors.textMuted),
           const SizedBox(height: 12),
           Text(msg,
-              style: GoogleFonts.spaceGrotesk(
+              style: GoogleFonts.inter(
                   color: AppColors.textSecondary, fontSize: 14),
               textAlign: TextAlign.center),
         ],
@@ -995,12 +994,12 @@ class _GpaRing extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(label,
-                  style: GoogleFonts.spaceGrotesk(
+                  style: GoogleFonts.inter(
                       fontSize: 12,
                       fontWeight: FontWeight.bold,
                       color: Colors.white)),
               Text('GPA',
-                  style: GoogleFonts.spaceGrotesk(
+                  style: GoogleFonts.inter(
                       fontSize: 9, color: Colors.white70)),
             ],
           ),
@@ -1091,12 +1090,12 @@ class _QuickCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(title,
-                      style: GoogleFonts.spaceGrotesk(
+                      style: GoogleFonts.inter(
                           fontSize: 11,
                           fontWeight: FontWeight.bold,
                           color: AppColors.textSecondary)),
                   Text(value,
-                      style: GoogleFonts.spaceGrotesk(
+                      style: GoogleFonts.inter(
                           fontSize: 13,
                           fontWeight: FontWeight.bold,
                           color: AppColors.textPrimary)),

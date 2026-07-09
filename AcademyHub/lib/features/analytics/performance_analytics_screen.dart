@@ -185,7 +185,7 @@ class _PerformanceAnalyticsScreenState extends State<PerformanceAnalyticsScreen>
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: Text(displayName!, style: GoogleFonts.spaceGrotesk(fontWeight: FontWeight.bold, fontSize: 16, color: AppColors.textPrimary)),
+        title: Text(displayName!, style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 16, color: AppColors.textPrimary)),
         backgroundColor: AppColors.surface,
         foregroundColor: AppColors.textPrimary,
         elevation: 0,
@@ -211,10 +211,10 @@ class _PerformanceAnalyticsScreenState extends State<PerformanceAnalyticsScreen>
                         child: DropdownButtonFormField<String>(
                           initialValue: _selectedSession,
                           dropdownColor: AppColors.surface2,
-                          style: GoogleFonts.spaceGrotesk(color: AppColors.textPrimary, fontSize: 13),
+                          style: GoogleFonts.inter(color: AppColors.textPrimary, fontSize: 13),
                           decoration: _inputDecoration('Academic Session'),
                           items: _sessionsList
-                              .map((s) => DropdownMenuItem(value: s, child: Text(s, style: GoogleFonts.spaceGrotesk(color: AppColors.textPrimary))))
+                              .map((s) => DropdownMenuItem(value: s, child: Text(s, style: GoogleFonts.inter(color: AppColors.textPrimary))))
                               .toList(),
                           onChanged: (val) {
                             if (val != null) {
@@ -229,7 +229,7 @@ class _PerformanceAnalyticsScreenState extends State<PerformanceAnalyticsScreen>
                         child: DropdownButtonFormField<int>(
                           initialValue: _selectedTerm,
                           dropdownColor: AppColors.surface2,
-                          style: GoogleFonts.spaceGrotesk(color: AppColors.textPrimary, fontSize: 13),
+                          style: GoogleFonts.inter(color: AppColors.textPrimary, fontSize: 13),
                           decoration: _inputDecoration('Term'),
                           items: [
                             DropdownMenuItem(value: 1, child: Text('1st Term', style: TextStyle(color: AppColors.textPrimary))),
@@ -298,12 +298,12 @@ class _PerformanceAnalyticsScreenState extends State<PerformanceAnalyticsScreen>
                                   children: [
                                     Text(
                                       'Attendance Impact Warning',
-                                      style: GoogleFonts.spaceGrotesk(fontWeight: FontWeight.bold, color: AppColors.error),
+                                      style: GoogleFonts.inter(fontWeight: FontWeight.bold, color: AppColors.error),
                                     ),
                                     const SizedBox(height: 4),
                                     Text(
                                       'Low attendance is negatively impacting this student\'s academic performance. Immediate classroom presence is advised.',
-                                      style: GoogleFonts.spaceGrotesk(fontSize: 12, color: AppColors.textPrimary),
+                                      style: GoogleFonts.inter(fontSize: 12, color: AppColors.textPrimary),
                                     ),
                                   ],
                                 ),
@@ -330,12 +330,12 @@ class _PerformanceAnalyticsScreenState extends State<PerformanceAnalyticsScreen>
                                   children: [
                                     Text(
                                       'Honor Roll Status',
-                                      style: GoogleFonts.spaceGrotesk(fontWeight: FontWeight.bold, color: AppColors.success),
+                                      style: GoogleFonts.inter(fontWeight: FontWeight.bold, color: AppColors.success),
                                     ),
                                     const SizedBox(height: 4),
                                     Text(
                                       'Exceptional performance! Outstanding understanding demonstrated across subjects.',
-                                      style: GoogleFonts.spaceGrotesk(fontSize: 12, color: AppColors.textPrimary),
+                                      style: GoogleFonts.inter(fontSize: 12, color: AppColors.textPrimary),
                                     ),
                                   ],
                                 ),
@@ -374,7 +374,7 @@ class _PerformanceAnalyticsScreenState extends State<PerformanceAnalyticsScreen>
                       // Subject Strengths & Weaknesses
                       Text(
                         'Strengths & Improvement Areas',
-                        style: GoogleFonts.spaceGrotesk(fontSize: 15, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+                        style: GoogleFonts.inter(fontSize: 15, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
                       ),
                       const SizedBox(height: 12),
                       Row(
@@ -404,13 +404,13 @@ class _PerformanceAnalyticsScreenState extends State<PerformanceAnalyticsScreen>
                       // Subject Scores List
                       Text(
                         'Subject Score Details',
-                        style: GoogleFonts.spaceGrotesk(fontSize: 15, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+                        style: GoogleFonts.inter(fontSize: 15, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
                       ),
                       const SizedBox(height: 12),
                       _allSubjects.isEmpty
                           ? Center(child: Padding(
                               padding: const EdgeInsets.symmetric(vertical: 20),
-                              child: Text('No subject scores loaded for this term.', style: GoogleFonts.spaceGrotesk(color: AppColors.textSecondary, fontSize: 13)),
+                              child: Text('No subject scores loaded for this term.', style: GoogleFonts.inter(color: AppColors.textSecondary, fontSize: 13)),
                             ))
                           : Container(
                               decoration: BoxDecoration(
@@ -437,9 +437,9 @@ class _PerformanceAnalyticsScreenState extends State<PerformanceAnalyticsScreen>
                                           child: Column(
                                             crossAxisAlignment: CrossAxisAlignment.start,
                                             children: [
-                                              Text(s['subject_name'] ?? 'Subject', style: GoogleFonts.spaceGrotesk(fontWeight: FontWeight.bold, fontSize: 13, color: AppColors.textPrimary)),
+                                              Text(s['subject_name'] ?? 'Subject', style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 13, color: AppColors.textPrimary)),
                                               const SizedBox(height: 4),
-                                              Text('CA1: ${s['ca1']} | CA2: ${s['ca2']} | Exam: ${s['exam']}', style: GoogleFonts.spaceGrotesk(fontSize: 11, color: AppColors.textSecondary)),
+                                              Text('CA1: ${s['ca1']} | CA2: ${s['ca2']} | Exam: ${s['exam']}', style: GoogleFonts.inter(fontSize: 11, color: AppColors.textSecondary)),
                                             ],
                                           ),
                                         ),
@@ -448,13 +448,13 @@ class _PerformanceAnalyticsScreenState extends State<PerformanceAnalyticsScreen>
                                           children: [
                                             Text(
                                               '$total%',
-                                              style: GoogleFonts.spaceGrotesk(
+                                              style: GoogleFonts.inter(
                                                 fontWeight: FontWeight.bold,
                                                 color: isGood ? AppColors.success : isBad ? AppColors.error : AppColors.textSecondary,
                                                 fontSize: 14,
                                               ),
                                             ),
-                                            Text(grade, style: GoogleFonts.spaceGrotesk(fontSize: 10, fontWeight: FontWeight.bold, color: AppColors.textMuted)),
+                                            Text(grade, style: GoogleFonts.inter(fontSize: 10, fontWeight: FontWeight.bold, color: AppColors.textMuted)),
                                           ],
                                         ),
                                       ],
@@ -487,7 +487,7 @@ class _PerformanceAnalyticsScreenState extends State<PerformanceAnalyticsScreen>
       ),
       child: Column(
         children: [
-          Text(title, style: GoogleFonts.spaceGrotesk(fontSize: 11, fontWeight: FontWeight.bold, color: AppColors.textSecondary)),
+          Text(title, style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.bold, color: AppColors.textSecondary)),
           const SizedBox(height: 16),
           Stack(
             alignment: Alignment.center,
@@ -504,12 +504,12 @@ class _PerformanceAnalyticsScreenState extends State<PerformanceAnalyticsScreen>
               ),
               Text(
                 value,
-                style: GoogleFonts.spaceGrotesk(fontSize: 15, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+                style: GoogleFonts.inter(fontSize: 15, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
               ),
             ],
           ),
           const SizedBox(height: 16),
-          Text(subtitle, style: GoogleFonts.spaceGrotesk(fontSize: 11, color: color, fontWeight: FontWeight.w600)),
+          Text(subtitle, style: GoogleFonts.inter(fontSize: 11, color: color, fontWeight: FontWeight.w600)),
         ],
       ),
     );
@@ -541,15 +541,15 @@ class _PerformanceAnalyticsScreenState extends State<PerformanceAnalyticsScreen>
                 decoration: BoxDecoration(color: color.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(8)),
                 child: Text(
                   title,
-                  style: GoogleFonts.spaceGrotesk(color: color, fontSize: 9, fontWeight: FontWeight.bold),
+                  style: GoogleFonts.inter(color: color, fontSize: 9, fontWeight: FontWeight.bold),
                 ),
               ),
             ],
           ),
           const SizedBox(height: 14),
-          Text(value, style: GoogleFonts.spaceGrotesk(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
+          Text(value, style: GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
           const SizedBox(height: 4),
-          Text(subtitle, style: GoogleFonts.spaceGrotesk(fontSize: 10, color: AppColors.textSecondary)),
+          Text(subtitle, style: GoogleFonts.inter(fontSize: 10, color: AppColors.textSecondary)),
         ],
       ),
     );
@@ -578,7 +578,7 @@ class _PerformanceAnalyticsScreenState extends State<PerformanceAnalyticsScreen>
               Expanded(
                 child: Text(
                   title,
-                  style: GoogleFonts.spaceGrotesk(fontSize: 11, fontWeight: FontWeight.bold, color: color),
+                  style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.bold, color: color),
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
@@ -586,7 +586,7 @@ class _PerformanceAnalyticsScreenState extends State<PerformanceAnalyticsScreen>
           ),
           const SizedBox(height: 12),
           items.isEmpty
-              ? Text('None recorded', style: GoogleFonts.spaceGrotesk(fontSize: 11, color: AppColors.textMuted))
+              ? Text('None recorded', style: GoogleFonts.inter(fontSize: 11, color: AppColors.textMuted))
               : Column(
                   children: items.map((itm) => Padding(
                     padding: const EdgeInsets.only(bottom: 6),
@@ -596,13 +596,13 @@ class _PerformanceAnalyticsScreenState extends State<PerformanceAnalyticsScreen>
                         Expanded(
                           child: Text(
                             itm['subject_name'] ?? '',
-                            style: GoogleFonts.spaceGrotesk(fontSize: 12, fontWeight: FontWeight.w500, color: AppColors.textPrimary),
+                            style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w500, color: AppColors.textPrimary),
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
                         Text(
                           '${itm['total'].toStringAsFixed(0)}%',
-                          style: GoogleFonts.spaceGrotesk(fontSize: 12, fontWeight: FontWeight.bold, color: color),
+                          style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.bold, color: color),
                         ),
                       ],
                     ),
@@ -615,7 +615,7 @@ class _PerformanceAnalyticsScreenState extends State<PerformanceAnalyticsScreen>
 
   InputDecoration _inputDecoration(String label) => InputDecoration(
         labelText: label,
-        labelStyle: GoogleFonts.spaceGrotesk(color: AppColors.textSecondary, fontSize: 11),
+        labelStyle: GoogleFonts.inter(color: AppColors.textSecondary, fontSize: 11),
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: AppColors.borderLight)),
         enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: AppColors.borderLight)),
         focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: AppColors.borderLight)),

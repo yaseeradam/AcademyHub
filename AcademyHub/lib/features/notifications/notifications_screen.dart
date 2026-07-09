@@ -84,21 +84,21 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: Text(
           'Mark All as Read',
-          style: GoogleFonts.spaceGrotesk(
+          style: GoogleFonts.inter(
             fontWeight: FontWeight.bold,
             color: AppColors.textPrimary,
           ),
         ),
         content: Text(
           'Are you sure you want to mark all notifications as read?',
-          style: GoogleFonts.spaceGrotesk(color: AppColors.textSecondary),
+          style: GoogleFonts.inter(color: AppColors.textSecondary),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
             child: Text(
               'Cancel',
-              style: GoogleFonts.spaceGrotesk(color: AppColors.textSecondary),
+              style: GoogleFonts.inter(color: AppColors.textSecondary),
             ),
           ),
           ElevatedButton(
@@ -111,7 +111,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
             ),
             child: Text(
               'Confirm',
-              style: GoogleFonts.spaceGrotesk(fontWeight: FontWeight.bold),
+              style: GoogleFonts.inter(fontWeight: FontWeight.bold),
             ),
           ),
         ],
@@ -148,7 +148,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
       appBar: AppBar(
         title: Text(
           'Notifications',
-          style: GoogleFonts.spaceGrotesk(
+          style: GoogleFonts.inter(
             fontWeight: FontWeight.bold,
             fontSize: 16,
             color: AppColors.textPrimary,
@@ -260,7 +260,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                                         Expanded(
                                           child: Text(
                                             title,
-                                            style: GoogleFonts.spaceGrotesk(
+                                            style: GoogleFonts.inter(
                                               fontWeight: isUnread
                                                   ? FontWeight.bold
                                                   : FontWeight.w600,
@@ -272,7 +272,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                                         const SizedBox(width: 8),
                                         Text(
                                           timeStr,
-                                          style: GoogleFonts.spaceGrotesk(
+                                          style: GoogleFonts.inter(
                                             fontSize: 10,
                                             color: AppColors.textMuted,
                                           ),
@@ -282,7 +282,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                                     const SizedBox(height: 6),
                                     Text(
                                       body,
-                                      style: GoogleFonts.spaceGrotesk(
+                                      style: GoogleFonts.inter(
                                         fontSize: 12,
                                         color: isUnread
                                             ? AppColors.textPrimary
@@ -324,7 +324,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
               const SizedBox(height: 12),
               Text(
                 'No notifications yet.',
-                style: GoogleFonts.spaceGrotesk(
+                style: GoogleFonts.inter(
                   color: AppColors.textSecondary,
                   fontSize: 14,
                 ),
@@ -332,7 +332,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
               const SizedBox(height: 8),
               Text(
                 'Pull to check for updates.',
-                style: GoogleFonts.spaceGrotesk(
+                style: GoogleFonts.inter(
                   color: AppColors.textMuted,
                   fontSize: 12,
                 ),

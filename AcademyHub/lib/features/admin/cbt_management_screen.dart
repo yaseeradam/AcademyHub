@@ -67,7 +67,7 @@ class _CbtManagementScreenState extends State<CbtManagementScreen> with SingleTi
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: Text('CBT Exam Management', style: GoogleFonts.spaceGrotesk(fontWeight: FontWeight.bold, fontSize: 16, color: AppColors.textPrimary)),
+        title: Text('CBT Exam Management', style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 16, color: AppColors.textPrimary)),
         backgroundColor: AppColors.surface,
         foregroundColor: AppColors.textPrimary,
         elevation: 0,
@@ -104,7 +104,7 @@ class _CbtManagementScreenState extends State<CbtManagementScreen> with SingleTi
 
   Widget _buildActiveExamsTab(Color primary) {
     if (_exams.isEmpty) {
-      return Center(child: Text('No active computer-based exams found.', style: GoogleFonts.spaceGrotesk(color: AppColors.textSecondary, fontSize: 14)));
+      return Center(child: Text('No active computer-based exams found.', style: GoogleFonts.inter(color: AppColors.textSecondary, fontSize: 14)));
     }
     return ListView.separated(
       padding: const EdgeInsets.all(16),
@@ -128,29 +128,29 @@ class _CbtManagementScreenState extends State<CbtManagementScreen> with SingleTi
             children: [
               Text(
                 exam['title'] ?? 'Exam',
-                style: GoogleFonts.spaceGrotesk(fontSize: 15, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+                style: GoogleFonts.inter(fontSize: 15, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
               ),
               const SizedBox(height: 8),
               Row(
                 children: [
                   Icon(Icons.timer_outlined, size: 14, color: primary),
                   const SizedBox(width: 4),
-                  Text('$duration mins', style: GoogleFonts.spaceGrotesk(fontSize: 12, color: AppColors.textSecondary)),
+                  Text('$duration mins', style: GoogleFonts.inter(fontSize: 12, color: AppColors.textSecondary)),
                   const SizedBox(width: 16),
                   Icon(Icons.help_outline_rounded, size: 14, color: primary),
                   const SizedBox(width: 4),
-                  Text('$totalQuestions questions', style: GoogleFonts.spaceGrotesk(fontSize: 12, color: AppColors.textSecondary)),
+                  Text('$totalQuestions questions', style: GoogleFonts.inter(fontSize: 12, color: AppColors.textSecondary)),
                   const SizedBox(width: 16),
                   Icon(Icons.emoji_events_outlined, size: 14, color: primary),
                   const SizedBox(width: 4),
-                  Text('Pass: $passPercentage%', style: GoogleFonts.spaceGrotesk(fontSize: 12, color: AppColors.textSecondary)),
+                  Text('Pass: $passPercentage%', style: GoogleFonts.inter(fontSize: 12, color: AppColors.textSecondary)),
                 ],
               ),
               if ((exam['instructions'] as String?)?.isNotEmpty == true) ...[
                 const SizedBox(height: 10),
                 Text(
                   exam['instructions'],
-                  style: GoogleFonts.spaceGrotesk(fontSize: 11, color: AppColors.textSecondary),
+                  style: GoogleFonts.inter(fontSize: 11, color: AppColors.textSecondary),
                 ),
               ],
             ],
@@ -162,7 +162,7 @@ class _CbtManagementScreenState extends State<CbtManagementScreen> with SingleTi
 
   Widget _buildAttemptsTab(Color primary) {
     if (_attempts.isEmpty) {
-      return Center(child: Text('No student exam attempts found.', style: GoogleFonts.spaceGrotesk(color: AppColors.textSecondary, fontSize: 14)));
+      return Center(child: Text('No student exam attempts found.', style: GoogleFonts.inter(color: AppColors.textSecondary, fontSize: 14)));
     }
     return ListView.separated(
       padding: const EdgeInsets.all(16),
@@ -197,15 +197,15 @@ class _CbtManagementScreenState extends State<CbtManagementScreen> with SingleTi
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Attempt ID: #${attempt['id']}', style: GoogleFonts.spaceGrotesk(fontWeight: FontWeight.bold, fontSize: 13, color: AppColors.textPrimary)),
+                    Text('Attempt ID: #${attempt['id']}', style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 13, color: AppColors.textPrimary)),
                     const SizedBox(height: 4),
-                    Text('Started: $date', style: GoogleFonts.spaceGrotesk(fontSize: 11, color: AppColors.textSecondary)),
+                    Text('Started: $date', style: GoogleFonts.inter(fontSize: 11, color: AppColors.textSecondary)),
                     if (isDirty)
                       Row(
                         children: [
                           const Icon(Icons.cloud_off_rounded, size: 12, color: AppColors.warning),
                           const SizedBox(width: 4),
-                          Text('Pending sync', style: GoogleFonts.spaceGrotesk(fontSize: 10, color: AppColors.warning, fontWeight: FontWeight.bold)),
+                          Text('Pending sync', style: GoogleFonts.inter(fontSize: 10, color: AppColors.warning, fontWeight: FontWeight.bold)),
                         ],
                       ),
                   ],
@@ -226,7 +226,7 @@ class _CbtManagementScreenState extends State<CbtManagementScreen> with SingleTi
                 ),
                 child: Text(
                   '${score.toStringAsFixed(1)}%',
-                  style: GoogleFonts.spaceGrotesk(
+                  style: GoogleFonts.inter(
                     fontWeight: FontWeight.bold,
                     color: passed ? AppColors.success : AppColors.error,
                     fontSize: 13,

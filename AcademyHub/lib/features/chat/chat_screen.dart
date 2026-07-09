@@ -215,7 +215,7 @@ class _ChatScreenState extends State<ChatScreen> {
       appBar: AppBar(
         title: Text(
           _activeConversationId != null ? (_activeConversationTitle ?? 'Chat') : 'Inbox & Chats',
-          style: GoogleFonts.spaceGrotesk(
+          style: GoogleFonts.inter(
               fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
         ),
         backgroundColor: AppColors.surface,
@@ -263,7 +263,7 @@ class _ChatScreenState extends State<ChatScreen> {
             Icon(Icons.chat_bubble_outline, size: 48, color: AppColors.textMuted),
             const SizedBox(height: 12),
             Text('No active conversations.',
-                style: GoogleFonts.spaceGrotesk(fontSize: 14, color: AppColors.textSecondary)),
+                style: GoogleFonts.inter(fontSize: 14, color: AppColors.textSecondary)),
             const SizedBox(height: 16),
             ElevatedButton.icon(
               onPressed: () {
@@ -272,7 +272,7 @@ class _ChatScreenState extends State<ChatScreen> {
               },
               style: ElevatedButton.styleFrom(backgroundColor: primary),
               icon: const Icon(Icons.edit, size: 16, color: Colors.white),
-              label: Text('New Chat', style: GoogleFonts.spaceGrotesk(color: Colors.white, fontSize: 12)),
+              label: Text('New Chat', style: GoogleFonts.inter(color: Colors.white, fontSize: 12)),
             ),
           ],
         ),
@@ -315,7 +315,7 @@ class _ChatScreenState extends State<ChatScreen> {
                             children: [
                               Text(
                                 title,
-                                style: GoogleFonts.spaceGrotesk(
+                                style: GoogleFonts.inter(
                                     fontSize: 14,
                                     fontWeight: isUnread ? FontWeight.bold : FontWeight.w500,
                                     color: AppColors.textPrimary),
@@ -323,14 +323,14 @@ class _ChatScreenState extends State<ChatScreen> {
                               if (lastAt != null)
                                 Text(
                                   '${lastAt.hour}:${lastAt.minute.toString().padLeft(2, '0')}',
-                                  style: GoogleFonts.spaceGrotesk(fontSize: 10, color: AppColors.textMuted),
+                                  style: GoogleFonts.inter(fontSize: 10, color: AppColors.textMuted),
                                 ),
                             ],
                           ),
                           const SizedBox(height: 4),
                           Text(
                             lastMsg,
-                            style: GoogleFonts.spaceGrotesk(
+                            style: GoogleFonts.inter(
                                 fontSize: 12,
                                 fontWeight: isUnread ? FontWeight.bold : FontWeight.normal,
                                 color: isUnread ? AppColors.textPrimary : AppColors.textSecondary),
@@ -360,7 +360,7 @@ class _ChatScreenState extends State<ChatScreen> {
           child: _loadingMessages
               ? const Center(child: CircularProgressIndicator())
               : _messages.isEmpty
-                  ? Center(child: Text('Start of thread.', style: GoogleFonts.spaceGrotesk(color: AppColors.textMuted)))
+                  ? Center(child: Text('Start of thread.', style: GoogleFonts.inter(color: AppColors.textMuted)))
                   : ListView.builder(
                       controller: _scrollController,
                       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
@@ -392,14 +392,14 @@ class _ChatScreenState extends State<ChatScreen> {
                               children: [
                                 if (!isMe)
                                   Text(senderName,
-                                      style: GoogleFonts.spaceGrotesk(
+                                      style: GoogleFonts.inter(
                                           fontSize: 10,
                                           fontWeight: FontWeight.bold,
                                           color: AppColors.textSecondary)),
                                 if (!isMe) const SizedBox(height: 4),
                                 Text(
                                   body,
-                                  style: GoogleFonts.spaceGrotesk(
+                                  style: GoogleFonts.inter(
                                       fontSize: 13,
                                       color: isMe ? Colors.white : AppColors.textPrimary),
                                 ),
@@ -419,10 +419,10 @@ class _ChatScreenState extends State<ChatScreen> {
               Expanded(
                 child: TextField(
                   controller: _msgController,
-                  style: GoogleFonts.spaceGrotesk(fontSize: 13, color: AppColors.textPrimary),
+                  style: GoogleFonts.inter(fontSize: 13, color: AppColors.textPrimary),
                   decoration: InputDecoration(
                     hintText: 'Type a message...',
-                    hintStyle: GoogleFonts.spaceGrotesk(color: AppColors.textMuted),
+                    hintStyle: GoogleFonts.inter(color: AppColors.textMuted),
                     filled: true,
                     fillColor: AppColors.surface2,
                     border: OutlineInputBorder(
@@ -468,7 +468,7 @@ class _ChatScreenState extends State<ChatScreen> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text('Select Contact',
-                        style: GoogleFonts.spaceGrotesk(
+                        style: GoogleFonts.inter(
                             fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
                     IconButton(
                       icon: const Icon(Icons.close),
@@ -483,7 +483,7 @@ class _ChatScreenState extends State<ChatScreen> {
                       : _contacts.isEmpty
                           ? Center(
                               child: Text('No contacts found.',
-                                  style: GoogleFonts.spaceGrotesk(color: AppColors.textMuted)))
+                                  style: GoogleFonts.inter(color: AppColors.textMuted)))
                           : ListView.separated(
                               itemCount: _contacts.length,
                               separatorBuilder: (_, _) => Divider(height: 1, color: AppColors.borderLight),
@@ -494,12 +494,12 @@ class _ChatScreenState extends State<ChatScreen> {
 
                                 return ListTile(
                                   title: Text(name,
-                                      style: GoogleFonts.spaceGrotesk(
+                                      style: GoogleFonts.inter(
                                           fontSize: 13,
                                           fontWeight: FontWeight.bold,
                                           color: AppColors.textPrimary)),
                                   subtitle: Text(role.toString().toUpperCase(),
-                                      style: GoogleFonts.spaceGrotesk(
+                                      style: GoogleFonts.inter(
                                           fontSize: 10, color: AppColors.textSecondary)),
                                   trailing: Icon(Icons.chat_bubble_outline, color: primary, size: 18),
                                   onTap: () => _startNewChat(contact['id'] as int, name),

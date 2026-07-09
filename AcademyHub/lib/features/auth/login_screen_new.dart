@@ -159,7 +159,7 @@ class _LoginScreenState extends State<LoginScreen>
         Text(
           auth.tenantName ?? 'AcademyHub',
           textAlign: TextAlign.center,
-          style: GoogleFonts.spaceGrotesk(
+          style: GoogleFonts.inter(
             fontSize: 24,
             fontWeight: FontWeight.bold,
             color: AppColors.textPrimary,
@@ -169,7 +169,7 @@ class _LoginScreenState extends State<LoginScreen>
         const SizedBox(height: 6),
         Text(
           'Academic Portal Access',
-          style: GoogleFonts.spaceGrotesk(
+          style: GoogleFonts.inter(
             fontSize: 14,
             color: AppColors.textSecondary,
             fontWeight: FontWeight.w500,
@@ -204,7 +204,7 @@ class _LoginScreenState extends State<LoginScreen>
             TextFormField(
               controller: _emailController,
               keyboardType: TextInputType.text,
-              style: GoogleFonts.spaceGrotesk(
+              style: GoogleFonts.inter(
                 color: AppColors.textPrimary,
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
@@ -223,7 +223,7 @@ class _LoginScreenState extends State<LoginScreen>
             TextFormField(
               controller: _passwordController,
               obscureText: _obscurePassword,
-              style: GoogleFonts.spaceGrotesk(
+              style: GoogleFonts.inter(
                 color: AppColors.textPrimary,
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
@@ -272,7 +272,7 @@ class _LoginScreenState extends State<LoginScreen>
                 const SizedBox(width: 10),
                 Text(
                   'Keep me signed in',
-                  style: GoogleFonts.spaceGrotesk(
+                  style: GoogleFonts.inter(
                     fontSize: 13,
                     color: AppColors.textSecondary,
                     fontWeight: FontWeight.w500,
@@ -305,7 +305,7 @@ class _LoginScreenState extends State<LoginScreen>
                       )
                     : Text(
                         'Sign In',
-                        style: GoogleFonts.spaceGrotesk(
+                        style: GoogleFonts.inter(
                           fontSize: 15,
                           fontWeight: FontWeight.bold,
                         ),
@@ -317,7 +317,7 @@ class _LoginScreenState extends State<LoginScreen>
               onPressed: () => auth.clearTenant(),
               child: Text(
                 'Change School',
-                style: GoogleFonts.spaceGrotesk(
+                style: GoogleFonts.inter(
                   fontWeight: FontWeight.bold,
                   fontSize: 13,
                   color: AppColors.textSecondary,
@@ -333,7 +333,7 @@ class _LoginScreenState extends State<LoginScreen>
   Widget _fieldLabel(String label) {
     return Text(
       label,
-      style: GoogleFonts.spaceGrotesk(
+      style: GoogleFonts.inter(
         fontSize: 12,
         fontWeight: FontWeight.bold,
         color: AppColors.textSecondary,
@@ -345,7 +345,7 @@ class _LoginScreenState extends State<LoginScreen>
   Widget _buildFooter() {
     return Text(
       'AcademyHub Gateway Client',
-      style: GoogleFonts.spaceGrotesk(
+      style: GoogleFonts.inter(
         fontSize: 12,
         fontWeight: FontWeight.w500,
         color: AppColors.textMuted,

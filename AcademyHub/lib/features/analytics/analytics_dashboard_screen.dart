@@ -321,7 +321,7 @@ class _AnalyticsDashboardScreenState extends State<AnalyticsDashboardScreen> wit
       appBar: AppBar(
         title: Text(
           'Analytics Dashboard',
-          style: GoogleFonts.spaceGrotesk(fontWeight: FontWeight.bold, fontSize: 16, color: AppColors.textPrimary),
+          style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 16, color: AppColors.textPrimary),
         ),
         backgroundColor: AppColors.surface,
         foregroundColor: AppColors.textPrimary,
@@ -361,10 +361,10 @@ class _AnalyticsDashboardScreenState extends State<AnalyticsDashboardScreen> wit
                   child: DropdownButtonFormField<String>(
                     initialValue: _selectedSession,
                     dropdownColor: AppColors.surface2,
-                    style: GoogleFonts.spaceGrotesk(color: AppColors.textPrimary, fontSize: 12),
+                    style: GoogleFonts.inter(color: AppColors.textPrimary, fontSize: 12),
                     decoration: _filterDecoration('Session'),
                     items: _sessionsList
-                        .map((s) => DropdownMenuItem(value: s, child: Text(s, style: GoogleFonts.spaceGrotesk(color: AppColors.textPrimary))))
+                        .map((s) => DropdownMenuItem(value: s, child: Text(s, style: GoogleFonts.inter(color: AppColors.textPrimary))))
                         .toList(),
                     onChanged: (val) {
                       if (val != null) {
@@ -379,7 +379,7 @@ class _AnalyticsDashboardScreenState extends State<AnalyticsDashboardScreen> wit
                   child: DropdownButtonFormField<int>(
                     initialValue: _selectedTerm,
                     dropdownColor: AppColors.surface2,
-                    style: GoogleFonts.spaceGrotesk(color: AppColors.textPrimary, fontSize: 12),
+                    style: GoogleFonts.inter(color: AppColors.textPrimary, fontSize: 12),
                     decoration: _filterDecoration('Term'),
                     items: const [
                       DropdownMenuItem(value: 1, child: Text('1st Term')),
@@ -417,7 +417,7 @@ class _AnalyticsDashboardScreenState extends State<AnalyticsDashboardScreen> wit
   // ─── Filter decoration helper ──────────────────────────────────────────────
   InputDecoration _filterDecoration(String label) => InputDecoration(
         labelText: label,
-        labelStyle: GoogleFonts.spaceGrotesk(color: AppColors.textSecondary, fontSize: 10),
+        labelStyle: GoogleFonts.inter(color: AppColors.textSecondary, fontSize: 10),
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: AppColors.borderLight)),
         enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: AppColors.borderLight)),
         focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: AppColors.borderLight)),
@@ -455,12 +455,12 @@ class _AnalyticsDashboardScreenState extends State<AnalyticsDashboardScreen> wit
             children: [
               Text(
                 'KPI Overview Console',
-                style: GoogleFonts.spaceGrotesk(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+                style: GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
               ),
               const SizedBox(height: 4),
               Text(
                 'Calculated offline from synced school registers for $_selectedSession - Term $_selectedTerm.',
-                style: GoogleFonts.spaceGrotesk(fontSize: 11, color: Colors.white70),
+                style: GoogleFonts.inter(fontSize: 11, color: Colors.white70),
               ),
             ],
           ),
@@ -543,7 +543,7 @@ class _AnalyticsDashboardScreenState extends State<AnalyticsDashboardScreen> wit
             children: [
               Text(
                 label,
-                style: GoogleFonts.spaceGrotesk(fontSize: 10, color: AppColors.textSecondary, fontWeight: FontWeight.w600),
+                style: GoogleFonts.inter(fontSize: 10, color: AppColors.textSecondary, fontWeight: FontWeight.w600),
               ),
               Icon(icon, color: color, size: 16),
             ],
@@ -551,7 +551,7 @@ class _AnalyticsDashboardScreenState extends State<AnalyticsDashboardScreen> wit
           const Spacer(),
           Text(
             value,
-            style: GoogleFonts.spaceGrotesk(
+            style: GoogleFonts.inter(
               fontSize: 20,
               fontWeight: FontWeight.bold,
               color: AppColors.textPrimary,
@@ -561,7 +561,7 @@ class _AnalyticsDashboardScreenState extends State<AnalyticsDashboardScreen> wit
           const SizedBox(height: 4),
           Text(
             trendMsg,
-            style: GoogleFonts.spaceGrotesk(fontSize: 9, color: AppColors.textMuted),
+            style: GoogleFonts.inter(fontSize: 9, color: AppColors.textMuted),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
@@ -615,12 +615,12 @@ class _AnalyticsDashboardScreenState extends State<AnalyticsDashboardScreen> wit
               children: [
                 Text(
                   title,
-                  style: GoogleFonts.spaceGrotesk(fontWeight: FontWeight.bold, color: textColor, fontSize: 13),
+                  style: GoogleFonts.inter(fontWeight: FontWeight.bold, color: textColor, fontSize: 13),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   message,
-                  style: GoogleFonts.spaceGrotesk(fontSize: 11, color: AppColors.textPrimary, height: 1.4),
+                  style: GoogleFonts.inter(fontSize: 11, color: AppColors.textPrimary, height: 1.4),
                 ),
               ],
             ),
@@ -638,7 +638,7 @@ class _AnalyticsDashboardScreenState extends State<AnalyticsDashboardScreen> wit
           padding: const EdgeInsets.all(32),
           child: Text(
             'No subject scores loaded for $_selectedSession.',
-            style: GoogleFonts.spaceGrotesk(color: AppColors.textSecondary, fontSize: 13),
+            style: GoogleFonts.inter(color: AppColors.textSecondary, fontSize: 13),
             textAlign: TextAlign.center,
           ),
         ),
@@ -661,9 +661,9 @@ class _AnalyticsDashboardScreenState extends State<AnalyticsDashboardScreen> wit
                 ),
                 child: Column(
                   children: [
-                    Text('Highest Task Score', style: GoogleFonts.spaceGrotesk(fontSize: 10, color: AppColors.textSecondary, fontWeight: FontWeight.bold)),
+                    Text('Highest Task Score', style: GoogleFonts.inter(fontSize: 10, color: AppColors.textSecondary, fontWeight: FontWeight.bold)),
                     const SizedBox(height: 4),
-                    Text('${_highestScore.toStringAsFixed(1)}%', style: GoogleFonts.spaceGrotesk(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.success)),
+                    Text('${_highestScore.toStringAsFixed(1)}%', style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.success)),
                   ],
                 ),
               ),
@@ -679,9 +679,9 @@ class _AnalyticsDashboardScreenState extends State<AnalyticsDashboardScreen> wit
                 ),
                 child: Column(
                   children: [
-                    Text('Lowest Task Score', style: GoogleFonts.spaceGrotesk(fontSize: 10, color: AppColors.textSecondary, fontWeight: FontWeight.bold)),
+                    Text('Lowest Task Score', style: GoogleFonts.inter(fontSize: 10, color: AppColors.textSecondary, fontWeight: FontWeight.bold)),
                     const SizedBox(height: 4),
-                    Text('${_lowestScore.toStringAsFixed(1)}%', style: GoogleFonts.spaceGrotesk(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.error)),
+                    Text('${_lowestScore.toStringAsFixed(1)}%', style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.error)),
                   ],
                 ),
               ),
@@ -693,7 +693,7 @@ class _AnalyticsDashboardScreenState extends State<AnalyticsDashboardScreen> wit
         // Subject Rankings Header
         Text(
           'Top Performing Subjects',
-          style: GoogleFonts.spaceGrotesk(fontSize: 13, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+          style: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
         ),
         const SizedBox(height: 10),
 
@@ -734,13 +734,13 @@ class _AnalyticsDashboardScreenState extends State<AnalyticsDashboardScreen> wit
                         Expanded(
                           child: Text(
                             name,
-                            style: GoogleFonts.spaceGrotesk(fontWeight: FontWeight.bold, fontSize: 13, color: AppColors.textPrimary),
+                            style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 13, color: AppColors.textPrimary),
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
                         Text(
                           '${score.toStringAsFixed(1)}%',
-                          style: GoogleFonts.spaceGrotesk(
+                          style: GoogleFonts.inter(
                             fontWeight: FontWeight.bold,
                             fontSize: 13,
                             color: progressColor,
@@ -766,7 +766,7 @@ class _AnalyticsDashboardScreenState extends State<AnalyticsDashboardScreen> wit
                         const SizedBox(width: 12),
                         Text(
                           '$count entries',
-                          style: GoogleFonts.spaceGrotesk(fontSize: 10, color: AppColors.textMuted),
+                          style: GoogleFonts.inter(fontSize: 10, color: AppColors.textMuted),
                         ),
                       ],
                     ),
@@ -781,7 +781,7 @@ class _AnalyticsDashboardScreenState extends State<AnalyticsDashboardScreen> wit
         // Grade Distribution Header
         Text(
           'Score Grade Distribution',
-          style: GoogleFonts.spaceGrotesk(fontSize: 13, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+          style: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
         ),
         const SizedBox(height: 10),
 
@@ -813,7 +813,7 @@ class _AnalyticsDashboardScreenState extends State<AnalyticsDashboardScreen> wit
                       width: 24,
                       child: Text(
                         g,
-                        style: GoogleFonts.spaceGrotesk(fontWeight: FontWeight.bold, fontSize: 13, color: AppColors.textPrimary),
+                        style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 13, color: AppColors.textPrimary),
                       ),
                     ),
                     Expanded(
@@ -840,7 +840,7 @@ class _AnalyticsDashboardScreenState extends State<AnalyticsDashboardScreen> wit
                                     alignment: Alignment.centerLeft,
                                     child: Text(
                                       '$count grades',
-                                      style: GoogleFonts.spaceGrotesk(
+                                      style: GoogleFonts.inter(
                                         fontSize: 9,
                                         fontWeight: FontWeight.bold,
                                         color: ratio > 0.4 ? Colors.white : AppColors.textSecondary,
@@ -872,7 +872,7 @@ class _AnalyticsDashboardScreenState extends State<AnalyticsDashboardScreen> wit
           padding: const EdgeInsets.all(32),
           child: Text(
             'No class rankings computed yet. Ensure scores are assigned to classes.',
-            style: GoogleFonts.spaceGrotesk(color: AppColors.textSecondary, fontSize: 13),
+            style: GoogleFonts.inter(color: AppColors.textSecondary, fontSize: 13),
             textAlign: TextAlign.center,
           ),
         ),
@@ -884,7 +884,7 @@ class _AnalyticsDashboardScreenState extends State<AnalyticsDashboardScreen> wit
       children: [
         Text(
           'Class Rankings by Performance',
-          style: GoogleFonts.spaceGrotesk(fontSize: 13, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+          style: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
         ),
         const SizedBox(height: 10),
 
@@ -938,12 +938,12 @@ class _AnalyticsDashboardScreenState extends State<AnalyticsDashboardScreen> wit
                     children: [
                       Text(
                         c['name'],
-                        style: GoogleFonts.spaceGrotesk(fontWeight: FontWeight.bold, fontSize: 13, color: AppColors.textPrimary),
+                        style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 13, color: AppColors.textPrimary),
                       ),
                       const SizedBox(height: 2),
                       Text(
                         '$students students • $assessments tasks',
-                        style: GoogleFonts.spaceGrotesk(fontSize: 10, color: AppColors.textSecondary),
+                        style: GoogleFonts.inter(fontSize: 10, color: AppColors.textSecondary),
                       ),
                     ],
                   ),
@@ -961,7 +961,7 @@ class _AnalyticsDashboardScreenState extends State<AnalyticsDashboardScreen> wit
                       ),
                       child: Text(
                         '${avg.toStringAsFixed(1)}% GPA',
-                        style: GoogleFonts.spaceGrotesk(
+                        style: GoogleFonts.inter(
                           color: badgeColor,
                           fontWeight: FontWeight.bold,
                           fontSize: 11,
@@ -976,7 +976,7 @@ class _AnalyticsDashboardScreenState extends State<AnalyticsDashboardScreen> wit
                         const SizedBox(width: 4),
                         Text(
                           '${attendance.toStringAsFixed(0)}% Att.',
-                          style: GoogleFonts.spaceGrotesk(
+                          style: GoogleFonts.inter(
                             fontSize: 10,
                             color: attendance < 85 ? AppColors.error : AppColors.textSecondary,
                             fontWeight: FontWeight.w600,
@@ -1002,7 +1002,7 @@ class _AnalyticsDashboardScreenState extends State<AnalyticsDashboardScreen> wit
           padding: const EdgeInsets.all(32),
           child: Text(
             'No computer-based exam data available.',
-            style: GoogleFonts.spaceGrotesk(color: AppColors.textSecondary, fontSize: 13),
+            style: GoogleFonts.inter(color: AppColors.textSecondary, fontSize: 13),
             textAlign: TextAlign.center,
           ),
         ),
@@ -1046,7 +1046,7 @@ class _AnalyticsDashboardScreenState extends State<AnalyticsDashboardScreen> wit
         // Distribution list
         Text(
           'Attempts Score Range Distribution',
-          style: GoogleFonts.spaceGrotesk(fontSize: 13, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+          style: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
         ),
         const SizedBox(height: 10),
 
@@ -1075,7 +1075,7 @@ class _AnalyticsDashboardScreenState extends State<AnalyticsDashboardScreen> wit
                       width: 80,
                       child: Text(
                         entry.key,
-                        style: GoogleFonts.spaceGrotesk(fontSize: 11, color: AppColors.textSecondary, fontWeight: FontWeight.bold),
+                        style: GoogleFonts.inter(fontSize: 11, color: AppColors.textSecondary, fontWeight: FontWeight.bold),
                       ),
                     ),
                     Expanded(
@@ -1101,7 +1101,7 @@ class _AnalyticsDashboardScreenState extends State<AnalyticsDashboardScreen> wit
                     const SizedBox(width: 12),
                     Text(
                       '${entry.value}',
-                      style: GoogleFonts.spaceGrotesk(fontWeight: FontWeight.bold, fontSize: 11, color: AppColors.textPrimary),
+                      style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 11, color: AppColors.textPrimary),
                     ),
                   ],
                 ),
@@ -1122,7 +1122,7 @@ class _AnalyticsDashboardScreenState extends State<AnalyticsDashboardScreen> wit
       children: [
         Text(
           value,
-          style: GoogleFonts.spaceGrotesk(
+          style: GoogleFonts.inter(
             fontSize: 22,
             fontWeight: FontWeight.bold,
             color: color,
@@ -1132,7 +1132,7 @@ class _AnalyticsDashboardScreenState extends State<AnalyticsDashboardScreen> wit
         const SizedBox(height: 4),
         Text(
           label,
-          style: GoogleFonts.spaceGrotesk(fontSize: 10, color: AppColors.textSecondary, fontWeight: FontWeight.w600),
+          style: GoogleFonts.inter(fontSize: 10, color: AppColors.textSecondary, fontWeight: FontWeight.w600),
         ),
       ],
     );

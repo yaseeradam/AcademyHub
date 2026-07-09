@@ -101,7 +101,7 @@ class _DarkAppBar extends StatelessWidget {
                 Expanded(
                   child: Text(
                     title,
-                    style: GoogleFonts.spaceGrotesk(
+                    style: GoogleFonts.inter(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
                       color: AppColors.textPrimary,
@@ -238,15 +238,15 @@ class _ProfileSheetState extends State<_ProfileSheet> {
         backgroundColor: AppColors.surface,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: Text('Confirm Logout',
-            style: GoogleFonts.spaceGrotesk(
+            style: GoogleFonts.inter(
                 color: AppColors.textPrimary, fontWeight: FontWeight.bold)),
         content: Text('Are you sure you want to logout?',
-            style: GoogleFonts.spaceGrotesk(color: AppColors.textSecondary)),
+            style: GoogleFonts.inter(color: AppColors.textSecondary)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
             child: Text('Cancel',
-                style: GoogleFonts.spaceGrotesk(color: AppColors.textSecondary)),
+                style: GoogleFonts.inter(color: AppColors.textSecondary)),
           ),
           ElevatedButton(
             onPressed: () async {
@@ -259,7 +259,7 @@ class _ProfileSheetState extends State<_ProfileSheet> {
                 backgroundColor: AppColors.error,
                 foregroundColor: Colors.white),
             child: Text('Logout',
-                style: GoogleFonts.spaceGrotesk(fontWeight: FontWeight.bold)),
+                style: GoogleFonts.inter(fontWeight: FontWeight.bold)),
           ),
         ],
       ),
@@ -329,7 +329,7 @@ class _ProfileSheetState extends State<_ProfileSheet> {
                     children: [
                       Text(
                         user?.name ?? 'User',
-                        style: GoogleFonts.spaceGrotesk(
+                        style: GoogleFonts.inter(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
                           color: AppColors.textPrimary,
@@ -345,7 +345,7 @@ class _ProfileSheetState extends State<_ProfileSheet> {
                         ),
                         child: Text(
                           (user?.role ?? 'user').toUpperCase(),
-                          style: GoogleFonts.spaceGrotesk(
+                          style: GoogleFonts.inter(
                             fontSize: 10,
                             fontWeight: FontWeight.bold,
                             color: primary,
@@ -380,7 +380,7 @@ class _ProfileSheetState extends State<_ProfileSheet> {
             const SizedBox(height: 24),
             Text(
               'MARKETPLACE PLUGINS',
-              style: GoogleFonts.spaceGrotesk(
+              style: GoogleFonts.inter(
                 fontSize: 10,
                 fontWeight: FontWeight.bold,
                 color: AppColors.textMuted,
@@ -430,7 +430,7 @@ class _ProfileSheetState extends State<_ProfileSheet> {
                         children: [
                           Text(
                             p['name'] ?? 'Plugin',
-                            style: GoogleFonts.spaceGrotesk(
+                            style: GoogleFonts.inter(
                               fontSize: 13,
                               fontWeight: FontWeight.bold,
                               color: AppColors.textPrimary,
@@ -438,7 +438,7 @@ class _ProfileSheetState extends State<_ProfileSheet> {
                           ),
                           Text(
                             p['description'] ?? '',
-                            style: GoogleFonts.spaceGrotesk(
+                            style: GoogleFonts.inter(
                               fontSize: 11,
                               color: AppColors.textSecondary,
                             ),
@@ -458,7 +458,7 @@ class _ProfileSheetState extends State<_ProfileSheet> {
                       ),
                       child: Text(
                         isActive ? 'ACTIVE' : 'LOCKED',
-                        style: GoogleFonts.spaceGrotesk(
+                        style: GoogleFonts.inter(
                           fontSize: 9,
                           fontWeight: FontWeight.w900,
                           color: isActive ? AppColors.success : AppColors.error,
@@ -499,7 +499,7 @@ class _ProfileSheetState extends State<_ProfileSheet> {
             const SizedBox(width: 14),
             Text(
               label,
-              style: GoogleFonts.spaceGrotesk(
+              style: GoogleFonts.inter(
                 fontSize: 14,
                 fontWeight: FontWeight.bold,
                 color: color,
@@ -517,24 +517,617 @@ class RoleShell extends StatelessWidget {
   final String title;
   final Widget body;
   final Widget? floatingActionButton;
-  const RoleShell({super.key, required this.title, required this.body, this.floatingActionButton});
+  
+  // New responsive navigation properties
+  final List<AHNavItem>? navItems;
+  final int? selectedIndex;
+  final ValueChanged<int>? onTabSelected;
+  final Color? accentColor;
+  final bool loading;
+  final RefreshCallback? onRefresh;
+
+  const RoleShell({
+    super.key,
+    required this.title,
+    required this.body,
+    this.floatingActionButton,
+    this.navItems,
+    this.selectedIndex,
+    this.onTabSelected,
+    this.accentColor,
+    this.loading = false,
+    this.onRefresh,
+  });
 
   @override
   Widget build(BuildContext context) {
     final isDark = context.watch<AuthProvider>().themeMode == ThemeMode.dark;
-    return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: SystemUiOverlayStyle(
-        statusBarColor: Colors.transparent,
-        statusBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
-      ),
-      child: Scaffold(
-        backgroundColor: AppColors.background,
-        appBar: PreferredSize(
-          preferredSize: const Size.fromHeight(64),
-          child: _DarkAppBar(title: title),
+
+    // If no navigation items are provided, fall back to simple layout
+    if (navItems == null) {
+      return AnnotatedRegion<SystemUiOverlayStyle>(
+        value: SystemUiOverlayStyle(
+          statusBarColor: Colors.transparent,
+          statusBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
         ),
-        body: body,
-        floatingActionButton: floatingActionButton,
+        child: Scaffold(
+          backgroundColor: AppColors.background,
+          appBar: PreferredSize(
+            preferredSize: const Size.fromHeight(64),
+            child: _DarkAppBar(title: title),
+          ),
+          body: body,
+          floatingActionButton: floatingActionButton,
+        ),
+      );
+    }
+
+    final isMobile = MediaQuery.of(context).size.width < 768;
+
+    if (isMobile) {
+      return AnnotatedRegion<SystemUiOverlayStyle>(
+        value: SystemUiOverlayStyle(
+          statusBarColor: Colors.transparent,
+          statusBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
+        ),
+        child: Scaffold(
+          backgroundColor: AppColors.background,
+          appBar: PreferredSize(
+            preferredSize: const Size.fromHeight(64),
+            child: _DarkAppBar(title: title),
+          ),
+          body: Column(
+            children: [
+              if (loading) LinearProgressIndicator(color: accentColor ?? AppColors.primary, minHeight: 2),
+              Expanded(
+                child: onRefresh != null
+                    ? RefreshIndicator(
+                        onRefresh: onRefresh!,
+                        color: accentColor ?? AppColors.primary,
+                        child: body,
+                      )
+                    : body,
+              ),
+            ],
+          ),
+          floatingActionButton: floatingActionButton,
+          bottomNavigationBar: AHBottomNav(
+            items: navItems!,
+            selectedIndex: selectedIndex ?? 0,
+            onTap: onTabSelected ?? (_) {},
+            accentColor: accentColor ?? AppColors.primary,
+          ),
+        ),
+      );
+    } else {
+      // Tablet / Desktop responsive split layout
+      return AnnotatedRegion<SystemUiOverlayStyle>(
+        value: SystemUiOverlayStyle(
+          statusBarColor: Colors.transparent,
+          statusBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
+        ),
+        child: Scaffold(
+          backgroundColor: AppColors.background,
+          body: Row(
+            children: [
+              // Left Sidebar
+              _ResponsiveSidebar(
+                title: title,
+                navItems: navItems!,
+                selectedIndex: selectedIndex ?? 0,
+                onTabSelected: onTabSelected ?? (_) {},
+                accentColor: accentColor ?? AppColors.primary,
+              ),
+              // Right Main Workspace
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Desktop Header
+                    _DesktopHeader(
+                      title: navItems![selectedIndex ?? 0].label,
+                      accentColor: accentColor ?? AppColors.primary,
+                    ),
+                    if (loading) LinearProgressIndicator(color: accentColor ?? AppColors.primary, minHeight: 2),
+                    Expanded(
+                      child: ClipRect(
+                        child: onRefresh != null
+                            ? RefreshIndicator(
+                                onRefresh: onRefresh!,
+                                color: accentColor ?? AppColors.primary,
+                                child: _buildConstrainedBody(body),
+                              )
+                            : _buildConstrainedBody(body),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          floatingActionButton: floatingActionButton,
+        ),
+      );
+    }
+  }
+
+  Widget _buildConstrainedBody(Widget child) {
+    return Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 1100),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
+          child: child,
+        ),
+      ),
+    );
+  }
+}
+
+// ─── Responsive Left Sidebar ──────────────────────────────────────────────────
+class _ResponsiveSidebar extends StatelessWidget {
+  final String title;
+  final List<AHNavItem> navItems;
+  final int selectedIndex;
+  final ValueChanged<int> onTabSelected;
+  final Color accentColor;
+
+  const _ResponsiveSidebar({
+    required this.title,
+    required this.navItems,
+    required this.selectedIndex,
+    required this.onTabSelected,
+    required this.accentColor,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final auth = context.watch<AuthProvider>();
+    final user = auth.user;
+    final isDark = auth.themeMode == ThemeMode.dark;
+
+    final schoolLogo = auth.tenantLogoUrl;
+    final schoolName = auth.tenantName ?? 'AcademyHub';
+    final userInitial = (user != null && user.name.trim().isNotEmpty)
+        ? user.name.trim().substring(0, 1).toUpperCase()
+        : 'U';
+
+    final roleLabel = (user?.role ?? 'User').toUpperCase();
+
+    return Container(
+      width: 280,
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        border: Border(
+          right: BorderSide(color: AppColors.borderLight, width: 1),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Branding Header
+          Padding(
+            padding: const EdgeInsets.all(20.0),
+            child: Row(
+              children: [
+                Container(
+                  width: 44,
+                  height: 44,
+                  decoration: BoxDecoration(
+                    color: isDark ? AppColors.surface2 : Colors.deepPurple.shade50,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: isDark ? AppColors.borderLight : Colors.deepPurple.shade100,
+                      width: 1.5,
+                    ),
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(10),
+                    child: schoolLogo != null && schoolLogo.isNotEmpty
+                        ? Image.network(
+                            schoolLogo,
+                            fit: BoxFit.contain,
+                            errorBuilder: (_, _, _) => Padding(
+                              padding: const EdgeInsets.all(4),
+                              child: Image.asset('lib/Alogo.png', fit: BoxFit.contain),
+                            ),
+                          )
+                        : Padding(
+                            padding: const EdgeInsets.all(6),
+                            child: Image.asset('lib/Alogo.png', fit: BoxFit.contain),
+                          ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        schoolName,
+                        style: GoogleFonts.inter(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w900,
+                          color: AppColors.textPrimary,
+                          letterSpacing: -0.3,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        title,
+                        style: GoogleFonts.inter(
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold,
+                          color: accentColor,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          // Menu Section Label
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 8.0),
+            child: Text(
+              'PORTAL MENU',
+              style: GoogleFonts.inter(
+                fontSize: 10,
+                fontWeight: FontWeight.w900,
+                color: AppColors.textMuted,
+                letterSpacing: 1.5,
+              ),
+            ),
+          ),
+
+          // Navigation Links
+          Expanded(
+            child: ListView.builder(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              itemCount: navItems.length,
+              itemBuilder: (context, i) {
+                final item = navItems[i];
+                final isSelected = selectedIndex == i;
+                final itemAccent = item.iconColor ?? accentColor;
+                final itemBg = item.iconBg ?? itemAccent.withValues(alpha: 0.12);
+
+                return Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 4.0),
+                  child: InkWell(
+                    onTap: () => onTabSelected(i),
+                    borderRadius: BorderRadius.circular(16),
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 200),
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: isSelected ? accentColor : Colors.transparent,
+                        borderRadius: BorderRadius.circular(16),
+                        boxShadow: isSelected
+                            ? [
+                                BoxShadow(
+                                  color: accentColor.withValues(alpha: 0.35),
+                                  blurRadius: 12,
+                                  offset: const Offset(0, 4),
+                                )
+                              ]
+                            : null,
+                      ),
+                      child: Row(
+                        children: [
+                          // Icon Container
+                          Container(
+                            width: 36,
+                            height: 36,
+                            decoration: BoxDecoration(
+                              color: isSelected
+                                  ? Colors.white.withValues(alpha: 0.2)
+                                  : itemBg,
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: Icon(
+                              isSelected ? item.activeIcon : item.icon,
+                              color: isSelected ? Colors.white : itemAccent,
+                              size: 20,
+                            ),
+                          ),
+                          const SizedBox(width: 14),
+                          // Label
+                          Expanded(
+                            child: Text(
+                              item.label,
+                              style: GoogleFonts.inter(
+                                fontSize: 13,
+                                fontWeight: isSelected ? FontWeight.w900 : FontWeight.bold,
+                                color: isSelected ? Colors.white : AppColors.textPrimary,
+                              ),
+                            ),
+                          ),
+                          // Chevron Arrow if selected
+                          if (isSelected)
+                            Container(
+                              width: 20,
+                              height: 20,
+                              decoration: BoxDecoration(
+                                color: Colors.white.withValues(alpha: 0.2),
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(
+                                Icons.chevron_right_rounded,
+                                color: Colors.white,
+                                size: 14,
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+
+          // User Profile Block at bottom
+          _SidebarProfileBlock(auth: auth, user: user, userInitial: userInitial, accentColor: accentColor, roleLabel: roleLabel),
+        ],
+      ),
+    );
+  }
+}
+
+// ─── Sidebar Profile Block ────────────────────────────────────────────────────
+class _SidebarProfileBlock extends StatelessWidget {
+  final AuthProvider auth;
+  final dynamic user;
+  final String userInitial;
+  final Color accentColor;
+  final String roleLabel;
+
+  const _SidebarProfileBlock({
+    required this.auth,
+    required this.user,
+    required this.userInitial,
+    required this.accentColor,
+    required this.roleLabel,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      margin: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.surface2,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.borderLight, width: 1),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Row(
+            children: [
+              CircleAvatar(
+                radius: 20,
+                backgroundColor: accentColor.withValues(alpha: 0.15),
+                backgroundImage: auth.getReachableUrl(user?.profilePhotoUrl) != null
+                    ? NetworkImage(auth.getReachableUrl(user?.profilePhotoUrl)!)
+                    : null,
+                child: auth.getReachableUrl(user?.profilePhotoUrl) != null
+                    ? null
+                    : Text(
+                        userInitial,
+                        style: TextStyle(
+                          color: accentColor,
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      user?.name ?? 'User',
+                      style: GoogleFonts.inter(
+                        fontSize: 13,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.textPrimary,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 2),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: accentColor.withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: Text(
+                        roleLabel,
+                        style: GoogleFonts.inter(
+                          fontSize: 9,
+                          fontWeight: FontWeight.bold,
+                          color: accentColor,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          // Logout Button
+          InkWell(
+            onTap: () => _showLogout(context),
+            borderRadius: BorderRadius.circular(10),
+            child: Container(
+              padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+              decoration: BoxDecoration(
+                border: Border.all(color: AppColors.error.withValues(alpha: 0.3)),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.logout_rounded, color: AppColors.error, size: 14),
+                  const SizedBox(width: 6),
+                  Text(
+                    'Sign Out',
+                    style: GoogleFonts.inter(
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.error,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showLogout(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AppColors.surface,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Text('Confirm Logout',
+            style: GoogleFonts.inter(
+                color: AppColors.textPrimary, fontWeight: FontWeight.bold)),
+        content: Text('Are you sure you want to logout?',
+            style: GoogleFonts.inter(color: AppColors.textSecondary)),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text('Cancel',
+                style: GoogleFonts.inter(color: AppColors.textSecondary)),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              final router = GoRouter.of(ctx);
+              Navigator.pop(ctx);
+              await auth.logout();
+              router.go('/login');
+            },
+            style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.error,
+                foregroundColor: Colors.white),
+            child: Text('Logout',
+                style: GoogleFonts.inter(fontWeight: FontWeight.bold)),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ─── Desktop Top Header ───────────────────────────────────────────────────────
+class _DesktopHeader extends StatelessWidget {
+  final String title;
+  final Color accentColor;
+
+  const _DesktopHeader({
+    required this.title,
+    required this.accentColor,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final user = context.watch<AuthProvider>().user;
+    final userInitial = (user != null && user.name.trim().isNotEmpty)
+        ? user.name.trim().substring(0, 1).toUpperCase()
+        : 'U';
+    final auth = context.watch<AuthProvider>();
+
+    return Container(
+      height: 70,
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        border: Border(
+          bottom: BorderSide(color: AppColors.borderLight, width: 1),
+        ),
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 24),
+      child: Row(
+        children: [
+          // Screen Title
+          Text(
+            title,
+            style: GoogleFonts.inter(
+              fontSize: 18,
+              fontWeight: FontWeight.w900,
+              color: AppColors.textPrimary,
+              letterSpacing: -0.5,
+            ),
+          ),
+          const Spacer(),
+          // Connection Status
+          const SyncDot(),
+          const SizedBox(width: 14),
+          // Theme Switcher
+          _IconBtn(
+            icon: auth.themeMode == ThemeMode.dark
+                ? Icons.light_mode_outlined
+                : Icons.dark_mode_outlined,
+            onTap: () => auth.toggleTheme(),
+          ),
+          const SizedBox(width: 10),
+          // Notifications
+          _IconBtn(
+            icon: Icons.notifications_outlined,
+            onTap: () => context.push('/notifications'),
+          ),
+          if (user?.role != 'student') ...[
+            const SizedBox(width: 10),
+            // Chat
+            _IconBtn(
+              icon: Icons.chat_bubble_outline_rounded,
+              onTap: () => context.push('/chat'),
+            ),
+          ],
+          const SizedBox(width: 14),
+          // Profile Avatar Triggering Sheet
+          GestureDetector(
+            onTap: () {
+              showModalBottomSheet(
+                context: context,
+                backgroundColor: AppColors.surface,
+                shape: const RoundedRectangleBorder(
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                ),
+                builder: (ctx) => _ProfileSheet(auth: auth),
+              );
+            },
+            child: CircleAvatar(
+              radius: 18,
+              backgroundColor: accentColor.withValues(alpha: 0.15),
+              backgroundImage: auth.getReachableUrl(user?.profilePhotoUrl) != null
+                  ? NetworkImage(auth.getReachableUrl(user?.profilePhotoUrl)!)
+                  : null,
+              child: auth.getReachableUrl(user?.profilePhotoUrl) != null
+                  ? null
+                  : Text(
+                      userInitial,
+                      style: TextStyle(
+                        color: accentColor,
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -570,6 +1163,7 @@ class AHBottomNav extends StatelessWidget {
             children: List.generate(items.length, (i) {
               final item = items[i];
               final selected = i == selectedIndex;
+              final itemAccent = item.iconColor ?? accentColor;
               return Expanded(
                 child: GestureDetector(
                   onTap: () => onTap(i),
@@ -580,7 +1174,7 @@ class AHBottomNav extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(vertical: 8),
                     decoration: BoxDecoration(
                       color: selected
-                          ? accentColor.withValues(alpha: 0.12)
+                          ? itemAccent.withValues(alpha: 0.12)
                           : Colors.transparent,
                       borderRadius: BorderRadius.circular(12),
                     ),
@@ -589,16 +1183,16 @@ class AHBottomNav extends StatelessWidget {
                       children: [
                         Icon(
                           selected ? item.activeIcon : item.icon,
-                          color: selected ? accentColor : AppColors.textSecondary,
+                          color: selected ? itemAccent : AppColors.textSecondary,
                           size: 22,
                         ),
                         const SizedBox(height: 4),
                         Text(
                           item.label,
-                          style: GoogleFonts.spaceGrotesk(
+                          style: GoogleFonts.inter(
                             fontSize: 10,
                             fontWeight: selected ? FontWeight.bold : FontWeight.w500,
-                            color: selected ? accentColor : AppColors.textSecondary,
+                            color: selected ? itemAccent : AppColors.textSecondary,
                           ),
                         ),
                       ],
@@ -618,10 +1212,16 @@ class AHNavItem {
   final IconData icon;
   final IconData activeIcon;
   final String label;
-  const AHNavItem(
-      {required this.icon,
-      required this.activeIcon,
-      required this.label});
+  final Color? iconBg;
+  final Color? iconColor;
+
+  const AHNavItem({
+    required this.icon,
+    required this.activeIcon,
+    required this.label,
+    this.iconBg,
+    this.iconColor,
+  });
 }
 
 // ─── Glassmorphism Hero Card ──────────────────────────────────────────────────
@@ -712,7 +1312,7 @@ class DarkStatCard extends StatelessWidget {
             const Spacer(),
             Text(
               value,
-              style: GoogleFonts.spaceGrotesk(
+              style: GoogleFonts.inter(
                 fontSize: 22,
                 fontWeight: FontWeight.bold,
                 color: AppColors.textPrimary,
@@ -721,7 +1321,7 @@ class DarkStatCard extends StatelessWidget {
             const SizedBox(height: 2),
             Text(
               label,
-              style: GoogleFonts.spaceGrotesk(
+              style: GoogleFonts.inter(
                 fontSize: 11,
                 fontWeight: FontWeight.w600,
                 color: AppColors.textSecondary,
@@ -754,7 +1354,7 @@ class SectionHeader extends StatelessWidget {
       children: [
         Text(
           title,
-          style: GoogleFonts.spaceGrotesk(
+          style: GoogleFonts.inter(
             fontSize: 14,
             fontWeight: FontWeight.bold,
             color: AppColors.textPrimary,
@@ -765,7 +1365,7 @@ class SectionHeader extends StatelessWidget {
             onTap: onAction,
             child: Text(
               actionLabel!,
-              style: GoogleFonts.spaceGrotesk(
+              style: GoogleFonts.inter(
                 fontSize: 12,
                 fontWeight: FontWeight.bold,
                 color: AppColors.primary,
@@ -817,13 +1417,13 @@ class DarkActionRow extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(title,
-                      style: GoogleFonts.spaceGrotesk(
+                      style: GoogleFonts.inter(
                           fontWeight: FontWeight.bold,
                           fontSize: 13,
                           color: AppColors.textPrimary)),
                   const SizedBox(height: 2),
                   Text(subtitle,
-                      style: GoogleFonts.spaceGrotesk(
+                      style: GoogleFonts.inter(
                           fontSize: 11,
                           color: AppColors.textSecondary)),
                 ],
@@ -901,7 +1501,7 @@ class AHLoadingButton extends StatelessWidget {
                   ],
                   Text(
                     label,
-                    style: GoogleFonts.spaceGrotesk(
+                    style: GoogleFonts.inter(
                       fontSize: 14,
                       fontWeight: FontWeight.bold,
                     ),

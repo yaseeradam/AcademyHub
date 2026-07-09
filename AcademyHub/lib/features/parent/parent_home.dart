@@ -41,21 +41,33 @@ class _ParentHomeState extends State<ParentHome> {
 
   static const _tabs = [
     AHNavItem(
-        icon: Icons.dashboard_outlined,
-        activeIcon: Icons.dashboard_rounded,
-        label: 'Overview'),
+      icon: Icons.dashboard_outlined,
+      activeIcon: Icons.dashboard_rounded,
+      label: 'Overview',
+      iconBg: Color(0xFFE0E7FF),
+      iconColor: Color(0xFF4F46E5),
+    ),
     AHNavItem(
-        icon: Icons.people_outline,
-        activeIcon: Icons.people_rounded,
-        label: 'Children'),
+      icon: Icons.people_outline,
+      activeIcon: Icons.people_rounded,
+      label: 'Children',
+      iconBg: Color(0xFFFFE4E6),
+      iconColor: Color(0xFFE11D48),
+    ),
     AHNavItem(
-        icon: Icons.receipt_long_outlined,
-        activeIcon: Icons.receipt_long_rounded,
-        label: 'Fees'),
+      icon: Icons.receipt_long_outlined,
+      activeIcon: Icons.receipt_long_rounded,
+      label: 'Fees',
+      iconBg: Color(0xFFE0F2FE),
+      iconColor: Color(0xFF0284C7),
+    ),
     AHNavItem(
-        icon: Icons.campaign_outlined,
-        activeIcon: Icons.campaign_rounded,
-        label: 'Updates'),
+      icon: Icons.campaign_outlined,
+      activeIcon: Icons.campaign_rounded,
+      label: 'Updates',
+      iconBg: Color(0xFFFEF9C3),
+      iconColor: Color(0xFFCA8A04),
+    ),
   ];
 
   @override
@@ -169,24 +181,13 @@ class _ParentHomeState extends State<ParentHome> {
 
     return RoleShell(
       title: 'Parent Portal',
-      body: Column(
-        children: [
-          if (_loading) LinearProgressIndicator(color: primary, minHeight: 2),
-          Expanded(
-            child: RefreshIndicator(
-              onRefresh: _load,
-              color: primary,
-              child: pages[_selectedTab],
-            ),
-          ),
-          AHBottomNav(
-            items: _tabs,
-            selectedIndex: _selectedTab,
-            onTap: (i) => setState(() => _selectedTab = i),
-            accentColor: accent,
-          ),
-        ],
-      ),
+      navItems: _tabs,
+      selectedIndex: _selectedTab,
+      onTabSelected: (i) => setState(() => _selectedTab = i),
+      accentColor: accent,
+      loading: _loading,
+      onRefresh: _load,
+      body: pages[_selectedTab],
     );
   }
 
@@ -326,10 +327,10 @@ class _ParentHomeState extends State<ParentHome> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text('Welcome back,',
-                          style: GoogleFonts.spaceGrotesk(
+                          style: GoogleFonts.inter(
                               fontSize: 12, color: Colors.white60)),
                       Text(user?.name ?? 'Parent',
-                          style: GoogleFonts.spaceGrotesk(
+                          style: GoogleFonts.inter(
                               fontSize: 20,
                               fontWeight: FontWeight.bold,
                               color: Colors.white)),
@@ -442,12 +443,12 @@ class _ParentHomeState extends State<ParentHome> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text('WhatsApp Alerts',
-                        style: GoogleFonts.spaceGrotesk(
+                        style: GoogleFonts.inter(
                             fontSize: 12,
                             fontWeight: FontWeight.bold,
                             color: AppColors.textPrimary)),
                     Text('Subscribe to automated student updates.',
-                        style: GoogleFonts.spaceGrotesk(
+                        style: GoogleFonts.inter(
                             fontSize: 9,
                             color: AppColors.textSecondary)),
                   ],
@@ -482,7 +483,7 @@ class _ParentHomeState extends State<ParentHome> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text('Quick Guidelines',
-                  style: GoogleFonts.spaceGrotesk(
+                  style: GoogleFonts.inter(
                       fontSize: 13,
                       fontWeight: FontWeight.bold,
                       color: AppColors.textPrimary)),
@@ -514,12 +515,12 @@ class _ParentHomeState extends State<ParentHome> {
             Icon(icon, color: Colors.white70, size: 14),
             const SizedBox(height: 4),
             Text(value,
-                style: GoogleFonts.spaceGrotesk(
+                style: GoogleFonts.inter(
                     fontSize: 14,
                     fontWeight: FontWeight.bold,
                     color: Colors.white)),
             Text(label,
-                style: GoogleFonts.spaceGrotesk(
+                style: GoogleFonts.inter(
                     fontSize: 9, color: Colors.white60)),
           ],
         ),
@@ -554,12 +555,12 @@ class _ParentHomeState extends State<ParentHome> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(title,
-                      style: GoogleFonts.spaceGrotesk(
+                      style: GoogleFonts.inter(
                           fontSize: 12,
                           fontWeight: FontWeight.bold,
                           color: AppColors.textPrimary)),
                   Text(subtitle,
-                      style: GoogleFonts.spaceGrotesk(
+                      style: GoogleFonts.inter(
                           fontSize: 10,
                           color: AppColors.textSecondary)),
                 ],
@@ -575,7 +576,7 @@ class _ParentHomeState extends State<ParentHome> {
     return Padding(
       padding: const EdgeInsets.only(bottom: 6),
       child: Text(text,
-          style: GoogleFonts.spaceGrotesk(
+          style: GoogleFonts.inter(
               fontSize: 12,
               color: AppColors.textSecondary,
               height: 1.4)),
@@ -649,14 +650,14 @@ class _ParentHomeState extends State<ParentHome> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(name.isEmpty ? 'Unknown' : name,
-                                  style: GoogleFonts.spaceGrotesk(
+                                  style: GoogleFonts.inter(
                                       fontWeight: FontWeight.bold,
                                       fontSize: 13,
                                       color: AppColors.textPrimary),
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis),
                               Text(cls,
-                                  style: GoogleFonts.spaceGrotesk(
+                                  style: GoogleFonts.inter(
                                       fontSize: 11,
                                       color: AppColors.textSecondary),
                                   maxLines: 1,
@@ -668,7 +669,7 @@ class _ParentHomeState extends State<ParentHome> {
                     ),
                     const Spacer(),
                     Text('Adm: ${c['admission_number'] ?? 'N/A'}',
-                        style: GoogleFonts.spaceGrotesk(
+                        style: GoogleFonts.inter(
                             fontSize: 10,
                             color: AppColors.textMuted,
                             fontWeight: FontWeight.w500)),
@@ -694,7 +695,7 @@ class _ParentHomeState extends State<ParentHome> {
                                     borderRadius: BorderRadius.circular(8)),
                               ),
                               child: Text('Performance',
-                                  style: GoogleFonts.spaceGrotesk(
+                                  style: GoogleFonts.inter(
                                       fontSize: 10,
                                       fontWeight: FontWeight.bold)),
                             ),
@@ -715,7 +716,7 @@ class _ParentHomeState extends State<ParentHome> {
                                     borderRadius: BorderRadius.circular(8)),
                               ),
                               child: Text('Attendance',
-                                  style: GoogleFonts.spaceGrotesk(
+                                  style: GoogleFonts.inter(
                                       fontSize: 10,
                                       fontWeight: FontWeight.bold)),
                             ),
@@ -833,17 +834,17 @@ class _ParentHomeState extends State<ParentHome> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(name.isEmpty ? 'Unknown' : name,
-                            style: GoogleFonts.spaceGrotesk(
+                            style: GoogleFonts.inter(
                                 fontWeight: FontWeight.bold,
                                 fontSize: 13,
                                 color: AppColors.textPrimary)),
                         Text('Class: $cls',
-                            style: GoogleFonts.spaceGrotesk(
+                            style: GoogleFonts.inter(
                                 fontSize: 11,
                                 color: AppColors.textSecondary)),
                         if (!_isOnline)
                           Text('No connection',
-                              style: GoogleFonts.spaceGrotesk(
+                              style: GoogleFonts.inter(
                                   fontSize: 10,
                                   color: AppColors.error)),
                       ],
@@ -874,7 +875,7 @@ class _ParentHomeState extends State<ParentHome> {
                                 strokeWidth: 2,
                                 color: Colors.white))
                         : Text('Pay Fees',
-                            style: GoogleFonts.spaceGrotesk(
+                            style: GoogleFonts.inter(
                                 fontSize: 11,
                                 fontWeight: FontWeight.bold)),
                   ),
@@ -929,19 +930,19 @@ class _ParentHomeState extends State<ParentHome> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(tx['category'] ?? 'Fee Payment',
-                                style: GoogleFonts.spaceGrotesk(
+                                style: GoogleFonts.inter(
                                     fontWeight: FontWeight.bold,
                                     fontSize: 13,
                                     color: AppColors.textPrimary)),
                             Text(date,
-                                style: GoogleFonts.spaceGrotesk(
+                                style: GoogleFonts.inter(
                                     fontSize: 11,
                                     color: AppColors.textMuted)),
                           ],
                         ),
                       ),
                       Text('₦${tx['amount_paid']}',
-                          style: GoogleFonts.spaceGrotesk(
+                          style: GoogleFonts.inter(
                               fontWeight: FontWeight.bold,
                               fontSize: 14,
                               color: badgeColor)),
@@ -989,25 +990,25 @@ class _ParentHomeState extends State<ParentHome> {
                   Row(children: [
                     Expanded(
                       child: Text(a['title'] ?? '',
-                          style: GoogleFonts.spaceGrotesk(
+                          style: GoogleFonts.inter(
                               fontWeight: FontWeight.bold,
                               fontSize: 13,
                               color: AppColors.textPrimary)),
                     ),
                     Text(date,
-                        style: GoogleFonts.spaceGrotesk(
+                        style: GoogleFonts.inter(
                             fontSize: 11, color: AppColors.textMuted)),
                   ]),
                   const SizedBox(height: 6),
                   Text(a['body'] ?? '',
-                      style: GoogleFonts.spaceGrotesk(
+                      style: GoogleFonts.inter(
                           fontSize: 12,
                           color: AppColors.textSecondary,
                           height: 1.4)),
                   if ((a['author_name'] as String?)?.isNotEmpty == true) ...[
                     const SizedBox(height: 6),
                     Text('— ${a['author_name']}',
-                        style: GoogleFonts.spaceGrotesk(
+                        style: GoogleFonts.inter(
                             fontSize: 11, color: AppColors.textMuted)),
                   ],
                 ]),
@@ -1023,7 +1024,7 @@ class _ParentHomeState extends State<ParentHome> {
             Icon(Icons.inbox_outlined, size: 40, color: AppColors.textMuted),
             const SizedBox(height: 12),
             Text(msg,
-                style: GoogleFonts.spaceGrotesk(
+                style: GoogleFonts.inter(
                     color: AppColors.textSecondary, fontSize: 13)),
           ],
         ),

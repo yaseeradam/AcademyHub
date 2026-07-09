@@ -145,13 +145,19 @@ class _AdminHomeState extends State<AdminHome> {
 
     final activeTabs = <AHNavItem>[
       const AHNavItem(
-          icon: Icons.terminal_outlined,
-          activeIcon: Icons.terminal_rounded,
-          label: 'Command'),
+        icon: Icons.terminal_outlined,
+        activeIcon: Icons.terminal_rounded,
+        label: 'Command',
+        iconBg: Color(0xFFE0E7FF),
+        iconColor: Color(0xFF4F46E5),
+      ),
       const AHNavItem(
-          icon: Icons.people_outline,
-          activeIcon: Icons.people_rounded,
-          label: 'Students'),
+        icon: Icons.people_outline,
+        activeIcon: Icons.people_rounded,
+        label: 'Students',
+        iconBg: Color(0xFFFFE4E6),
+        iconColor: Color(0xFFE11D48),
+      ),
     ];
 
     final activePages = <Widget>[
@@ -162,21 +168,30 @@ class _AdminHomeState extends State<AdminHome> {
     if (isAdmin) {
       if (hasHomework) {
         activeTabs.add(const AHNavItem(
-            icon: Icons.assignment_outlined,
-            activeIcon: Icons.assignment_rounded,
-            label: 'Homework'));
+          icon: Icons.assignment_outlined,
+          activeIcon: Icons.assignment_rounded,
+          label: 'Homework',
+          iconBg: Color(0xFFF3E8FF),
+          iconColor: Color(0xFF7C3AED),
+        ));
         activePages.add(_buildHomework());
       }
       activeTabs.add(const AHNavItem(
-          icon: Icons.campaign_outlined,
-          activeIcon: Icons.campaign_rounded,
-          label: 'News'));
+        icon: Icons.campaign_outlined,
+        activeIcon: Icons.campaign_rounded,
+        label: 'News',
+        iconBg: Color(0xFFFEF9C3),
+        iconColor: Color(0xFFCA8A04),
+      ));
       activePages.add(_buildAnnouncements());
     } else if (isBursar) {
       activeTabs.add(const AHNavItem(
-          icon: Icons.receipt_long_outlined,
-          activeIcon: Icons.receipt_long_rounded,
-          label: 'Transactions'));
+        icon: Icons.receipt_long_outlined,
+        activeIcon: Icons.receipt_long_rounded,
+        label: 'Transactions',
+        iconBg: Color(0xFFE0F2FE),
+        iconColor: Color(0xFF0284C7),
+      ));
       activePages.add(_buildBursarTransactions(primary));
     }
 
@@ -187,24 +202,13 @@ class _AdminHomeState extends State<AdminHome> {
 
     return RoleShell(
       title: isBursar ? 'Bursar Portal' : 'Admin Portal',
-      body: Column(
-        children: [
-          if (_loading) LinearProgressIndicator(color: primary, minHeight: 2),
-          Expanded(
-            child: RefreshIndicator(
-              onRefresh: _load,
-              color: primary,
-              child: activePages[currentTab],
-            ),
-          ),
-          AHBottomNav(
-            items: activeTabs,
-            selectedIndex: currentTab,
-            onTap: (i) => setState(() => _selectedTab = i),
-            accentColor: accent,
-          ),
-        ],
-      ),
+      navItems: activeTabs,
+      selectedIndex: currentTab,
+      onTabSelected: (i) => setState(() => _selectedTab = i),
+      accentColor: accent,
+      loading: _loading,
+      onRefresh: _load,
+      body: activePages[currentTab],
     );
   }
 
@@ -503,10 +507,10 @@ class _AdminHomeState extends State<AdminHome> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text('Bursar Portal',
-                            style: GoogleFonts.spaceGrotesk(
+                            style: GoogleFonts.inter(
                                 fontSize: 12, color: Colors.white60)),
                         Text(user?.name ?? 'Bursar',
-                            style: GoogleFonts.spaceGrotesk(
+                            style: GoogleFonts.inter(
                                 fontSize: 20,
                                 fontWeight: FontWeight.bold,
                                 color: Colors.white)),
@@ -553,10 +557,10 @@ class _AdminHomeState extends State<AdminHome> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text('Welcome back,',
-                            style: GoogleFonts.spaceGrotesk(
+                            style: GoogleFonts.inter(
                                 fontSize: 12, color: Colors.white60)),
                         Text(user?.name ?? 'Admin',
-                            style: GoogleFonts.spaceGrotesk(
+                            style: GoogleFonts.inter(
                                 fontSize: 20,
                                 fontWeight: FontWeight.bold,
                                 color: Colors.white)),
@@ -599,7 +603,7 @@ class _AdminHomeState extends State<AdminHome> {
                             hasPending
                                 ? '$pending pending sync transactions'
                                 : 'All data synced • Local copy up to date',
-                            style: GoogleFonts.spaceGrotesk(
+                            style: GoogleFonts.inter(
                                 fontSize: 12,
                                 color: Colors.white70),
                           ),
@@ -615,7 +619,7 @@ class _AdminHomeState extends State<AdminHome> {
                                 borderRadius: BorderRadius.circular(8),
                               ),
                               child: Text('Sync Now',
-                                  style: GoogleFonts.spaceGrotesk(
+                                  style: GoogleFonts.inter(
                                       fontSize: 11,
                                       fontWeight: FontWeight.bold,
                                       color: Colors.white)),
@@ -759,12 +763,12 @@ class _AdminHomeState extends State<AdminHome> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(name.isEmpty ? 'Unknown' : name,
-                      style: GoogleFonts.spaceGrotesk(
+                      style: GoogleFonts.inter(
                           fontWeight: FontWeight.bold,
                           fontSize: 13,
                           color: AppColors.textPrimary)),
                   Text(cls,
-                      style: GoogleFonts.spaceGrotesk(
+                      style: GoogleFonts.inter(
                           fontSize: 11,
                           color: AppColors.textSecondary)),
                 ],
@@ -779,7 +783,7 @@ class _AdminHomeState extends State<AdminHome> {
                 border: Border.all(color: AppColors.borderLight),
               ),
               child: Text(admNo,
-                  style: GoogleFonts.spaceGrotesk(
+                  style: GoogleFonts.inter(
                       fontSize: 10,
                       color: AppColors.textSecondary,
                       fontWeight: FontWeight.bold)),
@@ -822,7 +826,7 @@ class _AdminHomeState extends State<AdminHome> {
             ),
             Text(
               name,
-              style: GoogleFonts.spaceGrotesk(
+              style: GoogleFonts.inter(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
                 color: AppColors.textPrimary,
@@ -839,8 +843,8 @@ class _AdminHomeState extends State<AdminHome> {
                   ),
                   child: const Icon(Icons.payment_rounded, color: AppColors.success),
                 ),
-                title: Text('Launch Payment Checkout', style: GoogleFonts.spaceGrotesk(color: AppColors.textPrimary, fontWeight: FontWeight.bold)),
-                subtitle: Text('Initiate payment gateway billing links', style: GoogleFonts.spaceGrotesk(color: AppColors.textSecondary, fontSize: 11)),
+                title: Text('Launch Payment Checkout', style: GoogleFonts.inter(color: AppColors.textPrimary, fontWeight: FontWeight.bold)),
+                subtitle: Text('Initiate payment gateway billing links', style: GoogleFonts.inter(color: AppColors.textSecondary, fontSize: 11)),
                 onTap: () {
                   Navigator.pop(ctx);
                   _launchCheckout(s['id'] as int, name);
@@ -857,8 +861,8 @@ class _AdminHomeState extends State<AdminHome> {
                 ),
                 child: const Icon(Icons.insights_rounded, color: AppColors.info),
               ),
-              title: Text('View Academic Performance', style: GoogleFonts.spaceGrotesk(color: AppColors.textPrimary, fontWeight: FontWeight.bold)),
-              subtitle: Text('View attendance and score trends', style: GoogleFonts.spaceGrotesk(color: AppColors.textSecondary, fontSize: 11)),
+              title: Text('View Academic Performance', style: GoogleFonts.inter(color: AppColors.textPrimary, fontWeight: FontWeight.bold)),
+              subtitle: Text('View attendance and score trends', style: GoogleFonts.inter(color: AppColors.textSecondary, fontSize: 11)),
               onTap: () {
                 Navigator.pop(ctx);
                 context.push('/performance', extra: {
@@ -921,13 +925,13 @@ class _AdminHomeState extends State<AdminHome> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(value,
-                      style: GoogleFonts.spaceGrotesk(
+                      style: GoogleFonts.inter(
                           fontSize: 13,
                           fontWeight: FontWeight.bold,
                           color: Colors.white),
                       overflow: TextOverflow.ellipsis),
                   Text(label,
-                      style: GoogleFonts.spaceGrotesk(
+                      style: GoogleFonts.inter(
                           fontSize: 9, color: Colors.white60)),
                 ],
               ),
@@ -992,7 +996,7 @@ class _AdminHomeState extends State<AdminHome> {
                   children: [
                     Text(
                       studentName,
-                      style: GoogleFonts.spaceGrotesk(
+                      style: GoogleFonts.inter(
                         fontWeight: FontWeight.bold,
                         fontSize: 13,
                         color: AppColors.textPrimary,
@@ -1001,7 +1005,7 @@ class _AdminHomeState extends State<AdminHome> {
                     if (admNo.isNotEmpty)
                       Text(
                         'Adm: $admNo',
-                        style: GoogleFonts.spaceGrotesk(
+                        style: GoogleFonts.inter(
                           fontSize: 11,
                           color: AppColors.textSecondary,
                         ),
@@ -1009,7 +1013,7 @@ class _AdminHomeState extends State<AdminHome> {
                     const SizedBox(height: 4),
                     Text(
                       '${tx['category'] ?? "Fee"} • $date',
-                      style: GoogleFonts.spaceGrotesk(
+                      style: GoogleFonts.inter(
                         fontSize: 11,
                         color: AppColors.textMuted,
                       ),
@@ -1019,7 +1023,7 @@ class _AdminHomeState extends State<AdminHome> {
               ),
               Text(
                 '₦${tx['amount_paid']}',
-                style: GoogleFonts.spaceGrotesk(
+                style: GoogleFonts.inter(
                   fontWeight: FontWeight.bold,
                   fontSize: 14,
                   color: badgeColor,
@@ -1100,7 +1104,7 @@ class _AdminHomeState extends State<AdminHome> {
                           Row(children: [
                             Expanded(
                               child: Text(h['title'] ?? '',
-                                  style: GoogleFonts.spaceGrotesk(
+                                  style: GoogleFonts.inter(
                                       fontWeight: FontWeight.bold,
                                       fontSize: 13,
                                       color: AppColors.textPrimary)),
@@ -1111,12 +1115,12 @@ class _AdminHomeState extends State<AdminHome> {
                           ]),
                           const SizedBox(height: 2),
                           Text(h['subject_name'] ?? '',
-                              style: GoogleFonts.spaceGrotesk(
+                              style: GoogleFonts.inter(
                                   fontSize: 11,
                                   color: AppColors.textSecondary)),
                           const SizedBox(height: 4),
                           Text('Due: $due',
-                              style: GoogleFonts.spaceGrotesk(
+                              style: GoogleFonts.inter(
                                   fontSize: 11,
                                   fontWeight: overdue
                                       ? FontWeight.bold
@@ -1153,7 +1157,7 @@ class _AdminHomeState extends State<AdminHome> {
               },
               icon: const Icon(Icons.add, size: 18),
               label: Text('Publish Announcement',
-                  style: GoogleFonts.spaceGrotesk(fontWeight: FontWeight.bold)),
+                  style: GoogleFonts.inter(fontWeight: FontWeight.bold)),
               style: ElevatedButton.styleFrom(
                 backgroundColor: primary,
                 foregroundColor: Colors.black,
@@ -1188,26 +1192,26 @@ class _AdminHomeState extends State<AdminHome> {
                           Row(children: [
                             Expanded(
                               child: Text(a['title'] ?? '',
-                                  style: GoogleFonts.spaceGrotesk(
+                                  style: GoogleFonts.inter(
                                       fontWeight: FontWeight.bold,
                                       fontSize: 13,
                                       color: AppColors.textPrimary)),
                             ),
                             Text(date,
-                                style: GoogleFonts.spaceGrotesk(
+                                style: GoogleFonts.inter(
                                     fontSize: 11,
                                     color: AppColors.textMuted)),
                           ]),
                           const SizedBox(height: 6),
                           Text(a['body'] ?? '',
-                              style: GoogleFonts.spaceGrotesk(
+                              style: GoogleFonts.inter(
                                   fontSize: 12,
                                   color: AppColors.textSecondary,
                                   height: 1.4)),
                           if ((a['author_name'] as String?)?.isNotEmpty == true) ...[
                             const SizedBox(height: 6),
                             Text('— ${a['author_name']}',
-                                style: GoogleFonts.spaceGrotesk(
+                                style: GoogleFonts.inter(
                                     fontSize: 11,
                                     color: AppColors.textMuted)),
                           ],
@@ -1229,7 +1233,7 @@ class _AdminHomeState extends State<AdminHome> {
           Icon(Icons.inbox_outlined, size: 40, color: AppColors.textMuted),
           const SizedBox(height: 12),
           Text(msg,
-              style: GoogleFonts.spaceGrotesk(
+              style: GoogleFonts.inter(
                   color: AppColors.textSecondary, fontSize: 13)),
         ],
       ),

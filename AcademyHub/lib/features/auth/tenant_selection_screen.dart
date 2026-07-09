@@ -75,7 +75,7 @@ class _TenantSelectionScreenState extends State<TenantSelectionScreen> {
                   const SizedBox(height: 24),
                   Text(
                     'AcademyHub School Workspace Gateway',
-                    style: GoogleFonts.spaceGrotesk(
+                    style: GoogleFonts.inter(
                       fontSize: 12,
                       fontWeight: FontWeight.w500,
                       color: AppColors.textMuted,
@@ -144,7 +144,7 @@ class _TenantSelectionScreenState extends State<TenantSelectionScreen> {
             Text(
               'Connect Your School',
               textAlign: TextAlign.center,
-              style: GoogleFonts.spaceGrotesk(
+              style: GoogleFonts.inter(
                 fontSize: 22,
                 fontWeight: FontWeight.bold,
                 color: AppColors.textPrimary,
@@ -155,7 +155,7 @@ class _TenantSelectionScreenState extends State<TenantSelectionScreen> {
             Text(
               'Enter your school workspace domain slug',
               textAlign: TextAlign.center,
-              style: GoogleFonts.spaceGrotesk(
+              style: GoogleFonts.inter(
                 fontSize: 14,
                 color: AppColors.textSecondary,
                 fontWeight: FontWeight.w500,
@@ -164,7 +164,7 @@ class _TenantSelectionScreenState extends State<TenantSelectionScreen> {
             const SizedBox(height: 28),
             Text(
               'SCHOOL WORKSPACE DOMAIN',
-              style: GoogleFonts.spaceGrotesk(
+              style: GoogleFonts.inter(
                 fontSize: 10,
                 fontWeight: FontWeight.bold,
                 color: AppColors.textSecondary,
@@ -175,7 +175,7 @@ class _TenantSelectionScreenState extends State<TenantSelectionScreen> {
             TextFormField(
               controller: _slugController,
               keyboardType: TextInputType.text,
-              style: GoogleFonts.spaceGrotesk(
+              style: GoogleFonts.inter(
                 color: AppColors.textPrimary,
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
@@ -217,7 +217,7 @@ class _TenantSelectionScreenState extends State<TenantSelectionScreen> {
                       )
                     : Text(
                         'Continue to Login',
-                        style: GoogleFonts.spaceGrotesk(
+                        style: GoogleFonts.inter(
                           fontSize: 15,
                           fontWeight: FontWeight.bold,
                         ),

@@ -157,10 +157,10 @@ class _TeacherAttendanceScreenState extends State<TeacherAttendanceScreen> {
                   decoration: _inputDecoration('Class'),
                   dropdownColor: AppColors.surface2,
                   initialValue: _selectedClassId,
-                  style: GoogleFonts.spaceGrotesk(color: AppColors.textPrimary, fontSize: 14),
+                  style: GoogleFonts.inter(color: AppColors.textPrimary, fontSize: 14),
                   items: _classes.map((c) => DropdownMenuItem<int>(
                     value: c['id'] as int,
-                    child: Text(c['name'] as String, style: GoogleFonts.spaceGrotesk(color: AppColors.textPrimary)),
+                    child: Text(c['name'] as String, style: GoogleFonts.inter(color: AppColors.textPrimary)),
                   )).toList(),
                   onChanged: (v) {
                     setState(() => _selectedClassId = v);
@@ -201,7 +201,7 @@ class _TeacherAttendanceScreenState extends State<TeacherAttendanceScreen> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(_selectedDate, style: GoogleFonts.spaceGrotesk(color: AppColors.textPrimary, fontSize: 14)),
+                        Text(_selectedDate, style: GoogleFonts.inter(color: AppColors.textPrimary, fontSize: 14)),
                         Icon(Icons.calendar_today_rounded, size: 16, color: accent),
                       ],
                     ),
@@ -238,15 +238,15 @@ class _TeacherAttendanceScreenState extends State<TeacherAttendanceScreen> {
               CircleAvatar(
                 radius: 18,
                 backgroundColor: AppColors.teacherAccent.withValues(alpha: 0.12),
-                child: Text(initial, style: GoogleFonts.spaceGrotesk(color: AppColors.teacherAccent, fontWeight: FontWeight.bold)),
+                child: Text(initial, style: GoogleFonts.inter(color: AppColors.teacherAccent, fontWeight: FontWeight.bold)),
               ),
               const SizedBox(width: 12),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(name, style: GoogleFonts.spaceGrotesk(fontWeight: FontWeight.w600, fontSize: 14, color: AppColors.textPrimary)),
-                    Text(s['admission_number'] ?? '', style: GoogleFonts.spaceGrotesk(fontSize: 11, color: AppColors.textSecondary)),
+                    Text(name, style: GoogleFonts.inter(fontWeight: FontWeight.w600, fontSize: 14, color: AppColors.textPrimary)),
+                    Text(s['admission_number'] ?? '', style: GoogleFonts.inter(fontSize: 11, color: AppColors.textSecondary)),
                   ],
                 ),
               ),
@@ -277,7 +277,7 @@ class _TeacherAttendanceScreenState extends State<TeacherAttendanceScreen> {
         alignment: Alignment.center,
         child: Text(
           label,
-          style: GoogleFonts.spaceGrotesk(
+          style: GoogleFonts.inter(
             color: selected ? Colors.black : color,
             fontWeight: FontWeight.bold,
             fontSize: 13,
@@ -295,7 +295,7 @@ class _TeacherAttendanceScreenState extends State<TeacherAttendanceScreen> {
             const SizedBox(height: 12),
             Text(
               'Select a class to take attendance',
-              style: GoogleFonts.spaceGrotesk(color: AppColors.textSecondary, fontSize: 14),
+              style: GoogleFonts.inter(color: AppColors.textSecondary, fontSize: 14),
             ),
           ],
         ),
@@ -325,7 +325,7 @@ class _TeacherAttendanceScreenState extends State<TeacherAttendanceScreen> {
                 )
               : Text(
                   'Save Attendance',
-                  style: GoogleFonts.spaceGrotesk(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 15),
+                  style: GoogleFonts.inter(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 15),
                 ),
         ),
       ),
@@ -334,7 +334,7 @@ class _TeacherAttendanceScreenState extends State<TeacherAttendanceScreen> {
 
   InputDecoration _inputDecoration(String label) => InputDecoration(
         labelText: label,
-        labelStyle: GoogleFonts.spaceGrotesk(color: AppColors.textSecondary, fontSize: 12),
+        labelStyle: GoogleFonts.inter(color: AppColors.textSecondary, fontSize: 12),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
           borderSide: BorderSide(color: AppColors.borderLight),
