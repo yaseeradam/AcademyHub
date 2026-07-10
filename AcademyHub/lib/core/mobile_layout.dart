@@ -617,6 +617,12 @@ class RoleShell extends StatelessWidget {
             ],
           ),
           floatingActionButton: floatingActionButton,
+          bottomNavigationBar: AHBottomNav(
+            items: navItems!.take(4).toList(),
+            selectedIndex: selectedIndex ?? 0,
+            onTap: onTabSelected ?? (_) {},
+            accentColor: accentColor ?? AppColors.primary,
+          ),
         ),
       );
     } else {
