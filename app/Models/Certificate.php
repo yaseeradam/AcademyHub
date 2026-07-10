@@ -40,6 +40,17 @@ class Certificate extends Model
         return $this->belongsTo(Student::class);
     }
 
+    protected static function booted(): void
+    {
+        static::saving(function (self $certificate) {
+            if ($certificate->issue_date && !$certificate->issued_on) {
+                $certificate->issued_on = $certificate->issue_date;
+            } elseif ($certificate->issued_on && !$certificate->issue_date) {
+                $certificate->issue_date = $certificate->issued_on;
+            }
+        });
+    }
+
     public function issuer(): BelongsTo
     {
         return $this->belongsTo(User::class, 'issued_by');

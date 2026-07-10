@@ -42,12 +42,61 @@ class StudentController extends Controller
                 $student->parents()->detach();
                 $student->subjectOverrides()->detach();
 
-                // Clean up dependent records
+                // Clean up attendance marks
                 AttendanceMark::query()
                     ->where('student_id', $student->id)
                     ->delete();
 
+                // Clean up student notifications
                 StudentNotification::query()
+                    ->where('student_id', $student->id)
+                    ->delete();
+
+                // Explicitly delete academic scores
+                \App\Models\Score::query()
+                    ->where('student_id', $student->id)
+                    ->delete();
+
+                // Explicitly delete CBT attempts & answers (to trigger observers and clear cache)
+                $attempts = \App\Models\CbtAttempt::query()
+                    ->where('student_id', $student->id)
+                    ->get();
+                foreach ($attempts as $attempt) {
+                    \App\Models\CbtAnswer::query()
+                        ->where('attempt_id', $attempt->id)
+                        ->delete();
+                    $attempt->delete();
+                }
+
+                // Explicitly delete homework submissions & attachment files (to trigger observers, clear cache, and free disk space)
+                $submissions = \App\Models\HomeworkSubmission::query()
+                    ->where('student_id', $student->id)
+                    ->get();
+                foreach ($submissions as $submission) {
+                    if ($submission->attachment) {
+                        $attachmentPath = str_replace('\\', '/', (string) $submission->attachment);
+                        Storage::disk('uploads')->delete($attachmentPath);
+                    }
+                    $submission->delete();
+                }
+
+                // Explicitly delete certificates
+                \App\Models\Certificate::query()
+                    ->where('student_id', $student->id)
+                    ->delete();
+
+                // Explicitly delete psychomotor scores
+                \App\Models\PsychomotorScore::query()
+                    ->where('student_id', $student->id)
+                    ->delete();
+
+                // Explicitly delete class note comments
+                \App\Models\ClassNoteComment::query()
+                    ->where('student_id', $student->id)
+                    ->delete();
+
+                // Explicitly delete promotions
+                \App\Models\Promotion::query()
                     ->where('student_id', $student->id)
                     ->delete();
 
