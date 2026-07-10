@@ -1194,6 +1194,50 @@ class ExamEditor extends Component
 
         $exam->forceFill(['results_released_at' => now()])->save();
 
+        // Auto-transfer CBT scores to academic scoresheet if the exam has all required metadata
+        $transferCount = 0;
+        if ($exam->subject_id && $exam->class_id && $exam->term && $exam->session && Schema::hasTable('scores')) {
+            $attempts = CbtAttempt::query()
+                ->where('exam_id', $exam->id)
+                ->whereNotNull('submitted_at')
+                ->with('student')
+                ->get();
+
+            if ($attempts->isNotEmpty()) {
+                $cbtMax = (int) ($attempts->max('max_score') ?: 0);
+                $resultsExamMax = max(1, (int) config('academyhub.results_exam_max', 60));
+
+                DB::transaction(function () use ($exam, $attempts, $cbtMax, $resultsExamMax, &$transferCount) {
+                    foreach ($attempts as $attempt) {
+                        if (! $attempt->student) {
+                            continue;
+                        }
+
+                        $rawScore = (int) ($attempt->score ?? 0);
+                        $scaledExamScore = $cbtMax > 0
+                            ? (int) round(($rawScore / $cbtMax) * $resultsExamMax)
+                            : $rawScore;
+                        $scaledExamScore = max(0, min($scaledExamScore, $resultsExamMax));
+
+                        $score = Score::firstOrNew([
+                            'student_id' => $attempt->student_id,
+                            'subject_id' => $exam->subject_id,
+                            'class_id'   => $exam->class_id,
+                            'term'       => $exam->term,
+                            'session'    => $exam->session,
+                        ]);
+
+                        $score->exam = $scaledExamScore;
+                        $score->ca1  = $score->ca1 ?? 0;
+                        $score->ca2  = $score->ca2 ?? 0;
+                        $score->save();
+
+                        $transferCount++;
+                    }
+                });
+            }
+        }
+
         // Notify all students in the class
         Student::where('class_id', $exam->class_id)
             ->where('status', 'Active')
@@ -1206,10 +1250,14 @@ class ExamEditor extends Component
                 route('student.exams')
             ));
 
-        Audit::log('cbt.results_released', $exam, ['released_by' => $user->id]);
+        Audit::log('cbt.results_released', $exam, ['released_by' => $user->id, 'transferred_count' => $transferCount]);
 
         $this->dispatch('refresh');
-        $this->dispatch('alert', message: 'Results released to students.', type: 'success');
+        $msg = 'Results released to students.';
+        if ($transferCount > 0) {
+            $msg .= " {$transferCount} score(s) automatically transferred to the academic scoresheet.";
+        }
+        $this->dispatch('alert', message: $msg, type: 'success');
     }
 
 

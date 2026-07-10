@@ -9,6 +9,20 @@
     $canEdit = (bool) $this->canEdit;
     $tab = $this->tab;
     $hasTheory = $exam->questions->contains('type', 'theory');
+
+    $roster = collect();
+    $submittedCount = 0;
+    $inProgressCount = 0;
+    $notStartedCount = 0;
+    $terminatedCount = 0;
+
+    if (in_array($status, ['live', 'ended'], true) && in_array($me?->role, ['admin', 'teacher'], true)) {
+        $roster = $this->roster;
+        $submittedCount = (int) $roster->where('state', 'submitted')->count();
+        $inProgressCount = (int) $roster->where('state', 'in_progress')->count();
+        $notStartedCount = (int) $roster->where('state', 'not_started')->count();
+        $terminatedCount = (int) $roster->where('state', 'terminated')->count();
+    }
 @endphp
 
 <div class="space-y-6" x-data="{ tab: '{{ $tab }}', monitorSearch: '', monitorFilter: '' }">
@@ -509,21 +523,6 @@ ANS: C</pre>
 
     <div x-show="tab === 'monitor'" class="space-y-4">
         @if (in_array($status, ['live', 'ended'], true))
-            @php
-                $roster = collect();
-                $submittedCount = 0;
-                $inProgressCount = 0;
-                $notStartedCount = 0;
-                $terminatedCount = 0;
-
-                if (in_array($me?->role, ['admin', 'teacher'], true)) {
-                    $roster = $this->roster;
-                    $submittedCount = (int) $roster->where('state', 'submitted')->count();
-                    $inProgressCount = (int) $roster->where('state', 'in_progress')->count();
-                    $notStartedCount = (int) $roster->where('state', 'not_started')->count();
-                    $terminatedCount = (int) $roster->where('state', 'terminated')->count();
-                }
-            @endphp
             
             <div class="grid gap-4 lg:grid-cols-4">
                 <div class="cursor-pointer rounded-lg bg-emerald-50 p-4 ring-1 ring-emerald-200 hover:ring-2 hover:ring-emerald-400"
