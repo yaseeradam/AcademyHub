@@ -76,34 +76,34 @@ class AppTheme {
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: AppColors.surface2,
+        fillColor: isDark ? AppColors.surface2 : const Color(0xFFF8FAFC),
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(AppColors.radiusSmall),
+          borderRadius: BorderRadius.circular(AppColors.radiusMedium), // 12.0 matching rounded-xl
           borderSide: BorderSide(color: AppColors.borderLight),
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(AppColors.radiusSmall),
+          borderRadius: BorderRadius.circular(AppColors.radiusMedium),
           borderSide: BorderSide(color: AppColors.borderLight),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(AppColors.radiusSmall),
-          borderSide: BorderSide(color: primaryColor, width: 2),
+          borderRadius: BorderRadius.circular(AppColors.radiusMedium),
+          borderSide: BorderSide(color: primaryColor, width: 1.5), // cleaner border width
         ),
-        hintStyle: GoogleFonts.inter(color: AppColors.textMuted),
-        labelStyle: GoogleFonts.inter(color: AppColors.textSecondary),
+        hintStyle: GoogleFonts.inter(color: AppColors.textMuted, fontSize: 13),
+        labelStyle: GoogleFonts.inter(color: AppColors.textSecondary, fontSize: 13),
       ),
       cardTheme: CardThemeData(
         color: AppColors.surface,
         elevation: 0,
         shape: RoundedRectangleBorder(
-          borderRadius: const BorderRadius.all(Radius.circular(AppColors.radiusMedium)),
+          borderRadius: const BorderRadius.all(Radius.circular(AppColors.radiusLarge)), // 16.0 matching rounded-2xl
           side: BorderSide(color: AppColors.borderLight),
         ),
       ),
       dividerTheme: DividerThemeData(
         color: AppColors.borderLight,
-        thickness: 1,
+        thickness: 0.8,
       ),
       iconTheme: IconThemeData(color: AppColors.textSecondary),
       bottomNavigationBarTheme: BottomNavigationBarThemeData(
