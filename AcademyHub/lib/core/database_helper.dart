@@ -481,14 +481,25 @@ class DatabaseHelper {
 
   Future<void> saveStudentStats(String admissionNumber, Map<String, dynamic> s) async {
     final db = await database;
+    final statsMap = s['stats'] as Map<String, dynamic>? ?? s;
+    final gradesMap = statsMap['grades'] ?? {};
+    final extra = {
+      'total_days': statsMap['total_days'] ?? 0,
+      'present_days': statsMap['present_days'] ?? 0,
+      'total_subjects': statsMap['total_subjects'] ?? 0,
+      'overdue_homework': statsMap['overdue_homework'] ?? 0,
+    };
     await db.insert('local_student_stats', {
       'admission_number': admissionNumber,
-      'attendance_rate': s['attendance_rate'] ?? 0.0,
-      'average_score': s['average_score'] ?? 0.0,
-      'class_rank': s['class_rank'] ?? 0,
-      'classmates_count': s['classmates_count'] ?? 0,
-      'pending_homework': s['pending_homework'] ?? 0,
-      'grades_breakdown': jsonEncode(s['grades_breakdown'] ?? {}),
+      'attendance_rate': statsMap['attendance_rate'] ?? 0.0,
+      'average_score': statsMap['average_score'] ?? 0.0,
+      'class_rank': statsMap['position'] ?? statsMap['class_rank'] ?? 0,
+      'classmates_count': statsMap['total_students'] ?? statsMap['classmates_count'] ?? 0,
+      'pending_homework': statsMap['pending_homework'] ?? 0,
+      'grades_breakdown': jsonEncode({
+        'grades': gradesMap,
+        'extra': extra,
+      }),
     }, conflictAlgorithm: ConflictAlgorithm.replace);
   }
 

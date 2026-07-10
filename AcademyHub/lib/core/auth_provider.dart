@@ -369,6 +369,7 @@ class AuthProvider extends ChangeNotifier {
         name: isStudent ? '${userData['first_name']} ${userData['last_name']}' : userData['name'],
         email: isStudent ? (userData['admission_number'] ?? '') : userData['email'],
         role: isStudent ? 'student' : (userData['role'] ?? 'user'),
+        profilePhotoUrl: isStudent ? userData['passport_photo_url'] : userData['profile_photo_url'],
       );
 
       final prefs = await SharedPreferences.getInstance();

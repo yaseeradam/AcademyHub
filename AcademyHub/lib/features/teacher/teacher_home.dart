@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../core/auth_provider.dart';
 import '../../core/mobile_layout.dart';
 import '../../core/constants.dart';
@@ -32,6 +33,8 @@ class _TeacherHomeState extends State<TeacherHome> {
   int _totalSubjects = _cachedTotalSubjects;
   late bool _loading = !_wasLoaded;
   int _selectedTab = 0;
+  String _currentTermName = 'First Term 2026/2027';
+  bool _isLoadingData = false;
 
   @override
   void initState() {
@@ -52,8 +55,23 @@ class _TeacherHomeState extends State<TeacherHome> {
   }
 
   Future<void> _load() async {
+    if (_isLoadingData) return;
+    _isLoadingData = true;
     final auth = context.read<AuthProvider>();
     auth.refreshPlugins();
+
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final termInt = prefs.getInt('active_term') ?? 1;
+      final sessionStr = prefs.getString('active_session') ?? '';
+      String termWord = 'First Term';
+      if (termInt == 2) termWord = 'Second Term';
+      if (termInt == 3) termWord = 'Third Term';
+      final termName = sessionStr.isNotEmpty ? '$termWord $sessionStr' : termWord;
+      setState(() {
+        _currentTermName = termName;
+      });
+    } catch (_) {}
 
     final currentUserKey = '${auth.user?.id}_${auth.tenantSlug}';
     if (_lastUserKey != currentUserKey) {
@@ -166,6 +184,7 @@ class _TeacherHomeState extends State<TeacherHome> {
     _cachedTotalSubjects = _totalSubjects;
     _wasLoaded = true;
 
+    _isLoadingData = false;
     if (mounted) {
       setState(() => _loading = false);
     }
@@ -382,84 +401,221 @@ class _TeacherHomeState extends State<TeacherHome> {
       return _buildSkeleton(primary);
     }
     final user = context.watch<AuthProvider>().user;
+
+    final isCompact = MediaQuery.of(context).size.width < 500;
+
+    final statCards = [
+      _GradientStatCard(
+        title: 'Assigned Classes',
+        value: '${_classes.length}',
+        icon: Icons.school_rounded,
+        gradientColors: const [Color(0xFF60A5FA), Color(0xFF2563EB)], // blue
+      ),
+      _GradientStatCard(
+        title: 'Active Students',
+        value: '$_totalStudents',
+        icon: Icons.people_rounded,
+        gradientColors: const [Color(0xFF34D399), Color(0xFF0D9488)], // emerald
+        onTap: () => context.push('/students'),
+      ),
+      _GradientStatCard(
+        title: 'Assigned Subjects',
+        value: '$_totalSubjects',
+        icon: Icons.menu_book_rounded,
+        gradientColors: const [Color(0xFFC084FC), Color(0xFF7C3AED)], // purple/violet
+      ),
+      _GradientStatCard(
+        title: 'Pending Submissions',
+        value: '0',
+        icon: Icons.assignment_turned_in_rounded,
+        gradientColors: const [Color(0xFFFBBF24), Color(0xFFEA580C)], // amber/orange
+      ),
+    ];
+
     return ListView(
       physics: const AlwaysScrollableScrollPhysics(),
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
       children: [
-        // Hero card
-        GlassHeroCard(
-          gradientColors: [
-            AppColors.teacherAccent.withValues(alpha: 0.85),
-            const Color(0xFF065F46),
-          ],
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('Welcome back,',
-                          style: GoogleFonts.inter(
-                              fontSize: 12, color: Colors.white60)),
-                      Text(user?.name ?? 'Teacher',
-                          style: GoogleFonts.inter(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white)),
-                    ],
-                  ),
-                  GestureDetector(
-                    onTap: _load,
-                    child: Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.15),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: const Icon(Icons.sync_rounded,
-                          color: Colors.white, size: 18),
+        // ── Laravel-style Teacher Header Card ───────────────────────────
+        ClipRRect(
+          borderRadius: BorderRadius.circular(16),
+          child: Container(
+            width: double.infinity,
+            decoration: const BoxDecoration(
+              color: Color(0xFF1A2E4A), // Deep navy
+              gradient: RadialGradient(
+                center: Alignment.topLeft,
+                radius: 1.2,
+                colors: [
+                  Color(0xFF1E3A5F), // lighter navy
+                  Color(0xFF1A2E4A), // deep navy
+                ],
+              ),
+            ),
+            child: Stack(
+              children: [
+                // Concentric background decorative circle top-right
+                Positioned(
+                  right: -40,
+                  top: -20,
+                  bottom: -20,
+                  child: Opacity(
+                    opacity: 0.1,
+                    child: CustomPaint(
+                      size: const Size(200, 200),
+                      painter: _ConcentricCirclesPainter(),
                     ),
                   ),
-                ],
-              ),
-              const SizedBox(height: 20),
-              // Metric pills
-              Row(
-                children: [
-                  _metricPill(
-                      '$_totalStudents', 'Students', Icons.people_rounded,
-                      onTap: () => context.push('/students')),
-                  const SizedBox(width: 10),
-                  _metricPill(
-                      '$_totalSubjects', 'Subjects', Icons.book_rounded),
-                  const SizedBox(width: 10),
-                  _metricPill(
-                      '${_classes.length}', 'Classes', Icons.class_rounded),
-                ],
-              ),
-            ],
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withValues(alpha: 0.15),
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Container(
+                                  width: 6,
+                                  height: 6,
+                                  decoration: const BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: Color(0xFF34D399), // emerald-400
+                                  ),
+                                ),
+                                const SizedBox(width: 6),
+                                Text(
+                                  'TEACHER PORTAL',
+                                  style: GoogleFonts.inter(
+                                    color: const Color(0xFF93C5FD), // light blue
+                                    fontSize: 9,
+                                    fontWeight: FontWeight.bold,
+                                    letterSpacing: 1.0,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          GestureDetector(
+                            onTap: _load,
+                            child: Container(
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color: Colors.white.withValues(alpha: 0.15),
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: const Icon(Icons.sync_rounded,
+                                  color: Colors.white, size: 16),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 14),
+                      Text(
+                        'Welcome, ${user?.name ?? 'Teacher'}',
+                        style: GoogleFonts.inter(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                          letterSpacing: -0.5,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Manage your classes, scores and attendance.',
+                        style: GoogleFonts.inter(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w500,
+                          color: const Color(0xFF93C5FD),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      // Pill badges
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        children: [
+                          _HeroPill(
+                            icon: Icons.calendar_today_rounded,
+                            label: _currentTermName,
+                          ),
+                          _HeroPill(
+                            icon: Icons.people_alt_rounded,
+                            label: '$_totalStudents Students',
+                          ),
+                          _HeroPill(
+                            icon: Icons.access_time_filled_rounded,
+                            label: _formattedDate(),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
-        ),
+        )
+            .animate()
+            .fade(duration: 400.ms)
+            .slideY(begin: 0.1, end: 0, duration: 400.ms, curve: Curves.easeOutQuad),
         const SizedBox(height: 20),
 
-        // Analytics & KPI Card
+        // ── Laravel-style Stat Cards Grid (Responsive) ──────────────────────
+        (isCompact
+            ? Column(
+                children: [
+                  statCards[0],
+                  const SizedBox(height: 12),
+                  statCards[1],
+                  const SizedBox(height: 12),
+                  statCards[2],
+                  const SizedBox(height: 12),
+                  statCards[3],
+                ],
+              )
+            : Column(
+                children: [
+                  Row(
+                    children: [
+                      Expanded(child: statCards[0]),
+                      const SizedBox(width: 12),
+                      Expanded(child: statCards[1]),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      Expanded(child: statCards[2]),
+                      const SizedBox(width: 12),
+                      Expanded(child: statCards[3]),
+                    ],
+                  ),
+                ],
+              ))
+            .animate()
+            .fade(duration: 400.ms, delay: 100.ms)
+            .slideY(begin: 0.1, end: 0, duration: 400.ms, curve: Curves.easeOutQuad),
+        const SizedBox(height: 24),
+
+        // ── Analytics & KPI Card ───────────────────────────────────────────
         Container(
           margin: const EdgeInsets.only(bottom: 20),
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
             color: AppColors.surface,
-            borderRadius: BorderRadius.circular(14),
+            borderRadius: BorderRadius.circular(16),
             border: Border.all(color: AppColors.borderLight),
-            boxShadow: [
-              BoxShadow(
-                color: primary.withValues(alpha: 0.05),
-                blurRadius: 10,
-                offset: const Offset(0, 4),
-              ),
-            ],
+            boxShadow: AppColors.subtleShadow,
           ),
           child: Row(
             children: [
@@ -528,15 +684,9 @@ class _TeacherHomeState extends State<TeacherHome> {
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
               color: AppColors.surface,
-              borderRadius: BorderRadius.circular(14),
+              borderRadius: BorderRadius.circular(16),
               border: Border.all(color: AppColors.borderLight),
-              boxShadow: [
-                BoxShadow(
-                  color: primary.withValues(alpha: 0.05),
-                  blurRadius: 10,
-                  offset: const Offset(0, 4),
-                ),
-              ],
+              boxShadow: AppColors.subtleShadow,
             ),
             child: Row(
               children: [
@@ -652,40 +802,7 @@ class _TeacherHomeState extends State<TeacherHome> {
     );
   }
 
-  Widget _metricPill(String value, String label, IconData icon, {VoidCallback? onTap}) {
-    return Expanded(
-      child: GestureDetector(
-        onTap: onTap,
-        behavior: HitTestBehavior.opaque,
-        child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
-          decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.12),
-            borderRadius: BorderRadius.circular(10),
-          ),
-          child: Row(
-            children: [
-              Icon(icon, color: Colors.white70, size: 14),
-              const SizedBox(width: 6),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(value,
-                      style: GoogleFonts.inter(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white)),
-                  Text(label,
-                      style: GoogleFonts.inter(
-                          fontSize: 9, color: Colors.white60)),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
+
 
   Widget _buildClassCard(Map<String, dynamic> cls, Color primary, bool isClassTeacher, bool hasHomework) {
     final name          = cls['name'] ?? 'Class';
@@ -863,6 +980,184 @@ class _TeacherHomeState extends State<TeacherHome> {
                 style: GoogleFonts.inter(
                     color: AppColors.textSecondary, fontSize: 13)),
           ],
+        ),
+      ),
+    );
+  }
+
+  String _formattedDate() {
+    final now = DateTime.now();
+    final days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+    final months = [
+      'January', 'February', 'March', 'April', 'May', 'June', 
+      'July', 'August', 'September', 'October', 'November', 'December'
+    ];
+    return '${days[now.weekday - 1]}, ${months[now.month - 1]} ${now.day}';
+  }
+}
+
+class _ConcentricCirclesPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = Colors.white.withValues(alpha: 0.08)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.0;
+    
+    final center = Offset(size.width * 0.8, size.height * 0.5);
+    canvas.drawCircle(center, 130, paint);
+    canvas.drawCircle(center, 90, paint);
+    canvas.drawCircle(center, 50, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+class _HeroPill extends StatelessWidget {
+  final IconData icon;
+  final String label;
+
+  const _HeroPill({required this.icon, required this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, color: Colors.white, size: 12),
+          const SizedBox(width: 6),
+          Text(
+            label,
+            style: GoogleFonts.inter(
+              color: Colors.white,
+              fontSize: 10,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _GradientStatCard extends StatelessWidget {
+  final String title;
+  final String value;
+  final IconData icon;
+  final List<Color> gradientColors;
+  final VoidCallback? onTap;
+
+  const _GradientStatCard({
+    required this.title,
+    required this.value,
+    required this.icon,
+    required this.gradientColors,
+    this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(16),
+        child: Container(
+          height: 100,
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: gradientColors,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: gradientColors.first.withValues(alpha: 0.3),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: Stack(
+            children: [
+              Positioned(
+                right: -20,
+                top: -20,
+                child: Container(
+                  width: 80,
+                  height: 80,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Colors.white.withValues(alpha: 0.1),
+                  ),
+                ),
+              ),
+              Positioned(
+                right: 12,
+                bottom: 8,
+                child: Container(
+                  width: 44,
+                  height: 44,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Colors.white.withValues(alpha: 0.08),
+                  ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            value,
+                            style: GoogleFonts.inter(
+                              color: Colors.white,
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            title,
+                            style: GoogleFonts.inter(
+                              color: Colors.white.withValues(alpha: 0.85),
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 4),
+                    Container(
+                      width: 36,
+                      height: 36,
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.2),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Icon(icon, color: Colors.white, size: 20),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
