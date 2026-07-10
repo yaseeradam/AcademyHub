@@ -196,9 +196,16 @@ class _IconBtn extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
-          color: AppColors.surface2,
-          borderRadius: BorderRadius.circular(10),
+          color: AppColors.surface,
+          borderRadius: BorderRadius.circular(12),
           border: Border.all(color: AppColors.borderLight),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.03),
+              blurRadius: 4,
+              offset: const Offset(0, 2),
+            )
+          ],
         ),
         child: Icon(icon, color: AppColors.textSecondary, size: 20),
       ),
@@ -1481,7 +1488,7 @@ class AHLoadingButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final bg = color ?? AppColors.primary;
-    final fg = foregroundColor ?? Colors.black;
+    final fg = foregroundColor ?? (bg == Colors.amber || bg == const Color(0xFFF59E0B) || bg == const Color(0xFFFEF08A) ? Colors.black87 : Colors.white);
 
     return SizedBox(
       height: height,
@@ -1506,6 +1513,7 @@ class AHLoadingButton extends StatelessWidget {
                 ),
               )
             : Row(
+                mainAxisAlignment: MainAxisAlignment.center,
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   if (icon != null) ...[
@@ -1516,7 +1524,8 @@ class AHLoadingButton extends StatelessWidget {
                     label,
                     style: GoogleFonts.inter(
                       fontSize: 14,
-                      fontWeight: FontWeight.bold,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: 0.2,
                     ),
                   ),
                 ],
