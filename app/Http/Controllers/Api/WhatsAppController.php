@@ -1384,7 +1384,7 @@ class WhatsAppController extends Controller
         $attempts = 3;
         for ($i = 0; $i < $attempts; $i++) {
             try {
-                $raw = config('services.groq.key') ?: env('GROQ_API_KEY');
+                $raw = config('services.groq.key');
                 if (empty($raw)) break;
 
                 $keys = array_filter(array_map('trim', explode(',', $raw)));
@@ -1449,7 +1449,7 @@ class WhatsAppController extends Controller
     private function tryGeminiAPI(string $prompt, array $history = []): ?string
     {
         try {
-            $apiKey = env('GEMINI_API_KEY');
+            $apiKey = config('services.gemini.key');
             if (empty($apiKey)) {
                 \Illuminate\Support\Facades\Log::warning('WhatsApp AI: Gemini API key not configured.');
                 return null;
@@ -1504,7 +1504,7 @@ class WhatsAppController extends Controller
     private function tryOpenRouterAPI(string $prompt, array $history = []): ?string
     {
         try {
-            $apiKey = env('OPENROUTER_API_KEY');
+            $apiKey = config('services.openrouter.key');
             if (empty($apiKey)) {
                 \Illuminate\Support\Facades\Log::warning('WhatsApp AI: OpenRouter API key not configured.');
                 return $this->tryCohereAPI($prompt, $history);
@@ -1560,7 +1560,7 @@ class WhatsAppController extends Controller
     private function tryCohereAPI(string $prompt, array $history = []): ?string
     {
         try {
-            $apiKey = env('COHERE_API_KEY');
+            $apiKey = config('services.cohere.key');
             if (empty($apiKey)) {
                 \Illuminate\Support\Facades\Log::warning('WhatsApp AI: Cohere API key not configured.');
                 return null;

@@ -113,6 +113,11 @@ class Student extends Model
         return asset('uploads/'.$path);
     }
 
+    public function getProfilePhotoUrlAttribute(): ?string
+    {
+        return $this->passport_photo_url;
+    }
+
     public function getRouteKeyName(): string
     {
         return 'admission_number';

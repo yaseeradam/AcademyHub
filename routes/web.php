@@ -471,7 +471,7 @@ Route::get('/impersonate/return', [\App\Http\Controllers\SuperAdmin\Impersonatio
 
 // ── Deploy Cache Clear (no auth, secret key only) ──
 Route::get('/deploy-clear-cache/{key}', function (string $key) {
-    $validKey = env('DEPLOY_CACHE_CLEAR_KEY');
+    $validKey = config('services.deploy.cache_clear_key');
 
     // Abort if no key is configured or the provided key doesn't match
     if (! $validKey || ! hash_equals($validKey, $key)) {

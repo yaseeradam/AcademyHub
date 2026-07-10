@@ -46,9 +46,9 @@ class CertificatePdf
 
         $browsershot = Browsershot::html($html);
 
-        $nodeBinary = env('BROWSERSHOT_NODE_BINARY');
-        $npmBinary = env('BROWSERSHOT_NPM_BINARY');
-        $chromePath = env('BROWSERSHOT_CHROME_PATH') ?: self::findChromePath();
+        $nodeBinary = config('services.browsershot.node_binary');
+        $npmBinary = config('services.browsershot.npm_binary');
+        $chromePath = config('services.browsershot.chrome_path') ?: self::findChromePath();
 
         if (! $nodeBinary && PHP_OS_FAMILY === 'Windows') {
             $windowsNode = 'C:\\Program Files\\nodejs\\node.exe';
