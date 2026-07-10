@@ -1232,6 +1232,8 @@ class ExamEditor extends Component
                         $score->ca2  = $score->ca2 ?? 0;
                         $score->save();
 
+                        $attempt->forceFill(['transferred_at' => now()])->save();
+
                         $transferCount++;
                     }
                 });
@@ -1424,6 +1426,8 @@ class ExamEditor extends Component
                 $score->ca1 = $score->ca1 ?? 0;
                 $score->ca2 = $score->ca2 ?? 0;
                 $score->save();
+
+                $attempt->forceFill(['transferred_at' => now()])->save();
 
                 $count++;
             }

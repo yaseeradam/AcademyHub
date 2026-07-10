@@ -471,7 +471,10 @@ Route::get('/impersonate/return', [\App\Http\Controllers\SuperAdmin\Impersonatio
 
 // ── Deploy Cache Clear (no auth, secret key only) ──
 Route::get('/deploy-clear-cache/{key}', function (string $key) {
-    if ($key !== 'AcHub2026DeployX9k') {
+    $validKey = env('DEPLOY_CACHE_CLEAR_KEY');
+
+    // Abort if no key is configured or the provided key doesn't match
+    if (! $validKey || ! hash_equals($validKey, $key)) {
         abort(403);
     }
 
@@ -484,8 +487,9 @@ Route::get('/deploy-clear-cache/{key}', function (string $key) {
     \Illuminate\Support\Facades\Artisan::call('view:cache');
 
     return response()->json([
-        'status' => 'done',
+        'status'  => 'done',
         'message' => 'All caches cleared and rebuilt successfully.',
-        'time' => now()->toDateTimeString(),
+        'time'    => now()->toDateTimeString(),
     ]);
 })->withoutMiddleware(\App\Http\Middleware\TenantDiscovery::class);
+

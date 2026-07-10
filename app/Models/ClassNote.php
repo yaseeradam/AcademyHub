@@ -25,6 +25,15 @@ class ClassNote extends Model
         'downloads',
     ];
 
+    protected $casts = [
+        'tenant_id'  => 'integer',
+        'class_id'   => 'integer',
+        'subject_id' => 'integer',
+        'user_id'    => 'integer',
+        'file_size'  => 'integer',
+        'downloads'  => 'integer',
+    ];
+
     public function schoolClass(): BelongsTo
     {
         return $this->belongsTo(SchoolClass::class, 'class_id');

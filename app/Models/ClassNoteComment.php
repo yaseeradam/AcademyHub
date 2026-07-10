@@ -19,6 +19,13 @@ class ClassNoteComment extends Model
         'comment',
     ];
 
+    protected $casts = [
+        'tenant_id'     => 'integer',
+        'class_note_id' => 'integer',
+        'user_id'       => 'integer',
+        'student_id'    => 'integer',
+    ];
+
     protected $appends = ['commenter_name'];
 
     public function classNote(): BelongsTo

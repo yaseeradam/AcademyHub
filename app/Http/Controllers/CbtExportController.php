@@ -12,6 +12,15 @@ class CbtExportController extends Controller
 {
     public function examResults(CbtExam $exam): StreamedResponse
     {
+        $user = auth()->user();
+        abort_unless($user && in_array($user->role, ['admin', 'teacher'], true), 403);
+
+        if ($user->role === 'teacher') {
+            $canAccess = (int) $exam->created_by === (int) $user->id
+                || (int) ($exam->assigned_teacher_id ?? 0) === (int) $user->id;
+            abort_unless($canAccess, 403);
+        }
+
         $answeredSub = DB::table('cbt_answers')
             ->selectRaw('attempt_id, count(*) as answered')
             ->where(function ($q) {

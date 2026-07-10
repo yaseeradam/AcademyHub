@@ -22,9 +22,11 @@ class HomeworkSubmission extends Model
     ];
 
     protected $casts = [
-        'tenant_id' => 'integer',
+        'tenant_id'    => 'integer',
+        'homework_id'  => 'integer',
+        'student_id'   => 'integer',
         'submitted_at' => 'datetime',
-        'graded_at' => 'datetime',
+        'graded_at'    => 'datetime',
     ];
 
     protected static function booted(): void

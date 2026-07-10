@@ -4,6 +4,9 @@ namespace App\Models;
 
 use App\Models\Concerns\BelongsToTenant;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Collection;
 
 class Homework extends Model
 {
@@ -27,32 +30,32 @@ class Homework extends Model
         'due_date' => 'date',
     ];
 
-    public function teacher()
+    public function teacher(): BelongsTo
     {
         return $this->belongsTo(User::class, 'teacher_id');
     }
 
-    public function class()
+    public function class(): BelongsTo
     {
         return $this->belongsTo(SchoolClass::class, 'class_id');
     }
 
-    public function section()
+    public function section(): BelongsTo
     {
         return $this->belongsTo(Section::class);
     }
 
-    public function subject()
+    public function subject(): BelongsTo
     {
         return $this->belongsTo(Subject::class);
     }
 
-    public function submissions()
+    public function submissions(): HasMany
     {
         return $this->hasMany(HomeworkSubmission::class);
     }
 
-    public function getStudentsForHomework()
+    public function getStudentsForHomework(): Collection
     {
         $query = Student::where('class_id', $this->class_id)
             ->where('status', 'Active');
