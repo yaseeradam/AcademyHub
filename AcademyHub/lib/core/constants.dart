@@ -44,7 +44,7 @@ class AppColors {
 
   static List<BoxShadow> get subtleShadow => [
         BoxShadow(
-          color: Colors.black.withValues(alpha: 0.15),
+          color: isDark ? Colors.black.withValues(alpha: 0.3) : Colors.black.withValues(alpha: 0.04), // soft Tailwind shadow
           blurRadius: 12,
           offset: const Offset(0, 4),
         ),
@@ -52,8 +52,8 @@ class AppColors {
 
   static List<BoxShadow> get glowShadow => [
         BoxShadow(
-          color: primary.withValues(alpha: 0.25),
-          blurRadius: 20,
+          color: primary.withValues(alpha: 0.15), // soft glow
+          blurRadius: 16,
           spreadRadius: 0,
           offset: const Offset(0, 4),
         ),

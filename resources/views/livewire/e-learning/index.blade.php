@@ -242,15 +242,25 @@
 
     {{-- Create Modal --}}
     @if($showCreateModal)
-        <div class="fixed inset-0 z-[999] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 overflow-y-auto animate-fade-in">
-            <div class="w-full max-w-xl rounded-3xl bg-white shadow-2xl border border-slate-100 overflow-hidden transform transition-all duration-300 scale-95 opacity-100 flex flex-col">
+        <div class="fixed inset-0 z-[999] flex items-center justify-center bg-slate-950/40 backdrop-blur-md p-4 overflow-y-auto animate-fade-in">
+            <div class="w-full max-w-2xl rounded-[2rem] bg-white border border-slate-100 shadow-[0_20px_50px_rgba(79,70,229,0.12)] overflow-hidden transform transition-all duration-300 scale-100 opacity-100 flex flex-col">
                 {{-- Modal Header --}}
-                <div class="relative bg-gradient-to-r from-violet-600 to-indigo-600 px-6 py-4.5 text-white flex items-center justify-between">
-                    <div>
-                        <h2 class="text-base font-bold">Upload Digital Class Note</h2>
-                        <p class="text-[10px] text-indigo-100/90 font-medium mt-0.5">Share notes, lectures, and resources with students.</p>
+                <div class="relative bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 p-8 text-white flex items-center justify-between overflow-hidden">
+                    <!-- Glassy circle backgrounds -->
+                    <div class="absolute -right-10 -top-10 h-36 w-36 rounded-full bg-violet-600/20 blur-2xl"></div>
+                    <div class="absolute -left-10 -bottom-10 h-36 w-36 rounded-full bg-indigo-600/10 blur-2xl"></div>
+                    
+                    <div class="relative z-10">
+                        <span class="inline-flex items-center gap-1.5 rounded-full bg-indigo-500/20 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-indigo-300">
+                            <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
+                            </svg>
+                            E-Learning Hub
+                        </span>
+                        <h2 class="text-xl font-black mt-2 text-white tracking-tight">Upload Digital Resource</h2>
+                        <p class="text-xs text-slate-300 font-medium mt-1">Publish lecture notes, coursework, study guides, or slides to students.</p>
                     </div>
-                    <button type="button" wire:click="$set('showCreateModal', false)" class="text-white/80 hover:text-white rounded-lg p-1.5 hover:bg-white/10 transition-colors">
+                    <button type="button" wire:click="$set('showCreateModal', false)" class="relative z-10 text-slate-400 hover:text-white rounded-full p-2 bg-white/5 hover:bg-white/10 transition-all border border-white/10">
                         <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
                         </svg>
@@ -258,60 +268,77 @@
                 </div>
 
                 {{-- Modal Body --}}
-                <form wire:submit.prevent="saveNote" class="p-6 space-y-4.5">
+                <form wire:submit.prevent="saveNote" class="p-8 space-y-6">
                     {{-- Title --}}
                     <div>
-                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">Note Title <span class="text-red-500">*</span></label>
-                        <input type="text" wire:model="title" placeholder="e.g. Introduction to Quadratic Equations"
-                               class="w-full rounded-2xl border border-slate-200 px-4 py-2.5 text-sm text-slate-800 placeholder-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-4 focus:ring-indigo-500/10 transition-all"/>
-                        @error('title') <span class="mt-1 block text-xs text-red-500 font-semibold">{{ $message }}</span> @enderror
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">Resource Title <span class="text-red-500">*</span></label>
+                        <div class="relative">
+                            <input type="text" wire:model="title" placeholder="e.g. Introduction to Quadratic Equations (Week 3)"
+                                   class="w-full rounded-2xl border border-slate-200 bg-slate-50/50 px-4 py-3 text-sm text-slate-800 placeholder-slate-400 focus:border-indigo-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-indigo-500/10 transition-all shadow-sm hover:border-slate-300"/>
+                        </div>
+                        @error('title') <span class="mt-1.5 block text-xs text-red-500 font-semibold">{{ $message }}</span> @enderror
                     </div>
 
                     {{-- Row Class & Subject --}}
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
                         <div>
-                            <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">Target Class <span class="text-red-500">*</span></label>
-                            <select wire:model="class_id"
-                                    class="w-full rounded-2xl border border-slate-200 px-4 py-2.5 text-sm text-slate-800 focus:border-indigo-500 focus:outline-none focus:ring-4 focus:ring-indigo-500/10 transition-all">
-                                <option value="">Select Class</option>
-                                @foreach($classes as $c)
-                                    <option value="{{ $c->id }}">{{ $c->name }}</option>
-                                @endforeach
-                            </select>
-                            @error('class_id') <span class="mt-1 block text-xs text-red-500 font-semibold">{{ $message }}</span> @enderror
+                            <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">Target Class <span class="text-red-500">*</span></label>
+                            <div class="relative">
+                                <select wire:model="class_id"
+                                        class="w-full rounded-2xl border border-slate-200 bg-slate-50/50 px-4 py-3 text-sm text-slate-800 focus:border-indigo-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-indigo-500/10 transition-all shadow-sm hover:border-slate-300 appearance-none">
+                                    <option value="">Select Target Class</option>
+                                    @foreach($classes as $c)
+                                        <option value="{{ $c->id }}">{{ $c->name }}</option>
+                                    @endforeach
+                                </select>
+                                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-slate-500">
+                                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+                                </div>
+                            </div>
+                            @error('class_id') <span class="mt-1.5 block text-xs text-red-500 font-semibold">{{ $message }}</span> @enderror
                         </div>
 
                         <div>
-                            <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">Subject <span class="text-red-500">*</span></label>
-                            <select wire:model="subject_id"
-                                    class="w-full rounded-2xl border border-slate-200 px-4 py-2.5 text-sm text-slate-800 focus:border-indigo-500 focus:outline-none focus:ring-4 focus:ring-indigo-500/10 transition-all">
-                                <option value="">Select Subject</option>
-                                @foreach($subjects as $s)
-                                    <option value="{{ $s->id }}">{{ $s->name }}</option>
-                                @endforeach
-                            </select>
-                            @error('subject_id') <span class="mt-1 block text-xs text-red-500 font-semibold">{{ $message }}</span> @enderror
+                            <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">Subject / Course <span class="text-red-500">*</span></label>
+                            <div class="relative">
+                                <select wire:model="subject_id"
+                                        class="w-full rounded-2xl border border-slate-200 bg-slate-50/50 px-4 py-3 text-sm text-slate-800 focus:border-indigo-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-indigo-500/10 transition-all shadow-sm hover:border-slate-300 appearance-none">
+                                    <option value="">Select Subject</option>
+                                    @foreach($subjects as $s)
+                                        <option value="{{ $s->id }}">{{ $s->name }}</option>
+                                    @endforeach
+                                </select>
+                                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-slate-500">
+                                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+                                </div>
+                            </div>
+                            @error('subject_id') <span class="mt-1.5 block text-xs text-red-500 font-semibold">{{ $message }}</span> @enderror
                         </div>
                     </div>
 
                     {{-- Row Term --}}
                     <div>
-                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">Academic Term <span class="text-red-500">*</span></label>
-                        <select wire:model="term_name"
-                                class="w-full rounded-2xl border border-slate-200 px-4 py-2.5 text-sm text-slate-800 focus:border-indigo-500 focus:outline-none focus:ring-4 focus:ring-indigo-500/10 transition-all">
-                            <option value="First Term">First Term</option>
-                            <option value="Second Term">Second Term</option>
-                            <option value="Third Term">Third Term</option>
-                        </select>
-                        @error('term_name') <span class="mt-1 block text-xs text-red-500 font-semibold">{{ $message }}</span> @enderror
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">Academic Term <span class="text-red-500">*</span></label>
+                        <div class="relative">
+                            <select wire:model="term_name"
+                                    class="w-full rounded-2xl border border-slate-200 bg-slate-50/50 px-4 py-3 text-sm text-slate-800 focus:border-indigo-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-indigo-500/10 transition-all shadow-sm hover:border-slate-300 appearance-none">
+                                <option value="First Term">First Term</option>
+                                <option value="Second Term">Second Term</option>
+                                <option value="Third Term">Third Term</option>
+                            </select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-slate-500">
+                                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+                            </div>
+                        </div>
+                        @error('term_name') <span class="mt-1.5 block text-xs text-red-500 font-semibold">{{ $message }}</span> @enderror
                     </div>
 
                     {{-- Description --}}
                     <div>
-                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">Description / Learning Objectives</label>
-                        <textarea wire:model="description" rows="3" placeholder="Brief details about what topics or weeks are covered in this note..."
-                                  class="w-full rounded-2xl border border-slate-200 px-4 py-2.5 text-sm text-slate-800 placeholder-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-4 focus:ring-indigo-500/10 transition-all resize-none"></textarea>
-                        @error('description') <span class="mt-1 block text-xs text-red-500 font-semibold">{{ $message }}</span> @enderror
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">Description & Learning Objectives</label>
+                        <textarea wire:model="description" rows="3" placeholder="Describe the topics covered, weekly schedule, or specific instructions for students..."
+                                  class="w-full rounded-2xl border border-slate-200 bg-slate-50/50 px-4 py-3 text-sm text-slate-800 placeholder-slate-400 focus:border-indigo-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-indigo-500/10 transition-all resize-none shadow-sm hover:border-slate-300"></textarea>
+                        @error('description') <span class="mt-1.5 block text-xs text-red-500 font-semibold">{{ $message }}</span> @enderror
                     </div>
 
                     {{-- File Upload box --}}
@@ -320,50 +347,54 @@
                          x-on:livewire-upload-finish="progress = 100"
                          x-on:livewire-upload-progress="progress = $event.detail.progress"
                          class="relative">
-                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">Upload File <span class="text-red-500">*</span> <span class="text-[10px] lowercase text-slate-400">(PDF, DOC, PDF, ZIP — Max 10MB)</span></label>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">Attachment File <span class="text-red-500">*</span> <span class="text-[10px] text-slate-400 uppercase tracking-normal font-medium">(PDF, DOC, ZIP — Max 10MB)</span></label>
                         
-                        <div :class="isDragging ? 'border-indigo-500 bg-indigo-50/20' : 'border-slate-200 bg-slate-50/50 hover:bg-slate-50'"
-                             class="flex flex-col items-center justify-center border-2 border-dashed rounded-2xl p-6 text-center transition-all relative overflow-hidden group cursor-pointer">
+                        <div :class="isDragging ? 'border-indigo-500 bg-indigo-50/30' : 'border-slate-200 bg-slate-50/30 hover:bg-slate-50/80'"
+                             class="flex flex-col items-center justify-center border-2 border-dashed rounded-3xl p-8 text-center transition-all relative overflow-hidden group cursor-pointer shadow-inner">
                             
                             <input type="file" wire:model="file" id="class-note-file"
                                    @dragover="isDragging = true" @dragleave="isDragging = false" @drop="isDragging = false"
                                    class="absolute inset-0 opacity-0 cursor-pointer z-10"/>
 
                             @if($file)
-                                <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600 mb-2 shadow-inner">
-                                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                <div class="flex h-16 w-16 items-center justify-center rounded-2xl bg-indigo-50 text-indigo-600 mb-3 shadow-inner relative z-20">
+                                    <svg class="h-8 w-8 animate-bounce" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                                     </svg>
                                 </div>
-                                <p class="text-xs font-bold text-slate-700 max-w-[280px] truncate">{{ $file->getClientOriginalName() }}</p>
-                                <p class="text-[10px] text-emerald-500 font-bold mt-1">Ready for upload!</p>
+                                <p class="text-sm font-bold text-slate-800 max-w-[340px] truncate relative z-20">{{ $file->getClientOriginalName() }}</p>
+                                <p class="text-xs text-indigo-600 font-bold mt-1.5 flex items-center gap-1.5 relative z-20">
+                                    <span class="inline-block h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                                    File loaded successfully!
+                                </p>
                             @else
-                                <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-slate-100 text-slate-400 mb-2 group-hover:scale-110 transition-transform">
-                                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <div class="flex h-16 w-16 items-center justify-center rounded-2xl bg-white text-slate-400 mb-3 shadow-sm border border-slate-100 group-hover:scale-110 transition-transform relative z-20">
+                                    <svg class="h-8 w-8 text-indigo-500/80" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
                                     </svg>
                                 </div>
-                                <p class="text-xs font-bold text-slate-700">Drag your file here or <span class="text-indigo-600 group-hover:underline">browse</span></p>
+                                <p class="text-sm font-bold text-slate-700 relative z-20">Drag and drop file here, or <span class="text-indigo-600 group-hover:underline">browse files</span></p>
+                                <p class="text-xs text-slate-400 mt-1 relative z-20">Supports PDFs, Word documents, PowerPoint presentations, or ZIPs up to 10MB.</p>
                             @endif
 
                             {{-- Live Upload Progress Bar --}}
-                            <div x-show="progress > 0 && progress < 100" style="display:none" class="absolute bottom-0 inset-x-0 h-1 bg-slate-200">
-                                <div class="h-full bg-indigo-600 transition-all duration-150" :style="'width: ' + progress + '%'"></div>
+                            <div x-show="progress > 0 && progress < 100" style="display:none" class="absolute bottom-0 inset-x-0 h-1.5 bg-slate-150">
+                                <div class="h-full bg-gradient-to-r from-indigo-500 to-violet-500 transition-all duration-150" :style="'width: ' + progress + '%'"></div>
                             </div>
                         </div>
-                        @error('file') <span class="mt-1 block text-xs text-red-500 font-semibold">{{ $message }}</span> @enderror
+                        @error('file') <span class="mt-1.5 block text-xs text-red-500 font-semibold">{{ $message }}</span> @enderror
                     </div>
 
                     {{-- Modal Actions --}}
-                    <div class="pt-4 border-t border-slate-100 flex items-center justify-end gap-3">
+                    <div class="pt-6 border-t border-slate-100 flex items-center justify-end gap-3.5">
                         <button type="button" wire:click="$set('showCreateModal', false)"
-                                class="rounded-2xl border border-slate-200 bg-white px-5 py-2.5 text-xs font-bold text-slate-500 hover:bg-slate-50 transition-colors">
+                                class="rounded-2xl border-2 border-slate-150 bg-white px-6 py-3 text-xs font-bold text-slate-500 hover:bg-slate-50 hover:border-slate-200 transition-colors">
                             Cancel
                         </button>
                         <button type="submit" wire:loading.attr="disabled"
-                                class="flex items-center gap-2 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold px-5 py-2.5 shadow-md disabled:opacity-50 transition-colors">
+                                class="flex items-center gap-2 rounded-2xl bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white text-xs font-bold px-6 py-3 shadow-md hover:shadow-indigo-500/25 disabled:opacity-50 transition-all hover:scale-[1.02] transform">
                             <span wire:loading wire:target="saveNote" class="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-                            <span>Upload Note</span>
+                            <span>Upload Resource</span>
                         </button>
                     </div>
                 </form>
