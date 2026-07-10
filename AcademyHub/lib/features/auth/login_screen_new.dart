@@ -18,6 +18,7 @@ class _LoginScreenState extends State<LoginScreen>
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  String _selectedRole = 'staff'; // 'staff', 'parent', 'student'
   bool _rememberMe = false;
   bool _isLoading = false;
   bool _obscurePassword = true;
@@ -27,6 +28,8 @@ class _LoginScreenState extends State<LoginScreen>
   @override
   void initState() {
     super.initState();
+    _emailController.text = 'admin@academyhub.local';
+    _passwordController.text = 'password';
     _blobController = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 8),
@@ -77,10 +80,108 @@ class _LoginScreenState extends State<LoginScreen>
     }
   }
 
+  Color get _currentRoleColor {
+    switch (_selectedRole) {
+      case 'parent':
+        return AppColors.parentAccent;
+      case 'student':
+        return AppColors.studentAccent;
+      case 'staff':
+      default:
+        return const Color(0xFFE78B2C); // staff/admin orange
+    }
+  }
+
+  String get _currentRoleTitle {
+    switch (_selectedRole) {
+      case 'parent':
+        return 'Parent Login';
+      case 'student':
+        return 'Student Login';
+      case 'staff':
+      default:
+        return 'Staff Login';
+    }
+  }
+
+  Widget _buildRoleTabs() {
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.surface2,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      padding: const EdgeInsets.all(4),
+      margin: const EdgeInsets.only(bottom: 24),
+      child: Row(
+        children: [
+          _buildRoleTab('staff', 'Staff', Icons.domain_rounded),
+          _buildRoleTab('parent', 'Parent', Icons.people_alt_rounded),
+          _buildRoleTab('student', 'Student', Icons.school_rounded),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildRoleTab(String role, String label, IconData icon) {
+    final isSelected = _selectedRole == role;
+    return Expanded(
+      child: GestureDetector(
+        onTap: () {
+          setState(() {
+            _selectedRole = role;
+            if (role == 'staff') {
+              _emailController.text = 'admin@academyhub.local';
+            } else if (role == 'parent') {
+              _emailController.text = 'parent@academyhub.local';
+            } else {
+              _emailController.text = 'student@academyhub.local';
+            }
+            _passwordController.text = 'password';
+          });
+        },
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          decoration: BoxDecoration(
+            color: isSelected ? AppColors.surface : Colors.transparent,
+            borderRadius: BorderRadius.circular(9),
+            boxShadow: isSelected
+                ? [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.05),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    )
+                  ]
+                : null,
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                icon,
+                size: 14,
+                color: isSelected ? AppColors.textPrimary : AppColors.textSecondary,
+              ),
+              const SizedBox(width: 5),
+              Text(
+                label,
+                style: GoogleFonts.inter(
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                  color: isSelected ? AppColors.textPrimary : AppColors.textSecondary,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final auth = context.watch<AuthProvider>();
-    final primary = auth.tenantPrimaryColor;
+    final primary = _currentRoleColor;
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -168,11 +269,11 @@ class _LoginScreenState extends State<LoginScreen>
         ),
         const SizedBox(height: 6),
         Text(
-          'Academic Portal Access',
+          _currentRoleTitle,
           style: GoogleFonts.inter(
             fontSize: 14,
-            color: AppColors.textSecondary,
-            fontWeight: FontWeight.w500,
+            color: primary,
+            fontWeight: FontWeight.bold,
           ),
         ),
       ],
@@ -183,11 +284,11 @@ class _LoginScreenState extends State<LoginScreen>
     return Container(
       decoration: BoxDecoration(
         color: AppColors.surface,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(24),
         border: Border.all(color: AppColors.borderLight),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.3),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 24,
             offset: const Offset(0, 8),
           ),
@@ -199,7 +300,8 @@ class _LoginScreenState extends State<LoginScreen>
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            _fieldLabel('Username / Admission No.'),
+            _buildRoleTabs(),
+            _fieldLabel(_selectedRole == 'student' ? 'Admission Number' : 'Email Address'),
             const SizedBox(height: 8),
             TextFormField(
               controller: _emailController,
@@ -210,9 +312,13 @@ class _LoginScreenState extends State<LoginScreen>
                 fontWeight: FontWeight.w600,
               ),
               decoration: InputDecoration(
-                hintText: 'Email or Admission number',
+                hintText: _selectedRole == 'student' ? 'e.g. 2026/001' : 'e.g. parent@school.com',
                 prefixIcon: Icon(Icons.person_outline_rounded,
                     color: AppColors.textSecondary, size: 20),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  borderSide: BorderSide(color: primary, width: 2),
+                ),
               ),
               validator: (v) =>
                   (v == null || v.trim().isEmpty) ? 'Username is required' : null,
@@ -232,6 +338,10 @@ class _LoginScreenState extends State<LoginScreen>
                 hintText: '••••••••',
                 prefixIcon: Icon(Icons.lock_outline_rounded,
                     color: AppColors.textSecondary, size: 20),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  borderSide: BorderSide(color: primary, width: 2),
+                ),
                 suffixIcon: IconButton(
                   onPressed: () =>
                       setState(() => _obscurePassword = !_obscurePassword),
@@ -264,7 +374,7 @@ class _LoginScreenState extends State<LoginScreen>
                       }
                       return Colors.transparent;
                     }),
-                    checkColor: Colors.black,
+                    checkColor: Colors.white,
                     side: BorderSide(
                         color: AppColors.borderLight, width: 1.5),
                   ),
@@ -288,7 +398,7 @@ class _LoginScreenState extends State<LoginScreen>
                 onPressed: _isLoading ? null : _handleLogin,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: primary,
-                  foregroundColor: Colors.black,
+                  foregroundColor: Colors.white,
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12)),
                   elevation: 0,
@@ -300,15 +410,23 @@ class _LoginScreenState extends State<LoginScreen>
                         child: CircularProgressIndicator(
                           strokeWidth: 2,
                           valueColor:
-                              AlwaysStoppedAnimation<Color>(Colors.black),
+                              AlwaysStoppedAnimation<Color>(Colors.white),
                         ),
                       )
-                    : Text(
-                        'Sign In',
-                        style: GoogleFonts.inter(
-                          fontSize: 15,
-                          fontWeight: FontWeight.bold,
-                        ),
+                    : Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            'Login',
+                            style: GoogleFonts.inter(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w800,
+                              color: Colors.white,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          const Icon(Icons.arrow_forward_rounded, color: Colors.white, size: 18),
+                        ],
                       ),
               ),
             ),

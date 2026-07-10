@@ -56,7 +56,12 @@ class _SubPageScaffold extends StatelessWidget {
 class _DarkAppBar extends StatelessWidget {
   final String title;
   final bool showBack;
-  const _DarkAppBar({required this.title, this.showBack = false});
+  final bool showMenuButton;
+  const _DarkAppBar({
+    required this.title,
+    this.showBack = false,
+    this.showMenuButton = false,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -82,6 +87,11 @@ class _DarkAppBar extends StatelessWidget {
                   _IconBtn(
                     icon: Icons.arrow_back_rounded,
                     onTap: () => Navigator.of(context).pop(),
+                  )
+                else if (showMenuButton)
+                  _IconBtn(
+                    icon: Icons.menu_rounded,
+                    onTap: () => Scaffold.of(context).openDrawer(),
                   )
                 else
                   Container(
@@ -574,7 +584,16 @@ class RoleShell extends StatelessWidget {
           backgroundColor: AppColors.background,
           appBar: PreferredSize(
             preferredSize: const Size.fromHeight(64),
-            child: _DarkAppBar(title: title),
+            child: _DarkAppBar(
+              title: title,
+              showMenuButton: true,
+            ),
+          ),
+          drawer: _MobileDrawer(
+            navItems: navItems!,
+            selectedIndex: selectedIndex ?? 0,
+            onTabSelected: onTabSelected ?? (_) {},
+            accentColor: accentColor ?? AppColors.primary,
           ),
           body: Column(
             children: [
@@ -591,12 +610,6 @@ class RoleShell extends StatelessWidget {
             ],
           ),
           floatingActionButton: floatingActionButton,
-          bottomNavigationBar: AHBottomNav(
-            items: navItems!,
-            selectedIndex: selectedIndex ?? 0,
-            onTap: onTabSelected ?? (_) {},
-            accentColor: accentColor ?? AppColors.primary,
-          ),
         ),
       );
     } else {
@@ -1508,6 +1521,297 @@ class AHLoadingButton extends StatelessWidget {
                   ),
                 ],
               ),
+      ),
+    );
+  }
+}
+
+// ─── Mobile Drawer ──────────────────────────────────────────────────────────
+class _MobileDrawer extends StatelessWidget {
+  final List<AHNavItem> navItems;
+  final int selectedIndex;
+  final ValueChanged<int> onTabSelected;
+  final Color accentColor;
+
+  const _MobileDrawer({
+    required this.navItems,
+    required this.selectedIndex,
+    required this.onTabSelected,
+    required this.accentColor,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final auth = context.watch<AuthProvider>();
+    final isDark = auth.themeMode == ThemeMode.dark;
+    final schoolLogo = auth.tenantLogoUrl;
+    final schoolName = auth.tenantName ?? 'AcademyHub';
+
+    return Drawer(
+      backgroundColor: AppColors.background,
+      elevation: 0,
+      width: 290,
+      child: SafeArea(
+        child: Column(
+          children: [
+            // Top close button
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+              child: Align(
+                alignment: Alignment.centerRight,
+                child: GestureDetector(
+                  onTap: () => Navigator.of(context).pop(),
+                  child: Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: AppColors.surface,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: AppColors.borderLight),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.03),
+                          blurRadius: 4,
+                          offset: const Offset(0, 2),
+                        )
+                      ],
+                    ),
+                    child: Icon(
+                      Icons.close_rounded,
+                      color: AppColors.textSecondary,
+                      size: 20,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+
+            // Branding Info Card
+            Container(
+              margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0),
+              padding: const EdgeInsets.all(16.0),
+              decoration: BoxDecoration(
+                color: AppColors.surface,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: AppColors.borderLight),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.04),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  )
+                ],
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    width: 44,
+                    height: 44,
+                    decoration: BoxDecoration(
+                      color: isDark ? AppColors.surface2 : Colors.deepPurple.shade50,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: isDark ? AppColors.borderLight : Colors.deepPurple.shade100,
+                        width: 1.5,
+                      ),
+                    ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(10),
+                      child: schoolLogo != null && schoolLogo.isNotEmpty
+                          ? Image.network(
+                              schoolLogo,
+                              fit: BoxFit.contain,
+                              errorBuilder: (_, _, _) => Padding(
+                                padding: const EdgeInsets.all(4),
+                                child: Image.asset('lib/Alogo.png', fit: BoxFit.contain),
+                              ),
+                            )
+                          : Padding(
+                              padding: const EdgeInsets.all(6),
+                              child: Image.asset('lib/Alogo.png', fit: BoxFit.contain),
+                            ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          schoolName,
+                          style: GoogleFonts.inter(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w900,
+                            color: AppColors.textPrimary,
+                            letterSpacing: -0.3,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          'Smart Learning System',
+                          style: GoogleFonts.inter(
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                            color: accentColor,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 16),
+
+            // Menu Section Label
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 8.0),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  'MAIN MENU',
+                  style: GoogleFonts.inter(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w900,
+                    color: AppColors.textMuted,
+                    letterSpacing: 1.5,
+                  ),
+                ),
+              ),
+            ),
+
+            // Navigation items list
+            Expanded(
+              child: ListView.builder(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                itemCount: navItems.length,
+                itemBuilder: (context, i) {
+                  final item = navItems[i];
+                  final isSelected = selectedIndex == i;
+                  final itemAccent = item.iconColor ?? accentColor;
+                  final itemBg = item.iconBg ?? itemAccent.withValues(alpha: 0.12);
+
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 4.0),
+                    child: InkWell(
+                      onTap: () {
+                        Navigator.of(context).pop();
+                        onTabSelected(i);
+                      },
+                      borderRadius: BorderRadius.circular(16),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 10.0),
+                        decoration: BoxDecoration(
+                          color: isSelected ? accentColor : Colors.transparent,
+                          borderRadius: BorderRadius.circular(16),
+                          boxShadow: isSelected
+                              ? [
+                                  BoxShadow(
+                                    color: accentColor.withValues(alpha: 0.25),
+                                    blurRadius: 12,
+                                    offset: const Offset(0, 4),
+                                  )
+                                ]
+                              : null,
+                        ),
+                        child: Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color: isSelected ? Colors.white.withValues(alpha: 0.2) : itemBg,
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Icon(
+                                item.icon,
+                                size: 20,
+                                color: isSelected ? Colors.white : itemAccent,
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Text(
+                                item.label,
+                                style: GoogleFonts.inter(
+                                  fontSize: 14,
+                                  fontWeight: isSelected ? FontWeight.w900 : FontWeight.bold,
+                                  color: isSelected ? Colors.white : AppColors.textPrimary,
+                                ),
+                              ),
+                            ),
+                            if (isSelected)
+                              Container(
+                                padding: const EdgeInsets.all(4),
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withValues(alpha: 0.2),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: const Icon(
+                                  Icons.chevron_right_rounded,
+                                  size: 14,
+                                  color: Colors.white,
+                                ),
+                              ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+
+            // Logout footer
+            Container(
+              padding: const EdgeInsets.all(16.0),
+              decoration: BoxDecoration(
+                color: AppColors.surface,
+                border: Border(
+                  top: BorderSide(color: AppColors.borderLight, width: 0.5),
+                ),
+              ),
+              child: InkWell(
+                onTap: () async {
+                  Navigator.of(context).pop();
+                  await auth.logout();
+                  if (context.mounted) {
+                    context.go('/login');
+                  }
+                },
+                borderRadius: BorderRadius.circular(12),
+                child: Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(vertical: 12.0),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFFEF2F2),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(
+                        Icons.logout_rounded,
+                        color: Color(0xFFDC2626),
+                        size: 16,
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        'Logout',
+                        style: GoogleFonts.inter(
+                          fontSize: 13,
+                          fontWeight: FontWeight.bold,
+                          color: const Color(0xFFDC2626),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

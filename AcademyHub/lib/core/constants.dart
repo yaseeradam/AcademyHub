@@ -9,7 +9,7 @@ class AppColors {
   static const Color primaryDark = Color(0xFFD97706);
 
   // Backgrounds
-  static Color get background  => isDark ? const Color(0xFF0D1117) : const Color(0xFFF8FAFC); // near-black ink vs clean slate off-white
+  static Color get background  => isDark ? const Color(0xFF0D1117) : const Color(0xFFF5F6FA); // Laravel body background #f5f6fa
   static Color get surface     => isDark ? const Color(0xFF161B22) : const Color(0xFFFFFFFF); // dark card vs pure white card
   static Color get surface2    => isDark ? const Color(0xFF21262D) : const Color(0xFFF1F5F9); // elevated card vs slate-100
   static Color get surface3    => isDark ? const Color(0xFF30363D) : const Color(0xFFE2E8F0); // hover/pressed vs slate-200
@@ -29,11 +29,12 @@ class AppColors {
   static const Color info    = Color(0xFF58A6FF); // blue
   static const Color warning = Color(0xFFD29922); // yellow
 
-  // Role accent colors
+  // Role accent colors (aligned with Laravel portal)
   static const Color studentAccent = Color(0xFF6366F1); // indigo
-  static const Color teacherAccent = Color(0xFF10B981); // emerald
-  static const Color adminAccent   = Color(0xFFF59E0B); // amber
-  static const Color parentAccent  = Color(0xFFA855F7); // violet
+  static const Color teacherAccent = Color(0xFF0EA5E9); // sky
+  static const Color adminAccent   = Color(0xFF8B5CF6); // violet
+  static const Color bursarAccent  = Color(0xFF10B981); // emerald
+  static const Color parentAccent  = Color(0xFFEC4899); // pink
 
   // Layout tokens
   static const double radiusMedium = 12.0;
