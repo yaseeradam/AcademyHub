@@ -442,13 +442,13 @@ class _TeacherHomeState extends State<TeacherHome> {
           child: Container(
             width: double.infinity,
             decoration: const BoxDecoration(
-              color: Color(0xFF1A2E4A), // Deep navy
+              color: Color(0xFFFF2D20), 
               gradient: RadialGradient(
                 center: Alignment.topLeft,
                 radius: 1.2,
                 colors: [
-                  Color(0xFF1E3A5F), // lighter navy
-                  Color(0xFF1A2E4A), // deep navy
+                  Color(0xFFFF5247), 
+                  Color(0xFFFF2D20), 
                 ],
               ),
             ),
@@ -496,7 +496,7 @@ class _TeacherHomeState extends State<TeacherHome> {
                                 Text(
                                   'TEACHER PORTAL',
                                   style: GoogleFonts.inter(
-                                    color: const Color(0xFF93C5FD), // light blue
+                                    color: Colors.white, 
                                     fontSize: 9,
                                     fontWeight: FontWeight.bold,
                                     letterSpacing: 1.0,
@@ -535,7 +535,7 @@ class _TeacherHomeState extends State<TeacherHome> {
                         style: GoogleFonts.inter(
                           fontSize: 13,
                           fontWeight: FontWeight.w500,
-                          color: const Color(0xFF93C5FD),
+                          color: Colors.white.withValues(alpha: 0.8),
                         ),
                       ),
                       const SizedBox(height: 16),

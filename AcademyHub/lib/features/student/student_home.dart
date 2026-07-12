@@ -256,9 +256,9 @@ class _StudentHomeState extends State<StudentHome>
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
                 colors: [
-                  Color(0xFF166534), 
-                  Color(0xFF15803D), 
-                  Color(0xFF16A34A), 
+                  Color(0xFFFF2D20), 
+                  Color(0xFFFF5247), 
+                  Color(0xFFFF7A70),
                 ],
               ),
             ),
@@ -360,7 +360,7 @@ class _StudentHomeState extends State<StudentHome>
                               style: GoogleFonts.inter(
                                 fontSize: 13,
                                 fontWeight: FontWeight.w500,
-                                color: const Color(0xFF6EE7B7), 
+                                color: Colors.white.withValues(alpha: 0.8), 
                               ),
                             ),
                             const SizedBox(height: 16),

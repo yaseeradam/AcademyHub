@@ -81,15 +81,7 @@ class _LoginScreenState extends State<LoginScreen>
   }
 
   Color get _currentRoleColor {
-    switch (_selectedRole) {
-      case 'parent':
-        return AppColors.parentAccent;
-      case 'student':
-        return AppColors.studentAccent;
-      case 'staff':
-      default:
-        return const Color(0xFFE78B2C); // staff/admin orange
-    }
+    return AppColors.primary;
   }
 
   String get _currentRoleTitle {

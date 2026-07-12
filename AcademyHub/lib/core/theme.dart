@@ -14,7 +14,7 @@ class AppTheme {
       colorScheme: isDark
           ? ColorScheme.dark(
               primary: primaryColor,
-              onPrimary: Colors.black,
+              onPrimary: Colors.white,
               secondary: AppColors.studentAccent,
               surface: AppColors.surface,
               onSurface: AppColors.textPrimary,
@@ -32,9 +32,10 @@ class AppTheme {
             ),
       scaffoldBackgroundColor: AppColors.background,
       appBarTheme: AppBarTheme(
-        backgroundColor: AppColors.background,
+        backgroundColor: AppColors.surface,
         elevation: 0,
         centerTitle: false,
+        shape: Border(bottom: BorderSide(color: AppColors.borderLight, width: 1.0)),
         systemOverlayStyle: SystemUiOverlayStyle(
           statusBarColor: Colors.transparent,
           statusBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
@@ -42,7 +43,7 @@ class AppTheme {
         iconTheme: IconThemeData(color: AppColors.textPrimary),
         titleTextStyle: GoogleFonts.inter(
           color: AppColors.textPrimary,
-          fontSize: 20,
+          fontSize: 16,
           fontWeight: FontWeight.bold,
         ),
       ),
@@ -57,7 +58,7 @@ class AppTheme {
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           backgroundColor: primaryColor,
-          foregroundColor: isDark ? Colors.black : Colors.white,
+          foregroundColor: Colors.white,
           elevation: 0,
           padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
           shape: RoundedRectangleBorder(
@@ -68,15 +69,18 @@ class AppTheme {
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
-          foregroundColor: primaryColor,
-          side: BorderSide(color: primaryColor.withValues(alpha: 0.5)),
+          foregroundColor: AppColors.textPrimary,
+          side: BorderSide(color: AppColors.borderLight),
+          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
           shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(AppColors.radiusSmall)),
+              borderRadius: BorderRadius.circular(AppColors.radiusMedium)),
+          textStyle: GoogleFonts.inter(
+              fontWeight: FontWeight.bold, fontSize: 15),
         ),
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: isDark ? AppColors.surface2 : const Color(0xFFF8FAFC),
+        fillColor: isDark ? AppColors.surface2 : const Color(0xFFFFFFFF), // pure white in light mode
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppColors.radiusMedium), // 12.0 matching rounded-xl
@@ -98,7 +102,7 @@ class AppTheme {
         elevation: 0,
         shape: RoundedRectangleBorder(
           borderRadius: const BorderRadius.all(Radius.circular(AppColors.radiusLarge)), // 16.0 matching rounded-2xl
-          side: BorderSide(color: AppColors.borderLight),
+          side: BorderSide(color: AppColors.borderLight, width: 1.0),
         ),
       ),
       dividerTheme: DividerThemeData(

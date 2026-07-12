@@ -313,9 +313,9 @@ class _ParentHomeState extends State<ParentHome> {
       children: [
         // Hero
         GlassHeroCard(
-          gradientColors: [
-            AppColors.parentAccent.withValues(alpha: 0.85),
-            const Color(0xFF6B21A8),
+          gradientColors: const [
+            AppColors.primary,
+            Color(0xFFFF5247),
           ],
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
