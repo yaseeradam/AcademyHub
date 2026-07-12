@@ -576,7 +576,7 @@
 <body x-data="superAdminGlobal()" @submit="handleFormSubmit($event)">
 
     <!-- Mobile Sidebar Backdrop Overlay -->
-    <div x-cloak x-show="mobileSidebarOpen" @click="mobileSidebarOpen = false" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15, 23, 42, 0.4); backdrop-filter: blur(4px); z-index: 45;" class="lg-hidden"></div>
+    <div x-cloak x-show="mobileSidebarOpen" @click="mobileSidebarOpen = false" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15, 23, 42, 0.55); z-index: 45;" class="lg-hidden"></div>
 
     <!-- Sidebar -->
     <aside id="sa-sidebar" :class="mobileSidebarOpen ? 'open' : ''">
@@ -850,7 +850,7 @@
              x-transition:leave-start="opacity-100"
              x-transition:leave-end="opacity-0"
              @click="passwordConfirmOpen = false"
-             style="position: absolute; inset: 0; background: rgba(15, 23, 42, 0.4); backdrop-filter: blur(8px);"></div>
+             style="position: absolute; inset: 0; background: rgba(15, 23, 42, 0.55);"></div>
 
         <!-- Modal Box -->
         <div x-show="passwordConfirmOpen"

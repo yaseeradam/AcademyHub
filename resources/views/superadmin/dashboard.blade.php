@@ -43,12 +43,11 @@
         width: 44px;
         height: 44px;
         border-radius: 12px;
-        background: rgba(255, 255, 255, 0.2);
-        backdrop-filter: blur(8px);
+        background: rgba(255, 255, 255, 0.25);
         display: flex;
         align-items: center;
         justify-content: center;
-        border: 1px solid rgba(255, 255, 255, 0.25);
+        border: 1px solid rgba(255, 255, 255, 0.3);
         box-shadow: 0 4px 12px rgba(0,0,0,0.05);
         flex-shrink: 0;
         margin-bottom: 0;
@@ -97,6 +96,18 @@
         right: -30px;
         border-radius: 50%;
         pointer-events: none;
+    }
+    .sa-dashboard-grid-two-col {
+        display: grid;
+        grid-template-columns: 1fr 340px;
+        gap: 20px;
+        margin-bottom: 20px;
+    }
+    @media (max-width: 1023px) {
+        .sa-dashboard-grid-two-col {
+            grid-template-columns: 1fr;
+            gap: 16px;
+        }
     }
 </style>
 
@@ -261,7 +272,7 @@
 </div>
 
 {{-- ── Middle Row: Chart + Plan Breakdown ────────────────────── --}}
-<div style="display:grid; grid-template-columns:1fr 340px; gap:20px; margin-bottom:20px;">
+<div class="sa-dashboard-grid-two-col">
 
     {{-- Growth Chart --}}
     <div class="sa-panel">
