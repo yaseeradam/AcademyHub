@@ -74,7 +74,14 @@ class _DarkAppBar extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: AppColors.surface,
-        border: Border(bottom: BorderSide(color: AppColors.borderLight)),
+        border: Border(bottom: BorderSide(color: AppColors.borderLight, width: 0.8)),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF0F172A).withValues(alpha: 0.04),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: SafeArea(
         child: SizedBox(
@@ -196,18 +203,11 @@ class _IconBtn extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
-          color: AppColors.surface,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: AppColors.borderLight),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.03),
-              blurRadius: 4,
-              offset: const Offset(0, 2),
-            )
-          ],
+          color: AppColors.surface2,
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: AppColors.borderLight, width: 0.8),
         ),
-        child: Icon(icon, color: AppColors.textSecondary, size: 20),
+        child: Icon(icon, color: AppColors.textSecondary, size: 18),
       ),
     );
   }
@@ -725,8 +725,15 @@ class _ResponsiveSidebar extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.surface,
         border: Border(
-          right: BorderSide(color: AppColors.borderLight, width: 1),
+          right: BorderSide(color: AppColors.borderLight, width: 0.8),
         ),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF0F172A).withValues(alpha: 0.04),
+            blurRadius: 12,
+            offset: const Offset(2, 0),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -822,21 +829,22 @@ class _ResponsiveSidebar extends StatelessWidget {
                 final itemBg = item.iconBg ?? itemAccent.withValues(alpha: 0.12);
 
                 return Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 4.0),
+                  padding: const EdgeInsets.symmetric(vertical: 3.0),
                   child: InkWell(
                     onTap: () => onTabSelected(i),
-                    borderRadius: BorderRadius.circular(16),
+                    borderRadius: BorderRadius.circular(14),
                     child: AnimatedContainer(
                       duration: const Duration(milliseconds: 200),
-                      padding: const EdgeInsets.all(12),
+                      padding: const EdgeInsets.all(11),
                       decoration: BoxDecoration(
                         color: isSelected ? accentColor : Colors.transparent,
-                        borderRadius: BorderRadius.circular(16),
+                        borderRadius: BorderRadius.circular(14),
                         boxShadow: isSelected
                             ? [
                                 BoxShadow(
-                                  color: accentColor.withValues(alpha: 0.35),
-                                  blurRadius: 12,
+                                  color: accentColor.withValues(alpha: 0.3),
+                                  blurRadius: 14,
+                                  spreadRadius: 0,
                                   offset: const Offset(0, 4),
                                 )
                               ]
@@ -844,10 +852,9 @@ class _ResponsiveSidebar extends StatelessWidget {
                       ),
                       child: Row(
                         children: [
-                          // Icon Container
                           Container(
-                            width: 36,
-                            height: 36,
+                            width: 34,
+                            height: 34,
                             decoration: BoxDecoration(
                               color: isSelected
                                   ? Colors.white.withValues(alpha: 0.2)
@@ -857,34 +864,27 @@ class _ResponsiveSidebar extends StatelessWidget {
                             child: Icon(
                               isSelected ? item.activeIcon : item.icon,
                               color: isSelected ? Colors.white : itemAccent,
-                              size: 20,
+                              size: 18,
                             ),
                           ),
-                          const SizedBox(width: 14),
-                          // Label
+                          const SizedBox(width: 12),
                           Expanded(
                             child: Text(
                               item.label,
                               style: GoogleFonts.inter(
                                 fontSize: 13,
-                                fontWeight: isSelected ? FontWeight.w900 : FontWeight.bold,
+                                fontWeight: isSelected ? FontWeight.w900 : FontWeight.w600,
                                 color: isSelected ? Colors.white : AppColors.textPrimary,
                               ),
                             ),
                           ),
-                          // Chevron Arrow if selected
                           if (isSelected)
                             Container(
-                              width: 20,
-                              height: 20,
+                              width: 6,
+                              height: 6,
                               decoration: BoxDecoration(
-                                color: Colors.white.withValues(alpha: 0.2),
+                                color: Colors.white.withValues(alpha: 0.7),
                                 shape: BoxShape.circle,
-                              ),
-                              child: const Icon(
-                                Icons.chevron_right_rounded,
-                                color: Colors.white,
-                                size: 14,
                               ),
                             ),
                         ],
@@ -1081,8 +1081,15 @@ class _DesktopHeader extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.surface,
         border: Border(
-          bottom: BorderSide(color: AppColors.borderLight, width: 1),
+          bottom: BorderSide(color: AppColors.borderLight, width: 0.8),
         ),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF0F172A).withValues(alpha: 0.04),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       padding: const EdgeInsets.symmetric(horizontal: 24),
       child: Row(
@@ -1179,12 +1186,19 @@ class AHBottomNav extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: AppColors.surface,
-        border: Border(top: BorderSide(color: AppColors.borderLight)),
+        border: Border(top: BorderSide(color: AppColors.borderLight, width: 0.8)),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF0F172A).withValues(alpha: 0.05),
+            blurRadius: 12,
+            offset: const Offset(0, -2),
+          ),
+        ],
       ),
       child: SafeArea(
         top: false,
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
           child: Row(
             children: List.generate(items.length, (i) {
               final item = items[i];
@@ -1197,27 +1211,35 @@ class AHBottomNav extends StatelessWidget {
                   child: AnimatedContainer(
                     duration: const Duration(milliseconds: 200),
                     curve: Curves.easeInOut,
-                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
                     decoration: BoxDecoration(
                       color: selected
-                          ? itemAccent.withValues(alpha: 0.12)
+                          ? itemAccent.withValues(alpha: 0.1)
                           : Colors.transparent,
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(14),
                     ),
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(
-                          selected ? item.activeIcon : item.icon,
-                          color: selected ? itemAccent : AppColors.textSecondary,
-                          size: 22,
+                        AnimatedContainer(
+                          duration: const Duration(milliseconds: 200),
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: selected ? itemAccent : Colors.transparent,
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Icon(
+                            selected ? item.activeIcon : item.icon,
+                            color: selected ? Colors.white : AppColors.textSecondary,
+                            size: 20,
+                          ),
                         ),
-                        const SizedBox(height: 4),
+                        const SizedBox(height: 3),
                         Text(
                           item.label,
                           style: GoogleFonts.inter(
                             fontSize: 10,
-                            fontWeight: selected ? FontWeight.bold : FontWeight.w500,
+                            fontWeight: selected ? FontWeight.w800 : FontWeight.w500,
                             color: selected ? itemAccent : AppColors.textSecondary,
                           ),
                         ),
@@ -1267,7 +1289,7 @@ class GlassHeroCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(22),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
@@ -1277,9 +1299,16 @@ class GlassHeroCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(borderRadius),
         boxShadow: [
           BoxShadow(
-            color: gradientColors.first.withValues(alpha: 0.3),
-            blurRadius: 24,
-            offset: const Offset(0, 8),
+            color: gradientColors.first.withValues(alpha: 0.35),
+            blurRadius: 28,
+            spreadRadius: 0,
+            offset: const Offset(0, 10),
+          ),
+          BoxShadow(
+            color: gradientColors.first.withValues(alpha: 0.15),
+            blurRadius: 8,
+            spreadRadius: 0,
+            offset: const Offset(0, 2),
           ),
         ],
       ),
@@ -1310,11 +1339,12 @@ class DarkStatCard extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.all(14),
+        padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: AppColors.surface,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: AppColors.borderLight),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: AppColors.borderLight, width: 0.8),
+          boxShadow: AppColors.subtleShadow,
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -1323,25 +1353,33 @@ class DarkStatCard extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Container(
-                  padding: const EdgeInsets.all(7),
+                  padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: color.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(8),
+                    color: color.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(10),
                   ),
                   child: Icon(icon, color: color, size: 18),
                 ),
                 if (onTap != null)
-                  Icon(Icons.arrow_forward_ios_rounded,
-                      color: AppColors.textMuted, size: 11),
+                  Container(
+                    padding: const EdgeInsets.all(4),
+                    decoration: BoxDecoration(
+                      color: AppColors.surface2,
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: Icon(Icons.arrow_forward_ios_rounded,
+                        color: AppColors.textMuted, size: 10),
+                  ),
               ],
             ),
             const Spacer(),
             Text(
               value,
               style: GoogleFonts.inter(
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
+                fontSize: 24,
+                fontWeight: FontWeight.w900,
                 color: AppColors.textPrimary,
+                letterSpacing: -0.5,
               ),
             ),
             const SizedBox(height: 2),
@@ -1381,20 +1419,28 @@ class SectionHeader extends StatelessWidget {
         Text(
           title,
           style: GoogleFonts.inter(
-            fontSize: 14,
-            fontWeight: FontWeight.bold,
+            fontSize: 15,
+            fontWeight: FontWeight.w900,
             color: AppColors.textPrimary,
+            letterSpacing: -0.2,
           ),
         ),
         if (actionLabel != null && onAction != null)
           GestureDetector(
             onTap: onAction,
-            child: Text(
-              actionLabel!,
-              style: GoogleFonts.inter(
-                fontSize: 12,
-                fontWeight: FontWeight.bold,
-                color: AppColors.primary,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+              decoration: BoxDecoration(
+                color: AppColors.primary.withValues(alpha: 0.08),
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Text(
+                actionLabel!,
+                style: GoogleFonts.inter(
+                  fontSize: 11,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.primary,
+                ),
               ),
             ),
           ),
@@ -1430,10 +1476,10 @@ class DarkActionRow extends StatelessWidget {
         child: Row(
           children: [
             Container(
-              padding: const EdgeInsets.all(8),
+              padding: const EdgeInsets.all(9),
               decoration: BoxDecoration(
-                color: color.withValues(alpha: 0.12),
-                borderRadius: BorderRadius.circular(8),
+                color: color.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(10),
               ),
               child: Icon(icon, color: color, size: 18),
             ),
@@ -1444,7 +1490,7 @@ class DarkActionRow extends StatelessWidget {
                 children: [
                   Text(title,
                       style: GoogleFonts.inter(
-                          fontWeight: FontWeight.bold,
+                          fontWeight: FontWeight.w700,
                           fontSize: 13,
                           color: AppColors.textPrimary)),
                   const SizedBox(height: 2),
@@ -1455,8 +1501,15 @@ class DarkActionRow extends StatelessWidget {
                 ],
               ),
             ),
-            Icon(Icons.arrow_forward_ios_rounded,
-                color: AppColors.textMuted, size: 11),
+            Container(
+              padding: const EdgeInsets.all(4),
+              decoration: BoxDecoration(
+                color: AppColors.surface2,
+                borderRadius: BorderRadius.circular(6),
+              ),
+              child: Icon(Icons.chevron_right_rounded,
+                  color: AppColors.textMuted, size: 14),
+            ),
           ],
         ),
       ),

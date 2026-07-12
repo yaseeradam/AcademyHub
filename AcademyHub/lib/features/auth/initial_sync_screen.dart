@@ -19,6 +19,7 @@ class _InitialSyncScreenState extends State<InitialSyncScreen>
   double _progress = 0.0;
   bool   _failed   = false;
   bool   _retrying = false;
+  bool   _showSkip = false; // show skip button after a delay
 
   @override
   void initState() {
@@ -27,6 +28,10 @@ class _InitialSyncScreenState extends State<InitialSyncScreen>
         AnimationController(vsync: this, duration: const Duration(seconds: 2))
           ..repeat(reverse: true);
     _startSync();
+    // Always show skip after 8 seconds so users are never stuck
+    Future.delayed(const Duration(seconds: 8), () {
+      if (mounted && !_failed) setState(() => _showSkip = true);
+    });
   }
 
   @override
@@ -41,16 +46,22 @@ class _InitialSyncScreenState extends State<InitialSyncScreen>
       if (mounted) setState(() { _message = p.message; _progress = p.progress; });
     });
     try {
-      await auth.syncService.initialSync(auth.user?.role ?? 'teacher');
+      // 45-second hard timeout so the screen never hangs indefinitely
+      await auth.syncService.initialSync(auth.user?.role ?? 'teacher')
+          .timeout(const Duration(seconds: 45));
       auth.markSyncDone();
       if (mounted) context.go('/');
     } catch (e) {
-      if (mounted) setState(() { _failed = true; _retrying = false; });
+      if (mounted) setState(() { _failed = true; _retrying = false; _showSkip = true; });
     }
   }
 
   Future<void> _retry() async {
-    setState(() { _failed = false; _retrying = true; _progress = 0.0; _message = 'Retrying...'; });
+    setState(() { _failed = false; _retrying = true; _progress = 0.0; _message = 'Retrying...'; _showSkip = false; });
+    // Re-show skip after 8 seconds on retry
+    Future.delayed(const Duration(seconds: 8), () {
+      if (mounted && !_failed) setState(() => _showSkip = true);
+    });
     _startSync();
   }
 
@@ -139,6 +150,25 @@ class _InitialSyncScreenState extends State<InitialSyncScreen>
                     color: primary,
                   ),
                 ),
+                // Skip button appears after 8 seconds so users are never stuck
+                if (_showSkip) ...[
+                  const SizedBox(height: 24),
+                  SizedBox(
+                    width: double.infinity,
+                    child: OutlinedButton(
+                      onPressed: _skipSync,
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: AppColors.textSecondary,
+                        side: BorderSide(color: AppColors.borderLight),
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10)),
+                      ),
+                      child: Text('Skip for now',
+                          style: GoogleFonts.inter(fontWeight: FontWeight.bold)),
+                    ),
+                  ),
+                ],
               ] else ...[
                 // Error state
                 Container(

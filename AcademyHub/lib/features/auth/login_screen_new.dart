@@ -108,7 +108,8 @@ class _LoginScreenState extends State<LoginScreen>
     return Container(
       decoration: BoxDecoration(
         color: AppColors.surface2,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: AppColors.borderLight, width: 0.8),
       ),
       padding: const EdgeInsets.all(4),
       margin: const EdgeInsets.only(bottom: 24),
@@ -124,6 +125,11 @@ class _LoginScreenState extends State<LoginScreen>
 
   Widget _buildRoleTab(String role, String label, IconData icon) {
     final isSelected = _selectedRole == role;
+    final roleColor = role == 'staff'
+        ? const Color(0xFFE78B2C)
+        : role == 'parent'
+            ? AppColors.parentAccent
+            : AppColors.studentAccent;
     return Expanded(
       child: GestureDetector(
         onTap: () {
@@ -139,16 +145,17 @@ class _LoginScreenState extends State<LoginScreen>
             _passwordController.text = 'password';
           });
         },
-        child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 8),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          padding: const EdgeInsets.symmetric(vertical: 9),
           decoration: BoxDecoration(
             color: isSelected ? AppColors.surface : Colors.transparent,
-            borderRadius: BorderRadius.circular(9),
+            borderRadius: BorderRadius.circular(10),
             boxShadow: isSelected
                 ? [
                     BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.05),
-                      blurRadius: 8,
+                      color: roleColor.withValues(alpha: 0.12),
+                      blurRadius: 10,
                       offset: const Offset(0, 2),
                     )
                   ]
@@ -160,15 +167,15 @@ class _LoginScreenState extends State<LoginScreen>
               Icon(
                 icon,
                 size: 14,
-                color: isSelected ? AppColors.textPrimary : AppColors.textSecondary,
+                color: isSelected ? roleColor : AppColors.textSecondary,
               ),
               const SizedBox(width: 5),
               Text(
                 label,
                 style: GoogleFonts.inter(
                   fontSize: 12,
-                  fontWeight: FontWeight.bold,
-                  color: isSelected ? AppColors.textPrimary : AppColors.textSecondary,
+                  fontWeight: FontWeight.w800,
+                  color: isSelected ? roleColor : AppColors.textSecondary,
                 ),
               ),
             ],
@@ -284,13 +291,20 @@ class _LoginScreenState extends State<LoginScreen>
     return Container(
       decoration: BoxDecoration(
         color: AppColors.surface,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: AppColors.borderLight),
+        borderRadius: BorderRadius.circular(28),
+        border: Border.all(color: AppColors.borderLight, width: 0.8),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 24,
-            offset: const Offset(0, 8),
+            color: const Color(0xFF0F172A).withValues(alpha: 0.07),
+            blurRadius: 32,
+            spreadRadius: 0,
+            offset: const Offset(0, 12),
+          ),
+          BoxShadow(
+            color: const Color(0xFF0F172A).withValues(alpha: 0.03),
+            blurRadius: 8,
+            spreadRadius: 0,
+            offset: const Offset(0, 2),
           ),
         ],
       ),
@@ -303,59 +317,24 @@ class _LoginScreenState extends State<LoginScreen>
             _buildRoleTabs(),
             _fieldLabel(_selectedRole == 'student' ? 'Admission Number' : 'Email Address'),
             const SizedBox(height: 8),
-            TextFormField(
+            _StyledField(
               controller: _emailController,
-              keyboardType: TextInputType.text,
-              style: GoogleFonts.inter(
-                color: AppColors.textPrimary,
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-              ),
-              decoration: InputDecoration(
-                hintText: _selectedRole == 'student' ? 'e.g. 2026/001' : 'e.g. parent@school.com',
-                prefixIcon: Icon(Icons.person_outline_rounded,
-                    color: AppColors.textSecondary, size: 20),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
-                  borderSide: BorderSide(color: primary, width: 2),
-                ),
-              ),
-              validator: (v) =>
-                  (v == null || v.trim().isEmpty) ? 'Username is required' : null,
+              hint: _selectedRole == 'student' ? 'e.g. 2026/001' : 'e.g. parent@school.com',
+              icon: Icons.person_outline_rounded,
+              accentColor: primary,
+              validator: (v) => (v == null || v.trim().isEmpty) ? 'Username is required' : null,
             ),
             const SizedBox(height: 20),
             _fieldLabel('Password'),
             const SizedBox(height: 8),
-            TextFormField(
+            _StyledField(
               controller: _passwordController,
-              obscureText: _obscurePassword,
-              style: GoogleFonts.inter(
-                color: AppColors.textPrimary,
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-              ),
-              decoration: InputDecoration(
-                hintText: '••••••••',
-                prefixIcon: Icon(Icons.lock_outline_rounded,
-                    color: AppColors.textSecondary, size: 20),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
-                  borderSide: BorderSide(color: primary, width: 2),
-                ),
-                suffixIcon: IconButton(
-                  onPressed: () =>
-                      setState(() => _obscurePassword = !_obscurePassword),
-                  icon: Icon(
-                    _obscurePassword
-                        ? Icons.visibility_outlined
-                        : Icons.visibility_off_outlined,
-                    color: AppColors.textSecondary,
-                    size: 20,
-                  ),
-                ),
-              ),
-              validator: (v) =>
-                  (v == null || v.trim().isEmpty) ? 'Password is required' : null,
+              hint: '••••••••',
+              icon: Icons.lock_outline_rounded,
+              accentColor: primary,
+              obscure: _obscurePassword,
+              onToggleObscure: () => setState(() => _obscurePassword = !_obscurePassword),
+              validator: (v) => (v == null || v.trim().isEmpty) ? 'Password is required' : null,
             ),
             const SizedBox(height: 16),
             // Remember me
@@ -473,6 +452,121 @@ class _LoginScreenState extends State<LoginScreen>
   }
 }
 
+// ─── Styled input field ──────────────────────────────────────────────────────
+class _StyledField extends StatefulWidget {
+  final TextEditingController controller;
+  final String hint;
+  final IconData icon;
+  final Color accentColor;
+  final bool obscure;
+  final VoidCallback? onToggleObscure;
+  final String? Function(String?)? validator;
+
+  const _StyledField({
+    required this.controller,
+    required this.hint,
+    required this.icon,
+    required this.accentColor,
+    this.obscure = false,
+    this.onToggleObscure,
+    this.validator,
+  });
+
+  @override
+  State<_StyledField> createState() => _StyledFieldState();
+}
+
+class _StyledFieldState extends State<_StyledField> {
+  final _focus = FocusNode();
+  bool _focused = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _focus.addListener(() => setState(() => _focused = _focus.hasFocus));
+  }
+
+  @override
+  void dispose() {
+    _focus.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final accent = widget.accentColor;
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 180),
+      decoration: BoxDecoration(
+        color: _focused
+            ? accent.withValues(alpha: 0.05)
+            : const Color(0xFFF8FAFC),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: _focused ? accent : AppColors.borderLight,
+          width: _focused ? 1.8 : 1.0,
+        ),
+        boxShadow: _focused
+            ? [
+                BoxShadow(
+                  color: accent.withValues(alpha: 0.12),
+                  blurRadius: 12,
+                  offset: const Offset(0, 3),
+                )
+              ]
+            : null,
+      ),
+      child: TextFormField(
+        controller: widget.controller,
+        focusNode: _focus,
+        obscureText: widget.obscure,
+        validator: widget.validator,
+        style: GoogleFonts.inter(
+          color: AppColors.textPrimary,
+          fontSize: 14,
+          fontWeight: FontWeight.w600,
+        ),
+        decoration: InputDecoration(
+          hintText: widget.hint,
+          hintStyle: GoogleFonts.inter(
+            color: AppColors.textMuted,
+            fontSize: 13,
+            fontWeight: FontWeight.w400,
+          ),
+          prefixIcon: Padding(
+            padding: const EdgeInsets.only(left: 14, right: 10),
+            child: Icon(
+              widget.icon,
+              size: 18,
+              color: _focused ? accent : AppColors.textSecondary,
+            ),
+          ),
+          prefixIconConstraints: const BoxConstraints(minWidth: 0, minHeight: 0),
+          suffixIcon: widget.onToggleObscure != null
+              ? IconButton(
+                  onPressed: widget.onToggleObscure,
+                  icon: Icon(
+                    widget.obscure
+                        ? Icons.visibility_outlined
+                        : Icons.visibility_off_outlined,
+                    color: _focused ? accent : AppColors.textSecondary,
+                    size: 18,
+                  ),
+                )
+              : null,
+          filled: false,
+          border: InputBorder.none,
+          enabledBorder: InputBorder.none,
+          focusedBorder: InputBorder.none,
+          errorBorder: InputBorder.none,
+          focusedErrorBorder: InputBorder.none,
+          contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 15),
+        ),
+      ),
+    );
+  }
+}
+
 // ─── Animated ambient blobs ───────────────────────────────────────────────────
 class _AmbientBlobs extends StatelessWidget {
   final AnimationController controller;
@@ -505,23 +599,32 @@ class _BlobPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final paint = Paint()..blendMode = BlendMode.screen;
 
-    // Blob 1 — top-left amber glow
+    // Blob 1 — top-left warm amber glow
     final x1 = size.width * 0.1 + math.sin(t * math.pi * 2) * 40;
     final y1 = size.height * 0.15 + math.cos(t * math.pi * 2) * 30;
     paint.shader = RadialGradient(
-      colors: [primary.withValues(alpha: 0.25), Colors.transparent],
+      colors: [primary.withValues(alpha: 0.3), Colors.transparent],
     ).createShader(Rect.fromCircle(
-        center: Offset(x1, y1), radius: size.width * 0.45));
-    canvas.drawCircle(Offset(x1, y1), size.width * 0.45, paint);
+        center: Offset(x1, y1), radius: size.width * 0.5));
+    canvas.drawCircle(Offset(x1, y1), size.width * 0.5, paint);
 
     // Blob 2 — bottom-right indigo glow
     final x2 = size.width * 0.85 + math.cos(t * math.pi * 2 + 1) * 50;
     final y2 = size.height * 0.75 + math.sin(t * math.pi * 2 + 1) * 40;
     paint.shader = RadialGradient(
-      colors: [AppColors.studentAccent.withValues(alpha: 0.18), Colors.transparent],
+      colors: [AppColors.studentAccent.withValues(alpha: 0.2), Colors.transparent],
     ).createShader(Rect.fromCircle(
         center: Offset(x2, y2), radius: size.width * 0.55));
     canvas.drawCircle(Offset(x2, y2), size.width * 0.55, paint);
+
+    // Blob 3 — center-right soft pink accent
+    final x3 = size.width * 0.9 + math.sin(t * math.pi * 2 + 2) * 30;
+    final y3 = size.height * 0.35 + math.cos(t * math.pi * 2 + 2) * 25;
+    paint.shader = RadialGradient(
+      colors: [AppColors.parentAccent.withValues(alpha: 0.12), Colors.transparent],
+    ).createShader(Rect.fromCircle(
+        center: Offset(x3, y3), radius: size.width * 0.35));
+    canvas.drawCircle(Offset(x3, y3), size.width * 0.35, paint);
   }
 
   @override
