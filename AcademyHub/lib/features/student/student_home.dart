@@ -64,10 +64,9 @@ class _StudentHomeState extends State<StudentHome>
       _announcements  = await _db.getAnnouncements();
       _reportSubjects = await _db.getScores(0, 1, '');
     } catch (_) {}
-    finally {
-      _isLoadingData = false;
-      if (mounted) setState(() => _loading = false);
-    }
+    // Always dismiss loading — local DB reads are fast, show UI with whatever we have
+    _isLoadingData = false;
+    if (mounted) setState(() => _loading = false);
   }
 
   Future<void> _triggerRefresh() async {

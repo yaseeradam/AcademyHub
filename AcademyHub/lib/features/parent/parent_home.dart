@@ -108,35 +108,32 @@ class _ParentHomeState extends State<ParentHome> {
       _loading = true;
     }
 
-    final isFirstLoad = !_wasLoaded;
-    if (isFirstLoad) {
-      final cachedChildren = await _db.getAllStudents();
-      final cachedHomework = await _db.getAllHomework();
-      final cachedAnnouncements = await _db.getAnnouncements();
-      List<dynamic> cachedBilling = [];
-      try {
-        final cachedBillingData = await auth.apiService.dbHelper.getCache('/billing');
-        if (cachedBillingData != null) {
-          final decoded = jsonDecode(cachedBillingData);
-          cachedBilling = (decoded['data'] as List?) ?? [];
-        }
-      } catch (_) {}
-
-      if (mounted) {
-        setState(() {
-          _children = cachedChildren;
-          _homework = cachedHomework;
-          _announcements = cachedAnnouncements;
-          _billing = cachedBilling;
-          _loading = _children.isEmpty && _billing.isEmpty && _homework.isEmpty && _announcements.isEmpty;
-          
-          _cachedChildren = _children;
-          _cachedHomework = _homework;
-          _cachedAnnouncements = _announcements;
-          _cachedBilling = _billing;
-          _wasLoaded = !_loading;
-        });
+    // Always load from local DB first and show UI immediately
+    final cachedChildren = await _db.getAllStudents();
+    final cachedHomework = await _db.getAllHomework();
+    final cachedAnnouncements = await _db.getAnnouncements();
+    List<dynamic> cachedBilling = [];
+    try {
+      final cachedBillingData = await auth.apiService.dbHelper.getCache('/billing');
+      if (cachedBillingData != null) {
+        final decoded = jsonDecode(cachedBillingData);
+        cachedBilling = (decoded['data'] as List?) ?? [];
       }
+    } catch (_) {}
+
+    if (mounted) {
+      setState(() {
+        _children = cachedChildren;
+        _homework = cachedHomework;
+        _announcements = cachedAnnouncements;
+        _billing = cachedBilling;
+        _loading = false; // Always show UI immediately
+        _cachedChildren = _children;
+        _cachedHomework = _homework;
+        _cachedAnnouncements = _announcements;
+        _cachedBilling = _billing;
+        _wasLoaded = true;
+      });
     }
 
     try {
@@ -162,9 +159,7 @@ class _ParentHomeState extends State<ParentHome> {
     _cachedBilling = _billing;
     _wasLoaded = true;
 
-    if (mounted) {
-      setState(() => _loading = false);
-    }
+    if (mounted) setState(() {});
   }
 
   @override

@@ -86,8 +86,8 @@ class _TeacherHomeState extends State<TeacherHome> {
       _loading = true;
     }
 
-    final isFirstLoad = !_wasLoaded;
-    if (isFirstLoad) {
+    // Always show UI immediately from local DB cache
+    if (!_wasLoaded) {
       try {
         final cachedClassesData = await auth.apiService.dbHelper.getCache('/teacher/classes');
         if (cachedClassesData != null) {
@@ -129,17 +129,18 @@ class _TeacherHomeState extends State<TeacherHome> {
               _classes = extended;
               _totalStudents = students;
               _totalSubjects = subjectIds.length;
-              _loading = _classes.isEmpty;
-
               _cachedClasses = _classes;
               _cachedTotalStudents = _totalStudents;
               _cachedTotalSubjects = _totalSubjects;
-              _wasLoaded = !_loading;
+              _wasLoaded = true;
             });
           }
         }
       } catch (_) {}
     }
+
+    // Always dismiss loading immediately — show UI now, refresh silently below
+    if (mounted) setState(() => _loading = false);
 
     try {
       final data = await auth.apiService.getWithCache('/teacher/classes');
@@ -185,9 +186,7 @@ class _TeacherHomeState extends State<TeacherHome> {
     _wasLoaded = true;
 
     _isLoadingData = false;
-    if (mounted) {
-      setState(() => _loading = false);
-    }
+    if (mounted) setState(() {});
   }
 
   @override

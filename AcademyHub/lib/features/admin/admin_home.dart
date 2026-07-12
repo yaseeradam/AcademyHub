@@ -75,35 +75,32 @@ class _AdminHomeState extends State<AdminHome> {
       _loading = true;
     }
 
-    final isFirstLoad = !_wasLoaded;
-    if (isFirstLoad) {
-      final cachedStudents = await _db.getAllStudents();
-      final cachedHomework = await _db.getAllHomework();
-      final cachedAnnouncements = await _db.getAnnouncements();
-      List<dynamic> cachedBilling = [];
-      try {
-        final cachedBillingData = await auth.apiService.dbHelper.getCache('/billing');
-        if (cachedBillingData != null) {
-          final decoded = jsonDecode(cachedBillingData);
-          cachedBilling = (decoded['data'] as List?) ?? [];
-        }
-      } catch (_) {}
-
-      if (mounted) {
-        setState(() {
-          _students = cachedStudents;
-          _homework = cachedHomework;
-          _announcements = cachedAnnouncements;
-          _billingTransactions = cachedBilling;
-          _loading = _students.isEmpty && _billingTransactions.isEmpty && _homework.isEmpty && _announcements.isEmpty;
-          
-          _cachedStudents = _students;
-          _cachedHomework = _homework;
-          _cachedAnnouncements = _announcements;
-          _cachedBilling = _billingTransactions;
-          _wasLoaded = !_loading;
-        });
+    // Always load from local DB first and show UI immediately
+    final cachedStudents = await _db.getAllStudents();
+    final cachedHomework = await _db.getAllHomework();
+    final cachedAnnouncements = await _db.getAnnouncements();
+    List<dynamic> cachedBilling = [];
+    try {
+      final cachedBillingData = await auth.apiService.dbHelper.getCache('/billing');
+      if (cachedBillingData != null) {
+        final decoded = jsonDecode(cachedBillingData);
+        cachedBilling = (decoded['data'] as List?) ?? [];
       }
+    } catch (_) {}
+
+    if (mounted) {
+      setState(() {
+        _students = cachedStudents;
+        _homework = cachedHomework;
+        _announcements = cachedAnnouncements;
+        _billingTransactions = cachedBilling;
+        _loading = false; // Always show UI immediately — network refreshes silently
+        _cachedStudents = _students;
+        _cachedHomework = _homework;
+        _cachedAnnouncements = _announcements;
+        _cachedBilling = _billingTransactions;
+        _wasLoaded = true;
+      });
     }
 
     try {
@@ -127,9 +124,7 @@ class _AdminHomeState extends State<AdminHome> {
     _cachedBilling = _billingTransactions;
     _wasLoaded = true;
 
-    if (mounted) {
-      setState(() => _loading = false);
-    }
+    if (mounted) setState(() {});
   }
 
   @override
