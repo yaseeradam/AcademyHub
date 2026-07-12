@@ -818,44 +818,75 @@ class _ResponsiveSidebar extends StatelessWidget {
               itemBuilder: (context, i) {
                 final item = navItems[i];
                 final isSelected = selectedIndex == i;
+                final itemAccent = item.iconColor ?? accentColor;
+                final itemBg = item.iconBg ?? itemAccent.withValues(alpha: 0.12);
 
-
-                final isDark = Theme.of(context).brightness == Brightness.dark;
                 return Padding(
                   padding: const EdgeInsets.symmetric(vertical: 4.0),
                   child: InkWell(
                     onTap: () => onTabSelected(i),
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(16),
                     child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 150),
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      duration: const Duration(milliseconds: 200),
+                      padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        color: isSelected
-                            ? (isDark ? AppColors.surface2 : const Color(0xFFFEF2F2))
-                            : Colors.transparent,
-                        borderRadius: BorderRadius.circular(12),
-                        border: isSelected
-                            ? Border(left: BorderSide(color: AppColors.primary, width: 3))
+                        color: isSelected ? accentColor : Colors.transparent,
+                        borderRadius: BorderRadius.circular(16),
+                        boxShadow: isSelected
+                            ? [
+                                BoxShadow(
+                                  color: accentColor.withValues(alpha: 0.35),
+                                  blurRadius: 12,
+                                  offset: const Offset(0, 4),
+                                )
+                              ]
                             : null,
                       ),
                       child: Row(
                         children: [
-                          Icon(
-                            isSelected ? item.activeIcon : item.icon,
-                            color: isSelected ? AppColors.primary : AppColors.textSecondary,
-                            size: 20,
+                          // Icon Container
+                          Container(
+                            width: 36,
+                            height: 36,
+                            decoration: BoxDecoration(
+                              color: isSelected
+                                  ? Colors.white.withValues(alpha: 0.2)
+                                  : itemBg,
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: Icon(
+                              isSelected ? item.activeIcon : item.icon,
+                              color: isSelected ? Colors.white : itemAccent,
+                              size: 20,
+                            ),
                           ),
                           const SizedBox(width: 14),
+                          // Label
                           Expanded(
                             child: Text(
                               item.label,
                               style: GoogleFonts.inter(
                                 fontSize: 13,
-                                fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
-                                color: isSelected ? AppColors.primary : AppColors.textPrimary,
+                                fontWeight: isSelected ? FontWeight.w900 : FontWeight.bold,
+                                color: isSelected ? Colors.white : AppColors.textPrimary,
                               ),
                             ),
                           ),
+                          // Chevron Arrow if selected
+                          if (isSelected)
+                            Container(
+                              width: 20,
+                              height: 20,
+                              decoration: BoxDecoration(
+                                color: Colors.white.withValues(alpha: 0.2),
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(
+                                Icons.chevron_right_rounded,
+                                color: Colors.white,
+                                size: 14,
+                              ),
+                            ),
                         ],
                       ),
                     ),
@@ -1158,7 +1189,7 @@ class AHBottomNav extends StatelessWidget {
             children: List.generate(items.length, (i) {
               final item = items[i];
               final selected = i == selectedIndex;
-              final itemAccent = AppColors.primary;
+              final itemAccent = item.iconColor ?? accentColor;
               return Expanded(
                 child: GestureDetector(
                   onTap: () => onTap(i),
@@ -1229,7 +1260,7 @@ class GlassHeroCard extends StatelessWidget {
     super.key,
     required this.child,
     required this.gradientColors,
-    this.borderRadius = 16,
+    this.borderRadius = 20,
   });
 
   @override
@@ -1244,11 +1275,10 @@ class GlassHeroCard extends StatelessWidget {
           colors: gradientColors,
         ),
         borderRadius: BorderRadius.circular(borderRadius),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.15), width: 1),
         boxShadow: [
           BoxShadow(
-            color: gradientColors.first.withValues(alpha: 0.25),
-            blurRadius: 20,
+            color: gradientColors.first.withValues(alpha: 0.3),
+            blurRadius: 24,
             offset: const Offset(0, 8),
           ),
         ],
@@ -1280,12 +1310,11 @@ class DarkStatCard extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
           color: AppColors.surface,
-          borderRadius: BorderRadius.circular(AppColors.radiusLarge), // 16px corner radius
+          borderRadius: BorderRadius.circular(12),
           border: Border.all(color: AppColors.borderLight),
-          boxShadow: AppColors.subtleShadow,
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -1294,33 +1323,32 @@ class DarkStatCard extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Container(
-                  padding: const EdgeInsets.all(8),
+                  padding: const EdgeInsets.all(7),
                   decoration: BoxDecoration(
                     color: color.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(10),
+                    borderRadius: BorderRadius.circular(8),
                   ),
-                  child: Icon(icon, color: color, size: 20),
+                  child: Icon(icon, color: color, size: 18),
                 ),
                 if (onTap != null)
                   Icon(Icons.arrow_forward_ios_rounded,
-                      color: AppColors.textMuted, size: 12),
+                      color: AppColors.textMuted, size: 11),
               ],
             ),
             const Spacer(),
             Text(
               value,
               style: GoogleFonts.inter(
-                fontSize: 24,
+                fontSize: 22,
                 fontWeight: FontWeight.bold,
                 color: AppColors.textPrimary,
-                letterSpacing: -0.5,
               ),
             ),
             const SizedBox(height: 2),
             Text(
               label,
               style: GoogleFonts.inter(
-                fontSize: 12,
+                fontSize: 11,
                 fontWeight: FontWeight.w600,
                 color: AppColors.textSecondary,
               ),
@@ -1466,23 +1494,11 @@ class AHLoadingButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final bg = color ?? AppColors.primary;
-    final fg = foregroundColor ?? (bg == Colors.white || bg == const Color(0xFFF9FAFB) ? AppColors.textPrimary : Colors.white);
+    final fg = foregroundColor ?? (bg == Colors.amber || bg == const Color(0xFFF59E0B) || bg == const Color(0xFFFEF08A) ? Colors.black87 : Colors.white);
 
-    return Container(
+    return SizedBox(
       height: height,
       width: width ?? double.infinity,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(borderRadius),
-        boxShadow: onTap != null && !isLoading
-            ? [
-                BoxShadow(
-                  color: bg.withValues(alpha: 0.18),
-                  blurRadius: 10,
-                  offset: const Offset(0, 4),
-                )
-              ]
-            : null,
-      ),
       child: ElevatedButton(
         onPressed: isLoading ? null : onTap,
         style: ElevatedButton.styleFrom(
@@ -1689,7 +1705,8 @@ class _MobileDrawer extends StatelessWidget {
                 itemBuilder: (context, i) {
                   final item = navItems[i];
                   final isSelected = selectedIndex == i;
-
+                  final itemAccent = item.iconColor ?? accentColor;
+                  final itemBg = item.iconBg ?? itemAccent.withValues(alpha: 0.12);
 
                   return Padding(
                     padding: const EdgeInsets.symmetric(vertical: 4.0),
@@ -1698,37 +1715,60 @@ class _MobileDrawer extends StatelessWidget {
                         Navigator.of(context).pop();
                         onTabSelected(i);
                       },
-                      borderRadius: BorderRadius.circular(12),
-                      child: AnimatedContainer(
-                        duration: const Duration(milliseconds: 150),
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      borderRadius: BorderRadius.circular(16),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 10.0),
                         decoration: BoxDecoration(
-                          color: isSelected
-                              ? (isDark ? AppColors.surface2 : const Color(0xFFFEF2F2))
-                              : Colors.transparent,
-                          borderRadius: BorderRadius.circular(12),
-                          border: isSelected
-                              ? Border(left: BorderSide(color: AppColors.primary, width: 3))
+                          color: isSelected ? accentColor : Colors.transparent,
+                          borderRadius: BorderRadius.circular(16),
+                          boxShadow: isSelected
+                              ? [
+                                  BoxShadow(
+                                    color: accentColor.withValues(alpha: 0.25),
+                                    blurRadius: 12,
+                                    offset: const Offset(0, 4),
+                                  )
+                                ]
                               : null,
                         ),
                         child: Row(
                           children: [
-                            Icon(
-                              item.icon,
-                              size: 20,
-                              color: isSelected ? AppColors.primary : AppColors.textSecondary,
+                            Container(
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color: isSelected ? Colors.white.withValues(alpha: 0.2) : itemBg,
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Icon(
+                                item.icon,
+                                size: 20,
+                                color: isSelected ? Colors.white : itemAccent,
+                              ),
                             ),
                             const SizedBox(width: 12),
                             Expanded(
                               child: Text(
                                 item.label,
                                 style: GoogleFonts.inter(
-                                  fontSize: 13,
-                                  fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
-                                  color: isSelected ? AppColors.primary : AppColors.textPrimary,
+                                  fontSize: 14,
+                                  fontWeight: isSelected ? FontWeight.w900 : FontWeight.bold,
+                                  color: isSelected ? Colors.white : AppColors.textPrimary,
                                 ),
                               ),
                             ),
+                            if (isSelected)
+                              Container(
+                                padding: const EdgeInsets.all(4),
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withValues(alpha: 0.2),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: const Icon(
+                                  Icons.chevron_right_rounded,
+                                  size: 14,
+                                  color: Colors.white,
+                                ),
+                              ),
                           ],
                         ),
                       ),

@@ -152,82 +152,79 @@ class _StudentAttendanceScreenState extends State<StudentAttendanceScreen> {
 
   Widget _buildMetricsHeader(Color accent) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: AppColors.surface,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: AppColors.borderLight),
-          boxShadow: AppColors.subtleShadow,
-        ),
-        child: Row(
-          children: [
-            Container(
-              width: 76,
-              height: 76,
-              padding: const EdgeInsets.all(4),
-              child: Stack(
-                alignment: Alignment.center,
-                children: [
-                  SizedBox(
-                    width: 76,
-                    height: 76,
-                    child: CircularProgressIndicator(
-                      value: _attendanceRate / 100.0,
-                      backgroundColor: AppColors.surface2,
-                      color: _attendanceRate >= 85 ? AppColors.success : AppColors.error,
-                      strokeWidth: 8,
+      padding: const EdgeInsets.all(16),
+      color: AppColors.surface,
+      child: Column(
+        children: [
+          // Circular attendance rate ring & mini stats
+          Row(
+            children: [
+              Container(
+                width: 76,
+                height: 76,
+                padding: const EdgeInsets.all(4),
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    SizedBox(
+                      width: 76,
+                      height: 76,
+                      child: CircularProgressIndicator(
+                        value: _attendanceRate / 100.0,
+                        backgroundColor: AppColors.surface2,
+                        color: _attendanceRate >= 85 ? AppColors.success : AppColors.error,
+                        strokeWidth: 8,
+                      ),
                     ),
-                  ),
-                  Text(
-                    '${_attendanceRate.toStringAsFixed(0)}%',
-                    style: GoogleFonts.inter(
-                      fontSize: 14,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.textPrimary,
+                    Text(
+                      '${_attendanceRate.toStringAsFixed(0)}%',
+                      style: GoogleFonts.inter(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.textPrimary,
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-            const SizedBox(width: 20),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Attendance Summary',
-                    style: GoogleFonts.inter(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 13,
-                      color: AppColors.textPrimary,
+              const SizedBox(width: 20),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Attendance Summary',
+                      style: GoogleFonts.inter(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 13,
+                        color: AppColors.textPrimary,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    'Overall status: ${_attendanceRate >= 85 ? "Good Standings" : "At Risk of Lockout"}',
-                    style: GoogleFonts.inter(
-                      fontSize: 11,
-                      color: _attendanceRate >= 85 ? AppColors.success : AppColors.error,
-                      fontWeight: FontWeight.w600,
+                    const SizedBox(height: 2),
+                    Text(
+                      'Overall status: ${_attendanceRate >= 85 ? "Good Standings" : "At Risk of Lockout"}',
+                      style: GoogleFonts.inter(
+                        fontSize: 11,
+                        color: _attendanceRate >= 85 ? AppColors.success : AppColors.error,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 8),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      _miniStat('Total Days', '$_totalDays'),
-                      _miniStat('Present', '$_presentCount'),
-                      _miniStat('Late', '$_lateCount'),
-                      _miniStat('Absent', '$_absentCount'),
-                    ],
-                  ),
-                ],
+                    const SizedBox(height: 8),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        _miniStat('Total Days', '$_totalDays'),
+                        _miniStat('Present', '$_presentCount'),
+                        _miniStat('Late', '$_lateCount'),
+                        _miniStat('Absent', '$_absentCount'),
+                      ],
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ],
-        ),
+            ],
+          ),
+        ],
       ),
     );
   }

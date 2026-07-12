@@ -493,9 +493,9 @@ class _AdminHomeState extends State<AdminHome> {
         // Hero card
         if (isBursar)
           GlassHeroCard(
-            gradientColors: const [
-              AppColors.primary,
-              Color(0xFFFF5247),
+            gradientColors: [
+              AppColors.success.withValues(alpha: 0.85),
+              const Color(0xFF0F766E),
             ],
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -543,9 +543,9 @@ class _AdminHomeState extends State<AdminHome> {
           )
         else
           GlassHeroCard(
-            gradientColors: const [
-              AppColors.primary,
-              Color(0xFFFF5247),
+            gradientColors: [
+              AppColors.adminAccent.withValues(alpha: 0.9),
+              const Color(0xFF92400E),
             ],
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,

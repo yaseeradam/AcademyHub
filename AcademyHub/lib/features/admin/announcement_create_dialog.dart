@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../core/auth_provider.dart';
-import '../../core/constants.dart';
 
 class AnnouncementCreateDialog extends StatefulWidget {
   const AnnouncementCreateDialog({super.key});
@@ -48,7 +47,7 @@ class _AnnouncementCreateDialogState extends State<AnnouncementCreateDialog> {
               ? 'Announcement published successfully!' 
               : 'Offline: Announcement queued for sync.'
             ),
-            backgroundColor: online ? const Color(0xFF10B981) : AppColors.warning,
+            backgroundColor: online ? const Color(0xFF10B981) : const Color(0xFFF59E0B),
           ),
         );
         Navigator.of(context).pop(true);

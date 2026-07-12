@@ -5,23 +5,23 @@ class AppColors {
   static bool isDark = false; // default is light theme
 
   // ── Theme colors ──────────────────────────────────────────────────────
-  static const Color primary    = Color(0xFFFF2D20); // Laravel Red
-  static const Color primaryDark = Color(0xFFE0241B);
+  static const Color primary    = Color(0xFFF59E0B); // Amber (tenant-overridable)
+  static const Color primaryDark = Color(0xFFD97706);
 
   // Backgrounds
-  static Color get background  => isDark ? const Color(0xFF0F172A) : const Color(0xFFF3F4F6); // Laravel body background (#0F172A vs #F3F4F6)
-  static Color get surface     => isDark ? const Color(0xFF18212F) : const Color(0xFFFFFFFF); // dark card vs pure white card
-  static Color get surface2    => isDark ? const Color(0xFF243042) : const Color(0xFFF1F5F9); // elevated card vs slate-100
-  static Color get surface3    => isDark ? const Color(0xFF2E3E54) : const Color(0xFFE2E8F0); // hover/pressed vs slate-200
+  static Color get background  => isDark ? const Color(0xFF0D1117) : const Color(0xFFF5F6FA); // Laravel body background #f5f6fa
+  static Color get surface     => isDark ? const Color(0xFF161B22) : const Color(0xFFFFFFFF); // dark card vs pure white card
+  static Color get surface2    => isDark ? const Color(0xFF21262D) : const Color(0xFFF1F5F9); // elevated card vs slate-100
+  static Color get surface3    => isDark ? const Color(0xFF30363D) : const Color(0xFFE2E8F0); // hover/pressed vs slate-200
 
   // Text
-  static Color get textPrimary   => isDark ? const Color(0xFFF8FAFC) : const Color(0xFF111827); // slate-50 vs slate-900
-  static Color get textSecondary => isDark ? const Color(0xFF94A3B8) : const Color(0xFF4B5563); // gray vs slate-600 (Accents/Typography)
-  static Color get textMuted     => isDark ? const Color(0xFF64748B) : const Color(0xFF9CA3AF); // slate-500 vs zinc-400
+  static Color get textPrimary   => isDark ? const Color(0xFFF0F6FC) : const Color(0xFF0F172A); // off-white vs slate-900
+  static Color get textSecondary => isDark ? const Color(0xFF8B949E) : const Color(0xFF475569); // grey vs slate-600
+  static Color get textMuted     => isDark ? const Color(0xFF484F58) : const Color(0xFF94A3B8); // dark-grey vs slate-400
 
   // Borders
-  static Color get borderLight      => isDark ? const Color(0xFF2D3748) : const Color(0xFFE5E7EB); // zinc-800 vs zinc-200
-  static Color get borderExtraLight => isDark ? const Color(0xFF1E293B) : const Color(0xFFF3F4F6);
+  static Color get borderLight      => isDark ? const Color(0xFF30363D) : const Color(0xFFE2E8F0); // dark border vs slate-200
+  static Color get borderExtraLight => isDark ? const Color(0xFF21262D) : const Color(0xFFF1F5F9);
 
   // Semantic
   static const Color success = Color(0xFF3FB950); // green

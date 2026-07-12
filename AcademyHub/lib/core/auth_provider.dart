@@ -280,7 +280,7 @@ class AuthProvider extends ChangeNotifier {
       await prefs.setString('tenant_slug', _tenantSlug!);
       await prefs.setString('tenant_name', _tenantName ?? '');
       await prefs.setString('tenant_logo_url', _tenantLogoUrl ?? '');
-      await prefs.setString('tenant_primary_color', _tenantPrimaryColorHex ?? '#FF2D20');
+      await prefs.setString('tenant_primary_color', _tenantPrimaryColorHex ?? '#F59E0B');
       await prefs.setString('tenant_api_url', _dio.options.baseUrl);
 
       _dio.options.headers['X-Tenant-Slug'] = _tenantSlug;
