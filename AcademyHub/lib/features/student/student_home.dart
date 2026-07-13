@@ -255,9 +255,9 @@ class _StudentHomeState extends State<StudentHome>
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
                 colors: [
-                  Color(0xFF166534), 
-                  Color(0xFF15803D), 
-                  Color(0xFF16A34A), 
+                  Color(0xFF7F1D1D), // deep red
+                  Color(0xFFBF1919), // rich red
+                  Color(0xFFFF2D20), // Laravel Red
                 ],
               ),
             ),
@@ -313,7 +313,7 @@ class _StudentHomeState extends State<StudentHome>
                                         height: 6,
                                         decoration: const BoxDecoration(
                                           shape: BoxShape.circle,
-                                          color: Color(0xFF34D399), 
+                                          color: Color(0xFFFFB3AE),
                                         ),
                                       ),
                                       const SizedBox(width: 6),
@@ -359,7 +359,7 @@ class _StudentHomeState extends State<StudentHome>
                               style: GoogleFonts.inter(
                                 fontSize: 13,
                                 fontWeight: FontWeight.w500,
-                                color: const Color(0xFF6EE7B7), 
+                                color: const Color(0xFFFFB3AE),
                               ),
                             ),
                             const SizedBox(height: 16),

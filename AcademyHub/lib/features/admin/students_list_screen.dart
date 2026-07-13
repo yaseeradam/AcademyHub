@@ -26,26 +26,27 @@ class _StudentsListScreenState extends State<StudentsListScreen> {
   }
 
   Future<void> _loadStudents() async {
-    if (mounted) setState(() => _loading = true);
+    // Load from local DB first — instant, shows UI immediately
     try {
-      final auth = context.read<AuthProvider>();
-      List<Map<String, dynamic>> list = [];
-      try {
-        final r = await auth.apiService.getWithCache('/students');
-        list = ((r['data'] as List?) ?? []).cast<Map<String, dynamic>>();
-        await _db.upsertStudents(list);
-      } catch (_) {
-        list = await _db.getAllStudents();
-      }
+      final localList = await _db.getAllStudents();
       if (mounted) {
         setState(() {
-          _students = list;
+          _students = localList;
           _loading = false;
         });
       }
     } catch (_) {
       if (mounted) setState(() => _loading = false);
     }
+
+    // Silently refresh from network
+    try {
+      final auth = context.read<AuthProvider>();
+      final r = await auth.apiService.getWithCache('/students');
+      final list = ((r['data'] as List?) ?? []).cast<Map<String, dynamic>>();
+      await _db.upsertStudents(list);
+      if (mounted) setState(() => _students = list);
+    } catch (_) {}
   }
 
   @override
