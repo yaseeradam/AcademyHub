@@ -26,22 +26,15 @@ class _AdminBackupsScreenState extends State<AdminBackupsScreen> {
 
   Future<void> _loadBackups() async {
     final auth = context.read<AuthProvider>();
-    setState(() => _loading = true);
-
+    if (mounted) setState(() => _loading = false);
     try {
       final data = await auth.apiService.getWithCache('/admin/backups');
       if (mounted) {
         setState(() {
-          _backups = data as List;
-          _loading = false;
+          _backups = data is List ? data : [];
         });
       }
-    } catch (e) {
-      if (mounted) {
-        setState(() => _loading = false);
-        CustomToast.show(context: context, message: 'Failed to retrieve database backups: $e', type: 'error');
-      }
-    }
+    } catch (_) {}
   }
 
   Future<void> _triggerBackup() async {

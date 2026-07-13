@@ -25,24 +25,19 @@ class _AdminSessionsScreenState extends State<AdminSessionsScreen> {
 
   Future<void> _loadData() async {
     final auth = context.read<AuthProvider>();
-    setState(() => _loading = true);
-
+    // Show UI immediately — data arrives from network silently
     try {
       final sessionsData = await auth.apiService.getWithCache('/admin/sessions');
       final termsData = await auth.apiService.getWithCache('/admin/terms');
-
       if (mounted) {
         setState(() {
-          _sessions = sessionsData as List;
-          _terms = termsData as List;
+          _sessions = sessionsData is List ? sessionsData : [];
+          _terms = termsData is List ? termsData : [];
           _loading = false;
         });
       }
-    } catch (e) {
-      if (mounted) {
-        setState(() => _loading = false);
-        CustomToast.show(context: context, message: 'Error loading configurations: $e', type: 'error');
-      }
+    } catch (_) {
+      if (mounted) setState(() => _loading = false);
     }
   }
 
@@ -164,14 +159,12 @@ class _AdminSessionsScreenState extends State<AdminSessionsScreen> {
             ],
           ),
         ),
-        body: _loading
-            ? const Center(child: CircularProgressIndicator())
-            : TabBarView(
-                children: [
-                  _buildSessionsTab(primary),
-                  _buildTermsTab(primary),
-                ],
-              ),
+        body: TabBarView(
+            children: [
+              _buildSessionsTab(primary),
+              _buildTermsTab(primary),
+            ],
+          ),
       ),
     );
   }

@@ -24,22 +24,16 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
 
   Future<void> _loadUsers() async {
     final auth = context.read<AuthProvider>();
-    setState(() => _loading = true);
-
+    // Show UI immediately, fetch from network
+    if (mounted) setState(() => _loading = false);
     try {
       final data = await auth.apiService.getWithCache('/admin/users');
       if (mounted) {
         setState(() {
-          _users = data as List;
-          _loading = false;
+          _users = data is List ? data : [];
         });
       }
-    } catch (e) {
-      if (mounted) {
-        setState(() => _loading = false);
-        CustomToast.show(context: context, message: 'Failed to load user accounts: $e', type: 'error');
-      }
-    }
+    } catch (_) {}
   }
 
   Future<void> _deleteUser(int id) async {
