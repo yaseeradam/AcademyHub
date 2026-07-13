@@ -77,16 +77,18 @@
                         </button>
                     @endif
 
-                    @if (in_array($status, ['live', 'ended'], true) && !$exam->results_released_at)
-                        <button wire:click="releaseResults"
-                            wire:confirm="Release results to students? They will be able to see their scores if 'Show Score' is enabled."
-                            class="rounded-lg bg-amber-500 px-4 py-2 text-sm font-semibold text-white hover:bg-amber-600">
-                            📊 Release Results
-                        </button>
-                    @elseif($exam->results_released_at)
-                        <span class="rounded-lg bg-white/20 px-4 py-2 text-sm font-semibold text-emerald-300 backdrop-blur-sm">
-                            ✓ Results Released
-                        </span>
+                    @if ($exam->exam_type !== 'aptitude')
+                        @if (in_array($status, ['live', 'ended'], true) && !$exam->results_released_at)
+                            <button wire:click="releaseResults"
+                                wire:confirm="Release results to students? They will be able to see their scores if 'Show Score' is enabled."
+                                class="rounded-lg bg-amber-500 px-4 py-2 text-sm font-semibold text-white hover:bg-amber-600">
+                                📊 Release Results
+                            </button>
+                        @elseif($exam->results_released_at)
+                            <span class="rounded-lg bg-white/20 px-4 py-2 text-sm font-semibold text-emerald-300 backdrop-blur-sm">
+                                ✓ Results Released
+                            </span>
+                        @endif
                     @endif
                 </div>
             </div>
@@ -718,7 +720,7 @@ ANS: C</pre>
                 <p class="text-xs text-gray-500">Overview of student performances in Objective (OBJ) and Theory sections.</p>
             </div>
             <div class="flex gap-2">
-                @if ($me?->role === 'admin')
+                @if ($me?->role === 'admin' && $exam->exam_type !== 'aptitude')
                     <button wire:click="transferToResults" onclick="return confirm('Transfer CBT scores to academic results?')" class="inline-flex items-center gap-1.5 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-2 text-xs font-bold text-emerald-700 transition hover:bg-emerald-100">
                         Transfer to Results
                     </button>
@@ -865,10 +867,12 @@ ANS: C</pre>
                             <span class="text-xs font-normal opacity-70">Students see their score after results are released</span>
                         </div>
                     </button>
-                    <button wire:click="transferToResults" onclick="return confirm('Transfer CBT scores to academic results?')" class="flex w-full items-center gap-3 rounded-lg border border-emerald-200 bg-emerald-50 p-4 text-left text-sm font-semibold text-emerald-700 transition hover:border-emerald-300 hover:bg-emerald-100">
-                        <span class="text-xl">✅</span>
-                        <span>Transfer to Results</span>
-                    </button>
+                    @if ($exam->exam_type !== 'aptitude')
+                        <button wire:click="transferToResults" onclick="return confirm('Transfer CBT scores to academic results?')" class="flex w-full items-center gap-3 rounded-lg border border-emerald-200 bg-emerald-50 p-4 text-left text-sm font-semibold text-emerald-700 transition hover:border-emerald-300 hover:bg-emerald-100">
+                            <span class="text-xl">✅</span>
+                            <span>Transfer to Results</span>
+                        </button>
+                    @endif
                     @if ($status === 'live')
                         <button wire:click="endAllExams" onclick="return confirm('End this exam?')" class="flex w-full items-center gap-3 rounded-lg border border-orange-200 bg-orange-50 p-4 text-left text-sm font-semibold text-orange-700 transition hover:border-orange-300 hover:bg-orange-100">
                             <span class="text-xl">⏹️</span>
