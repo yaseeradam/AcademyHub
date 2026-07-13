@@ -441,13 +441,13 @@ class _TeacherHomeState extends State<TeacherHome> {
           child: Container(
             width: double.infinity,
             decoration: const BoxDecoration(
-              color: Color(0xFF1A2E4A), // Deep navy
-              gradient: RadialGradient(
-                center: Alignment.topLeft,
-                radius: 1.2,
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
                 colors: [
-                  Color(0xFF1E3A5F), // lighter navy
-                  Color(0xFF1A2E4A), // deep navy
+                  Color(0xFF7F1D1D), // deep red
+                  Color(0xFFBF1919), // rich red
+                  Color(0xFFFF2D20), // Laravel Red
                 ],
               ),
             ),
@@ -488,14 +488,14 @@ class _TeacherHomeState extends State<TeacherHome> {
                                   height: 6,
                                   decoration: const BoxDecoration(
                                     shape: BoxShape.circle,
-                                    color: Color(0xFF34D399), // emerald-400
+                                    color: Color(0xFFFFB3AE), // light red
                                   ),
                                 ),
                                 const SizedBox(width: 6),
                                 Text(
                                   'TEACHER PORTAL',
                                   style: GoogleFonts.inter(
-                                    color: const Color(0xFF93C5FD), // light blue
+                                    color: Colors.white,
                                     fontSize: 9,
                                     fontWeight: FontWeight.bold,
                                     letterSpacing: 1.0,
@@ -534,7 +534,7 @@ class _TeacherHomeState extends State<TeacherHome> {
                         style: GoogleFonts.inter(
                           fontSize: 13,
                           fontWeight: FontWeight.w500,
-                          color: const Color(0xFF93C5FD),
+                          color: const Color(0xFFFFB3AE), // light red
                         ),
                       ),
                       const SizedBox(height: 16),

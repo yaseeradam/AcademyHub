@@ -141,7 +141,7 @@ class _DarkAppBar extends StatelessWidget {
                   icon: Icons.notifications_outlined,
                   onTap: () => context.push('/notifications'),
                 ),
-                if (user?.role != 'student') ...[
+                if (user?.role != 'student' && user?.role != 'admin' && user?.role != 'bursar') ...[
                   const SizedBox(width: 8),
                   // Direct Chat Messaging
                   _IconBtn(
