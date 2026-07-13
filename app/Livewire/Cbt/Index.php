@@ -177,6 +177,7 @@ class Index extends Component
                 'access_code' => $code,
                 'created_by' => $user->id,
                 'assigned_teacher_id' => $user->id,
+                'show_score' => true,
             ]);
         });
 

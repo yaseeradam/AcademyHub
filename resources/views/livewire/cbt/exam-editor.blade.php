@@ -858,15 +858,6 @@ ANS: C</pre>
                     <span>Export CSV</span>
                 </a>
                 @if (in_array($status, ['live', 'ended'], true))
-                    {{-- Show Score toggle — always accessible even after exam has started --}}
-                    <button wire:click="toggleShowScore" class="flex w-full items-center gap-3 rounded-lg border p-4 text-left text-sm font-semibold transition
-                        {{ $exam->show_score ? 'border-indigo-300 bg-indigo-50 text-indigo-700 hover:bg-indigo-100' : 'border-gray-200 bg-gray-50 text-gray-600 hover:bg-gray-100' }}">
-                        <span class="text-xl">{{ $exam->show_score ? '👁️' : '🙈' }}</span>
-                        <div class="flex flex-col">
-                            <span>Show Score to Students: <strong>{{ $exam->show_score ? 'ON' : 'OFF' }}</strong></span>
-                            <span class="text-xs font-normal opacity-70">Students see their score after results are released</span>
-                        </div>
-                    </button>
                     @if ($exam->exam_type !== 'aptitude')
                         <button wire:click="transferToResults" onclick="return confirm('Transfer CBT scores to academic results?')" class="flex w-full items-center gap-3 rounded-lg border border-emerald-200 bg-emerald-50 p-4 text-left text-sm font-semibold text-emerald-700 transition hover:border-emerald-300 hover:bg-emerald-100">
                             <span class="text-xl">✅</span>

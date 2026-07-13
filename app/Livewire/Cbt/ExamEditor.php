@@ -70,7 +70,7 @@ class ExamEditor extends Component
     public string $pin = '';
     public int $graceMinutes = 0;
     public string $allowedCidrs = '';
-    public bool $showScore = false;
+    public bool $showScore = true;
     public ?int $reviewAttemptId = null;
     /** @var array<int, int|string|null> */
     public array $theoryMarks = [];
@@ -131,7 +131,7 @@ class ExamEditor extends Component
         $this->pin = (string) ($exam->pin ?? '');
         $this->graceMinutes = (int) ($exam->grace_minutes ?? 0);
         $this->allowedCidrs = (string) ($exam->allowed_cidrs ?? '');
-        $this->showScore = (bool) ($exam->show_score ?? false);
+        $this->showScore = (bool) ($exam->show_score ?? true);
         $this->shuffleQuestions = (bool) ($exam->shuffle_questions ?? false);
     }
 
