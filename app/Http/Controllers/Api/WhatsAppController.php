@@ -41,7 +41,7 @@ class WhatsAppController extends Controller
             } else {
                 $suffix   = substr($student->admission_number, -4);
                 $expected = strtolower($student->first_name) . $suffix;
-                $valid    = $password === $expected;
+                $valid    = hash_equals($expected, $password);
             }
 
             if (! $valid) {

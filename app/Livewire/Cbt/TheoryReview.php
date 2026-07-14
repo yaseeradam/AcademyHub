@@ -190,7 +190,7 @@ class TheoryReview extends Component
             return;
         }
 
-        $rawKeys = config('services.groq.key') ?: env('GROQ_API_KEY') ?: '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';
+        $rawKeys = config('services.groq.key');
         $keys = array_filter(array_map('trim', explode(',', $rawKeys)));
 
         if (empty($keys)) {

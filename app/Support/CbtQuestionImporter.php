@@ -196,7 +196,7 @@ PROMPT;
 
     private static function callGroq(string $prompt): ?string
     {
-        $rawKeys = env('GROQ_API_KEY') ?: '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';
+        $rawKeys = config('services.groq.key');
         $keys = array_filter(array_map('trim', explode(',', $rawKeys)));
 
         if (empty($keys)) {

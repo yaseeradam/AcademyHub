@@ -705,6 +705,13 @@ class MobileFeatureParityController extends Controller
     public function downloadBackup(Request $request, $filename)
     {
         $this->authorizeAdmin($request);
+
+        // Prevent path traversal — only allow bare filenames
+        $filename = basename($filename);
+        if (empty($filename) || $filename === '.' || $filename === '..') {
+            abort(400, 'Invalid filename.');
+        }
+
         $path = storage_path('app/backups/' . $filename);
         if (!file_exists($path)) {
             abort(404);

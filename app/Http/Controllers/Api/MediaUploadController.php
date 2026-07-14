@@ -19,7 +19,7 @@ class MediaUploadController extends Controller
         }
 
         $request->validate([
-            'file' => 'required|file|max:20480', // limit to 20MB
+            'file' => 'required|file|max:20480|mimes:jpg,jpeg,png,gif,webp,bmp,svg,pdf,doc,docx,xls,xlsx,ppt,pptx,txt,csv,mp4,mp3,zip', // 20MB limit, restricted file types
             'type' => 'required|string|in:note,assignment,profile_photo',
         ]);
 

@@ -133,15 +133,28 @@ class UtilityController extends Controller
 
     public function logClientError(Request $request)
     {
+        if (!auth()->check()) {
+            return response()->json(['message' => 'Unauthorized'], 401);
+        }
+
+        $request->validate([
+            'message'    => 'required|string|max:500',
+            'source'     => 'nullable|string|max:255',
+            'line'       => 'nullable|integer',
+            'col'        => 'nullable|integer',
+            'stack'      => 'nullable|string|max:2000',
+            'url'        => 'nullable|string|max:500',
+        ]);
+
         \Illuminate\Support\Facades\Log::error('CLIENT JS ERROR DETECTED', [
-            'message' => $request->input('message'),
-            'source' => $request->input('source'),
-            'line' => $request->input('line'),
-            'col' => $request->input('col'),
-            'stack' => $request->input('stack'),
-            'url' => $request->input('url'),
-            'user_agent' => $request->header('User-Agent'),
-            'user' => auth()->check() ? auth()->user()->email : 'guest',
+            'message'    => $request->input('message'),
+            'source'     => $request->input('source'),
+            'line'       => $request->input('line'),
+            'col'        => $request->input('col'),
+            'stack'      => $request->input('stack'),
+            'url'        => $request->input('url'),
+            'user_agent' => substr((string)$request->header('User-Agent'), 0, 255),
+            'user'       => auth()->user()->email,
         ]);
 
         return response()->json(['success' => true]);

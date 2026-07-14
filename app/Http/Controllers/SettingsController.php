@@ -407,7 +407,7 @@ class SettingsController extends Controller
             
         } catch (\Exception $e) {
             \Log::error('Template settings update error: ' . $e->getMessage(), [
-                'request_data' => $request->all(),
+                'request_keys' => array_keys($request->all()),
                 'trace' => $e->getTraceAsString()
             ]);
             

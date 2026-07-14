@@ -2,7 +2,7 @@
 <html lang="en">
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-        <title>Report Card - {{ $student->admission_number }}</title>
+        <title>Report Sheet - {{ $student->admission_number }}</title>
         <style>
             @page { margin: {{ count($rows) > 12 ? '5mm' : '15mm' }}; }
             * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -389,7 +389,7 @@
                                     Phone: {{ config('academyhub.school_phone') }}
                                 </div>
                             @endif
-                            <div class="report-badge">Report Card</div>
+                            <div class="report-badge">Report Sheet</div>
                         </div>
                         @if($logoExists)
                             <div class="header-cell logo-cell">
