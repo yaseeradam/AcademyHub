@@ -7,6 +7,11 @@ import 'package:academyhub_app/core/storage/secure_storage.dart';
 import 'package:academyhub_app/core/network/sync_processor.dart';
 import 'package:academyhub_app/features/results/presentation/results_chart.dart';
 import 'package:academyhub_app/features/timetable/presentation/timetable_view.dart';
+import 'package:academyhub_app/features/attendance/presentation/attendance_screen.dart';
+import 'package:academyhub_app/features/scores/presentation/scores_entry_screen.dart';
+import 'package:academyhub_app/features/homework/presentation/homework_view.dart';
+import 'package:academyhub_app/features/parent/presentation/children_view.dart';
+import 'package:academyhub_app/features/messaging/presentation/chat_view.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -27,6 +32,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
     {'subject': 'English Language', 'subject_code': 'ENG', 'ca1': 14, 'ca2': 15, 'exam': 48, 'total': 77, 'grade': 'B'},
     {'subject': 'Basic Science', 'subject_code': 'SCI', 'ca1': 17, 'ca2': 16, 'exam': 50, 'total': 83, 'grade': 'A'},
     {'subject': 'History', 'subject_code': 'HIS', 'ca1': 12, 'ca2': 14, 'exam': 42, 'total': 68, 'grade': 'C'},
+  ];
+
+  final List<Map<String, dynamic>> _teacherClasses = [
+    {'id': 1, 'name': 'Grade 10A', 'subject': 'Mathematics', 'subject_id': 101},
+    {'id': 2, 'name': 'Grade 10B', 'subject': 'Mathematics', 'subject_id': 101},
+    {'id': 3, 'name': 'Grade 11A', 'subject': 'Further Mathematics', 'subject_id': 102},
   ];
 
   @override
@@ -442,12 +453,204 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
+  Widget _buildTeacherAttendanceView() {
+    return ListView.builder(
+      padding: const EdgeInsets.all(16),
+      itemCount: _teacherClasses.length,
+      itemBuilder: (context, idx) {
+        final cls = _teacherClasses[idx];
+        return Card(
+          child: ListTile(
+            leading: CircleAvatar(
+              backgroundColor: AppColors.primaryBlue.withOpacity(0.12),
+              child: const Icon(Icons.class_, color: AppColors.primaryBlue),
+            ),
+            title: Text(
+              cls['name'],
+              style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+            ),
+            subtitle: Text(
+              'Subject: ${cls['subject']}',
+              style: const TextStyle(color: AppColors.textSecondary, fontSize: 13),
+            ),
+            trailing: const Icon(Icons.arrow_forward_ios, size: 14),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => AttendanceScreen(
+                    classId: cls['id'],
+                    className: cls['name'],
+                  ),
+                ),
+              );
+            },
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildTeacherScoresView() {
+    return ListView.builder(
+      padding: const EdgeInsets.all(16),
+      itemCount: _teacherClasses.length,
+      itemBuilder: (context, idx) {
+        final cls = _teacherClasses[idx];
+        return Card(
+          child: ListTile(
+            leading: CircleAvatar(
+              backgroundColor: AppColors.accentAmber.withOpacity(0.12),
+              child: const Icon(Icons.edit_note, color: AppColors.accentAmber),
+            ),
+            title: Text(
+              cls['name'],
+              style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+            ),
+            subtitle: Text(
+              'Subject: ${cls['subject']}',
+              style: const TextStyle(color: AppColors.textSecondary, fontSize: 13),
+            ),
+            trailing: const Icon(Icons.arrow_forward_ios, size: 14),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => ScoresEntryScreen(
+                    classId: cls['id'],
+                    className: cls['name'],
+                    subjectId: cls['subject_id'],
+                    subjectName: cls['subject'],
+                  ),
+                ),
+              );
+            },
+          ),
+        );
+      },
+    );
+  }
+
+  void _showChildResultsModal(String childName) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (context) {
+        return DraggableScrollableSheet(
+          initialChildSize: 0.8,
+          maxChildSize: 0.95,
+          minChildSize: 0.5,
+          expand: false,
+          builder: (context, scrollController) {
+            return SingleChildScrollView(
+              controller: scrollController,
+              padding: const EdgeInsets.all(20.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Center(
+                    child: Container(
+                      width: 40,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: AppColors.divider,
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    "Academic Results: $childName",
+                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 16),
+                  ResultsChart(subjectResults: _sampleResults),
+                  const SizedBox(height: 24),
+                  const Text(
+                    'Subject Scores',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+                  ),
+                  const SizedBox(height: 12),
+                  ListView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: _sampleResults.length,
+                    itemBuilder: (context, idx) {
+                      final res = _sampleResults[idx];
+                      final total = res['total'] as int;
+                      Color gradeColor;
+                      if (total >= 80) gradeColor = AppColors.successGreen;
+                      else if (total >= 70) gradeColor = AppColors.softBlue;
+                      else if (total >= 50) gradeColor = AppColors.accentAmber;
+                      else gradeColor = AppColors.dangerRed;
+
+                      return Card(
+                        child: Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    res['subject'],
+                                    style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+                                  ),
+                                  Text(
+                                    res['grade'],
+                                    style: TextStyle(fontWeight: FontWeight.bold, color: gradeColor),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 8),
+                              LinearProgressIndicator(
+                                value: total / 100.0,
+                                backgroundColor: AppColors.divider,
+                                color: gradeColor,
+                                minHeight: 4,
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Widget _buildParentChildrenView() {
+    return ChildrenView(
+      onViewResults: () => _showChildResultsModal('David Hassan'),
+      onMessageTeacher: () {
+        setState(() {
+          _currentIndex = 2; // Jump to Chat tab
+        });
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final navItems = _getNavItems();
     final isMeTab = _currentIndex == navItems.length - 1;
     final isHomeTab = _currentIndex == 0;
-    final isResultsTab = _currentIndex == 1 && (_userRole == 'student' || _userRole == 'parent');
+    final isResultsTab = _currentIndex == 1 && _userRole == 'student';
+    final isTeacherAttendanceTab = _currentIndex == 1 && _userRole == 'teacher';
+    final isTeacherScoresTab = _currentIndex == 2 && _userRole == 'teacher';
+    final isHomeworkTab = _currentIndex == 2 && _userRole == 'student';
+    final isChildrenTab = _currentIndex == 1 && _userRole == 'parent';
+    final isChatTab = _currentIndex == 2 && _userRole == 'parent';
 
     return Scaffold(
       appBar: AppBar(
@@ -491,12 +694,22 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     ? _buildMeView()
                     : isResultsTab
                         ? _buildResultsView()
-                        : Center(
-                            child: Text(
-                              '${navItems[_currentIndex].label} module is ready.',
-                              style: const TextStyle(fontSize: 16, color: AppColors.textSecondary),
-                            ),
-                          ),
+                        : isTeacherAttendanceTab
+                            ? _buildTeacherAttendanceView()
+                            : isTeacherScoresTab
+                                ? _buildTeacherScoresView()
+                                : isHomeworkTab
+                                    ? HomeworkView()
+                                    : isChildrenTab
+                                        ? _buildParentChildrenView()
+                                        : isChatTab
+                                            ? const ChatView()
+                                            : Center(
+                                                child: Text(
+                                                  '${navItems[_currentIndex].label} module is ready.',
+                                                  style: const TextStyle(fontSize: 16, color: AppColors.textSecondary),
+                                                ),
+                                              ),
           ),
         ],
       ),
