@@ -45,31 +45,22 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
     });
 
     try {
+      List<Map<String, dynamic>> studentsList = [];
       // Offline-first: check cached students
       final cached = await LocalDatabase.instance.getStudents();
       final classCached = cached.where((s) => s['class_id'] == widget.classId).toList();
 
       if (classCached.isNotEmpty) {
-        setState(() {
-          _students = classCached;
-          for (var s in _students) {
-            _attendanceMap[s['id']] = 'present'; // Default
-          }
-        });
+        studentsList = classCached;
       } else if (_isOnline) {
         // Fetch from API
         final response = await apiClient.dio.get('/teacher/classes/${widget.classId}/students');
         if (response.statusCode == 200 && response.data != null) {
-          final list = List<Map<String, dynamic>>.from(response.data);
-          setState(() {
-            _students = list;
-            for (var s in _students) {
-              _attendanceMap[s['id']] = 'present';
-            }
-          });
+          final rawList = response.data['data'] ?? response.data;
+          studentsList = List<Map<String, dynamic>>.from(rawList);
 
           // Cache locally
-          for (var s in list) {
+          for (var s in studentsList) {
             await LocalDatabase.instance.insertStudent({
               'id': s['id'],
               'first_name': s['first_name'] ?? '',
@@ -82,8 +73,43 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
           }
         }
       }
+
+      // Initialize default
+      final Map<int, String> initialAttendance = {};
+      for (var s in studentsList) {
+        initialAttendance[s['id']] = 'present';
+      }
+
+      // If online, fetch existing attendance sheet for pre-population
+      if (_isOnline) {
+        final todayStr = DateTime.now().toIso8601String().substring(0, 10);
+        final response = await apiClient.dio.get(
+          '/teacher/classes/${widget.classId}/attendance',
+          queryParameters: {
+            'date': todayStr,
+            'term': 2,
+            'session': '2024/2025',
+          },
+        );
+        if (response.statusCode == 200 && response.data != null && response.data['data'] != null) {
+          final sheet = response.data['data'] ?? {};
+          final marks = List<dynamic>.from(sheet['marks'] ?? []);
+          for (var m in marks) {
+            final studentId = m['student_id'] as int?;
+            final status = m['status']?.toString().toLowerCase();
+            if (studentId != null && status != null) {
+              initialAttendance[studentId] = status;
+            }
+          }
+        }
+      }
+
+      setState(() {
+        _students = studentsList;
+        _attendanceMap.addAll(initialAttendance);
+      });
     } catch (e) {
-      // Fallback
+      debugPrint('Error loading attendance students: $e');
     } finally {
       setState(() {
         _isLoading = false;
@@ -104,10 +130,23 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
       _isLoading = true;
     });
 
+    final List<Map<String, dynamic>> marksList = [];
+    _attendanceMap.forEach((studentId, status) {
+      // Capitalize status to match backend validation rule validation
+      final capitalizedStatus = status.substring(0, 1).toUpperCase() + status.substring(1);
+      marksList.add({
+        'student_id': studentId,
+        'status': capitalizedStatus,
+        'note': null,
+      });
+    });
+
     final payload = {
       'class_id': widget.classId,
       'date': DateTime.now().toIso8601String().substring(0, 10),
-      'attendance': _attendanceMap.map((key, value) => MapEntry(key.toString(), value)),
+      'term': 2,
+      'session': '2024/2025',
+      'marks': marksList,
     };
 
     try {
@@ -143,7 +182,14 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
         Navigator.pop(context);
       }
     } catch (e) {
-      // Handle error
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to save attendance: $e'),
+            backgroundColor: AppColors.dangerRed,
+          ),
+        );
+      }
     } finally {
       setState(() {
         _isLoading = false;
