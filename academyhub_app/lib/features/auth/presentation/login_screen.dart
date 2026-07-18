@@ -76,6 +76,15 @@ class _LoginScreenState extends State<LoginScreen> {
             if (studentId != null) {
               await SecureStorage.instance.setStudentId(studentId);
             }
+            final name = response.data['student']['full_name']?.toString();
+            if (name != null) {
+              await SecureStorage.instance.setUserName(name);
+            }
+          } else if (response.data['user'] != null) {
+            final name = response.data['user']['name']?.toString();
+            if (name != null) {
+              await SecureStorage.instance.setUserName(name);
+            }
           }
 
           if (mounted) {

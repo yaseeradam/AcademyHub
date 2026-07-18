@@ -41,6 +41,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
   List<Map<String, dynamic>> _studentResults = [];
   bool _isLoadingResults = false;
   bool _isResultsPublished = false;
+  List<dynamic> _announcements = [];
+  bool _isLoadingAnnouncements = false;
 
   @override
   void initState() {
@@ -48,6 +50,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     _loadRole();
     _checkConnectivity();
     _fetchActivePlugins();
+    _loadAnnouncements();
     
     // Wire up automatic queue background processor status changes
     SyncQueueProcessor.instance.onStatusChanged = (status) {
@@ -58,6 +61,32 @@ class _DashboardScreenState extends State<DashboardScreen> {
       }
     };
     SyncQueueProcessor.instance.startListening();
+  }
+
+  Future<void> _loadAnnouncements() async {
+    if (!mounted) return;
+    setState(() {
+      _isLoadingAnnouncements = true;
+    });
+    try {
+      final response = await apiClient.dio.get('/announcements');
+      if (response.statusCode == 200 && response.data != null) {
+        final list = List<dynamic>.from(response.data['data'] ?? []);
+        if (mounted) {
+          setState(() {
+            _announcements = list;
+          });
+        }
+      }
+    } catch (e) {
+      debugPrint('Error loading announcements: $e');
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoadingAnnouncements = false;
+        });
+      }
+    }
   }
 
   Future<void> _fetchActivePlugins() async {
@@ -76,10 +105,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
     }
   }
 
+  String _userName = 'User';
+
   Future<void> _loadRole() async {
     final role = await SecureStorage.instance.getRole();
+    final name = await SecureStorage.instance.getUserName();
     setState(() {
       _userRole = role ?? 'student';
+      _userName = name ?? 'User';
     });
     if (_userRole == 'teacher') {
       _loadTeacherClasses();
@@ -341,8 +374,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  _userRole.toUpperCase(),
-                  style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold),
+                  'Hello, $_userName',
+                  style: const TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 8),
                 const Text(
@@ -364,32 +397,46 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
                 ),
                 const SizedBox(height: 12),
-                Card(
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              '📢 Term Holidays Announcement',
-                              style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.textPrimary),
-                            ),
-                            Text('2h ago', style: TextStyle(color: AppColors.textSecondary, fontSize: 11)),
-                          ],
-                        ),
-                        const SizedBox(height: 8),
-                        const Text(
-                          'The school will be closing early this Friday for the midterm break. All buses will depart at 1:00 PM.',
+                if (_isLoadingAnnouncements)
+                  const Center(child: LinearProgressIndicator())
+                else if (_announcements.isEmpty)
+                  const Card(
+                    child: Padding(
+                      padding: EdgeInsets.all(16.0),
+                      child: Center(
+                        child: Text(
+                          'No active announcements posted.',
                           style: TextStyle(color: AppColors.textSecondary, fontSize: 13),
                         ),
-                      ],
+                      ),
                     ),
-                  ),
-                ),
-                const SizedBox(height: 24),
+                  )
+                else
+                  ..._announcements.map((ann) {
+                    final title = ann['title'] ?? '';
+                    final body = ann['body'] ?? '';
+                    return Card(
+                      margin: const EdgeInsets.only(bottom: 12),
+                      child: Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              '📢 $title',
+                              style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.textPrimary, fontSize: 14),
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              body,
+                              style: const TextStyle(color: AppColors.textSecondary, fontSize: 13, height: 1.4),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  }),
+                const SizedBox(height: 12),
                 const TimetableView(),
               ],
             ),
@@ -413,10 +460,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
             ),
           ),
           const SizedBox(height: 16),
-          const Center(
+          Center(
             child: Text(
-              'Amina Hassan',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+              _userName,
+              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
             ),
           ),
           const SizedBox(height: 32),

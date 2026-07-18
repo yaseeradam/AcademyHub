@@ -51,6 +51,12 @@ class SecureStorage {
   Future<String?> getStudentId() => read(_keyStudentId);
   Future<void> deleteStudentId() => delete(_keyStudentId);
 
+  // User Name
+  static const String _keyUserName = 'user_name';
+  Future<void> setUserName(String name) => write(_keyUserName, name);
+  Future<String?> getUserName() => read(_keyUserName);
+  Future<void> deleteUserName() => delete(_keyUserName);
+
   // Global Clear
   Future<void> clearAll() async {
     await _storage.deleteAll();
