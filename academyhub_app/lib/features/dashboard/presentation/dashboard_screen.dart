@@ -36,11 +36,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
     {'subject': 'History', 'subject_code': 'HIS', 'ca1': 12, 'ca2': 14, 'exam': 42, 'total': 68, 'grade': 'C'},
   ];
 
-  final List<Map<String, dynamic>> _teacherClasses = [
-    {'id': 1, 'name': 'Grade 10A', 'subject': 'Mathematics', 'subject_id': 101},
-    {'id': 2, 'name': 'Grade 10B', 'subject': 'Mathematics', 'subject_id': 101},
-    {'id': 3, 'name': 'Grade 11A', 'subject': 'Further Mathematics', 'subject_id': 102},
-  ];
+  List<Map<String, dynamic>> _teacherClasses = [];
+  bool _isLoadingClasses = false;
 
   @override
   void initState() {
@@ -81,6 +78,35 @@ class _DashboardScreenState extends State<DashboardScreen> {
     setState(() {
       _userRole = role ?? 'student';
     });
+    if (_userRole == 'teacher') {
+      _loadTeacherClasses();
+    }
+  }
+
+  Future<void> _loadTeacherClasses() async {
+    if (!mounted) return;
+    setState(() {
+      _isLoadingClasses = true;
+    });
+    try {
+      final response = await apiClient.dio.get('/teacher/classes');
+      if (response.statusCode == 200 && response.data != null) {
+        final list = List<Map<String, dynamic>>.from(response.data['data'] ?? []);
+        if (mounted) {
+          setState(() {
+            _teacherClasses = list;
+          });
+        }
+      }
+    } catch (e) {
+      debugPrint('Error loading teacher classes: $e');
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoadingClasses = false;
+        });
+      }
+    }
   }
 
   void _checkConnectivity() {
@@ -476,6 +502,21 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   Widget _buildTeacherAttendanceView() {
+    if (_isLoadingClasses) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    if (_teacherClasses.isEmpty) {
+      return const Center(
+        child: Padding(
+          padding: EdgeInsets.all(24.0),
+          child: Text(
+            'No classes allocated to you yet.',
+            style: TextStyle(color: AppColors.textSecondary, fontSize: 15),
+            textAlign: TextAlign.center,
+          ),
+        ),
+      );
+    }
     return ListView.builder(
       padding: const EdgeInsets.all(16),
       itemCount: _teacherClasses.length,
@@ -488,11 +529,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
               child: const Icon(Icons.class_, color: AppColors.primaryBlue),
             ),
             title: Text(
-              cls['name'],
+              cls['name'] ?? '',
               style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.textPrimary),
             ),
             subtitle: Text(
-              'Subject: ${cls['subject']}',
+              'Level: ${cls['level'] ?? ''}',
               style: const TextStyle(color: AppColors.textSecondary, fontSize: 13),
             ),
             trailing: const Icon(Icons.arrow_forward_ios, size: 14),
@@ -502,7 +543,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 MaterialPageRoute(
                   builder: (context) => AttendanceScreen(
                     classId: cls['id'],
-                    className: cls['name'],
+                    className: cls['name'] ?? '',
                   ),
                 ),
               );
@@ -513,7 +554,118 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
+  Future<void> _loadSubjectsAndNavigate(int classId, String className) async {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => const Center(child: CircularProgressIndicator()),
+    );
+    try {
+      final response = await apiClient.dio.get('/teacher/classes/$classId/subjects');
+      if (mounted) {
+        Navigator.pop(context); // Close loading dialog
+      }
+      if (response.statusCode == 200 && response.data != null) {
+        final subjects = List<Map<String, dynamic>>.from(response.data['data'] ?? []);
+        if (subjects.isEmpty) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('No subjects allocated for this class.')),
+            );
+          }
+          return;
+        }
+        if (subjects.length == 1) {
+          final sub = subjects.first;
+          if (mounted) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => ScoresEntryScreen(
+                  classId: classId,
+                  className: className,
+                  subjectId: sub['id'],
+                  subjectName: sub['name'] ?? '',
+                ),
+              ),
+            );
+          }
+        } else {
+          // Show subject selection bottom sheet
+          if (mounted) {
+            showModalBottomSheet(
+              context: context,
+              shape: const RoundedRectangleBorder(
+                borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+              ),
+              builder: (context) {
+                return Padding(
+                  padding: const EdgeInsets.all(20.0),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      const Text(
+                        'Select Subject',
+                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+                      ),
+                      const SizedBox(height: 12),
+                      ...subjects.map((sub) => ListTile(
+                        leading: CircleAvatar(
+                          backgroundColor: AppColors.accentAmber.withOpacity(0.12),
+                          child: const Icon(Icons.book, color: AppColors.accentAmber),
+                        ),
+                        title: Text(sub['name'] ?? '', style: const TextStyle(fontWeight: FontWeight.bold)),
+                        trailing: const Icon(Icons.arrow_forward_ios, size: 14),
+                        onTap: () {
+                          Navigator.pop(context); // Close bottom sheet
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => ScoresEntryScreen(
+                                classId: classId,
+                                className: className,
+                                subjectId: sub['id'],
+                                subjectName: sub['name'] ?? '',
+                              ),
+                            ),
+                          );
+                        },
+                      )),
+                    ],
+                  ),
+                );
+              },
+            );
+          }
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        Navigator.pop(context); // Safe dismiss
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to load subjects: $e')),
+        );
+      }
+    }
+  }
+
   Widget _buildTeacherScoresView() {
+    if (_isLoadingClasses) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    if (_teacherClasses.isEmpty) {
+      return const Center(
+        child: Padding(
+          padding: EdgeInsets.all(24.0),
+          child: Text(
+            'No classes allocated to you yet.',
+            style: TextStyle(color: AppColors.textSecondary, fontSize: 15),
+            textAlign: TextAlign.center,
+          ),
+        ),
+      );
+    }
     return ListView.builder(
       padding: const EdgeInsets.all(16),
       itemCount: _teacherClasses.length,
@@ -526,27 +678,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
               child: const Icon(Icons.edit_note, color: AppColors.accentAmber),
             ),
             title: Text(
-              cls['name'],
+              cls['name'] ?? '',
               style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.textPrimary),
             ),
             subtitle: Text(
-              'Subject: ${cls['subject']}',
+              'Level: ${cls['level'] ?? ''}',
               style: const TextStyle(color: AppColors.textSecondary, fontSize: 13),
             ),
             trailing: const Icon(Icons.arrow_forward_ios, size: 14),
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => ScoresEntryScreen(
-                    classId: cls['id'],
-                    className: cls['name'],
-                    subjectId: cls['subject_id'],
-                    subjectName: cls['subject'],
-                  ),
-                ),
-              );
-            },
+            onTap: () => _loadSubjectsAndNavigate(cls['id'], cls['name'] ?? ''),
           ),
         );
       },
