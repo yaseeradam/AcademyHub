@@ -199,11 +199,15 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
 
   Widget _buildStudentRow(Map<String, dynamic> student) {
     final int id = student['id'];
-    final currentStatus = _attendanceMap[id] ?? 'present';
     final name = '${student['first_name']} ${student['last_name']}';
     final admission = student['admission_number'];
 
     return Card(
+      color: Colors.white,
+      elevation: 2,
+      shadowColor: Colors.black.withOpacity(0.06),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+      margin: const EdgeInsets.only(bottom: 12),
       child: Padding(
         padding: const EdgeInsets.all(12.0),
         child: Column(
@@ -211,11 +215,11 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
             Row(
               children: [
                 CircleAvatar(
-                  backgroundColor: AppColors.softBlue.withOpacity(0.12),
+                  backgroundColor: const Color(0xFFFEF3C7),
                   child: Text(
                     student['first_name'].substring(0, 1).toUpperCase() +
                     student['last_name'].substring(0, 1).toUpperCase(),
-                    style: const TextStyle(color: AppColors.softBlue, fontWeight: FontWeight.bold),
+                    style: const TextStyle(color: Color(0xFFF59E0B), fontWeight: FontWeight.bold),
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -225,11 +229,11 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                     children: [
                       Text(
                         name,
-                        style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+                        style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF0F172A), fontSize: 15),
                       ),
                       Text(
                         admission,
-                        style: const TextStyle(color: AppColors.textSecondary, fontSize: 12),
+                        style: const TextStyle(color: Color(0xFF64748B), fontSize: 12),
                       ),
                     ],
                   ),
@@ -240,9 +244,9 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                _buildStatusButton(id, 'present', 'Present', AppColors.successGreen),
-                _buildStatusButton(id, 'absent', 'Absent', AppColors.dangerRed),
-                _buildStatusButton(id, 'late', 'Late', AppColors.warningOrange),
+                _buildStatusButton(id, 'present', 'Present'),
+                _buildStatusButton(id, 'absent', 'Absent'),
+                _buildStatusButton(id, 'late', 'Late'),
               ],
             ),
           ],
@@ -251,29 +255,68 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
     );
   }
 
-  Widget _buildStatusButton(int studentId, String status, String label, Color color) {
+  Widget _buildStatusButton(int studentId, String status, String label) {
     final isSelected = _attendanceMap[studentId] == status;
+    Color bg;
+    Color text;
+    BorderSide border;
+
+    if (status == 'present') {
+      if (isSelected) {
+        bg = const Color(0xFF10B981);
+        text = Colors.white;
+        border = BorderSide.none;
+      } else {
+        bg = const Color(0xFFF0FDF4);
+        text = const Color(0xFF10B981);
+        border = const BorderSide(color: Color(0xFF10B981), width: 0.5);
+      }
+    } else if (status == 'absent') {
+      if (isSelected) {
+        bg = const Color(0xFFF43F5E);
+        text = Colors.white;
+        border = BorderSide.none;
+      } else {
+        bg = const Color(0xFFFFF1F2);
+        text = const Color(0xFFF43F5E);
+        border = const BorderSide(color: Color(0xFFF43F5E), width: 0.5);
+      }
+    } else { // late
+      if (isSelected) {
+        bg = const Color(0xFFF97316);
+        text = Colors.white;
+        border = BorderSide.none;
+      } else {
+        bg = const Color(0xFFFFF7ED);
+        text = const Color(0xFFF97316);
+        border = const BorderSide(color: Color(0xFFF97316), width: 0.5);
+      }
+    }
+
     return Expanded(
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 4.0),
-        child: OutlinedButton(
-          style: OutlinedButton.styleFrom(
-            backgroundColor: isSelected ? color : Colors.white,
-            side: BorderSide(color: isSelected ? color : AppColors.divider),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-            padding: const EdgeInsets.symmetric(vertical: 8),
-          ),
-          onPressed: () {
-            setState(() {
-              _attendanceMap[studentId] = status;
-            });
-          },
-          child: Text(
-            label,
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.bold,
-              color: isSelected ? Colors.white : AppColors.textSecondary,
+        child: SizedBox(
+          height: 36,
+          child: OutlinedButton(
+            style: OutlinedButton.styleFrom(
+              backgroundColor: bg,
+              side: border,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+              padding: EdgeInsets.zero,
+            ),
+            onPressed: () {
+              setState(() {
+                _attendanceMap[studentId] = status;
+              });
+            },
+            child: Text(
+              label,
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
+                color: text,
+              ),
             ),
           ),
         ),
@@ -285,22 +328,29 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('${widget.className} Attendance'),
-        elevation: 0.5,
-        backgroundColor: AppColors.cardSurface,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: Text(
+          '${widget.className} Attendance',
+          style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+        ),
+        elevation: 0,
+        backgroundColor: const Color(0xFF1E293B),
       ),
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? const Center(child: CircularProgressIndicator(color: AppColors.amberPrimary))
           : Column(
               children: [
                 if (!_isOnline)
                   Container(
-                    height: 32,
-                    color: const Color(0xFFFEF3C7),
+                    height: 36,
+                    color: const Color(0xFFF59E0B),
                     child: const Center(
                       child: Text(
-                        '📡 Offline Mode — Queueing Changes',
-                        style: TextStyle(color: Color(0xFF92400E), fontSize: 13, fontWeight: FontWeight.w600),
+                        'OFFLINE — QUEUEING CHANGES',
+                        style: TextStyle(color: Color(0xFF0F172A), fontSize: 13, fontWeight: FontWeight.bold, letterSpacing: 0.5),
                       ),
                     ),
                   ),
@@ -309,26 +359,32 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                   child: Row(
                     children: [
                       Expanded(
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.successGreen.withOpacity(0.12),
-                            foregroundColor: AppColors.successGreen,
-                            minimumSize: const Size.fromHeight(40),
+                        child: SizedBox(
+                          height: 44,
+                          child: OutlinedButton(
+                            style: OutlinedButton.styleFrom(
+                              side: const BorderSide(color: Color(0xFF10B981), width: 1.5),
+                              foregroundColor: const Color(0xFF10B981),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                            ),
+                            onPressed: () => _markAll('present'),
+                            child: const Text('Mark All Present', style: TextStyle(fontWeight: FontWeight.bold)),
                           ),
-                          onPressed: () => _markAll('present'),
-                          child: const Text('Mark All Present'),
                         ),
                       ),
                       const SizedBox(width: 8),
                       Expanded(
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.dangerRed.withOpacity(0.12),
-                            foregroundColor: AppColors.dangerRed,
-                            minimumSize: const Size.fromHeight(40),
+                        child: SizedBox(
+                          height: 44,
+                          child: OutlinedButton(
+                            style: OutlinedButton.styleFrom(
+                              side: const BorderSide(color: Color(0xFFF43F5E), width: 1.5),
+                              foregroundColor: const Color(0xFFF43F5E),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                            ),
+                            onPressed: () => _markAll('absent'),
+                            child: const Text('Mark All Absent', style: TextStyle(fontWeight: FontWeight.bold)),
                           ),
-                          onPressed: () => _markAll('absent'),
-                          child: const Text('Mark All Absent'),
                         ),
                       ),
                     ],
@@ -345,9 +401,44 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                 ),
                 Padding(
                   padding: const EdgeInsets.all(16.0),
-                  child: ElevatedButton(
-                    onPressed: _students.isEmpty ? null : _saveAttendance,
-                    child: const Text('Save Attendance'),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Container(
+                        height: 52,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(12),
+                          boxShadow: [
+                            BoxShadow(
+                              color: AppColors.amberPrimary.withOpacity(0.35),
+                              blurRadius: 16,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
+                        ),
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.amberPrimary,
+                            foregroundColor: Colors.white,
+                            elevation: 0,
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          ),
+                          onPressed: _students.isEmpty ? null : _saveAttendance,
+                          child: const Text(
+                            'SAVE ATTENDANCE',
+                            style: TextStyle(fontWeight: FontWeight.extrabold, fontSize: 16),
+                          ),
+                        ),
+                      ),
+                      if (!_isOnline) ...[
+                        const SizedBox(height: 8),
+                        const Text(
+                          '📡 Will sync when connected',
+                          style: TextStyle(color: AppColors.amberPrimary, fontSize: 11, fontWeight: FontWeight.bold),
+                          textAlign: TextAlign.center,
+                        ),
+                      ],
+                    ],
                   ),
                 ),
               ],

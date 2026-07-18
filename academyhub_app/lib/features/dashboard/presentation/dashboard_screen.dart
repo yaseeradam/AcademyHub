@@ -263,6 +263,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   void _showSyncStatusSheet() {
     showModalBottomSheet(
       context: context,
+      backgroundColor: const Color(0xFF1E293B),
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
@@ -278,7 +279,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   width: 40,
                   height: 4,
                   decoration: BoxDecoration(
-                    color: AppColors.divider,
+                    color: const Color(0xFF334155),
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
@@ -286,7 +287,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               const SizedBox(height: 16),
               const Text(
                 'Sync Status',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
               ),
               const SizedBox(height: 16),
               Row(
@@ -299,17 +300,21 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   const SizedBox(width: 12),
                   Text(
                     _isOnline ? 'Everything is up to date' : 'Offline — Changes saved locally',
-                    style: const TextStyle(fontWeight: FontWeight.w600, color: AppColors.textPrimary),
+                    style: const TextStyle(fontWeight: FontWeight.w600, color: Colors.white),
                   ),
                 ],
               ),
               const SizedBox(height: 8),
               const Text(
                 'Last synced: just now',
-                style: TextStyle(color: AppColors.textSecondary, fontSize: 13),
+                style: TextStyle(color: Color(0xFF64748B), fontSize: 13),
               ),
               const SizedBox(height: 24),
               ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.amberPrimary,
+                  foregroundColor: Colors.white,
+                ),
                 onPressed: () {
                   Navigator.pop(context);
                   setState(() {
@@ -337,17 +342,17 @@ class _DashboardScreenState extends State<DashboardScreen> {
     LinearGradient headerGradient;
     switch (_userRole) {
       case 'parent':
-        headerGradient = const LinearGradient(colors: [AppColors.primaryBlue, AppColors.parentEnd]);
+        headerGradient = const LinearGradient(colors: [Color(0xFF1E293B), AppColors.parentEnd]);
         break;
       case 'teacher':
-        headerGradient = const LinearGradient(colors: [AppColors.primaryBlue, AppColors.teacherEnd]);
+        headerGradient = const LinearGradient(colors: [Color(0xFF1E293B), AppColors.teacherEnd]);
         break;
       case 'admin':
-        headerGradient = const LinearGradient(colors: [AppColors.primaryBlue, AppColors.adminEnd]);
+        headerGradient = const LinearGradient(colors: [Color(0xFF1E293B), AppColors.adminEnd]);
         break;
       case 'student':
       default:
-        headerGradient = const LinearGradient(colors: [AppColors.primaryBlue, AppColors.studentEnd]);
+        headerGradient = const LinearGradient(colors: [Color(0xFF1E293B), AppColors.studentEnd]);
         break;
     }
 
@@ -360,27 +365,24 @@ class _DashboardScreenState extends State<DashboardScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 32),
             decoration: BoxDecoration(
               gradient: headerGradient,
-              borderRadius: const BorderRadius.only(
-                bottomLeft: Radius.circular(24),
-                bottomRight: Radius.circular(24),
-              ),
+              borderRadius: BorderRadius.zero, // square bottom edge
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Text(
                   'Good morning 👋',
-                  style: TextStyle(color: Colors.white, fontSize: 14),
+                  style: TextStyle(color: Color(0xFF94A3B8), fontSize: 13),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   'Hello, $_userName',
-                  style: const TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold),
+                  style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.extrabold),
                 ),
                 const SizedBox(height: 8),
                 const Text(
                   'Term 2 · 2024/2025',
-                  style: TextStyle(color: Colors.white70, fontSize: 13),
+                  style: TextStyle(color: Color(0xFF94A3B8), fontSize: 12),
                 ),
               ],
             ),
@@ -393,12 +395,17 @@ class _DashboardScreenState extends State<DashboardScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Text(
-                  'Quick Announcements',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+                  'QUICK ANNOUNCEMENTS',
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.amberPrimary,
+                    letterSpacing: 1.2,
+                  ),
                 ),
                 const SizedBox(height: 12),
                 if (_isLoadingAnnouncements)
-                  const Center(child: LinearProgressIndicator())
+                  const Center(child: LinearProgressIndicator(color: AppColors.amberPrimary))
                 else if (_announcements.isEmpty)
                   const Card(
                     child: Padding(
@@ -415,8 +422,20 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   ..._announcements.map((ann) {
                     final title = ann['title'] ?? '';
                     final body = ann['body'] ?? '';
-                    return Card(
+                    return Container(
                       margin: const EdgeInsets.only(bottom: 12),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(14),
+                        border: const Border(left: BorderSide(color: AppColors.amberPrimary, width: 3)),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.04),
+                            blurRadius: 4,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
                       child: Padding(
                         padding: const EdgeInsets.all(16.0),
                         child: Column(
@@ -455,7 +474,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           const Center(
             child: CircleAvatar(
               radius: 40,
-              backgroundColor: AppColors.primaryBlue,
+              backgroundColor: AppColors.amberPrimary,
               child: Icon(Icons.person, size: 48, color: Colors.white),
             ),
           ),
@@ -463,7 +482,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           Center(
             child: Text(
               _userName,
-              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+              style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Color(0xFF0F172A)),
             ),
           ),
           const SizedBox(height: 32),
@@ -497,7 +516,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   Widget _buildResultsView() {
     if (_isLoadingResults) {
-      return const Center(child: CircularProgressIndicator());
+      return const Center(child: CircularProgressIndicator(color: AppColors.amberPrimary));
     }
 
     if (!_isResultsPublished) {
@@ -557,13 +576,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
             itemBuilder: (context, idx) {
               final res = _studentResults[idx];
               final total = int.tryParse(res['total']?.toString() ?? '0') ?? 0;
+              final grade = (res['grade'] ?? 'F').toString().toUpperCase();
               Color gradeColor;
-              if (total >= 80) {
+              if (grade.startsWith('A')) {
                 gradeColor = AppColors.successGreen;
-              } else if (total >= 70) {
-                gradeColor = AppColors.softBlue;
-              } else if (total >= 50) {
-                gradeColor = AppColors.accentAmber;
+              } else if (grade.startsWith('B')) {
+                gradeColor = const Color(0xFF3B82F6); // Blue
+              } else if (grade.startsWith('C')) {
+                gradeColor = AppColors.amberPrimary;
               } else {
                 gradeColor = AppColors.dangerRed;
               }
@@ -584,7 +604,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                             decoration: BoxDecoration(
-                              color: gradeColor.withOpacity(0.1),
+                              color: gradeColor.withOpacity(0.12),
                               borderRadius: BorderRadius.circular(20),
                             ),
                             child: Text(
@@ -647,8 +667,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
         return Card(
           child: ListTile(
             leading: CircleAvatar(
-              backgroundColor: AppColors.primaryBlue.withOpacity(0.12),
-              child: const Icon(Icons.class_, color: AppColors.primaryBlue),
+              backgroundColor: AppColors.amberPrimary.withOpacity(0.12),
+              child: const Icon(Icons.class_, color: AppColors.amberPrimary),
             ),
             title: Text(
               cls['name'] ?? '',
@@ -658,7 +678,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               'Level: ${cls['level'] ?? ''}',
               style: const TextStyle(color: AppColors.textSecondary, fontSize: 13),
             ),
-            trailing: const Icon(Icons.arrow_forward_ios, size: 14),
+            trailing: const Icon(Icons.arrow_forward_ios, size: 14, color: AppColors.amberPrimary),
             onTap: () {
               Navigator.push(
                 context,
@@ -796,8 +816,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
         return Card(
           child: ListTile(
             leading: CircleAvatar(
-              backgroundColor: AppColors.accentAmber.withOpacity(0.12),
-              child: const Icon(Icons.edit_note, color: AppColors.accentAmber),
+              backgroundColor: AppColors.amberPrimary.withOpacity(0.12),
+              child: const Icon(Icons.edit_note, color: AppColors.amberPrimary),
             ),
             title: Text(
               cls['name'] ?? '',
@@ -807,7 +827,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               'Level: ${cls['level'] ?? ''}',
               style: const TextStyle(color: AppColors.textSecondary, fontSize: 13),
             ),
-            trailing: const Icon(Icons.arrow_forward_ios, size: 14),
+            trailing: const Icon(Icons.arrow_forward_ios, size: 14, color: AppColors.amberPrimary),
             onTap: () => _loadSubjectsAndNavigate(cls['id'], cls['name'] ?? ''),
           ),
         );
@@ -1011,7 +1031,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       appBar: AppBar(
         title: Text(
           isHomeTab ? 'AcademyHub' : navItems[_currentIndex].label!,
-          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: AppColors.textPrimary),
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 17, color: Colors.white),
         ),
         actions: [
           // Sync dot
@@ -1021,24 +1041,24 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ),
           // Notification bell
           IconButton(
-            icon: const Icon(Icons.notifications_none, color: AppColors.textPrimary),
+            icon: const Icon(Icons.notifications_none, color: Colors.white),
             onPressed: () {},
           ),
         ],
-        elevation: 0.5,
-        backgroundColor: AppColors.cardSurface,
+        elevation: 0,
+        backgroundColor: const Color(0xFF1E293B),
       ),
       body: Column(
         children: [
           // Offline Amber Alert Banner
           if (!_isOnline)
             Container(
-              height: 32,
-              color: const Color(0xFFFEF3C7),
+              height: 36,
+              color: const Color(0xFFF59E0B),
               child: const Center(
                 child: Text(
-                  '📡 Offline — changes saved locally',
-                  style: TextStyle(color: Color(0xFF92400E), fontSize: 13, fontWeight: FontWeight.w600),
+                  'OFFLINE — CHANGES SAVED LOCALLY',
+                  style: TextStyle(color: Color(0xFF0F172A), fontSize: 12, fontWeight: FontWeight.bold, letterSpacing: 0.5),
                 ),
               ),
             ),
@@ -1068,19 +1088,30 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ),
         ],
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _currentIndex,
-        onTap: (index) {
-          setState(() {
-            _currentIndex = index;
-          });
-        },
-        type: BottomNavigationBarType.fixed,
-        selectedItemColor: AppColors.primaryBlue,
-        unselectedItemColor: AppColors.textDisabled,
-        backgroundColor: AppColors.cardSurface,
-        elevation: 12,
-        items: navItems,
+      bottomNavigationBar: Container(
+        decoration: const BoxDecoration(
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black38,
+              blurRadius: 20,
+              offset: Offset(0, -4),
+            ),
+          ],
+        ),
+        child: BottomNavigationBar(
+          currentIndex: _currentIndex,
+          onTap: (index) {
+            setState(() {
+              _currentIndex = index;
+            });
+          },
+          type: BottomNavigationBarType.fixed,
+          selectedItemColor: const Color(0xFFF59E0B),
+          unselectedItemColor: const Color(0xFF64748B),
+          backgroundColor: const Color(0xFF1E293B),
+          elevation: 0,
+          items: navItems,
+        ),
       ),
     );
   }

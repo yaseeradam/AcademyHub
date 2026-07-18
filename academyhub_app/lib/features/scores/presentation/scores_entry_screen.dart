@@ -93,6 +93,7 @@ class _ScoresEntryScreenState extends State<ScoresEntryScreen> {
   void _openNumericKeypad(int studentId, String fieldName, String currentVal) {
     showModalBottomSheet(
       context: context,
+      backgroundColor: const Color(0xFF1E293B),
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
@@ -106,7 +107,7 @@ class _ScoresEntryScreenState extends State<ScoresEntryScreen> {
                   input = '';
                 } else if (key == '⌫') {
                   if (input.isNotEmpty) {
-                    input = input.substring(0, input.length - 1);
+                     input = input.substring(0, input.length - 1);
                   }
                 } else {
                   // Cap scores length
@@ -123,7 +124,7 @@ class _ScoresEntryScreenState extends State<ScoresEntryScreen> {
 
             return Container(
               padding: const EdgeInsets.all(20),
-              color: Colors.white,
+              color: const Color(0xFF1E293B),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -133,7 +134,7 @@ class _ScoresEntryScreenState extends State<ScoresEntryScreen> {
                       width: 40,
                       height: 4,
                       decoration: BoxDecoration(
-                        color: AppColors.divider,
+                        color: const Color(0xFF334155),
                         borderRadius: BorderRadius.circular(2),
                       ),
                     ),
@@ -141,19 +142,19 @@ class _ScoresEntryScreenState extends State<ScoresEntryScreen> {
                   const SizedBox(height: 12),
                   Text(
                     'Enter ${fieldName.toUpperCase()} Score',
-                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.white),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 16),
                   Container(
                     padding: const EdgeInsets.symmetric(vertical: 12),
                     decoration: BoxDecoration(
-                      color: AppColors.inputFill,
-                      borderRadius: BorderRadius.circular(10),
+                      color: const Color(0xFF0F172A),
+                      borderRadius: BorderRadius.circular(12),
                     ),
                     child: Text(
                       input.isEmpty ? '-' : input,
-                      style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: AppColors.primaryBlue),
+                      style: const TextStyle(fontSize: 36, fontWeight: FontWeight.extrabold, color: AppColors.amberPrimary),
                       textAlign: TextAlign.center,
                     ),
                   ),
@@ -173,25 +174,54 @@ class _ScoresEntryScreenState extends State<ScoresEntryScreen> {
                     itemBuilder: (context, index) {
                       final keys = ['1', '2', '3', '4', '5', '6', '7', '8', '9', 'C', '0', '⌫'];
                       final key = keys[index];
+                      Color keyBg = const Color(0xFF334155);
+                      Color textCol = Colors.white;
+                      
+                      if (key == 'C') {
+                        keyBg = const Color(0xFF7F1D1D); // dark red
+                        textCol = const Color(0xFFF43F5E); // text red
+                      } else if (key == '⌫') {
+                        textCol = const Color(0xFFF43F5E);
+                      }
+
                       return ElevatedButton(
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: key == 'C' || key == '⌫' ? Colors.grey[200] : AppColors.inputFill,
-                          foregroundColor: AppColors.textPrimary,
+                          backgroundColor: keyBg,
+                          foregroundColor: AppColors.amberPrimary, // amber ripple on press
                           elevation: 0,
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                         ),
                         onPressed: () => pressKey(key),
                         child: Text(
                           key,
-                          style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: textCol),
                         ),
                       );
                     },
                   ),
                   const SizedBox(height: 16),
-                  ElevatedButton(
-                    onPressed: () => Navigator.pop(context),
-                    child: const Text('Confirm'),
+                  Container(
+                    height: 52,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(12),
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppColors.amberPrimary.withOpacity(0.4),
+                          blurRadius: 16,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.amberPrimary,
+                        foregroundColor: Colors.white,
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      ),
+                      onPressed: () => Navigator.pop(context),
+                      child: const Text('CONFIRM', style: TextStyle(fontWeight: FontWeight.extrabold, fontSize: 16)),
+                    ),
                   ),
                 ],
               ),
@@ -261,8 +291,25 @@ class _ScoresEntryScreenState extends State<ScoresEntryScreen> {
 
     final hasEmpty = scores['ca1']!.isEmpty || scores['ca2']!.isEmpty || scores['exam']!.isEmpty;
 
-    return Card(
-      color: hasEmpty ? const Color(0xFFFFFBEB) : Colors.white, // Amber tinted if empty cells
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14),
+        border: Border(
+          left: BorderSide(
+            color: hasEmpty ? AppColors.amberPrimary : Colors.transparent,
+            width: 3,
+          ),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         child: Column(
@@ -270,7 +317,7 @@ class _ScoresEntryScreenState extends State<ScoresEntryScreen> {
           children: [
             Text(
               name,
-              style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+              style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF0F172A), fontSize: 15),
             ),
             const SizedBox(height: 12),
             Row(
@@ -289,29 +336,29 @@ class _ScoresEntryScreenState extends State<ScoresEntryScreen> {
   }
 
   Widget _buildCell(int studentId, String field, String label, String value) {
+    final isEmpty = value.isEmpty;
     return Expanded(
       child: GestureDetector(
         onTap: () => _openNumericKeypad(studentId, field, value),
         child: Container(
           padding: const EdgeInsets.symmetric(vertical: 10),
           decoration: BoxDecoration(
-            color: Colors.white,
-            border: Border.all(color: AppColors.divider),
-            borderRadius: BorderRadius.circular(8),
+            color: const Color(0xFFF1F5F9), // slate-100
+            borderRadius: BorderRadius.circular(10),
           ),
           child: Column(
             children: [
               Text(
-                label,
-                style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
+                label.toUpperCase(),
+                style: const TextStyle(fontSize: 10, color: Color(0xFF94A3B8), fontWeight: FontWeight.w700, letterSpacing: 0.5),
               ),
               const SizedBox(height: 4),
               Text(
-                value.isEmpty ? '-' : value,
+                isEmpty ? '—' : value,
                 style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: value.isEmpty ? AppColors.textDisabled : AppColors.primaryBlue,
+                  fontSize: 18,
+                  fontWeight: FontWeight.extrabold,
+                  color: isEmpty ? const Color(0xFFCBD5E1) : AppColors.amberPrimary,
                 ),
               ),
             ],
@@ -325,27 +372,39 @@ class _ScoresEntryScreenState extends State<ScoresEntryScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.subjectName),
-        elevation: 0.5,
-        backgroundColor: AppColors.cardSurface,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: Text(
+          widget.subjectName,
+          style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+        ),
+        elevation: 0,
+        backgroundColor: const Color(0xFF1E293B),
       ),
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? const Center(child: CircularProgressIndicator(color: AppColors.amberPrimary))
           : Column(
               children: [
                 Container(
-                  padding: const EdgeInsets.all(16),
-                  color: AppColors.cardSurface,
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  decoration: const BoxDecoration(
+                    color: Color(0xFF1E293B),
+                    border: Border(
+                      bottom: BorderSide(color: Color(0xFF334155), width: 1.0),
+                    ),
+                  ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
                         'Class: ${widget.className}',
-                        style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+                        style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white, fontSize: 14),
                       ),
                       const Text(
                         'Term 2',
-                        style: TextStyle(color: AppColors.textSecondary),
+                        style: TextStyle(color: Color(0xFF94A3B8), fontSize: 12),
                       ),
                     ],
                   ),
@@ -361,9 +420,31 @@ class _ScoresEntryScreenState extends State<ScoresEntryScreen> {
                 ),
                 Padding(
                   padding: const EdgeInsets.all(16.0),
-                  child: ElevatedButton(
-                    onPressed: _students.isEmpty ? null : _saveScores,
-                    child: const Text('Save Scores'),
+                  child: Container(
+                    height: 52,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(12),
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppColors.amberPrimary.withOpacity(0.35),
+                          blurRadius: 16,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.amberPrimary,
+                        foregroundColor: Colors.white,
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      ),
+                      onPressed: _students.isEmpty ? null : _saveScores,
+                      child: const Text(
+                        'SAVE SCORES',
+                        style: TextStyle(fontWeight: FontWeight.extrabold, fontSize: 16),
+                      ),
+                    ),
                   ),
                 ),
               ],
