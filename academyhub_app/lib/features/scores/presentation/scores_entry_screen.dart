@@ -40,32 +40,49 @@ class _ScoresEntryScreenState extends State<ScoresEntryScreen> {
     });
 
     try {
-      // Load cached students
+      List<Map<String, dynamic>> studentsList = [];
       final cached = await LocalDatabase.instance.getStudents();
       final classCached = cached.where((s) => s['class_id'] == widget.classId).toList();
 
       if (classCached.isNotEmpty) {
-        setState(() {
-          _students = classCached;
-          for (var s in _students) {
-            _scoresMap[s['id']] = {'ca1': '', 'ca2': '', 'exam': ''};
-          }
-        });
+        studentsList = classCached;
       } else {
-        // Fallback fetch
         final response = await apiClient.dio.get('/teacher/classes/${widget.classId}/students');
         if (response.statusCode == 200 && response.data != null) {
-          final list = List<Map<String, dynamic>>.from(response.data);
-          setState(() {
-            _students = list;
-            for (var s in _students) {
-              _scoresMap[s['id']] = {'ca1': '', 'ca2': '', 'exam': ''};
-            }
-          });
+          final rawList = response.data['data'] ?? response.data;
+          studentsList = List<Map<String, dynamic>>.from(rawList);
         }
       }
+
+      for (var s in studentsList) {
+        _scoresMap[s['id']] = {'ca1': '', 'ca2': '', 'exam': ''};
+      }
+
+      // Fetch existing recorded scores for pre-population
+      final scoresResponse = await apiClient.dio.get(
+        '/teacher/classes/${widget.classId}/scores',
+        queryParameters: {'term': 2, 'session': '2024/2025'},
+      );
+      if (scoresResponse.statusCode == 200 && scoresResponse.data != null) {
+        final List<dynamic> scoresData = scoresResponse.data['data'] ?? [];
+        for (var score in scoresData) {
+          final studentId = score['student_id'] as int?;
+          final subjectId = score['subject_id'] as int?;
+          if (studentId != null && subjectId == widget.subjectId) {
+            _scoresMap[studentId] = {
+              'ca1': score['ca1']?.toString() ?? '',
+              'ca2': score['ca2']?.toString() ?? '',
+              'exam': score['exam']?.toString() ?? '',
+            };
+          }
+        }
+      }
+
+      setState(() {
+        _students = studentsList;
+      });
     } catch (e) {
-      // Handle error
+      debugPrint('Error loading students or scores: $e');
     } finally {
       setState(() {
         _isLoading = false;
@@ -195,6 +212,9 @@ class _ScoresEntryScreenState extends State<ScoresEntryScreen> {
       scoresList.add({
         'student_id': studentId,
         'subject_id': widget.subjectId,
+        'class_id': widget.classId,
+        'term': 2,
+        'session': '2024/2025',
         'ca1': int.tryParse(scores['ca1'] ?? '') ?? 0,
         'ca2': int.tryParse(scores['ca2'] ?? '') ?? 0,
         'exam': int.tryParse(scores['exam'] ?? '') ?? 0,
@@ -202,9 +222,6 @@ class _ScoresEntryScreenState extends State<ScoresEntryScreen> {
     });
 
     final payload = {
-      'class_id': widget.classId,
-      'term': 2,
-      'session': '2024/2025',
       'scores': scoresList,
     };
 
