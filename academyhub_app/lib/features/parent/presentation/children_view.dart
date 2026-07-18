@@ -37,11 +37,13 @@ class ChildrenView extends StatelessWidget {
 
   final VoidCallback onViewResults;
   final VoidCallback onMessageTeacher;
+  final bool isMessagingEnabled;
 
   const ChildrenView({
     super.key,
     required this.onViewResults,
     required this.onMessageTeacher,
+    this.isMessagingEnabled = true,
   });
 
   @override
@@ -115,18 +117,20 @@ class ChildrenView extends StatelessWidget {
                         child: const Text('View Results', style: TextStyle(color: AppColors.primaryBlue, fontSize: 13)),
                       ),
                     ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primaryBlue,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                          padding: const EdgeInsets.symmetric(vertical: 10),
+                    if (isMessagingEnabled) ...[
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.primaryBlue,
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                            padding: const EdgeInsets.symmetric(vertical: 10),
+                          ),
+                          onPressed: onMessageTeacher,
+                          child: const Text('Message Teacher', style: TextStyle(fontSize: 13)),
                         ),
-                        onPressed: onMessageTeacher,
-                        child: const Text('Message Teacher', style: TextStyle(fontSize: 13)),
                       ),
-                    ),
+                    ],
                   ],
                 ),
               ],

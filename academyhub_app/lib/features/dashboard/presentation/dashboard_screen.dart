@@ -5,6 +5,7 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:academyhub_app/core/theme/app_theme.dart';
 import 'package:academyhub_app/core/storage/secure_storage.dart';
 import 'package:academyhub_app/core/network/sync_processor.dart';
+import 'package:academyhub_app/core/network/api_client.dart';
 import 'package:academyhub_app/features/results/presentation/results_chart.dart';
 import 'package:academyhub_app/features/timetable/presentation/timetable_view.dart';
 import 'package:academyhub_app/features/attendance/presentation/attendance_screen.dart';
@@ -26,6 +27,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   bool _isOnline = true;
   String _syncStatus = 'synced'; // 'synced', 'pending', 'syncing'
   late StreamSubscription<List<ConnectivityResult>> _connectivitySubscription;
+  List<String> _activePlugins = [];
 
   final List<Map<String, dynamic>> _sampleResults = [
     {'subject': 'Mathematics', 'subject_code': 'MTH', 'ca1': 16, 'ca2': 18, 'exam': 54, 'total': 88, 'grade': 'A'},
@@ -45,6 +47,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     super.initState();
     _loadRole();
     _checkConnectivity();
+    _fetchActivePlugins();
     
     // Wire up automatic queue background processor status changes
     SyncQueueProcessor.instance.onStatusChanged = (status) {
@@ -55,6 +58,22 @@ class _DashboardScreenState extends State<DashboardScreen> {
       }
     };
     SyncQueueProcessor.instance.startListening();
+  }
+
+  Future<void> _fetchActivePlugins() async {
+    try {
+      final response = await apiClient.dio.get('/term');
+      if (response.statusCode == 200 && response.data != null) {
+        final plugins = List<String>.from(response.data['active_plugins'] ?? []);
+        if (mounted) {
+          setState(() {
+            _activePlugins = plugins;
+          });
+        }
+      }
+    } catch (e) {
+      debugPrint('Error loading active plugins: $e');
+    }
   }
 
   Future<void> _loadRole() async {
@@ -83,12 +102,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
   List<BottomNavigationBarItem> _getNavItems() {
     switch (_userRole) {
       case 'parent':
-        return const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-          BottomNavigationBarItem(icon: Icon(Icons.child_care), label: 'Children'),
-          BottomNavigationBarItem(icon: Icon(Icons.message), label: 'Chat'),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Me'),
+        final list = <BottomNavigationBarItem>[
+          const BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
+          const BottomNavigationBarItem(icon: Icon(Icons.child_care), label: 'Children'),
         ];
+        if (_activePlugins.contains('messages')) {
+          list.add(const BottomNavigationBarItem(icon: Icon(Icons.message), label: 'Chat'));
+        }
+        list.add(const BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Me'));
+        return list;
       case 'teacher':
         return const [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
