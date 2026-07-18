@@ -106,13 +106,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   String _userName = 'User';
+  String? _schoolName;
 
   Future<void> _loadRole() async {
     final role = await SecureStorage.instance.getRole();
     final name = await SecureStorage.instance.getUserName();
+    final school = await SecureStorage.instance.getSchoolName();
     setState(() {
       _userRole = role ?? 'student';
       _userName = name ?? 'User';
+      _schoolName = school;
     });
     if (_userRole == 'teacher') {
       _loadTeacherClasses();
@@ -337,129 +340,304 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  Widget _buildHomeView() {
-    // Dynamic greeting gradient based on role
-    LinearGradient headerGradient;
-    switch (_userRole) {
-      case 'parent':
-        headerGradient = const LinearGradient(colors: [Color(0xFF1E293B), AppColors.parentEnd]);
-        break;
-      case 'teacher':
-        headerGradient = const LinearGradient(colors: [Color(0xFF1E293B), AppColors.teacherEnd]);
-        break;
-      case 'admin':
-        headerGradient = const LinearGradient(colors: [Color(0xFF1E293B), AppColors.adminEnd]);
-        break;
-      case 'student':
-      default:
-        headerGradient = const LinearGradient(colors: [Color(0xFF1E293B), AppColors.studentEnd]);
-        break;
+  Widget _buildQuickActions() {
+    List<Map<String, dynamic>> actions = [];
+    if (_userRole == 'student') {
+      actions = [
+        {'label': 'Report Card', 'icon': Icons.assignment_turned_in_rounded, 'tab': 1},
+        {'label': 'Homework', 'icon': Icons.menu_book_rounded, 'tab': 2},
+      ];
+    } else if (_userRole == 'parent') {
+      actions = [
+        {'label': 'My Children', 'icon': Icons.people_alt_rounded, 'tab': 1},
+        {'label': 'Chat Teacher', 'icon': Icons.chat_rounded, 'tab': 2},
+      ];
+    } else if (_userRole == 'teacher') {
+      actions = [
+        {'label': 'Record Attendance', 'icon': Icons.how_to_reg_rounded, 'tab': 1},
+        {'label': 'Term Scores', 'icon': Icons.grade_rounded, 'tab': 2},
+      ];
     }
 
+    if (actions.isEmpty) return const SizedBox.shrink();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'QUICK ACTIONS',
+          style: TextStyle(
+            fontSize: 11,
+            fontWeight: FontWeight.w700,
+            color: AppColors.amberPrimary,
+            letterSpacing: 1.2,
+          ),
+        ),
+        const SizedBox(height: 12),
+        Row(
+          children: actions.map((act) {
+            return Expanded(
+              child: Card(
+                color: Colors.white,
+                elevation: 2,
+                shadowColor: Colors.black.withOpacity(0.04),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                child: InkWell(
+                  onTap: () {
+                    setState(() {
+                      _currentIndex = act['tab'];
+                    });
+                  },
+                  borderRadius: BorderRadius.circular(16),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 16.0),
+                    child: Column(
+                      children: [
+                        Icon(act['icon'] as IconData, color: AppColors.amberPrimary, size: 28),
+                        const SizedBox(height: 8),
+                        Text(
+                          act['label'] as String,
+                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Color(0xFF0F172A)),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            );
+          }).toList(),
+        ),
+        const SizedBox(height: 24),
+      ],
+    );
+  }
+
+  Widget _buildOverviewStats() {
+    String title1 = '';
+    String val1 = '';
+    String title2 = '';
+    String val2 = '';
+
+    if (_userRole == 'student') {
+      title1 = 'Enrolled Subjects';
+      val1 = '${_studentResults.isNotEmpty ? _studentResults.length : 8} Courses';
+      title2 = 'Academic Status';
+      val2 = 'Active Term';
+    } else if (_userRole == 'parent') {
+      title1 = 'Connected Children';
+      val1 = '2 Student Profiles';
+      title2 = 'School Status';
+      val2 = 'Fully Synced';
+    } else if (_userRole == 'teacher') {
+      title1 = 'Allocated Classes';
+      val1 = '${_teacherClasses.length} Active Classrooms';
+      title2 = 'Session Status';
+      val2 = 'Term 2 Active';
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'TODAY\'S OVERVIEW',
+          style: TextStyle(
+            fontSize: 11,
+            fontWeight: FontWeight.w700,
+            color: AppColors.amberPrimary,
+            letterSpacing: 1.2,
+          ),
+        ),
+        const SizedBox(height: 12),
+        Row(
+          children: [
+            Expanded(
+              child: Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.04),
+                      blurRadius: 4,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(title1, style: const TextStyle(fontSize: 12, color: Color(0xFF64748B))),
+                    const SizedBox(height: 4),
+                    Text(val1, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF0F172A))),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.04),
+                      blurRadius: 4,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(title2, style: const TextStyle(fontSize: 12, color: Color(0xFF64748B))),
+                    const SizedBox(height: 4),
+                    Text(val2, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF0F172A))),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 24),
+      ],
+    );
+  }
+
+  Widget _buildHomeView() {
     return SingleChildScrollView(
+      padding: const EdgeInsets.all(16.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Greeting Header
+          // Floating Greeting Header Card
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 32),
+            padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              gradient: headerGradient,
-              borderRadius: BorderRadius.zero, // square bottom edge
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  'Good morning 👋',
-                  style: TextStyle(color: Color(0xFF94A3B8), fontSize: 13),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  'Hello, $_userName',
-                  style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.extrabold),
-                ),
-                const SizedBox(height: 8),
-                const Text(
-                  'Term 2 · 2024/2025',
-                  style: TextStyle(color: Color(0xFF94A3B8), fontSize: 12),
+              gradient: const LinearGradient(
+                colors: [Color(0xFF1E293B), Color(0xFF0F172A)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: [
+                BoxShadow(
+                  color: const Color(0xFF1E293B).withOpacity(0.2),
+                  blurRadius: 15,
+                  offset: const Offset(0, 8),
                 ),
               ],
             ),
-          ),
-          
-          // Cards Listing Area
-          Padding(
-            padding: const EdgeInsets.all(20.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            child: Row(
               children: [
-                const Text(
-                  'QUICK ANNOUNCEMENTS',
-                  style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.amberPrimary,
-                    letterSpacing: 1.2,
+                CircleAvatar(
+                  radius: 26,
+                  backgroundColor: AppColors.amberPrimary.withOpacity(0.15),
+                  child: Text(
+                    _userName.isNotEmpty ? _userName.substring(0, 1).toUpperCase() : 'U',
+                    style: const TextStyle(color: AppColors.amberPrimary, fontSize: 20, fontWeight: FontWeight.bold),
                   ),
                 ),
-                const SizedBox(height: 12),
-                if (_isLoadingAnnouncements)
-                  const Center(child: LinearProgressIndicator(color: AppColors.amberPrimary))
-                else if (_announcements.isEmpty)
-                  const Card(
-                    child: Padding(
-                      padding: EdgeInsets.all(16.0),
-                      child: Center(
-                        child: Text(
-                          'No active announcements posted.',
-                          style: TextStyle(color: AppColors.textSecondary, fontSize: 13),
-                        ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Good morning 👋',
+                        style: TextStyle(color: Color(0xFF94A3B8), fontSize: 13),
                       ),
-                    ),
-                  )
-                else
-                  ..._announcements.map((ann) {
-                    final title = ann['title'] ?? '';
-                    final body = ann['body'] ?? '';
-                    return Container(
-                      margin: const EdgeInsets.only(bottom: 12),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(14),
-                        border: const Border(left: BorderSide(color: AppColors.amberPrimary, width: 3)),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.04),
-                            blurRadius: 4,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
+                      const SizedBox(height: 2),
+                      Text(
+                        _userName,
+                        style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
                       ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              '📢 $title',
-                              style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.textPrimary, fontSize: 14),
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              body,
-                              style: const TextStyle(color: AppColors.textSecondary, fontSize: 13, height: 1.4),
-                            ),
-                          ],
-                        ),
+                      const SizedBox(height: 4),
+                      Text(
+                        '${_schoolName ?? "AcademyHub"} · Term 2',
+                        style: const TextStyle(color: Color(0xFF94A3B8), fontSize: 11),
                       ),
-                    );
-                  }),
-                const SizedBox(height: 12),
-                const TimetableView(),
+                    ],
+                  ),
+                ),
               ],
             ),
           ),
+          const SizedBox(height: 24),
+
+          // Quick Actions
+          _buildQuickActions(),
+
+          // Overview Statistics
+          _buildOverviewStats(),
+          
+          // Announcements Section
+          const Text(
+            'QUICK ANNOUNCEMENTS',
+            style: TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w700,
+              color: AppColors.amberPrimary,
+              letterSpacing: 1.2,
+            ),
+          ),
+          const SizedBox(height: 12),
+          if (_isLoadingAnnouncements)
+            const Center(child: LinearProgressIndicator(color: AppColors.amberPrimary))
+          else if (_announcements.isEmpty)
+            const Card(
+              color: Colors.white,
+              child: Padding(
+                padding: EdgeInsets.all(16.0),
+                child: Center(
+                  child: Text(
+                    'No active announcements posted.',
+                    style: TextStyle(color: AppColors.textSecondary, fontSize: 13),
+                  ),
+                ),
+              ),
+            )
+          else
+            ..._announcements.map((ann) {
+              final title = ann['title'] ?? '';
+              final body = ann['body'] ?? '';
+              return Container(
+                margin: const EdgeInsets.only(bottom: 12),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(14),
+                  border: const Border(left: BorderSide(color: AppColors.amberPrimary, width: 3)),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.04),
+                      blurRadius: 4,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '📢 $title',
+                        style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.textPrimary, fontSize: 14),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        body,
+                        style: const TextStyle(color: AppColors.textSecondary, fontSize: 13, height: 1.4),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            }),
+          const SizedBox(height: 12),
+          const TimetableView(),
         ],
       ),
     );
@@ -1028,6 +1206,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     final isChatTab = _currentIndex == 2 && _userRole == 'parent';
 
     return Scaffold(
+      backgroundColor: const Color(0xFFF1F5F9),
       appBar: AppBar(
         title: Text(
           isHomeTab ? 'AcademyHub' : navItems[_currentIndex].label!,
@@ -1088,29 +1267,74 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ),
         ],
       ),
-      bottomNavigationBar: Container(
-        decoration: const BoxDecoration(
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black38,
-              blurRadius: 20,
-              offset: Offset(0, -4),
-            ),
-          ],
-        ),
-        child: BottomNavigationBar(
-          currentIndex: _currentIndex,
-          onTap: (index) {
-            setState(() {
-              _currentIndex = index;
-            });
-          },
-          type: BottomNavigationBarType.fixed,
-          selectedItemColor: const Color(0xFFF59E0B),
-          unselectedItemColor: const Color(0xFF64748B),
-          backgroundColor: const Color(0xFF1E293B),
-          elevation: 0,
-          items: navItems,
+      bottomNavigationBar: SafeArea(
+        child: Container(
+          margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+          height: 72,
+          decoration: BoxDecoration(
+            color: const Color(0xFF1E293B),
+            borderRadius: BorderRadius.circular(24),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.2),
+                blurRadius: 20,
+                offset: const Offset(0, 8),
+              ),
+            ],
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: List.generate(navItems.length, (idx) {
+              final item = navItems[idx];
+              final isSelected = _currentIndex == idx;
+              
+              IconData iconData = Icons.home_rounded;
+              if (idx == 0) iconData = Icons.home_rounded;
+              else if (idx == 1) {
+                if (_userRole == 'student') iconData = Icons.assignment_rounded;
+                else if (_userRole == 'parent') iconData = Icons.people_alt_rounded;
+                else if (_userRole == 'teacher') iconData = Icons.class_rounded;
+              } else if (idx == 2) {
+                if (_userRole == 'student') iconData = Icons.menu_book_rounded;
+                else if (_userRole == 'parent') iconData = Icons.chat_rounded;
+                else if (_userRole == 'teacher') iconData = Icons.grade_rounded;
+              } else if (idx == navItems.length - 1) {
+                iconData = Icons.person_rounded;
+              }
+
+              return InkWell(
+                onTap: () => setState(() => _currentIndex = idx),
+                borderRadius: BorderRadius.circular(24),
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                  decoration: BoxDecoration(
+                    color: isSelected ? AppColors.amberPrimary.withOpacity(0.15) : Colors.transparent,
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        iconData,
+                        color: isSelected ? AppColors.amberPrimary : const Color(0xFF94A3B8),
+                        size: 24,
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        item.label ?? '',
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                          color: isSelected ? AppColors.amberPrimary : const Color(0xFF94A3B8),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            }),
+          ),
         ),
       ),
     );

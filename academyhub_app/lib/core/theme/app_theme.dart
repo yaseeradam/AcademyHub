@@ -152,7 +152,7 @@ class AppTheme {
 
       // ── Text ────────────────────────────────────────────
       textTheme: base.copyWith(
-        displayLarge: GoogleFonts.spaceGrotesk(fontSize: 28, fontWeight: FontWeight.extrabold, color: AppColors.slate900),
+        displayLarge: GoogleFonts.spaceGrotesk(fontSize: 28, fontWeight: FontWeight.w800, color: AppColors.slate900),
         titleLarge:   GoogleFonts.spaceGrotesk(fontSize: 22, fontWeight: FontWeight.bold, color: AppColors.slate900),
         titleMedium:  GoogleFonts.spaceGrotesk(fontSize: 17, fontWeight: FontWeight.bold, color: AppColors.slate900),
         titleSmall:   GoogleFonts.spaceGrotesk(fontSize: 15, fontWeight: FontWeight.w600, color: AppColors.slate900),

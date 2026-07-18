@@ -426,7 +426,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                           onPressed: _students.isEmpty ? null : _saveAttendance,
                           child: const Text(
                             'SAVE ATTENDANCE',
-                            style: TextStyle(fontWeight: FontWeight.extrabold, fontSize: 16),
+                            style: TextStyle(fontWeight: FontWeight.w800, fontSize: 16),
                           ),
                         ),
                       ),

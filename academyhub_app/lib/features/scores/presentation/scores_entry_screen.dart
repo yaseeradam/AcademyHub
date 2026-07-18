@@ -154,7 +154,7 @@ class _ScoresEntryScreenState extends State<ScoresEntryScreen> {
                     ),
                     child: Text(
                       input.isEmpty ? '-' : input,
-                      style: const TextStyle(fontSize: 36, fontWeight: FontWeight.extrabold, color: AppColors.amberPrimary),
+                      style: const TextStyle(fontSize: 36, fontWeight: FontWeight.w800, color: AppColors.amberPrimary),
                       textAlign: TextAlign.center,
                     ),
                   ),
@@ -220,7 +220,7 @@ class _ScoresEntryScreenState extends State<ScoresEntryScreen> {
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                       ),
                       onPressed: () => Navigator.pop(context),
-                      child: const Text('CONFIRM', style: TextStyle(fontWeight: FontWeight.extrabold, fontSize: 16)),
+                      child: const Text('CONFIRM', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 16)),
                     ),
                   ),
                 ],
@@ -357,7 +357,7 @@ class _ScoresEntryScreenState extends State<ScoresEntryScreen> {
                 isEmpty ? '—' : value,
                 style: TextStyle(
                   fontSize: 18,
-                  fontWeight: FontWeight.extrabold,
+                  fontWeight: FontWeight.w800,
                   color: isEmpty ? const Color(0xFFCBD5E1) : AppColors.amberPrimary,
                 ),
               ),
@@ -442,7 +442,7 @@ class _ScoresEntryScreenState extends State<ScoresEntryScreen> {
                       onPressed: _students.isEmpty ? null : _saveScores,
                       child: const Text(
                         'SAVE SCORES',
-                        style: TextStyle(fontWeight: FontWeight.extrabold, fontSize: 16),
+                        style: TextStyle(fontWeight: FontWeight.w800, fontSize: 16),
                       ),
                     ),
                   ),

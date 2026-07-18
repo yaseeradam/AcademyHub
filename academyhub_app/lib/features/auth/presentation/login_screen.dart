@@ -118,11 +118,18 @@ class _LoginScreenState extends State<LoginScreen> {
           duration: const Duration(milliseconds: 200),
           height: 64,
           decoration: BoxDecoration(
-            color: isSelected ? AppColors.amberPrimary : const Color(0xFF1E293B),
+            color: isSelected ? AppColors.amberPrimary : Colors.white,
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color: isSelected ? AppColors.amberPrimary : const Color(0xFF334155),
+              color: isSelected ? AppColors.amberPrimary : const Color(0xFFCBD5E1),
             ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.03),
+                blurRadius: 4,
+                offset: const Offset(0, 2),
+              ),
+            ],
           ),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -152,10 +159,10 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     final isStudent = _selectedRole == 'student';
     return Scaffold(
-      backgroundColor: const Color(0xFF0F172A),
+      backgroundColor: const Color(0xFFF1F5F9),
       appBar: AppBar(
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          icon: const Icon(Icons.arrow_back, color: Color(0xFF0F172A)),
           onPressed: () async {
             await SecureStorage.instance.deleteSchoolSlug();
             if (mounted) {
@@ -165,7 +172,7 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
         title: Text(
           _schoolName ?? 'Greenwood High School',
-          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
+          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF0F172A)),
         ),
         elevation: 0,
         backgroundColor: Colors.transparent,
@@ -207,84 +214,98 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               const SizedBox(height: 32),
 
-              // Inputs Column (no Card wrapper)
-              Text(
-                (isStudent ? 'Admission Number' : 'Email Address').toUpperCase(),
-                style: const TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.amberPrimary,
-                  letterSpacing: 1.2,
-                ),
-              ),
-              const SizedBox(height: 8),
-              TextField(
-                controller: _usernameController,
-                keyboardType: isStudent ? TextInputType.text : TextInputType.emailAddress,
-                style: const TextStyle(color: Colors.white),
-                decoration: InputDecoration(
-                  fillColor: const Color(0xFF1E293B),
-                  filled: true,
-                  hintText: isStudent ? 'e.g. STU20240001' : 'e.g. parent@school.com',
-                  hintStyle: const TextStyle(color: Color(0xFF475569), fontSize: 13),
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide.none,
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide.none,
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: AppColors.amberPrimary, width: 1.5),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 20),
-              const Text(
-                'PASSWORD',
-                style: TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.amberPrimary,
-                  letterSpacing: 1.2,
-                ),
-              ),
-              const SizedBox(height: 8),
-              TextField(
-                controller: _passwordController,
-                obscureText: _obscurePassword,
-                style: const TextStyle(color: Colors.white),
-                decoration: InputDecoration(
-                  fillColor: const Color(0xFF1E293B),
-                  filled: true,
-                  hintText: 'Enter your password',
-                  hintStyle: const TextStyle(color: Color(0xFF475569), fontSize: 13),
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide.none,
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide.none,
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: AppColors.amberPrimary, width: 1.5),
-                  ),
-                  suffixIcon: IconButton(
-                    icon: Icon(
-                      _obscurePassword ? Icons.visibility_off : Icons.visibility,
-                      color: const Color(0xFF64748B),
-                    ),
-                    onPressed: () {
-                      setState(() {
-                        _obscurePassword = !_obscurePassword;
-                      });
-                    },
+              // Inputs Card
+              Card(
+                color: Colors.white,
+                elevation: 2,
+                shadowColor: Colors.black.withOpacity(0.06),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                child: Padding(
+                  padding: const EdgeInsets.all(20.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Text(
+                        (isStudent ? 'Admission Number' : 'Email Address').toUpperCase(),
+                        style: const TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.amberPrimary,
+                          letterSpacing: 1.2,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      TextField(
+                        controller: _usernameController,
+                        keyboardType: isStudent ? TextInputType.text : TextInputType.emailAddress,
+                        style: const TextStyle(color: Color(0xFF0F172A)),
+                        decoration: InputDecoration(
+                          fillColor: const Color(0xFFF1F5F9),
+                          filled: true,
+                          hintText: isStudent ? 'e.g. STU20240001' : 'e.g. parent@school.com',
+                          hintStyle: const TextStyle(color: Color(0xFF94A3B8), fontSize: 13),
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide.none,
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide.none,
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: const BorderSide(color: AppColors.amberPrimary, width: 1.5),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                      const Text(
+                        'PASSWORD',
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.amberPrimary,
+                          letterSpacing: 1.2,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      TextField(
+                        controller: _passwordController,
+                        obscureText: _obscurePassword,
+                        style: const TextStyle(color: Color(0xFF0F172A)),
+                        decoration: InputDecoration(
+                          fillColor: const Color(0xFFF1F5F9),
+                          filled: true,
+                          hintText: 'Enter your password',
+                          hintStyle: const TextStyle(color: Color(0xFF94A3B8), fontSize: 13),
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide.none,
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide.none,
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: const BorderSide(color: AppColors.amberPrimary, width: 1.5),
+                          ),
+                          suffixIcon: IconButton(
+                            icon: Icon(
+                              _obscurePassword ? Icons.visibility_off : Icons.visibility,
+                              color: const Color(0xFF64748B),
+                            ),
+                            onPressed: () {
+                              setState(() {
+                                _obscurePassword = !_obscurePassword;
+                              });
+                            },
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),
@@ -333,7 +354,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         )
                       : const Text(
                           'SIGN IN',
-                          style: TextStyle(fontWeight: FontWeight.extrabold, fontSize: 16),
+                          style: TextStyle(fontWeight: FontWeight.w800, fontSize: 16),
                         ),
                 ),
               ),

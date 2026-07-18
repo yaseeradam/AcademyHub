@@ -71,37 +71,45 @@ class _SchoolFinderScreenState extends State<SchoolFinderScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0F172A),
+      backgroundColor: const Color(0xFFF1F5F9),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const SizedBox(height: 64),
-              // AcademyHub Logo / Icon with amber glow shadow
+              const SizedBox(height: 48),
+              // Logo
               Center(
-                child: Icon(
-                  Icons.school_rounded,
-                  size: 72,
-                  color: AppColors.amberPrimary,
-                  shadows: [
-                    Shadow(
-                      color: AppColors.amberPrimary.withOpacity(0.4),
-                      blurRadius: 20,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
+                child: Container(
+                  width: 90,
+                  height: 90,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.06),
+                        blurRadius: 16,
+                        offset: const Offset(0, 8),
+                      ),
+                    ],
+                  ),
+                  child: const Icon(
+                    Icons.school_rounded,
+                    size: 48,
+                    color: AppColors.amberPrimary,
+                  ),
                 ),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 20),
               const Center(
                 child: Text(
                   'AcademyHub',
                   style: TextStyle(
                     fontSize: 28,
-                    fontWeight: FontWeight.extrabold,
-                    color: Colors.white,
+                    fontWeight: FontWeight.w800,
+                    color: Color(0xFF0F172A),
                   ),
                 ),
               ),
@@ -111,81 +119,98 @@ class _SchoolFinderScreenState extends State<SchoolFinderScreen> {
                   'Your School, In Your Pocket',
                   style: TextStyle(
                     fontSize: 13,
-                    color: Color(0xFF94A3B8),
+                    color: Color(0xFF64748B),
                   ),
                 ),
               ),
-              const SizedBox(height: 64),
+              const SizedBox(height: 48),
               
-              // Plain Input Column
-              const Text(
-                'ENTER YOUR SCHOOL SLUG',
-                style: TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.amberPrimary,
-                  letterSpacing: 1.2,
-                ),
-              ),
-              const SizedBox(height: 8),
-              SizedBox(
-                height: 72, // accommodate for helper/error text
-                child: TextField(
-                  controller: _slugController,
-                  style: const TextStyle(color: Color(0xFF0F172A)), // readable dark text on white bg
-                  onChanged: (val) {
-                    if (val.length > 2) {
-                      _validateSchoolSlug(val.trim().toLowerCase());
-                    } else {
-                      setState(() {
-                        _isValidSlug = false;
-                        _resolvedSchoolName = null;
-                      });
-                    }
-                  },
-                  decoration: InputDecoration(
-                    fillColor: Colors.white,
-                    filled: true,
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                    hintText: 'Enter school slug (e.g. greenwood)',
-                    hintStyle: const TextStyle(color: Color(0xFF94A3B8), fontSize: 13),
-                    helperText: 'Your school provided this',
-                    helperStyle: const TextStyle(color: Color(0xFF64748B), fontSize: 11),
-                    prefixIcon: const Icon(Icons.school_rounded, color: AppColors.amberPrimary),
-                    suffixIcon: _isLoading
-                        ? const Padding(
-                            padding: EdgeInsets.all(12.0),
-                            child: SizedBox(
-                              width: 20,
-                              height: 20,
-                              child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.amberPrimary),
-                            ),
-                          )
-                        : _isValidSlug
-                            ? const Icon(Icons.check_circle, color: AppColors.successGreen)
-                            : null,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide.none,
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide.none,
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(color: AppColors.amberPrimary, width: 1.5),
-                    ),
-                    errorBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(color: AppColors.dangerRed, width: 1.5),
-                    ),
+              // Input Field Card
+              Card(
+                color: Colors.white,
+                elevation: 2,
+                shadowColor: Colors.black.withOpacity(0.06),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                child: Padding(
+                  padding: const EdgeInsets.all(20.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'ENTER YOUR SCHOOL SLUG',
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.amberPrimary,
+                          letterSpacing: 1.2,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      TextField(
+                        controller: _slugController,
+                        style: const TextStyle(color: Color(0xFF0F172A)),
+                        onChanged: (val) {
+                          if (val.length > 2) {
+                            _validateSchoolSlug(val.trim().toLowerCase());
+                          } else {
+                            setState(() {
+                              _isValidSlug = false;
+                              _resolvedSchoolName = null;
+                            });
+                          }
+                        },
+                        decoration: InputDecoration(
+                          fillColor: const Color(0xFFF1F5F9),
+                          filled: true,
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                          hintText: 'Enter school slug (e.g. greenwood)',
+                          hintStyle: const TextStyle(color: Color(0xFF94A3B8), fontSize: 13),
+                          prefixIcon: const Icon(Icons.domain, color: Color(0xFF94A3B8)),
+                          suffixIcon: _isLoading
+                              ? const Padding(
+                                  padding: EdgeInsets.all(12.0),
+                                  child: SizedBox(
+                                    width: 20,
+                                    height: 20,
+                                    child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.amberPrimary),
+                                  ),
+                                )
+                              : _isValidSlug
+                                  ? const Icon(Icons.check_circle, color: AppColors.successGreen)
+                                  : null,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide.none,
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide.none,
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: const BorderSide(color: AppColors.amberPrimary, width: 1.5),
+                          ),
+                          errorBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: const BorderSide(color: AppColors.dangerRed, width: 1.5),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      const Text(
+                        'Your school administrator provided you with this code.',
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: Color(0xFF64748B),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 20),
 
-              // Plain Amber-tinted Container Chip
+              // Resolved Confirmation Chip
               if (_resolvedSchoolName != null) ...[
                 AnimatedContainer(
                   duration: const Duration(milliseconds: 300),
@@ -223,7 +248,7 @@ class _SchoolFinderScreenState extends State<SchoolFinderScreen> {
                 const SizedBox(height: 16),
               ],
 
-              const SizedBox(height: 32),
+              const SizedBox(height: 24),
               
               // Continue Button
               Opacity(
@@ -261,7 +286,7 @@ class _SchoolFinderScreenState extends State<SchoolFinderScreen> {
                         : null,
                     child: const Text(
                       'Continue →',
-                      style: TextStyle(fontWeight: FontWeight.extrabold, fontSize: 16),
+                      style: TextStyle(fontWeight: FontWeight.w800, fontSize: 16),
                     ),
                   ),
                 ),
