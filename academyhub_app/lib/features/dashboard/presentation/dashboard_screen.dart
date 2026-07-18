@@ -815,112 +815,183 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  void _showChildResultsModal(String childName) {
-    showModalBottomSheet(
+  void _showChildResultsModal(int studentId, String childName) async {
+    showDialog(
       context: context,
-      isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
-      builder: (context) {
-        return DraggableScrollableSheet(
-          initialChildSize: 0.8,
-          maxChildSize: 0.95,
-          minChildSize: 0.5,
-          expand: false,
-          builder: (context, scrollController) {
-            return SingleChildScrollView(
-              controller: scrollController,
-              padding: const EdgeInsets.all(20.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Center(
-                    child: Container(
-                      width: 40,
-                      height: 4,
-                      decoration: BoxDecoration(
-                        color: AppColors.divider,
-                        borderRadius: BorderRadius.circular(2),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    "Academic Results: $childName",
-                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 16),
-                  ResultsChart(subjectResults: _sampleResults),
-                  const SizedBox(height: 24),
-                  const Text(
-                    'Subject Scores',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
-                  ),
-                  const SizedBox(height: 12),
-                  ListView.builder(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemCount: _sampleResults.length,
-                    itemBuilder: (context, idx) {
-                      final res = _sampleResults[idx];
-                      final total = res['total'] as int;
-                      Color gradeColor;
-                      if (total >= 80) gradeColor = AppColors.successGreen;
-                      else if (total >= 70) gradeColor = AppColors.softBlue;
-                      else if (total >= 50) gradeColor = AppColors.accentAmber;
-                      else gradeColor = AppColors.dangerRed;
+      barrierDismissible: false,
+      builder: (context) => const Center(child: CircularProgressIndicator()),
+    );
+    try {
+      final response = await apiClient.dio.get('/students/$studentId/report-card');
+      if (mounted) {
+        Navigator.pop(context); // Close loading dialog
+      }
+      if (response.statusCode == 200 && response.data != null) {
+        final data = response.data['data'] ?? {};
+        final published = data['is_published'] as bool? ?? false;
+        final rawSubjects = List<dynamic>.from(data['subjects'] ?? []);
+        
+        final List<Map<String, dynamic>> subjectsList = rawSubjects.map((s) {
+          return {
+            'subject_name': s['subject'] ?? 'Subject',
+            'ca1': s['ca1'],
+            'ca2': s['ca2'],
+            'exam': s['exam'],
+            'total': s['total'],
+            'grade': s['grade'] ?? 'F',
+          };
+        }).toList();
 
-                      return Card(
-                        child: Padding(
-                          padding: const EdgeInsets.all(16.0),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        if (mounted) {
+          showModalBottomSheet(
+            context: context,
+            isScrollControlled: true,
+            shape: const RoundedRectangleBorder(
+              borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+            ),
+            builder: (context) {
+              return DraggableScrollableSheet(
+                initialChildSize: 0.8,
+                maxChildSize: 0.95,
+                minChildSize: 0.5,
+                expand: false,
+                builder: (context, scrollController) {
+                  return SingleChildScrollView(
+                    controller: scrollController,
+                    padding: const EdgeInsets.all(20.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Center(
+                          child: Container(
+                            width: 40,
+                            height: 4,
+                            decoration: BoxDecoration(
+                              color: AppColors.divider,
+                              borderRadius: BorderRadius.circular(2),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          "Academic Results: $childName",
+                          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 16),
+                        if (!published)
+                          const Center(
+                            child: Padding(
+                              padding: EdgeInsets.symmetric(vertical: 40.0),
+                              child: Column(
                                 children: [
+                                  Icon(Icons.lock_outline, size: 48, color: AppColors.textDisabled),
+                                  SizedBox(height: 12),
                                   Text(
-                                    res['subject'],
-                                    style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+                                    'Results Not Published',
+                                    style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.textPrimary),
                                   ),
+                                  SizedBox(height: 6),
                                   Text(
-                                    res['grade'],
-                                    style: TextStyle(fontWeight: FontWeight.bold, color: gradeColor),
+                                    'Report cards for this term are not published yet.',
+                                    style: TextStyle(color: AppColors.textSecondary, fontSize: 12),
                                   ),
                                 ],
                               ),
-                              const SizedBox(height: 8),
-                              LinearProgressIndicator(
-                                value: total / 100.0,
-                                backgroundColor: AppColors.divider,
-                                color: gradeColor,
-                                minHeight: 4,
+                            ),
+                          )
+                        else if (subjectsList.isEmpty)
+                          const Center(
+                            child: Padding(
+                              padding: EdgeInsets.symmetric(vertical: 40.0),
+                              child: Text(
+                                'No academic records found for this term.',
+                                style: TextStyle(color: AppColors.textSecondary),
                               ),
-                            ],
+                            ),
+                          )
+                        else ...[
+                          ResultsChart(subjectResults: subjectsList),
+                          const SizedBox(height: 24),
+                          const Text(
+                            'Subject Scores',
+                            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
                           ),
-                        ),
-                      );
-                    },
-                  ),
-                ],
-              ),
-            );
-          },
+                          const SizedBox(height: 12),
+                          ListView.builder(
+                            shrinkWrap: true,
+                            physics: const NeverScrollableScrollPhysics(),
+                            itemCount: subjectsList.length,
+                            itemBuilder: (context, idx) {
+                              final res = subjectsList[idx];
+                              final total = int.tryParse(res['total']?.toString() ?? '0') ?? 0;
+                              Color gradeColor;
+                              if (total >= 80) gradeColor = AppColors.successGreen;
+                              else if (total >= 70) gradeColor = AppColors.softBlue;
+                              else if (total >= 50) gradeColor = AppColors.accentAmber;
+                              else gradeColor = AppColors.dangerRed;
+
+                              return Card(
+                                child: Padding(
+                                  padding: const EdgeInsets.all(16.0),
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Row(
+                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Text(
+                                            res['subject_name'] ?? '',
+                                            style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+                                          ),
+                                          Text(
+                                            res['grade'] ?? 'F',
+                                            style: TextStyle(fontWeight: FontWeight.bold, color: gradeColor),
+                                          ),
+                                        ],
+                                      ),
+                                      const SizedBox(height: 8),
+                                      LinearProgressIndicator(
+                                        value: total / 100.0,
+                                        backgroundColor: AppColors.divider,
+                                        color: gradeColor,
+                                        minHeight: 4,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                        ],
+                      ],
+                    ),
+                  );
+                },
+              );
+            },
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        Navigator.pop(context); // Safe dismiss
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to load child results: $e')),
         );
-      },
-    );
+      }
+    }
   }
 
   Widget _buildParentChildrenView() {
     return ChildrenView(
-      onViewResults: () => _showChildResultsModal('David Hassan'),
+      onViewResults: (id, name) => _showChildResultsModal(id, name),
       onMessageTeacher: () {
         setState(() {
           _currentIndex = 2; // Jump to Chat tab
         });
       },
+      isMessagingEnabled: _activePlugins.contains('messages'),
     );
   }
 

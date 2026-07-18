@@ -1,41 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:academyhub_app/core/theme/app_theme.dart';
+import 'package:academyhub_app/core/network/api_client.dart';
 
-class ChildItem {
-  final int id;
-  final String name;
-  final String className;
-  final String attendanceRate;
-  final String teacherName;
-
-  const ChildItem({
-    required this.id,
-    required this.name,
-    required this.className,
-    required this.attendanceRate,
-    required this.teacherName,
-  });
-}
-
-class ChildrenView extends StatelessWidget {
-  final List<ChildItem> childrenList = const [
-    ChildItem(
-      id: 1,
-      name: 'David Hassan',
-      className: 'Grade 10A',
-      attendanceRate: '96.4%',
-      teacherName: 'Mr. Benson',
-    ),
-    ChildItem(
-      id: 2,
-      name: 'Sarah Hassan',
-      className: 'Grade 8B',
-      attendanceRate: '98.1%',
-      teacherName: 'Mrs. Fowler',
-    ),
-  ];
-
-  final VoidCallback onViewResults;
+class ChildrenView extends StatefulWidget {
+  final Function(int id, String name) onViewResults;
   final VoidCallback onMessageTeacher;
   final bool isMessagingEnabled;
 
@@ -47,12 +15,82 @@ class ChildrenView extends StatelessWidget {
   });
 
   @override
+  State<ChildrenView> createState() => _ChildrenViewState();
+}
+
+class _ChildrenViewState extends State<ChildrenView> {
+  List<dynamic> _children = [];
+  bool _isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadChildren();
+  }
+
+  Future<void> _loadChildren() async {
+    if (!mounted) return;
+    setState(() {
+      _isLoading = true;
+    });
+    try {
+      final response = await apiClient.dio.get('/students');
+      if (response.statusCode == 200 && response.data != null) {
+        // Paginated list -> 'data' key contains the array
+        final list = List<dynamic>.from(response.data['data'] ?? []);
+        if (mounted) {
+          setState(() {
+            _children = list;
+          });
+        }
+      }
+    } catch (e) {
+      debugPrint('Error loading parent children: $e');
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
+    if (_isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    if (_children.isEmpty) {
+      return const Center(
+        child: Padding(
+          padding: EdgeInsets.all(24.0),
+          child: Text(
+            'No children profiles linked to your account.',
+            style: TextStyle(color: AppColors.textSecondary, fontSize: 15),
+            textAlign: TextAlign.center,
+          ),
+        ),
+      );
+    }
+
     return ListView.builder(
       padding: const EdgeInsets.all(16),
-      itemCount: childrenList.length,
+      itemCount: _children.length,
       itemBuilder: (context, idx) {
-        final child = childrenList[idx];
+        final child = _children[idx];
+        final firstName = child['first_name'] ?? '';
+        final lastName = child['last_name'] ?? '';
+        final fullName = '$firstName $lastName'.trim();
+        final className = child['school_class']?['name'] ?? 'Unassigned';
+        final sectionName = child['section']?['name'] ?? '';
+        final displayClass = sectionName.isNotEmpty ? '$className ($sectionName)' : className;
+
+        String initials = '';
+        if (firstName.isNotEmpty) initials += firstName[0].toUpperCase();
+        if (lastName.isNotEmpty) initials += lastName[0].toUpperCase();
+        if (initials.isEmpty) initials = '?';
+
         return Card(
           child: Padding(
             padding: const EdgeInsets.all(16.0),
@@ -65,7 +103,7 @@ class ChildrenView extends StatelessWidget {
                       radius: 24,
                       backgroundColor: AppColors.primaryBlue.withOpacity(0.12),
                       child: Text(
-                        child.name.substring(0, 1) + child.name.split(' ')[1].substring(0, 1),
+                        initials,
                         style: const TextStyle(color: AppColors.primaryBlue, fontWeight: FontWeight.bold),
                       ),
                     ),
@@ -75,29 +113,15 @@ class ChildrenView extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            child.name,
+                            fullName,
                             style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: AppColors.textPrimary),
                           ),
                           Text(
-                            'Class: ${child.className} · Teacher: ${child.teacherName}',
+                            'Class: $displayClass',
                             style: const TextStyle(color: AppColors.textSecondary, fontSize: 12),
                           ),
                         ],
                       ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text(
-                      'Attendance Rate',
-                      style: TextStyle(color: AppColors.textSecondary, fontSize: 13),
-                    ),
-                    Text(
-                      child.attendanceRate,
-                      style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.successGreen, fontSize: 14),
                     ),
                   ],
                 ),
@@ -113,11 +137,11 @@ class ChildrenView extends StatelessWidget {
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                           padding: const EdgeInsets.symmetric(vertical: 10),
                         ),
-                        onPressed: onViewResults,
+                        onPressed: () => widget.onViewResults(child['id'], fullName),
                         child: const Text('View Results', style: TextStyle(color: AppColors.primaryBlue, fontSize: 13)),
                       ),
                     ),
-                    if (isMessagingEnabled) ...[
+                    if (widget.isMessagingEnabled) ...[
                       const SizedBox(width: 8),
                       Expanded(
                         child: ElevatedButton(
@@ -126,7 +150,7 @@ class ChildrenView extends StatelessWidget {
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                             padding: const EdgeInsets.symmetric(vertical: 10),
                           ),
-                          onPressed: onMessageTeacher,
+                          onPressed: widget.onMessageTeacher,
                           child: const Text('Message Teacher', style: TextStyle(fontSize: 13)),
                         ),
                       ),
