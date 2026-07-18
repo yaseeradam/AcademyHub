@@ -17,13 +17,14 @@ class TimetableController extends Controller
 
         if ($user->role === 'teacher') {
             $query->where('teacher_id', $user->id);
-        } elseif ($user->role === 'student') {
-            $student = Student::where('user_id', $user->id)->first();
+        } elseif ($user->role === 'student' || $user instanceof Student) {
+            $student = $user instanceof Student ? $user : Student::where('user_id', $user->id)->first();
             abort_unless($student, 403);
             $query->where('class_id', $student->class_id);
         } elseif ($user->role === 'parent') {
-            $classIds = $user->students()->pluck('class_id');
-            $query->whereIn('class_id', $classIds);
+            $classIds = $user->students()->pluck('students.id'); // Pluck parent students IDs to get class ids
+            $studentClassIds = Student::whereIn('id', $classIds)->pluck('class_id');
+            $query->whereIn('class_id', $studentClassIds);
         }
 
         return response()->json(['data' => $query->get()]);
