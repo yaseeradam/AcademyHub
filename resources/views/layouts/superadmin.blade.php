@@ -632,6 +632,33 @@
                 @endif
             </a>
 
+            @if($saUnreadCount > 0)
+                @php
+                    $unreadSchools = \App\Models\SuperadminNotification::whereNull('read_at')
+                        ->with('tenant')
+                        ->select('tenant_id', \DB::raw('count(*) as count'))
+                        ->groupBy('tenant_id')
+                        ->get();
+                @endphp
+                @if($unreadSchools->isNotEmpty())
+                    <div class="sa-unread-schools-sidebar" style="margin-left: 28px; margin-top: -2px; margin-bottom: 8px; display: flex; flex-direction: column; gap: 4px;">
+                        @foreach($unreadSchools as $us)
+                            @if($us->tenant)
+                                <a href="{{ route('superadmin.notifications.list') }}" style="display: flex; align-items: center; justify-content: space-between; font-size: 11px; color: #64748b; font-weight: 600; padding: 3px 8px; background: rgba(124, 58, 237, 0.05); border-radius: 6px; text-decoration: none; margin: 0; border: none; box-shadow: none; gap: 6px; height: auto; width: auto; font-family: inherit;">
+                                    <span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 120px;">{{ $us->tenant->name }}</span>
+                                    <span style="background: #ef4444; color: white; border-radius: 999px; padding: 1px 5px; font-size: 9px; font-weight: 800; line-height: 1; flex-shrink: 0; min-width: 15px; text-align: center;">{{ $us->count }}</span>
+                                </a>
+                            @else
+                                <a href="{{ route('superadmin.notifications.list') }}" style="display: flex; align-items: center; justify-content: space-between; font-size: 11px; color: #64748b; font-weight: 600; padding: 3px 8px; background: rgba(124, 58, 237, 0.05); border-radius: 6px; text-decoration: none; margin: 0; border: none; box-shadow: none; gap: 6px; height: auto; width: auto; font-family: inherit;">
+                                    <span>System</span>
+                                    <span style="background: #ef4444; color: white; border-radius: 999px; padding: 1px 5px; font-size: 9px; font-weight: 800; line-height: 1; flex-shrink: 0; min-width: 15px; text-align: center;">{{ $us->count }}</span>
+                                </a>
+                            @endif
+                        @endforeach
+                    </div>
+                @endif
+            @endif
+
             <div class="sa-nav-label" style="margin-top:12px;">School Instances</div>
 
             <a href="{{ route('superadmin.tenants.index') }}"

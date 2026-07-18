@@ -24,7 +24,10 @@ class TenantController extends Controller
 {
     public function index()
     {
-        $tenants = Tenant::latest()->paginate(20);
+        $tenants = Tenant::withCount(['superadminNotifications as unread_notifications_count' => function ($query) {
+            $query->whereNull('read_at');
+        }])->latest()->paginate(20);
+        
         return view('superadmin.tenants.index', compact('tenants'));
     }
 

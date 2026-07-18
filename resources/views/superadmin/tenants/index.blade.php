@@ -88,7 +88,14 @@
                 @forelse($tenants as $tenant)
                 <tr>
                     <td>
-                        <div style="font-weight:700;color:#1e293b;font-size:14px;">{{ $tenant->name }}</div>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <div style="font-weight:700;color:#1e293b;font-size:14px;">{{ $tenant->name }}</div>
+                            @if($tenant->unread_notifications_count > 0)
+                                <span style="background: #ef4444; color: white; font-size: 10px; font-weight: 800; padding: 1px 6px; border-radius: 999px; animation: pulse 2s infinite;" title="Has unread notifications">
+                                    {{ $tenant->unread_notifications_count }} unread
+                                </span>
+                            @endif
+                        </div>
                         @if($tenant->contact_email)
                             <div style="font-size:11.5px;color:#94a3b8;margin-top:1px;">{{ $tenant->contact_email }}</div>
                         @endif

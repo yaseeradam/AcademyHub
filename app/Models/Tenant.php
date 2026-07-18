@@ -94,6 +94,11 @@ class Tenant extends Model
         return $this->hasMany(TenantPluginBill::class);
     }
 
+    public function superadminNotifications(): HasMany
+    {
+        return $this->hasMany(SuperadminNotification::class);
+    }
+
     public function scopeActive($query)
     {
         return $query->where('status', 'active');
