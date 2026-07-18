@@ -129,7 +129,7 @@ class SubscriptionBilling extends Component
         $email = str_replace('.local', '.com', auth()->user()->email ?? 'admin@school.com');
         $reference = 'SUB_' . uniqid() . '_' . time();
 
-        $secretKey = config('services.paystack.secret_key', env('PAYSTACK_SECRET_KEY'));
+        $secretKey = config('services.paystack.secret_key');
 
         $response = Http::withToken($secretKey)
             ->withOptions(['verify' => false])
@@ -182,7 +182,7 @@ class SubscriptionBilling extends Component
 
     public function verifyPayment($reference)
     {
-        $response = \Illuminate\Support\Facades\Http::withToken(config('services.paystack.secret_key', env('PAYSTACK_SECRET_KEY')))
+        $response = \Illuminate\Support\Facades\Http::withToken(config('services.paystack.secret_key'))
             ->withOptions(['verify' => false])
             ->timeout(10)
             ->get("https://api.paystack.co/transaction/verify/{$reference}");

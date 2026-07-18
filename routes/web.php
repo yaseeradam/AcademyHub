@@ -84,8 +84,8 @@ Route::middleware(['student.session', 'plugin:cbt', 'throttle:cbt_attempt'])->gr
 });
 
 // Fresh CSRF token endpoint — used by JS logout to prevent 419 Page Expired
-Route::get('/csrf-token', [UtilityController::class, 'csrfToken']);
-Route::post('/log-error', [UtilityController::class, 'logClientError']);
+Route::get('/csrf-token', [UtilityController::class, 'csrfToken'])->middleware('throttle:10,1');
+Route::post('/log-error', [UtilityController::class, 'logClientError'])->middleware('throttle:5,1');
 
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthenticatedSessionController::class, 'create'])
@@ -116,6 +116,7 @@ Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])
     ->name('logout');
 
 Route::post('/student/logout', [AuthenticatedSessionController::class, 'studentLogout'])
+    ->middleware('student.session')
     ->name('student.logout');
 
 // Student dashboard route (session-based, not auth-based)

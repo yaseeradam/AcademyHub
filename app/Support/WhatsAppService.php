@@ -34,8 +34,8 @@ class WhatsAppService
         }
 
         try {
-            $token = config('services.whatsapp.token') ?: env('WHATSAPP_TOKEN');
-            $phoneNumberId = config('services.whatsapp.phone_number_id') ?: env('WHATSAPP_PHONE_NUMBER_ID');
+            $token = config('services.whatsapp.token');
+            $phoneNumberId = config('services.whatsapp.phone_number_id');
 
             if (empty($token) || empty($phoneNumberId)) {
                 Log::warning('WhatsAppService (Meta Cloud API): Token or Phone Number ID not configured.');

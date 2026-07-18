@@ -35,6 +35,10 @@ class UtilityController extends Controller
 
     public function csrfToken()
     {
+        if (!auth()->check() && !session()->has('student_id')) {
+            return response()->json(['message' => 'Unauthorized'], 401);
+        }
+
         return response()->json(['token' => csrf_token()]);
     }
 

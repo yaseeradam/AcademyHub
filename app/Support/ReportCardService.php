@@ -476,7 +476,7 @@ class ReportCardService
         ?int $timesAbsent,
         string $role
     ): ?string {
-        $raw = config('services.groq.key') ?: env('GROQ_API_KEY');
+        $raw = config('services.groq.key');
         if (empty($raw)) {
             return null;
         }

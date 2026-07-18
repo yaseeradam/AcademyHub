@@ -9,5 +9,11 @@ class WhatsappLog extends Model
 {
     use BelongsToTenant;
 
-    protected $guarded = [];
+    protected $fillable = [
+        'tenant_id',
+        'phone',
+        'message_type',
+        'message',
+        'status',
+    ];
 }

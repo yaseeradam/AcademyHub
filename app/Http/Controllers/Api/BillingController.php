@@ -66,7 +66,7 @@ class BillingController extends Controller
             ->sum('amount_paid');
 
         $outstandingBalance = max(0.0, $amountDue - $amountPaid);
-        $apiKey = config('services.whatsapp.api_key') ?: env('WHATSAPP_API_KEY');
+        $apiKey = config('services.whatsapp.api_key');
 
         $paymentUrl = \Illuminate\Support\Facades\URL::temporarySignedRoute(
             'whatsapp.pay',

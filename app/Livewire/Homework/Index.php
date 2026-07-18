@@ -268,7 +268,7 @@ class Index extends Component
     private function tryGroqAPI($prompt)
     {
         try {
-            $raw = config('services.groq.key') ?: env('GROQ_API_KEY');
+            $raw = config('services.groq.key');
             if (empty($raw)) return null;
 
             // Support comma-separated keys — rotate through them

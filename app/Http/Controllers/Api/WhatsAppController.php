@@ -1654,7 +1654,7 @@ class WhatsAppController extends Controller
             file_put_contents($tempFilePath, $audioContent);
 
             // 3. Send to Groq Whisper
-            $raw = config('services.groq.key') ?: env('GROQ_API_KEY');
+            $raw = config('services.groq.key');
             if (empty($raw)) {
                 \Illuminate\Support\Facades\Log::warning('transcribeAudio: Groq API key not configured.');
                 unlink($tempFilePath);

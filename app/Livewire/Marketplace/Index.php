@@ -71,7 +71,7 @@ class Index extends Component
         $reference = 'PLG-' . strtoupper(Str::random(12));
         $amountInKobo = (int) ($component->price * 100);
 
-        $secretKey = config('services.paystack.secret_key', env('PAYSTACK_SECRET_KEY'));
+        $secretKey = config('services.paystack.secret_key');
 
         $response = Http::withToken($secretKey)
             ->withOptions(['verify' => false])
@@ -108,7 +108,7 @@ class Index extends Component
         $user = auth()->user();
         abort_unless($user?->role === 'admin' || $user?->is_super_admin, 403);
 
-        $response = Http::withToken(config('services.paystack.secret_key', env('PAYSTACK_SECRET_KEY')))
+        $response = Http::withToken(config('services.paystack.secret_key'))
             ->withOptions(['verify' => false])
             ->timeout(10)
             ->get("https://api.paystack.co/transaction/verify/{$reference}");

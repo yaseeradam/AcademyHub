@@ -18,28 +18,34 @@ class EnsureUserIsActive
     {
         $user = $request->user();
 
-        if ($user && ! $user->is_active) {
-            // Revoke current Sanctum token if present to prevent reuse
-            if (method_exists($user, 'currentAccessToken') && $user->currentAccessToken()) {
-                $user->currentAccessToken()->delete();
+        if ($user) {
+            $isActive = $user instanceof \App\Models\Student
+                ? $user->status === 'Active'
+                : (bool) $user->is_active;
+
+            if (!$isActive) {
+                // Revoke current Sanctum token if present to prevent reuse
+                if (method_exists($user, 'currentAccessToken') && $user->currentAccessToken()) {
+                    $user->currentAccessToken()->delete();
+                }
+
+                if ($request->expectsJson() || $request->is('api/*')) {
+                    return response()->json([
+                        'message' => 'Your account is inactive. Contact the administrator.',
+                    ], 403);
+                }
+
+                Auth::logout();
+
+                if ($request->hasSession()) {
+                    $request->session()->invalidate();
+                    $request->session()->regenerateToken();
+                }
+
+                return redirect()
+                    ->route('login')
+                    ->withErrors(['email' => 'Your account is inactive. Contact the administrator.']);
             }
-
-            if ($request->expectsJson() || $request->is('api/*')) {
-                return response()->json([
-                    'message' => 'Your account is inactive. Contact the administrator.',
-                ], 403);
-            }
-
-            Auth::logout();
-
-            if ($request->hasSession()) {
-                $request->session()->invalidate();
-                $request->session()->regenerateToken();
-            }
-
-            return redirect()
-                ->route('login')
-                ->withErrors(['email' => 'Your account is inactive. Contact the administrator.']);
         }
 
         return $next($request);

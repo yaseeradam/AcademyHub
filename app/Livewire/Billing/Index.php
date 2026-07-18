@@ -664,7 +664,7 @@ class Index extends Component
         $email = str_replace('.local', '.com', $user->email ?? 'admin@school.com');
         $reference = 'BILL_' . $bill->id . '_' . uniqid() . '_' . time();
 
-        $secretKey = config('services.paystack.secret_key', env('PAYSTACK_SECRET_KEY'));
+        $secretKey = config('services.paystack.secret_key');
 
         $response = Http::withToken($secretKey)
             ->withOptions(['verify' => false])

@@ -363,7 +363,7 @@ PROMPT;
 
     private function tryGroqAPI(string $prompt): ?string
     {
-        $rawKeys = env('GROQ_API_KEY');
+        $rawKeys = config('services.groq.key');
         if (empty($rawKeys)) {
             return null;
         }

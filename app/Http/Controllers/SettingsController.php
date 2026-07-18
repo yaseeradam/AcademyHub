@@ -105,9 +105,7 @@ class SettingsController extends Controller
         }
         
         // Force config reload by clearing config cache
-        if (function_exists('opcache_reset')) {
-            opcache_reset();
-        }
+        \Illuminate\Support\Facades\Artisan::call('config:clear');
 
         return back()->with('status', 'School settings saved.');
     }
@@ -139,9 +137,7 @@ class SettingsController extends Controller
         $this->refreshSettingsCache();
         
         // Force config reload by clearing config cache
-        if (function_exists('opcache_reset')) {
-            opcache_reset();
-        }
+        \Illuminate\Support\Facades\Artisan::call('config:clear');
 
         return back()->with('status', 'Result scoring marks saved.');
     }
@@ -269,9 +265,7 @@ class SettingsController extends Controller
         $this->refreshSettingsCache();
         
         // Force config reload by clearing config cache
-        if (function_exists('opcache_reset')) {
-            opcache_reset();
-        }
+        \Illuminate\Support\Facades\Artisan::call('config:clear');
 
         return back()->with('status', 'Certificate settings saved.');
     }

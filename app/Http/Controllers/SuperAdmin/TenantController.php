@@ -895,7 +895,7 @@ class TenantController extends Controller
         }
 
         // Register subaccount on Paystack
-        $secretKey = config('services.paystack.secret_key', env('PAYSTACK_SECRET_KEY'));
+        $secretKey = config('services.paystack.secret_key');
         $response = Http::withToken($secretKey)
             ->withOptions(['verify' => false])
             ->post('https://api.paystack.co/subaccount', [
@@ -980,7 +980,7 @@ class TenantController extends Controller
 
         // Fallback: search via Paystack API
         try {
-            $secretKey = config('services.paystack.secret_key', env('PAYSTACK_SECRET_KEY'));
+            $secretKey = config('services.paystack.secret_key');
             $response = Http::withToken($secretKey)
                 ->withOptions(['verify' => false])
                 ->get('https://api.paystack.co/bank');

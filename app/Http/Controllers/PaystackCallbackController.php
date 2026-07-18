@@ -25,7 +25,7 @@ class PaystackCallbackController extends Controller
         }
 
         // Verify the transaction with Paystack
-        $secretKey = config('services.paystack.secret_key', env('PAYSTACK_SECRET_KEY'));
+        $secretKey = config('services.paystack.secret_key');
         $response = Http::withToken($secretKey)
             ->withOptions(['verify' => false])
             ->timeout(15)

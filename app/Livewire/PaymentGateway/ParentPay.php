@@ -310,7 +310,7 @@ class ParentPay extends Component
         $tenant = $student->tenant;
         $subaccount = $tenant->settings['payment_gateway']['subaccount_code'] ?? null;
 
-        $secretKey = config('services.paystack.secret_key', env('PAYSTACK_SECRET_KEY'));
+        $secretKey = config('services.paystack.secret_key');
 
         $payload = [
             'email' => $email,

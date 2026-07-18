@@ -766,8 +766,8 @@ class MobileFeatureParityController extends Controller
 
     private function sendSMSBroadcast($phone, $message)
     {
-        $token = config('services.whatsapp.token') ?: env('WHATSAPP_TOKEN');
-        $phoneId = config('services.whatsapp.phone_id') ?: env('WHATSAPP_PHONE_ID');
+        $token = config('services.whatsapp.token');
+        $phoneId = config('services.whatsapp.phone_number_id');
 
         if (empty($token) || empty($phoneId)) {
             return false;

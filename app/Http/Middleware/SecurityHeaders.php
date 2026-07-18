@@ -17,8 +17,8 @@ class SecurityHeaders
         $response->headers->set('X-Frame-Options', 'SAMEORIGIN');
         $response->headers->set('Referrer-Policy', 'strict-origin-when-cross-origin');
 
-        // Only enforce strict CSP & HSTS in a true production deployment where Vite hot reload is NOT active
-        if (app()->environment('production') && ! file_exists(public_path('hot'))) {
+        // Only enforce strict CSP & HSTS in staging/production deployments where Vite hot reload is NOT active
+        if (! app()->environment('local', 'testing') && ! file_exists(public_path('hot'))) {
             $cspDomains = $this->getCspDomains($request);
             $cspDomainsStr = implode(' ', $cspDomains);
 
