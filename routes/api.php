@@ -147,6 +147,13 @@ Route::middleware(['auth:sanctum', 'active'])->group(function () {
         Route::get('/dashboard',                [StudentDashboardController::class, 'dashboard']);
         Route::get('/results',                  [StudentResultsController::class, 'results']);
         Route::get('/attendance',               [StudentAttendanceController::class, 'attendance']);
+        Route::get('/homework', function (\Illuminate\Http\Request $request) {
+            $student = $request->user();
+            if (!$student || !($student instanceof \App\Models\Student)) {
+                return response()->json(['message' => 'Unauthorized student context.'], 403);
+            }
+            return response()->json(['data' => $student->getHomeworkForStudent()]);
+        });
         Route::get('/exams',                    [StudentCbtController::class, 'exams']);
         Route::post('/exams/{exam}/start',      [StudentCbtController::class, 'startExam']);
         Route::post('/exams/{attempt}/submit',  [StudentCbtController::class, 'submitExam']);

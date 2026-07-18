@@ -38,6 +38,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   List<Map<String, dynamic>> _teacherClasses = [];
   bool _isLoadingClasses = false;
+  List<Map<String, dynamic>> _studentResults = [];
+  bool _isLoadingResults = false;
+  bool _isResultsPublished = false;
 
   @override
   void initState() {
@@ -80,6 +83,36 @@ class _DashboardScreenState extends State<DashboardScreen> {
     });
     if (_userRole == 'teacher') {
       _loadTeacherClasses();
+    } else if (_userRole == 'student') {
+      _loadStudentResults();
+    }
+  }
+
+  Future<void> _loadStudentResults() async {
+    if (!mounted) return;
+    setState(() {
+      _isLoadingResults = true;
+    });
+    try {
+      final response = await apiClient.dio.get('/student/results');
+      if (response.statusCode == 200 && response.data != null) {
+        final list = List<Map<String, dynamic>>.from(response.data['results'] ?? []);
+        final published = response.data['is_published'] as bool? ?? false;
+        if (mounted) {
+          setState(() {
+            _studentResults = list;
+            _isResultsPublished = published;
+          });
+        }
+      }
+    } catch (e) {
+      debugPrint('Error loading student results: $e');
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoadingResults = false;
+        });
+      }
     }
   }
 
@@ -416,12 +449,54 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   Widget _buildResultsView() {
+    if (_isLoadingResults) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    if (!_isResultsPublished) {
+      return const Center(
+        child: Padding(
+          padding: EdgeInsets.all(24.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.lock_outline, size: 64, color: AppColors.textDisabled),
+              SizedBox(height: 16),
+              Text(
+                'Results Not Published',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+              ),
+              SizedBox(height: 8),
+              Text(
+                'Report cards for the active term are not published yet. Please check back later or contact your school administrator.',
+                style: TextStyle(color: AppColors.textSecondary, fontSize: 13),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    if (_studentResults.isEmpty) {
+      return const Center(
+        child: Padding(
+          padding: EdgeInsets.all(24.0),
+          child: Text(
+            'No academic results found for the active term.',
+            style: TextStyle(color: AppColors.textSecondary, fontSize: 15),
+            textAlign: TextAlign.center,
+          ),
+        ),
+      );
+    }
+
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          ResultsChart(subjectResults: _sampleResults),
+          ResultsChart(subjectResults: _studentResults),
           const SizedBox(height: 16),
           const Text(
             'Subject Breakdown',
@@ -431,10 +506,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ListView.builder(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
-            itemCount: _sampleResults.length,
+            itemCount: _studentResults.length,
             itemBuilder: (context, idx) {
-              final res = _sampleResults[idx];
-              final total = res['total'] as int;
+              final res = _studentResults[idx];
+              final total = int.tryParse(res['total']?.toString() ?? '0') ?? 0;
               Color gradeColor;
               if (total >= 80) {
                 gradeColor = AppColors.successGreen;
@@ -456,7 +531,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            res['subject'],
+                            res['subject_name'] ?? 'General',
                             style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.textPrimary),
                           ),
                           Container(
@@ -466,7 +541,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                               borderRadius: BorderRadius.circular(20),
                             ),
                             child: Text(
-                              res['grade'],
+                              res['grade'] ?? 'F',
                               style: TextStyle(fontWeight: FontWeight.bold, color: gradeColor),
                             ),
                           ),
@@ -476,10 +551,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text('CA1: ${res['ca1']}/20', style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
-                          Text('CA2: ${res['ca2']}/20', style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
-                          Text('Exam: ${res['exam']}/60', style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
-                          Text('Total: ${res['total']}/100', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
+                          Text('CA1: ${res['ca1'] ?? 0}/20', style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+                          Text('CA2: ${res['ca2'] ?? 0}/20', style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+                          Text('Exam: ${res['exam'] ?? 0}/60', style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+                          Text('Total: $total/100', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
                         ],
                       ),
                       const SizedBox(height: 8),

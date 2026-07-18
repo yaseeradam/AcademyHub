@@ -1,57 +1,137 @@
 import 'package:flutter/material.dart';
 import 'package:academyhub_app/core/theme/app_theme.dart';
+import 'package:academyhub_app/core/network/api_client.dart';
 
-class HomeworkItem {
-  final String subject;
-  final String title;
-  final String description;
-  final DateTime dueDate;
-  final String status; // 'pending', 'submitted'
+class HomeworkView extends StatefulWidget {
+  const HomeworkView({super.key});
 
-  const HomeworkItem({
-    required this.subject,
-    required this.title,
-    required this.description,
-    required this.dueDate,
-    required this.status,
-  });
+  @override
+  State<HomeworkView> createState() => _HomeworkViewState();
 }
 
-class HomeworkView extends StatelessWidget {
-  final List<HomeworkItem> assignments = [
-    HomeworkItem(
-      subject: 'Mathematics',
-      title: 'Quadratic Equations Worksheet',
-      description: 'Solve questions 1 through 10 on page 42 of the textbook. Show all workings clearly on a paper sheet.',
-      dueDate: DateTime.now().add(const Duration(days: 2)),
-      status: 'pending',
-    ),
-    HomeworkItem(
-      subject: 'English Lit.',
-      title: 'Shakespearian Essay Outline',
-      description: 'Create an outline summarizing the main themes in Macbeth Act 1. Minimum 300 words.',
-      dueDate: DateTime.now().add(const Duration(days: 4)),
-      status: 'submitted',
-    ),
-    HomeworkItem(
-      subject: 'Chemistry',
-      title: 'Stoichiometry Questions',
-      description: 'Complete the stoichiometry exercise sheet uploaded in the resource portal.',
-      dueDate: DateTime.now().add(const Duration(days: 1)),
-      status: 'pending',
-    ),
-  ];
+class _HomeworkViewState extends State<HomeworkView> {
+  List<dynamic> _assignments = [];
+  bool _isLoading = false;
 
-  HomeworkView({super.key});
+  @override
+  void initState() {
+    super.initState();
+    _loadHomework();
+  }
 
-  void _showHomeworkDetails(BuildContext context, HomeworkItem item) {
+  Future<void> _loadHomework() async {
+    if (!mounted) return;
+    setState(() {
+      _isLoading = true;
+    });
+    try {
+      final response = await apiClient.dio.get('/student/homework');
+      if (response.statusCode == 200 && response.data != null) {
+        final list = List<dynamic>.from(response.data['data'] ?? []);
+        if (mounted) {
+          setState(() {
+            _assignments = list;
+          });
+        }
+      }
+    } catch (e) {
+      debugPrint('Error loading homework: $e');
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _submitAssignment(int homeworkId, String submissionText) async {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => const Center(child: CircularProgressIndicator()),
+    );
+    try {
+      final response = await apiClient.dio.post(
+        '/homework/$homeworkId/submit',
+        data: {'submission': submissionText},
+      );
+      if (mounted) {
+        Navigator.pop(context); // Close loading dialog
+      }
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('✓ Assignment submitted successfully!'),
+              backgroundColor: AppColors.successGreen,
+            ),
+          );
+        }
+        _loadHomework(); // Reload list to update status
+      }
+    } catch (e) {
+      if (mounted) {
+        Navigator.pop(context);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to submit assignment: $e'),
+            backgroundColor: AppColors.dangerRed,
+          ),
+        );
+      }
+    }
+  }
+
+  void _showSubmitDialog(BuildContext context, int homeworkId) {
+    final controller = TextEditingController();
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Submit Assignment'),
+          content: TextField(
+            controller: controller,
+            maxLines: 4,
+            decoration: const InputDecoration(
+              hintText: 'Enter your assignment answers or notes here...',
+              border: OutlineInputBorder(),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                final text = controller.text.trim();
+                if (text.isEmpty) return;
+                Navigator.pop(context);
+                _submitAssignment(homeworkId, text);
+              },
+              child: const Text('Submit'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showHomeworkDetails(BuildContext context, dynamic item) {
+    final submissions = List<dynamic>.from(item['submissions'] ?? []);
+    final isSubmitted = submissions.isNotEmpty;
+    final subjectName = item['subject']?['name'] ?? 'General';
+    final teacherName = item['teacher']?['name'] ?? 'Teacher';
+    final title = item['title'] ?? '';
+    final content = item['content'] ?? '';
+
     showModalBottomSheet(
       context: context,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       builder: (context) {
-        final isPending = item.status == 'pending';
         return Padding(
           padding: const EdgeInsets.all(20.0),
           child: Column(
@@ -73,21 +153,21 @@ class HomeworkView extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    item.subject,
+                    '$subjectName · By $teacherName',
                     style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.softBlue, fontSize: 13),
                   ),
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                     decoration: BoxDecoration(
-                      color: (isPending ? AppColors.accentAmber : AppColors.successGreen).withOpacity(0.12),
+                      color: (!isSubmitted ? AppColors.accentAmber : AppColors.successGreen).withOpacity(0.12),
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Text(
-                      item.status.toUpperCase(),
+                      isSubmitted ? 'SUBMITTED' : 'PENDING',
                       style: TextStyle(
                         fontSize: 10,
                         fontWeight: FontWeight.bold,
-                        color: isPending ? AppColors.accentAmber : AppColors.successGreen,
+                        color: !isSubmitted ? AppColors.accentAmber : AppColors.successGreen,
                       ),
                     ),
                   ),
@@ -95,7 +175,7 @@ class HomeworkView extends StatelessWidget {
               ),
               const SizedBox(height: 12),
               Text(
-                item.title,
+                title,
                 style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
               ),
               const SizedBox(height: 16),
@@ -105,20 +185,15 @@ class HomeworkView extends StatelessWidget {
               ),
               const SizedBox(height: 6),
               Text(
-                item.description,
+                content,
                 style: const TextStyle(color: AppColors.textSecondary, fontSize: 13, height: 1.4),
               ),
               const SizedBox(height: 24),
-              if (isPending)
+              if (!isSubmitted)
                 ElevatedButton(
                   onPressed: () {
                     Navigator.pop(context);
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('✓ Homework submitted successfully!'),
-                        backgroundColor: AppColors.successGreen,
-                      ),
-                    );
+                    _showSubmitDialog(context, item['id']);
                   },
                   child: const Text('Submit Assignment'),
                 ),
@@ -131,39 +206,83 @@ class HomeworkView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (_isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    if (_assignments.isEmpty) {
+      return const Center(
+        child: Padding(
+          padding: EdgeInsets.all(24.0),
+          child: Text(
+            'No homework assigned to your class yet.',
+            style: TextStyle(color: AppColors.textSecondary, fontSize: 15),
+            textAlign: TextAlign.center,
+          ),
+        ),
+      );
+    }
+
     return ListView.builder(
       padding: const EdgeInsets.all(16),
-      itemCount: assignments.length,
+      itemCount: _assignments.length,
       itemBuilder: (context, idx) {
-        final item = assignments[idx];
-        final isPending = item.status == 'pending';
-        final diff = item.dueDate.difference(DateTime.now()).inDays;
+        final item = _assignments[idx];
+        final submissions = List<dynamic>.from(item['submissions'] ?? []);
+        final isSubmitted = submissions.isNotEmpty;
+        final subjectName = item['subject']?['name'] ?? 'General';
+        final title = item['title'] ?? '';
+        
+        DateTime? dueDate;
+        if (item['due_date'] != null) {
+          dueDate = DateTime.tryParse(item['due_date'].toString());
+        }
+
+        String dueText = '';
+        if (dueDate != null) {
+          final diff = dueDate.difference(DateTime.now()).inDays;
+          if (diff < 0) {
+            dueText = 'Overdue by ${diff.abs()} days';
+          } else {
+            dueText = 'Due in $diff days';
+          }
+        }
 
         return Card(
           child: ListTile(
             leading: CircleAvatar(
-              backgroundColor: (isPending ? AppColors.accentAmber : AppColors.successGreen).withOpacity(0.12),
+              backgroundColor: (!isSubmitted ? AppColors.accentAmber : AppColors.successGreen).withOpacity(0.12),
               child: Icon(
-                isPending ? Icons.pending_actions : Icons.check_circle,
-                color: isPending ? AppColors.accentAmber : AppColors.successGreen,
+                !isSubmitted ? Icons.pending_actions : Icons.check_circle,
+                color: !isSubmitted ? AppColors.accentAmber : AppColors.successGreen,
               ),
             ),
             title: Text(
-              item.title,
+              title,
               style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.textPrimary),
             ),
             subtitle: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  item.subject,
+                  subjectName,
                   style: const TextStyle(color: AppColors.textSecondary, fontSize: 12),
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  'Due in $diff days',
-                  style: const TextStyle(color: AppColors.textDisabled, fontSize: 11),
-                ),
+                if (dueText.isNotEmpty) ...[
+                  const SizedBox(height: 4),
+                  Text(
+                    dueText,
+                    style: TextStyle(
+                      color: !isSubmitted && dueDate != null && dueDate.isBefore(DateTime.now()) 
+                        ? AppColors.dangerRed 
+                        : AppColors.textDisabled, 
+                      fontSize: 11,
+                      fontWeight: !isSubmitted && dueDate != null && dueDate.isBefore(DateTime.now())
+                        ? FontWeight.bold
+                        : FontWeight.normal,
+                    ),
+                  ),
+                ],
               ],
             ),
             trailing: const Icon(Icons.arrow_forward_ios, size: 14),

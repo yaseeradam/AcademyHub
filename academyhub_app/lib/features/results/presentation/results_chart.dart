@@ -66,7 +66,10 @@ class ResultsChart extends StatelessWidget {
                         getTitlesWidget: (value, meta) {
                           int idx = value.toInt();
                           if (idx >= 0 && idx < subjectResults.length) {
-                            String code = subjectResults[idx]['subject_code'] ?? '';
+                            String code = subjectResults[idx]['subject_code'] ?? 
+                                (subjectResults[idx]['subject_name'] != null && subjectResults[idx]['subject_name'].toString().length >= 3
+                                    ? subjectResults[idx]['subject_name'].toString().substring(0, 3).toUpperCase()
+                                    : subjectResults[idx]['subject_name']?.toString().toUpperCase() ?? '');
                             return Padding(
                               padding: const EdgeInsets.only(top: 8.0),
                               child: Text(
