@@ -27,7 +27,7 @@ void main() {
 
     // Verify the Continue button is initially disabled (can't proceed without slug validation)
     final ElevatedButton button = tester.widget<ElevatedButton>(
-      find.widgetWithText(ElevatedButton, 'Continue'),
+      find.widgetWithText(ElevatedButton, 'Continue →'),
     );
     expect(button.enabled, isFalse);
   });

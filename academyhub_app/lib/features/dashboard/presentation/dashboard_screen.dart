@@ -2519,7 +2519,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Widget build(BuildContext context) {
     final navItems = _getNavItems();
     final isMeTab = _currentIndex == navItems.length - 1;
-    final isHomeTab = _currentIndex == 0;
     final isResultsTab = _currentIndex == 1 && _userRole == 'student';
     final isTeacherAttendanceTab = _currentIndex == 1 && _userRole == 'teacher';
     final isTeacherScoresTab = _currentIndex == 2 && _userRole == 'teacher';
