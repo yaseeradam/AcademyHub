@@ -58,6 +58,7 @@ Route::middleware(['auth:sanctum', 'active'])->group(function () {
 
     // Students
     Route::get('/students',                      [StudentController::class, 'index']);
+    Route::get('/students/{id}/details',         [StudentController::class, 'details']);
     Route::get('/students/{id}/report-card',     [StudentController::class, 'reportCard']);
 
     // Billing

@@ -201,25 +201,41 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
     final int id = student['id'];
     final name = '${student['first_name']} ${student['last_name']}';
     final admission = student['admission_number'];
+    final status = _attendanceMap[id] ?? 'present';
+    final initials = student['first_name'].substring(0, 1).toUpperCase() +
+        student['last_name'].substring(0, 1).toUpperCase();
 
-    return Card(
-      color: Colors.white,
-      elevation: 2,
-      shadowColor: Colors.black.withOpacity(0.06),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-      margin: const EdgeInsets.only(bottom: 12),
+    final Color statusColor = status == 'present'
+        ? const Color(0xFF10B981)
+        : status == 'absent'
+            ? const Color(0xFFF43F5E)
+            : const Color(0xFFF97316);
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 10),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: statusColor.withOpacity(0.2)),
+        boxShadow: [BoxShadow(color: statusColor.withOpacity(0.06), blurRadius: 8, offset: const Offset(0, 3))],
+      ),
       child: Padding(
-        padding: const EdgeInsets.all(12.0),
+        padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
         child: Column(
           children: [
             Row(
               children: [
-                CircleAvatar(
-                  backgroundColor: const Color(0xFFFEF3C7),
-                  child: Text(
-                    student['first_name'].substring(0, 1).toUpperCase() +
-                    student['last_name'].substring(0, 1).toUpperCase(),
-                    style: const TextStyle(color: Color(0xFFF59E0B), fontWeight: FontWeight.bold),
+                AnimatedContainer(
+                  duration: const Duration(milliseconds: 250),
+                  width: 44, height: 44,
+                  decoration: BoxDecoration(
+                    color: statusColor.withOpacity(0.12),
+                    shape: BoxShape.circle,
+                    border: Border.all(color: statusColor.withOpacity(0.35), width: 1.5),
+                  ),
+                  child: Center(
+                    child: Text(initials,
+                        style: TextStyle(color: statusColor, fontWeight: FontWeight.bold, fontSize: 15)),
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -227,22 +243,29 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        name,
-                        style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF0F172A), fontSize: 15),
-                      ),
-                      Text(
-                        admission,
-                        style: const TextStyle(color: Color(0xFF64748B), fontSize: 12),
-                      ),
+                      Text(name,
+                          style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF0F172A), fontSize: 14)),
+                      const SizedBox(height: 2),
+                      Text(admission,
+                          style: const TextStyle(color: Color(0xFF64748B), fontSize: 11)),
                     ],
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                  decoration: BoxDecoration(
+                    color: statusColor.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Text(
+                    status[0].toUpperCase() + status.substring(1),
+                    style: TextStyle(color: statusColor, fontSize: 10, fontWeight: FontWeight.bold),
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 10),
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 _buildStatusButton(id, 'present', 'Present'),
                 _buildStatusButton(id, 'absent', 'Absent'),
@@ -324,69 +347,184 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
     );
   }
 
+  Widget _summaryChip(String label, Color color) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: color.withOpacity(0.25)),
+      ),
+      child: Text(label, style: TextStyle(color: color, fontSize: 11, fontWeight: FontWeight.bold)),
+    );
+  }
+
+  Widget _markAllButton(String status, String label, IconData icon, Color color) {
+    return Expanded(
+      child: GestureDetector(
+        onTap: () => _markAll(status),
+        child: Container(
+          height: 40,
+          decoration: BoxDecoration(
+            color: color.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: color.withOpacity(0.3)),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(icon, color: color, size: 14),
+              const SizedBox(width: 5),
+              Text(label, style: TextStyle(color: color, fontSize: 11, fontWeight: FontWeight.bold)),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildHeroHeader() {
+    final today = DateTime.now();
+    final dateStr = '${_weekday(today.weekday)}, ${today.day} ${_month(today.month)} ${today.year}';
+    return SafeArea(
+      bottom: false,
+      child: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Color(0xFF0F766E), Color(0xFF134E4A)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+        ),
+        padding: const EdgeInsets.fromLTRB(16, 12, 16, 20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                GestureDetector(
+                  onTap: () => Navigator.pop(context),
+                  child: Container(
+                    width: 36, height: 36,
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.15),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: const Icon(Icons.arrow_back_rounded, color: Colors.white, size: 20),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(widget.className,
+                          style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+                      const SizedBox(height: 2),
+                      Text(dateStr,
+                          style: TextStyle(color: Colors.white.withOpacity(0.75), fontSize: 12)),
+                    ],
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                  decoration: BoxDecoration(
+                    color: _isOnline
+                        ? Colors.white.withOpacity(0.2)
+                        : const Color(0xFFF59E0B).withOpacity(0.9),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        _isOnline ? Icons.cloud_done_rounded : Icons.cloud_off_rounded,
+                        color: Colors.white, size: 12,
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        _isOnline ? 'Online' : 'Offline',
+                        style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                _heroBadge(Icons.people_rounded, '${_students.length}', 'Students'),
+                const SizedBox(width: 10),
+                _heroBadge(Icons.check_circle_rounded, '${_countStatus("present")}', 'Present'),
+                const SizedBox(width: 10),
+                _heroBadge(Icons.cancel_rounded, '${_countStatus("absent")}', 'Absent'),
+                const SizedBox(width: 10),
+                _heroBadge(Icons.watch_later_rounded, '${_countStatus("late")}', 'Late'),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _heroBadge(IconData icon, String value, String label) {
+    return Expanded(
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        decoration: BoxDecoration(
+          color: Colors.white.withOpacity(0.12),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Column(
+          children: [
+            Icon(icon, color: Colors.white, size: 16),
+            const SizedBox(height: 3),
+            Text(value, style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold)),
+            Text(label, style: TextStyle(color: Colors.white.withOpacity(0.7), fontSize: 9)),
+          ],
+        ),
+      ),
+    );
+  }
+
+  int _countStatus(String status) =>
+      _attendanceMap.values.where((v) => v == status).length;
+
+  String _weekday(int d) => ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'][d - 1];
+  String _month(int m) => ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][m - 1];
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () => Navigator.pop(context),
-        ),
-        title: Text(
-          '${widget.className} Attendance',
-          style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
-        ),
-        elevation: 0,
-        backgroundColor: const Color(0xFF1E293B),
-      ),
+      backgroundColor: AppColors.appBackground,
+      appBar: null,
       body: _isLoading
           ? const Center(child: CircularProgressIndicator(color: AppColors.amberPrimary))
           : Column(
               children: [
+                _buildHeroHeader(),
                 if (!_isOnline)
                   Container(
-                    height: 36,
+                    height: 32,
                     color: const Color(0xFFF59E0B),
                     child: const Center(
                       child: Text(
-                        'OFFLINE — QUEUEING CHANGES',
-                        style: TextStyle(color: Color(0xFF0F172A), fontSize: 13, fontWeight: FontWeight.bold, letterSpacing: 0.5),
+                        'OFFLINE — CHANGES WILL SYNC WHEN CONNECTED',
+                        style: TextStyle(color: Color(0xFF0F172A), fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 0.4),
                       ),
                     ),
                   ),
                 Padding(
-                  padding: const EdgeInsets.all(16.0),
+                  padding: const EdgeInsets.fromLTRB(16, 14, 16, 4),
                   child: Row(
                     children: [
-                      Expanded(
-                        child: SizedBox(
-                          height: 44,
-                          child: OutlinedButton(
-                            style: OutlinedButton.styleFrom(
-                              side: const BorderSide(color: Color(0xFF10B981), width: 1.5),
-                              foregroundColor: const Color(0xFF10B981),
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                            ),
-                            onPressed: () => _markAll('present'),
-                            child: const Text('Mark All Present', style: TextStyle(fontWeight: FontWeight.bold)),
-                          ),
-                        ),
-                      ),
+                      _markAllButton('present', 'All Present', Icons.check_circle_rounded, const Color(0xFF10B981)),
                       const SizedBox(width: 8),
-                      Expanded(
-                        child: SizedBox(
-                          height: 44,
-                          child: OutlinedButton(
-                            style: OutlinedButton.styleFrom(
-                              side: const BorderSide(color: Color(0xFFF43F5E), width: 1.5),
-                              foregroundColor: const Color(0xFFF43F5E),
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                            ),
-                            onPressed: () => _markAll('absent'),
-                            child: const Text('Mark All Absent', style: TextStyle(fontWeight: FontWeight.bold)),
-                          ),
-                        ),
-                      ),
+                      _markAllButton('absent', 'All Absent', Icons.cancel_rounded, const Color(0xFFF43F5E)),
+                      const SizedBox(width: 8),
+                      _markAllButton('late', 'All Late', Icons.watch_later_rounded, const Color(0xFFF97316)),
                     ],
                   ),
                 ),
@@ -400,41 +538,54 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                   ),
                 ),
                 Padding(
-                  padding: const EdgeInsets.all(16.0),
+                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
+                      // Summary row
+                      if (_students.isNotEmpty)
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 10),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              _summaryChip('${_countStatus("present")} Present', const Color(0xFF10B981)),
+                              const SizedBox(width: 8),
+                              _summaryChip('${_countStatus("absent")} Absent', const Color(0xFFF43F5E)),
+                              const SizedBox(width: 8),
+                              _summaryChip('${_countStatus("late")} Late', const Color(0xFFF97316)),
+                            ],
+                          ),
+                        ),
                       Container(
                         height: 52,
                         decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(12),
-                          boxShadow: [
-                            BoxShadow(
-                              color: AppColors.amberPrimary.withOpacity(0.35),
-                              blurRadius: 16,
-                              offset: const Offset(0, 4),
-                            ),
-                          ],
+                          borderRadius: BorderRadius.circular(14),
+                          gradient: const LinearGradient(
+                            colors: [Color(0xFF0F766E), Color(0xFF134E4A)],
+                          ),
+                          boxShadow: [BoxShadow(color: const Color(0xFF0F766E).withOpacity(0.35), blurRadius: 14, offset: const Offset(0, 4))],
                         ),
-                        child: ElevatedButton(
+                        child: ElevatedButton.icon(
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.amberPrimary,
+                            backgroundColor: Colors.transparent,
+                            shadowColor: Colors.transparent,
                             foregroundColor: Colors.white,
-                            elevation: 0,
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                           ),
                           onPressed: _students.isEmpty ? null : _saveAttendance,
-                          child: const Text(
-                            'SAVE ATTENDANCE',
-                            style: TextStyle(fontWeight: FontWeight.w800, fontSize: 16),
+                          icon: const Icon(Icons.save_rounded, size: 20),
+                          label: Text(
+                            _isOnline ? 'SAVE & SYNC ATTENDANCE' : 'SAVE LOCALLY',
+                            style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 15),
                           ),
                         ),
                       ),
                       if (!_isOnline) ...[
-                        const SizedBox(height: 8),
+                        const SizedBox(height: 6),
                         const Text(
-                          '📡 Will sync when connected',
-                          style: TextStyle(color: AppColors.amberPrimary, fontSize: 11, fontWeight: FontWeight.bold),
+                          '📡 Will sync automatically when back online',
+                          style: TextStyle(color: Color(0xFFF97316), fontSize: 11, fontWeight: FontWeight.bold),
                           textAlign: TextAlign.center,
                         ),
                       ],

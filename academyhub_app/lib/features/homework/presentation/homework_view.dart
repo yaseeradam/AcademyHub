@@ -154,9 +154,7 @@ class _HomeworkViewState extends State<HomeworkView> with SingleTickerProviderSt
           builder: (context, setSheetState) {
             return Padding(
               padding: EdgeInsets.only(
-                top: 20.0,
-                left: 20.0,
-                right: 20.0,
+                top: 20.0, left: 20.0, right: 20.0,
                 bottom: MediaQuery.of(context).viewInsets.bottom + 20.0,
               ),
               child: SingleChildScrollView(
@@ -164,103 +162,106 @@ class _HomeworkViewState extends State<HomeworkView> with SingleTickerProviderSt
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    // Handle & Header
+                    // Handle
                     Center(
                       child: Container(
-                        width: 40,
-                        height: 4,
-                        decoration: BoxDecoration(
-                          color: AppColors.divider,
-                          borderRadius: BorderRadius.circular(2),
-                        ),
+                        width: 40, height: 4,
+                        decoration: BoxDecoration(color: const Color(0xFFE2E8F0), borderRadius: BorderRadius.circular(2)),
                       ),
                     ),
                     const SizedBox(height: 16),
+                    // Header
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Expanded(
-                          child: Text(
-                            'Submit: $title',
-                            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+                        Container(
+                          width: 40, height: 40,
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF7C3AED).withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(12),
                           ),
+                          child: const Icon(Icons.upload_file_rounded, color: Color(0xFF7C3AED), size: 20),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Text('Submit: $title',
+                              style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Color(0xFF0F172A)),
+                              maxLines: 2, overflow: TextOverflow.ellipsis),
                         ),
                         IconButton(
-                          icon: const Icon(Icons.close),
+                          icon: const Icon(Icons.close_rounded, color: Color(0xFF64748B)),
                           onPressed: () => Navigator.pop(context),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 16),
-
-                    // Written Answers Area
-                    const Text(
-                      'WRITTEN ANSWERS (OPTIONAL)',
-                      style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: AppColors.textSecondary, letterSpacing: 0.5),
-                    ),
+                    const SizedBox(height: 20),
+                    // Written answer
+                    const Text('WRITTEN ANSWER',
+                        style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Color(0xFF64748B), letterSpacing: 0.8)),
                     const SizedBox(height: 8),
                     TextField(
                       controller: writtenController,
                       maxLines: 4,
                       decoration: InputDecoration(
-                        hintText: 'Type your written answers here...',
-                        fillColor: const Color(0xFFF1F5F9),
+                        hintText: 'Type your answers here...',
+                        hintStyle: const TextStyle(color: Color(0xFF94A3B8), fontSize: 13),
+                        fillColor: const Color(0xFFF8FAFC),
                         filled: true,
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: const BorderSide(color: Color(0xFF7C3AED), width: 1.5),
+                        ),
                       ),
                     ),
                     const SizedBox(height: 20),
-
-                    // Attach Files Section
-                    const Text(
-                      'ATTACH PHOTOS / FILES',
-                      style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: AppColors.textSecondary, letterSpacing: 0.5),
-                    ),
+                    // Attach files
+                    const Text('ATTACH FILES',
+                        style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Color(0xFF64748B), letterSpacing: 0.8)),
                     const SizedBox(height: 8),
                     GestureDetector(
-                      onTap: () {
-                        // simulate adding file
-                        setSheetState(() {
-                          attachments.add('notebook_page_${attachments.length + 1}.jpg');
-                        });
-                      },
+                      onTap: () => setSheetState(() {
+                        attachments.add('notebook_page_${attachments.length + 1}.jpg');
+                      }),
                       child: Container(
-                        height: 90,
+                        height: 80,
                         decoration: BoxDecoration(
                           color: const Color(0xFFF8FAFC),
                           borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: AppColors.amberPrimary.withOpacity(0.5), style: BorderStyle.values[1]), // dashed-like effect
+                          border: Border.all(color: const Color(0xFF7C3AED).withOpacity(0.3), width: 1.5),
                         ),
                         child: const Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(Icons.camera_alt_outlined, color: AppColors.amberPrimary),
+                            Icon(Icons.add_photo_alternate_rounded, color: Color(0xFF7C3AED), size: 26),
                             SizedBox(height: 4),
-                            Text(
-                              'Tap to take picture of notebook pages or upload PDF',
-                              style: TextStyle(fontSize: 11, color: AppColors.textSecondary),
-                              textAlign: TextAlign.center,
-                            ),
+                            Text('Tap to attach photos or PDF',
+                                style: TextStyle(fontSize: 11, color: Color(0xFF64748B))),
                           ],
                         ),
                       ),
                     ),
-                    const SizedBox(height: 12),
-
-                    // Attachment Preview
                     if (attachments.isNotEmpty) ...[
+                      const SizedBox(height: 12),
                       SizedBox(
-                        height: 80,
+                        height: 72,
                         child: ListView.builder(
                           scrollDirection: Axis.horizontal,
                           itemCount: attachments.length,
                           itemBuilder: (context, index) {
                             return Container(
                               margin: const EdgeInsets.only(right: 8),
-                              width: 80,
+                              width: 72,
                               decoration: BoxDecoration(
                                 color: const Color(0xFFF1F5F9),
-                                borderRadius: BorderRadius.circular(8),
+                                borderRadius: BorderRadius.circular(10),
+                                border: Border.all(color: const Color(0xFFE2E8F0)),
                               ),
                               child: Stack(
                                 children: [
@@ -268,29 +269,22 @@ class _HomeworkViewState extends State<HomeworkView> with SingleTickerProviderSt
                                     child: Column(
                                       mainAxisAlignment: MainAxisAlignment.center,
                                       children: [
-                                        const Icon(Icons.image, size: 24, color: AppColors.slate400),
+                                        const Icon(Icons.image_rounded, size: 22, color: Color(0xFF94A3B8)),
                                         const SizedBox(height: 2),
-                                        Text(
-                                          attachments[index],
-                                          style: const TextStyle(fontSize: 8, color: AppColors.textSecondary),
-                                          overflow: TextOverflow.ellipsis,
-                                        ),
+                                        Text(attachments[index],
+                                            style: const TextStyle(fontSize: 7, color: Color(0xFF64748B)),
+                                            overflow: TextOverflow.ellipsis),
                                       ],
                                     ),
                                   ),
                                   Positioned(
-                                    top: 2,
-                                    right: 2,
+                                    top: 2, right: 2,
                                     child: GestureDetector(
-                                      onTap: () {
-                                        setSheetState(() {
-                                          attachments.removeAt(index);
-                                        });
-                                      },
-                                      child: const CircleAvatar(
-                                        radius: 8,
-                                        backgroundColor: Colors.red,
-                                        child: Icon(Icons.close, size: 10, color: Colors.white),
+                                      onTap: () => setSheetState(() => attachments.removeAt(index)),
+                                      child: Container(
+                                        width: 16, height: 16,
+                                        decoration: const BoxDecoration(color: Color(0xFFF43F5E), shape: BoxShape.circle),
+                                        child: const Icon(Icons.close, size: 10, color: Colors.white),
                                       ),
                                     ),
                                   ),
@@ -300,23 +294,31 @@ class _HomeworkViewState extends State<HomeworkView> with SingleTickerProviderSt
                           },
                         ),
                       ),
-                      const SizedBox(height: 20),
                     ],
-
-                    // Submit Button
-                    ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.amberPrimary,
-                        foregroundColor: Colors.white,
-                        elevation: 0,
+                    const SizedBox(height: 20),
+                    Container(
+                      height: 50,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(14),
+                        gradient: const LinearGradient(colors: [Color(0xFF7C3AED), Color(0xFF6D28D9)]),
+                        boxShadow: [BoxShadow(color: const Color(0xFF7C3AED).withOpacity(0.3), blurRadius: 12, offset: const Offset(0, 4))],
                       ),
-                      onPressed: () {
-                        Navigator.pop(context);
-                        _submitAssignment(homeworkId, writtenController.text, attachments);
-                      },
-                      child: const Text('SUBMIT TO TEACHER', style: TextStyle(fontWeight: FontWeight.bold)),
+                      child: ElevatedButton.icon(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.transparent,
+                          shadowColor: Colors.transparent,
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                        ),
+                        onPressed: () {
+                          Navigator.pop(context);
+                          _submitAssignment(homeworkId, writtenController.text, attachments);
+                        },
+                        icon: const Icon(Icons.send_rounded, size: 18),
+                        label: const Text('SUBMIT TO TEACHER', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                      ),
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 8),
                   ],
                 ),
               ),
@@ -460,7 +462,7 @@ class _HomeworkViewState extends State<HomeworkView> with SingleTickerProviderSt
     }
 
     return ListView.builder(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
       itemCount: list.length,
       itemBuilder: (context, index) {
         final item = list[index];
@@ -468,46 +470,104 @@ class _HomeworkViewState extends State<HomeworkView> with SingleTickerProviderSt
         final subject = item['subject']?['name'] ?? 'General';
         final submissions = List<dynamic>.from(item['submissions'] ?? []);
         final isSubmitted = submissions.isNotEmpty;
-        final score = isSubmitted && submissions.first['score'] != null ? '${submissions.first['score']}/20' : null;
+        final score = isSubmitted && submissions.first['score'] != null
+            ? '${submissions.first['score']}/20'
+            : null;
+        final due = item['due_date']?.toString() ?? 'Tomorrow';
 
-        return Card(
-          child: ListTile(
-            leading: CircleAvatar(
-              backgroundColor: (isSubmitted ? AppColors.successGreen : AppColors.dangerRed).withOpacity(0.12),
-              child: Icon(
-                isSubmitted ? Icons.check_circle_outline : Icons.pending_actions,
-                color: isSubmitted ? AppColors.successGreen : AppColors.dangerRed,
-              ),
+        final Color statusColor = isSubmitted ? const Color(0xFF10B981) : const Color(0xFFF43F5E);
+        final IconData statusIcon = isSubmitted ? Icons.check_circle_rounded : Icons.pending_actions_rounded;
+
+        return GestureDetector(
+          onTap: () => _showHomeworkDetails(context, item),
+          child: Container(
+            margin: const EdgeInsets.only(bottom: 10),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: statusColor.withOpacity(0.2)),
+              boxShadow: [BoxShadow(color: statusColor.withOpacity(0.06), blurRadius: 8, offset: const Offset(0, 3))],
             ),
-            title: Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
-            subtitle: Text('$subject · Due: ${item['due_date'] ?? 'Tomorrow'}'),
-            trailing: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                if (score != null) ...[
+            child: Padding(
+              padding: const EdgeInsets.all(14),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                    decoration: BoxDecoration(color: AppColors.successGreen.withOpacity(0.1), borderRadius: BorderRadius.circular(12)),
-                    child: Text(score, style: const TextStyle(color: AppColors.successGreen, fontSize: 11, fontWeight: FontWeight.bold)),
+                    width: 42, height: 42,
+                    decoration: BoxDecoration(
+                      color: statusColor.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Icon(statusIcon, color: statusColor, size: 22),
                   ),
-                ] else ...[
-                  Text(
-                    isSubmitted ? 'Submitted' : 'Pending',
-                    style: TextStyle(
-                      color: isSubmitted ? AppColors.successGreen : AppColors.dangerRed,
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(title,
+                            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Color(0xFF0F172A)),
+                            maxLines: 1, overflow: TextOverflow.ellipsis),
+                        const SizedBox(height: 6),
+                        Row(
+                          children: [
+                            _pill(subject, const Color(0xFF7C3AED)),
+                            const SizedBox(width: 6),
+                            _pill('Due: $due', const Color(0xFFF43F5E)),
+                          ],
+                        ),
+                      ],
                     ),
                   ),
+                  const SizedBox(width: 8),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      if (score != null)
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF10B981).withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Text(score,
+                              style: const TextStyle(color: Color(0xFF10B981), fontSize: 11, fontWeight: FontWeight.bold)),
+                        )
+                      else
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                          decoration: BoxDecoration(
+                            color: statusColor.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Text(
+                            isSubmitted ? 'Done' : 'Pending',
+                            style: TextStyle(color: statusColor, fontSize: 11, fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                      const SizedBox(height: 6),
+                      const Icon(Icons.arrow_forward_ios_rounded, size: 12, color: Color(0xFF94A3B8)),
+                    ],
+                  ),
                 ],
-                const Icon(Icons.arrow_forward_ios, size: 10, color: AppColors.textDisabled),
-              ],
+              ),
             ),
-            onTap: () => _showHomeworkDetails(context, item),
           ),
         );
       },
+    );
+  }
+
+  Widget _pill(String label, Color color) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.08),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: color.withOpacity(0.2)),
+      ),
+      child: Text(label, style: TextStyle(color: color, fontSize: 10, fontWeight: FontWeight.w600)),
     );
   }
 
@@ -542,37 +602,84 @@ class _HomeworkViewState extends State<HomeworkView> with SingleTickerProviderSt
     }
 
     return ListView.builder(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
       itemCount: list.length,
       itemBuilder: (context, index) {
         final item = list[index];
         final title = item['title'] ?? '';
-        final desc = item['description'] ?? 'E-learning resources';
+        final desc = item['description'] ?? 'E-learning resource';
         final subject = item['subject_name'] ?? 'General';
         final sizeBytes = int.tryParse(item['file_size']?.toString() ?? '0') ?? 0;
         final sizeMb = (sizeBytes / (1024 * 1024)).toStringAsFixed(1);
         final fileType = item['file_name']?.toString().split('.').last.toUpperCase() ?? 'PDF';
+        final Color typeColor = fileType == 'PDF'
+            ? const Color(0xFFF43F5E)
+            : fileType == 'DOCX' || fileType == 'DOC'
+                ? const Color(0xFF3B82F6)
+                : const Color(0xFF10B981);
 
-        return Card(
-          child: ListTile(
-            leading: CircleAvatar(
-              backgroundColor: AppColors.amberPrimary.withOpacity(0.12),
-              child: const Icon(Icons.description_outlined, color: AppColors.amberPrimary),
-            ),
-            title: Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
-            subtitle: Text('$subject · $desc'),
-            trailing: Row(
-              mainAxisSize: MainAxisSize.min,
+        return Container(
+          margin: const EdgeInsets.only(bottom: 10),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: const Color(0xFFE2E8F0)),
+            boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 6, offset: const Offset(0, 2))],
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(14),
+            child: Row(
               children: [
-                Text('$sizeMb MB ($fileType)', style: const TextStyle(fontSize: 11, color: AppColors.textSecondary)),
+                Container(
+                  width: 46, height: 46,
+                  decoration: BoxDecoration(
+                    color: typeColor.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.description_rounded, color: typeColor, size: 18),
+                      Text(fileType, style: TextStyle(color: typeColor, fontSize: 7, fontWeight: FontWeight.bold)),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(title,
+                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Color(0xFF0F172A)),
+                          maxLines: 1, overflow: TextOverflow.ellipsis),
+                      const SizedBox(height: 4),
+                      Text(desc,
+                          style: const TextStyle(color: Color(0xFF64748B), fontSize: 11),
+                          maxLines: 1, overflow: TextOverflow.ellipsis),
+                      const SizedBox(height: 6),
+                      Row(
+                        children: [
+                          _pill(subject, const Color(0xFF0F766E)),
+                          const SizedBox(width: 6),
+                          _pill('$sizeMb MB', const Color(0xFF64748B)),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
                 const SizedBox(width: 8),
-                IconButton(
-                  icon: const Icon(Icons.cloud_download, color: AppColors.amberPrimary),
-                  onPressed: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Downloading note: $title'), backgroundColor: AppColors.amberPrimary),
-                    );
-                  },
+                GestureDetector(
+                  onTap: () => ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Downloading $title'), backgroundColor: const Color(0xFF0F766E)),
+                  ),
+                  child: Container(
+                    width: 38, height: 38,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF0F766E).withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: const Icon(Icons.download_rounded, color: Color(0xFF0F766E), size: 20),
+                  ),
                 ),
               ],
             ),
@@ -586,17 +693,73 @@ class _HomeworkViewState extends State<HomeworkView> with SingleTickerProviderSt
   Widget build(BuildContext context) {
     return Column(
       children: [
-        // Tab Control Header
+        // Styled Tab Header
         Container(
-          color: Colors.white,
-          child: TabBar(
-            controller: _tabController,
-            indicatorColor: AppColors.amberPrimary,
-            labelColor: AppColors.amberPrimary,
-            unselectedLabelColor: AppColors.textSecondary,
-            tabs: const [
-              Tab(text: 'Homework Assignments'),
-              Tab(text: 'Downloaded Notes'),
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            border: Border(bottom: BorderSide(color: Color(0xFFE2E8F0))),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 14, 16, 0),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 36, height: 36,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF7C3AED).withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: const Icon(Icons.menu_book_rounded, color: Color(0xFF7C3AED), size: 20),
+                    ),
+                    const SizedBox(width: 10),
+                    const Text('Homework & Notes',
+                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF0F172A))),
+                    const Spacer(),
+                    if (_tabController.index == 0)
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF7C3AED).withOpacity(0.08),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Text(
+                          '${_assignments.length} tasks',
+                          style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Color(0xFF7C3AED)),
+                        ),
+                      )
+                    else
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF0F766E).withOpacity(0.08),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Text(
+                          '${_notesList.length} notes',
+                          style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Color(0xFF0F766E)),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 10),
+              TabBar(
+                controller: _tabController,
+                indicatorColor: const Color(0xFF7C3AED),
+                indicatorWeight: 3,
+                indicatorSize: TabBarIndicatorSize.label,
+                labelColor: const Color(0xFF7C3AED),
+                unselectedLabelColor: const Color(0xFF94A3B8),
+                labelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.normal, fontSize: 13),
+                tabs: const [
+                  Tab(text: 'Assignments'),
+                  Tab(text: 'Class Notes'),
+                ],
+              ),
             ],
           ),
         ),

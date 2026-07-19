@@ -18,16 +18,16 @@ void main() {
 
     // Verify key titles and logo details are present
     expect(find.text('AcademyHub'), findsOneWidget);
-    expect(find.text('Your School, In Your Pocket'), findsOneWidget);
+    expect(find.text('Your School Portal'), findsOneWidget);
     expect(find.byIcon(Icons.school_rounded), findsWidgets);
 
     // Verify text field exists for slug lookup
     expect(find.byType(TextField), findsOneWidget);
-    expect(find.text('Enter school slug (e.g. greenwood)'), findsOneWidget); // It is a hint text
+    expect(find.text('e.g. greenwood'), findsOneWidget); // Hint text
 
     // Verify the Continue button is initially disabled (can't proceed without slug validation)
     final ElevatedButton button = tester.widget<ElevatedButton>(
-      find.widgetWithText(ElevatedButton, 'Continue →'),
+      find.widgetWithText(ElevatedButton, 'Continue'),
     );
     expect(button.enabled, isFalse);
   });

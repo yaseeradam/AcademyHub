@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:academyhub_app/core/theme/app_theme.dart';
 import 'package:academyhub_app/core/network/api_client.dart';
+import 'package:academyhub_app/features/students/presentation/student_detail_screen.dart';
 
 class ChildrenView extends StatefulWidget {
   final Function(int id, String name) onViewResults;
@@ -92,9 +93,16 @@ class _ChildrenViewState extends State<ChildrenView> {
         if (initials.isEmpty) initials = '?';
 
         return Card(
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
+          clipBehavior: Clip.antiAlias,
+          child: InkWell(
+            onTap: () {
+              if (child['id'] != null) {
+                StudentDetailScreen.show(context, studentId: child['id'], studentName: fullName);
+              }
+            },
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
@@ -160,8 +168,9 @@ class _ChildrenViewState extends State<ChildrenView> {
               ],
             ),
           ),
-        );
-      },
+        ),
+      );
+    },
     );
   }
 }

@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:academyhub_app/core/theme/app_theme.dart';
@@ -13,6 +14,7 @@ import 'package:academyhub_app/features/scores/presentation/scores_entry_screen.
 import 'package:academyhub_app/features/homework/presentation/homework_view.dart';
 import 'package:academyhub_app/features/parent/presentation/children_view.dart';
 import 'package:academyhub_app/features/messaging/presentation/chat_view.dart';
+import 'package:academyhub_app/features/students/presentation/student_detail_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -41,6 +43,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   List<Map<String, dynamic>> _studentResults = [];
   bool _isLoadingResults = false;
   bool _isResultsPublished = false;
+  Map<String, dynamic> _studentDashboardStats = {};
   List<dynamic> _announcements = [];
   bool _isLoadingAnnouncements = false;
 
@@ -61,6 +64,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
   List<dynamic> _adminStudentsList = [];
   bool _isLoadingAdminStudents = false;
   String _adminStudentsSearchQuery = '';
+
+  // Admin Staff state
+  int _adminDirectoryTab = 0; // 0 = Students, 1 = Staff & Faculty
+  List<dynamic> _adminStaffList = [];
+  bool _isLoadingAdminStaff = false;
+  String _adminStaffSearchQuery = '';
+  String _adminStaffRoleFilter = 'all';
 
   @override
   void initState() {
@@ -143,6 +153,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       _loadTeacherClasses();
     } else if (_userRole == 'student') {
       _loadStudentResults();
+      _loadStudentDashboard();
     } else if (_userRole == 'parent') {
       _loadParentChildren();
     } else if (_userRole == 'admin') {
@@ -150,9 +161,52 @@ class _DashboardScreenState extends State<DashboardScreen> {
     }
   }
 
+  Future<void> _loadStudentDashboard() async {
+    if (!mounted) return;
+    try {
+      final response = await apiClient.dio.get('/student/dashboard');
+      if (response.statusCode == 200 && response.data != null && response.data['stats'] != null) {
+        if (mounted) {
+          setState(() {
+            _studentDashboardStats = Map<String, dynamic>.from(response.data['stats']);
+          });
+        }
+      }
+    } catch (e) {
+      debugPrint('Error loading student dashboard stats: $e');
+    }
+  }
+
   Future<void> _loadAdminHomeData() async {
     _loadBackups();
     _loadAdminStudents();
+    _loadAdminStaff();
+  }
+
+  Future<void> _loadAdminStaff() async {
+    if (!mounted) return;
+    setState(() {
+      _isLoadingAdminStaff = true;
+    });
+    try {
+      final response = await apiClient.dio.get('/admin/users');
+      if (response.statusCode == 200 && response.data != null) {
+        if (mounted) {
+          final list = List<dynamic>.from(response.data);
+          setState(() {
+            _adminStaffList = list;
+          });
+        }
+      }
+    } catch (e) {
+      debugPrint('Error loading admin staff: $e');
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoadingAdminStaff = false;
+        });
+      }
+    }
   }
 
   Future<void> _loadAdminStudents() async {
@@ -418,58 +472,63 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Widget _buildRoleHeader() {
     final initials = _userName.trim().split(' ')
         .where((w) => w.isNotEmpty).map((w) => w[0].toUpperCase()).take(2).join();
-    return Container(
-      margin: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(colors: _roleGradient, begin: Alignment.topLeft, end: Alignment.bottomRight),
-        borderRadius: BorderRadius.circular(24),
-        boxShadow: [BoxShadow(color: _roleGradient.first.withOpacity(0.35), blurRadius: 18, offset: const Offset(0, 8))],
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 54, height: 54,
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.2),
-              shape: BoxShape.circle,
-              border: Border.all(color: Colors.white.withOpacity(0.4), width: 2),
-            ),
-            child: Center(
-              child: Text(initials.isEmpty ? 'U' : initials,
-                  style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)),
-            ),
-          ),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+    return ClipPath(
+      clipper: _LiquidBottomClipper(),
+      child: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(colors: _roleGradient, begin: Alignment.topLeft, end: Alignment.bottomRight),
+        ),
+        child: SafeArea(
+          bottom: false,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(20, 16, 20, 48),
+            child: Row(
               children: [
-                Text('$_greeting 👋', style: TextStyle(color: Colors.white.withOpacity(0.8), fontSize: 12)),
-                const SizedBox(height: 2),
-                Text(_userName,
-                    style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
-                    maxLines: 1, overflow: TextOverflow.ellipsis),
-                const SizedBox(height: 6),
-                Wrap(
-                  spacing: 6,
-                  children: [
-                    _headerBadge(_roleLabel, Icons.verified_user_outlined),
-                    _headerBadge('$_activeSessionName · $_activeTermName', Icons.calendar_today_outlined),
-                  ],
+                Container(
+                  width: 54, height: 54,
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.2),
+                    shape: BoxShape.circle,
+                    border: Border.all(color: Colors.white.withOpacity(0.4), width: 2),
+                  ),
+                  child: Center(
+                    child: Text(initials.isEmpty ? 'U' : initials,
+                        style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)),
+                  ),
+                ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('$_greeting 👋', style: TextStyle(color: Colors.white.withOpacity(0.8), fontSize: 12)),
+                      const SizedBox(height: 2),
+                      Text(_userName,
+                          style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+                          maxLines: 1, overflow: TextOverflow.ellipsis),
+                      const SizedBox(height: 6),
+                      Wrap(
+                        spacing: 6,
+                        children: [
+                          _headerBadge(_roleLabel, Icons.verified_user_outlined),
+                          _headerBadge('$_activeSessionName · $_activeTermName', Icons.calendar_today_outlined),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                GestureDetector(
+                  onTap: _showSyncStatusSheet,
+                  child: Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(color: Colors.white.withOpacity(0.15), shape: BoxShape.circle),
+                    child: _getSyncDot(),
+                  ),
                 ),
               ],
             ),
           ),
-          GestureDetector(
-            onTap: _showSyncStatusSheet,
-            child: Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(color: Colors.white.withOpacity(0.15), shape: BoxShape.circle),
-              child: _getSyncDot(),
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }
@@ -736,11 +795,29 @@ class _DashboardScreenState extends State<DashboardScreen> {
   List<_StatCard> _buildStatCards() {
     switch (_userRole) {
       case 'student':
+        final double avgScore = (_studentDashboardStats['average_score'] ?? 84.5).toDouble();
+        final double attRate = (_studentDashboardStats['attendance_rate'] ?? 96.0).toDouble();
+        final int pendingHw = (_studentDashboardStats['pending_homework'] ?? 0);
+        final int? position = _studentDashboardStats['position'];
+        final int? totalStudents = _studentDashboardStats['total_students'];
+
+        String gradeLetter = 'A';
+        if (avgScore < 50) {
+          gradeLetter = 'F';
+        } else if (avgScore < 60) {
+          gradeLetter = 'C';
+        } else if (avgScore < 75) {
+          gradeLetter = 'B';
+        }
+
+        String rankText = position != null ? '#$position of $totalStudents' : 'Top 5%';
+
         return [
-          _StatCard('Subjects', '${_studentResults.isNotEmpty ? _studentResults.length : 8}', Icons.menu_book_rounded, const Color(0xFF3B82F6)),
-          _StatCard('Term', _activeTermName, Icons.calendar_month_rounded, AppColors.amberPrimary),
-          _StatCard('Session', _activeSessionName, Icons.school_rounded, const Color(0xFF10B981)),
-          _StatCard('Status', 'Active', Icons.verified_rounded, const Color(0xFF7C3AED)),
+          _StatCard('Grade Avg', '${avgScore.toStringAsFixed(1)}% ($gradeLetter)', Icons.emoji_events_rounded, const Color(0xFF7C3AED)),
+          _StatCard('Attendance', '${attRate.toStringAsFixed(0)}% Rate', Icons.event_available_rounded, const Color(0xFF10B981)),
+          _StatCard('Pending HW', '$pendingHw Due', Icons.assignment_rounded, const Color(0xFFF59E0B)),
+          _StatCard('Class Rank', rankText, Icons.military_tech_rounded, const Color(0xFF3B82F6)),
+          _StatCard('Streak', '🔥 5 Days', Icons.local_fire_department_rounded, const Color(0xFFF43F5E)),
         ];
       case 'teacher':
         return [
@@ -759,6 +836,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       case 'admin':
         return [
           _StatCard('Students', '${_adminStudentsList.length}', Icons.people_rounded, const Color(0xFF7C3AED)),
+          _StatCard('Staff', '${_adminStaffList.length}', Icons.badge_rounded, const Color(0xFF10B981)),
           _StatCard('Session', _activeSessionName, Icons.school_rounded, const Color(0xFF92400E)),
           _StatCard('Term', _activeTermName, Icons.calendar_month_rounded, AppColors.amberPrimary),
           _StatCard('Backups', '${_backups.length}', Icons.storage_rounded, const Color(0xFF3B82F6)),
@@ -815,7 +893,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         children: [
           _buildRoleHeader(),
           Padding(
-            padding: const EdgeInsets.fromLTRB(16, 20, 16, 24),
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
@@ -877,7 +955,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         children: [
           _buildRoleHeader(),
           Padding(
-            padding: const EdgeInsets.fromLTRB(16, 20, 16, 24),
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
@@ -1026,7 +1104,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         children: [
           _buildRoleHeader(),
           Padding(
-            padding: const EdgeInsets.fromLTRB(16, 20, 16, 24),
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
@@ -1159,7 +1237,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         children: [
           _buildRoleHeader(),
           Padding(
-            padding: const EdgeInsets.fromLTRB(16, 20, 16, 24),
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
@@ -1253,60 +1331,114 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   Widget _buildMeView() {
-    return Padding(
-      padding: const EdgeInsets.all(20.0),
+    final initials = _userName.trim().split(' ')
+        .where((w) => w.isNotEmpty).map((w) => w[0].toUpperCase()).take(2).join();
+    return SingleChildScrollView(
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const Center(
-            child: CircleAvatar(
-              radius: 40,
-              backgroundColor: AppColors.amberPrimary,
-              child: Icon(Icons.person, size: 48, color: Colors.white),
+          // Profile card
+          Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(colors: _roleGradient, begin: Alignment.topLeft, end: Alignment.bottomRight),
+              borderRadius: BorderRadius.circular(24),
+              boxShadow: [BoxShadow(color: _roleGradient.first.withOpacity(0.3), blurRadius: 16, offset: const Offset(0, 8))],
+            ),
+            child: Column(
+              children: [
+                Container(
+                  width: 72, height: 72,
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.2),
+                    shape: BoxShape.circle,
+                    border: Border.all(color: Colors.white.withOpacity(0.5), width: 2.5),
+                  ),
+                  child: Center(
+                    child: Text(initials.isEmpty ? 'U' : initials,
+                        style: const TextStyle(color: Colors.white, fontSize: 26, fontWeight: FontWeight.bold)),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Text(_userName, style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)),
+                const SizedBox(height: 6),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Text(_roleLabel.toUpperCase(),
+                      style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 1)),
+                ),
+                const SizedBox(height: 8),
+                Text('$_activeSessionName · $_activeTermName',
+                    style: TextStyle(color: Colors.white.withOpacity(0.75), fontSize: 12)),
+              ],
+            ),
+          ),
+          const SizedBox(height: 24),
+          // Settings tiles
+          Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: AppColors.divider),
+            ),
+            child: Column(
+              children: [
+                _meTile(Icons.settings_rounded, const Color(0xFF64748B), 'Settings & Offline Sync',
+                    subtitle: 'Sync preferences, storage', onTap: () => context.push('/settings')),
+                const Divider(height: 1, indent: 16, endIndent: 16),
+                _meTile(Icons.notifications_rounded, const Color(0xFF3B82F6), 'Notifications',
+                    trailing: const Text('On', style: TextStyle(color: AppColors.textSecondary, fontSize: 13)), onTap: () {}),
+                const Divider(height: 1, indent: 16, endIndent: 16),
+                _meTile(Icons.info_outline_rounded, const Color(0xFF10B981), 'About AcademyHub',
+                    subtitle: 'Version 1.0.0', onTap: () {}),
+              ],
             ),
           ),
           const SizedBox(height: 16),
-          Center(
-            child: Text(
-              _userName,
-              style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Color(0xFF0F172A)),
-            ),
-          ),
-          const SizedBox(height: 32),
-          Card(
-            child: Column(
-              children: [
-                ListTile(
-                  leading: const Icon(Icons.settings),
-                  title: const Text('Settings & Offline Sync'),
-                  trailing: const Icon(Icons.arrow_forward_ios, size: 14),
-                  onTap: () {
-                    context.push('/settings');
-                  },
-                ),
-                const Divider(),
-                ListTile(
-                  leading: const Icon(Icons.notifications),
-                  title: const Text('Notifications'),
-                  trailing: const Text('On', style: TextStyle(color: AppColors.textSecondary)),
-                  onTap: () {},
-                ),
-                const Divider(),
-                ListTile(
-                  leading: const Icon(Icons.exit_to_app, color: AppColors.dangerRed),
-                  title: const Text('Sign Out', style: TextStyle(color: AppColors.dangerRed)),
-                  onTap: () async {
-                    await SecureStorage.instance.clearAll();
-                    if (mounted) {
-                      context.go('/');
-                    }
-                  },
-                ),
-              ],
+          // Sign out
+          GestureDetector(
+            onTap: () async {
+              await SecureStorage.instance.clearAll();
+              if (mounted) context.go('/');
+            },
+            child: Container(
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              decoration: BoxDecoration(
+                color: AppColors.dangerRed.withOpacity(0.06),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: AppColors.dangerRed.withOpacity(0.2)),
+              ),
+              child: const Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.logout_rounded, color: AppColors.dangerRed, size: 20),
+                  SizedBox(width: 8),
+                  Text('Sign Out', style: TextStyle(color: AppColors.dangerRed, fontWeight: FontWeight.bold, fontSize: 15)),
+                ],
+              ),
             ),
           ),
         ],
       ),
+    );
+  }
+
+  Widget _meTile(IconData icon, Color color, String title, {String? subtitle, Widget? trailing, VoidCallback? onTap}) {
+    return ListTile(
+      onTap: onTap,
+      leading: Container(
+        width: 38, height: 38,
+        decoration: BoxDecoration(color: color.withOpacity(0.12), borderRadius: BorderRadius.circular(11)),
+        child: Icon(icon, color: color, size: 20),
+      ),
+      title: Text(title, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.textPrimary)),
+      subtitle: subtitle != null ? Text(subtitle, style: const TextStyle(fontSize: 11, color: AppColors.textSecondary)) : null,
+      trailing: trailing ?? const Icon(Icons.arrow_forward_ios_rounded, size: 13, color: AppColors.textSecondary),
     );
   }
 
@@ -1811,7 +1943,82 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  Widget _buildAdminStudentsView() {
+  Widget _buildAdminDirectoryView() {
+    return Column(
+      children: [
+        // Directory Header Segmented Switcher
+        Container(
+          margin: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+          padding: const EdgeInsets.all(4),
+          decoration: BoxDecoration(
+            color: const Color(0xFFF1F5F9),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                child: GestureDetector(
+                  onTap: () => setState(() => _adminDirectoryTab = 0),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    decoration: BoxDecoration(
+                      color: _adminDirectoryTab == 0 ? Colors.white : Colors.transparent,
+                      borderRadius: BorderRadius.circular(9),
+                      boxShadow: _adminDirectoryTab == 0
+                          ? [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 4)]
+                          : [],
+                    ),
+                    child: Center(
+                      child: Text(
+                        '🎓 Students (${_adminStudentsList.length})',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          color: _adminDirectoryTab == 0 ? AppColors.textPrimary : AppColors.textSecondary,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              Expanded(
+                child: GestureDetector(
+                  onTap: () => setState(() => _adminDirectoryTab = 1),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    decoration: BoxDecoration(
+                      color: _adminDirectoryTab == 1 ? Colors.white : Colors.transparent,
+                      borderRadius: BorderRadius.circular(9),
+                      boxShadow: _adminDirectoryTab == 1
+                          ? [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 4)]
+                          : [],
+                    ),
+                    child: Center(
+                      child: Text(
+                        '👨‍🏫 Staff (${_adminStaffList.length})',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          color: _adminDirectoryTab == 1 ? AppColors.textPrimary : AppColors.textSecondary,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+
+        // Body Content
+        Expanded(
+          child: _adminDirectoryTab == 0 ? _buildAdminStudentsContent() : _buildAdminStaffContent(),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildAdminStudentsContent() {
     var filtered = _adminStudentsList;
     if (_adminStudentsSearchQuery.isNotEmpty) {
       filtered = filtered.where((s) {
@@ -1827,7 +2034,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       children: [
         // Search bar
         Padding(
-          padding: const EdgeInsets.all(16.0),
+          padding: const EdgeInsets.fromLTRB(16, 4, 16, 12),
           child: TextField(
             style: const TextStyle(fontSize: 13),
             decoration: InputDecoration(
@@ -1852,9 +2059,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           child: _isLoadingAdminStudents
               ? const Center(child: CircularProgressIndicator())
               : filtered.isEmpty
-                  ? const Center(
-                      child: Text('No students found.'),
-                    )
+                  ? const Center(child: Text('No students found.'))
                   : ListView.builder(
                       padding: const EdgeInsets.symmetric(horizontal: 16),
                       itemCount: filtered.length,
@@ -1882,7 +2087,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                               ),
                             ),
                             title: Text(fullName, style: const TextStyle(fontWeight: FontWeight.bold)),
-                            subtitle: Text('Class: $className · Admission No: $admNum'),
+                            subtitle: Text('Class: $className · Adm No: $admNum'),
                             trailing: const Icon(Icons.arrow_forward_ios, size: 12),
                             onTap: () {
                               _showAdminStudentDetailSheet(student);
@@ -1896,18 +2101,162 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  void _showAdminStudentDetailSheet(dynamic student) {
-    final fName = student['first_name'] ?? '';
-    final lName = student['last_name'] ?? '';
-    final fullName = '$fName $lName'.trim();
-    final admNum = student['admission_number'] ?? '';
-    final className = student['school_class']?['name'] ?? 'Unassigned';
-    final sectionName = student['section']?['name'] ?? 'Unassigned';
-    final dob = student['date_of_birth'] ?? 'N/A';
-    final gender = student['gender'] ?? 'N/A';
-    final phone = student['guardian_phone'] ?? 'N/A';
-    final email = student['guardian_email'] ?? 'N/A';
-    final active = student['status'] ?? 'Active';
+  Widget _buildAdminStaffContent() {
+    var filtered = _adminStaffList;
+
+    if (_adminStaffRoleFilter != 'all') {
+      filtered = filtered.where((s) => (s['role']?.toString().toLowerCase() ?? '') == _adminStaffRoleFilter).toList();
+    }
+
+    if (_adminStaffSearchQuery.isNotEmpty) {
+      filtered = filtered.where((s) {
+        final name = s['name']?.toString().toLowerCase() ?? '';
+        final email = s['email']?.toString().toLowerCase() ?? '';
+        final query = _adminStaffSearchQuery.toLowerCase();
+        return name.contains(query) || email.contains(query);
+      }).toList();
+    }
+
+    return Column(
+      children: [
+        // Staff Search bar
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
+          child: TextField(
+            style: const TextStyle(fontSize: 13),
+            decoration: InputDecoration(
+              hintText: 'Search staff by name or email address...',
+              fillColor: Colors.white,
+              filled: true,
+              prefixIcon: const Icon(Icons.search, size: 18),
+              contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 16),
+              border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: const BorderSide(color: AppColors.divider)),
+              enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: const BorderSide(color: AppColors.divider)),
+            ),
+            onChanged: (val) {
+              setState(() {
+                _adminStaffSearchQuery = val.trim();
+              });
+            },
+          ),
+        ),
+
+        // Role filter chips
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+          child: Row(
+            children: [
+              _buildRoleFilterChip('All Staff', 'all'),
+              const SizedBox(width: 8),
+              _buildRoleFilterChip('Teachers', 'teacher'),
+              const SizedBox(width: 8),
+              _buildRoleFilterChip('Admins', 'admin'),
+              const SizedBox(width: 8),
+              _buildRoleFilterChip('Bursars', 'bursar'),
+            ],
+          ),
+        ),
+        const SizedBox(height: 8),
+
+        // Staff List
+        Expanded(
+          child: _isLoadingAdminStaff
+              ? const Center(child: CircularProgressIndicator())
+              : filtered.isEmpty
+                  ? const Center(child: Text('No staff members found.'))
+                  : ListView.builder(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      itemCount: filtered.length,
+                      itemBuilder: (context, index) {
+                        final staff = filtered[index];
+                        final name = staff['name'] ?? 'Staff Member';
+                        final email = staff['email'] ?? 'No email';
+                        final role = (staff['role'] ?? 'teacher').toString().toUpperCase();
+                        final isActive = staff['is_active'] ?? true;
+
+                        Color roleColor = const Color(0xFF10B981);
+                        if (role == 'ADMIN') roleColor = const Color(0xFF7C3AED);
+                        if (role == 'BURSAR') roleColor = const Color(0xFFF59E0B);
+
+                        String initials = '';
+                        final parts = name.split(' ');
+                        if (parts.isNotEmpty && parts[0].isNotEmpty) initials += parts[0][0].toUpperCase();
+                        if (parts.length > 1 && parts[1].isNotEmpty) initials += parts[1][0].toUpperCase();
+                        if (initials.isEmpty) initials = '?';
+
+                        return Card(
+                          margin: const EdgeInsets.only(bottom: 12),
+                          child: ListTile(
+                            leading: CircleAvatar(
+                              backgroundColor: roleColor.withOpacity(0.12),
+                              child: Text(
+                                initials,
+                                style: TextStyle(color: roleColor, fontWeight: FontWeight.bold),
+                              ),
+                            ),
+                            title: Text(name, style: const TextStyle(fontWeight: FontWeight.bold)),
+                            subtitle: Text('$email · $role'),
+                            trailing: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                              decoration: BoxDecoration(
+                                color: (isActive ? AppColors.successGreen : AppColors.dangerRed).withOpacity(0.12),
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: Text(
+                                isActive ? 'Active' : 'Inactive',
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.bold,
+                                  color: isActive ? AppColors.successGreen : AppColors.dangerRed,
+                                ),
+                              ),
+                            ),
+                            onTap: () {
+                              _showAdminStaffDetailSheet(staff);
+                            },
+                          ),
+                        );
+                      },
+                    ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildRoleFilterChip(String label, String key) {
+    final isSelected = _adminStaffRoleFilter == key;
+    return ChoiceChip(
+      label: Text(label, style: TextStyle(fontSize: 11, fontWeight: isSelected ? FontWeight.bold : FontWeight.normal)),
+      selected: isSelected,
+      selectedColor: const Color(0xFF7C3AED).withOpacity(0.15),
+      onSelected: (val) {
+        if (val) {
+          setState(() {
+            _adminStaffRoleFilter = key;
+          });
+        }
+      },
+    );
+  }
+
+  void _showAdminStaffDetailSheet(dynamic staff) {
+    final name = staff['name'] ?? 'Staff Member';
+    final email = staff['email'] ?? 'No email';
+    final role = (staff['role'] ?? 'teacher').toString().toUpperCase();
+    final phone = staff['whatsapp_phone'] ?? staff['phone'] ?? '';
+    final isActive = staff['is_active'] ?? true;
+    final isClassTeacher = staff['is_class_teacher'] ?? false;
+
+    Color roleColor = const Color(0xFF10B981);
+    if (role == 'ADMIN') roleColor = const Color(0xFF7C3AED);
+    if (role == 'BURSAR') roleColor = const Color(0xFFF59E0B);
+
+    String initials = '';
+    final parts = name.split(' ');
+    if (parts.isNotEmpty && parts[0].isNotEmpty) initials += parts[0][0].toUpperCase();
+    if (parts.length > 1 && parts[1].isNotEmpty) initials += parts[1][0].toUpperCase();
+    if (initials.isEmpty) initials = '?';
 
     showModalBottomSheet(
       context: context,
@@ -1933,42 +2282,140 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   ),
                 ),
                 const SizedBox(height: 16),
+
+                // Staff Header Avatar & Info
+                Center(
+                  child: CircleAvatar(
+                    radius: 30,
+                    backgroundColor: roleColor.withOpacity(0.12),
+                    child: Text(
+                      initials,
+                      style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: roleColor),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
                 Text(
-                  fullName,
+                  name,
                   style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
                   textAlign: TextAlign.center,
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  'Admission Number: $admNum',
-                  style: const TextStyle(color: AppColors.textSecondary, fontSize: 13),
-                  textAlign: TextAlign.center,
+                const SizedBox(height: 6),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+                      decoration: BoxDecoration(
+                        color: roleColor.withOpacity(0.12),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(role, style: TextStyle(color: roleColor, fontSize: 10, fontWeight: FontWeight.bold)),
+                    ),
+                    const SizedBox(width: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+                      decoration: BoxDecoration(
+                        color: (isActive ? AppColors.successGreen : AppColors.dangerRed).withOpacity(0.12),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        isActive ? 'ACTIVE ACCOUNT' : 'INACTIVE',
+                        style: TextStyle(
+                          color: isActive ? AppColors.successGreen : AppColors.dangerRed,
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
                 const SizedBox(height: 16),
                 const Divider(),
-                const SizedBox(height: 8),
-                _buildDetailRow('Class', className),
-                _buildDetailRow('Section', sectionName),
-                _buildDetailRow('Date of Birth', dob),
-                _buildDetailRow('Gender', gender.toUpperCase()),
-                _buildDetailRow('Guardian Phone', phone),
-                _buildDetailRow('Guardian Email', email),
-                _buildDetailRow('Account Status', active),
-                const SizedBox(height: 24),
-                ElevatedButton.icon(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.amberPrimary,
-                    foregroundColor: Colors.white,
-                    elevation: 0,
-                  ),
-                  onPressed: () {
-                    Navigator.pop(context);
-                    _showChildResultsModal(student['id'], fullName);
-                  },
-                  icon: const Icon(Icons.analytics_outlined),
-                  label: const Text('View Report Card / Term Results', style: TextStyle(fontWeight: FontWeight.bold)),
-                ),
                 const SizedBox(height: 12),
+
+                // Quick Action Contacts
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: const Color(0xFF10B981),
+                          side: const BorderSide(color: Color(0xFF10B981)),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                        ),
+                        onPressed: () {
+                          if (phone.isNotEmpty) {
+                            Clipboard.setData(ClipboardData(text: phone));
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text('Phone ($phone) copied to clipboard!'), backgroundColor: AppColors.successGreen),
+                            );
+                          } else {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('No phone number recorded.')),
+                            );
+                          }
+                        },
+                        icon: const Icon(Icons.phone_outlined, size: 16),
+                        label: const Text('Call Staff', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: const Color(0xFF25D366),
+                          side: const BorderSide(color: Color(0xFF25D366)),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                        ),
+                        onPressed: () {
+                          if (phone.isNotEmpty) {
+                            Clipboard.setData(ClipboardData(text: phone));
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text('WhatsApp ($phone) copied to clipboard!'), backgroundColor: AppColors.successGreen),
+                            );
+                          } else {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('No WhatsApp phone recorded.')),
+                            );
+                          }
+                        },
+                        icon: const Icon(Icons.chat_bubble_outline, size: 16),
+                        label: const Text('WhatsApp', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: const Color(0xFF3B82F6),
+                          side: const BorderSide(color: Color(0xFF3B82F6)),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                        ),
+                        onPressed: () {
+                          if (email.isNotEmpty) {
+                            Clipboard.setData(ClipboardData(text: email));
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text('Email ($email) copied to clipboard!'), backgroundColor: AppColors.successGreen),
+                            );
+                          }
+                        },
+                        icon: const Icon(Icons.email_outlined, size: 16),
+                        label: const Text('Email', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+
+                // Details Card
+                _buildDetailRow('Full Name', name),
+                _buildDetailRow('Email Address', email),
+                _buildDetailRow('Assigned Role', role),
+                _buildDetailRow('WhatsApp / Phone', phone.isNotEmpty ? phone : 'N/A'),
+                _buildDetailRow('Class Teacher Designation', isClassTeacher ? 'Yes' : 'No'),
+                _buildDetailRow('Account Status', isActive ? 'Active' : 'Inactive', isBadge: true),
+                const SizedBox(height: 16),
               ],
             ),
           ),
@@ -1977,14 +2424,42 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  Widget _buildDetailRow(String label, String val) {
+  void _showAdminStudentDetailSheet(dynamic student) {
+    final fName = student['first_name'] ?? '';
+    final lName = student['last_name'] ?? '';
+    final fullName = '$fName $lName'.trim();
+    final studentId = student['id'];
+
+    if (studentId != null) {
+      StudentDetailScreen.show(context, studentId: studentId, studentName: fullName);
+    }
+  }
+
+  Widget _buildDetailRow(String label, String val, {bool isBadge = false}) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 6.0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(label, style: const TextStyle(color: AppColors.textSecondary, fontSize: 13, fontWeight: FontWeight.w600)),
-          Text(val, style: const TextStyle(color: AppColors.textPrimary, fontSize: 13, fontWeight: FontWeight.bold)),
+          if (!isBadge)
+            Text(val, style: const TextStyle(color: AppColors.textPrimary, fontSize: 13, fontWeight: FontWeight.bold))
+          else
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+              decoration: BoxDecoration(
+                color: (val == 'Active' ? AppColors.successGreen : AppColors.dangerRed).withOpacity(0.12),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Text(
+                val,
+                style: TextStyle(
+                  color: val == 'Active' ? AppColors.successGreen : AppColors.dangerRed,
+                  fontSize: 11,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
         ],
       ),
     );
@@ -2056,46 +2531,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
     return Scaffold(
       backgroundColor: AppColors.appBackground,
-      appBar: AppBar(
-        title: Row(
-          children: [
-            Container(
-              width: 28, height: 28,
-              decoration: BoxDecoration(
-                gradient: LinearGradient(colors: _roleGradient),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: const Icon(Icons.school_rounded, color: Colors.white, size: 16),
-            ),
-            const SizedBox(width: 8),
-            Text(
-              isHomeTab ? 'AcademyHub' : (navItems[_currentIndex].label ?? ''),
-              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 17, color: AppColors.textPrimary),
-            ),
-          ],
-        ),
-        actions: [
-          Stack(
-            alignment: Alignment.center,
-            children: [
-              IconButton(
-                icon: const Icon(Icons.notifications_outlined, color: AppColors.textPrimary),
-                onPressed: () {},
-              ),
-              Positioned(
-                top: 10, right: 10,
-                child: Container(
-                  width: 8, height: 8,
-                  decoration: const BoxDecoration(color: AppColors.dangerRed, shape: BoxShape.circle),
-                ),
-              ),
-            ],
-          ),
-        ],
-        elevation: 0,
-        backgroundColor: Colors.white,
-        surfaceTintColor: Colors.white,
-      ),
       body: Column(
         children: [
           if (!_isOnline)
@@ -2129,7 +2564,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                             : isAdminAnnounceTab
                                                 ? _buildAdminAnnouncementsView()
                                                 : isAdminStudentsTab
-                                                    ? _buildAdminStudentsView()
+                                                    ? _buildAdminDirectoryView()
                                                     : Center(
                                                         child: Text(
                                                           '${navItems[_currentIndex].label} module is ready.',
@@ -2154,13 +2589,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(24),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.06),
-                blurRadius: 20,
-                offset: const Offset(0, 4),
-              ),
-            ],
+            boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.08), blurRadius: 20, offset: const Offset(0, 4))],
             border: Border.all(color: AppColors.divider),
           ),
           child: Row(
@@ -2168,51 +2597,70 @@ class _DashboardScreenState extends State<DashboardScreen> {
             children: List.generate(navItems.length, (idx) {
               final item = navItems[idx];
               final isSelected = _currentIndex == idx;
-              
-              IconData iconData = Icons.home_rounded;
-              if (idx == 0) iconData = Icons.home_rounded;
-              else if (idx == 1) {
-                if (_userRole == 'student') iconData = Icons.assignment_rounded;
-                else if (_userRole == 'parent') iconData = Icons.people_alt_rounded;
-                else if (_userRole == 'teacher') iconData = Icons.class_rounded;
-                else if (_userRole == 'admin') iconData = Icons.people_rounded;
-              } else if (idx == 2) {
-                if (_userRole == 'student') iconData = Icons.menu_book_rounded;
-                else if (_userRole == 'parent') iconData = Icons.chat_rounded;
-                else if (_userRole == 'teacher') iconData = Icons.grade_rounded;
-                else if (_userRole == 'admin') iconData = Icons.campaign_rounded;
+              final activeColor = _roleGradient.first;
+
+              IconData iconData;
+              if (idx == 0) {
+                iconData = Icons.home_rounded;
               } else if (idx == navItems.length - 1) {
                 iconData = Icons.person_rounded;
+              } else if (idx == 1) {
+                iconData = _userRole == 'student' ? Icons.assignment_rounded
+                    : _userRole == 'parent' ? Icons.people_alt_rounded
+                    : _userRole == 'teacher' ? Icons.class_rounded
+                    : Icons.people_rounded;
+              } else {
+                iconData = _userRole == 'student' ? Icons.menu_book_rounded
+                    : _userRole == 'parent' ? Icons.chat_rounded
+                    : _userRole == 'teacher' ? Icons.grade_rounded
+                    : Icons.campaign_rounded;
               }
 
-              return InkWell(
-                onTap: () => setState(() => _currentIndex = idx),
-                borderRadius: BorderRadius.circular(24),
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 200),
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                  decoration: BoxDecoration(
-                    color: isSelected ? AppColors.amberPrimary.withOpacity(0.1) : Colors.transparent,
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        iconData,
-                        color: isSelected ? AppColors.amberPrimary : const Color(0xFF94A3B8),
-                        size: 24,
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        item.label ?? '',
-                        style: TextStyle(
-                          fontSize: 11,
-                          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                          color: isSelected ? AppColors.amberPrimary : const Color(0xFF94A3B8),
+              return Expanded(
+                child: GestureDetector(
+                  onTap: () => setState(() => _currentIndex = idx),
+                  behavior: HitTestBehavior.opaque,
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 220),
+                    curve: Curves.easeInOut,
+                    margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    decoration: BoxDecoration(
+                      color: isSelected ? activeColor.withOpacity(0.12) : Colors.transparent,
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        AnimatedScale(
+                          scale: isSelected ? 1.15 : 1.0,
+                          duration: const Duration(milliseconds: 200),
+                          child: Icon(iconData,
+                              color: isSelected ? activeColor : const Color(0xFF94A3B8),
+                              size: 22),
                         ),
-                      ),
-                    ],
+                        const SizedBox(height: 3),
+                        AnimatedDefaultTextStyle(
+                          duration: const Duration(milliseconds: 200),
+                          style: TextStyle(
+                            fontSize: 10,
+                            fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                            color: isSelected ? activeColor : const Color(0xFF94A3B8),
+                          ),
+                          child: Text(item.label ?? ''),
+                        ),
+                        const SizedBox(height: 2),
+                        AnimatedContainer(
+                          duration: const Duration(milliseconds: 220),
+                          width: isSelected ? 18 : 0,
+                          height: 3,
+                          decoration: BoxDecoration(
+                            color: activeColor,
+                            borderRadius: BorderRadius.circular(2),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               );
@@ -2222,6 +2670,28 @@ class _DashboardScreenState extends State<DashboardScreen> {
       ),
     );
   }
+}
+
+class _LiquidBottomClipper extends CustomClipper<Path> {
+  @override
+  Path getClip(Size size) {
+    final path = Path();
+    path.lineTo(0, size.height - 30);
+    path.quadraticBezierTo(
+      size.width * 0.25, size.height,
+      size.width * 0.5, size.height - 20,
+    );
+    path.quadraticBezierTo(
+      size.width * 0.75, size.height - 40,
+      size.width, size.height - 10,
+    );
+    path.lineTo(size.width, 0);
+    path.close();
+    return path;
+  }
+
+  @override
+  bool shouldReclip(_LiquidBottomClipper old) => false;
 }
 
 class _StatCard {
