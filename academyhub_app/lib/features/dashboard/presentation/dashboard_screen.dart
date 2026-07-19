@@ -46,6 +46,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Map<String, dynamic> _studentDashboardStats = {};
   List<dynamic> _announcements = [];
   bool _isLoadingAnnouncements = false;
+  bool _notificationsEnabled = true;
 
   // Parent Role state
   List<dynamic> _parentChildren = [];
@@ -417,21 +418,21 @@ class _DashboardScreenState extends State<DashboardScreen> {
         if (_activePlugins.contains('messages')) {
           list.add(const BottomNavigationBarItem(icon: Icon(Icons.message), label: 'Chat'));
         }
-        list.add(const BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Me'));
+        list.add(const BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'));
         return list;
       case 'teacher':
         return const [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
           BottomNavigationBarItem(icon: Icon(Icons.check_circle), label: 'Attendance'),
           BottomNavigationBarItem(icon: Icon(Icons.edit_note), label: 'Scores'),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Me'),
+          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
         ];
       case 'admin':
         return const [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-          BottomNavigationBarItem(icon: Icon(Icons.people), label: 'Students'),
+          BottomNavigationBarItem(icon: Icon(Icons.people), label: 'Directory'),
           BottomNavigationBarItem(icon: Icon(Icons.campaign), label: 'Announce'),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Me'),
+          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
         ];
       case 'student':
       default:
@@ -439,19 +440,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
           BottomNavigationBarItem(icon: Icon(Icons.article), label: 'Results'),
           BottomNavigationBarItem(icon: Icon(Icons.book), label: 'Homework'),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Me'),
+          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
         ];
     }
   }
 
-  List<Color> get _roleGradient {
-    switch (_userRole) {
-      case 'teacher': return [const Color(0xFF0F766E), const Color(0xFF134E4A)];
-      case 'parent':  return [const Color(0xFF6B4FA0), const Color(0xFF4C1D95)];
-      case 'admin':   return [const Color(0xFF92400E), const Color(0xFF78350F)];
-      default:        return [const Color(0xFFB45309), const Color(0xFF92400E)];
-    }
-  }
+  List<Color> get _roleGradient => AppColors.roleGradient(_userRole == 'teacher' ? 'staff' : _userRole);
 
   String get _roleLabel {
     switch (_userRole) {
@@ -681,7 +675,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
             final color = act['color'] as Color;
             return GestureDetector(
               onTap: () {
-                if (act.containsKey('route')) {
+                if (act.containsKey('dirTab')) {
+                  setState(() {
+                    _adminDirectoryTab = act['dirTab'] as int;
+                    _currentIndex = act['tab'] as int;
+                  });
+                } else if (act.containsKey('route')) {
                   context.push(act['route'] as String);
                 } else if (act.containsKey('tab')) {
                   setState(() => _currentIndex = act['tab'] as int);
@@ -754,13 +753,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
         ];
       case 'admin':
         return [
-          {'label': 'Students', 'icon': Icons.people_rounded, 'color': const Color(0xFF3B82F6), 'tab': 1},
+          {'label': 'Students', 'icon': Icons.people_rounded, 'color': const Color(0xFF3B82F6), 'tab': 1, 'dirTab': 0},
+          {'label': 'Staff', 'icon': Icons.badge_rounded, 'color': const Color(0xFF10B981), 'tab': 1, 'dirTab': 1},
           {'label': 'Announce', 'icon': Icons.campaign_rounded, 'color': const Color(0xFF7C3AED), 'tab': 2},
-          {'label': 'Backup', 'icon': Icons.storage_rounded, 'color': const Color(0xFF10B981), 'tab': 0},
-          {'label': 'Timetable', 'icon': Icons.table_chart_rounded, 'color': const Color(0xFF0F766E), 'tab': 0},
-          {'label': 'Results', 'icon': Icons.assignment_turned_in_rounded, 'color': const Color(0xFFF59E0B), 'tab': 0},
+          {'label': 'Backup', 'icon': Icons.storage_rounded, 'color': const Color(0xFF0F766E), 'tab': 0},
+          {'label': 'Timetable', 'icon': Icons.table_chart_rounded, 'color': const Color(0xFFF59E0B), 'tab': 0},
+          {'label': 'Results', 'icon': Icons.assignment_turned_in_rounded, 'color': const Color(0xFF3B82F6), 'tab': 0},
           {'label': 'Attendance', 'icon': Icons.fact_check_rounded, 'color': const Color(0xFFF97316), 'tab': 0},
-          {'label': 'Messages', 'icon': Icons.chat_bubble_rounded, 'color': const Color(0xFFEC4899), 'tab': 0},
           {'label': 'Profile', 'icon': Icons.person_rounded, 'color': const Color(0xFF64748B), 'tab': 3},
         ];
       default:
@@ -1379,7 +1378,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
             ),
           ),
           const SizedBox(height: 24),
-          // Settings tiles
+          // Account & Preferences Section
+          const Text(
+            'ACCOUNT & PREFERENCES',
+            style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppColors.amberPrimary, letterSpacing: 1.2),
+          ),
+          const SizedBox(height: 10),
           Container(
             decoration: BoxDecoration(
               color: Colors.white,
@@ -1388,18 +1392,57 @@ class _DashboardScreenState extends State<DashboardScreen> {
             ),
             child: Column(
               children: [
-                _meTile(Icons.settings_rounded, const Color(0xFF64748B), 'Settings & Offline Sync',
-                    subtitle: 'Sync preferences, storage', onTap: () => context.push('/settings')),
+                _meTile(
+                  Icons.cloud_sync_rounded,
+                  const Color(0xFF10B981),
+                  'Offline Sync & Storage',
+                  subtitle: _isOnline ? 'Online — Auto-sync active' : 'Offline — Changes saved locally',
+                  trailing: TextButton(
+                    onPressed: () async {
+                      await SyncQueueProcessor.instance.processQueue();
+                      if (mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('✓ Synchronization process completed.'), backgroundColor: AppColors.successGreen),
+                        );
+                      }
+                    },
+                    child: const Text('Sync Now', style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.amberPrimary)),
+                  ),
+                ),
                 const Divider(height: 1, indent: 16, endIndent: 16),
-                _meTile(Icons.notifications_rounded, const Color(0xFF3B82F6), 'Notifications',
-                    trailing: const Text('On', style: TextStyle(color: AppColors.textSecondary, fontSize: 13)), onTap: () {}),
+                _meTile(
+                  Icons.notifications_active_rounded,
+                  const Color(0xFF3B82F6),
+                  'Push Notifications',
+                  subtitle: 'Receive instant school alerts & grades',
+                  trailing: Switch.adaptive(
+                    value: _notificationsEnabled,
+                    activeThumbColor: const Color(0xFF10B981),
+                    onChanged: (val) {
+                      setState(() {
+                        _notificationsEnabled = val;
+                      });
+                    },
+                  ),
+                ),
                 const Divider(height: 1, indent: 16, endIndent: 16),
-                _meTile(Icons.info_outline_rounded, const Color(0xFF10B981), 'About AcademyHub',
-                    subtitle: 'Version 1.0.0', onTap: () {}),
+                _meTile(
+                  Icons.security_rounded,
+                  const Color(0xFF7C3AED),
+                  'Portal Access & Security',
+                  subtitle: 'Logged in as ${_userRole.toUpperCase()} · ${_schoolName ?? 'School Portal'}',
+                ),
+                const Divider(height: 1, indent: 16, endIndent: 16),
+                _meTile(
+                  Icons.info_outline_rounded,
+                  const Color(0xFF64748B),
+                  'About AcademyHub',
+                  subtitle: 'Version 1.0.0 (Build 2026.1)',
+                ),
               ],
             ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 24),
           // Sign out
           GestureDetector(
             onTap: () async {
@@ -2677,12 +2720,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
           : null,
       bottomNavigationBar: SafeArea(
         child: Container(
-          margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-          height: 72,
+          margin: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+          height: 62,
           decoration: BoxDecoration(
             color: Colors.white,
-            borderRadius: BorderRadius.circular(24),
-            boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.08), blurRadius: 20, offset: const Offset(0, 4))],
+            borderRadius: BorderRadius.circular(20),
+            boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.06), blurRadius: 16, offset: const Offset(0, 4))],
             border: Border.all(color: AppColors.divider),
           ),
           child: Row(
@@ -2713,44 +2756,25 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 child: GestureDetector(
                   onTap: () => setState(() => _currentIndex = idx),
                   behavior: HitTestBehavior.opaque,
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 220),
-                    curve: Curves.easeInOut,
-                    margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
-                    padding: const EdgeInsets.symmetric(vertical: 8),
-                    decoration: BoxDecoration(
-                      color: isSelected ? activeColor.withOpacity(0.12) : Colors.transparent,
-                      borderRadius: BorderRadius.circular(16),
-                    ),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(vertical: 6),
                     child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        AnimatedScale(
-                          scale: isSelected ? 1.15 : 1.0,
-                          duration: const Duration(milliseconds: 200),
-                          child: Icon(iconData,
-                              color: isSelected ? activeColor : const Color(0xFF94A3B8),
-                              size: 22),
-                        ),
-                        const SizedBox(height: 3),
-                        AnimatedDefaultTextStyle(
-                          duration: const Duration(milliseconds: 200),
+                        Icon(iconData,
+                            color: isSelected ? activeColor : const Color(0xFF94A3B8),
+                            size: 20),
+                        const SizedBox(height: 2),
+                        Text(
+                          item.label ?? '',
                           style: TextStyle(
                             fontSize: 10,
                             fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                             color: isSelected ? activeColor : const Color(0xFF94A3B8),
                           ),
-                          child: Text(item.label ?? ''),
-                        ),
-                        const SizedBox(height: 2),
-                        AnimatedContainer(
-                          duration: const Duration(milliseconds: 220),
-                          width: isSelected ? 18 : 0,
-                          height: 3,
-                          decoration: BoxDecoration(
-                            color: activeColor,
-                            borderRadius: BorderRadius.circular(2),
-                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ],
                     ),

@@ -43,6 +43,30 @@ class AppColors {
   static const Color parentEnd     = Color(0xFF6B4FA0);
   static const Color teacherEnd    = Color(0xFF0F766E);
   static const Color adminEnd      = Color(0xFFB45309);
+
+  // ── Role primary colours ────────────────────────────────
+  static const Color roleStudent   = Color(0xFFB45309); // amber-brown
+  static const Color roleParent    = Color(0xFF6B4FA0); // purple
+  static const Color roleStaff     = Color(0xFF0F766E); // teal
+  static const Color roleAdmin     = Color(0xFF92400E); // dark amber
+
+  static List<Color> roleGradient(String role) {
+    switch (role) {
+      case 'parent': return [Color(0xFF6B4FA0), Color(0xFF4C1D95)];
+      case 'staff':  return [Color(0xFF0F766E), Color(0xFF134E4A)];
+      case 'admin':  return [Color(0xFF92400E), Color(0xFF78350F)];
+      default:       return [Color(0xFFB45309), Color(0xFF92400E)]; // student
+    }
+  }
+
+  static Color rolePrimary(String role) {
+    switch (role) {
+      case 'parent': return roleParent;
+      case 'staff':  return roleStaff;
+      case 'admin':  return roleAdmin;
+      default:       return roleStudent;
+    }
+  }
 }
 
 class AppTheme {
