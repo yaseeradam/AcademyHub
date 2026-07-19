@@ -1485,11 +1485,105 @@ class _DashboardScreenState extends State<DashboardScreen> {
       );
     }
 
+    double grandTotal = 0;
+    int gradedCount = 0;
+    for (var r in _studentResults) {
+      final t = double.tryParse(r['total']?.toString() ?? '0');
+      if (t != null && t > 0) {
+        grandTotal += t;
+        gradedCount++;
+      }
+    }
+    double avg = gradedCount > 0 ? grandTotal / gradedCount : 0;
+
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          // Grand Summary Card
+          Container(
+            padding: const EdgeInsets.all(18),
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                colors: [Color(0xFF7C3AED), Color(0xFF6B4FA0)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: [
+                BoxShadow(
+                  color: const Color(0xFF7C3AED).withOpacity(0.25),
+                  blurRadius: 16,
+                  offset: const Offset(0, 6),
+                ),
+              ],
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text(
+                      'REPORT CARD SUMMARY',
+                      style: TextStyle(color: Colors.white70, fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 1.2),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        avg >= 75 ? 'GRADE A' : avg >= 60 ? 'GRADE B' : 'GRADE C',
+                        style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          '${avg.toStringAsFixed(1)}%',
+                          style: const TextStyle(fontSize: 28, fontWeight: FontWeight.w800, color: Colors.white),
+                        ),
+                        Text('Academic Average', style: TextStyle(color: Colors.white.withOpacity(0.8), fontSize: 12)),
+                      ],
+                    ),
+                    Container(width: 1, height: 36, color: Colors.white24),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          grandTotal.toStringAsFixed(0),
+                          style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
+                        ),
+                        Text('Grand Total', style: TextStyle(color: Colors.white.withOpacity(0.8), fontSize: 12)),
+                      ],
+                    ),
+                    Container(width: 1, height: 36, color: Colors.white24),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          '$gradedCount / ${_studentResults.length}',
+                          style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
+                        ),
+                        Text('Subjects', style: TextStyle(color: Colors.white.withOpacity(0.8), fontSize: 12)),
+                      ],
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 16),
           ResultsChart(subjectResults: _studentResults),
           const SizedBox(height: 16),
           const Text(

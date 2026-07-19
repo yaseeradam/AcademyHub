@@ -72,11 +72,12 @@ class StudentResultsController extends Controller
             ];
         })->values();
 
-        $published = \App\Models\ResultPublication::where('class_id', $student->class_id)
+        $publicationRecord = \App\Models\ResultPublication::where('class_id', $student->class_id)
             ->where('term', $term)
             ->where('session', $session)
-            ->whereNotNull('published_at')
-            ->exists();
+            ->first();
+
+        $published = ($publicationRecord && $publicationRecord->published_at !== null) || $scores->count() > 0;
 
         // Calculate summary
         $grandTotal = $rows->sum('total');
@@ -87,18 +88,13 @@ class StudentResultsController extends Controller
             'session' => $session,
             'term' => $term,
             'is_published' => $published,
-            'results' => $published ? $rows : [],
-            'summary' => $published ? [
+            'results' => $rows,
+            'summary' => [
                 'grand_total' => $grandTotal,
                 'average' => $average,
                 'total_subjects' => $subjects->count(),
                 'graded_subjects' => $validScoreCount,
-            ] : [
-                'grand_total' => 0,
-                'average' => 0,
-                'total_subjects' => $subjects->count(),
-                'graded_subjects' => 0,
-            ]
+            ],
         ]);
     }
 }
