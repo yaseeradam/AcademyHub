@@ -696,26 +696,26 @@
                     </div>
                     <div class="p-6">
                         @if(isset($performanceData['attendance_impact']) && $performanceData['attendance_impact']['total_days'] > 0)
-                            <div class="grid grid-cols-2 gap-4 lg:grid-cols-5">
-                                <div class="rounded-xl border border-emerald-100 bg-gradient-to-br from-emerald-50 to-emerald-100/30 p-5 hover:shadow-md transition">
-                                    <div class="text-xs font-bold uppercase tracking-wider text-emerald-600">Attendance Rate</div>
-                                    <div class="mt-2 text-2xl font-black text-slate-800">{{ $performanceData['attendance_impact']['attendance_rate'] }}%</div>
+                            <div class="grid grid-cols-2 gap-2.5 lg:grid-cols-5">
+                                <div class="rounded-lg border border-emerald-100 bg-gradient-to-br from-emerald-50 to-emerald-100/30 p-3 hover:shadow-sm transition">
+                                    <div class="text-[10px] font-bold uppercase tracking-wider text-emerald-600">Attendance Rate</div>
+                                    <div class="mt-1 text-lg font-extrabold text-slate-800">{{ $performanceData['attendance_impact']['attendance_rate'] }}%</div>
                                 </div>
-                                <div class="rounded-xl border border-slate-100 bg-white p-5 hover:shadow-md transition">
-                                    <div class="text-xs font-bold uppercase tracking-wider text-slate-400">Days Present</div>
-                                    <div class="mt-2 text-2xl font-black text-emerald-600">{{ $performanceData['attendance_impact']['present_days'] }}</div>
+                                <div class="rounded-lg border border-slate-100 bg-white p-3 hover:shadow-sm transition">
+                                    <div class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Days Present</div>
+                                    <div class="mt-1 text-lg font-extrabold text-emerald-600">{{ $performanceData['attendance_impact']['present_days'] }}</div>
                                 </div>
-                                <div class="rounded-xl border border-slate-100 bg-white p-5 hover:shadow-md transition">
-                                    <div class="text-xs font-bold uppercase tracking-wider text-slate-400">Days Absent</div>
-                                    <div class="mt-2 text-2xl font-black text-red-500">{{ $performanceData['attendance_impact']['absent_days'] }}</div>
+                                <div class="rounded-lg border border-slate-100 bg-white p-3 hover:shadow-sm transition">
+                                    <div class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Days Absent</div>
+                                    <div class="mt-1 text-lg font-extrabold text-red-500">{{ $performanceData['attendance_impact']['absent_days'] }}</div>
                                 </div>
-                                <div class="rounded-xl border border-slate-100 bg-white p-5 hover:shadow-md transition">
-                                    <div class="text-xs font-bold uppercase tracking-wider text-slate-400">Days Late</div>
-                                    <div class="mt-2 text-2xl font-black text-amber-500">{{ $performanceData['attendance_impact']['late_days'] }}</div>
+                                <div class="rounded-lg border border-slate-100 bg-white p-3 hover:shadow-sm transition">
+                                    <div class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Days Late</div>
+                                    <div class="mt-1 text-lg font-extrabold text-amber-500">{{ $performanceData['attendance_impact']['late_days'] }}</div>
                                 </div>
-                                <div class="rounded-xl border border-slate-100 bg-white p-5 hover:shadow-md transition">
-                                    <div class="text-xs font-bold uppercase tracking-wider text-slate-400">Total Term Days</div>
-                                    <div class="mt-2 text-2xl font-black text-slate-800">{{ $performanceData['attendance_impact']['total_days'] }}</div>
+                                <div class="rounded-lg border border-slate-100 bg-white p-3 hover:shadow-sm transition">
+                                    <div class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Total Term Days</div>
+                                    <div class="mt-1 text-lg font-extrabold text-slate-800">{{ $performanceData['attendance_impact']['total_days'] }}</div>
                                 </div>
                             </div>
                             <div class="mt-5 rounded-xl border border-blue-200 bg-gradient-to-r from-blue-50 to-indigo-50/50 p-4 shadow-sm">

@@ -71,7 +71,7 @@ class _SchoolFinderScreenState extends State<SchoolFinderScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF1F5F9),
+      backgroundColor: AppColors.appBackground,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
@@ -89,8 +89,8 @@ class _SchoolFinderScreenState extends State<SchoolFinderScreen> {
                     shape: BoxShape.circle,
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.06),
-                        blurRadius: 16,
+                        color: AppColors.amberPrimary.withOpacity(0.15),
+                        blurRadius: 24,
                         offset: const Offset(0, 8),
                       ),
                     ],
@@ -116,7 +116,7 @@ class _SchoolFinderScreenState extends State<SchoolFinderScreen> {
               const SizedBox(height: 4),
               const Center(
                 child: Text(
-                  'Your School, In Your Pocket',
+                  'Your School Portal',
                   style: TextStyle(
                     fontSize: 13,
                     color: Color(0xFF64748B),
@@ -129,15 +129,15 @@ class _SchoolFinderScreenState extends State<SchoolFinderScreen> {
               Card(
                 color: Colors.white,
                 elevation: 2,
-                shadowColor: Colors.black.withOpacity(0.06),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                shadowColor: Colors.black.withOpacity(0.04),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
                 child: Padding(
                   padding: const EdgeInsets.all(20.0),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const Text(
-                        'ENTER YOUR SCHOOL SLUG',
+                        'SCHOOL CODE',
                         style: TextStyle(
                           fontSize: 11,
                           fontWeight: FontWeight.w700,
@@ -148,7 +148,7 @@ class _SchoolFinderScreenState extends State<SchoolFinderScreen> {
                       const SizedBox(height: 12),
                       TextField(
                         controller: _slugController,
-                        style: const TextStyle(color: Color(0xFF0F172A)),
+                        style: const TextStyle(color: Color(0xFF0F172A), fontWeight: FontWeight.bold),
                         onChanged: (val) {
                           if (val.length > 2) {
                             _validateSchoolSlug(val.trim().toLowerCase());
@@ -163,7 +163,7 @@ class _SchoolFinderScreenState extends State<SchoolFinderScreen> {
                           fillColor: const Color(0xFFF1F5F9),
                           filled: true,
                           contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                          hintText: 'Enter school slug (e.g. greenwood)',
+                          hintText: 'e.g. greenwood',
                           hintStyle: const TextStyle(color: Color(0xFF94A3B8), fontSize: 13),
                           prefixIcon: const Icon(Icons.domain, color: Color(0xFF94A3B8)),
                           suffixIcon: _isLoading
@@ -176,7 +176,22 @@ class _SchoolFinderScreenState extends State<SchoolFinderScreen> {
                                   ),
                                 )
                               : _isValidSlug
-                                  ? const Icon(Icons.check_circle, color: AppColors.successGreen)
+                                  ? Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        const Icon(Icons.check_circle, color: AppColors.successGreen, size: 16),
+                                        const SizedBox(width: 4),
+                                        const Text(
+                                          'Verified',
+                                          style: TextStyle(
+                                            color: AppColors.successGreen,
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                        const SizedBox(width: 12),
+                                      ],
+                                    )
                                   : null,
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
@@ -198,7 +213,7 @@ class _SchoolFinderScreenState extends State<SchoolFinderScreen> {
                       ),
                       const SizedBox(height: 8),
                       const Text(
-                        'Your school administrator provided you with this code.',
+                        'Your school gave you this.',
                         style: TextStyle(
                           fontSize: 11,
                           color: Color(0xFF64748B),

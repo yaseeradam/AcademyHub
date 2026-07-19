@@ -107,68 +107,68 @@
     {{-- Live Sheet UI --}}
     @if($classId && $sectionId)
         {{-- Real-Time Stats Bar --}}
-        <div class="grid grid-cols-2 gap-4 lg:grid-cols-5">
+        <div class="grid grid-cols-2 gap-2.5 sm:grid-cols-3 lg:grid-cols-5">
             {{-- Total Active Students --}}
-            <div class="relative overflow-hidden rounded-3xl bg-slate-900 p-5 shadow-lg border border-slate-800 text-white">
+            <div class="relative overflow-hidden rounded-xl bg-slate-900 p-3 shadow-sm border border-slate-800 text-white">
                 <div class="flex items-center justify-between">
-                    <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">Active Students</span>
-                    <span class="rounded-full bg-slate-800 px-2.5 py-0.5 text-[10px] font-bold text-slate-300">Total</span>
+                    <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Active Students</span>
+                    <span class="rounded-full bg-slate-800 px-2 py-0.5 text-[9px] font-bold text-slate-300">Total</span>
                 </div>
-                <div class="mt-4 text-3xl font-black">{{ $students->count() }}</div>
-                <div class="mt-1 text-xs font-medium text-slate-400">Enrolled in section</div>
+                <div class="mt-1.5 text-xl font-extrabold">{{ $students->count() }}</div>
+                <div class="text-[10px] font-medium text-slate-400">Enrolled in section</div>
             </div>
 
             {{-- Present Counter --}}
-            <div class="relative overflow-hidden rounded-3xl bg-white p-5 shadow-sm border border-slate-100 transition-all hover:shadow-md">
+            <div class="relative overflow-hidden rounded-xl bg-white p-3 shadow-sm border border-slate-100 transition-all hover:shadow-md">
                 <div class="absolute top-0 left-0 right-0 h-1 bg-emerald-500"></div>
                 <div class="flex items-center justify-between">
-                    <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">Present</span>
-                    <span class="rounded-full bg-emerald-50 px-2.5 py-0.5 text-[10px] font-bold text-emerald-600">P</span>
+                    <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Present</span>
+                    <span class="rounded-full bg-emerald-50 px-2 py-0.5 text-[9px] font-bold text-emerald-600">P</span>
                 </div>
-                <div class="mt-4 text-3xl font-black text-slate-850">{{ $markCounts['Present'] ?? 0 }}</div>
-                <div class="mt-1 text-xs font-semibold text-emerald-500 flex items-center gap-1">
+                <div class="mt-1.5 text-xl font-extrabold text-slate-850">{{ $markCounts['Present'] ?? 0 }}</div>
+                <div class="text-[10px] font-semibold text-emerald-500 flex items-center gap-1">
                     <span>{{ $students->count() > 0 ? round((($markCounts['Present'] ?? 0) / $students->count()) * 100) : 0 }}%</span>
                     <span class="text-slate-400 font-medium">attendance rate</span>
                 </div>
             </div>
 
             {{-- Absent Counter --}}
-            <div class="relative overflow-hidden rounded-3xl bg-white p-5 shadow-sm border border-slate-100 transition-all hover:shadow-md">
+            <div class="relative overflow-hidden rounded-xl bg-white p-3 shadow-sm border border-slate-100 transition-all hover:shadow-md">
                 <div class="absolute top-0 left-0 right-0 h-1 bg-red-500"></div>
                 <div class="flex items-center justify-between">
-                    <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">Absent</span>
-                    <span class="rounded-full bg-red-50 px-2.5 py-0.5 text-[10px] font-bold text-red-600">A</span>
+                    <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Absent</span>
+                    <span class="rounded-full bg-red-50 px-2 py-0.5 text-[9px] font-bold text-red-600">A</span>
                 </div>
-                <div class="mt-4 text-3xl font-black text-slate-850">{{ $markCounts['Absent'] ?? 0 }}</div>
-                <div class="mt-1 text-xs font-semibold text-red-500">
+                <div class="mt-1.5 text-xl font-extrabold text-slate-850">{{ $markCounts['Absent'] ?? 0 }}</div>
+                <div class="text-[10px] font-semibold text-red-500">
                     <span>{{ $students->count() > 0 ? round((($markCounts['Absent'] ?? 0) / $students->count()) * 100) : 0 }}%</span>
                     <span class="text-slate-400 font-medium">truancy rate</span>
                 </div>
             </div>
 
             {{-- Late Counter --}}
-            <div class="relative overflow-hidden rounded-3xl bg-white p-5 shadow-sm border border-slate-100 transition-all hover:shadow-md">
+            <div class="relative overflow-hidden rounded-xl bg-white p-3 shadow-sm border border-slate-100 transition-all hover:shadow-md">
                 <div class="absolute top-0 left-0 right-0 h-1 bg-amber-500"></div>
                 <div class="flex items-center justify-between">
-                    <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">Late</span>
-                    <span class="rounded-full bg-amber-50 px-2.5 py-0.5 text-[10px] font-bold text-amber-600">L</span>
+                    <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Late</span>
+                    <span class="rounded-full bg-amber-50 px-2 py-0.5 text-[9px] font-bold text-amber-600">L</span>
                 </div>
-                <div class="mt-4 text-3xl font-black text-slate-850">{{ $markCounts['Late'] ?? 0 }}</div>
-                <div class="mt-1 text-xs font-semibold text-amber-500">
+                <div class="mt-1.5 text-xl font-extrabold text-slate-850">{{ $markCounts['Late'] ?? 0 }}</div>
+                <div class="text-[10px] font-semibold text-amber-500">
                     <span>{{ $students->count() > 0 ? round((($markCounts['Late'] ?? 0) / $students->count()) * 100) : 0 }}%</span>
                     <span class="text-slate-400 font-medium">tardiness rate</span>
                 </div>
             </div>
 
             {{-- Excused Counter --}}
-            <div class="relative overflow-hidden rounded-3xl bg-white p-5 shadow-sm border border-slate-100 transition-all hover:shadow-md">
+            <div class="relative overflow-hidden rounded-xl bg-white p-3 shadow-sm border border-slate-100 transition-all hover:shadow-md">
                 <div class="absolute top-0 left-0 right-0 h-1 bg-purple-500"></div>
                 <div class="flex items-center justify-between">
-                    <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">Excused</span>
-                    <span class="rounded-full bg-purple-50 px-2.5 py-0.5 text-[10px] font-bold text-purple-600">E</span>
+                    <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Excused</span>
+                    <span class="rounded-full bg-purple-50 px-2 py-0.5 text-[9px] font-bold text-purple-600">E</span>
                 </div>
-                <div class="mt-4 text-3xl font-black text-slate-850">{{ $markCounts['Excused'] ?? 0 }}</div>
-                <div class="mt-1 text-xs font-semibold text-purple-500">
+                <div class="mt-1.5 text-xl font-extrabold text-slate-850">{{ $markCounts['Excused'] ?? 0 }}</div>
+                <div class="text-[10px] font-semibold text-purple-500">
                     <span>{{ $students->count() > 0 ? round((($markCounts['Excused'] ?? 0) / $students->count()) * 100) : 0 }}%</span>
                     <span class="text-slate-400 font-medium">excuse rate</span>
                 </div>

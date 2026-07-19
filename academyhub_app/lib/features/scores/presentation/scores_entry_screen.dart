@@ -28,6 +28,10 @@ class _ScoresEntryScreenState extends State<ScoresEntryScreen> {
   // StudentId -> { 'ca1': val, 'ca2': val, 'exam': val }
   final Map<int, Map<String, String>> _scoresMap = {};
 
+  // Active keyboard focus state
+  int? _focusedStudentId;
+  String? _focusedField; // 'ca1', 'ca2', 'exam'
+
   @override
   void initState() {
     super.initState();
@@ -90,148 +94,6 @@ class _ScoresEntryScreenState extends State<ScoresEntryScreen> {
     }
   }
 
-  void _openNumericKeypad(int studentId, String fieldName, String currentVal) {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: const Color(0xFF1E293B),
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
-      builder: (context) {
-        String input = currentVal;
-        return StatefulBuilder(
-          builder: (context, setModalState) {
-            void pressKey(String key) {
-              setModalState(() {
-                if (key == 'C') {
-                  input = '';
-                } else if (key == '⌫') {
-                  if (input.isNotEmpty) {
-                     input = input.substring(0, input.length - 1);
-                  }
-                } else {
-                  // Cap scores length
-                  if (input.length < 3) {
-                    input += key;
-                  }
-                }
-              });
-              
-              setState(() {
-                _scoresMap[studentId]![fieldName] = input;
-              });
-            }
-
-            return Container(
-              padding: const EdgeInsets.all(20),
-              color: const Color(0xFF1E293B),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Center(
-                    child: Container(
-                      width: 40,
-                      height: 4,
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF334155),
-                        borderRadius: BorderRadius.circular(2),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  Text(
-                    'Enter ${fieldName.toUpperCase()} Score',
-                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.white),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 16),
-                  Container(
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF0F172A),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Text(
-                      input.isEmpty ? '-' : input,
-                      style: const TextStyle(fontSize: 36, fontWeight: FontWeight.w800, color: AppColors.amberPrimary),
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  
-                  // Keypad Grid
-                  GridView.builder(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 3,
-                      mainAxisSpacing: 10,
-                      crossAxisSpacing: 10,
-                      childAspectRatio: 1.6,
-                    ),
-                    itemCount: 12,
-                    itemBuilder: (context, index) {
-                      final keys = ['1', '2', '3', '4', '5', '6', '7', '8', '9', 'C', '0', '⌫'];
-                      final key = keys[index];
-                      Color keyBg = const Color(0xFF334155);
-                      Color textCol = Colors.white;
-                      
-                      if (key == 'C') {
-                        keyBg = const Color(0xFF7F1D1D); // dark red
-                        textCol = const Color(0xFFF43F5E); // text red
-                      } else if (key == '⌫') {
-                        textCol = const Color(0xFFF43F5E);
-                      }
-
-                      return ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: keyBg,
-                          foregroundColor: AppColors.amberPrimary, // amber ripple on press
-                          elevation: 0,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                        ),
-                        onPressed: () => pressKey(key),
-                        child: Text(
-                          key,
-                          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: textCol),
-                        ),
-                      );
-                    },
-                  ),
-                  const SizedBox(height: 16),
-                  Container(
-                    height: 52,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(12),
-                      boxShadow: [
-                        BoxShadow(
-                          color: AppColors.amberPrimary.withOpacity(0.4),
-                          blurRadius: 16,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
-                    ),
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.amberPrimary,
-                        foregroundColor: Colors.white,
-                        elevation: 0,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                      ),
-                      onPressed: () => Navigator.pop(context),
-                      child: const Text('CONFIRM', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 16)),
-                    ),
-                  ),
-                ],
-              ),
-            );
-          },
-        );
-      },
-    );
-  }
-
   Future<void> _saveScores() async {
     setState(() {
       _isLoading = true;
@@ -284,49 +146,173 @@ class _ScoresEntryScreenState extends State<ScoresEntryScreen> {
     }
   }
 
-  Widget _buildStudentScoreRow(Map<String, dynamic> student) {
-    final id = student['id'];
-    final name = '${student['first_name']} ${student['last_name']}';
-    final scores = _scoresMap[id] ?? {'ca1': '', 'ca2': '', 'exam': ''};
+  void _onKeyPress(String key) {
+    if (_focusedStudentId == null || _focusedField == null) return;
+    
+    final currentVal = _scoresMap[_focusedStudentId]![_focusedField] ?? '';
+    String newVal = currentVal;
 
-    final hasEmpty = scores['ca1']!.isEmpty || scores['ca2']!.isEmpty || scores['exam']!.isEmpty;
+    if (key == '⌫') {
+      if (currentVal.isNotEmpty) {
+        newVal = currentVal.substring(0, currentVal.length - 1);
+      }
+    } else {
+      // enforce max constraints: CA1/CA2 max 20, EXAM max 60
+      final parsed = int.tryParse(currentVal + key) ?? 0;
+      final maxVal = _focusedField == 'exam' ? 60 : 20;
+      if (parsed <= maxVal && (currentVal + key).length <= 2) {
+        newVal = currentVal + key;
+      }
+    }
 
+    setState(() {
+      _scoresMap[_focusedStudentId]![_focusedField!] = newVal;
+    });
+  }
+
+  void _nextField() {
+    if (_focusedStudentId == null || _focusedField == null) return;
+
+    setState(() {
+      if (_focusedField == 'ca1') {
+        _focusedField = 'ca2';
+      } else if (_focusedField == 'ca2') {
+        _focusedField = 'exam';
+      } else {
+        // Move to next student
+        final currentStudentIndex = _students.indexWhere((s) => s['id'] == _focusedStudentId);
+        if (currentStudentIndex < _students.length - 1) {
+          _focusedStudentId = _students[currentStudentIndex + 1]['id'];
+          _focusedField = 'ca1';
+        } else {
+          // Finished all
+          _focusedStudentId = null;
+          _focusedField = null;
+        }
+      }
+    });
+  }
+
+  Widget _buildKeypadOverlay() {
     return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
-        border: Border(
-          left: BorderSide(
-            color: hasEmpty ? AppColors.amberPrimary : Colors.transparent,
-            width: 3,
+      color: const Color(0xFFF1F5F9), // light slate recessed bg
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Entering ${_focusedField?.toUpperCase()} Score...',
+                style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.textSecondary),
+              ),
+              TextButton(
+                onPressed: () {
+                  setState(() {
+                    _focusedStudentId = null;
+                    _focusedField = null;
+                  });
+                },
+                child: const Text('Done', style: TextStyle(color: AppColors.amberPrimary, fontWeight: FontWeight.bold)),
+              ),
+            ],
           ),
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 4,
-            offset: const Offset(0, 2),
+          const SizedBox(height: 4),
+          GridView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 6,
+              mainAxisSpacing: 8,
+              crossAxisSpacing: 8,
+              childAspectRatio: 1.2,
+            ),
+            itemCount: 12,
+            itemBuilder: (context, index) {
+              final keys = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '⌫', 'Next'];
+              final key = keys[index];
+              
+              return ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: key == 'Next' ? AppColors.amberPrimary : Colors.white,
+                  foregroundColor: key == 'Next' ? Colors.white : AppColors.amberPrimary,
+                  elevation: 0.5,
+                  padding: EdgeInsets.zero,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                ),
+                onPressed: key == 'Next' ? _nextField : () => _onKeyPress(key),
+                child: Text(
+                  key,
+                  style: TextStyle(
+                    fontSize: key == 'Next' ? 12 : 18,
+                    fontWeight: FontWeight.bold,
+                    color: key == 'Next' ? Colors.white : AppColors.textPrimary,
+                  ),
+                ),
+              );
+            },
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildStudentScoreRow(Map<String, dynamic> student) {
+    final id = student['id'];
+    final name = '${student['first_name']} ${student['last_name']}';
+    final admNum = student['admission_number'] ?? '';
+    final scores = _scoresMap[id] ?? {'ca1': '', 'ca2': '', 'exam': ''};
+
+    String initials = '';
+    if (student['first_name'] != null && student['first_name'].toString().isNotEmpty) {
+      initials += student['first_name'][0].toUpperCase();
+    }
+    if (student['last_name'] != null && student['last_name'].toString().isNotEmpty) {
+      initials += student['last_name'][0].toUpperCase();
+    }
+
+    return Card(
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        child: Row(
           children: [
-            Text(
-              name,
-              style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF0F172A), fontSize: 15),
+            // Left profile passport avatar representation
+            CircleAvatar(
+              radius: 22,
+              backgroundColor: AppColors.amberPrimary.withOpacity(0.1),
+              child: Text(
+                initials,
+                style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.amberPrimary),
+              ),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    name,
+                    style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.textPrimary, fontSize: 14),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    admNum,
+                    style: const TextStyle(color: AppColors.textSecondary, fontSize: 11),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 12),
+            // Right score entry cells
             Row(
               children: [
-                _buildCell(id, 'ca1', 'CA1', scores['ca1']!),
-                const SizedBox(width: 8),
-                _buildCell(id, 'ca2', 'CA2', scores['ca2']!),
-                const SizedBox(width: 8),
-                _buildCell(id, 'exam', 'Exam', scores['exam']!),
+                _buildCell(id, 'ca1', 'CA 1', scores['ca1']!),
+                const SizedBox(width: 6),
+                _buildCell(id, 'ca2', 'CA 2', scores['ca2']!),
+                const SizedBox(width: 6),
+                _buildCell(id, 'exam', 'EXAM', scores['exam']!),
               ],
             ),
           ],
@@ -336,33 +322,53 @@ class _ScoresEntryScreenState extends State<ScoresEntryScreen> {
   }
 
   Widget _buildCell(int studentId, String field, String label, String value) {
+    final isFocused = _focusedStudentId == studentId && _focusedField == field;
     final isEmpty = value.isEmpty;
-    return Expanded(
-      child: GestureDetector(
-        onTap: () => _openNumericKeypad(studentId, field, value),
-        child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 10),
-          decoration: BoxDecoration(
-            color: const Color(0xFFF1F5F9), // slate-100
-            borderRadius: BorderRadius.circular(10),
+
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          _focusedStudentId = studentId;
+          _focusedField = field;
+        });
+      },
+      child: Container(
+        width: 48,
+        height: 48,
+        decoration: BoxDecoration(
+          color: const Color(0xFFF1F5F9), // slate-100
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(
+            color: isFocused
+                ? AppColors.amberPrimary
+                : (isEmpty ? AppColors.amberPrimary.withOpacity(0.3) : Colors.transparent),
+            width: isFocused ? 2.0 : 1.0,
           ),
-          child: Column(
-            children: [
-              Text(
-                label.toUpperCase(),
-                style: const TextStyle(fontSize: 10, color: Color(0xFF94A3B8), fontWeight: FontWeight.w700, letterSpacing: 0.5),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                isEmpty ? '—' : value,
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w800,
-                  color: isEmpty ? const Color(0xFFCBD5E1) : AppColors.amberPrimary,
+        ),
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  label,
+                  style: const TextStyle(fontSize: 8, color: AppColors.textSecondary, fontWeight: FontWeight.bold),
                 ),
-              ),
-            ],
-          ),
+                const SizedBox(height: 1),
+                Text(
+                  isEmpty ? '' : value,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.amberPrimary,
+                  ),
+                ),
+              ],
+            ),
+            if (isFocused && isEmpty)
+              const _BlinkingCursor(),
+          ],
         ),
       ),
     );
@@ -370,29 +376,33 @@ class _ScoresEntryScreenState extends State<ScoresEntryScreen> {
 
   @override
   Widget build(BuildContext context) {
+    const headerColor = Color(0xFF334155); // Slate-800
+
     return Scaffold(
+      backgroundColor: AppColors.appBackground,
       appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () => Navigator.pop(context),
-        ),
         title: Text(
           widget.subjectName,
           style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
         ),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () => Navigator.pop(context),
+        ),
         elevation: 0,
-        backgroundColor: const Color(0xFF1E293B),
+        backgroundColor: headerColor,
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator(color: AppColors.amberPrimary))
           : Column(
               children: [
+                // Flat dark header subtitle
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                   decoration: const BoxDecoration(
-                    color: Color(0xFF1E293B),
+                    color: headerColor,
                     border: Border(
-                      bottom: BorderSide(color: Color(0xFF334155), width: 1.0),
+                      bottom: BorderSide(color: Color(0xFF475569), width: 1.0),
                     ),
                   ),
                   child: Row(
@@ -400,55 +410,96 @@ class _ScoresEntryScreenState extends State<ScoresEntryScreen> {
                     children: [
                       Text(
                         'Class: ${widget.className}',
-                        style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white, fontSize: 14),
+                        style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white, fontSize: 13),
                       ),
-                      const Text(
-                        'Term 2',
-                        style: TextStyle(color: Color(0xFF94A3B8), fontSize: 12),
+                      Text(
+                        'Size: ${_students.length} Students',
+                        style: const TextStyle(color: Colors.white70, fontSize: 12),
                       ),
                     ],
                   ),
                 ),
                 Expanded(
                   child: ListView.builder(
-                    padding: const EdgeInsets.all(16),
+                    padding: const EdgeInsets.all(12),
                     itemCount: _students.length,
                     itemBuilder: (context, index) {
                       return _buildStudentScoreRow(_students[index]);
                     },
                   ),
                 ),
-                Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Container(
-                    height: 52,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(12),
-                      boxShadow: [
-                        BoxShadow(
-                          color: AppColors.amberPrimary.withOpacity(0.35),
-                          blurRadius: 16,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
-                    ),
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.amberPrimary,
-                        foregroundColor: Colors.white,
-                        elevation: 0,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                if (_focusedStudentId != null)
+                  _buildKeypadOverlay()
+                else
+                  Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Container(
+                      height: 52,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(12),
+                        boxShadow: [
+                          BoxShadow(
+                            color: AppColors.amberPrimary.withOpacity(0.3),
+                            blurRadius: 16,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
                       ),
-                      onPressed: _students.isEmpty ? null : _saveScores,
-                      child: const Text(
-                        'SAVE SCORES',
-                        style: TextStyle(fontWeight: FontWeight.w800, fontSize: 16),
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.amberPrimary,
+                          foregroundColor: Colors.white,
+                          elevation: 0,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        ),
+                        onPressed: _students.isEmpty ? null : _saveScores,
+                        child: const Text(
+                          'SAVE SCORES',
+                          style: TextStyle(fontWeight: FontWeight.w800, fontSize: 16),
+                        ),
                       ),
                     ),
                   ),
-                ),
               ],
             ),
+    );
+  }
+}
+
+class _BlinkingCursor extends StatefulWidget {
+  const _BlinkingCursor();
+
+  @override
+  State<_BlinkingCursor> createState() => _BlinkingCursorState();
+}
+
+class _BlinkingCursorState extends State<_BlinkingCursor> with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 500),
+    )..repeat(reverse: true);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FadeTransition(
+      opacity: _controller,
+      child: Container(
+        width: 1.5,
+        height: 12,
+        color: AppColors.amberPrimary,
+      ),
     );
   }
 }

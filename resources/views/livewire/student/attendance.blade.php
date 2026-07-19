@@ -30,51 +30,59 @@
     </div>
 
     {{-- ── Term Stats ── --}}
-    <div class="grid grid-cols-2 gap-4 sm:grid-cols-4">
+    <div class="grid grid-cols-2 gap-2.5 sm:grid-cols-4">
 
         {{-- Attendance Rate Ring --}}
-        <div class="col-span-2 sm:col-span-1 relative overflow-hidden rounded-xl bg-white border border-slate-100 p-3 shadow-sm flex flex-col items-center justify-center">
-            <div class="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-2">Attendance Rate</div>
-            <div class="relative">
-                <svg width="70" height="70" viewBox="0 0 100 100" class="-rotate-90">
-                    <circle cx="50" cy="50" r="40" fill="none" stroke="#f1f5f9" stroke-width="8"/>
-                    <circle cx="50" cy="50" r="40" fill="none" stroke="#0f172a" stroke-width="8"
+        <div class="col-span-2 sm:col-span-1 relative overflow-hidden rounded-lg bg-white border border-slate-200/80 p-2.5 shadow-sm flex items-center justify-between">
+            <div>
+                <div class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Attendance Rate</div>
+                <div class="mt-0.5 flex items-baseline gap-1">
+                    <span class="text-base font-extrabold text-slate-900">{{ $rate }}%</span>
+                    <span class="text-[10px] font-semibold text-slate-500">({{ $rateLabel }})</span>
+                </div>
+            </div>
+            <div class="relative shrink-0">
+                <svg width="42" height="42" viewBox="0 0 100 100" class="-rotate-90">
+                    <circle cx="50" cy="50" r="40" fill="none" stroke="#f1f5f9" stroke-width="10"/>
+                    <circle cx="50" cy="50" r="40" fill="none" stroke="#0f172a" stroke-width="10"
                             stroke-linecap="round"
                             stroke-dasharray="{{ $circ }}"
                             stroke-dashoffset="{{ $circ - $dash }}"
                             style="transition: stroke-dashoffset 1s ease"/>
                 </svg>
-                <div class="absolute inset-0 flex flex-col items-center justify-center">
-                    <span class="text-sm font-bold text-slate-900">{{ $rate }}%</span>
-                </div>
             </div>
-            <div class="mt-1 text-[10px] font-semibold text-slate-500">{{ $rateLabel }}</div>
         </div>
 
         {{-- Present --}}
-        <div class="relative overflow-hidden rounded-xl bg-white border border-slate-100 p-3 shadow-sm border-l-4 border-l-emerald-500">
+        <div class="relative overflow-hidden rounded-lg bg-white border border-slate-200/80 p-2.5 shadow-sm border-l-4 border-l-emerald-500 flex flex-col justify-between">
             <div class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Present</div>
-            <div class="mt-1 text-2xl font-black text-slate-800">{{ $present }}</div>
-            <div class="text-[10px] font-medium text-slate-400">of {{ $total }} days</div>
+            <div class="mt-0.5 flex items-baseline justify-between">
+                <span class="text-base font-extrabold text-slate-800">{{ $present }}</span>
+                <span class="text-[10px] font-medium text-slate-400">of {{ $total }} days</span>
+            </div>
         </div>
 
         {{-- Absent --}}
-        <div class="relative overflow-hidden rounded-xl bg-white border border-slate-100 p-3 shadow-sm border-l-4 border-l-rose-500">
+        <div class="relative overflow-hidden rounded-lg bg-white border border-slate-200/80 p-2.5 shadow-sm border-l-4 border-l-rose-500 flex flex-col justify-between">
             <div class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Absent</div>
-            <div class="mt-1 text-2xl font-black text-slate-800">{{ $absent }}</div>
-            <div class="text-[10px] font-medium text-slate-400">day{{ $absent !== 1 ? 's' : '' }} missed</div>
+            <div class="mt-0.5 flex items-baseline justify-between">
+                <span class="text-base font-extrabold text-slate-800">{{ $absent }}</span>
+                <span class="text-[10px] font-medium text-slate-400">day{{ $absent !== 1 ? 's' : '' }}</span>
+            </div>
         </div>
 
         {{-- Late + Streak --}}
-        <div class="relative overflow-hidden rounded-xl bg-white border border-slate-100 p-3 shadow-sm border-l-4 border-l-amber-500">
-            <div class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Late</div>
-            <div class="mt-1 text-2xl font-black text-slate-800">{{ $late }}</div>
-            <div class="text-[10px] font-medium text-slate-400">arrival{{ $late !== 1 ? 's' : '' }}</div>
-            @if ($streak > 0)
-                <div class="mt-1.5 inline-flex items-center gap-1 rounded bg-slate-100 px-1.5 py-0.5 text-[9px] font-bold text-slate-700">
-                    🔥 {{ $streak }}-day streak
-                </div>
-            @endif
+        <div class="relative overflow-hidden rounded-lg bg-white border border-slate-200/80 p-2.5 shadow-sm border-l-4 border-l-amber-500 flex flex-col justify-between">
+            <div class="flex items-center justify-between">
+                <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Late</span>
+                @if ($streak > 0)
+                    <span class="text-[9px] font-bold text-slate-600">🔥 {{ $streak }}d</span>
+                @endif
+            </div>
+            <div class="mt-0.5 flex items-baseline justify-between">
+                <span class="text-base font-extrabold text-slate-800">{{ $late }}</span>
+                <span class="text-[10px] font-medium text-slate-400">arrival{{ $late !== 1 ? 's' : '' }}</span>
+            </div>
         </div>
     </div>
 

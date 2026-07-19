@@ -24,7 +24,7 @@ class AppColors {
   // ── Surface ────────────────────────────────────────────
   static const Color white         = Color(0xFFFFFFFF);
   static const Color cardSurface   = Color(0xFFFFFFFF);
-  static const Color appBackground = Color(0xFFF1F5F9);
+  static const Color appBackground = Color(0xFFF8FAFC);
   static const Color inputFill     = Color(0xFFF1F5F9);
   static const Color divider       = Color(0xFFE2E8F0);
 
@@ -53,7 +53,7 @@ class AppTheme {
       useMaterial3: true,
       brightness: Brightness.light,
       primaryColor: AppColors.amberPrimary,
-      scaffoldBackgroundColor: AppColors.slate100,
+      scaffoldBackgroundColor: AppColors.appBackground,
 
       colorScheme: const ColorScheme.light(
         primary:    AppColors.amberPrimary,
@@ -68,24 +68,25 @@ class AppTheme {
 
       // ── AppBar ──────────────────────────────────────────
       appBarTheme: AppBarTheme(
-        backgroundColor: AppColors.slate900,
-        foregroundColor: AppColors.white,
-        elevation: 0,
+        backgroundColor: AppColors.white,
+        foregroundColor: AppColors.textPrimary,
+        elevation: 0.5,
+        shadowColor: AppColors.divider,
         centerTitle: false,
         titleTextStyle: GoogleFonts.spaceGrotesk(
           fontSize: 17,
           fontWeight: FontWeight.w700,
-          color: AppColors.white,
+          color: AppColors.textPrimary,
         ),
-        iconTheme: const IconThemeData(color: AppColors.white),
+        iconTheme: const IconThemeData(color: AppColors.textPrimary),
       ),
 
       // ── Bottom Nav ──────────────────────────────────────
       bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-        backgroundColor: AppColors.slate900,
+        backgroundColor: AppColors.white,
         selectedItemColor: AppColors.amberPrimary,
         unselectedItemColor: AppColors.slate400,
-        elevation: 0,
+        elevation: 8,
         type: BottomNavigationBarType.fixed,
         selectedLabelStyle: TextStyle(fontWeight: FontWeight.w700, fontSize: 11),
         unselectedLabelStyle: TextStyle(fontWeight: FontWeight.w500, fontSize: 11),

@@ -69,9 +69,14 @@ class _LoginScreenState extends State<LoginScreen> {
         final token = response.data['token'];
         if (token != null) {
           await SecureStorage.instance.setToken(token);
-          await SecureStorage.instance.setRole(_selectedRole);
+          
+          String storedRole = _selectedRole;
+          if (_selectedRole == 'staff' && response.data['user'] != null) {
+            storedRole = response.data['user']['role'] ?? 'teacher';
+          }
+          await SecureStorage.instance.setRole(storedRole);
 
-          if (_selectedRole == 'student' && response.data['student'] != null) {
+          if (storedRole == 'student' && response.data['student'] != null) {
             final studentId = response.data['student']['id']?.toString();
             if (studentId != null) {
               await SecureStorage.instance.setStudentId(studentId);
@@ -106,7 +111,7 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget _buildRoleCard(String role, String label, IconData icon) {
     final isSelected = _selectedRole == role;
     return Expanded(
-      child: GestureDetector(
+      child: InkWell(
         onTap: () {
           setState(() {
             _selectedRole = role;
@@ -114,38 +119,31 @@ class _LoginScreenState extends State<LoginScreen> {
             _errorMessage = null;
           });
         },
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
-          height: 64,
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 12),
           decoration: BoxDecoration(
-            color: isSelected ? AppColors.amberPrimary : Colors.white,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: isSelected ? AppColors.amberPrimary : const Color(0xFFCBD5E1),
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.03),
-                blurRadius: 4,
-                offset: const Offset(0, 2),
+            border: Border(
+              bottom: BorderSide(
+                color: isSelected ? AppColors.amberPrimary : Colors.transparent,
+                width: 3,
               ),
-            ],
+            ),
           ),
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
             children: [
               Icon(
                 icon,
-                color: isSelected ? Colors.white : const Color(0xFF64748B),
-                size: 20,
+                color: isSelected ? AppColors.amberPrimary : const Color(0xFF64748B),
+                size: 22,
               ),
-              const SizedBox(height: 2),
+              const SizedBox(height: 4),
               Text(
                 label,
                 style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.bold,
-                  color: isSelected ? Colors.white : const Color(0xFF64748B),
+                  fontSize: 14,
+                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                  color: isSelected ? AppColors.amberPrimary : const Color(0xFF64748B),
                 ),
               ),
             ],
@@ -159,7 +157,7 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     final isStudent = _selectedRole == 'student';
     return Scaffold(
-      backgroundColor: const Color(0xFFF1F5F9),
+      backgroundColor: AppColors.appBackground,
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Color(0xFF0F172A)),
@@ -176,13 +174,6 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
         elevation: 0,
         backgroundColor: Colors.transparent,
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(2),
-          child: Container(
-            color: AppColors.amberPrimary,
-            height: 2,
-          ),
-        ),
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -190,9 +181,33 @@ class _LoginScreenState extends State<LoginScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+              // Crest Logo
+              Center(
+                child: Column(
+                  children: [
+                    const Icon(
+                      Icons.school_outlined,
+                      size: 64,
+                      color: AppColors.amberPrimary,
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      _schoolName ?? 'AcademyHub',
+                      style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Color(0xFF0F172A)),
+                    ),
+                    const SizedBox(height: 4),
+                    const Text(
+                      'Your School Portal',
+                      style: TextStyle(fontSize: 12, color: Color(0xFF64748B)),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 32),
+
               // Role Selector Label
               const Text(
-                'I AM A',
+                'LOG IN AS',
                 style: TextStyle(
                   fontSize: 11,
                   fontWeight: FontWeight.w700,
@@ -202,13 +217,11 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               const SizedBox(height: 12),
               
-              // Role Selectors
+              // Role Selectors (Tabs)
               Row(
                 children: [
                   _buildRoleCard('student', 'Student', Icons.school),
-                  const SizedBox(width: 8),
                   _buildRoleCard('parent', 'Parent', Icons.people_alt),
-                  const SizedBox(width: 8),
                   _buildRoleCard('staff', 'Staff', Icons.assignment_ind),
                 ],
               ),
@@ -218,8 +231,8 @@ class _LoginScreenState extends State<LoginScreen> {
               Card(
                 color: Colors.white,
                 elevation: 2,
-                shadowColor: Colors.black.withOpacity(0.06),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                shadowColor: Colors.black.withOpacity(0.04),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
                 child: Padding(
                   padding: const EdgeInsets.all(20.0),
                   child: Column(
@@ -238,20 +251,20 @@ class _LoginScreenState extends State<LoginScreen> {
                       TextField(
                         controller: _usernameController,
                         keyboardType: isStudent ? TextInputType.text : TextInputType.emailAddress,
-                        style: const TextStyle(color: Color(0xFF0F172A)),
+                        style: const TextStyle(color: Color(0xFF0F172A), fontWeight: FontWeight.w600),
                         decoration: InputDecoration(
                           fillColor: const Color(0xFFF1F5F9),
                           filled: true,
-                          hintText: isStudent ? 'e.g. STU20240001' : 'e.g. parent@school.com',
+                          hintText: isStudent ? 'e.g. ADM-2026-0092' : 'e.g. parent1@academyhub.local',
                           hintStyle: const TextStyle(color: Color(0xFF94A3B8), fontSize: 13),
                           contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide.none,
+                            borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
                           ),
                           enabledBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide.none,
+                            borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
                           ),
                           focusedBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
@@ -273,7 +286,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       TextField(
                         controller: _passwordController,
                         obscureText: _obscurePassword,
-                        style: const TextStyle(color: Color(0xFF0F172A)),
+                        style: const TextStyle(color: Color(0xFF0F172A), fontWeight: FontWeight.w600),
                         decoration: InputDecoration(
                           fillColor: const Color(0xFFF1F5F9),
                           filled: true,
@@ -282,11 +295,11 @@ class _LoginScreenState extends State<LoginScreen> {
                           contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide.none,
+                            borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
                           ),
                           enabledBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide.none,
+                            borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
                           ),
                           focusedBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
@@ -320,17 +333,15 @@ class _LoginScreenState extends State<LoginScreen> {
                 const SizedBox(height: 16),
               ],
 
-              const SizedBox(height: 16),
-
-              // Sign In Button
+              // Log In Button
               Container(
                 height: 52,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(12),
                   boxShadow: [
                     BoxShadow(
-                      color: AppColors.amberPrimary.withOpacity(0.4),
-                      blurRadius: 20,
+                      color: AppColors.amberPrimary.withOpacity(0.35),
+                      blurRadius: 16,
                       offset: const Offset(0, 4),
                     ),
                   ],
@@ -353,9 +364,30 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                         )
                       : const Text(
-                          'SIGN IN',
+                          'LOG IN',
                           style: TextStyle(fontWeight: FontWeight.w800, fontSize: 16),
                         ),
+                ),
+              ),
+              const SizedBox(height: 24),
+              
+              // Support Links
+              Center(
+                child: TextButton(
+                  onPressed: () {},
+                  child: const Text(
+                    'Forgot Password?',
+                    style: TextStyle(color: Color(0xFF64748B), fontSize: 13, fontWeight: FontWeight.bold),
+                  ),
+                ),
+              ),
+              Center(
+                child: TextButton(
+                  onPressed: () {},
+                  child: const Text(
+                    'Need help? Contact Admin',
+                    style: TextStyle(color: AppColors.amberPrimary, fontSize: 13, fontWeight: FontWeight.bold),
+                  ),
                 ),
               ),
             ],
