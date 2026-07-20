@@ -2714,9 +2714,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ),
         ],
       ),
-      floatingActionButton: isAdminAnnounceTab
+      floatingActionButton: _userRole == 'admin' && _currentIndex == 2
           ? FloatingActionButton(
-              backgroundColor: const Color(0xFF7C3AED),
+              backgroundColor: AppColors.rolePrimary(_userRole),
               foregroundColor: Colors.white,
               onPressed: () => context.push('/broadcast-creator'),
               child: const Icon(Icons.add),
@@ -2737,7 +2737,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             children: List.generate(navItems.length, (idx) {
               final item = navItems[idx];
               final isSelected = _currentIndex == idx;
-              final activeColor = _roleGradient.first;
+              final activeColor = AppColors.rolePrimary(_userRole);
 
               IconData iconData;
               if (idx == 0) {

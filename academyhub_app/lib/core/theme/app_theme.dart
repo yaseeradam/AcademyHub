@@ -38,31 +38,31 @@ class AppColors {
   static const Color softBlue      = slate800;
   static const Color accentAmber   = amberPrimary;
 
-  // ── Role gradient end colours ──────────────────────────
-  static const Color studentEnd    = Color(0xFF2D6A9F);
-  static const Color parentEnd     = Color(0xFF6B4FA0);
-  static const Color teacherEnd    = Color(0xFF0F766E);
-  static const Color adminEnd      = Color(0xFFB45309);
-
   // ── Role primary colours ────────────────────────────────
-  static const Color roleStudent   = Color(0xFFB45309); // amber-brown
-  static const Color roleParent    = Color(0xFF6B4FA0); // purple
-  static const Color roleStaff     = Color(0xFF0F766E); // teal
-  static const Color roleAdmin     = Color(0xFF92400E); // dark amber
+  static const Color roleStudent   = Color(0xFF3B82F6); // Blue
+  static const Color roleParent    = Color(0xFF10B981); // Emerald Green
+  static const Color roleStaff     = Color(0xFF7C3AED); // Purple
+  static const Color roleAdmin     = Color(0xFF7C3AED); // Purple
 
   static List<Color> roleGradient(String role) {
     switch (role) {
-      case 'parent': return [Color(0xFF6B4FA0), Color(0xFF4C1D95)];
-      case 'staff':  return [Color(0xFF0F766E), Color(0xFF134E4A)];
-      case 'admin':  return [Color(0xFF92400E), Color(0xFF78350F)];
-      default:       return [Color(0xFFB45309), Color(0xFF92400E)]; // student
+      case 'parent':
+        return const [Color(0xFF064E3B), Color(0xFF10B981)];
+      case 'staff':
+      case 'teacher':
+        return const [Color(0xFF4C1D95), Color(0xFF7C3AED)];
+      case 'admin':
+        return const [Color(0xFF311078), Color(0xFF7C3AED)];
+      default: // student
+        return const [Color(0xFF1E3A5F), Color(0xFF3B82F6)];
     }
   }
 
   static Color rolePrimary(String role) {
     switch (role) {
-      case 'parent': return roleParent;
-      case 'staff':  return roleStaff;
+      case 'parent':  return roleParent;
+      case 'staff':
+      case 'teacher': return roleStaff;
       case 'admin':  return roleAdmin;
       default:       return roleStudent;
     }
