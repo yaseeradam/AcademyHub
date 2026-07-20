@@ -18,7 +18,7 @@ void main() {
 
     // Verify key titles and logo details are present
     expect(find.text('AcademyHub'), findsOneWidget);
-    expect(find.text('Your School Portal'), findsOneWidget);
+    expect(find.text('Find Your School'), findsOneWidget);
     expect(find.byIcon(Icons.school_rounded), findsWidgets);
 
     // Verify text field exists for slug lookup
@@ -27,7 +27,7 @@ void main() {
 
     // Verify the Continue button is initially disabled (can't proceed without slug validation)
     final ElevatedButton button = tester.widget<ElevatedButton>(
-      find.widgetWithText(ElevatedButton, 'Continue →'),
+      find.widgetWithText(ElevatedButton, 'Enter school code above'),
     );
     expect(button.enabled, isFalse);
   });

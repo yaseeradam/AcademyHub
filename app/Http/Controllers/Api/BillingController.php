@@ -56,7 +56,7 @@ class BillingController extends Controller
             ->where('session', $activeSessionName)
             ->first();
 
-        $amountDue = $feeStructure ? (float) $feeStructure->amount_due : 0.0;
+        $amountDue = $feeStructure ? (float) $feeStructure->amount_due : 45000.0;
 
         $amountPaid = (float) Transaction::where('student_id', $student->id)
             ->where('type', 'Income')

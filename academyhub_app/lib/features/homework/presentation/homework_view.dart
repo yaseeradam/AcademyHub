@@ -140,7 +140,7 @@ class _HomeworkViewState extends State<HomeworkView> with SingleTickerProviderSt
     final homeworkId = item['id'] as int;
     
     final writtenController = TextEditingController();
-    List<String> attachments = ['page_1_scan.jpg', 'page_2_scan.jpg']; // default mock files in composer
+    List<String> attachments = [];
 
     showModalBottomSheet(
       context: context,
