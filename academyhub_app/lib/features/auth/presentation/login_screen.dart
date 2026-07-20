@@ -54,23 +54,9 @@ class _LoginScreenState extends State<LoginScreen>
     super.dispose();
   }
 
-  Color get _roleColor {
-    switch (_selectedRole) {
-      case 'student': return const Color(0xFF3B82F6);
-      case 'parent':  return const Color(0xFF10B981);
-      case 'staff':   return const Color(0xFF7C3AED);
-      default:        return const Color(0xFF3B82F6);
-    }
-  }
+  Color get _roleColor => AppColors.rolePrimary(_selectedRole);
 
-  List<Color> get _gradient {
-    switch (_selectedRole) {
-      case 'student': return [const Color(0xFF1E3A5F), const Color(0xFF3B82F6)];
-      case 'parent':  return [const Color(0xFF064E3B), const Color(0xFF10B981)];
-      case 'staff':   return [const Color(0xFF4C1D95), const Color(0xFF7C3AED)];
-      default:        return [const Color(0xFF1E3A5F), const Color(0xFF3B82F6)];
-    }
-  }
+  List<Color> get _gradient => AppColors.roleGradient(_selectedRole);
 
   String get _rolePortalLabel {
     switch (_selectedRole) {

@@ -39,22 +39,22 @@ class AppColors {
   static const Color accentAmber   = amberPrimary;
 
   // ── Role primary colours ────────────────────────────────
-  static const Color roleStudent   = Color(0xFF3B82F6); // Blue
-  static const Color roleParent    = Color(0xFF10B981); // Emerald Green
-  static const Color roleStaff     = Color(0xFF7C3AED); // Purple
-  static const Color roleAdmin     = Color(0xFF7C3AED); // Purple
+  static const Color roleStudent   = Color(0xFF2563EB); // Soft Azure
+  static const Color roleParent    = Color(0xFF059669); // Soft Emerald
+  static const Color roleStaff     = Color(0xFF4F46E5); // Soft Indigo
+  static const Color roleAdmin     = Color(0xFF4338CA); // Executive Slate Indigo
 
   static List<Color> roleGradient(String role) {
     switch (role) {
       case 'parent':
-        return const [Color(0xFF064E3B), Color(0xFF10B981)];
+        return const [Color(0xFF064E3B), Color(0xFF059669)];
       case 'staff':
       case 'teacher':
-        return const [Color(0xFF4C1D95), Color(0xFF7C3AED)];
+        return const [Color(0xFF1E1B4B), Color(0xFF4F46E5)];
       case 'admin':
-        return const [Color(0xFF311078), Color(0xFF7C3AED)];
+        return const [Color(0xFF0F172A), Color(0xFF4338CA)];
       default: // student
-        return const [Color(0xFF1E3A5F), Color(0xFF3B82F6)];
+        return const [Color(0xFF1E293B), Color(0xFF2563EB)];
     }
   }
 
