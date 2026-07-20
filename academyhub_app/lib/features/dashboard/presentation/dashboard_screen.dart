@@ -1397,16 +1397,20 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   const Color(0xFF10B981),
                   'Offline Sync & Storage',
                   subtitle: _isOnline ? 'Online — Auto-sync active' : 'Offline — Changes saved locally',
-                  trailing: TextButton(
-                    onPressed: () async {
-                      await SyncQueueProcessor.instance.processQueue();
-                      if (mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('✓ Synchronization process completed.'), backgroundColor: AppColors.successGreen),
-                        );
-                      }
-                    },
-                    child: const Text('Sync Now', style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.amberPrimary)),
+                  trailing: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: (_isOnline ? AppColors.successGreen : const Color(0xFFF59E0B)).withOpacity(0.12),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      _isOnline ? 'AUTO-SYNC ON' : 'OFFLINE MODE',
+                      style: TextStyle(
+                        color: _isOnline ? AppColors.successGreen : const Color(0xFFF59E0B),
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                   ),
                 ),
                 const Divider(height: 1, indent: 16, endIndent: 16),

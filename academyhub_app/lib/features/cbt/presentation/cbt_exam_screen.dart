@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:academyhub_app/core/theme/app_theme.dart';
 import 'package:academyhub_app/core/network/api_client.dart';
 
