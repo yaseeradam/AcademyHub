@@ -180,11 +180,13 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                   ),
                 ),
 
+                const Spacer(),
+
                 // ── Hero section ──────────────────────────────
-                Expanded(
-                  flex: 4,
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24),
                   child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.min,
                     children: [
                       // School icon
                       Container(
@@ -237,6 +239,8 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                     ],
                   ),
                 ),
+
+                const Spacer(),
 
                 // ── Bottom sheet card ─────────────────────────
                 SlideTransition(

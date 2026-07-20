@@ -60,8 +60,9 @@ class _BroadcastCreatorScreenState extends State<BroadcastCreatorScreen> {
       final response = await apiClient.dio.post(
         '/admin/broadcast',
         data: {
+          'title': title,
           'target': _selectedTarget,
-          'message': fullMessage,
+          'message': body,
         },
       );
 

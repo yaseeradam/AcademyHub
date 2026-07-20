@@ -874,17 +874,28 @@ class WhatsAppController extends Controller
     public function adminBroadcast(Request $request)
     {
         $request->validate([
-            'user_id' => 'required',
             'target' => 'required',
             'message' => 'required'
         ]);
 
-        $user = \App\Models\User::findOrFail($request->user_id);
-        if (!in_array($user->role, ['admin', 'superadmin'])) {
+        $user = $request->user() ?: ($request->input('user_id') ? \App\Models\User::find($request->input('user_id')) : null);
+        if (!$user || !in_array($user->role, ['admin', 'superadmin'])) {
             return response()->json(['success' => false, 'message' => 'Unauthorized broadcast attempt.'], 403);
         }
 
         $target = strtolower($request->target);
+
+        // Also save to Announcements table for portal visibility
+        $title = $request->input('title', 'School Broadcast');
+        $body = $request->message;
+        \App\Models\Announcement::create([
+            'title' => $title,
+            'body' => $body,
+            'audience' => $target,
+            'published_at' => now(),
+            'created_by' => $user->id,
+        ]);
+
         $query = \App\Models\User::where('whatsapp_subscribed', true)
             ->whereNotNull('whatsapp_phone')
             ->where('id', '!=', $user->id);
@@ -895,8 +906,6 @@ class WhatsAppController extends Controller
             $query->whereIn('role', ['teacher', 'bursar', 'admin']);
         } elseif ($target === 'all') {
             // Keep all
-        } else {
-             return response()->json(['success' => false, 'message' => 'Invalid target. Use Parents, Staff, or All.'], 400);
         }
 
         $phones = $query->pluck('whatsapp_phone')->toArray();
@@ -911,7 +920,7 @@ class WhatsAppController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => "Broadcast successfully delivered to {$successCount} out of " . count($phones) . " users!"
+            'message' => "Broadcast successfully published to portal and dispatched to {$successCount} users!"
         ]);
     }
 
