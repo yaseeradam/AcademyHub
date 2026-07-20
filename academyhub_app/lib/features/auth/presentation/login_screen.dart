@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:dio/dio.dart';
 import 'package:academyhub_app/core/theme/app_theme.dart';
 import 'package:academyhub_app/core/storage/secure_storage.dart';
 import 'package:academyhub_app/core/network/api_client.dart';
@@ -11,141 +12,204 @@ class LoginScreen extends StatefulWidget {
   State<LoginScreen> createState() => _LoginScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin {
-  String _selectedRole = 'student';
+class _LoginScreenState extends State<LoginScreen>
+    with SingleTickerProviderStateMixin {
+  String _selectedRole = 'student'; // 'student', 'parent', 'staff'
   final _usernameCtrl = TextEditingController();
   final _passwordCtrl = TextEditingController();
+
   bool _obscurePassword = true;
   bool _isLoading = false;
-  String? _schoolName;
   String? _errorMessage;
+  String? _schoolName;
 
-  late AnimationController _gradientCtrl;
   late AnimationController _cardCtrl;
-  late Animation<double> _cardSlide;
+  late Animation<Offset> _cardAnim;
 
   @override
   void initState() {
     super.initState();
-    _loadSchoolName();
-    _gradientCtrl = AnimationController(vsync: this, duration: const Duration(milliseconds: 500));
-    _cardCtrl = AnimationController(vsync: this, duration: const Duration(milliseconds: 350));
-    _cardSlide = CurvedAnimation(parent: _cardCtrl, curve: Curves.easeOutCubic);
-    _gradientCtrl.forward();
+    _cardCtrl = AnimationController(vsync: this, duration: const Duration(milliseconds: 500));
+    _cardAnim = Tween<Offset>(begin: const Offset(0, 0.1), end: Offset.zero)
+        .animate(CurvedAnimation(parent: _cardCtrl, curve: Curves.easeOutCubic));
     _cardCtrl.forward();
+
+    _loadSchoolInfo();
+  }
+
+  Future<void> _loadSchoolInfo() async {
+    final name = await SecureStorage.instance.getSchoolName();
+    if (name != null && mounted) {
+      setState(() {
+        _schoolName = name;
+      });
+    }
   }
 
   @override
   void dispose() {
-    _gradientCtrl.dispose();
     _cardCtrl.dispose();
     _usernameCtrl.dispose();
     _passwordCtrl.dispose();
     super.dispose();
   }
 
-  Future<void> _loadSchoolName() async {
-    final name = await SecureStorage.instance.getSchoolName();
-    if (mounted) setState(() => _schoolName = name ?? 'AcademyHub');
+  Color get _roleColor {
+    switch (_selectedRole) {
+      case 'student': return const Color(0xFF3B82F6);
+      case 'parent':  return const Color(0xFF10B981);
+      case 'staff':   return const Color(0xFF7C3AED);
+      default:        return const Color(0xFF3B82F6);
+    }
   }
 
-  void _selectRole(String role) {
+  List<Color> get _gradient {
+    switch (_selectedRole) {
+      case 'student': return [const Color(0xFF1E3A5F), const Color(0xFF3B82F6)];
+      case 'parent':  return [const Color(0xFF064E3B), const Color(0xFF10B981)];
+      case 'staff':   return [const Color(0xFF4C1D95), const Color(0xFF7C3AED)];
+      default:        return [const Color(0xFF1E3A5F), const Color(0xFF3B82F6)];
+    }
+  }
+
+  String get _rolePortalLabel {
+    switch (_selectedRole) {
+      case 'student': return 'Student Portal';
+      case 'parent':  return 'Parent Portal';
+      case 'staff':   return 'Staff & Faculty Portal';
+      default:        return 'School Portal';
+    }
+  }
+
+  String get _roleShortLabel {
+    switch (_selectedRole) {
+      case 'student': return 'Student';
+      case 'parent':  return 'Parent';
+      case 'staff':   return 'Staff';
+      default:        return 'User';
+    }
+  }
+
+  void _switchRole(String role) {
     if (_selectedRole == role) return;
     setState(() {
       _selectedRole = role;
-      _usernameCtrl.clear();
       _errorMessage = null;
+      _usernameCtrl.clear();
+      _passwordCtrl.clear();
     });
-    _gradientCtrl.forward(from: 0);
-    _cardCtrl.forward(from: 0);
   }
 
-  List<Color> get _gradient => AppColors.roleGradient(_selectedRole);
-  Color get _roleColor => AppColors.rolePrimary(_selectedRole);
-
   Future<void> _handleLogin() async {
-    final username = _usernameCtrl.text.trim();
+    final loginInput = _usernameCtrl.text.trim();
     final password = _passwordCtrl.text;
-    if (username.isEmpty || password.isEmpty) {
-      setState(() => _errorMessage = 'Please fill in all fields.');
+
+    if (loginInput.isEmpty || password.isEmpty) {
+      setState(() {
+        _errorMessage = 'Please enter your login details.';
+      });
       return;
     }
-    setState(() { _isLoading = true; _errorMessage = null; });
+
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+
+    final payload = <String, dynamic>{
+      'role': _selectedRole,
+      'password': password,
+    };
+
+    if (_selectedRole == 'student') {
+      payload['admission_number'] = loginInput;
+    } else {
+      payload['email'] = loginInput;
+    }
+
     try {
-      final endpoint = _selectedRole == 'student' ? '/student/login' : '/login';
-      final payload = _selectedRole == 'student'
-          ? {'admission_number': username, 'password': password, 'device_name': 'mobile_companion'}
-          : {'email': username, 'password': password, 'device_name': 'mobile_companion'};
-      final response = await apiClient.dio.post(endpoint, data: payload);
+      final response = await apiClient.dio.post('/login', data: payload);
+
       if (response.statusCode == 200 && response.data != null) {
-        final token = response.data['token'];
+        final data = response.data;
+        final token = data['token'] ?? data['access_token'];
+
         if (token != null) {
-          await SecureStorage.instance.setToken(token);
-          String storedRole = _selectedRole;
-          if (_selectedRole == 'staff' && response.data['user'] != null) {
-            storedRole = response.data['user']['role'] ?? 'teacher';
+          await SecureStorage.instance.setToken(token.toString());
+
+          final user = data['user'] ?? data['student'];
+          if (user != null) {
+            final userRole = user['role'] ?? _selectedRole;
+            final userId = user['id']?.toString() ?? '';
+            final userName = '${user['first_name'] ?? ''} ${user['last_name'] ?? user['name'] ?? ''}'.trim();
+
+            await SecureStorage.instance.setRole(userRole.toString());
+            await SecureStorage.instance.setStudentId(userId);
+            if (userName.isNotEmpty) {
+              await SecureStorage.instance.setUserName(userName);
+            }
+          } else {
+            await SecureStorage.instance.setRole(_selectedRole);
           }
-          await SecureStorage.instance.setRole(storedRole);
-          if (storedRole == 'student' && response.data['student'] != null) {
-            final sid = response.data['student']['id']?.toString();
-            if (sid != null) await SecureStorage.instance.setStudentId(sid);
-            final name = response.data['student']['full_name']?.toString();
-            if (name != null) await SecureStorage.instance.setUserName(name);
-          } else if (response.data['user'] != null) {
-            final name = response.data['user']['name']?.toString();
-            if (name != null) await SecureStorage.instance.setUserName(name);
-          }
+
           if (mounted) context.go('/dashboard');
+          return;
         }
       }
-    } catch (_) {
-      setState(() => _errorMessage = 'Invalid credentials. Please try again.');
+
+      setState(() {
+        _errorMessage = 'Invalid login credentials.';
+      });
+    } on DioException catch (e) {
+      String msg = 'Login failed. Check your credentials.';
+      if (e.response != null && e.response?.data != null) {
+        msg = e.response?.data['message'] ?? e.response?.data['error'] ?? msg;
+      }
+      setState(() {
+        _errorMessage = msg;
+      });
+    } catch (e) {
+      setState(() {
+        _errorMessage = 'An unexpected error occurred. Try again.';
+      });
     } finally {
-      if (mounted) setState(() => _isLoading = false);
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final isStudent = _selectedRole == 'student';
     final size = MediaQuery.of(context).size;
+    final isStudent = _selectedRole == 'student';
 
     return Scaffold(
+      backgroundColor: const Color(0xFF0F172A),
+      resizeToAvoidBottomInset: true,
       body: Stack(
         children: [
-          // ── Full-screen animated gradient background ──────────
+          // ── Ambient background gradient ─────────────────────
           AnimatedContainer(
             duration: const Duration(milliseconds: 500),
-            curve: Curves.easeInOut,
             width: size.width,
             height: size.height,
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [_gradient[0], _gradient[1], _gradient[1].withValues(alpha: 0.6)],
-                begin: Alignment.topLeft,
+                colors: [_gradient[0], _gradient[1].withValues(alpha: 0.8), const Color(0xFF0F172A)],
+                begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
-                stops: const [0.0, 0.45, 1.0],
               ),
             ),
           ),
 
-          // ── Decorative circles ────────────────────────────────
+          // ── Decorative background circles ────────────────────
           Positioned(
-            top: -60, right: -60,
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 500),
+            top: -60, right: -40,
+            child: Container(
               width: 220, height: 220,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: Colors.white.withValues(alpha: 0.07),
-              ),
-            ),
-          ),
-          Positioned(
-            top: 80, right: -30,
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 500),
-              width: 120, height: 120,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 color: Colors.white.withValues(alpha: 0.05),
@@ -153,215 +217,240 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
             ),
           ),
 
-          // ── Content ───────────────────────────────────────────
+          // ── Main Content Area ────────────────────────────────
           SafeArea(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  // Back button & header row
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      GestureDetector(
-                        onTap: () async {
-                          await SecureStorage.instance.deleteSchoolSlug();
-                          if (mounted) context.go('/');
-                        },
-                        child: Container(
-                          width: 40, height: 40,
+            child: Center(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    // Top Bar (Back button + School Name Badge)
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        GestureDetector(
+                          onTap: () async {
+                            await SecureStorage.instance.deleteSchoolSlug();
+                            if (mounted) context.go('/');
+                          },
+                          child: Container(
+                            width: 40, height: 40,
+                            decoration: BoxDecoration(
+                              color: Colors.white.withValues(alpha: 0.15),
+                              shape: BoxShape.circle,
+                              border: Border.all(color: Colors.white.withValues(alpha: 0.25)),
+                            ),
+                            child: const Icon(Icons.arrow_back_rounded, color: Colors.white, size: 20),
+                          ),
+                        ),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
                           decoration: BoxDecoration(
                             color: Colors.white.withValues(alpha: 0.15),
-                            shape: BoxShape.circle,
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(color: Colors.white.withValues(alpha: 0.25)),
                           ),
-                          child: const Icon(Icons.arrow_back_rounded, color: Colors.white, size: 20),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(Icons.school_rounded, color: Colors.white, size: 14),
+                              const SizedBox(width: 6),
+                              Text(
+                                _schoolName ?? 'AcademyHub',
+                                style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13),
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.15),
-                          borderRadius: BorderRadius.circular(20),
-                          border: Border.all(color: Colors.white.withValues(alpha: 0.25)),
-                        ),
-                        child: Text(
-                          _schoolName ?? 'AcademyHub',
-                          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13),
-                        ),
-                      ),
-                    ],
-                  ),
+                      ],
+                    ),
 
-                  const SizedBox(height: 16),
+                    const SizedBox(height: 20),
 
-                  // ── Role Selector Tabs AT THE TOP ─────────────────
-                  Row(
-                    children: [
-                      _roleCard('student', 'Student', Icons.school_rounded, 'Admission No.'),
-                      const SizedBox(width: 8),
-                      _roleCard('parent', 'Parent', Icons.family_restroom_rounded, 'Email'),
-                      const SizedBox(width: 8),
-                      _roleCard('staff', 'Staff', Icons.badge_rounded, 'Email'),
-                    ],
-                  ),
-
-                  const SizedBox(height: 16),
-
-                  // ── Login Credentials Card AT THE TOP ─────────────
-                  SlideTransition(
-                    position: Tween<Offset>(begin: const Offset(0, 0.2), end: Offset.zero)
-                        .animate(_cardSlide),
-                    child: Container(
+                    // Role Selector Segmented Controls
+                    Container(
+                      padding: const EdgeInsets.all(4),
                       decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(24),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.15),
-                            blurRadius: 20,
-                            offset: const Offset(0, 8),
-                          ),
-                        ],
+                        color: Colors.white.withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
                       ),
-                      padding: const EdgeInsets.fromLTRB(22, 24, 22, 22),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                      child: Row(
                         children: [
-                          Text(
-                            'Sign In to Your Account',
-                            style: const TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w800,
-                              color: AppColors.textPrimary,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          AnimatedSwitcher(
-                            duration: const Duration(milliseconds: 300),
-                            child: Text(
-                              _rolePortalLabel,
-                              key: ValueKey(_selectedRole),
-                              style: const TextStyle(
-                                color: AppColors.textSecondary,
-                                fontSize: 12,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 20),
-
-                          // Username / Email field
-                          _label(isStudent ? 'ADMISSION NUMBER' : 'EMAIL ADDRESS'),
-                          const SizedBox(height: 8),
-                          _field(
-                            controller: _usernameCtrl,
-                            hint: isStudent ? 'e.g. STU20240001' : 'e.g. you@school.com',
-                            keyboard: isStudent ? TextInputType.text : TextInputType.emailAddress,
-                            icon: isStudent ? Icons.badge_outlined : Icons.email_outlined,
-                          ),
-                          const SizedBox(height: 16),
-
-                          // Password field
-                          _label('PASSWORD'),
-                          const SizedBox(height: 8),
-                          _field(
-                            controller: _passwordCtrl,
-                            hint: 'Enter your password',
-                            icon: Icons.lock_outline_rounded,
-                            obscure: _obscurePassword,
-                            suffix: GestureDetector(
-                              onTap: () => setState(() => _obscurePassword = !_obscurePassword),
-                              child: Icon(
-                                _obscurePassword ? Icons.visibility_off_rounded : Icons.visibility_rounded,
-                                color: AppColors.textSecondary, size: 20,
-                              ),
-                            ),
-                          ),
-
-                          // Error message
-                          if (_errorMessage != null) ...[
-                            const SizedBox(height: 12),
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                              decoration: BoxDecoration(
-                                color: AppColors.dangerRed.withValues(alpha: 0.07),
-                                borderRadius: BorderRadius.circular(12),
-                                border: Border.all(color: AppColors.dangerRed.withValues(alpha: 0.2)),
-                              ),
-                              child: Row(
-                                children: [
-                                  const Icon(Icons.error_outline_rounded, color: AppColors.dangerRed, size: 16),
-                                  const SizedBox(width: 8),
-                                  Expanded(
-                                    child: Text(
-                                      _errorMessage!,
-                                      style: const TextStyle(color: AppColors.dangerRed, fontSize: 12),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-
-                          const SizedBox(height: 22),
-
-                          // Login button
-                          AnimatedContainer(
-                            duration: const Duration(milliseconds: 400),
-                            height: 52,
-                            decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                colors: _gradient,
-                                begin: Alignment.centerLeft,
-                                end: Alignment.centerRight,
-                              ),
-                              borderRadius: BorderRadius.circular(16),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: _roleColor.withValues(alpha: 0.4),
-                                  blurRadius: 20,
-                                  offset: const Offset(0, 8),
-                                ),
-                              ],
-                            ),
-                            child: ElevatedButton(
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.transparent,
-                                shadowColor: Colors.transparent,
-                                foregroundColor: Colors.white,
-                                elevation: 0,
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                              ),
-                              onPressed: _isLoading ? null : _handleLogin,
-                              child: _isLoading
-                                  ? const SizedBox(
-                                      width: 22, height: 22,
-                                      child: CircularProgressIndicator(strokeWidth: 2.5, color: Colors.white),
-                                    )
-                                  : Row(
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      children: [
-                                        Text('Sign in as $_roleShortLabel', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
-                                        const SizedBox(width: 8),
-                                        const Icon(Icons.arrow_forward_rounded, size: 18),
-                                      ],
-                                    ),
-                            ),
-                          ),
-
-                          const SizedBox(height: 12),
-                          Center(
-                            child: Text(
-                              'Need account help? Contact your school portal admin.',
-                              style: TextStyle(fontSize: 11, color: AppColors.textSecondary),
-                            ),
-                          ),
+                          _roleTab('student', 'Student', Icons.school_rounded),
+                          _roleTab('parent', 'Parent', Icons.family_restroom_rounded),
+                          _roleTab('staff', 'Staff', Icons.badge_rounded),
                         ],
                       ),
                     ),
-                  ),
-                ],
+
+                    const SizedBox(height: 20),
+
+                    // ── Upper Floating Login Credentials Card ────────
+                    SlideTransition(
+                      position: _cardAnim,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(28),
+                          border: Border.all(color: const Color(0xFFE2E8F0)),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.18),
+                              blurRadius: 30,
+                              offset: const Offset(0, 12),
+                            ),
+                          ],
+                        ),
+                        padding: const EdgeInsets.fromLTRB(24, 26, 24, 24),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            Text(
+                              'Sign In as $_roleShortLabel',
+                              style: const TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.w800,
+                                color: AppColors.textPrimary,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              'Access your $_rolePortalLabel account',
+                              style: const TextStyle(
+                                color: AppColors.textSecondary,
+                                fontSize: 13,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            const SizedBox(height: 22),
+
+                            // Username / Admission Number / Email
+                            _label(isStudent ? 'ADMISSION NUMBER' : 'EMAIL ADDRESS'),
+                            const SizedBox(height: 8),
+                            _field(
+                              controller: _usernameCtrl,
+                              hint: isStudent ? 'e.g. STU20240001' : 'e.g. you@school.com',
+                              keyboard: isStudent ? TextInputType.text : TextInputType.emailAddress,
+                              icon: isStudent ? Icons.badge_outlined : Icons.email_outlined,
+                            ),
+                            const SizedBox(height: 18),
+
+                            // Password Field
+                            _label('PASSWORD'),
+                            const SizedBox(height: 8),
+                            _field(
+                              controller: _passwordCtrl,
+                              hint: 'Enter your password',
+                              icon: Icons.lock_outline_rounded,
+                              obscure: _obscurePassword,
+                              suffix: GestureDetector(
+                                onTap: () => setState(() => _obscurePassword = !_obscurePassword),
+                                child: Icon(
+                                  _obscurePassword ? Icons.visibility_off_rounded : Icons.visibility_rounded,
+                                  color: AppColors.textSecondary, size: 20,
+                                ),
+                              ),
+                            ),
+
+                            // Error display
+                            AnimatedSize(
+                              duration: const Duration(milliseconds: 250),
+                              child: _errorMessage != null
+                                  ? Padding(
+                                      padding: const EdgeInsets.only(top: 14),
+                                      child: Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                                        decoration: BoxDecoration(
+                                          color: AppColors.dangerRed.withValues(alpha: 0.07),
+                                          borderRadius: BorderRadius.circular(12),
+                                          border: Border.all(color: AppColors.dangerRed.withValues(alpha: 0.2)),
+                                        ),
+                                        child: Row(
+                                          children: [
+                                            const Icon(Icons.error_outline_rounded, color: AppColors.dangerRed, size: 16),
+                                            const SizedBox(width: 8),
+                                            Expanded(
+                                              child: Text(
+                                                _errorMessage!,
+                                                style: const TextStyle(color: AppColors.dangerRed, fontSize: 12),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    )
+                                  : const SizedBox.shrink(),
+                            ),
+
+                            const SizedBox(height: 24),
+
+                            // Submit Action Button
+                            AnimatedContainer(
+                              duration: const Duration(milliseconds: 400),
+                              height: 54,
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  colors: _gradient,
+                                  begin: Alignment.centerLeft,
+                                  end: Alignment.centerRight,
+                                ),
+                                borderRadius: BorderRadius.circular(16),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: _roleColor.withValues(alpha: 0.35),
+                                    blurRadius: 16,
+                                    offset: const Offset(0, 6),
+                                  ),
+                                ],
+                              ),
+                              child: ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.transparent,
+                                  shadowColor: Colors.transparent,
+                                  foregroundColor: Colors.white,
+                                  elevation: 0,
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                                ),
+                                onPressed: _isLoading ? null : _handleLogin,
+                                child: _isLoading
+                                    ? const SizedBox(
+                                        width: 22, height: 22,
+                                        child: CircularProgressIndicator(strokeWidth: 2.5, color: Colors.white),
+                                      )
+                                    : Row(
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        children: [
+                                          Text(
+                                            'Sign in to $_roleShortLabel Portal',
+                                            style: const TextStyle(
+                                              fontWeight: FontWeight.w800,
+                                              fontSize: 15,
+                                              letterSpacing: 0.3,
+                                            ),
+                                          ),
+                                          const SizedBox(width: 8),
+                                          const Icon(Icons.arrow_forward_rounded, size: 18),
+                                        ],
+                                      ),
+                              ),
+                            ),
+
+                            const SizedBox(height: 14),
+                            Center(
+                              child: Text(
+                                'Need account help? Contact your school portal admin.',
+                                style: TextStyle(fontSize: 11, color: AppColors.textSecondary),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
@@ -370,70 +459,42 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
     );
   }
 
-  String get _rolePortalLabel {
-    switch (_selectedRole) {
-      case 'parent': return 'Parent Portal — View your children\'s progress';
-      case 'staff':  return 'Staff Portal — Manage classes & records';
-      default:       return 'Student Portal — Access your academics';
-    }
-  }
-
-  String get _roleShortLabel {
-    switch (_selectedRole) {
-      case 'parent': return 'Parent';
-      case 'staff':  return 'Staff';
-      default:       return 'Student';
-    }
-  }
-
-  Widget _roleCard(String role, String label, IconData icon, String hint) {
+  Widget _roleTab(String role, String label, IconData icon) {
     final isSelected = _selectedRole == role;
-    final color = AppColors.rolePrimary(role);
     return Expanded(
       child: GestureDetector(
-        onTap: () => _selectRole(role),
+        onTap: () => _switchRole(role),
         child: AnimatedContainer(
-          duration: const Duration(milliseconds: 280),
-          curve: Curves.easeOutCubic,
-          padding: const EdgeInsets.symmetric(vertical: 14),
+          duration: const Duration(milliseconds: 250),
+          padding: const EdgeInsets.symmetric(vertical: 10),
           decoration: BoxDecoration(
-            color: isSelected ? Colors.white : Colors.white.withValues(alpha: 0.12),
-            borderRadius: BorderRadius.circular(18),
-            border: Border.all(
-              color: isSelected ? Colors.white : Colors.white.withValues(alpha: 0.25),
-              width: isSelected ? 2 : 1,
-            ),
+            color: isSelected ? Colors.white : Colors.transparent,
+            borderRadius: BorderRadius.circular(16),
             boxShadow: isSelected
-                ? [BoxShadow(color: Colors.black.withValues(alpha: 0.15), blurRadius: 16, offset: const Offset(0, 6))]
+                ? [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.1),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ]
                 : [],
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              AnimatedContainer(
-                duration: const Duration(milliseconds: 280),
-                width: 40, height: 40,
-                decoration: BoxDecoration(
-                  color: isSelected ? color.withValues(alpha: 0.12) : Colors.white.withValues(alpha: 0.15),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(icon, size: 22, color: isSelected ? color : Colors.white),
+              Icon(
+                icon,
+                size: 18,
+                color: isSelected ? _roleColor : Colors.white.withValues(alpha: 0.7),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: 4),
               Text(
                 label,
                 style: TextStyle(
+                  color: isSelected ? AppColors.textPrimary : Colors.white.withValues(alpha: 0.85),
                   fontSize: 12,
-                  fontWeight: FontWeight.w700,
-                  color: isSelected ? color : Colors.white,
-                ),
-              ),
-              const SizedBox(height: 2),
-              Text(
-                hint,
-                style: TextStyle(
-                  fontSize: 9,
-                  color: isSelected ? color.withValues(alpha: 0.6) : Colors.white.withValues(alpha: 0.6),
+                  fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
                 ),
               ),
             ],
@@ -443,15 +504,17 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
     );
   }
 
-  Widget _label(String text) => Text(
-    text,
-    style: TextStyle(
-      fontSize: 11,
-      fontWeight: FontWeight.w700,
-      color: _roleColor,
-      letterSpacing: 1.1,
-    ),
-  );
+  Widget _label(String text) {
+    return Text(
+      text,
+      style: const TextStyle(
+        fontSize: 11,
+        fontWeight: FontWeight.bold,
+        color: AppColors.textSecondary,
+        letterSpacing: 1.0,
+      ),
+    );
+  }
 
   Widget _field({
     required TextEditingController controller,
@@ -465,26 +528,27 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
       controller: controller,
       keyboardType: keyboard,
       obscureText: obscure,
-      style: const TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w600, fontSize: 14),
+      style: const TextStyle(
+        color: AppColors.textPrimary,
+        fontWeight: FontWeight.w600,
+        fontSize: 15,
+      ),
       decoration: InputDecoration(
-        fillColor: Colors.white,
-        filled: true,
         hintText: hint,
-        hintStyle: const TextStyle(color: AppColors.textDisabled, fontSize: 13, fontWeight: FontWeight.normal),
-        prefixIcon: Icon(icon, color: _roleColor, size: 20),
-        suffixIcon: suffix != null ? Padding(padding: const EdgeInsets.only(right: 12), child: suffix) : null,
-        suffixIconConstraints: const BoxConstraints(minWidth: 0, minHeight: 0),
+        hintStyle: const TextStyle(color: AppColors.textDisabled, fontSize: 14),
+        prefixIcon: Icon(icon, color: AppColors.textSecondary, size: 20),
+        suffixIcon: suffix,
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(16),
           borderSide: const BorderSide(color: AppColors.divider),
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(16),
           borderSide: const BorderSide(color: AppColors.divider),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(16),
           borderSide: BorderSide(color: _roleColor, width: 2),
         ),
       ),
