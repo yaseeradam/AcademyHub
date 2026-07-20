@@ -466,61 +466,69 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Widget _buildRoleHeader() {
     final initials = _userName.trim().split(' ')
         .where((w) => w.isNotEmpty).map((w) => w[0].toUpperCase()).take(2).join();
-    return ClipPath(
-      clipper: _LiquidBottomClipper(),
-      child: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(colors: _roleGradient, begin: Alignment.topLeft, end: Alignment.bottomRight),
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(colors: _roleGradient, begin: Alignment.topLeft, end: Alignment.bottomRight),
+        borderRadius: const BorderRadius.only(
+          bottomLeft: Radius.circular(24),
+          bottomRight: Radius.circular(24),
         ),
-        child: SafeArea(
-          bottom: false,
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(20, 16, 20, 48),
-            child: Row(
-              children: [
-                Container(
-                  width: 54, height: 54,
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.2),
-                    shape: BoxShape.circle,
-                    border: Border.all(color: Colors.white.withOpacity(0.4), width: 2),
-                  ),
-                  child: Center(
-                    child: Text(initials.isEmpty ? 'U' : initials,
-                        style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)),
-                  ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.08),
+            blurRadius: 16,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: SafeArea(
+        bottom: false,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
+          child: Row(
+            children: [
+              Container(
+                width: 54, height: 54,
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.2),
+                  shape: BoxShape.circle,
+                  border: Border.all(color: Colors.white.withOpacity(0.4), width: 2),
                 ),
-                const SizedBox(width: 14),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('$_greeting 👋', style: TextStyle(color: Colors.white.withOpacity(0.8), fontSize: 12)),
-                      const SizedBox(height: 2),
-                      Text(_userName,
-                          style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
-                          maxLines: 1, overflow: TextOverflow.ellipsis),
-                      const SizedBox(height: 6),
-                      Wrap(
-                        spacing: 6,
-                        children: [
-                          _headerBadge(_roleLabel, Icons.verified_user_outlined),
-                          _headerBadge('$_activeSessionName · $_activeTermName', Icons.calendar_today_outlined),
-                        ],
-                      ),
-                    ],
-                  ),
+                child: Center(
+                  child: Text(initials.isEmpty ? 'U' : initials,
+                      style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)),
                 ),
-                GestureDetector(
-                  onTap: _showSyncStatusSheet,
-                  child: Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(color: Colors.white.withOpacity(0.15), shape: BoxShape.circle),
-                    child: _getSyncDot(),
-                  ),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('$_greeting 👋', style: TextStyle(color: Colors.white.withOpacity(0.8), fontSize: 12)),
+                    const SizedBox(height: 2),
+                    Text(_userName,
+                        style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+                        maxLines: 1, overflow: TextOverflow.ellipsis),
+                    const SizedBox(height: 6),
+                    Wrap(
+                      spacing: 6,
+                      children: [
+                        _headerBadge(_roleLabel, Icons.verified_user_outlined),
+                        _headerBadge('$_activeSessionName · $_activeTermName', Icons.calendar_today_outlined),
+                      ],
+                    ),
+                  ],
                 ),
-              ],
-            ),
+              ),
+              GestureDetector(
+                onTap: _showSyncStatusSheet,
+                child: Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(color: Colors.white.withOpacity(0.15), shape: BoxShape.circle),
+                  child: _getSyncDot(),
+                ),
+              ),
+            ],
           ),
         ),
       ),
