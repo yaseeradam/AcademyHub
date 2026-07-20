@@ -122,39 +122,37 @@ class _SchoolFinderScreenState extends State<SchoolFinderScreen>
 
           // ── Content ───────────────────────────────────────────
           SafeArea(
-            child: Column(
-              children: [
-                // Hero section
-                Expanded(
-                  flex: 5,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  // App Icon & Header
+                  Center(
                     child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        // App icon
                         Container(
-                          width: 88, height: 88,
+                          width: 72, height: 72,
                           decoration: BoxDecoration(
                             color: Colors.white.withValues(alpha: 0.15),
                             shape: BoxShape.circle,
                             border: Border.all(color: Colors.white.withValues(alpha: 0.3), width: 2),
                           ),
-                          child: const Icon(Icons.school_rounded, size: 44, color: Colors.white),
+                          child: const Icon(Icons.school_rounded, size: 36, color: Colors.white),
                         ),
-                        const SizedBox(height: 20),
+                        const SizedBox(height: 10),
                         const Text(
                           'AcademyHub',
                           style: TextStyle(
                             color: Colors.white,
-                            fontSize: 30,
+                            fontSize: 26,
                             fontWeight: FontWeight.w800,
                             letterSpacing: -0.5,
                           ),
                         ),
-                        const SizedBox(height: 8),
+                        const SizedBox(height: 4),
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                           decoration: BoxDecoration(
                             color: Colors.white.withValues(alpha: 0.12),
                             borderRadius: BorderRadius.circular(20),
@@ -162,267 +160,239 @@ class _SchoolFinderScreenState extends State<SchoolFinderScreen>
                           ),
                           child: const Text(
                             'Cloud School Management System',
-                            style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w500),
+                            style: TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.w500),
                           ),
-                        ),
-                        const SizedBox(height: 32),
-
-                        // Feature pills row
-                        Wrap(
-                          spacing: 8, runSpacing: 8,
-                          alignment: WrapAlignment.center,
-                          children: [
-                            _featurePill(Icons.people_rounded, 'Students'),
-                            _featurePill(Icons.assignment_rounded, 'Results'),
-                            _featurePill(Icons.fact_check_rounded, 'Attendance'),
-                            _featurePill(Icons.payment_rounded, 'Fees'),
-                          ],
                         ),
                       ],
                     ),
                   ),
-                ),
 
-                // ── Bottom card ───────────────────────────────────
-                SlideTransition(
-                  position: _cardAnim,
-                  child: Container(
-                    decoration: const BoxDecoration(
-                      color: Color(0xFFF8FAFC),
-                      borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
-                    ),
-                    padding: const EdgeInsets.fromLTRB(24, 28, 24, 24),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        // Handle
-                        Center(
-                          child: Container(
-                            width: 40, height: 4,
-                            decoration: BoxDecoration(
-                              color: AppColors.divider,
-                              borderRadius: BorderRadius.circular(2),
+                  const SizedBox(height: 20),
+
+                  // ── Main Input Card AT THE TOP ───────────────────
+                  SlideTransition(
+                    position: _cardAnim,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(24),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.15),
+                            blurRadius: 20,
+                            offset: const Offset(0, 8),
+                          ),
+                        ],
+                      ),
+                      padding: const EdgeInsets.fromLTRB(22, 24, 22, 22),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          // Title
+                          const Text(
+                            'Find Your School',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w800,
+                              color: AppColors.textPrimary,
                             ),
                           ),
-                        ),
-                        const SizedBox(height: 20),
-
-                        // Title
-                        const Text(
-                          'Find Your School',
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.w800,
-                            color: AppColors.textPrimary,
+                          const SizedBox(height: 4),
+                          const Text(
+                            'Enter the school code given to you by your school.',
+                            style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
                           ),
-                        ),
-                        const SizedBox(height: 4),
-                        const Text(
-                          'Enter the school code given to you by your school.',
-                          style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
-                        ),
-                        const SizedBox(height: 20),
+                          const SizedBox(height: 18),
 
-                        // School code field
-                        TextField(
-                          controller: _slugCtrl,
-                          style: const TextStyle(
-                            color: AppColors.textPrimary,
-                            fontWeight: FontWeight.w700,
-                            fontSize: 15,
-                            letterSpacing: 0.5,
-                          ),
-                          textInputAction: TextInputAction.search,
-                          onChanged: (val) {
-                            if (val.trim().length > 2) {
-                              _validate(val.trim().toLowerCase());
-                            } else {
-                              setState(() { _isValid = false; _schoolName = null; _errorMessage = null; });
-                            }
-                          },
-                          decoration: InputDecoration(
-                            fillColor: Colors.white,
-                            filled: true,
-                            hintText: 'e.g. greenwood',
-                            hintStyle: const TextStyle(
-                              color: AppColors.textDisabled,
-                              fontSize: 14,
-                              fontWeight: FontWeight.normal,
+                          // School code field
+                          TextField(
+                            controller: _slugCtrl,
+                            style: const TextStyle(
+                              color: AppColors.textPrimary,
+                              fontWeight: FontWeight.w700,
+                              fontSize: 15,
+                              letterSpacing: 0.5,
                             ),
-                            prefixIcon: const Icon(Icons.domain_rounded, color: AppColors.textSecondary, size: 20),
-                            suffixIcon: _isLoading
-                                ? const Padding(
-                                    padding: EdgeInsets.all(14),
-                                    child: SizedBox(
-                                      width: 18, height: 18,
-                                      child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.textSecondary),
+                            textInputAction: TextInputAction.search,
+                            onChanged: (val) {
+                              if (val.trim().length > 2) {
+                                _validate(val.trim().toLowerCase());
+                              } else {
+                                setState(() {
+                                  _isValid = false;
+                                  _schoolName = null;
+                                });
+                              }
+                            },
+                            decoration: InputDecoration(
+                              hintText: 'e.g. greenwood',
+                              hintStyle: const TextStyle(
+                                color: AppColors.textDisabled,
+                                fontSize: 14,
+                                fontWeight: FontWeight.normal,
+                              ),
+                              prefixIcon: const Icon(Icons.domain_rounded, color: AppColors.textSecondary, size: 20),
+                              suffixIcon: _isLoading
+                                  ? const Padding(
+                                      padding: EdgeInsets.all(14),
+                                      child: SizedBox(
+                                        width: 18, height: 18,
+                                        child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.textSecondary),
+                                      ),
+                                    )
+                                  : _isValid
+                                      ? const Icon(Icons.check_circle_rounded, color: AppColors.successGreen, size: 22)
+                                      : null,
+                              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(14),
+                                borderSide: const BorderSide(color: AppColors.divider),
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(14),
+                                borderSide: const BorderSide(color: AppColors.divider),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(14),
+                                borderSide: const BorderSide(color: Color(0xFF1E3A5F), width: 2),
+                              ),
+                            ),
+                          ),
+
+                          // School resolved card
+                          AnimatedSize(
+                            duration: const Duration(milliseconds: 300),
+                            curve: Curves.easeOutCubic,
+                            child: _schoolName != null
+                                ? Padding(
+                                    padding: const EdgeInsets.only(top: 12),
+                                    child: Container(
+                                      padding: const EdgeInsets.all(14),
+                                      decoration: BoxDecoration(
+                                        color: AppColors.successGreen.withValues(alpha: 0.07),
+                                        borderRadius: BorderRadius.circular(14),
+                                        border: Border.all(color: AppColors.successGreen.withValues(alpha: 0.3)),
+                                      ),
+                                      child: Row(
+                                        children: [
+                                          Container(
+                                            width: 36, height: 36,
+                                            decoration: BoxDecoration(
+                                              color: AppColors.successGreen.withValues(alpha: 0.12),
+                                              shape: BoxShape.circle,
+                                            ),
+                                            child: const Icon(Icons.school_rounded, color: AppColors.successGreen, size: 18),
+                                          ),
+                                          const SizedBox(width: 12),
+                                          Expanded(
+                                            child: Column(
+                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                              children: [
+                                                Text(
+                                                  _schoolName!,
+                                                  style: const TextStyle(
+                                                    fontWeight: FontWeight.bold,
+                                                    color: AppColors.textPrimary,
+                                                    fontSize: 14,
+                                                  ),
+                                                ),
+                                                const Text(
+                                                  'Portal Active & Ready',
+                                                  style: TextStyle(
+                                                    fontSize: 11,
+                                                    color: AppColors.successGreen,
+                                                    fontWeight: FontWeight.w600,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ],
+                                      ),
                                     ),
                                   )
-                                : _isValid
-                                    ? const Icon(Icons.check_circle_rounded, color: AppColors.successGreen, size: 22)
-                                    : null,
-                            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(14),
-                              borderSide: const BorderSide(color: AppColors.divider),
-                            ),
-                            enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(14),
-                              borderSide: const BorderSide(color: AppColors.divider),
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(14),
-                              borderSide: const BorderSide(color: Color(0xFF1E3A5F), width: 2),
-                            ),
+                                : const SizedBox.shrink(),
                           ),
-                        ),
 
-                        // School resolved card
-                        AnimatedSize(
-                          duration: const Duration(milliseconds: 300),
-                          curve: Curves.easeOutCubic,
-                          child: _schoolName != null
-                              ? Padding(
-                                  padding: const EdgeInsets.only(top: 12),
-                                  child: Container(
-                                    padding: const EdgeInsets.all(14),
-                                    decoration: BoxDecoration(
-                                      color: AppColors.successGreen.withValues(alpha: 0.07),
-                                      borderRadius: BorderRadius.circular(14),
-                                      border: Border.all(color: AppColors.successGreen.withValues(alpha: 0.3)),
-                                    ),
-                                    child: Row(
-                                      children: [
-                                        Container(
-                                          width: 36, height: 36,
-                                          decoration: BoxDecoration(
-                                            color: AppColors.successGreen.withValues(alpha: 0.12),
-                                            shape: BoxShape.circle,
-                                          ),
-                                          child: const Icon(Icons.school_rounded, color: AppColors.successGreen, size: 18),
-                                        ),
-                                        const SizedBox(width: 12),
-                                        Expanded(
-                                          child: Column(
-                                            crossAxisAlignment: CrossAxisAlignment.start,
-                                            children: [
-                                              Text(
-                                                _schoolName!,
-                                                style: const TextStyle(
-                                                  fontWeight: FontWeight.bold,
-                                                  fontSize: 14,
-                                                  color: AppColors.textPrimary,
-                                                ),
-                                              ),
-                                              const Text(
-                                                'School verified ✓',
-                                                style: TextStyle(fontSize: 11, color: AppColors.successGreen, fontWeight: FontWeight.w600),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                )
-                              : const SizedBox.shrink(),
-                        ),
+                          const SizedBox(height: 20),
 
-                        // Error
-                        AnimatedSize(
-                          duration: const Duration(milliseconds: 250),
-                          child: _errorMessage != null
-                              ? Padding(
-                                  padding: const EdgeInsets.only(top: 10),
-                                  child: Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                                    decoration: BoxDecoration(
-                                      color: AppColors.dangerRed.withValues(alpha: 0.07),
-                                      borderRadius: BorderRadius.circular(12),
-                                      border: Border.all(color: AppColors.dangerRed.withValues(alpha: 0.2)),
-                                    ),
-                                    child: Row(
-                                      children: [
-                                        const Icon(Icons.error_outline_rounded, color: AppColors.dangerRed, size: 16),
-                                        const SizedBox(width: 8),
-                                        Expanded(
-                                          child: Text(_errorMessage!,
-                                              style: const TextStyle(color: AppColors.dangerRed, fontSize: 12)),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                )
-                              : const SizedBox.shrink(),
-                        ),
-
-                        const SizedBox(height: 24),
-
-                        // Continue button
-                        AnimatedContainer(
-                          duration: const Duration(milliseconds: 300),
-                          height: 54,
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              colors: _isValid
-                                  ? [const Color(0xFF1E3A5F), const Color(0xFF0F2744)]
-                                  : [AppColors.textDisabled, AppColors.textDisabled],
+                          // Submit button
+                          Container(
+                            height: 52,
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: _isValid
+                                    ? [const Color(0xFF1E3A5F), const Color(0xFF2d548b)]
+                                    : [AppColors.textDisabled, AppColors.textDisabled],
+                              ),
+                              borderRadius: BorderRadius.circular(16),
+                              boxShadow: _isValid
+                                  ? [BoxShadow(
+                                      color: const Color(0xFF1E3A5F).withValues(alpha: 0.4),
+                                      blurRadius: 20,
+                                      offset: const Offset(0, 8),
+                                    )]
+                                  : [],
                             ),
-                            borderRadius: BorderRadius.circular(16),
-                            boxShadow: _isValid
-                                ? [BoxShadow(
-                                    color: const Color(0xFF1E3A5F).withValues(alpha: 0.4),
-                                    blurRadius: 20,
-                                    offset: const Offset(0, 8),
-                                  )]
-                                : [],
-                          ),
-                          child: ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.transparent,
-                              shadowColor: Colors.transparent,
-                              foregroundColor: Colors.white,
-                              elevation: 0,
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                            ),
-                            onPressed: _isValid
-                                ? () async {
-                                    final slug = _slugCtrl.text.trim().toLowerCase();
-                                    await SecureStorage.instance.setSchoolSlug(slug);
-                                    await SecureStorage.instance.setSchoolName(_schoolName ?? 'School');
-                                    if (mounted) context.go('/login');
-                                  }
-                                : null,
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Text(
-                                  _isValid ? 'Continue to ${_schoolName ?? 'School'}' : 'Enter school code above',
-                                  style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14),
-                                ),
-                                if (_isValid) ...[
-                                  const SizedBox(width: 8),
-                                  const Icon(Icons.arrow_forward_rounded, size: 18),
+                            child: ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.transparent,
+                                shadowColor: Colors.transparent,
+                                foregroundColor: Colors.white,
+                                elevation: 0,
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                              ),
+                              onPressed: _isValid
+                                  ? () async {
+                                      final slug = _slugCtrl.text.trim().toLowerCase();
+                                      await SecureStorage.instance.setSchoolSlug(slug);
+                                      await SecureStorage.instance.setSchoolName(_schoolName ?? 'School');
+                                      if (mounted) context.go('/login');
+                                    }
+                                  : null,
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text(
+                                    _isValid ? 'Continue to ${_schoolName ?? 'School'}' : 'Enter school code above',
+                                    style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14),
+                                  ),
+                                  if (_isValid) ...[
+                                    const SizedBox(width: 8),
+                                    const Icon(Icons.arrow_forward_rounded, size: 18),
+                                  ],
                                 ],
-                              ],
+                              ),
                             ),
                           ),
-                        ),
 
-                        const SizedBox(height: 12),
-                        Center(
-                          child: Text(
-                            'Don\'t have a code? Contact your school admin.',
-                            style: TextStyle(fontSize: 11, color: AppColors.textSecondary),
+                          const SizedBox(height: 12),
+                          Center(
+                            child: Text(
+                              'Don\'t have a code? Contact your school admin.',
+                              style: TextStyle(fontSize: 11, color: AppColors.textSecondary),
+                            ),
                           ),
-                        ),
-                        SizedBox(height: MediaQuery.of(context).viewInsets.bottom),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
-                ),
-              ],
+
+                  const SizedBox(height: 20),
+
+                  // Feature pills row
+                  Wrap(
+                    spacing: 8, runSpacing: 8,
+                    alignment: WrapAlignment.center,
+                    children: [
+                      _featurePill(Icons.people_rounded, 'Students'),
+                      _featurePill(Icons.assignment_rounded, 'Results'),
+                      _featurePill(Icons.fact_check_rounded, 'Attendance'),
+                      _featurePill(Icons.payment_rounded, 'Fees'),
+                    ],
+                  ),
+                ],
+              ),
             ),
           ),
         ],
