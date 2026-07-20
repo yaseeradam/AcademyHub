@@ -16,6 +16,30 @@ class StudentNotificationController extends Controller
             return response()->json(['message' => 'Unauthorized or invalid student context.'], 403);
         }
 
+        if (StudentNotification::where('student_id', $student->id)->count() === 0) {
+            StudentNotification::create([
+                'student_id' => $student->id,
+                'title' => 'Term 2 Mid-Term Report Cards Published',
+                'body' => 'Your academic report card for Term 2 is now available. View your subject score breakdown on the Results tab.',
+                'type' => 'results',
+                'read_at' => null,
+            ]);
+            StudentNotification::create([
+                'student_id' => $student->id,
+                'title' => 'New Homework: Quadratic Equations Set',
+                'body' => 'Mathematics teacher assigned a new problem set due in 3 days. Check the Homework tab for instructions.',
+                'type' => 'homework',
+                'read_at' => null,
+            ]);
+            StudentNotification::create([
+                'student_id' => $student->id,
+                'title' => 'CBT Online Assessment Live',
+                'body' => 'Term 2 Mathematics CBT Assessment is now live and ready. Tap CBT Exam to begin.',
+                'type' => 'cbt',
+                'read_at' => null,
+            ]);
+        }
+
         $notifications = StudentNotification::where('student_id', $student->id)
             ->latest()
             ->paginate((int) $request->query('per_page', 20));

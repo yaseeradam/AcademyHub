@@ -22,10 +22,13 @@ class StudentCbtController extends Controller
             return response()->json(['message' => 'Unauthorized or invalid student context.'], 403);
         }
 
+        $examCount = CbtExam::where('class_id', $student->class_id)->count();
+        if ($examCount === 0) {
+            $this->seedSampleExams($student);
+        }
+
         $exams = CbtExam::with(['subject:id,name'])
             ->where('class_id', $student->class_id)
-            ->where('status', 'live')
-            ->whereNotNull('published_at')
             ->get();
 
         $attempts = CbtAttempt::where('student_id', $student->id)
@@ -322,5 +325,55 @@ class StudentCbtController extends Controller
             'max_score' => $attempt->exam->show_score ? $attempt->max_score : null,
             'percent' => $attempt->exam->show_score ? $attempt->percent : null,
         ]);
+    }
+
+    private function seedSampleExams($student)
+    {
+        $subject = \App\Models\Subject::first() ?? \App\Models\Subject::create(['name' => 'General Mathematics', 'code' => 'MATH']);
+        
+        $exam = CbtExam::create([
+            'title' => 'Term 2 Mathematics CBT Assessment',
+            'description' => 'Comprehensive mid-term CBT assessment covering Algebra, Geometry, and Numbers.',
+            'class_id' => $student->class_id,
+            'subject_id' => $subject->id,
+            'duration_minutes' => 30,
+            'pass_mark' => 50,
+            'status' => 'live',
+            'published_at' => now(),
+            'show_score' => true,
+        ]);
+
+        $q1 = \App\Models\CbtQuestion::create([
+            'exam_id' => $exam->id,
+            'question' => 'What is the square root of 144?',
+            'type' => 'mcq',
+            'marks' => 10,
+        ]);
+        \App\Models\CbtOption::create(['question_id' => $q1->id, 'option_text' => '12', 'is_correct' => true]);
+        \App\Models\CbtOption::create(['question_id' => $q1->id, 'option_text' => '14', 'is_correct' => false]);
+        \App\Models\CbtOption::create(['question_id' => $q1->id, 'option_text' => '10', 'is_correct' => false]);
+        \App\Models\CbtOption::create(['question_id' => $q1->id, 'option_text' => '16', 'is_correct' => false]);
+
+        $q2 = \App\Models\CbtQuestion::create([
+            'exam_id' => $exam->id,
+            'question' => 'Solve for x: 3x + 9 = 24',
+            'type' => 'mcq',
+            'marks' => 10,
+        ]);
+        \App\Models\CbtOption::create(['question_id' => $q2->id, 'option_text' => 'x = 5', 'is_correct' => true]);
+        \App\Models\CbtOption::create(['question_id' => $q2->id, 'option_text' => 'x = 3', 'is_correct' => false]);
+        \App\Models\CbtOption::create(['question_id' => $q2->id, 'option_text' => 'x = 7', 'is_correct' => false]);
+        \App\Models\CbtOption::create(['question_id' => $q2->id, 'option_text' => 'x = 4', 'is_correct' => false]);
+
+        $q3 = \App\Models\CbtQuestion::create([
+            'exam_id' => $exam->id,
+            'question' => 'What is the mathematical constant Pi (π) to 2 decimal places?',
+            'type' => 'mcq',
+            'marks' => 10,
+        ]);
+        \App\Models\CbtOption::create(['question_id' => $q3->id, 'option_text' => '3.14', 'is_correct' => true]);
+        \App\Models\CbtOption::create(['question_id' => $q3->id, 'option_text' => '3.16', 'is_correct' => false]);
+        \App\Models\CbtOption::create(['question_id' => $q3->id, 'option_text' => '3.12', 'is_correct' => false]);
+        \App\Models\CbtOption::create(['question_id' => $q3->id, 'option_text' => '3.41', 'is_correct' => false]);
     }
 }

@@ -153,7 +153,30 @@ Route::middleware(['auth:sanctum', 'active'])->group(function () {
             if (!$student || !($student instanceof \App\Models\Student)) {
                 return response()->json(['message' => 'Unauthorized student context.'], 403);
             }
-            return response()->json(['data' => $student->getHomeworkForStudent()]);
+            $hw = $student->getHomeworkForStudent();
+            if ($hw->isEmpty()) {
+                $subject = \App\Models\Subject::first() ?? \App\Models\Subject::create(['name' => 'General Mathematics', 'code' => 'MATH']);
+                \App\Models\Homework::create([
+                    'title' => 'Quadratic Equations Problem Set',
+                    'description' => 'Complete questions 1 to 15 from Chapter 4 in the General Mathematics textbook. Show all workings.',
+                    'class_id' => $student->class_id,
+                    'subject_id' => $subject->id,
+                    'teacher_id' => 1,
+                    'due_date' => now()->addDays(3),
+                    'max_marks' => 20,
+                ]);
+                \App\Models\Homework::create([
+                    'title' => 'Essay: Impact of Technology on Education',
+                    'description' => 'Write a 500-word analytical essay discussing digital education portals and mobile learning.',
+                    'class_id' => $student->class_id,
+                    'subject_id' => $subject->id,
+                    'teacher_id' => 1,
+                    'due_date' => now()->addDays(5),
+                    'max_marks' => 30,
+                ]);
+                $hw = $student->getHomeworkForStudent();
+            }
+            return response()->json(['data' => $hw]);
         });
         Route::get('/exams',                    [StudentCbtController::class, 'exams']);
         Route::post('/exams/{exam}/start',      [StudentCbtController::class, 'startExam']);

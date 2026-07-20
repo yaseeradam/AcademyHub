@@ -3,6 +3,9 @@ import 'package:academyhub_app/core/theme/app_theme.dart';
 import 'package:academyhub_app/core/database/local_db.dart';
 import 'package:academyhub_app/core/network/api_client.dart';
 
+const _rc = AppColors.roleStaff;
+const _rcDark = Color(0xFF134E4A);
+
 class ScoresEntryScreen extends StatefulWidget {
   final int classId;
   final String className;
@@ -213,12 +216,12 @@ class _ScoresEntryScreenState extends State<ScoresEntryScreen> {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF0F766E).withOpacity(0.1),
+                  color: _rc.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
                   '${_focusedField?.toUpperCase() ?? ''} · max $maxLabel',
-                  style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Color(0xFF0F766E)),
+                  style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: _rc),
                 ),
               ),
               const SizedBox(width: 8),
@@ -242,7 +245,7 @@ class _ScoresEntryScreenState extends State<ScoresEntryScreen> {
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF0F766E),
+                    color: _rc,
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: const Text('Done', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12)),
@@ -271,16 +274,16 @@ class _ScoresEntryScreenState extends State<ScoresEntryScreen> {
                 child: Container(
                   decoration: BoxDecoration(
                     color: isNext
-                        ? const Color(0xFF0F766E)
+                        ? _rc
                         : isBack
                             ? const Color(0xFFFEE2E2)
                             : Colors.white,
                     borderRadius: BorderRadius.circular(10),
                     border: Border.all(
                       color: isNext
-                          ? const Color(0xFF0F766E)
+                          ? _rc
                           : isBack
-                              ? const Color(0xFFF43F5E).withOpacity(0.3)
+                              ? const Color(0xFFF43F5E).withValues(alpha: 0.3)
                               : const Color(0xFFE2E8F0),
                     ),
                     boxShadow: [
@@ -325,7 +328,7 @@ class _ScoresEntryScreenState extends State<ScoresEntryScreen> {
     }
 
     final bool hasAnyScore = scores.values.any((v) => v.isNotEmpty);
-    final Color rowAccent = hasAnyScore ? const Color(0xFF0F766E) : const Color(0xFF94A3B8);
+    final Color rowAccent = hasAnyScore ? _rc : const Color(0xFF94A3B8);
 
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
@@ -449,8 +452,8 @@ class _ScoresEntryScreenState extends State<ScoresEntryScreen> {
                   child: Container(
                     padding: const EdgeInsets.fromLTRB(16, 12, 16, 14),
                     decoration: const BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [Color(0xFF0F766E), Color(0xFF134E4A)],
+                      gradient: const LinearGradient(
+                        colors: [_rc, _rcDark],
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
                       ),
@@ -462,7 +465,7 @@ class _ScoresEntryScreenState extends State<ScoresEntryScreen> {
                           child: Container(
                             width: 36, height: 36,
                             decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.15),
+                              color: Colors.white.withValues(alpha: 0.15),
                               borderRadius: BorderRadius.circular(10),
                             ),
                             child: const Icon(Icons.arrow_back_rounded, color: Colors.white, size: 20),
@@ -477,14 +480,14 @@ class _ScoresEntryScreenState extends State<ScoresEntryScreen> {
                                   style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
                               const SizedBox(height: 2),
                               Text('${widget.className} · ${_students.length} students',
-                                  style: TextStyle(color: Colors.white.withOpacity(0.75), fontSize: 11)),
+                                  style: TextStyle(color: Colors.white.withValues(alpha: 0.75), fontSize: 11)),
                             ],
                           ),
                         ),
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                           decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.15),
+                            color: Colors.white.withValues(alpha: 0.15),
                             borderRadius: BorderRadius.circular(20),
                           ),
                           child: const Row(
@@ -519,9 +522,9 @@ class _ScoresEntryScreenState extends State<ScoresEntryScreen> {
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(14),
                         gradient: const LinearGradient(
-                          colors: [Color(0xFF0F766E), Color(0xFF134E4A)],
+                          colors: [_rc, _rcDark],
                         ),
-                        boxShadow: [BoxShadow(color: const Color(0xFF0F766E).withOpacity(0.35), blurRadius: 14, offset: const Offset(0, 4))],
+                        boxShadow: [BoxShadow(color: _rc, blurRadius: 14, offset: const Offset(0, 4))],
                       ),
                       child: ElevatedButton.icon(
                         style: ElevatedButton.styleFrom(

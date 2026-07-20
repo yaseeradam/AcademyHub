@@ -5,6 +5,10 @@ import 'package:academyhub_app/core/theme/app_theme.dart';
 import 'package:academyhub_app/core/database/local_db.dart';
 import 'package:academyhub_app/core/network/api_client.dart';
 
+// Teacher role color
+const _rc = AppColors.roleStaff;
+const _rcDark = Color(0xFF134E4A);
+
 class AttendanceScreen extends StatefulWidget {
   final int classId;
   final String className;
@@ -390,8 +394,8 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
       bottom: false,
       child: Container(
         decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            colors: [Color(0xFF0F766E), Color(0xFF134E4A)],
+          gradient: const LinearGradient(
+            colors: [_rc, _rcDark],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
@@ -430,8 +434,8 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                   decoration: BoxDecoration(
                     color: _isOnline
-                        ? Colors.white.withOpacity(0.2)
-                        : const Color(0xFFF59E0B).withOpacity(0.9),
+                        ? Colors.white.withValues(alpha: 0.2)
+                        : const Color(0xFFF59E0B).withValues(alpha: 0.9),
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Row(
@@ -562,9 +566,9 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(14),
                           gradient: const LinearGradient(
-                            colors: [Color(0xFF0F766E), Color(0xFF134E4A)],
+                            colors: [_rc, _rcDark],
                           ),
-                          boxShadow: [BoxShadow(color: const Color(0xFF0F766E).withOpacity(0.35), blurRadius: 14, offset: const Offset(0, 4))],
+                          boxShadow: [BoxShadow(color: _rc, blurRadius: 14, offset: const Offset(0, 4))],
                         ),
                         child: ElevatedButton.icon(
                           style: ElevatedButton.styleFrom(
