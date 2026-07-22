@@ -1,11 +1,10 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:dio/dio.dart';
 import 'package:academyhub_app/core/theme/app_theme.dart';
 import 'package:academyhub_app/core/storage/secure_storage.dart';
 import 'package:academyhub_app/core/network/api_client.dart';
-
-const _kGrad = [Color(0xFF1E3A5F), Color(0xFF0F2744)];
 
 class SchoolFinderScreen extends StatefulWidget {
   const SchoolFinderScreen({super.key});
@@ -17,6 +16,7 @@ class SchoolFinderScreen extends StatefulWidget {
 class _SchoolFinderScreenState extends State<SchoolFinderScreen>
     with SingleTickerProviderStateMixin {
   final _slugCtrl = TextEditingController();
+  Timer? _debounceTimer;
   bool _isLoading = false;
   bool _isValid = false;
   String? _schoolName;
@@ -32,67 +32,117 @@ class _SchoolFinderScreenState extends State<SchoolFinderScreen>
     _cardAnim = Tween<Offset>(begin: const Offset(0, 0.1), end: Offset.zero)
         .animate(CurvedAnimation(parent: _cardCtrl, curve: Curves.easeOutCubic));
     _cardCtrl.forward();
+
+    _slugCtrl.addListener(() {
+      if (mounted) setState(() {});
+    });
   }
 
   @override
   void dispose() {
+    _debounceTimer?.cancel();
     _cardCtrl.dispose();
     _slugCtrl.dispose();
     super.dispose();
   }
 
-  Future<void> _validate(String slug) async {
-    if (slug.isEmpty) return;
+  void _onSlugChanged(String val) {
+    _debounceTimer?.cancel();
+    final trimmed = val.trim().toLowerCase();
+
+    // Clear old validation states while actively typing
+    if (_errorMessage != null || _isValid) {
+      setState(() {
+        _errorMessage = null;
+        _isValid = false;
+        _schoolName = null;
+      });
+    }
+
+    if (trimmed.length >= 3) {
+      _debounceTimer = Timer(const Duration(milliseconds: 500), () {
+        _validate(trimmed, isExplicitSubmit: false);
+      });
+    }
+  }
+
+  Future<bool> _validate(String slug, {bool isExplicitSubmit = false}) async {
+    if (slug.isEmpty) return false;
     setState(() { _isLoading = true; _errorMessage = null; });
     try {
       final response = await apiClient.dio.get('/tenant/$slug');
       if (response.statusCode == 200 && response.data != null) {
-        setState(() {
-          _isValid = true;
-          _schoolName = response.data['name'] ?? 'School Found';
-        });
+        if (mounted) {
+          setState(() {
+            _isValid = true;
+            _schoolName = response.data['name'] ?? 'School Found';
+            _errorMessage = null;
+          });
+        }
+        return true;
       } else {
-        setState(() { _isValid = false; _schoolName = null; _errorMessage = 'School not found. Check the code.'; });
+        if (mounted && isExplicitSubmit) {
+          setState(() { _isValid = false; _schoolName = null; _errorMessage = 'School not found. Check the code.'; });
+        }
+        return false;
       }
     } on DioException catch (e) {
-      String msg = e.response?.statusCode == 404
-          ? (e.response?.data?['message'] ?? 'School not found. Check the code.')
-          : 'Connection error. Try again.';
-      setState(() { _isValid = false; _schoolName = null; _errorMessage = msg; });
+      if (mounted) {
+        String msg = e.response?.statusCode == 404
+            ? (e.response?.data?['message'] ?? 'School not found. Check the code.')
+            : 'Connection error. Try again.';
+        setState(() { _isValid = false; _schoolName = null; _errorMessage = msg; });
+      }
+      return false;
     } catch (_) {
-      setState(() { _isValid = false; _schoolName = null; _errorMessage = 'Unexpected error. Try again.'; });
+      if (mounted) {
+        setState(() { _isValid = false; _schoolName = null; _errorMessage = 'Unexpected error. Try again.'; });
+      }
+      return false;
     } finally {
       if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  Future<void> _handleSubmit() async {
+    final slug = _slugCtrl.text.trim().toLowerCase();
+    if (slug.isEmpty || _isLoading) return;
+
+    final router = GoRouter.of(context);
+    bool ok = _isValid;
+    if (!ok) {
+      ok = await _validate(slug, isExplicitSubmit: true);
+    }
+
+    if (ok && mounted) {
+      await SecureStorage.instance.setSchoolSlug(slug);
+      await SecureStorage.instance.setSchoolName(_schoolName ?? 'School');
+      if (mounted) router.go('/login');
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
+    final hasText = _slugCtrl.text.trim().isNotEmpty;
 
     return Scaffold(
-      backgroundColor: const Color(0xFF0F172A),
+      backgroundColor: const Color(0xFF1E3A5F),
       resizeToAvoidBottomInset: true,
       body: Stack(
         children: [
-          // ── Ambient gradient background ─────────────────────
+          // ── Solid background ────────────────────────────────
           Container(
             width: size.width,
             height: size.height,
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                colors: _kGrad,
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-              ),
-            ),
+            color: const Color(0xFF1E3A5F),
           ),
 
-          // ── Decorative background circles ────────────────────
+          // ── Soft decorative orbs ─────────────────────────────
           Positioned(
-            top: -60, right: -40,
+            top: -80, right: -60,
             child: Container(
-              width: 240, height: 240,
+              width: 280, height: 280,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 color: Colors.white.withValues(alpha: 0.05),
@@ -100,9 +150,19 @@ class _SchoolFinderScreenState extends State<SchoolFinderScreen>
             ),
           ),
           Positioned(
-            top: 120, left: -50,
+            top: 160, left: -70,
             child: Container(
-              width: 180, height: 180,
+              width: 200, height: 200,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.white.withValues(alpha: 0.04),
+              ),
+            ),
+          ),
+          Positioned(
+            bottom: 100, right: -50,
+            child: Container(
+              width: 160, height: 160,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 color: Colors.white.withValues(alpha: 0.03),
@@ -124,16 +184,16 @@ class _SchoolFinderScreenState extends State<SchoolFinderScreen>
                       child: Column(
                         children: [
                           Container(
-                            width: 76, height: 76,
+                            width: 80, height: 80,
                             decoration: BoxDecoration(
-                              color: Colors.white.withValues(alpha: 0.15),
+                              color: Colors.white.withValues(alpha: 0.14),
                               shape: BoxShape.circle,
-                              border: Border.all(color: Colors.white.withValues(alpha: 0.35), width: 2.5),
+                              border: Border.all(color: Colors.white.withValues(alpha: 0.30), width: 2),
                               boxShadow: [
                                 BoxShadow(
-                                  color: Colors.black.withValues(alpha: 0.2),
-                                  blurRadius: 16,
-                                  offset: const Offset(0, 6),
+                                  color: Colors.black.withValues(alpha: 0.10),
+                                  blurRadius: 24,
+                                  offset: const Offset(0, 8),
                                 ),
                               ],
                             ),
@@ -175,12 +235,17 @@ class _SchoolFinderScreenState extends State<SchoolFinderScreen>
                         decoration: BoxDecoration(
                           color: Colors.white,
                           borderRadius: BorderRadius.circular(28),
-                          border: Border.all(color: const Color(0xFFE2E8F0)),
+                          border: Border.all(color: const Color(0xFFEDF0F7)),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.18),
-                              blurRadius: 30,
-                              offset: const Offset(0, 12),
+                              color: Colors.black.withValues(alpha: 0.10),
+                              blurRadius: 40,
+                              offset: const Offset(0, 16),
+                            ),
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.04),
+                              blurRadius: 6,
+                              offset: const Offset(0, 2),
                             ),
                           ],
                         ),
@@ -213,16 +278,8 @@ class _SchoolFinderScreenState extends State<SchoolFinderScreen>
                                 letterSpacing: 0.5,
                               ),
                               textInputAction: TextInputAction.search,
-                              onChanged: (val) {
-                                if (val.trim().length > 2) {
-                                  _validate(val.trim().toLowerCase());
-                                } else {
-                                  setState(() {
-                                    _isValid = false;
-                                    _schoolName = null;
-                                  });
-                                }
-                              },
+                              onChanged: _onSlugChanged,
+                              onSubmitted: (_) => _handleSubmit(),
                               decoration: InputDecoration(
                                 hintText: 'e.g. greenwood',
                                 hintStyle: const TextStyle(
@@ -344,20 +401,17 @@ class _SchoolFinderScreenState extends State<SchoolFinderScreen>
                             const SizedBox(height: 22),
 
                             // Action button
-                            Container(
+                            AnimatedContainer(
+                              duration: const Duration(milliseconds: 250),
                               height: 54,
                               decoration: BoxDecoration(
-                                gradient: LinearGradient(
-                                  colors: _isValid
-                                      ? [const Color(0xFF1E3A5F), const Color(0xFF2d548b)]
-                                      : [AppColors.textDisabled, AppColors.textDisabled],
-                                ),
+                                color: (hasText && !_isLoading) ? const Color(0xFF1E3A5F) : AppColors.textDisabled,
                                 borderRadius: BorderRadius.circular(16),
-                                boxShadow: _isValid
+                                boxShadow: (hasText && !_isLoading)
                                     ? [BoxShadow(
-                                        color: const Color(0xFF1E3A5F).withValues(alpha: 0.35),
-                                        blurRadius: 16,
-                                        offset: const Offset(0, 6),
+                                        color: const Color(0xFF1E3A5F).withValues(alpha: 0.22),
+                                        blurRadius: 20,
+                                        offset: const Offset(0, 8),
                                       )]
                                     : [],
                               ),
@@ -369,22 +423,24 @@ class _SchoolFinderScreenState extends State<SchoolFinderScreen>
                                   elevation: 0,
                                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                                 ),
-                                onPressed: _isValid
-                                    ? () async {
-                                        final slug = _slugCtrl.text.trim().toLowerCase();
-                                        await SecureStorage.instance.setSchoolSlug(slug);
-                                        await SecureStorage.instance.setSchoolName(_schoolName ?? 'School');
-                                        if (mounted) context.go('/login');
-                                      }
-                                    : null,
+                                onPressed: (hasText && !_isLoading) ? _handleSubmit : null,
                                 child: Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
+                                  mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    Text(
-                                      _isValid ? 'Continue to ${_schoolName ?? 'School'}' : 'Enter school code above',
-                                      style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14),
+                                    Flexible(
+                                      child: Text(
+                                        _isLoading
+                                            ? 'Finding school...'
+                                            : _isValid
+                                                ? 'Continue to ${_schoolName ?? 'School'}'
+                                                : 'Find School & Continue',
+                                        style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
                                     ),
-                                    if (_isValid) ...[
+                                    if (!_isLoading) ...[
                                       const SizedBox(width: 8),
                                       const Icon(Icons.arrow_forward_rounded, size: 18),
                                     ],
@@ -404,44 +460,11 @@ class _SchoolFinderScreenState extends State<SchoolFinderScreen>
                         ),
                       ),
                     ),
-
-                    const SizedBox(height: 24),
-
-                    // Feature pills row
-                    Wrap(
-                      spacing: 8, runSpacing: 8,
-                      alignment: WrapAlignment.center,
-                      children: [
-                        _featurePill(Icons.people_rounded, 'Students'),
-                        _featurePill(Icons.assignment_rounded, 'Results'),
-                        _featurePill(Icons.fact_check_rounded, 'Attendance'),
-                        _featurePill(Icons.payment_rounded, 'Fees'),
-                      ],
-                    ),
                   ],
                 ),
               ),
             ),
           ),
-        ],
-      ),
-    );
-  }
-
-  Widget _featurePill(IconData icon, String label) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 13, color: Colors.white.withValues(alpha: 0.85)),
-          const SizedBox(width: 5),
-          Text(label, style: TextStyle(color: Colors.white.withValues(alpha: 0.85), fontSize: 11, fontWeight: FontWeight.w600)),
         ],
       ),
     );

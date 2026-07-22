@@ -53,9 +53,6 @@ class _BroadcastCreatorScreenState extends State<BroadcastCreatorScreen> {
       _isLoading = true;
     });
 
-    // Format target payload
-    final fullMessage = '*Title: $title*\n\n$body';
-
     try {
       final response = await apiClient.dio.post(
         '/admin/broadcast',
@@ -63,6 +60,8 @@ class _BroadcastCreatorScreenState extends State<BroadcastCreatorScreen> {
           'title': title,
           'target': _selectedTarget,
           'message': body,
+          'channel_push': _channelPush,
+          'channel_whatsapp': _channelWhatsapp,
         },
       );
 
@@ -96,7 +95,7 @@ class _BroadcastCreatorScreenState extends State<BroadcastCreatorScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to send broadcast: $e'), backgroundColor: AppColors.dangerRed),
+          SnackBar(content: const Text('Failed to send broadcast. Please try again.'), backgroundColor: AppColors.dangerRed),
         );
       }
     } finally {
@@ -111,7 +110,7 @@ class _BroadcastCreatorScreenState extends State<BroadcastCreatorScreen> {
   Widget _buildChannelItem(IconData icon, String label, bool value, ValueChanged<bool?> onChanged) {
     const violetAccent = Color(0xFF7C3AED);
     return Card(
-      color: value ? violetAccent.withOpacity(0.06) : Colors.white,
+      color: value ? violetAccent.withValues(alpha: 0.06) : Colors.white,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
         side: BorderSide(
@@ -153,11 +152,24 @@ class _BroadcastCreatorScreenState extends State<BroadcastCreatorScreen> {
     return Scaffold(
       backgroundColor: AppColors.appBackground,
       appBar: AppBar(
-        title: const Text('New Broadcast Announcement'),
-        leading: IconButton(
-          icon: const Icon(Icons.close),
-          onPressed: () => Navigator.pop(context),
+        backgroundColor: AppColors.rolePrimary('admin'),
+        foregroundColor: Colors.white,
+        elevation: 0,
+        leading: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: InkWell(
+            onTap: () => Navigator.maybePop(context),
+            borderRadius: BorderRadius.circular(10),
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.18),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white, size: 18),
+            ),
+          ),
         ),
+        title: const Text('New Broadcast Announcement', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 17)),
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
@@ -179,7 +191,7 @@ class _BroadcastCreatorScreenState extends State<BroadcastCreatorScreen> {
                           ),
                           const SizedBox(height: 10),
                           DropdownButtonFormField<String>(
-                            value: _selectedTarget,
+                            initialValue: _selectedTarget,
                             decoration: InputDecoration(
                               fillColor: AppColors.appBackground,
                               filled: true,
@@ -289,7 +301,7 @@ class _BroadcastCreatorScreenState extends State<BroadcastCreatorScreen> {
                       borderRadius: BorderRadius.circular(12),
                       boxShadow: [
                         BoxShadow(
-                          color: violetAccent.withOpacity(0.35),
+                          color: violetAccent.withValues(alpha: 0.35),
                           blurRadius: 16,
                           offset: const Offset(0, 4),
                         ),

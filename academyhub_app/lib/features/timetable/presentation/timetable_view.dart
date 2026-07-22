@@ -89,7 +89,7 @@ class _TimetableViewState extends State<TimetableView> {
         // Sort by start time
         todaysPeriods.sort((a, b) {
           final minutesA = a.startTime.hour * 60 + a.startTime.minute;
-          final minutesB = b.startTime.hour * 60 + a.startTime.minute;
+          final minutesB = b.startTime.hour * 60 + b.startTime.minute;
           return minutesA.compareTo(minutesB);
         });
 
@@ -174,7 +174,7 @@ class _TimetableViewState extends State<TimetableView> {
                   boxShadow: isActive
                       ? [
                           BoxShadow(
-                            color: AppColors.accentAmber.withOpacity(0.15),
+                            color: AppColors.accentAmber.withValues(alpha: 0.15),
                             blurRadius: 10,
                             offset: const Offset(0, 4),
                           ),
@@ -243,7 +243,7 @@ class _TimetableViewState extends State<TimetableView> {
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                           decoration: BoxDecoration(
-                            color: AppColors.accentAmber.withOpacity(0.12),
+                            color: AppColors.accentAmber.withValues(alpha: 0.12),
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: const Text(

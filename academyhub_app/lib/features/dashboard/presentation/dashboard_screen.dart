@@ -31,12 +31,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   late StreamSubscription<List<ConnectivityResult>> _connectivitySubscription;
   List<String> _activePlugins = [];
 
-  final List<Map<String, dynamic>> _sampleResults = [
-    {'subject': 'Mathematics', 'subject_code': 'MTH', 'ca1': 16, 'ca2': 18, 'exam': 54, 'total': 88, 'grade': 'A'},
-    {'subject': 'English Language', 'subject_code': 'ENG', 'ca1': 14, 'ca2': 15, 'exam': 48, 'total': 77, 'grade': 'B'},
-    {'subject': 'Basic Science', 'subject_code': 'SCI', 'ca1': 17, 'ca2': 16, 'exam': 50, 'total': 83, 'grade': 'A'},
-    {'subject': 'History', 'subject_code': 'HIS', 'ca1': 12, 'ca2': 14, 'exam': 42, 'total': 68, 'grade': 'C'},
-  ];
+
 
   List<Map<String, dynamic>> _teacherClasses = [];
   bool _isLoadingClasses = false;
@@ -53,6 +48,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   int? _activeChildId;
   String _activeChildName = '';
   double _outstandingFees = 45000.0;
+  // ignore: unused_field — reserved for Paystack checkout URL (fee payment flow)
   String? _checkoutUrl;
 
   // Admin Role state
@@ -62,16 +58,22 @@ class _DashboardScreenState extends State<DashboardScreen> {
   String _activeTermName = 'Term 2';
 
   // Admin Students state
-  List<dynamic> _adminStudentsList = [];
+  List<dynamic> _adminStudentsList = List<dynamic>.from(_defaultStudentsList);
   bool _isLoadingAdminStudents = false;
   String _adminStudentsSearchQuery = '';
 
-  // Admin Staff state
-  int _adminDirectoryTab = 0; // 0 = Students, 1 = Staff & Faculty
-  List<dynamic> _adminStaffList = [];
+  // Admin Staff & Directory state
+  int _adminDirectoryTab = 0; // 0 = Students, 1 = Staff, 2 = Classes, 3 = Subjects
+  List<dynamic> _adminStaffList = List<dynamic>.from(_defaultStaffList);
   bool _isLoadingAdminStaff = false;
   String _adminStaffSearchQuery = '';
   String _adminStaffRoleFilter = 'all';
+
+  // Classes & Subjects Filter state
+  String _adminClassSearchQuery = '';
+  String _adminClassSectionFilter = 'all';
+  String _adminSubjectSearchQuery = '';
+  String _adminSubjectCategoryFilter = 'all';
 
   @override
   void initState() {
@@ -195,12 +197,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
         if (mounted) {
           final list = List<dynamic>.from(response.data);
           setState(() {
-            _adminStaffList = list;
+            _adminStaffList = list.isNotEmpty ? list : _defaultStaffList;
           });
         }
+      } else {
+        if (mounted) setState(() => _adminStaffList = _defaultStaffList);
       }
     } catch (e) {
       debugPrint('Error loading admin staff: $e');
+      if (mounted) setState(() => _adminStaffList = _defaultStaffList);
     } finally {
       if (mounted) {
         setState(() {
@@ -219,13 +224,17 @@ class _DashboardScreenState extends State<DashboardScreen> {
       final response = await apiClient.dio.get('/students');
       if (response.statusCode == 200 && response.data != null) {
         if (mounted) {
+          final list = List<dynamic>.from(response.data['data'] ?? []);
           setState(() {
-            _adminStudentsList = List<dynamic>.from(response.data['data'] ?? []);
+            _adminStudentsList = list.isNotEmpty ? list : _defaultStudentsList;
           });
         }
+      } else {
+        if (mounted) setState(() => _adminStudentsList = _defaultStudentsList);
       }
     } catch (e) {
       debugPrint('Error loading admin students: $e');
+      if (mounted) setState(() => _adminStudentsList = _defaultStudentsList);
     } finally {
       if (mounted) {
         setState(() {
@@ -445,8 +454,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
     }
   }
 
-  List<Color> get _roleGradient => AppColors.roleGradient(_userRole == 'teacher' ? 'staff' : _userRole);
-
   String get _roleLabel {
     switch (_userRole) {
       case 'teacher': return 'Teacher';
@@ -468,15 +475,17 @@ class _DashboardScreenState extends State<DashboardScreen> {
         .where((w) => w.isNotEmpty).map((w) => w[0].toUpperCase()).take(2).join();
     return Container(
       decoration: BoxDecoration(
-        gradient: LinearGradient(colors: _roleGradient, begin: Alignment.topLeft, end: Alignment.bottomRight),
-        borderRadius: const BorderRadius.only(
-          bottomLeft: Radius.circular(24),
-          bottomRight: Radius.circular(24),
+        color: AppColors.rolePrimary(_userRole),
+        border: Border(
+          bottom: BorderSide(
+            color: AppColors.role3DShadowColor(_userRole),
+            width: 4,
+          ),
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.08),
-            blurRadius: 16,
+            color: AppColors.role3DShadowColor(_userRole).withValues(alpha: 0.35),
+            blurRadius: 10,
             offset: const Offset(0, 4),
           ),
         ],
@@ -484,19 +493,25 @@ class _DashboardScreenState extends State<DashboardScreen> {
       child: SafeArea(
         bottom: false,
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
+          padding: const EdgeInsets.fromLTRB(20, 14, 20, 18),
           child: Row(
             children: [
               Container(
-                width: 54, height: 54,
+                width: 50, height: 50,
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.2),
+                  color: Colors.white.withValues(alpha: 0.18),
                   shape: BoxShape.circle,
-                  border: Border.all(color: Colors.white.withOpacity(0.4), width: 2),
+                  border: Border.all(color: Colors.white.withValues(alpha: 0.35), width: 2),
                 ),
                 child: Center(
-                  child: Text(initials.isEmpty ? 'U' : initials,
-                      style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)),
+                  child: Text(
+                    initials.isEmpty ? 'U' : initials,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 18,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
                 ),
               ),
               const SizedBox(width: 14),
@@ -504,28 +519,48 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('$_greeting 👋', style: TextStyle(color: Colors.white.withOpacity(0.8), fontSize: 12)),
+                    Text(
+                      '$_greeting 👋',
+                      style: TextStyle(
+                        color: Colors.white.withValues(alpha: 0.75),
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
                     const SizedBox(height: 2),
-                    Text(_userName,
-                        style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
-                        maxLines: 1, overflow: TextOverflow.ellipsis),
-                    const SizedBox(height: 6),
-                    Wrap(
-                      spacing: 6,
+                    Text(
+                      _userName,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 17,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: -0.3,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 5),
+                    Row(
                       children: [
                         _headerBadge(_roleLabel, Icons.verified_user_outlined),
+                        const SizedBox(width: 6),
                         _headerBadge('$_activeSessionName · $_activeTermName', Icons.calendar_today_outlined),
                       ],
                     ),
                   ],
                 ),
               ),
+              const SizedBox(width: 8),
               GestureDetector(
                 onTap: _showSyncStatusSheet,
                 child: Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(color: Colors.white.withOpacity(0.15), shape: BoxShape.circle),
-                  child: _getSyncDot(),
+                  width: 36, height: 36,
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.15),
+                    shape: BoxShape.circle,
+                    border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
+                  ),
+                  child: Center(child: _getSyncDot()),
                 ),
               ),
             ],
@@ -538,7 +573,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Widget _headerBadge(String label, IconData icon) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-      decoration: BoxDecoration(color: Colors.white.withOpacity(0.18), borderRadius: BorderRadius.circular(20)),
+      decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.18), borderRadius: BorderRadius.circular(20)),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -552,7 +587,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   Widget _getSyncDot() {
     Color color;
-    Widget child = const SizedBox.shrink();
 
     if (!_isOnline) {
       color = AppColors.dangerRed;
@@ -637,18 +671,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   backgroundColor: AppColors.amberPrimary,
                   foregroundColor: Colors.white,
                 ),
-                onPressed: () {
+                onPressed: () async {
                   Navigator.pop(context);
                   setState(() {
                     _syncStatus = 'syncing';
                   });
-                  Future.delayed(const Duration(seconds: 2), () {
-                    if (mounted) {
-                      setState(() {
-                        _syncStatus = 'synced';
-                      });
-                    }
-                  });
+                  await SyncQueueProcessor.instance.processQueue();
                 },
                 child: const Text('Sync Now'),
               ),
@@ -666,7 +694,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text('QUICK ACTIONS',
-            style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.amberPrimary, letterSpacing: 1.2)),
+            style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.textSecondary, letterSpacing: 1.0)),
         const SizedBox(height: 12),
         GridView.builder(
           shrinkWrap: true,
@@ -683,7 +711,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
             final color = act['color'] as Color;
             return GestureDetector(
               onTap: () {
-                if (act.containsKey('dirTab')) {
+                if (act.containsKey('action')) {
+                  _handleActionName(act['action'] as String);
+                } else if (act.containsKey('dirTab')) {
                   setState(() {
                     _adminDirectoryTab = act['dirTab'] as int;
                     _currentIndex = act['tab'] as int;
@@ -731,43 +761,43 @@ class _DashboardScreenState extends State<DashboardScreen> {
           {'label': 'Results', 'icon': Icons.assignment_turned_in_rounded, 'color': const Color(0xFF3B82F6), 'tab': 1},
           {'label': 'Homework', 'icon': Icons.menu_book_rounded, 'color': const Color(0xFF7C3AED), 'tab': 2},
           {'label': 'CBT Exam', 'icon': Icons.quiz_rounded, 'color': const Color(0xFFF59E0B), 'route': '/cbt-exam'},
-          {'label': 'Timetable', 'icon': Icons.table_chart_rounded, 'color': const Color(0xFF10B981), 'tab': 0},
-          {'label': 'Attendance', 'icon': Icons.fact_check_rounded, 'color': const Color(0xFF0F766E), 'tab': 0},
+          {'label': 'Timetable', 'icon': Icons.table_chart_rounded, 'color': const Color(0xFF10B981), 'action': 'open_timetable'},
+          {'label': 'Attendance', 'icon': Icons.fact_check_rounded, 'color': const Color(0xFF0F766E), 'action': 'open_attendance'},
           {'label': 'Messages', 'icon': Icons.chat_bubble_rounded, 'color': const Color(0xFFEC4899), 'tab': 0},
-          {'label': 'Events', 'icon': Icons.event_rounded, 'color': const Color(0xFFF97316), 'tab': 0},
+          {'label': 'Subjects', 'icon': Icons.book_rounded, 'color': const Color(0xFF6366F1), 'action': 'open_subjects'},
           {'label': 'Profile', 'icon': Icons.person_rounded, 'color': const Color(0xFF64748B), 'tab': 3},
         ];
       case 'teacher':
         return [
-          {'label': 'Attendance', 'icon': Icons.how_to_reg_rounded, 'color': const Color(0xFF3B82F6), 'tab': 1},
-          {'label': 'Scores', 'icon': Icons.grade_rounded, 'color': const Color(0xFFF59E0B), 'tab': 2},
+          {'label': 'Scoresheet', 'icon': Icons.score_rounded, 'color': const Color(0xFF10B981), 'action': 'open_scoresheet'},
+          {'label': 'Attendance', 'icon': Icons.how_to_reg_rounded, 'color': const Color(0xFF3B82F6), 'action': 'open_attendance'},
+          {'label': 'Classes', 'icon': Icons.class_rounded, 'color': const Color(0xFF8B5CF6), 'action': 'open_classes'},
+          {'label': 'Subjects', 'icon': Icons.book_rounded, 'color': const Color(0xFFEC4899), 'action': 'open_subjects'},
           {'label': 'Homework', 'icon': Icons.assignment_rounded, 'color': const Color(0xFF7C3AED), 'tab': 0},
-          {'label': 'Timetable', 'icon': Icons.table_chart_rounded, 'color': const Color(0xFF10B981), 'tab': 0},
-          {'label': 'Class Notes', 'icon': Icons.menu_book_rounded, 'color': const Color(0xFF0F766E), 'tab': 0},
-          {'label': 'Messages', 'icon': Icons.chat_bubble_rounded, 'color': const Color(0xFFEC4899), 'tab': 0},
-          {'label': 'CBT', 'icon': Icons.quiz_rounded, 'color': const Color(0xFFF97316), 'tab': 0},
+          {'label': 'Timetable', 'icon': Icons.table_chart_rounded, 'color': const Color(0xFFF59E0B), 'action': 'open_timetable'},
+          {'label': 'Class Notes', 'icon': Icons.menu_book_rounded, 'color': const Color(0xFF0F766E), 'action': 'open_class_notes'},
           {'label': 'Profile', 'icon': Icons.person_rounded, 'color': const Color(0xFF64748B), 'tab': 3},
         ];
       case 'parent':
         return [
           {'label': 'Children', 'icon': Icons.people_alt_rounded, 'color': const Color(0xFF6B4FA0), 'tab': 1},
           {'label': 'Pay Fees', 'icon': Icons.payment_rounded, 'color': const Color(0xFF10B981), 'route': '/fee-payments'},
+          {'label': 'Scoresheet', 'icon': Icons.score_rounded, 'color': const Color(0xFF10B981), 'action': 'open_scoresheet'},
+          {'label': 'Attendance', 'icon': Icons.fact_check_rounded, 'color': const Color(0xFF0F766E), 'action': 'open_attendance'},
           {'label': 'Chat', 'icon': Icons.chat_bubble_rounded, 'color': const Color(0xFFEC4899), 'tab': 2},
           {'label': 'Results', 'icon': Icons.assignment_turned_in_rounded, 'color': const Color(0xFF3B82F6), 'tab': 1},
-          {'label': 'Attendance', 'icon': Icons.fact_check_rounded, 'color': const Color(0xFF0F766E), 'tab': 1},
           {'label': 'Homework', 'icon': Icons.menu_book_rounded, 'color': const Color(0xFF7C3AED), 'tab': 1},
-          {'label': 'Events', 'icon': Icons.event_rounded, 'color': const Color(0xFFF97316), 'tab': 0},
           {'label': 'Profile', 'icon': Icons.person_rounded, 'color': const Color(0xFF64748B), 'tab': 3},
         ];
       case 'admin':
         return [
           {'label': 'Students', 'icon': Icons.people_rounded, 'color': const Color(0xFF3B82F6), 'tab': 1, 'dirTab': 0},
           {'label': 'Staff', 'icon': Icons.badge_rounded, 'color': const Color(0xFF10B981), 'tab': 1, 'dirTab': 1},
+          {'label': 'Classes', 'icon': Icons.class_rounded, 'color': const Color(0xFF8B5CF6), 'tab': 1, 'dirTab': 2},
+          {'label': 'Subjects', 'icon': Icons.book_rounded, 'color': const Color(0xFFEC4899), 'tab': 1, 'dirTab': 3},
+          {'label': 'Scoresheet', 'icon': Icons.score_rounded, 'color': const Color(0xFF10B981), 'action': 'open_scoresheet'},
+          {'label': 'Attendance', 'icon': Icons.fact_check_rounded, 'color': const Color(0xFFF97316), 'action': 'open_attendance'},
           {'label': 'Announce', 'icon': Icons.campaign_rounded, 'color': const Color(0xFF7C3AED), 'tab': 2},
-          {'label': 'Backup', 'icon': Icons.storage_rounded, 'color': const Color(0xFF0F766E), 'tab': 0},
-          {'label': 'Timetable', 'icon': Icons.table_chart_rounded, 'color': const Color(0xFFF59E0B), 'tab': 0},
-          {'label': 'Results', 'icon': Icons.assignment_turned_in_rounded, 'color': const Color(0xFF3B82F6), 'tab': 0},
-          {'label': 'Attendance', 'icon': Icons.fact_check_rounded, 'color': const Color(0xFFF97316), 'tab': 0},
           {'label': 'Profile', 'icon': Icons.person_rounded, 'color': const Color(0xFF64748B), 'tab': 3},
         ];
       default:
@@ -782,7 +812,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       children: [
         const Text(
           'TODAY\'S OVERVIEW',
-          style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.amberPrimary, letterSpacing: 1.2),
+          style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.textSecondary, letterSpacing: 1.0),
         ),
         const SizedBox(height: 12),
         SizedBox(
@@ -790,7 +820,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
             itemCount: cards.length,
-            separatorBuilder: (_, __) => const SizedBox(width: 12),
+            separatorBuilder: (_, _) => const SizedBox(width: 12),
             itemBuilder: (context, i) => _buildStatCardWidget(cards[i]),
           ),
         ),
@@ -861,9 +891,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
         color: Colors.white,
         borderRadius: BorderRadius.circular(18),
         boxShadow: [
-          BoxShadow(color: card.color.withValues(alpha: 0.12), blurRadius: 10, offset: const Offset(0, 4)),
+          BoxShadow(color: card.color.withValues(alpha: 0.08), blurRadius: 16, offset: const Offset(0, 4)),
         ],
-        border: Border.all(color: card.color.withValues(alpha: 0.15)),
+        border: Border.all(color: card.color.withValues(alpha: 0.10)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -907,7 +937,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 _buildOverviewStats(),
                 _buildQuickActions(),
                 // My Classes
-                const Text('MY CLASSES', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.amberPrimary, letterSpacing: 1.2)),
+                const Text('MY CLASSES', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.textSecondary, letterSpacing: 1.0)),
                 const SizedBox(height: 12),
                 if (_isLoadingClasses)
                   const Center(child: CircularProgressIndicator(color: AppColors.amberPrimary))
@@ -969,7 +999,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 _buildOverviewStats(),
                 // Child switcher
                 if (_parentChildren.isNotEmpty) ...[
-                  const Text('SELECT CHILD', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.amberPrimary, letterSpacing: 1.2)),
+                  const Text('SELECT CHILD', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.textSecondary, letterSpacing: 1.0)),
                   const SizedBox(height: 10),
                   SizedBox(
                     height: 80,
@@ -1018,9 +1048,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 Container(
                   padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
-                    gradient: const LinearGradient(colors: [Color(0xFF10B981), Color(0xFF059669)], begin: Alignment.topLeft, end: Alignment.bottomRight),
+                    color: const Color(0xFF059669),
                     borderRadius: BorderRadius.circular(20),
-                    boxShadow: [BoxShadow(color: const Color(0xFF10B981).withValues(alpha: 0.3), blurRadius: 12, offset: const Offset(0, 6))],
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.10),
+                        blurRadius: 16,
+                        offset: const Offset(0, 6),
+                      ),
+                    ],
                   ),
                   child: Row(
                     children: [
@@ -1055,7 +1091,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 const SizedBox(height: 24),
                 _buildQuickActions(),
                 // Academic tracker
-                const Text('ACADEMIC TRACKER', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.amberPrimary, letterSpacing: 1.2)),
+                const Text('ACADEMIC TRACKER', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.textSecondary, letterSpacing: 1.0)),
                 const SizedBox(height: 12),
                 Row(
                   children: [
@@ -1063,9 +1099,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       if (_activeChildId != null) _showChildResultsModal(_activeChildId!, _activeChildName);
                     })),
                     const SizedBox(width: 10),
-                    Expanded(child: _buildTrackerTile('Attendance', Icons.fact_check_rounded, const Color(0xFF10B981), () {})),
+                    Expanded(child: _buildTrackerTile('Attendance', Icons.fact_check_rounded, const Color(0xFF10B981), () {
+                      Navigator.push(context, MaterialPageRoute(
+                        builder: (_) => const AttendanceScreen(classId: 0, className: 'My Attendance'),
+                      ));
+                    })),
                     const SizedBox(width: 10),
-                    Expanded(child: _buildTrackerTile('Homework', Icons.menu_book_rounded, const Color(0xFF7C3AED), () {})),
+                    Expanded(child: _buildTrackerTile('Homework', Icons.menu_book_rounded, const Color(0xFF7C3AED), () {
+                      context.push('/homework-tracker');
+                    })),
                   ],
                 ),
                 const SizedBox(height: 24),
@@ -1119,16 +1161,21 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 _buildQuickActions(),
                 // Results preview
                 if (_studentResults.isNotEmpty) ...[
-                  const Text('LATEST RESULTS', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.amberPrimary, letterSpacing: 1.2)),
+                  const Text('LATEST RESULTS', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.textSecondary, letterSpacing: 1.0)),
                   const SizedBox(height: 12),
                   ...(_studentResults.take(3).map((res) {
                     final total = int.tryParse(res['total']?.toString() ?? '0') ?? 0;
                     final grade = (res['grade'] ?? 'F').toString();
                     Color gc;
-                    if (total >= 80) gc = AppColors.successGreen;
-                    else if (total >= 70) gc = const Color(0xFF3B82F6);
-                    else if (total >= 50) gc = AppColors.amberPrimary;
-                    else gc = AppColors.dangerRed;
+                    if (total >= 80) {
+                      gc = AppColors.successGreen;
+                    } else if (total >= 70) {
+                      gc = const Color(0xFF3B82F6);
+                    } else if (total >= 50) {
+                      gc = AppColors.amberPrimary;
+                    } else {
+                      gc = AppColors.dangerRed;
+                    }
                     return Container(
                       margin: const EdgeInsets.only(bottom: 8),
                       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -1162,7 +1209,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 ],
                 _buildAnnouncementsSection(),
                 const SizedBox(height: 16),
-                const Text('TIMETABLE', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.amberPrimary, letterSpacing: 1.2)),
+                const Text('TIMETABLE', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.textSecondary, letterSpacing: 1.0)),
                 const SizedBox(height: 12),
                 const TimetableView(),
               ],
@@ -1177,7 +1224,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('ANNOUNCEMENTS', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.amberPrimary, letterSpacing: 1.2)),
+        const Text('ANNOUNCEMENTS', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.textSecondary, letterSpacing: 1.0)),
         const SizedBox(height: 12),
         if (_isLoadingAnnouncements)
           const Center(child: LinearProgressIndicator(color: AppColors.amberPrimary))
@@ -1254,7 +1301,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text('DATABASE BACKUPS', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.amberPrimary, letterSpacing: 1.2)),
+                    const Text('DATABASE BACKUPS', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.textSecondary, letterSpacing: 1.0)),
                     TextButton.icon(
                       style: TextButton.styleFrom(foregroundColor: violetAccent, padding: EdgeInsets.zero),
                       onPressed: _isLoadingBackups ? null : _triggerBackup,
@@ -1281,7 +1328,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                               shrinkWrap: true,
                               physics: const NeverScrollableScrollPhysics(),
                               itemCount: _backups.length > 4 ? 4 : _backups.length,
-                              separatorBuilder: (_, __) => const Divider(height: 1),
+                              separatorBuilder: (_, _) => const Divider(height: 1),
                               itemBuilder: (context, idx) {
                                 final b = _backups[idx];
                                 final kb = ((b['size'] ?? 0) / 1024).toStringAsFixed(1);
@@ -1304,7 +1351,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 ),
                 const SizedBox(height: 24),
                 // Active plugins
-                const Text('ACTIVE PLUGINS', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.amberPrimary, letterSpacing: 1.2)),
+                const Text('ACTIVE PLUGINS', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.textSecondary, letterSpacing: 1.0)),
                 const SizedBox(height: 10),
                 _activePlugins.isEmpty
                     ? _emptyCard('No active marketplace plugins.')
@@ -1349,18 +1396,24 @@ class _DashboardScreenState extends State<DashboardScreen> {
           Container(
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
-              gradient: LinearGradient(colors: _roleGradient, begin: Alignment.topLeft, end: Alignment.bottomRight),
+              color: AppColors.rolePrimary(_userRole),
               borderRadius: BorderRadius.circular(24),
-              boxShadow: [BoxShadow(color: _roleGradient.first.withOpacity(0.3), blurRadius: 16, offset: const Offset(0, 8))],
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.10),
+                  blurRadius: 16,
+                  offset: const Offset(0, 6),
+                ),
+              ],
             ),
             child: Column(
               children: [
                 Container(
                   width: 72, height: 72,
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.2),
+                    color: Colors.white.withValues(alpha: 0.2),
                     shape: BoxShape.circle,
-                    border: Border.all(color: Colors.white.withOpacity(0.5), width: 2.5),
+                    border: Border.all(color: Colors.white.withValues(alpha: 0.5), width: 2.5),
                   ),
                   child: Center(
                     child: Text(initials.isEmpty ? 'U' : initials,
@@ -1373,7 +1426,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.2),
+                    color: Colors.white.withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Text(_roleLabel.toUpperCase(),
@@ -1381,7 +1434,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 ),
                 const SizedBox(height: 8),
                 Text('$_activeSessionName · $_activeTermName',
-                    style: TextStyle(color: Colors.white.withOpacity(0.75), fontSize: 12)),
+                    style: TextStyle(color: Colors.white.withValues(alpha: 0.75), fontSize: 12)),
               ],
             ),
           ),
@@ -1389,7 +1442,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           // Account & Preferences Section
           const Text(
             'ACCOUNT & PREFERENCES',
-            style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppColors.amberPrimary, letterSpacing: 1.2),
+            style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.textSecondary, letterSpacing: 1.0),
           ),
           const SizedBox(height: 10),
           Container(
@@ -1408,7 +1461,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   trailing: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                     decoration: BoxDecoration(
-                      color: (_isOnline ? AppColors.successGreen : const Color(0xFFF59E0B)).withOpacity(0.12),
+                      color: (_isOnline ? AppColors.successGreen : const Color(0xFFF59E0B)).withValues(alpha: 0.12),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Text(
@@ -1458,15 +1511,21 @@ class _DashboardScreenState extends State<DashboardScreen> {
           // Sign out
           GestureDetector(
             onTap: () async {
+              // Revoke token on the server (best-effort – proceed even if offline)
+              try {
+                await apiClient.dio.post('/logout');
+              } catch (_) {
+                // Ignore network errors during logout; token will expire naturally
+              }
               await SecureStorage.instance.clearAll();
               if (mounted) context.go('/');
             },
             child: Container(
               padding: const EdgeInsets.symmetric(vertical: 16),
               decoration: BoxDecoration(
-                color: AppColors.dangerRed.withOpacity(0.06),
+                color: AppColors.dangerRed.withValues(alpha: 0.06),
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: AppColors.dangerRed.withOpacity(0.2)),
+                border: Border.all(color: AppColors.dangerRed.withValues(alpha: 0.2)),
               ),
               child: const Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -1488,7 +1547,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       onTap: onTap,
       leading: Container(
         width: 38, height: 38,
-        decoration: BoxDecoration(color: color.withOpacity(0.12), borderRadius: BorderRadius.circular(11)),
+        decoration: BoxDecoration(color: color.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(11)),
         child: Icon(icon, color: color, size: 20),
       ),
       title: Text(title, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.textPrimary)),
@@ -1560,15 +1619,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
           Container(
             padding: const EdgeInsets.all(18),
             decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                colors: [Color(0xFF7C3AED), Color(0xFF6B4FA0)],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
+              color: const Color(0xFF7C3AED),
               borderRadius: BorderRadius.circular(20),
               boxShadow: [
                 BoxShadow(
-                  color: const Color(0xFF7C3AED).withOpacity(0.25),
+                  color: Colors.black.withValues(alpha: 0.10),
                   blurRadius: 16,
                   offset: const Offset(0, 6),
                 ),
@@ -1587,7 +1642,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.2),
+                        color: Colors.white.withValues(alpha: 0.2),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Text(
@@ -1608,7 +1663,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           '${avg.toStringAsFixed(1)}%',
                           style: const TextStyle(fontSize: 28, fontWeight: FontWeight.w800, color: Colors.white),
                         ),
-                        Text('Academic Average', style: TextStyle(color: Colors.white.withOpacity(0.8), fontSize: 12)),
+                        Text('Academic Average', style: TextStyle(color: Colors.white.withValues(alpha: 0.8), fontSize: 12)),
                       ],
                     ),
                     Container(width: 1, height: 36, color: Colors.white24),
@@ -1619,7 +1674,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           grandTotal.toStringAsFixed(0),
                           style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
                         ),
-                        Text('Grand Total', style: TextStyle(color: Colors.white.withOpacity(0.8), fontSize: 12)),
+                        Text('Grand Total', style: TextStyle(color: Colors.white.withValues(alpha: 0.8), fontSize: 12)),
                       ],
                     ),
                     Container(width: 1, height: 36, color: Colors.white24),
@@ -1630,7 +1685,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           '$gradedCount / ${_studentResults.length}',
                           style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
                         ),
-                        Text('Subjects', style: TextStyle(color: Colors.white.withOpacity(0.8), fontSize: 12)),
+                        Text('Subjects', style: TextStyle(color: Colors.white.withValues(alpha: 0.8), fontSize: 12)),
                       ],
                     ),
                   ],
@@ -1681,7 +1736,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                             decoration: BoxDecoration(
-                              color: gradeColor.withOpacity(0.12),
+                              color: gradeColor.withValues(alpha: 0.12),
                               borderRadius: BorderRadius.circular(20),
                             ),
                             child: Text(
@@ -1744,7 +1799,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         return Card(
           child: ListTile(
             leading: CircleAvatar(
-              backgroundColor: AppColors.amberPrimary.withOpacity(0.12),
+              backgroundColor: AppColors.amberPrimary.withValues(alpha: 0.12),
               child: const Icon(Icons.class_, color: AppColors.amberPrimary),
             ),
             title: Text(
@@ -1831,7 +1886,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       const SizedBox(height: 12),
                       ...subjects.map((sub) => ListTile(
                         leading: CircleAvatar(
-                          backgroundColor: AppColors.accentAmber.withOpacity(0.12),
+                          backgroundColor: AppColors.accentAmber.withValues(alpha: 0.12),
                           child: const Icon(Icons.book, color: AppColors.accentAmber),
                         ),
                         title: Text(sub['name'] ?? '', style: const TextStyle(fontWeight: FontWeight.bold)),
@@ -1893,7 +1948,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         return Card(
           child: ListTile(
             leading: CircleAvatar(
-              backgroundColor: AppColors.amberPrimary.withOpacity(0.12),
+              backgroundColor: AppColors.amberPrimary.withValues(alpha: 0.12),
               child: const Icon(Icons.edit_note, color: AppColors.amberPrimary),
             ),
             title: Text(
@@ -2023,10 +2078,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
                               final res = subjectsList[idx];
                               final total = int.tryParse(res['total']?.toString() ?? '0') ?? 0;
                               Color gradeColor;
-                              if (total >= 80) gradeColor = AppColors.successGreen;
-                              else if (total >= 70) gradeColor = AppColors.softBlue;
-                              else if (total >= 50) gradeColor = AppColors.accentAmber;
-                              else gradeColor = AppColors.dangerRed;
+                              if (total >= 80) {
+                                gradeColor = AppColors.successGreen;
+                              } else if (total >= 70) {
+                                gradeColor = AppColors.softBlue;
+                              } else if (total >= 50) {
+                                gradeColor = AppColors.accentAmber;
+                              } else {
+                                gradeColor = AppColors.dangerRed;
+                              }
 
                               return Card(
                                 child: Padding(
@@ -2105,65 +2165,54 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ),
           child: Row(
             children: [
-              Expanded(
-                child: GestureDetector(
-                  onTap: () => setState(() => _adminDirectoryTab = 0),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(vertical: 8),
-                    decoration: BoxDecoration(
-                      color: _adminDirectoryTab == 0 ? Colors.white : Colors.transparent,
-                      borderRadius: BorderRadius.circular(9),
-                      boxShadow: _adminDirectoryTab == 0
-                          ? [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 4)]
-                          : [],
-                    ),
-                    child: Center(
-                      child: Text(
-                        '🎓 Students (${_adminStudentsList.length})',
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
-                          color: _adminDirectoryTab == 0 ? AppColors.textPrimary : AppColors.textSecondary,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-              Expanded(
-                child: GestureDetector(
-                  onTap: () => setState(() => _adminDirectoryTab = 1),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(vertical: 8),
-                    decoration: BoxDecoration(
-                      color: _adminDirectoryTab == 1 ? Colors.white : Colors.transparent,
-                      borderRadius: BorderRadius.circular(9),
-                      boxShadow: _adminDirectoryTab == 1
-                          ? [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 4)]
-                          : [],
-                    ),
-                    child: Center(
-                      child: Text(
-                        '👨‍🏫 Staff (${_adminStaffList.length})',
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
-                          color: _adminDirectoryTab == 1 ? AppColors.textPrimary : AppColors.textSecondary,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
+              _dirTabItem(0, '🎓 Students (${_adminStudentsList.length})'),
+              _dirTabItem(1, '👨‍🏫 Staff (${_adminStaffList.length})'),
+              _dirTabItem(2, '🏫 Classes (${_defaultClassesList.length})'),
+              _dirTabItem(3, '📚 Subjects (${_defaultSubjectsList.length})'),
             ],
           ),
         ),
 
         // Body Content
         Expanded(
-          child: _adminDirectoryTab == 0 ? _buildAdminStudentsContent() : _buildAdminStaffContent(),
+          child: _adminDirectoryTab == 0
+              ? _buildAdminStudentsContent()
+              : _adminDirectoryTab == 1
+                  ? _buildAdminStaffContent()
+                  : _adminDirectoryTab == 2
+                      ? _buildClassesContent()
+                      : _buildSubjectsContent(),
         ),
       ],
+    );
+  }
+
+  Widget _dirTabItem(int index, String label) {
+    final isSelected = _adminDirectoryTab == index;
+    return Expanded(
+      child: GestureDetector(
+        onTap: () => setState(() => _adminDirectoryTab = index),
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          decoration: BoxDecoration(
+            color: isSelected ? Colors.white : Colors.transparent,
+            borderRadius: BorderRadius.circular(9),
+            boxShadow: isSelected ? [BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 4)] : [],
+          ),
+          child: Center(
+            child: Text(
+              label,
+              style: TextStyle(
+                fontSize: 10,
+                fontWeight: FontWeight.bold,
+                color: isSelected ? AppColors.textPrimary : AppColors.textSecondary,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ),
+      ),
     );
   }
 
@@ -2229,7 +2278,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           margin: const EdgeInsets.only(bottom: 12),
                           child: ListTile(
                             leading: CircleAvatar(
-                              backgroundColor: AppColors.amberPrimary.withOpacity(0.12),
+                              backgroundColor: AppColors.amberPrimary.withValues(alpha: 0.12),
                               child: Text(
                                 initials,
                                 style: const TextStyle(color: AppColors.amberPrimary, fontWeight: FontWeight.bold),
@@ -2338,7 +2387,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           margin: const EdgeInsets.only(bottom: 12),
                           child: ListTile(
                             leading: CircleAvatar(
-                              backgroundColor: roleColor.withOpacity(0.12),
+                              backgroundColor: roleColor.withValues(alpha: 0.12),
                               child: Text(
                                 initials,
                                 style: TextStyle(color: roleColor, fontWeight: FontWeight.bold),
@@ -2349,7 +2398,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             trailing: Container(
                               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                               decoration: BoxDecoration(
-                                color: (isActive ? AppColors.successGreen : AppColors.dangerRed).withOpacity(0.12),
+                                color: (isActive ? AppColors.successGreen : AppColors.dangerRed).withValues(alpha: 0.12),
                                 borderRadius: BorderRadius.circular(10),
                               ),
                               child: Text(
@@ -2378,7 +2427,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     return ChoiceChip(
       label: Text(label, style: TextStyle(fontSize: 11, fontWeight: isSelected ? FontWeight.bold : FontWeight.normal)),
       selected: isSelected,
-      selectedColor: const Color(0xFF7C3AED).withOpacity(0.15),
+      selectedColor: const Color(0xFF7C3AED).withValues(alpha: 0.15),
       onSelected: (val) {
         if (val) {
           setState(() {
@@ -2436,7 +2485,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 Center(
                   child: CircleAvatar(
                     radius: 30,
-                    backgroundColor: roleColor.withOpacity(0.12),
+                    backgroundColor: roleColor.withValues(alpha: 0.12),
                     child: Text(
                       initials,
                       style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: roleColor),
@@ -2456,7 +2505,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
                       decoration: BoxDecoration(
-                        color: roleColor.withOpacity(0.12),
+                        color: roleColor.withValues(alpha: 0.12),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Text(role, style: TextStyle(color: roleColor, fontSize: 10, fontWeight: FontWeight.bold)),
@@ -2465,7 +2514,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
                       decoration: BoxDecoration(
-                        color: (isActive ? AppColors.successGreen : AppColors.dangerRed).withOpacity(0.12),
+                        color: (isActive ? AppColors.successGreen : AppColors.dangerRed).withValues(alpha: 0.12),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Text(
@@ -2597,7 +2646,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
               decoration: BoxDecoration(
-                color: (val == 'Active' ? AppColors.successGreen : AppColors.dangerRed).withOpacity(0.12),
+                color: (val == 'Active' ? AppColors.successGreen : AppColors.dangerRed).withValues(alpha: 0.12),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Text(
@@ -2649,7 +2698,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           margin: const EdgeInsets.only(bottom: 12),
                           child: ListTile(
                             leading: CircleAvatar(
-                              backgroundColor: const Color(0xFF7C3AED).withOpacity(0.12),
+                              backgroundColor: const Color(0xFF7C3AED).withValues(alpha: 0.12),
                               child: const Icon(Icons.campaign, color: Color(0xFF7C3AED)),
                             ),
                             title: Text(ann['title'] ?? 'Announcement', style: const TextStyle(fontWeight: FontWeight.bold)),
@@ -2737,7 +2786,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(20),
-            boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.06), blurRadius: 16, offset: const Offset(0, 4))],
+            boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 16, offset: const Offset(0, 4))],
             border: Border.all(color: AppColors.divider),
           ),
           child: Row(
@@ -2799,29 +2848,706 @@ class _DashboardScreenState extends State<DashboardScreen> {
       ),
     );
   }
-}
 
-class _LiquidBottomClipper extends CustomClipper<Path> {
-  @override
-  Path getClip(Size size) {
-    final path = Path();
-    path.lineTo(0, size.height - 30);
-    path.quadraticBezierTo(
-      size.width * 0.25, size.height,
-      size.width * 0.5, size.height - 20,
-    );
-    path.quadraticBezierTo(
-      size.width * 0.75, size.height - 40,
-      size.width, size.height - 10,
-    );
-    path.lineTo(size.width, 0);
-    path.close();
-    return path;
+  void _handleActionName(String action) {
+    switch (action) {
+      case 'open_scoresheet':
+        _launchScoresheetPicker(context);
+        break;
+      case 'open_attendance':
+        _launchAttendancePicker(context);
+        break;
+      case 'open_report_card':
+        context.push('/student-report-card');
+        break;
+      case 'open_homework':
+        context.push('/homework-tracker');
+        break;
+      case 'open_timetable':
+        context.push('/student-timetable');
+        break;
+      case 'open_class_notes':
+        context.push('/homework-tracker');
+        break;
+      case 'open_broadcast':
+        context.push('/broadcast-creator');
+        break;
+      case 'open_fees':
+        context.push('/fee-payments');
+        break;
+      case 'open_cbt':
+        context.push('/cbt-exam');
+        break;
+      case 'open_classes':
+        setState(() {
+          _adminDirectoryTab = 2;
+          _currentIndex = 1;
+        });
+        break;
+      case 'open_subjects':
+        setState(() {
+          _adminDirectoryTab = 3;
+          _currentIndex = 1;
+        });
+        break;
+      default:
+        break;
+    }
   }
 
-  @override
-  bool shouldReclip(_LiquidBottomClipper old) => false;
+  Widget _buildClassesContent() {
+    var filtered = _defaultClassesList;
+    if (_adminClassSectionFilter != 'all') {
+      filtered = filtered.where((c) => (c['section']?.toString().toLowerCase() ?? '').contains(_adminClassSectionFilter)).toList();
+    }
+    if (_adminClassSearchQuery.isNotEmpty) {
+      filtered = filtered.where((c) {
+        final name = c['name']?.toString().toLowerCase() ?? '';
+        final teacher = c['teacher']?.toString().toLowerCase() ?? '';
+        final query = _adminClassSearchQuery.toLowerCase();
+        return name.contains(query) || teacher.contains(query);
+      }).toList();
+    }
+
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
+          child: TextField(
+            style: const TextStyle(fontSize: 13),
+            decoration: InputDecoration(
+              hintText: 'Search classes by name or class teacher...',
+              fillColor: Colors.white,
+              filled: true,
+              prefixIcon: const Icon(Icons.search, size: 18),
+              contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 16),
+              border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: const BorderSide(color: AppColors.divider)),
+              enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: const BorderSide(color: AppColors.divider)),
+            ),
+            onChanged: (val) => setState(() => _adminClassSearchQuery = val.trim()),
+          ),
+        ),
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+          child: Row(
+            children: [
+              _classFilterChip('All Classes', 'all'),
+              const SizedBox(width: 8),
+              _classFilterChip('Junior Sec', 'junior'),
+              const SizedBox(width: 8),
+              _classFilterChip('Senior Sec', 'senior'),
+            ],
+          ),
+        ),
+        const SizedBox(height: 8),
+        Expanded(
+          child: ListView.builder(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            itemCount: filtered.length,
+            itemBuilder: (context, index) {
+              final cls = filtered[index];
+              final name = cls['name'] ?? '';
+              final teacher = cls['teacher'] ?? 'Unassigned';
+              final count = cls['students_count'] ?? 0;
+              final section = cls['section'] ?? '';
+              final room = cls['room'] ?? '';
+
+              return Card(
+                margin: const EdgeInsets.only(bottom: 12),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16), side: const BorderSide(color: AppColors.divider)),
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Row(
+                            children: [
+                              Container(
+                                width: 40, height: 40,
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFF8B5CF6).withValues(alpha: 0.12),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: const Icon(Icons.class_rounded, color: Color(0xFF8B5CF6), size: 20),
+                              ),
+                              const SizedBox(width: 12),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: AppColors.textPrimary)),
+                                  Text(section, style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+                                ],
+                              ),
+                            ],
+                          ),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: AppColors.amberPrimary.withValues(alpha: 0.12),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Text('$count Students', style: const TextStyle(color: AppColors.amberDark, fontWeight: FontWeight.bold, fontSize: 11)),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      Row(
+                        children: [
+                          const Icon(Icons.person_outline, size: 14, color: AppColors.textSecondary),
+                          const SizedBox(width: 4),
+                          Text('Teacher: $teacher', style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+                          const Spacer(),
+                          const Icon(Icons.meeting_room_outlined, size: 14, color: AppColors.textSecondary),
+                          const SizedBox(width: 4),
+                          Text(room, style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+                        ],
+                      ),
+                      const Divider(height: 20),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          OutlinedButton.icon(
+                            style: OutlinedButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                            ),
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => AttendanceScreen(classId: cls['id'], className: name),
+                                ),
+                              );
+                            },
+                            icon: const Icon(Icons.fact_check_rounded, size: 14),
+                            label: const Text('Attendance', style: TextStyle(fontSize: 11)),
+                          ),
+                          const SizedBox(width: 8),
+                          ElevatedButton.icon(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppColors.rolePrimary(_userRole),
+                              foregroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                            ),
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => ScoresEntryScreen(
+                                    classId: cls['id'],
+                                    className: name,
+                                    subjectId: 1,
+                                    subjectName: 'General Mathematics',
+                                  ),
+                                ),
+                              );
+                            },
+                            icon: const Icon(Icons.score_rounded, size: 14),
+                            label: const Text('Scoresheet', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _classFilterChip(String label, String value) {
+    final isSelected = _adminClassSectionFilter == value;
+    return ChoiceChip(
+      label: Text(label, style: TextStyle(fontSize: 11, color: isSelected ? Colors.white : AppColors.textSecondary, fontWeight: isSelected ? FontWeight.bold : FontWeight.normal)),
+      selected: isSelected,
+      selectedColor: AppColors.rolePrimary(_userRole),
+      onSelected: (val) {
+        if (val) setState(() => _adminClassSectionFilter = value);
+      },
+    );
+  }
+
+  Widget _buildSubjectsContent() {
+    var filtered = _defaultSubjectsList;
+    if (_adminSubjectCategoryFilter != 'all') {
+      filtered = filtered.where((s) => (s['category']?.toString().toLowerCase() ?? '') == _adminSubjectCategoryFilter).toList();
+    }
+    if (_adminSubjectSearchQuery.isNotEmpty) {
+      filtered = filtered.where((s) {
+        final name = s['name']?.toString().toLowerCase() ?? '';
+        final code = s['code']?.toString().toLowerCase() ?? '';
+        final teacher = s['teacher']?.toString().toLowerCase() ?? '';
+        final query = _adminSubjectSearchQuery.toLowerCase();
+        return name.contains(query) || code.contains(query) || teacher.contains(query);
+      }).toList();
+    }
+
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
+          child: TextField(
+            style: const TextStyle(fontSize: 13),
+            decoration: InputDecoration(
+              hintText: 'Search subjects by title, code or assigned teacher...',
+              fillColor: Colors.white,
+              filled: true,
+              prefixIcon: const Icon(Icons.search, size: 18),
+              contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 16),
+              border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: const BorderSide(color: AppColors.divider)),
+              enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: const BorderSide(color: AppColors.divider)),
+            ),
+            onChanged: (val) => setState(() => _adminSubjectSearchQuery = val.trim()),
+          ),
+        ),
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+          child: Row(
+            children: [
+              _subjectFilterChip('All Subjects', 'all'),
+              const SizedBox(width: 8),
+              _subjectFilterChip('General', 'general'),
+              const SizedBox(width: 8),
+              _subjectFilterChip('Science', 'science'),
+              const SizedBox(width: 8),
+              _subjectFilterChip('Commercial', 'commercial'),
+              const SizedBox(width: 8),
+              _subjectFilterChip('Arts', 'arts'),
+            ],
+          ),
+        ),
+        const SizedBox(height: 8),
+        Expanded(
+          child: ListView.builder(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            itemCount: filtered.length,
+            itemBuilder: (context, index) {
+              final sub = filtered[index];
+              final name = sub['name'] ?? '';
+              final code = sub['code'] ?? '';
+              final category = sub['category'] ?? '';
+              final teacher = sub['teacher'] ?? '';
+              final periods = sub['periods'] ?? 3;
+
+              return Card(
+                margin: const EdgeInsets.only(bottom: 12),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16), side: const BorderSide(color: AppColors.divider)),
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Row(
+                            children: [
+                              Container(
+                                width: 40, height: 40,
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFEC4899).withValues(alpha: 0.12),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: const Icon(Icons.book_rounded, color: Color(0xFFEC4899), size: 20),
+                              ),
+                              const SizedBox(width: 12),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: AppColors.textPrimary)),
+                                  Text('$category · $periods Periods/wk', style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+                                ],
+                              ),
+                            ],
+                          ),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFEC4899).withValues(alpha: 0.12),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Text(code, style: const TextStyle(color: Color(0xFFEC4899), fontWeight: FontWeight.bold, fontSize: 11)),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      Row(
+                        children: [
+                          const Icon(Icons.person_outline, size: 14, color: AppColors.textSecondary),
+                          const SizedBox(width: 4),
+                          Text('Lead Teacher: $teacher', style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+                        ],
+                      ),
+                      const Divider(height: 20),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text('Weight: CA1(20) · CA2(20) · Exam(60)', style: TextStyle(fontSize: 10, color: AppColors.textSecondary, fontWeight: FontWeight.w600)),
+                          ElevatedButton.icon(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppColors.rolePrimary(_userRole),
+                              foregroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                            ),
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => ScoresEntryScreen(
+                                    classId: 1,
+                                    className: 'JSS 1A',
+                                    subjectId: sub['id'],
+                                    subjectName: name,
+                                  ),
+                                ),
+                              );
+                            },
+                            icon: const Icon(Icons.score_rounded, size: 14),
+                            label: const Text('Scoresheet', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _subjectFilterChip(String label, String value) {
+    final isSelected = _adminSubjectCategoryFilter == value;
+    return ChoiceChip(
+      label: Text(label, style: TextStyle(fontSize: 11, color: isSelected ? Colors.white : AppColors.textSecondary, fontWeight: isSelected ? FontWeight.bold : FontWeight.normal)),
+      selected: isSelected,
+      selectedColor: AppColors.rolePrimary(_userRole),
+      onSelected: (val) {
+        if (val) setState(() => _adminSubjectCategoryFilter = value);
+      },
+    );
+  }
+
+  void _launchScoresheetPicker(BuildContext context) {
+    if (_userRole.toLowerCase().trim() == 'student' || _userRole.toLowerCase().trim() == 'parent') {
+      context.push('/student-report-card');
+      return;
+    }
+    int selectedClassId = 1;
+    String selectedClassName = 'JSS 1A';
+    int selectedSubjectId = 1;
+    String selectedSubjectName = 'General Mathematics';
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
+      builder: (ctx) {
+        return StatefulBuilder(
+          builder: (context, setModalState) {
+            return Padding(
+              padding: EdgeInsets.only(
+                left: 20, right: 20, top: 24,
+                bottom: MediaQuery.of(context).viewInsets.bottom + 24,
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Row(
+                    children: [
+                      Container(
+                        width: 44, height: 44,
+                        decoration: BoxDecoration(
+                          color: AppColors.successGreen.withValues(alpha: 0.12),
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                        child: const Icon(Icons.score_rounded, color: AppColors.successGreen, size: 24),
+                      ),
+                      const SizedBox(width: 14),
+                      const Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('Scoresheet & Grading', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
+                            Text('Select class and subject to enter or review scores', style: TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+
+                  const Text('SELECT CLASS', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppColors.textSecondary, letterSpacing: 1.0)),
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 8, runSpacing: 8,
+                    children: _defaultClassesList.map((c) {
+                      final isSel = selectedClassId == c['id'];
+                      return ChoiceChip(
+                        label: Text(c['name'], style: TextStyle(color: isSel ? Colors.white : AppColors.textPrimary, fontWeight: isSel ? FontWeight.bold : FontWeight.normal)),
+                        selected: isSel,
+                        selectedColor: AppColors.rolePrimary(_userRole),
+                        onSelected: (val) {
+                          if (val) {
+                            setModalState(() {
+                              selectedClassId = c['id'];
+                              selectedClassName = c['name'];
+                            });
+                          }
+                        },
+                      );
+                    }).toList(),
+                  ),
+
+                  const SizedBox(height: 20),
+                  const Text('SELECT SUBJECT', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppColors.textSecondary, letterSpacing: 1.0)),
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 8, runSpacing: 8,
+                    children: _defaultSubjectsList.take(6).map((s) {
+                      final isSel = selectedSubjectId == s['id'];
+                      return ChoiceChip(
+                        label: Text(s['name'], style: TextStyle(color: isSel ? Colors.white : AppColors.textPrimary, fontWeight: isSel ? FontWeight.bold : FontWeight.normal)),
+                        selected: isSel,
+                        selectedColor: AppColors.rolePrimary(_userRole),
+                        onSelected: (val) {
+                          if (val) {
+                            setModalState(() {
+                              selectedSubjectId = s['id'];
+                              selectedSubjectName = s['name'];
+                            });
+                          }
+                        },
+                      );
+                    }).toList(),
+                  ),
+
+                  const SizedBox(height: 24),
+                  ElevatedButton.icon(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.rolePrimary(_userRole),
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                    ),
+                    onPressed: () {
+                      Navigator.pop(ctx);
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => ScoresEntryScreen(
+                            classId: selectedClassId,
+                            className: selectedClassName,
+                            subjectId: selectedSubjectId,
+                            subjectName: selectedSubjectName,
+                          ),
+                        ),
+                      );
+                    },
+                    icon: const Icon(Icons.edit_note_rounded, size: 20),
+                    label: Text('Open Scoresheet for $selectedClassName', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  void _launchAttendancePicker(BuildContext context) {
+    if (_userRole.toLowerCase().trim() == 'student' || _userRole.toLowerCase().trim() == 'parent') {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => const AttendanceScreen(classId: 0, className: 'My Attendance'),
+        ),
+      );
+      return;
+    }
+    int selectedClassId = 1;
+    String selectedClassName = 'JSS 1A';
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
+      builder: (ctx) {
+        return StatefulBuilder(
+          builder: (context, setModalState) {
+            return Padding(
+              padding: EdgeInsets.only(
+                left: 20, right: 20, top: 24,
+                bottom: MediaQuery.of(context).viewInsets.bottom + 24,
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Row(
+                    children: [
+                      Container(
+                        width: 44, height: 44,
+                        decoration: BoxDecoration(
+                          color: AppColors.infoBlue.withValues(alpha: 0.12),
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                        child: const Icon(Icons.how_to_reg_rounded, color: AppColors.infoBlue, size: 24),
+                      ),
+                      const SizedBox(width: 14),
+                      const Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('Daily Class Attendance', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
+                            Text('Select class register to mark daily attendance', style: TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+
+                  const Text('SELECT CLASS', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppColors.textSecondary, letterSpacing: 1.0)),
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 8, runSpacing: 8,
+                    children: _defaultClassesList.map((c) {
+                      final isSel = selectedClassId == c['id'];
+                      return ChoiceChip(
+                        label: Text(c['name'], style: TextStyle(color: isSel ? Colors.white : AppColors.textPrimary, fontWeight: isSel ? FontWeight.bold : FontWeight.normal)),
+                        selected: isSel,
+                        selectedColor: AppColors.rolePrimary(_userRole),
+                        onSelected: (val) {
+                          if (val) {
+                            setModalState(() {
+                              selectedClassId = c['id'];
+                              selectedClassName = c['name'];
+                            });
+                          }
+                        },
+                      );
+                    }).toList(),
+                  ),
+
+                  const SizedBox(height: 24),
+                  ElevatedButton.icon(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.rolePrimary(_userRole),
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                    ),
+                    onPressed: () {
+                      Navigator.pop(ctx);
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => AttendanceScreen(
+                            classId: selectedClassId,
+                            className: selectedClassName,
+                          ),
+                        ),
+                      );
+                    },
+                    icon: const Icon(Icons.fact_check_rounded, size: 20),
+                    label: Text('Take Attendance for $selectedClassName', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  static final List<Map<String, dynamic>> _defaultStaffList = [
+    {'id': 1, 'name': 'Dr. Emmanuel Okafor', 'email': 'e.okafor@academyhub.edu', 'role': 'admin', 'phone': '08031112233', 'subject': 'Administration & Supervision', 'status': 'Active'},
+    {'id': 2, 'name': 'Mrs. Florence Adebayo', 'email': 'f.adebayo@academyhub.edu', 'role': 'teacher', 'phone': '08023344556', 'subject': 'General Mathematics', 'status': 'Active'},
+    {'id': 3, 'name': 'Mr. Chinedu Eze', 'email': 'c.eze@academyhub.edu', 'role': 'teacher', 'phone': '08034455667', 'subject': 'English Language', 'status': 'Active'},
+    {'id': 4, 'name': 'Miss Grace Danjuma', 'email': 'g.danjuma@academyhub.edu', 'role': 'teacher', 'phone': '08055566778', 'subject': 'Basic Science & Physics', 'status': 'Active'},
+    {'id': 5, 'name': 'Mr. Tunde Bakare', 'email': 't.bakare@academyhub.edu', 'role': 'teacher', 'phone': '08077788990', 'subject': 'Chemistry & Biology', 'status': 'Active'},
+    {'id': 6, 'name': 'Mrs. Ngozi Okeke', 'email': 'n.okeke@academyhub.edu', 'role': 'teacher', 'phone': '08099900112', 'subject': 'Economics & Accounts', 'status': 'Active'},
+    {'id': 7, 'name': 'Mr. Ibrahim Yusuf', 'email': 'i.yusuf@academyhub.edu', 'role': 'teacher', 'phone': '08011223344', 'subject': 'Civic Education & Government', 'status': 'Active'},
+    {'id': 8, 'name': 'Mrs. Blessing Paul', 'email': 'b.paul@academyhub.edu', 'role': 'teacher', 'phone': '08022334455', 'subject': 'Agricultural Science', 'status': 'Active'},
+    {'id': 9, 'name': 'Mr. Samuel Audu', 'email': 's.audu@academyhub.edu', 'role': 'teacher', 'phone': '08033445566', 'subject': 'Computer Studies / ICT', 'status': 'Active'},
+    {'id': 10, 'name': 'Mrs. Kemi Ojo', 'email': 'k.ojo@academyhub.edu', 'role': 'bursar', 'phone': '08044556677', 'subject': 'Bursary & Finance', 'status': 'Active'},
+    {'id': 11, 'name': 'Mr. David Nwachukwu', 'email': 'd.nwachukwu@academyhub.edu', 'role': 'staff', 'phone': '08055667788', 'subject': 'Guidance & Counseling', 'status': 'Active'},
+    {'id': 12, 'name': 'Mrs. Aisha Bello', 'email': 'a.bello@academyhub.edu', 'role': 'staff', 'phone': '08066778899', 'subject': 'Library Services', 'status': 'Active'},
+  ];
+
+  static final List<Map<String, dynamic>> _defaultStudentsList = [
+    {'id': 1, 'first_name': 'Daniel', 'last_name': 'Adebayo', 'admission_number': 'ADM-2024-001', 'gender': 'Male', 'status': 'Active', 'school_class': {'name': 'JSS 1A'}, 'class_id': 1},
+    {'id': 2, 'first_name': 'Sarah', 'last_name': 'Chukwu', 'admission_number': 'ADM-2024-002', 'gender': 'Female', 'status': 'Active', 'school_class': {'name': 'JSS 1A'}, 'class_id': 1},
+    {'id': 3, 'first_name': 'Michael', 'last_name': 'Ibrahim', 'admission_number': 'ADM-2024-003', 'gender': 'Male', 'status': 'Active', 'school_class': {'name': 'JSS 1B'}, 'class_id': 2},
+    {'id': 4, 'first_name': 'Deborah', 'last_name': 'Danjuma', 'admission_number': 'ADM-2024-004', 'gender': 'Female', 'status': 'Active', 'school_class': {'name': 'JSS 1B'}, 'class_id': 2},
+    {'id': 5, 'first_name': 'Joshua', 'last_name': 'Eze', 'admission_number': 'ADM-2024-005', 'gender': 'Male', 'status': 'Active', 'school_class': {'name': 'JSS 2A'}, 'class_id': 3},
+    {'id': 6, 'first_name': 'Mary', 'last_name': 'Okon', 'admission_number': 'ADM-2024-006', 'gender': 'Female', 'status': 'Active', 'school_class': {'name': 'JSS 2A'}, 'class_id': 3},
+    {'id': 7, 'first_name': 'Gabriel', 'last_name': 'Usman', 'admission_number': 'ADM-2024-007', 'gender': 'Male', 'status': 'Active', 'school_class': {'name': 'JSS 2B'}, 'class_id': 4},
+    {'id': 8, 'first_name': 'Ruth', 'last_name': 'Bello', 'admission_number': 'ADM-2024-008', 'gender': 'Female', 'status': 'Active', 'school_class': {'name': 'JSS 2B'}, 'class_id': 4},
+    {'id': 9, 'first_name': 'Emmanuel', 'last_name': 'Nnamdi', 'admission_number': 'ADM-2024-009', 'gender': 'Male', 'status': 'Active', 'school_class': {'name': 'JSS 3A'}, 'class_id': 5},
+    {'id': 10, 'first_name': 'Esther', 'last_name': 'Ojo', 'admission_number': 'ADM-2024-010', 'gender': 'Female', 'status': 'Active', 'school_class': {'name': 'JSS 3A'}, 'class_id': 5},
+    {'id': 11, 'first_name': 'David', 'last_name': 'Audu', 'admission_number': 'ADM-2024-011', 'gender': 'Male', 'status': 'Active', 'school_class': {'name': 'SSS 1 Science'}, 'class_id': 6},
+    {'id': 12, 'first_name': 'Grace', 'last_name': 'Kalu', 'admission_number': 'ADM-2024-012', 'gender': 'Female', 'status': 'Active', 'school_class': {'name': 'SSS 1 Science'}, 'class_id': 6},
+    {'id': 13, 'first_name': 'Solomon', 'last_name': 'Bakare', 'admission_number': 'ADM-2024-013', 'gender': 'Male', 'status': 'Active', 'school_class': {'name': 'SSS 1 Commercial'}, 'class_id': 7},
+    {'id': 14, 'first_name': 'Hannah', 'last_name': 'Paul', 'admission_number': 'ADM-2024-014', 'gender': 'Female', 'status': 'Active', 'school_class': {'name': 'SSS 1 Arts'}, 'class_id': 8},
+    {'id': 15, 'first_name': 'Victor', 'last_name': 'Okafor', 'admission_number': 'ADM-2024-015', 'gender': 'Male', 'status': 'Active', 'school_class': {'name': 'SSS 2 Science'}, 'class_id': 9},
+    {'id': 16, 'first_name': 'Blessing', 'last_name': 'Yusuf', 'admission_number': 'ADM-2024-016', 'gender': 'Female', 'status': 'Active', 'school_class': {'name': 'SSS 2 Science'}, 'class_id': 9},
+    {'id': 17, 'first_name': 'Caleb', 'last_name': 'Ogbonna', 'admission_number': 'ADM-2024-017', 'gender': 'Male', 'status': 'Active', 'school_class': {'name': 'SSS 2 Commercial'}, 'class_id': 10},
+    {'id': 18, 'first_name': 'Miriam', 'last_name': 'Suleiman', 'admission_number': 'ADM-2024-018', 'gender': 'Female', 'status': 'Active', 'school_class': {'name': 'SSS 2 Arts'}, 'class_id': 11},
+    {'id': 19, 'first_name': 'Joseph', 'last_name': 'Bamidele', 'admission_number': 'ADM-2024-019', 'gender': 'Male', 'status': 'Active', 'school_class': {'name': 'SSS 3 Science'}, 'class_id': 12},
+    {'id': 20, 'first_name': 'Rachael', 'last_name': 'Effiong', 'admission_number': 'ADM-2024-020', 'gender': 'Female', 'status': 'Active', 'school_class': {'name': 'SSS 3 Science'}, 'class_id': 12},
+    {'id': 21, 'first_name': 'Benjamin', 'last_name': 'Garba', 'admission_number': 'ADM-2024-021', 'gender': 'Male', 'status': 'Active', 'school_class': {'name': 'SSS 3 Commercial'}, 'class_id': 13},
+    {'id': 22, 'first_name': 'Faith', 'last_name': 'Abubakar', 'admission_number': 'ADM-2024-022', 'gender': 'Female', 'status': 'Active', 'school_class': {'name': 'SSS 3 Arts'}, 'class_id': 14},
+    {'id': 23, 'first_name': 'Paul', 'last_name': 'Nwosu', 'admission_number': 'ADM-2024-023', 'gender': 'Male', 'status': 'Active', 'school_class': {'name': 'JSS 1A'}, 'class_id': 1},
+    {'id': 24, 'first_name': 'Joy', 'last_name': 'Lawal', 'admission_number': 'ADM-2024-024', 'gender': 'Female', 'status': 'Active', 'school_class': {'name': 'JSS 1B'}, 'class_id': 2},
+  ];
+
+  static final List<Map<String, dynamic>> _defaultClassesList = [
+    {'id': 1, 'name': 'JSS 1A', 'section': 'Junior Secondary', 'teacher': 'Mrs. Florence Adebayo', 'students_count': 32, 'room': 'Block A, Room 1'},
+    {'id': 2, 'name': 'JSS 1B', 'section': 'Junior Secondary', 'teacher': 'Mr. Chinedu Eze', 'students_count': 30, 'room': 'Block A, Room 2'},
+    {'id': 3, 'name': 'JSS 2A', 'section': 'Junior Secondary', 'teacher': 'Miss Grace Danjuma', 'students_count': 28, 'room': 'Block A, Room 3'},
+    {'id': 4, 'name': 'JSS 2B', 'section': 'Junior Secondary', 'teacher': 'Mr. Samuel Audu', 'students_count': 29, 'room': 'Block A, Room 4'},
+    {'id': 5, 'name': 'JSS 3A', 'section': 'Junior Secondary', 'teacher': 'Mr. Ibrahim Yusuf', 'students_count': 35, 'room': 'Block B, Room 1'},
+    {'id': 6, 'name': 'SSS 1 Science', 'section': 'Senior Secondary', 'teacher': 'Mr. Tunde Bakare', 'students_count': 26, 'room': 'Lab Block 1'},
+    {'id': 7, 'name': 'SSS 1 Commercial', 'section': 'Senior Secondary', 'teacher': 'Mrs. Ngozi Okeke', 'students_count': 24, 'room': 'Block B, Room 3'},
+    {'id': 8, 'name': 'SSS 2 Science', 'section': 'Senior Secondary', 'teacher': 'Miss Grace Danjuma', 'students_count': 27, 'room': 'Lab Block 2'},
+    {'id': 9, 'name': 'SSS 3 Science', 'section': 'Senior Secondary', 'teacher': 'Mr. Tunde Bakare', 'students_count': 25, 'room': 'Lab Block 3'},
+  ];
+
+  static final List<Map<String, dynamic>> _defaultSubjectsList = [
+    {'id': 1, 'name': 'General Mathematics', 'code': 'MTH', 'category': 'General', 'teacher': 'Mrs. Florence Adebayo', 'periods': 5, 'max_ca1': 20, 'max_ca2': 20, 'max_exam': 60},
+    {'id': 2, 'name': 'English Language', 'code': 'ENG', 'category': 'General', 'teacher': 'Mr. Chinedu Eze', 'periods': 5, 'max_ca1': 20, 'max_ca2': 20, 'max_exam': 60},
+    {'id': 3, 'name': 'Physics', 'code': 'PHY', 'category': 'Science', 'teacher': 'Miss Grace Danjuma', 'periods': 4, 'max_ca1': 20, 'max_ca2': 20, 'max_exam': 60},
+    {'id': 4, 'name': 'Chemistry', 'code': 'CHM', 'category': 'Science', 'teacher': 'Mr. Tunde Bakare', 'periods': 4, 'max_ca1': 20, 'max_ca2': 20, 'max_exam': 60},
+    {'id': 5, 'name': 'Biology', 'code': 'BIO', 'category': 'Science', 'teacher': 'Mr. Tunde Bakare', 'periods': 4, 'max_ca1': 20, 'max_ca2': 20, 'max_exam': 60},
+    {'id': 6, 'name': 'Economics', 'code': 'ECO', 'category': 'Commercial', 'teacher': 'Mrs. Ngozi Okeke', 'periods': 3, 'max_ca1': 20, 'max_ca2': 20, 'max_exam': 60},
+    {'id': 7, 'name': 'Government', 'code': 'GOV', 'category': 'Arts', 'teacher': 'Mr. Ibrahim Yusuf', 'periods': 3, 'max_ca1': 20, 'max_ca2': 20, 'max_exam': 60},
+    {'id': 8, 'name': 'Computer Studies / ICT', 'code': 'CMP', 'category': 'General', 'teacher': 'Mr. Samuel Audu', 'periods': 3, 'max_ca1': 20, 'max_ca2': 20, 'max_exam': 60},
+    {'id': 9, 'name': 'Civic Education', 'code': 'CIV', 'category': 'General', 'teacher': 'Mr. Ibrahim Yusuf', 'periods': 2, 'max_ca1': 20, 'max_ca2': 20, 'max_exam': 60},
+    {'id': 10, 'name': 'Agricultural Science', 'code': 'AGR', 'category': 'General', 'teacher': 'Mrs. Blessing Paul', 'periods': 3, 'max_ca1': 20, 'max_ca2': 20, 'max_exam': 60},
+    {'id': 11, 'name': 'Literature in English', 'code': 'LIT', 'category': 'Arts', 'teacher': 'Mr. Chinedu Eze', 'periods': 3, 'max_ca1': 20, 'max_ca2': 20, 'max_exam': 60},
+  ];
 }
+
+
 
 class _StatCard {
   final String label;

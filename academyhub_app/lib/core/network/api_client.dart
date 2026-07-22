@@ -30,6 +30,7 @@ class ApiClient {
           }
 
           options.headers['Accept'] = 'application/json';
+          options.headers['Content-Type'] = 'application/json';
           return handler.next(options);
         },
         onError: (DioException e, handler) async {
@@ -45,9 +46,9 @@ class ApiClient {
     );
   }
 
-  // Dynamic BaseURL helper when school slug is resolved
+  // Update base URL when school domain is resolved (always HTTPS)
   void updateBaseUrl(String domainOrIp) {
-    dio.options.baseUrl = 'http://$domainOrIp/api';
+    dio.options.baseUrl = 'https://$domainOrIp/api';
   }
 }
 

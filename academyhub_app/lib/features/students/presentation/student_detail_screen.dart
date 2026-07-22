@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:academyhub_app/core/theme/app_theme.dart';
 import 'package:academyhub_app/core/network/api_client.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class StudentDetailScreen extends StatefulWidget {
   final int studentId;
@@ -209,7 +210,7 @@ class _StudentDetailScreenState extends State<StudentDetailScreen> with SingleTi
             children: [
               CircleAvatar(
                 radius: 28,
-                backgroundColor: AppColors.amberPrimary.withOpacity(0.12),
+                backgroundColor: AppColors.amberPrimary.withValues(alpha: 0.12),
                 child: Text(
                   initials,
                   style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: AppColors.amberPrimary),
@@ -233,7 +234,7 @@ class _StudentDetailScreenState extends State<StudentDetailScreen> with SingleTi
                 ),
               ),
               IconButton(
-                icon: const Icon(Icons.close, color: AppColors.textSecondary),
+                icon: const Icon(Icons.close_rounded, color: AppColors.textSecondary),
                 onPressed: () => Navigator.pop(context),
               ),
             ],
@@ -248,9 +249,14 @@ class _StudentDetailScreenState extends State<StudentDetailScreen> with SingleTi
                   icon: Icons.phone_outlined,
                   label: 'Call Guardian',
                   color: const Color(0xFF10B981),
-                  onTap: () {
+                  onTap: () async {
                     if (phone.isNotEmpty) {
-                      _copyToClipboard(phone, 'Guardian Phone');
+                      final uri = Uri.parse('tel:$phone');
+                      if (await canLaunchUrl(uri)) {
+                        await launchUrl(uri);
+                      } else {
+                        _copyToClipboard(phone, 'Guardian Phone');
+                      }
                     } else {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(content: Text('No phone number recorded.')),
@@ -265,9 +271,15 @@ class _StudentDetailScreenState extends State<StudentDetailScreen> with SingleTi
                   icon: Icons.chat_bubble_outline,
                   label: 'WhatsApp',
                   color: const Color(0xFF25D366),
-                  onTap: () {
+                  onTap: () async {
                     if (phone.isNotEmpty) {
-                      _copyToClipboard(phone, 'WhatsApp Number');
+                      final cleaned = phone.replaceAll(RegExp(r'[^0-9]'), '');
+                      final uri = Uri.parse('https://wa.me/$cleaned');
+                      if (await canLaunchUrl(uri)) {
+                        await launchUrl(uri, mode: LaunchMode.externalApplication);
+                      } else {
+                        _copyToClipboard(phone, 'WhatsApp Number');
+                      }
                     } else {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(content: Text('No WhatsApp number recorded.')),
@@ -282,9 +294,14 @@ class _StudentDetailScreenState extends State<StudentDetailScreen> with SingleTi
                   icon: Icons.email_outlined,
                   label: 'Email',
                   color: const Color(0xFF3B82F6),
-                  onTap: () {
+                  onTap: () async {
                     if (email.isNotEmpty) {
-                      _copyToClipboard(email, 'Guardian Email');
+                      final uri = Uri.parse('mailto:$email');
+                      if (await canLaunchUrl(uri)) {
+                        await launchUrl(uri);
+                      } else {
+                        _copyToClipboard(email, 'Guardian Email');
+                      }
                     } else {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(content: Text('No email recorded.')),
@@ -312,9 +329,9 @@ class _StudentDetailScreenState extends State<StudentDetailScreen> with SingleTi
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
         decoration: BoxDecoration(
-          color: color.withOpacity(0.08),
+          color: color.withValues(alpha: 0.08),
           borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: color.withOpacity(0.2)),
+          border: Border.all(color: color.withValues(alpha: 0.2)),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -409,7 +426,7 @@ class _StudentDetailScreenState extends State<StudentDetailScreen> with SingleTi
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                   decoration: BoxDecoration(
-                    color: AppColors.amberPrimary.withOpacity(0.12),
+                    color: AppColors.amberPrimary.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Text('${subjects.length} Subjects', style: const TextStyle(color: AppColors.amberPrimary, fontSize: 11, fontWeight: FontWeight.bold)),
@@ -469,7 +486,7 @@ class _StudentDetailScreenState extends State<StudentDetailScreen> with SingleTi
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                               decoration: BoxDecoration(
-                                color: gradeColor.withOpacity(0.12),
+                                color: gradeColor.withValues(alpha: 0.12),
                                 borderRadius: BorderRadius.circular(6),
                               ),
                               child: Text('Grade $grade', style: TextStyle(color: gradeColor, fontSize: 10, fontWeight: FontWeight.bold)),
@@ -606,7 +623,7 @@ class _StudentDetailScreenState extends State<StudentDetailScreen> with SingleTi
                   trailing: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                     decoration: BoxDecoration(
-                      color: statusColor.withOpacity(0.12),
+                      color: statusColor.withValues(alpha: 0.12),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Text(status, style: TextStyle(color: statusColor, fontWeight: FontWeight.bold, fontSize: 11)),
@@ -634,12 +651,18 @@ class _StudentDetailScreenState extends State<StudentDetailScreen> with SingleTi
           Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                colors: [Color(0xFF0D9488), Color(0xFF059669)],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
+              color: AppColors.rolePrimary('parent'),
               borderRadius: BorderRadius.circular(20),
+              border: const Border(
+                bottom: BorderSide(color: Color(0xFF5B21B6), width: 4),
+              ),
+              boxShadow: const [
+                BoxShadow(
+                  color: Color(0x3D5B21B6),
+                  blurRadius: 10,
+                  offset: Offset(0, 4),
+                ),
+              ],
             ),
             child: Row(
               children: [
@@ -664,7 +687,7 @@ class _StudentDetailScreenState extends State<StudentDetailScreen> with SingleTi
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.2),
+                    color: Colors.white.withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Text(
@@ -744,7 +767,7 @@ class _StudentDetailScreenState extends State<StudentDetailScreen> with SingleTi
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
               decoration: BoxDecoration(
-                color: AppColors.successGreen.withOpacity(0.12),
+                color: AppColors.successGreen.withValues(alpha: 0.12),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Text(value, style: const TextStyle(color: AppColors.successGreen, fontWeight: FontWeight.bold, fontSize: 11)),

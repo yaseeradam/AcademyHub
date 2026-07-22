@@ -35,7 +35,7 @@ class _ChildrenViewState extends State<ChildrenView> {
       _isLoading = true;
     });
     try {
-      final response = await apiClient.dio.get('/students');
+      final response = await apiClient.dio.get('/parent/children');
       if (response.statusCode == 200 && response.data != null) {
         // Paginated list -> 'data' key contains the array
         final list = List<dynamic>.from(response.data['data'] ?? []);
@@ -109,7 +109,7 @@ class _ChildrenViewState extends State<ChildrenView> {
                   children: [
                     CircleAvatar(
                       radius: 24,
-                      backgroundColor: AppColors.primaryBlue.withOpacity(0.12),
+                      backgroundColor: AppColors.primaryBlue.withValues(alpha: 0.12),
                       child: Text(
                         initials,
                         style: const TextStyle(color: AppColors.primaryBlue, fontWeight: FontWeight.bold),

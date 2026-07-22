@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:academyhub_app/core/theme/app_theme.dart';
 import 'package:academyhub_app/core/network/api_client.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class FeePaymentsScreen extends StatefulWidget {
   const FeePaymentsScreen({super.key});
@@ -27,12 +28,10 @@ class _FeePaymentsScreenState extends State<FeePaymentsScreen> {
   }
 
   Future<void> _loadChildrenAndBilling() async {
-    setState(() {
-      _isLoading = true;
-    });
+    if (mounted) setState(() { _isLoading = true; });
     try {
-      // 1. Fetch children
-      final studentsRes = await apiClient.dio.get('/students');
+      // 1. Fetch parent's children
+      final studentsRes = await apiClient.dio.get('/parent/children');
       if (studentsRes.statusCode == 200 && studentsRes.data != null) {
         final list = List<dynamic>.from(studentsRes.data['data'] ?? []);
         if (list.isNotEmpty) {
@@ -46,9 +45,11 @@ class _FeePaymentsScreenState extends State<FeePaymentsScreen> {
       // 2. Fetch invoices history
       final invoicesRes = await apiClient.dio.get('/billing');
       if (invoicesRes.statusCode == 200 && invoicesRes.data != null) {
-        setState(() {
-          _invoices = List<dynamic>.from(invoicesRes.data['data'] ?? []);
-        });
+        if (mounted) {
+          setState(() {
+            _invoices = List<dynamic>.from(invoicesRes.data['data'] ?? []);
+          });
+        }
       }
 
       // 3. Fetch checkout URL and balance for active child
@@ -58,9 +59,7 @@ class _FeePaymentsScreenState extends State<FeePaymentsScreen> {
     } catch (e) {
       debugPrint('Error loading billing: $e');
     } finally {
-      setState(() {
-        _isLoading = false;
-      });
+      if (mounted) setState(() { _isLoading = false; });
     }
   }
 
@@ -71,10 +70,12 @@ class _FeePaymentsScreenState extends State<FeePaymentsScreen> {
         queryParameters: {'student_id': studentId},
       );
       if (res.statusCode == 200 && res.data != null) {
-        setState(() {
-          _outstandingBalance = double.tryParse(res.data['outstanding_balance']?.toString() ?? '') ?? 0.0;
-          _checkoutUrl = res.data['checkout_url'];
-        });
+        if (mounted) {
+          setState(() {
+            _outstandingBalance = double.tryParse(res.data['outstanding_balance']?.toString() ?? '') ?? 0.0;
+            _checkoutUrl = res.data['checkout_url'];
+          });
+        }
       }
     } catch (e) {
       debugPrint('Error fetching checkout details: $e');
@@ -83,30 +84,44 @@ class _FeePaymentsScreenState extends State<FeePaymentsScreen> {
 
   Future<void> _onChildChanged(int? childId) async {
     if (childId == null) return;
-    final child = _children.firstWhere((c) => c['id'] == childId);
-    setState(() {
-      _selectedChildId = childId;
-      _selectedChildName = '${child['first_name']} ${child['last_name']}';
-      _isLoading = true;
-    });
+    final child = _children.firstWhere(
+      (c) => c['id'] == childId,
+      orElse: () => _children.isNotEmpty ? _children.first : {},
+    );
+    if (child.isEmpty) return;
+    if (mounted) {
+      setState(() {
+        _selectedChildId = childId;
+        _selectedChildName = '${child['first_name']} ${child['last_name']}';
+        _isLoading = true;
+      });
+    }
     await _fetchCheckoutUrlForChild(childId);
-    setState(() {
-      _isLoading = false;
-    });
+    if (mounted) setState(() { _isLoading = false; });
   }
 
   @override
   Widget build(BuildContext context) {
-    const emeraldGreen = Color(0xFF10B981);
-    const tealColor = Color(0xFF0F766E);
-
     return Scaffold(
       backgroundColor: AppColors.appBackground,
       appBar: AppBar(
-        title: const Text('Fee Payments & Invoices'),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.pop(context),
+        backgroundColor: AppColors.rolePrimary('parent'),
+        foregroundColor: Colors.white,
+        elevation: 0,
+        title: const Text('Fee Payments & Invoices', style: TextStyle(fontWeight: FontWeight.bold)),
+        leading: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: InkWell(
+            onTap: () => Navigator.maybePop(context),
+            borderRadius: BorderRadius.circular(10),
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.18),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white, size: 18),
+            ),
+          ),
         ),
       ),
       body: _isLoading
@@ -139,21 +154,23 @@ class _FeePaymentsScreenState extends State<FeePaymentsScreen> {
                     const SizedBox(height: 12),
                   ],
 
-                  // Top Balance Card (Emerald Green/Teal gradient)
+                  // Top Balance Card (Solid 3D Parent Violet)
                   Container(
                     padding: const EdgeInsets.all(24),
                     decoration: BoxDecoration(
-                      gradient: const LinearGradient(
-                        colors: [emeraldGreen, tealColor],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      ),
+                      color: AppColors.rolePrimary('parent'),
                       borderRadius: BorderRadius.circular(24),
+                      border: Border(
+                        bottom: BorderSide(
+                          color: AppColors.role3DShadowColor('parent'),
+                          width: 4,
+                        ),
+                      ),
                       boxShadow: [
                         BoxShadow(
-                          color: emeraldGreen.withOpacity(0.3),
-                          blurRadius: 20,
-                          offset: const Offset(0, 8),
+                          color: AppColors.role3DShadowColor('parent').withValues(alpha: 0.35),
+                          blurRadius: 12,
+                          offset: const Offset(0, 4),
                         ),
                       ],
                     ),
@@ -179,21 +196,26 @@ class _FeePaymentsScreenState extends State<FeePaymentsScreen> {
                         ElevatedButton(
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.white,
-                            foregroundColor: emeraldGreen,
+                            foregroundColor: AppColors.rolePrimary('parent'),
                             elevation: 0,
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                             minimumSize: const Size.fromHeight(50),
                           ),
                           onPressed: _outstandingBalance <= 0 || _checkoutUrl == null
                               ? null
-                              : () {
-                                  // In mobile app, we can launch web checkout
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text('Redirecting to Paystack checkout: $_checkoutUrl'),
-                                      backgroundColor: emeraldGreen,
-                                    ),
-                                  );
+                              : () async {
+                                  final messenger = ScaffoldMessenger.of(context);
+                                  final uri = Uri.tryParse(_checkoutUrl!);
+                                  if (uri != null && await canLaunchUrl(uri)) {
+                                    await launchUrl(uri, mode: LaunchMode.externalApplication);
+                                  } else {
+                                    messenger.showSnackBar(
+                                      const SnackBar(
+                                        content: Text('Could not open payment page. Please try again.'),
+                                        backgroundColor: AppColors.dangerRed,
+                                      ),
+                                    );
+                                  }
                                 },
                           child: Text(
                             _outstandingBalance <= 0 ? 'FEE FULLY PAID' : 'PAY TOTAL NOW via Paystack',
@@ -263,13 +285,13 @@ class _FeePaymentsScreenState extends State<FeePaymentsScreen> {
                               Container(
                                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                                 decoration: BoxDecoration(
-                                  color: (isPaid ? emeraldGreen : AppColors.dangerRed).withOpacity(0.12),
+                                  color: (isPaid ? AppColors.successGreen : AppColors.dangerRed).withValues(alpha: 0.12),
                                   borderRadius: BorderRadius.circular(20),
                                 ),
                                 child: Text(
                                   isPaid ? 'Paid' : 'Unpaid',
                                   style: TextStyle(
-                                    color: isPaid ? emeraldGreen : AppColors.dangerRed,
+                                    color: isPaid ? AppColors.successGreen : AppColors.dangerRed,
                                     fontWeight: FontWeight.bold,
                                     fontSize: 11,
                                   ),

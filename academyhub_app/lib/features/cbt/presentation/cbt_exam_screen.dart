@@ -95,9 +95,12 @@ class _CbtExamScreenState extends State<CbtExamScreen> {
         _startTimer();
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to start exam: $e'), backgroundColor: AppColors.dangerRed),
-      );
+      if (!mounted) return;
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to start exam: $e'), backgroundColor: AppColors.dangerRed),
+        );
+      }
     } finally {
       setState(() {
         _isLoading = false;
@@ -151,40 +154,46 @@ class _CbtExamScreenState extends State<CbtExamScreen> {
         '/student/exams/$_attemptUuid/submit',
         data: {'answers': answersPayload},
       );
+      if (!mounted) return;
       if (response.statusCode == 200 && response.data != null) {
         final score = response.data['score'];
         final percent = response.data['percent'];
         
-        showDialog(
-          context: context,
-          barrierDismissible: false,
-          builder: (context) => AlertDialog(
-            title: const Text('Exam Completed!'),
-            content: Text(score != null 
-                ? 'Your exam was successfully submitted.\nScore: $score% ($percent%)' 
-                : 'Your exam was successfully submitted to school servers.'),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.pop(context); // Close dialog
-                  setState(() {
-                    _examStarted = false;
-                    _activeExam = null;
-                    _attemptUuid = null;
-                    _questions.clear();
-                  });
-                  _fetchExams();
-                },
-                child: const Text('Back to Exams'),
-              )
-            ],
-          ),
-        );
+        if (mounted) {
+          showDialog(
+            context: context,
+            barrierDismissible: false,
+            builder: (context) => AlertDialog(
+              title: const Text('Exam Completed!'),
+              content: Text(score != null 
+                  ? 'Your exam was successfully submitted.\nScore: $score% ($percent%)' 
+                  : 'Your exam was successfully submitted to school servers.'),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.pop(context); // Close dialog
+                    setState(() {
+                      _examStarted = false;
+                      _activeExam = null;
+                      _attemptUuid = null;
+                      _questions.clear();
+                    });
+                    _fetchExams();
+                  },
+                  child: const Text('Back to Exams'),
+                )
+              ],
+            ),
+          );
+        }
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to submit exam: $e'), backgroundColor: AppColors.dangerRed),
-      );
+      if (!mounted) return;
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to submit exam: $e'), backgroundColor: AppColors.dangerRed),
+        );
+      }
       // Resume timer
       _startTimer();
     } finally {
@@ -247,7 +256,7 @@ class _CbtExamScreenState extends State<CbtExamScreen> {
               Container(
                 width: 80, height: 80,
                 decoration: BoxDecoration(
-                  color: const Color(0xFFF59E0B).withOpacity(0.1),
+                  color: const Color(0xFFF59E0B).withValues(alpha: 0.1),
                   shape: BoxShape.circle,
                 ),
                 child: const Icon(Icons.quiz_rounded, size: 40, color: Color(0xFFF59E0B)),
@@ -280,12 +289,18 @@ class _CbtExamScreenState extends State<CbtExamScreen> {
           bottom: false,
           child: Container(
             padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                colors: [Color(0xFFF59E0B), Color(0xFFB45309)],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
+            decoration: BoxDecoration(
+              color: AppColors.rolePrimary('student'),
+              border: const Border(
+                bottom: BorderSide(color: Color(0xFF1E40AF), width: 4),
               ),
+              boxShadow: const [
+                BoxShadow(
+                  color: Color(0x3D1E40AF),
+                  blurRadius: 10,
+                  offset: Offset(0, 4),
+                ),
+              ],
             ),
             child: Row(
               children: [
@@ -294,17 +309,17 @@ class _CbtExamScreenState extends State<CbtExamScreen> {
                   child: Container(
                     width: 36, height: 36,
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.2),
+                      color: Colors.white.withValues(alpha: 0.2),
                       borderRadius: BorderRadius.circular(10),
                     ),
-                    child: const Icon(Icons.arrow_back_rounded, color: Colors.white, size: 20),
+                    child: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white, size: 18),
                   ),
                 ),
                 const SizedBox(width: 12),
                 Container(
                   width: 44, height: 44,
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.2),
+                    color: Colors.white.withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: const Icon(Icons.quiz_rounded, color: Colors.white, size: 24),
@@ -317,7 +332,7 @@ class _CbtExamScreenState extends State<CbtExamScreen> {
                       const Text('CBT Exam Portal',
                           style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
                       Text('${_availableExams.length} exam(s) available',
-                          style: TextStyle(color: Colors.white.withOpacity(0.8), fontSize: 12)),
+                          style: TextStyle(color: Colors.white.withValues(alpha: 0.8), fontSize: 12)),
                     ],
                   ),
                 ),
@@ -343,8 +358,8 @@ class _CbtExamScreenState extends State<CbtExamScreen> {
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(18),
-                  border: Border.all(color: color.withOpacity(0.2)),
-                  boxShadow: [BoxShadow(color: color.withOpacity(0.08), blurRadius: 10, offset: const Offset(0, 4))],
+                  border: Border.all(color: color.withValues(alpha: 0.2)),
+                  boxShadow: [BoxShadow(color: color.withValues(alpha: 0.08), blurRadius: 10, offset: const Offset(0, 4))],
                 ),
                 child: Padding(
                   padding: const EdgeInsets.all(16),
@@ -353,7 +368,7 @@ class _CbtExamScreenState extends State<CbtExamScreen> {
                       Container(
                         width: 50, height: 50,
                         decoration: BoxDecoration(
-                          color: color.withOpacity(0.1),
+                          color: color.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(14),
                         ),
                         child: Icon(Icons.quiz_rounded, color: color, size: 26),
@@ -382,7 +397,7 @@ class _CbtExamScreenState extends State<CbtExamScreen> {
                           ? Container(
                               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                               decoration: BoxDecoration(
-                                color: const Color(0xFF10B981).withOpacity(0.1),
+                                color: const Color(0xFF10B981).withValues(alpha: 0.1),
                                 borderRadius: BorderRadius.circular(20),
                               ),
                               child: const Text('DONE',
@@ -395,7 +410,7 @@ class _CbtExamScreenState extends State<CbtExamScreen> {
                                 decoration: BoxDecoration(
                                   color: color,
                                   borderRadius: BorderRadius.circular(12),
-                                  boxShadow: [BoxShadow(color: color.withOpacity(0.35), blurRadius: 8, offset: const Offset(0, 3))],
+                                  boxShadow: [BoxShadow(color: color.withValues(alpha: 0.35), blurRadius: 8, offset: const Offset(0, 3))],
                                 ),
                                 child: const Icon(Icons.play_arrow_rounded, color: Colors.white, size: 24),
                               ),
@@ -415,9 +430,9 @@ class _CbtExamScreenState extends State<CbtExamScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.08),
+        color: color.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: color.withOpacity(0.2)),
+        border: Border.all(color: color.withValues(alpha: 0.2)),
       ),
       child: Text(label, style: TextStyle(color: color, fontSize: 10, fontWeight: FontWeight.w600)),
     );
@@ -602,7 +617,7 @@ class _CbtExamScreenState extends State<CbtExamScreen> {
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(18),
                     border: Border.all(color: const Color(0xFFE2E8F0)),
-                    boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 8, offset: const Offset(0, 3))],
+                    boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 8, offset: const Offset(0, 3))],
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -612,7 +627,7 @@ class _CbtExamScreenState extends State<CbtExamScreen> {
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                             decoration: BoxDecoration(
-                              color: const Color(0xFFF59E0B).withOpacity(0.12),
+                              color: const Color(0xFFF59E0B).withValues(alpha: 0.12),
                               borderRadius: BorderRadius.circular(20),
                             ),
                             child: Text(
@@ -722,7 +737,7 @@ class _CbtExamScreenState extends State<CbtExamScreen> {
                     decoration: BoxDecoration(
                       color: const Color(0xFFF59E0B),
                       borderRadius: BorderRadius.circular(12),
-                      boxShadow: [BoxShadow(color: const Color(0xFFF59E0B).withOpacity(0.35), blurRadius: 8, offset: const Offset(0, 3))],
+                      boxShadow: [BoxShadow(color: const Color(0xFFF59E0B).withValues(alpha: 0.35), blurRadius: 8, offset: const Offset(0, 3))],
                     ),
                     child: const Icon(Icons.arrow_forward_rounded, color: Colors.white, size: 20),
                   ),
@@ -736,7 +751,7 @@ class _CbtExamScreenState extends State<CbtExamScreen> {
                     decoration: BoxDecoration(
                       color: const Color(0xFFF43F5E),
                       borderRadius: BorderRadius.circular(12),
-                      boxShadow: [BoxShadow(color: const Color(0xFFF43F5E).withOpacity(0.35), blurRadius: 8, offset: const Offset(0, 3))],
+                      boxShadow: [BoxShadow(color: const Color(0xFFF43F5E).withValues(alpha: 0.35), blurRadius: 8, offset: const Offset(0, 3))],
                     ),
                     child: const Row(
                       mainAxisSize: MainAxisSize.min,

@@ -34,9 +34,9 @@ class ResultsChart extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 4),
-            const Text(
-              'Showing Term 2 CA1, CA2, and Exam score metrics',
-              style: TextStyle(color: AppColors.textSecondary, fontSize: 12),
+            Text(
+              'Performance chart for ${subjectResults.length} subject(s)',
+              style: const TextStyle(color: AppColors.textSecondary, fontSize: 12),
             ),
             const SizedBox(height: 24),
             SizedBox(
@@ -86,7 +86,7 @@ class ResultsChart extends StatelessWidget {
                   ),
                   borderData: FlBorderData(show: false),
                   minX: 0,
-                  maxX: (subjectResults.length - 1).toDouble(),
+                  maxX: subjectResults.length <= 1 ? 1.0 : (subjectResults.length - 1).toDouble(),
                   minY: 0,
                   maxY: 100, // Normalized percentage or total marks
                   lineBarsData: [

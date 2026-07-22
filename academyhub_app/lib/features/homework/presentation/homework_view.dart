@@ -176,7 +176,7 @@ class _HomeworkViewState extends State<HomeworkView> with SingleTickerProviderSt
                         Container(
                           width: 40, height: 40,
                           decoration: BoxDecoration(
-                            color: const Color(0xFF7C3AED).withOpacity(0.1),
+                            color: const Color(0xFF7C3AED).withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: const Icon(Icons.upload_file_rounded, color: Color(0xFF7C3AED), size: 20),
@@ -234,7 +234,7 @@ class _HomeworkViewState extends State<HomeworkView> with SingleTickerProviderSt
                         decoration: BoxDecoration(
                           color: const Color(0xFFF8FAFC),
                           borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: const Color(0xFF7C3AED).withOpacity(0.3), width: 1.5),
+                          border: Border.all(color: const Color(0xFF7C3AED).withValues(alpha: 0.3), width: 1.5),
                         ),
                         child: const Column(
                           mainAxisAlignment: MainAxisAlignment.center,
@@ -299,9 +299,12 @@ class _HomeworkViewState extends State<HomeworkView> with SingleTickerProviderSt
                     Container(
                       height: 50,
                       decoration: BoxDecoration(
+                        color: AppColors.rolePrimary('student'),
                         borderRadius: BorderRadius.circular(14),
-                        gradient: const LinearGradient(colors: [Color(0xFF7C3AED), Color(0xFF6D28D9)]),
-                        boxShadow: [BoxShadow(color: const Color(0xFF7C3AED).withOpacity(0.3), blurRadius: 12, offset: const Offset(0, 4))],
+                        border: const Border(
+                          bottom: BorderSide(color: Color(0xFF1E40AF), width: 3),
+                        ),
+                        boxShadow: [BoxShadow(color: const Color(0xFF1E40AF).withValues(alpha: 0.3), blurRadius: 10, offset: const Offset(0, 4))],
                       ),
                       child: ElevatedButton.icon(
                         style: ElevatedButton.styleFrom(
@@ -371,7 +374,7 @@ class _HomeworkViewState extends State<HomeworkView> with SingleTickerProviderSt
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                     decoration: BoxDecoration(
-                      color: (isSubmitted ? AppColors.successGreen : AppColors.dangerRed).withOpacity(0.12),
+                      color: (isSubmitted ? AppColors.successGreen : AppColors.dangerRed).withValues(alpha: 0.12),
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Text(
@@ -485,8 +488,8 @@ class _HomeworkViewState extends State<HomeworkView> with SingleTickerProviderSt
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: statusColor.withOpacity(0.2)),
-              boxShadow: [BoxShadow(color: statusColor.withOpacity(0.06), blurRadius: 8, offset: const Offset(0, 3))],
+              border: Border.all(color: statusColor.withValues(alpha: 0.2)),
+              boxShadow: [BoxShadow(color: statusColor.withValues(alpha: 0.06), blurRadius: 8, offset: const Offset(0, 3))],
             ),
             child: Padding(
               padding: const EdgeInsets.all(14),
@@ -496,7 +499,7 @@ class _HomeworkViewState extends State<HomeworkView> with SingleTickerProviderSt
                   Container(
                     width: 42, height: 42,
                     decoration: BoxDecoration(
-                      color: statusColor.withOpacity(0.1),
+                      color: statusColor.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Icon(statusIcon, color: statusColor, size: 22),
@@ -528,7 +531,7 @@ class _HomeworkViewState extends State<HomeworkView> with SingleTickerProviderSt
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                           decoration: BoxDecoration(
-                            color: const Color(0xFF10B981).withOpacity(0.1),
+                            color: const Color(0xFF10B981).withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(20),
                           ),
                           child: Text(score,
@@ -538,7 +541,7 @@ class _HomeworkViewState extends State<HomeworkView> with SingleTickerProviderSt
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                           decoration: BoxDecoration(
-                            color: statusColor.withOpacity(0.1),
+                            color: statusColor.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(20),
                           ),
                           child: Text(
@@ -563,9 +566,9 @@ class _HomeworkViewState extends State<HomeworkView> with SingleTickerProviderSt
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.08),
+        color: color.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: color.withOpacity(0.2)),
+        border: Border.all(color: color.withValues(alpha: 0.2)),
       ),
       child: Text(label, style: TextStyle(color: color, fontSize: 10, fontWeight: FontWeight.w600)),
     );
@@ -624,7 +627,7 @@ class _HomeworkViewState extends State<HomeworkView> with SingleTickerProviderSt
             color: Colors.white,
             borderRadius: BorderRadius.circular(16),
             border: Border.all(color: const Color(0xFFE2E8F0)),
-            boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 6, offset: const Offset(0, 2))],
+            boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 6, offset: const Offset(0, 2))],
           ),
           child: Padding(
             padding: const EdgeInsets.all(14),
@@ -633,7 +636,7 @@ class _HomeworkViewState extends State<HomeworkView> with SingleTickerProviderSt
                 Container(
                   width: 46, height: 46,
                   decoration: BoxDecoration(
-                    color: typeColor.withOpacity(0.1),
+                    color: typeColor.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Column(
@@ -675,7 +678,7 @@ class _HomeworkViewState extends State<HomeworkView> with SingleTickerProviderSt
                   child: Container(
                     width: 38, height: 38,
                     decoration: BoxDecoration(
-                      color: const Color(0xFF0F766E).withOpacity(0.1),
+                      color: const Color(0xFF0F766E).withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: const Icon(Icons.download_rounded, color: Color(0xFF0F766E), size: 20),
@@ -709,7 +712,7 @@ class _HomeworkViewState extends State<HomeworkView> with SingleTickerProviderSt
                     Container(
                       width: 36, height: 36,
                       decoration: BoxDecoration(
-                        color: const Color(0xFF7C3AED).withOpacity(0.1),
+                        color: const Color(0xFF7C3AED).withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(10),
                       ),
                       child: const Icon(Icons.menu_book_rounded, color: Color(0xFF7C3AED), size: 20),
@@ -722,7 +725,7 @@ class _HomeworkViewState extends State<HomeworkView> with SingleTickerProviderSt
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                         decoration: BoxDecoration(
-                          color: const Color(0xFF7C3AED).withOpacity(0.08),
+                          color: const Color(0xFF7C3AED).withValues(alpha: 0.08),
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: Text(
@@ -734,7 +737,7 @@ class _HomeworkViewState extends State<HomeworkView> with SingleTickerProviderSt
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                         decoration: BoxDecoration(
-                          color: const Color(0xFF0F766E).withOpacity(0.08),
+                          color: const Color(0xFF0F766E).withValues(alpha: 0.08),
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: Text(

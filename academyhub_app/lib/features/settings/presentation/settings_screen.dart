@@ -38,11 +38,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final name = await SecureStorage.instance.getUserName();
     final role = await SecureStorage.instance.getRole();
     final school = await SecureStorage.instance.getSchoolName();
-    setState(() {
-      _userName = name ?? 'User';
-      _userRole = role ?? 'Student';
-      _schoolName = school ?? 'My School';
-    });
+    if (mounted) {
+      setState(() {
+        _userName = name ?? 'User';
+        _userRole = role ?? 'Student';
+        _schoolName = school ?? 'My School';
+      });
+    }
   }
 
   Future<void> _loadDatabaseStats() async {
@@ -143,13 +145,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         shape: BoxShape.circle,
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.04),
+                            color: Colors.black.withValues(alpha: 0.04),
                             blurRadius: 10,
                             offset: const Offset(0, 2),
                           ),
                         ],
                       ),
-                      child: const Icon(Icons.arrow_back, color: AppColors.textPrimary, size: 20),
+                      child: const Icon(Icons.arrow_back_ios_new_rounded, color: AppColors.textPrimary, size: 18),
                     ),
                   ),
                   const SizedBox(width: 16),
@@ -177,17 +179,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
               Container(
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [Color(0xFF8B5CF6), Color(0xFF6D28D9)],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
+                  color: AppColors.rolePrimary(_userRole.toLowerCase()),
                   borderRadius: BorderRadius.circular(24),
+                  border: Border(
+                    bottom: BorderSide(
+                      color: AppColors.role3DShadowColor(_userRole.toLowerCase()),
+                      width: 4,
+                    ),
+                  ),
                   boxShadow: [
                     BoxShadow(
-                      color: const Color(0xFF8B5CF6).withOpacity(0.25),
-                      blurRadius: 16,
-                      offset: const Offset(0, 8),
+                      color: AppColors.role3DShadowColor(_userRole.toLowerCase()).withValues(alpha: 0.35),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
                     ),
                   ],
                 ),
@@ -221,7 +225,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                             decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.15),
+                              color: Colors.white.withValues(alpha: 0.15),
                               borderRadius: BorderRadius.circular(20),
                             ),
                             child: Text(
@@ -256,6 +260,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       iconColor: const Color(0xFF3B82F6),
                       iconBg: const Color(0xFFEFF6FF),
                       title: 'Profile Info',
+                      onTap: () {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Profile editing coming soon.')),
+                        );
+                      },
                     ),
                     const Divider(height: 1, indent: 50),
                     _buildCustomListItem(
@@ -263,6 +272,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       iconColor: const Color(0xFF10B981),
                       iconBg: const Color(0xFFECFDF5),
                       title: 'Change Password',
+                      onTap: () {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Password change coming soon.')),
+                        );
+                      },
                     ),
                     const Divider(height: 1, indent: 50),
                     _buildCustomListItem(
@@ -272,7 +286,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       title: 'Push Notifications',
                       trailing: Switch(
                         value: _pushNotifications,
-                        activeColor: violetAccent,
+                        activeThumbColor: violetAccent,
                         onChanged: (val) {
                           setState(() {
                             _pushNotifications = val;
@@ -296,7 +310,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: violetAccent.withOpacity(0.15)),
+                  border: Border.all(color: violetAccent.withValues(alpha: 0.15)),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -409,7 +423,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         borderRadius: BorderRadius.circular(12),
                         boxShadow: [
                           BoxShadow(
-                            color: violetAccent.withOpacity(0.2),
+                            color: violetAccent.withValues(alpha: 0.2),
                             blurRadius: 10,
                             offset: const Offset(0, 4),
                           ),
@@ -453,7 +467,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   trailing: const SizedBox.shrink(),
                   onTap: () async {
                     await SecureStorage.instance.clearAll();
-                    if (mounted) {
+                    if (context.mounted) {
                       context.go('/');
                     }
                   },
@@ -469,7 +483,20 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ),
               Center(
                 child: TextButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    showDialog(
+                      context: context,
+                      builder: (_) => AlertDialog(
+                        title: const Text('Terms of Service'),
+                        content: const Text(
+                          'By using AcademyHub, you agree to use the platform responsibly and in accordance with your school\'s policies. All data is handled securely and in compliance with applicable privacy laws.',
+                        ),
+                        actions: [
+                          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Close')),
+                        ],
+                      ),
+                    );
+                  },
                   child: const Text(
                     'Terms of Service',
                     style: TextStyle(color: violetAccent, fontSize: 12, decoration: TextDecoration.underline),

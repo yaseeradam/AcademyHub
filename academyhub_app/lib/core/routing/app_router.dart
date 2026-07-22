@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:academyhub_app/core/storage/secure_storage.dart';
 
@@ -10,6 +9,9 @@ import 'package:academyhub_app/features/cbt/presentation/cbt_exam_screen.dart';
 import 'package:academyhub_app/features/settings/presentation/settings_screen.dart';
 import 'package:academyhub_app/features/admin/presentation/broadcast_creator_screen.dart';
 import 'package:academyhub_app/features/parent/presentation/fee_payments_screen.dart';
+import 'package:academyhub_app/features/parent/presentation/student_report_card_screen.dart';
+import 'package:academyhub_app/features/homework/presentation/homework_tracker_screen.dart';
+import 'package:academyhub_app/features/timetable/presentation/student_timetable_screen.dart';
 
 final GoRouter appRouter = GoRouter(
   initialLocation: '/',
@@ -41,6 +43,18 @@ final GoRouter appRouter = GoRouter(
     GoRoute(
       path: '/fee-payments',
       builder: (context, state) => const FeePaymentsScreen(),
+    ),
+    GoRoute(
+      path: '/student-report-card',
+      builder: (context, state) => const StudentReportCardScreen(),
+    ),
+    GoRoute(
+      path: '/homework-tracker',
+      builder: (context, state) => const HomeworkTrackerScreen(),
+    ),
+    GoRoute(
+      path: '/student-timetable',
+      builder: (context, state) => const StudentTimetableScreen(),
     ),
   ],
   redirect: (context, state) async {
