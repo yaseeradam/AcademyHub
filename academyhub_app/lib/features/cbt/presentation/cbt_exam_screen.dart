@@ -203,6 +203,52 @@ class _CbtExamScreenState extends State<CbtExamScreen> {
     }
   }
 
+  void _confirmExit() {
+    if (!_examStarted) {
+      Navigator.pop(context);
+      return;
+    }
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: const Row(
+          children: [
+            Icon(Icons.exit_to_app_rounded, color: Color(0xFFF97316), size: 24),
+            SizedBox(width: 8),
+            Text('Exit Exam?', style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold)),
+          ],
+        ),
+        content: const Text(
+          'Are you sure you want to leave the exam arena? Your current progress and answers are saved.',
+          style: TextStyle(fontSize: 13, color: Color(0xFF64748B)),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Stay', style: TextStyle(color: Color(0xFF64748B))),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFFF97316),
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              elevation: 0,
+            ),
+            onPressed: () {
+              Navigator.pop(context);
+              setState(() {
+                _examStarted = false;
+                _timer?.cancel();
+              });
+            },
+            child: const Text('Exit Exam', style: TextStyle(fontWeight: FontWeight.bold)),
+          ),
+        ],
+      ),
+    );
+  }
+
   void _confirmSubmit() {
     final unanswered = _questions.length - _selectedAnswers.length;
     showDialog(
@@ -281,70 +327,10 @@ class _CbtExamScreenState extends State<CbtExamScreen> {
       const Color(0xFFF59E0B), const Color(0xFFF43F5E), const Color(0xFF0F766E),
     ];
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        // Header strip
-        SafeArea(
-          bottom: false,
-          child: Container(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
-            decoration: BoxDecoration(
-              color: AppColors.rolePrimary('student'),
-              border: const Border(
-                bottom: BorderSide(color: Color(0xFF1E40AF), width: 4),
-              ),
-              boxShadow: const [
-                BoxShadow(
-                  color: Color(0x3D1E40AF),
-                  blurRadius: 10,
-                  offset: Offset(0, 4),
-                ),
-              ],
-            ),
-            child: Row(
-              children: [
-                GestureDetector(
-                  onTap: () => Navigator.pop(context),
-                  child: Container(
-                    width: 36, height: 36,
-                    decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.2),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white, size: 18),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Container(
-                  width: 44, height: 44,
-                  decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.2),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: const Icon(Icons.quiz_rounded, color: Colors.white, size: 24),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text('CBT Exam Portal',
-                          style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
-                      Text('${_availableExams.length} exam(s) available',
-                          style: TextStyle(color: Colors.white.withValues(alpha: 0.8), fontSize: 12)),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-        Expanded(
-          child: ListView.builder(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
-            itemCount: _availableExams.length,
-            itemBuilder: (context, idx) {
+    return ListView.builder(
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
+      itemCount: _availableExams.length,
+      itemBuilder: (context, idx) {
               final exam = _availableExams[idx];
               final title = exam['title'] ?? 'Exam';
               final subject = exam['subject'] ?? 'General';

@@ -119,6 +119,28 @@
                         </tbody>
                     </x-table>
                 </div>
+
+                @if(isset($customFields) && $customFields->count() > 0 && !empty($teacher->custom_fields))
+                    <div class="card-padded mt-4">
+                        <div class="text-sm font-semibold text-slate-900 mb-4">Additional Information</div>
+                        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                            @foreach($customFields as $field)
+                                @if(isset($teacher->custom_fields[$field->name]) && $teacher->custom_fields[$field->name] !== '')
+                                    <div class="rounded-lg bg-slate-50 p-3 border border-slate-100">
+                                        <div class="text-xs font-medium text-slate-500">{{ $field->label }}</div>
+                                        <div class="mt-1 text-sm font-semibold text-slate-900">
+                                            @if($field->type === 'checkbox')
+                                                {{ $teacher->custom_fields[$field->name] ? 'Yes' : 'No' }}
+                                            @else
+                                                {{ $teacher->custom_fields[$field->name] }}
+                                            @endif
+                                        </div>
+                                    </div>
+                                @endif
+                            @endforeach
+                        </div>
+                    </div>
+                @endif
             </div>
 
             <div class="space-y-4">

@@ -14,23 +14,51 @@ use Illuminate\Support\Str;
 use App\Support\TenantSettings;
 use Illuminate\Validation\Rule;
 
+use App\Models\CustomField;
+
 class TeacherController extends Controller
 {
     public function create()
     {
-        return view('pages.teachers.create');
+        $customFields = CustomField::active()->ordered()->where('form_type', 'teacher')->get();
+        return view('pages.teachers.create', compact('customFields'));
     }
 
     public function store(Request $request)
     {
-        $data = $request->validate([
+        $customFields = CustomField::active()->ordered()->where('form_type', 'teacher')->get();
+
+        $rules = [
             'name'      => ['required', 'string', 'max:255'],
             'email'     => ['required', 'string', 'email', 'max:255', Rule::unique('users', 'email')->where('tenant_id', TenantSettings::tenantId())],
             'password'  => ['required', 'string', 'min:8', 'confirmed'],
             'is_active' => ['nullable', 'boolean'],
             'is_class_teacher' => ['nullable', 'boolean'],
             'photo'     => ['nullable', 'image', 'max:5120'],
-        ]);
+        ];
+
+        foreach ($customFields as $field) {
+            $fieldRules = $field->required ? ['required'] : ['nullable'];
+            match ($field->type) {
+                'number'   => $fieldRules[] = 'numeric',
+                'date'     => $fieldRules[] = 'date',
+                'checkbox' => $fieldRules[] = 'boolean',
+                default    => array_push($fieldRules, 'string', 'max:255'),
+            };
+            $rules["custom_fields.{$field->name}"] = $fieldRules;
+        }
+
+        $data = $request->validate($rules);
+
+        $customFieldValues = [];
+        $rawCustom = $request->input('custom_fields', []);
+        foreach ($customFields as $field) {
+            if ($field->type === 'checkbox') {
+                $customFieldValues[$field->name] = !empty($rawCustom[$field->name]);
+            } elseif (array_key_exists($field->name, $rawCustom) && $rawCustom[$field->name] !== null && $rawCustom[$field->name] !== '') {
+                $customFieldValues[$field->name] = $rawCustom[$field->name];
+            }
+        }
 
         $profilePhotoPath = null;
         if ($request->hasFile('photo')) {
@@ -50,6 +78,7 @@ class TeacherController extends Controller
             'is_active'        => (bool) ($data['is_active'] ?? false),
             'is_class_teacher' => (bool) ($data['is_class_teacher'] ?? false),
             'profile_photo'    => $profilePhotoPath,
+            'custom_fields'    => !empty($customFieldValues) ? $customFieldValues : null,
         ]);
 
         return redirect()
@@ -70,33 +99,67 @@ class TeacherController extends Controller
 
         $classes = SchoolClass::query()->orderBy('level')->get();
         $subjects = Subject::query()->orderBy('name')->get();
+        $customFields = CustomField::active()->ordered()->where('form_type', 'teacher')->get();
 
-        return view('pages.teachers.show', compact('teacher', 'allocations', 'classes', 'subjects'));
+        return view('pages.teachers.show', compact('teacher', 'allocations', 'classes', 'subjects', 'customFields'));
     }
 
     public function edit(User $teacher)
     {
         abort_unless($teacher->role === 'teacher', 404);
 
-        return view('pages.teachers.edit', compact('teacher'));
+        $customFields = CustomField::active()->ordered()->where('form_type', 'teacher')->get();
+
+        return view('pages.teachers.edit', compact('teacher', 'customFields'));
     }
 
     public function update(Request $request, User $teacher)
     {
         abort_unless($teacher->role === 'teacher', 404);
 
-        $data = $request->validate([
+        $customFields = CustomField::active()->ordered()->where('form_type', 'teacher')->get();
+
+        $rules = [
             'name'             => ['required', 'string', 'max:255'],
             'email'            => ['required', 'string', 'email', 'max:255', Rule::unique('users', 'email')->where('tenant_id', TenantSettings::tenantId())->ignore($teacher->id)],
             'password'         => ['nullable', 'string', 'min:8', 'confirmed'],
             'is_active'        => ['nullable', 'boolean'],
             'is_class_teacher' => ['nullable', 'boolean'],
-        ]);
+        ];
+
+        foreach ($customFields as $field) {
+            $fieldRules = $field->required ? ['required'] : ['nullable'];
+            match ($field->type) {
+                'number'   => $fieldRules[] = 'numeric',
+                'date'     => $fieldRules[] = 'date',
+                'checkbox' => $fieldRules[] = 'boolean',
+                default    => array_push($fieldRules, 'string', 'max:255'),
+            };
+            $rules["custom_fields.{$field->name}"] = $fieldRules;
+        }
+
+        $data = $request->validate($rules);
+
+        $customFieldValues = $teacher->custom_fields ?? [];
+        $rawCustom = $request->input('custom_fields', []);
+        foreach ($customFields as $field) {
+            if ($field->type === 'checkbox') {
+                $customFieldValues[$field->name] = !empty($rawCustom[$field->name]);
+            } else {
+                $val = $rawCustom[$field->name] ?? null;
+                if ($val !== null && $val !== '') {
+                    $customFieldValues[$field->name] = $val;
+                } else {
+                    unset($customFieldValues[$field->name]);
+                }
+            }
+        }
 
         $teacher->name             = $data['name'];
         $teacher->email            = $data['email'];
         $teacher->is_active        = (bool) ($data['is_active'] ?? false);
         $teacher->is_class_teacher = (bool) ($data['is_class_teacher'] ?? false);
+        $teacher->custom_fields    = !empty($customFieldValues) ? $customFieldValues : null;
 
         if (! empty($data['password'])) {
             $teacher->password = $data['password'];

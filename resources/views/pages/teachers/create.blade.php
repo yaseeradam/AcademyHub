@@ -139,6 +139,72 @@
                         </label>
                     </div>
                 </div>
+
+                {{-- Additional Information (Custom Fields) --}}
+                @if(isset($customFields) && $customFields->count() > 0)
+                    <div class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+                        <h2 class="text-base font-semibold text-gray-900 mb-4 border-b border-gray-100 pb-2">Additional Information</h2>
+                        <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                            @foreach ($customFields as $field)
+                                @php
+                                    $val = old("custom_fields.{$field->name}");
+                                @endphp
+                                <div>
+                                    <label class="block text-sm font-bold text-gray-900 mb-2">
+                                        {{ $field->label }}
+                                        @if ($field->required) <span class="text-red-500">*</span> @endif
+                                    </label>
+                                    @if ($field->type === 'select')
+                                        <select
+                                            name="custom_fields[{{ $field->name }}]"
+                                            class="w-full rounded-lg border-2 border-gray-300 bg-white px-4 py-3 text-sm font-medium text-gray-900 shadow-sm transition-all focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 hover:border-gray-400"
+                                            @if($field->required) required @endif
+                                        >
+                                            <option value="">Select...</option>
+                                            @foreach ($field->options ?? [] as $opt)
+                                                <option value="{{ $opt }}" @selected($val == $opt)>{{ $opt }}</option>
+                                            @endforeach
+                                        </select>
+                                    @elseif ($field->type === 'textarea')
+                                        <textarea
+                                            name="custom_fields[{{ $field->name }}]"
+                                            rows="3"
+                                            class="w-full rounded-lg border-2 border-gray-300 bg-white px-4 py-3 text-sm font-medium text-gray-900 shadow-sm transition-all focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 hover:border-gray-400"
+                                            placeholder="{{ $field->placeholder }}"
+                                            @if($field->required) required @endif
+                                        >{{ $val }}</textarea>
+                                    @elseif ($field->type === 'checkbox')
+                                        <div class="mt-2 flex items-center">
+                                            <input
+                                                type="checkbox"
+                                                name="custom_fields[{{ $field->name }}]"
+                                                value="1"
+                                                id="cf_{{ $field->name }}"
+                                                @checked($val)
+                                                class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                            />
+                                            <label for="cf_{{ $field->name }}" class="ml-2 text-sm text-gray-700">
+                                                {{ $field->placeholder ?: 'Yes' }}
+                                            </label>
+                                        </div>
+                                    @else
+                                        <input
+                                            type="{{ $field->type }}"
+                                            name="custom_fields[{{ $field->name }}]"
+                                            value="{{ $val }}"
+                                            class="w-full rounded-lg border-2 border-gray-300 bg-white px-4 py-3 text-sm font-medium text-gray-900 shadow-sm transition-all focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 hover:border-gray-400"
+                                            placeholder="{{ $field->placeholder }}"
+                                            @if($field->required) required @endif
+                                        />
+                                    @endif
+                                    @error("custom_fields.{$field->name}")
+                                        <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
+                                    @enderror
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
+                @endif
             </div>
             
             {{-- Right Column (Takes 1/3 space) --}}

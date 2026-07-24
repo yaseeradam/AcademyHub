@@ -109,7 +109,11 @@ class Index extends Component
         ];
 
         // Add role-specific custom field validation
-        $relevantCustomFields = $this->role === 'parent' ? $this->parentCustomFields : $this->teacherCustomFields;
+        $relevantCustomFields = match ($this->role) {
+            'parent' => $this->parentCustomFields,
+            'teacher' => $this->teacherCustomFields,
+            default => collect(),
+        };
         foreach ($relevantCustomFields as $field) {
             $fieldRules = $field->required ? ['required'] : ['nullable'];
             match ($field->type) {
@@ -220,7 +224,11 @@ class Index extends Component
         ];
 
         // Add role-specific custom field validation for edit
-        $relevantCustomFields = $this->editRole === 'parent' ? $this->parentCustomFields : $this->teacherCustomFields;
+        $relevantCustomFields = match ($this->editRole) {
+            'parent' => $this->parentCustomFields,
+            'teacher' => $this->teacherCustomFields,
+            default => collect(),
+        };
         foreach ($relevantCustomFields as $field) {
             $fieldRules = $field->required ? ['required'] : ['nullable'];
             match ($field->type) {

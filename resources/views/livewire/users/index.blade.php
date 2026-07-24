@@ -87,7 +87,7 @@
             </div>
 
             {{-- Role-Specific Custom Fields (Create) --}}
-            @php $createFields = $role === 'parent' ? $this->parentCustomFields : $this->teacherCustomFields; @endphp
+            @php $createFields = match($role) { 'parent' => $this->parentCustomFields, 'teacher' => $this->teacherCustomFields, default => collect() }; @endphp
             @if($createFields->count() > 0)
                 @foreach($createFields as $field)
                     <div class="lg:col-span-3" wire:key="create-cf-{{ $field->id }}">
@@ -206,7 +206,7 @@
                                         </div>
 
                                         {{-- Role-Specific Custom Fields (Edit) --}}
-                                        @php $editFields = $editRole === 'parent' ? $this->parentCustomFields : $this->teacherCustomFields; @endphp
+                                        @php $editFields = match($editRole) { 'parent' => $this->parentCustomFields, 'teacher' => $this->teacherCustomFields, default => collect() }; @endphp
                                         @if($editFields->count() > 0)
                                             @foreach($editFields as $field)
                                                 <div class="lg:col-span-2" wire:key="edit-cf-{{ $field->id }}-{{ $user->id }}">

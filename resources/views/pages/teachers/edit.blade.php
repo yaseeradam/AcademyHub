@@ -89,10 +89,76 @@
                             type="password"
                             class="input"
                             autocomplete="new-password"
-                        />
                     </div>
                 </div>
             </div>
+
+            @if(isset($customFields) && $customFields->count() > 0)
+                <div class="mt-6 border-t border-gray-200/70 pt-6">
+                    <h3 class="text-sm font-bold text-slate-900 mb-4">Additional Information</h3>
+                    <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
+                        @foreach ($customFields as $field)
+                            @php
+                                $val = old("custom_fields.{$field->name}", $teacher->custom_fields[$field->name] ?? null);
+                            @endphp
+                            <div>
+                                <label class="text-sm font-semibold text-slate-900">
+                                    {{ $field->label }}
+                                    @if ($field->required) <span class="text-red-500">*</span> @endif
+                                </label>
+                                <div class="mt-2">
+                                    @if ($field->type === 'select')
+                                        <select
+                                            name="custom_fields[{{ $field->name }}]"
+                                            class="select"
+                                            @if($field->required) required @endif
+                                        >
+                                            <option value="">Select...</option>
+                                            @foreach ($field->options ?? [] as $opt)
+                                                <option value="{{ $opt }}" @selected($val == $opt)>{{ $opt }}</option>
+                                            @endforeach
+                                        </select>
+                                    @elseif ($field->type === 'textarea')
+                                        <textarea
+                                            name="custom_fields[{{ $field->name }}]"
+                                            rows="2"
+                                            class="input"
+                                            placeholder="{{ $field->placeholder }}"
+                                            @if($field->required) required @endif
+                                        >{{ $val }}</textarea>
+                                    @elseif ($field->type === 'checkbox')
+                                        <div class="flex items-center mt-2">
+                                            <input
+                                                type="checkbox"
+                                                name="custom_fields[{{ $field->name }}]"
+                                                value="1"
+                                                id="cf_{{ $field->name }}"
+                                                @checked($val)
+                                                class="checkbox-custom"
+                                            />
+                                            <label for="cf_{{ $field->name }}" class="ml-2 text-sm text-slate-700">
+                                                {{ $field->placeholder ?: 'Yes' }}
+                                            </label>
+                                        </div>
+                                    @else
+                                        <input
+                                            type="{{ $field->type }}"
+                                            name="custom_fields[{{ $field->name }}]"
+                                            value="{{ $val }}"
+                                            class="input"
+                                            placeholder="{{ $field->placeholder }}"
+                                            @if($field->required) required @endif
+                                        />
+                                    @endif
+                                    @error("custom_fields.{$field->name}")
+                                        <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
+                                    @enderror
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+            @endif
 
             <div class="mt-6 flex flex-col gap-3 border-t border-gray-200/70 pt-6 sm:flex-row sm:items-center sm:justify-between">
                 <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
