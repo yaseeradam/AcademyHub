@@ -8,7 +8,6 @@ import 'package:academyhub_app/core/storage/secure_storage.dart';
 import 'package:academyhub_app/core/network/sync_processor.dart';
 import 'package:academyhub_app/core/network/api_client.dart';
 import 'package:academyhub_app/features/results/presentation/results_chart.dart';
-import 'package:academyhub_app/features/timetable/presentation/timetable_view.dart';
 import 'package:academyhub_app/features/attendance/presentation/attendance_screen.dart';
 import 'package:academyhub_app/features/scores/presentation/scores_entry_screen.dart';
 import 'package:academyhub_app/features/homework/presentation/homework_view.dart';
@@ -1200,10 +1199,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   const SizedBox(height: 24),
                 ],
                 _buildAnnouncementsSection(),
-                const SizedBox(height: 16),
-                const Text('TIMETABLE', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.textSecondary, letterSpacing: 1.0)),
-                const SizedBox(height: 12),
-                const TimetableView(),
               ],
             ),
           ),
