@@ -752,7 +752,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       case 'student':
         return [
           {'label': 'Results', 'icon': Icons.assignment_turned_in_rounded, 'color': const Color(0xFF3B82F6), 'tab': 1},
-          {'label': 'Homework', 'icon': Icons.menu_book_rounded, 'color': const Color(0xFF7C3AED), 'tab': 2},
+          {'label': 'Homework', 'icon': Icons.assignment_rounded, 'color': const Color(0xFF7C3AED), 'action': 'open_homework'},
           {'label': 'CBT Exam', 'icon': Icons.quiz_rounded, 'color': const Color(0xFFF59E0B), 'route': '/cbt-exam'},
           {'label': 'Timetable', 'icon': Icons.table_chart_rounded, 'color': const Color(0xFF10B981), 'action': 'open_timetable'},
           {'label': 'Attendance', 'icon': Icons.fact_check_rounded, 'color': const Color(0xFF0F766E), 'action': 'open_attendance'},
@@ -760,11 +760,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
         ];
       case 'teacher':
         return [
+          {'label': 'Homework', 'icon': Icons.assignment_rounded, 'color': const Color(0xFF7C3AED), 'action': 'open_homework'},
           {'label': 'Scoresheet', 'icon': Icons.score_rounded, 'color': const Color(0xFF10B981), 'action': 'open_scoresheet'},
           {'label': 'Attendance', 'icon': Icons.how_to_reg_rounded, 'color': const Color(0xFF3B82F6), 'action': 'open_attendance'},
           {'label': 'Classes', 'icon': Icons.class_rounded, 'color': const Color(0xFF8B5CF6), 'action': 'open_classes'},
           {'label': 'Subjects', 'icon': Icons.book_rounded, 'color': const Color(0xFFEC4899), 'action': 'open_subjects'},
-          {'label': 'Homework', 'icon': Icons.assignment_rounded, 'color': const Color(0xFF7C3AED), 'tab': 0},
           {'label': 'Timetable', 'icon': Icons.table_chart_rounded, 'color': const Color(0xFFF59E0B), 'action': 'open_timetable'},
           {'label': 'Class Notes', 'icon': Icons.menu_book_rounded, 'color': const Color(0xFF0F766E), 'action': 'open_class_notes'},
           {'label': 'Profile', 'icon': Icons.person_rounded, 'color': const Color(0xFF64748B), 'tab': 3},
@@ -772,12 +772,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
       case 'parent':
         return [
           {'label': 'Children', 'icon': Icons.people_alt_rounded, 'color': const Color(0xFF6B4FA0), 'tab': 1},
+          {'label': 'Homework', 'icon': Icons.assignment_rounded, 'color': const Color(0xFF7C3AED), 'action': 'open_homework'},
           {'label': 'Pay Fees', 'icon': Icons.payment_rounded, 'color': const Color(0xFF10B981), 'route': '/fee-payments'},
           {'label': 'Scoresheet', 'icon': Icons.score_rounded, 'color': const Color(0xFF10B981), 'action': 'open_scoresheet'},
           {'label': 'Attendance', 'icon': Icons.fact_check_rounded, 'color': const Color(0xFF0F766E), 'action': 'open_attendance'},
           {'label': 'Chat', 'icon': Icons.chat_bubble_rounded, 'color': const Color(0xFFEC4899), 'tab': 2},
           {'label': 'Results', 'icon': Icons.assignment_turned_in_rounded, 'color': const Color(0xFF3B82F6), 'tab': 1},
-          {'label': 'Homework', 'icon': Icons.menu_book_rounded, 'color': const Color(0xFF7C3AED), 'tab': 1},
           {'label': 'Profile', 'icon': Icons.person_rounded, 'color': const Color(0xFF64748B), 'tab': 3},
         ];
       case 'admin':
@@ -785,6 +785,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           {'label': 'Students', 'icon': Icons.people_rounded, 'color': const Color(0xFF3B82F6), 'action': 'open_students'},
           {'label': 'Classes', 'icon': Icons.class_rounded, 'color': const Color(0xFF8B5CF6), 'action': 'open_classes'},
           {'label': 'Subjects', 'icon': Icons.book_rounded, 'color': const Color(0xFFEC4899), 'action': 'open_subjects'},
+          {'label': 'Homework', 'icon': Icons.assignment_rounded, 'color': const Color(0xFF7C3AED), 'action': 'open_homework'},
           {'label': 'Scoresheet', 'icon': Icons.score_rounded, 'color': const Color(0xFF10B981), 'action': 'open_scoresheet'},
           {'label': 'Attendance', 'icon': Icons.fact_check_rounded, 'color': const Color(0xFFF97316), 'action': 'open_attendance'},
           {'label': 'Announce', 'icon': Icons.campaign_rounded, 'color': const Color(0xFF7C3AED), 'tab': 2},
