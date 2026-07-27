@@ -486,7 +486,7 @@ class _CbtExamScreenState extends State<CbtExamScreen> {
 
     final question = _questions[_currentQuestionIndex];
     final qId = question['id'] as int;
-    final text = question['question_text'] ?? '';
+    final text = (question['question_text'] ?? question['prompt'] ?? question['question'] ?? '').toString();
     final options = List<dynamic>.from(question['options'] ?? []);
     final totalQuestions = _questions.length;
     final questionNumber = _currentQuestionIndex + 1;
