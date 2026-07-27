@@ -223,16 +223,22 @@ class _TimetableViewState extends State<TimetableView> {
                               children: [
                                 const Icon(Icons.person_outline, size: 12, color: AppColors.textSecondary),
                                 const SizedBox(width: 4),
-                                Text(
-                                  period.teacher,
-                                  style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                                Flexible(
+                                  child: Text(
+                                    period.teacher,
+                                    style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
                                 ),
                                 const SizedBox(width: 12),
                                 const Icon(Icons.place_outlined, size: 12, color: AppColors.textSecondary),
                                 const SizedBox(width: 4),
-                                Text(
-                                  period.room,
-                                  style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                                Flexible(
+                                  child: Text(
+                                    period.room,
+                                    style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
                                 ),
                               ],
                             ),

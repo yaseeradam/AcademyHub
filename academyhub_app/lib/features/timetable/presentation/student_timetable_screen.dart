@@ -259,11 +259,23 @@ class _StudentTimetableScreenState extends State<StudentTimetableScreen>
                                   children: [
                                     const Icon(Icons.access_time_rounded, size: 12, color: AppColors.textSecondary),
                                     const SizedBox(width: 4),
-                                    Text(item['time'], style: const TextStyle(fontSize: 11, color: AppColors.textSecondary)),
+                                    Flexible(
+                                      child: Text(
+                                        item['time'],
+                                        style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ),
                                     const SizedBox(width: 12),
                                     const Icon(Icons.location_on_outlined, size: 12, color: AppColors.textSecondary),
                                     const SizedBox(width: 2),
-                                    Text(item['room'], style: const TextStyle(fontSize: 11, color: AppColors.textSecondary)),
+                                    Flexible(
+                                      child: Text(
+                                        item['room'],
+                                        style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ),
                                   ],
                                 ),
                                 const SizedBox(height: 4),
