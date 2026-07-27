@@ -62,8 +62,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   bool _isLoadingAdminStudents = false;
   String _adminStudentsSearchQuery = '';
 
-  // Admin Staff & Directory state
-  int _adminDirectoryTab = 0; // 0 = Students, 1 = Staff, 2 = Classes, 3 = Subjects
+  // Admin Staff state
   List<dynamic> _adminStaffList = List<dynamic>.from(_defaultStaffList);
   bool _isLoadingAdminStaff = false;
   String _adminStaffSearchQuery = '';
@@ -713,11 +712,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
               onTap: () {
                 if (act.containsKey('action')) {
                   _handleActionName(act['action'] as String);
-                } else if (act.containsKey('dirTab')) {
-                  setState(() {
-                    _adminDirectoryTab = act['dirTab'] as int;
-                    _currentIndex = act['tab'] as int;
-                  });
                 } else if (act.containsKey('route')) {
                   context.push(act['route'] as String);
                 } else if (act.containsKey('tab')) {
@@ -763,8 +757,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
           {'label': 'CBT Exam', 'icon': Icons.quiz_rounded, 'color': const Color(0xFFF59E0B), 'route': '/cbt-exam'},
           {'label': 'Timetable', 'icon': Icons.table_chart_rounded, 'color': const Color(0xFF10B981), 'action': 'open_timetable'},
           {'label': 'Attendance', 'icon': Icons.fact_check_rounded, 'color': const Color(0xFF0F766E), 'action': 'open_attendance'},
-          {'label': 'Messages', 'icon': Icons.chat_bubble_rounded, 'color': const Color(0xFFEC4899), 'tab': 0},
-          {'label': 'Subjects', 'icon': Icons.book_rounded, 'color': const Color(0xFF6366F1), 'action': 'open_subjects'},
           {'label': 'Profile', 'icon': Icons.person_rounded, 'color': const Color(0xFF64748B), 'tab': 3},
         ];
       case 'teacher':
@@ -791,13 +783,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
         ];
       case 'admin':
         return [
-          {'label': 'Students', 'icon': Icons.people_rounded, 'color': const Color(0xFF3B82F6), 'tab': 1, 'dirTab': 0},
-          {'label': 'Staff', 'icon': Icons.badge_rounded, 'color': const Color(0xFF10B981), 'tab': 1, 'dirTab': 1},
-          {'label': 'Classes', 'icon': Icons.class_rounded, 'color': const Color(0xFF8B5CF6), 'tab': 1, 'dirTab': 2},
-          {'label': 'Subjects', 'icon': Icons.book_rounded, 'color': const Color(0xFFEC4899), 'tab': 1, 'dirTab': 3},
+          {'label': 'Students', 'icon': Icons.people_rounded, 'color': const Color(0xFF3B82F6), 'action': 'open_students'},
+          {'label': 'Classes', 'icon': Icons.class_rounded, 'color': const Color(0xFF8B5CF6), 'action': 'open_classes'},
+          {'label': 'Subjects', 'icon': Icons.book_rounded, 'color': const Color(0xFFEC4899), 'action': 'open_subjects'},
           {'label': 'Scoresheet', 'icon': Icons.score_rounded, 'color': const Color(0xFF10B981), 'action': 'open_scoresheet'},
           {'label': 'Attendance', 'icon': Icons.fact_check_rounded, 'color': const Color(0xFFF97316), 'action': 'open_attendance'},
           {'label': 'Announce', 'icon': Icons.campaign_rounded, 'color': const Color(0xFF7C3AED), 'tab': 2},
+          {'label': 'Timetable', 'icon': Icons.table_chart_rounded, 'color': const Color(0xFFF59E0B), 'action': 'open_timetable'},
           {'label': 'Profile', 'icon': Icons.person_rounded, 'color': const Color(0xFF64748B), 'tab': 3},
         ];
       default:
@@ -2152,152 +2144,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  Widget _buildAdminDirectoryView() {
-    return Column(
-      children: [
-        // Directory Header Segmented Switcher
-        Container(
-          margin: const EdgeInsets.fromLTRB(16, 12, 16, 8),
-          padding: const EdgeInsets.all(4),
-          decoration: BoxDecoration(
-            color: const Color(0xFFF1F5F9),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Row(
-            children: [
-              _dirTabItem(0, '🎓 Students (${_adminStudentsList.length})'),
-              _dirTabItem(1, '👨‍🏫 Staff (${_adminStaffList.length})'),
-              _dirTabItem(2, '🏫 Classes (${_defaultClassesList.length})'),
-              _dirTabItem(3, '📚 Subjects (${_defaultSubjectsList.length})'),
-            ],
-          ),
-        ),
-
-        // Body Content
-        Expanded(
-          child: _adminDirectoryTab == 0
-              ? _buildAdminStudentsContent()
-              : _adminDirectoryTab == 1
-                  ? _buildAdminStaffContent()
-                  : _adminDirectoryTab == 2
-                      ? _buildClassesContent()
-                      : _buildSubjectsContent(),
-        ),
-      ],
-    );
-  }
-
-  Widget _dirTabItem(int index, String label) {
-    final isSelected = _adminDirectoryTab == index;
-    return Expanded(
-      child: GestureDetector(
-        onTap: () => setState(() => _adminDirectoryTab = index),
-        child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 8),
-          decoration: BoxDecoration(
-            color: isSelected ? Colors.white : Colors.transparent,
-            borderRadius: BorderRadius.circular(9),
-            boxShadow: isSelected ? [BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 4)] : [],
-          ),
-          child: Center(
-            child: Text(
-              label,
-              style: TextStyle(
-                fontSize: 10,
-                fontWeight: FontWeight.bold,
-                color: isSelected ? AppColors.textPrimary : AppColors.textSecondary,
-              ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildAdminStudentsContent() {
-    var filtered = _adminStudentsList;
-    if (_adminStudentsSearchQuery.isNotEmpty) {
-      filtered = filtered.where((s) {
-        final fName = s['first_name']?.toString().toLowerCase() ?? '';
-        final lName = s['last_name']?.toString().toLowerCase() ?? '';
-        final admNum = s['admission_number']?.toString().toLowerCase() ?? '';
-        final query = _adminStudentsSearchQuery.toLowerCase();
-        return fName.contains(query) || lName.contains(query) || admNum.contains(query);
-      }).toList();
-    }
-
-    return Column(
-      children: [
-        // Search bar
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16, 4, 16, 12),
-          child: TextField(
-            style: const TextStyle(fontSize: 13),
-            decoration: InputDecoration(
-              hintText: 'Search students by name or admission number...',
-              fillColor: Colors.white,
-              filled: true,
-              prefixIcon: const Icon(Icons.search, size: 18),
-              contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 16),
-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: const BorderSide(color: AppColors.divider)),
-              enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: const BorderSide(color: AppColors.divider)),
-            ),
-            onChanged: (val) {
-              setState(() {
-                _adminStudentsSearchQuery = val.trim();
-              });
-            },
-          ),
-        ),
-
-        // Students list
-        Expanded(
-          child: _isLoadingAdminStudents
-              ? const Center(child: CircularProgressIndicator())
-              : filtered.isEmpty
-                  ? const Center(child: Text('No students found.'))
-                  : ListView.builder(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      itemCount: filtered.length,
-                      itemBuilder: (context, index) {
-                        final student = filtered[index];
-                        final fName = student['first_name'] ?? '';
-                        final lName = student['last_name'] ?? '';
-                        final fullName = '$fName $lName'.trim();
-                        final admNum = student['admission_number'] ?? '';
-                        final className = student['school_class']?['name'] ?? 'Unassigned';
-
-                        String initials = '';
-                        if (fName.isNotEmpty) initials += fName[0].toUpperCase();
-                        if (lName.isNotEmpty) initials += lName[0].toUpperCase();
-                        if (initials.isEmpty) initials = '?';
-
-                        return Card(
-                          margin: const EdgeInsets.only(bottom: 12),
-                          child: ListTile(
-                            leading: CircleAvatar(
-                              backgroundColor: AppColors.amberPrimary.withValues(alpha: 0.12),
-                              child: Text(
-                                initials,
-                                style: const TextStyle(color: AppColors.amberPrimary, fontWeight: FontWeight.bold),
-                              ),
-                            ),
-                            title: Text(fullName, style: const TextStyle(fontWeight: FontWeight.bold)),
-                            subtitle: Text('Class: $className · Adm No: $admNum'),
-                            trailing: const Icon(Icons.arrow_forward_ios, size: 12),
-                            onTap: () {
-                              _showAdminStudentDetailSheet(student);
-                            },
-                          ),
-                        );
-                      },
-                    ),
-        ),
-      ],
-    );
-  }
 
   Widget _buildAdminStaffContent() {
     var filtered = _adminStaffList;
@@ -2724,7 +2570,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     final isChildrenTab = _currentIndex == 1 && _userRole == 'parent';
     final isChatTab = _currentIndex == 2 && _userRole == 'parent';
     final isAdminAnnounceTab = _currentIndex == 2 && _userRole == 'admin';
-    final isAdminStudentsTab = _currentIndex == 1 && _userRole == 'admin';
+
 
     return Scaffold(
       backgroundColor: AppColors.appBackground,
@@ -2760,14 +2606,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                             ? const ChatView()
                                             : isAdminAnnounceTab
                                                 ? _buildAdminAnnouncementsView()
-                                                : isAdminStudentsTab
-                                                    ? _buildAdminDirectoryView()
-                                                    : Center(
-                                                        child: Text(
-                                                          '${navItems[_currentIndex].label} module is ready.',
-                                                          style: const TextStyle(fontSize: 16, color: AppColors.textSecondary),
-                                                        ),
-                                                      ),
+                                                : Center(
+                                                    child: Text(
+                                                      '${navItems[_currentIndex].label} module is ready.',
+                                                      style: const TextStyle(fontSize: 16, color: AppColors.textSecondary),
+                                                    ),
+                                                  ),
           ),
         ],
       ),
@@ -2879,366 +2723,19 @@ class _DashboardScreenState extends State<DashboardScreen> {
         context.push('/cbt-exam');
         break;
       case 'open_classes':
-        setState(() {
-          _adminDirectoryTab = 2;
-          _currentIndex = 1;
-        });
+        context.push('/classes');
         break;
       case 'open_subjects':
-        setState(() {
-          _adminDirectoryTab = 3;
-          _currentIndex = 1;
-        });
+        context.push('/subjects');
+        break;
+      case 'open_students':
+        context.push('/students');
         break;
       default:
         break;
     }
   }
 
-  Widget _buildClassesContent() {
-    var filtered = _defaultClassesList;
-    if (_adminClassSectionFilter != 'all') {
-      filtered = filtered.where((c) => (c['section']?.toString().toLowerCase() ?? '').contains(_adminClassSectionFilter)).toList();
-    }
-    if (_adminClassSearchQuery.isNotEmpty) {
-      filtered = filtered.where((c) {
-        final name = c['name']?.toString().toLowerCase() ?? '';
-        final teacher = c['teacher']?.toString().toLowerCase() ?? '';
-        final query = _adminClassSearchQuery.toLowerCase();
-        return name.contains(query) || teacher.contains(query);
-      }).toList();
-    }
-
-    return Column(
-      children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
-          child: TextField(
-            style: const TextStyle(fontSize: 13),
-            decoration: InputDecoration(
-              hintText: 'Search classes by name or class teacher...',
-              fillColor: Colors.white,
-              filled: true,
-              prefixIcon: const Icon(Icons.search, size: 18),
-              contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 16),
-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: const BorderSide(color: AppColors.divider)),
-              enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: const BorderSide(color: AppColors.divider)),
-            ),
-            onChanged: (val) => setState(() => _adminClassSearchQuery = val.trim()),
-          ),
-        ),
-        SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-          child: Row(
-            children: [
-              _classFilterChip('All Classes', 'all'),
-              const SizedBox(width: 8),
-              _classFilterChip('Junior Sec', 'junior'),
-              const SizedBox(width: 8),
-              _classFilterChip('Senior Sec', 'senior'),
-            ],
-          ),
-        ),
-        const SizedBox(height: 8),
-        Expanded(
-          child: ListView.builder(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            itemCount: filtered.length,
-            itemBuilder: (context, index) {
-              final cls = filtered[index];
-              final name = cls['name'] ?? '';
-              final teacher = cls['teacher'] ?? 'Unassigned';
-              final count = cls['students_count'] ?? 0;
-              final section = cls['section'] ?? '';
-              final room = cls['room'] ?? '';
-
-              return Card(
-                margin: const EdgeInsets.only(bottom: 12),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16), side: const BorderSide(color: AppColors.divider)),
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Row(
-                            children: [
-                              Container(
-                                width: 40, height: 40,
-                                decoration: BoxDecoration(
-                                  color: const Color(0xFF8B5CF6).withValues(alpha: 0.12),
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                child: const Icon(Icons.class_rounded, color: Color(0xFF8B5CF6), size: 20),
-                              ),
-                              const SizedBox(width: 12),
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: AppColors.textPrimary)),
-                                  Text(section, style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
-                                ],
-                              ),
-                            ],
-                          ),
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                            decoration: BoxDecoration(
-                              color: AppColors.amberPrimary.withValues(alpha: 0.12),
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Text('$count Students', style: const TextStyle(color: AppColors.amberDark, fontWeight: FontWeight.bold, fontSize: 11)),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 12),
-                      Row(
-                        children: [
-                          const Icon(Icons.person_outline, size: 14, color: AppColors.textSecondary),
-                          const SizedBox(width: 4),
-                          Text('Teacher: $teacher', style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
-                          const Spacer(),
-                          const Icon(Icons.meeting_room_outlined, size: 14, color: AppColors.textSecondary),
-                          const SizedBox(width: 4),
-                          Text(room, style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
-                        ],
-                      ),
-                      const Divider(height: 20),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          OutlinedButton.icon(
-                            style: OutlinedButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                            ),
-                            onPressed: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) => AttendanceScreen(classId: cls['id'], className: name),
-                                ),
-                              );
-                            },
-                            icon: const Icon(Icons.fact_check_rounded, size: 14),
-                            label: const Text('Attendance', style: TextStyle(fontSize: 11)),
-                          ),
-                          const SizedBox(width: 8),
-                          ElevatedButton.icon(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: AppColors.rolePrimary(_userRole),
-                              foregroundColor: Colors.white,
-                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                            ),
-                            onPressed: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) => ScoresEntryScreen(
-                                    classId: cls['id'],
-                                    className: name,
-                                    subjectId: 1,
-                                    subjectName: 'General Mathematics',
-                                  ),
-                                ),
-                              );
-                            },
-                            icon: const Icon(Icons.score_rounded, size: 14),
-                            label: const Text('Scoresheet', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            },
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _classFilterChip(String label, String value) {
-    final isSelected = _adminClassSectionFilter == value;
-    return ChoiceChip(
-      label: Text(label, style: TextStyle(fontSize: 11, color: isSelected ? Colors.white : AppColors.textSecondary, fontWeight: isSelected ? FontWeight.bold : FontWeight.normal)),
-      selected: isSelected,
-      selectedColor: AppColors.rolePrimary(_userRole),
-      onSelected: (val) {
-        if (val) setState(() => _adminClassSectionFilter = value);
-      },
-    );
-  }
-
-  Widget _buildSubjectsContent() {
-    var filtered = _defaultSubjectsList;
-    if (_adminSubjectCategoryFilter != 'all') {
-      filtered = filtered.where((s) => (s['category']?.toString().toLowerCase() ?? '') == _adminSubjectCategoryFilter).toList();
-    }
-    if (_adminSubjectSearchQuery.isNotEmpty) {
-      filtered = filtered.where((s) {
-        final name = s['name']?.toString().toLowerCase() ?? '';
-        final code = s['code']?.toString().toLowerCase() ?? '';
-        final teacher = s['teacher']?.toString().toLowerCase() ?? '';
-        final query = _adminSubjectSearchQuery.toLowerCase();
-        return name.contains(query) || code.contains(query) || teacher.contains(query);
-      }).toList();
-    }
-
-    return Column(
-      children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
-          child: TextField(
-            style: const TextStyle(fontSize: 13),
-            decoration: InputDecoration(
-              hintText: 'Search subjects by title, code or assigned teacher...',
-              fillColor: Colors.white,
-              filled: true,
-              prefixIcon: const Icon(Icons.search, size: 18),
-              contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 16),
-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: const BorderSide(color: AppColors.divider)),
-              enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: const BorderSide(color: AppColors.divider)),
-            ),
-            onChanged: (val) => setState(() => _adminSubjectSearchQuery = val.trim()),
-          ),
-        ),
-        SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-          child: Row(
-            children: [
-              _subjectFilterChip('All Subjects', 'all'),
-              const SizedBox(width: 8),
-              _subjectFilterChip('General', 'general'),
-              const SizedBox(width: 8),
-              _subjectFilterChip('Science', 'science'),
-              const SizedBox(width: 8),
-              _subjectFilterChip('Commercial', 'commercial'),
-              const SizedBox(width: 8),
-              _subjectFilterChip('Arts', 'arts'),
-            ],
-          ),
-        ),
-        const SizedBox(height: 8),
-        Expanded(
-          child: ListView.builder(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            itemCount: filtered.length,
-            itemBuilder: (context, index) {
-              final sub = filtered[index];
-              final name = sub['name'] ?? '';
-              final code = sub['code'] ?? '';
-              final category = sub['category'] ?? '';
-              final teacher = sub['teacher'] ?? '';
-              final periods = sub['periods'] ?? 3;
-
-              return Card(
-                margin: const EdgeInsets.only(bottom: 12),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16), side: const BorderSide(color: AppColors.divider)),
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Row(
-                            children: [
-                              Container(
-                                width: 40, height: 40,
-                                decoration: BoxDecoration(
-                                  color: const Color(0xFFEC4899).withValues(alpha: 0.12),
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                child: const Icon(Icons.book_rounded, color: Color(0xFFEC4899), size: 20),
-                              ),
-                              const SizedBox(width: 12),
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: AppColors.textPrimary)),
-                                  Text('$category · $periods Periods/wk', style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
-                                ],
-                              ),
-                            ],
-                          ),
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFFEC4899).withValues(alpha: 0.12),
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Text(code, style: const TextStyle(color: Color(0xFFEC4899), fontWeight: FontWeight.bold, fontSize: 11)),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 12),
-                      Row(
-                        children: [
-                          const Icon(Icons.person_outline, size: 14, color: AppColors.textSecondary),
-                          const SizedBox(width: 4),
-                          Text('Lead Teacher: $teacher', style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
-                        ],
-                      ),
-                      const Divider(height: 20),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          const Text('Weight: CA1(20) · CA2(20) · Exam(60)', style: TextStyle(fontSize: 10, color: AppColors.textSecondary, fontWeight: FontWeight.w600)),
-                          ElevatedButton.icon(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: AppColors.rolePrimary(_userRole),
-                              foregroundColor: Colors.white,
-                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                            ),
-                            onPressed: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) => ScoresEntryScreen(
-                                    classId: 1,
-                                    className: 'JSS 1A',
-                                    subjectId: sub['id'],
-                                    subjectName: name,
-                                  ),
-                                ),
-                              );
-                            },
-                            icon: const Icon(Icons.score_rounded, size: 14),
-                            label: const Text('Scoresheet', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            },
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _subjectFilterChip(String label, String value) {
-    final isSelected = _adminSubjectCategoryFilter == value;
-    return ChoiceChip(
-      label: Text(label, style: TextStyle(fontSize: 11, color: isSelected ? Colors.white : AppColors.textSecondary, fontWeight: isSelected ? FontWeight.bold : FontWeight.normal)),
-      selected: isSelected,
-      selectedColor: AppColors.rolePrimary(_userRole),
-      onSelected: (val) {
-        if (val) setState(() => _adminSubjectCategoryFilter = value);
-      },
-    );
-  }
 
   void _launchScoresheetPicker(BuildContext context) {
     if (_userRole.toLowerCase().trim() == 'student' || _userRole.toLowerCase().trim() == 'parent') {
@@ -3478,73 +2975,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  static final List<Map<String, dynamic>> _defaultStaffList = [
-    {'id': 1, 'name': 'Dr. Emmanuel Okafor', 'email': 'e.okafor@academyhub.edu', 'role': 'admin', 'phone': '08031112233', 'subject': 'Administration & Supervision', 'status': 'Active'},
-    {'id': 2, 'name': 'Mrs. Florence Adebayo', 'email': 'f.adebayo@academyhub.edu', 'role': 'teacher', 'phone': '08023344556', 'subject': 'General Mathematics', 'status': 'Active'},
-    {'id': 3, 'name': 'Mr. Chinedu Eze', 'email': 'c.eze@academyhub.edu', 'role': 'teacher', 'phone': '08034455667', 'subject': 'English Language', 'status': 'Active'},
-    {'id': 4, 'name': 'Miss Grace Danjuma', 'email': 'g.danjuma@academyhub.edu', 'role': 'teacher', 'phone': '08055566778', 'subject': 'Basic Science & Physics', 'status': 'Active'},
-    {'id': 5, 'name': 'Mr. Tunde Bakare', 'email': 't.bakare@academyhub.edu', 'role': 'teacher', 'phone': '08077788990', 'subject': 'Chemistry & Biology', 'status': 'Active'},
-    {'id': 6, 'name': 'Mrs. Ngozi Okeke', 'email': 'n.okeke@academyhub.edu', 'role': 'teacher', 'phone': '08099900112', 'subject': 'Economics & Accounts', 'status': 'Active'},
-    {'id': 7, 'name': 'Mr. Ibrahim Yusuf', 'email': 'i.yusuf@academyhub.edu', 'role': 'teacher', 'phone': '08011223344', 'subject': 'Civic Education & Government', 'status': 'Active'},
-    {'id': 8, 'name': 'Mrs. Blessing Paul', 'email': 'b.paul@academyhub.edu', 'role': 'teacher', 'phone': '08022334455', 'subject': 'Agricultural Science', 'status': 'Active'},
-    {'id': 9, 'name': 'Mr. Samuel Audu', 'email': 's.audu@academyhub.edu', 'role': 'teacher', 'phone': '08033445566', 'subject': 'Computer Studies / ICT', 'status': 'Active'},
-    {'id': 10, 'name': 'Mrs. Kemi Ojo', 'email': 'k.ojo@academyhub.edu', 'role': 'bursar', 'phone': '08044556677', 'subject': 'Bursary & Finance', 'status': 'Active'},
-    {'id': 11, 'name': 'Mr. David Nwachukwu', 'email': 'd.nwachukwu@academyhub.edu', 'role': 'staff', 'phone': '08055667788', 'subject': 'Guidance & Counseling', 'status': 'Active'},
-    {'id': 12, 'name': 'Mrs. Aisha Bello', 'email': 'a.bello@academyhub.edu', 'role': 'staff', 'phone': '08066778899', 'subject': 'Library Services', 'status': 'Active'},
-  ];
-
-  static final List<Map<String, dynamic>> _defaultStudentsList = [
-    {'id': 1, 'first_name': 'Daniel', 'last_name': 'Adebayo', 'admission_number': 'ADM-2024-001', 'gender': 'Male', 'status': 'Active', 'school_class': {'name': 'JSS 1A'}, 'class_id': 1},
-    {'id': 2, 'first_name': 'Sarah', 'last_name': 'Chukwu', 'admission_number': 'ADM-2024-002', 'gender': 'Female', 'status': 'Active', 'school_class': {'name': 'JSS 1A'}, 'class_id': 1},
-    {'id': 3, 'first_name': 'Michael', 'last_name': 'Ibrahim', 'admission_number': 'ADM-2024-003', 'gender': 'Male', 'status': 'Active', 'school_class': {'name': 'JSS 1B'}, 'class_id': 2},
-    {'id': 4, 'first_name': 'Deborah', 'last_name': 'Danjuma', 'admission_number': 'ADM-2024-004', 'gender': 'Female', 'status': 'Active', 'school_class': {'name': 'JSS 1B'}, 'class_id': 2},
-    {'id': 5, 'first_name': 'Joshua', 'last_name': 'Eze', 'admission_number': 'ADM-2024-005', 'gender': 'Male', 'status': 'Active', 'school_class': {'name': 'JSS 2A'}, 'class_id': 3},
-    {'id': 6, 'first_name': 'Mary', 'last_name': 'Okon', 'admission_number': 'ADM-2024-006', 'gender': 'Female', 'status': 'Active', 'school_class': {'name': 'JSS 2A'}, 'class_id': 3},
-    {'id': 7, 'first_name': 'Gabriel', 'last_name': 'Usman', 'admission_number': 'ADM-2024-007', 'gender': 'Male', 'status': 'Active', 'school_class': {'name': 'JSS 2B'}, 'class_id': 4},
-    {'id': 8, 'first_name': 'Ruth', 'last_name': 'Bello', 'admission_number': 'ADM-2024-008', 'gender': 'Female', 'status': 'Active', 'school_class': {'name': 'JSS 2B'}, 'class_id': 4},
-    {'id': 9, 'first_name': 'Emmanuel', 'last_name': 'Nnamdi', 'admission_number': 'ADM-2024-009', 'gender': 'Male', 'status': 'Active', 'school_class': {'name': 'JSS 3A'}, 'class_id': 5},
-    {'id': 10, 'first_name': 'Esther', 'last_name': 'Ojo', 'admission_number': 'ADM-2024-010', 'gender': 'Female', 'status': 'Active', 'school_class': {'name': 'JSS 3A'}, 'class_id': 5},
-    {'id': 11, 'first_name': 'David', 'last_name': 'Audu', 'admission_number': 'ADM-2024-011', 'gender': 'Male', 'status': 'Active', 'school_class': {'name': 'SSS 1 Science'}, 'class_id': 6},
-    {'id': 12, 'first_name': 'Grace', 'last_name': 'Kalu', 'admission_number': 'ADM-2024-012', 'gender': 'Female', 'status': 'Active', 'school_class': {'name': 'SSS 1 Science'}, 'class_id': 6},
-    {'id': 13, 'first_name': 'Solomon', 'last_name': 'Bakare', 'admission_number': 'ADM-2024-013', 'gender': 'Male', 'status': 'Active', 'school_class': {'name': 'SSS 1 Commercial'}, 'class_id': 7},
-    {'id': 14, 'first_name': 'Hannah', 'last_name': 'Paul', 'admission_number': 'ADM-2024-014', 'gender': 'Female', 'status': 'Active', 'school_class': {'name': 'SSS 1 Arts'}, 'class_id': 8},
-    {'id': 15, 'first_name': 'Victor', 'last_name': 'Okafor', 'admission_number': 'ADM-2024-015', 'gender': 'Male', 'status': 'Active', 'school_class': {'name': 'SSS 2 Science'}, 'class_id': 9},
-    {'id': 16, 'first_name': 'Blessing', 'last_name': 'Yusuf', 'admission_number': 'ADM-2024-016', 'gender': 'Female', 'status': 'Active', 'school_class': {'name': 'SSS 2 Science'}, 'class_id': 9},
-    {'id': 17, 'first_name': 'Caleb', 'last_name': 'Ogbonna', 'admission_number': 'ADM-2024-017', 'gender': 'Male', 'status': 'Active', 'school_class': {'name': 'SSS 2 Commercial'}, 'class_id': 10},
-    {'id': 18, 'first_name': 'Miriam', 'last_name': 'Suleiman', 'admission_number': 'ADM-2024-018', 'gender': 'Female', 'status': 'Active', 'school_class': {'name': 'SSS 2 Arts'}, 'class_id': 11},
-    {'id': 19, 'first_name': 'Joseph', 'last_name': 'Bamidele', 'admission_number': 'ADM-2024-019', 'gender': 'Male', 'status': 'Active', 'school_class': {'name': 'SSS 3 Science'}, 'class_id': 12},
-    {'id': 20, 'first_name': 'Rachael', 'last_name': 'Effiong', 'admission_number': 'ADM-2024-020', 'gender': 'Female', 'status': 'Active', 'school_class': {'name': 'SSS 3 Science'}, 'class_id': 12},
-    {'id': 21, 'first_name': 'Benjamin', 'last_name': 'Garba', 'admission_number': 'ADM-2024-021', 'gender': 'Male', 'status': 'Active', 'school_class': {'name': 'SSS 3 Commercial'}, 'class_id': 13},
-    {'id': 22, 'first_name': 'Faith', 'last_name': 'Abubakar', 'admission_number': 'ADM-2024-022', 'gender': 'Female', 'status': 'Active', 'school_class': {'name': 'SSS 3 Arts'}, 'class_id': 14},
-    {'id': 23, 'first_name': 'Paul', 'last_name': 'Nwosu', 'admission_number': 'ADM-2024-023', 'gender': 'Male', 'status': 'Active', 'school_class': {'name': 'JSS 1A'}, 'class_id': 1},
-    {'id': 24, 'first_name': 'Joy', 'last_name': 'Lawal', 'admission_number': 'ADM-2024-024', 'gender': 'Female', 'status': 'Active', 'school_class': {'name': 'JSS 1B'}, 'class_id': 2},
-  ];
-
-  static final List<Map<String, dynamic>> _defaultClassesList = [
-    {'id': 1, 'name': 'JSS 1A', 'section': 'Junior Secondary', 'teacher': 'Mrs. Florence Adebayo', 'students_count': 32, 'room': 'Block A, Room 1'},
-    {'id': 2, 'name': 'JSS 1B', 'section': 'Junior Secondary', 'teacher': 'Mr. Chinedu Eze', 'students_count': 30, 'room': 'Block A, Room 2'},
-    {'id': 3, 'name': 'JSS 2A', 'section': 'Junior Secondary', 'teacher': 'Miss Grace Danjuma', 'students_count': 28, 'room': 'Block A, Room 3'},
-    {'id': 4, 'name': 'JSS 2B', 'section': 'Junior Secondary', 'teacher': 'Mr. Samuel Audu', 'students_count': 29, 'room': 'Block A, Room 4'},
-    {'id': 5, 'name': 'JSS 3A', 'section': 'Junior Secondary', 'teacher': 'Mr. Ibrahim Yusuf', 'students_count': 35, 'room': 'Block B, Room 1'},
-    {'id': 6, 'name': 'SSS 1 Science', 'section': 'Senior Secondary', 'teacher': 'Mr. Tunde Bakare', 'students_count': 26, 'room': 'Lab Block 1'},
-    {'id': 7, 'name': 'SSS 1 Commercial', 'section': 'Senior Secondary', 'teacher': 'Mrs. Ngozi Okeke', 'students_count': 24, 'room': 'Block B, Room 3'},
-    {'id': 8, 'name': 'SSS 2 Science', 'section': 'Senior Secondary', 'teacher': 'Miss Grace Danjuma', 'students_count': 27, 'room': 'Lab Block 2'},
-    {'id': 9, 'name': 'SSS 3 Science', 'section': 'Senior Secondary', 'teacher': 'Mr. Tunde Bakare', 'students_count': 25, 'room': 'Lab Block 3'},
-  ];
-
-  static final List<Map<String, dynamic>> _defaultSubjectsList = [
-    {'id': 1, 'name': 'General Mathematics', 'code': 'MTH', 'category': 'General', 'teacher': 'Mrs. Florence Adebayo', 'periods': 5, 'max_ca1': 20, 'max_ca2': 20, 'max_exam': 60},
-    {'id': 2, 'name': 'English Language', 'code': 'ENG', 'category': 'General', 'teacher': 'Mr. Chinedu Eze', 'periods': 5, 'max_ca1': 20, 'max_ca2': 20, 'max_exam': 60},
-    {'id': 3, 'name': 'Physics', 'code': 'PHY', 'category': 'Science', 'teacher': 'Miss Grace Danjuma', 'periods': 4, 'max_ca1': 20, 'max_ca2': 20, 'max_exam': 60},
-    {'id': 4, 'name': 'Chemistry', 'code': 'CHM', 'category': 'Science', 'teacher': 'Mr. Tunde Bakare', 'periods': 4, 'max_ca1': 20, 'max_ca2': 20, 'max_exam': 60},
-    {'id': 5, 'name': 'Biology', 'code': 'BIO', 'category': 'Science', 'teacher': 'Mr. Tunde Bakare', 'periods': 4, 'max_ca1': 20, 'max_ca2': 20, 'max_exam': 60},
-    {'id': 6, 'name': 'Economics', 'code': 'ECO', 'category': 'Commercial', 'teacher': 'Mrs. Ngozi Okeke', 'periods': 3, 'max_ca1': 20, 'max_ca2': 20, 'max_exam': 60},
-    {'id': 7, 'name': 'Government', 'code': 'GOV', 'category': 'Arts', 'teacher': 'Mr. Ibrahim Yusuf', 'periods': 3, 'max_ca1': 20, 'max_ca2': 20, 'max_exam': 60},
-    {'id': 8, 'name': 'Computer Studies / ICT', 'code': 'CMP', 'category': 'General', 'teacher': 'Mr. Samuel Audu', 'periods': 3, 'max_ca1': 20, 'max_ca2': 20, 'max_exam': 60},
-    {'id': 9, 'name': 'Civic Education', 'code': 'CIV', 'category': 'General', 'teacher': 'Mr. Ibrahim Yusuf', 'periods': 2, 'max_ca1': 20, 'max_ca2': 20, 'max_exam': 60},
-    {'id': 10, 'name': 'Agricultural Science', 'code': 'AGR', 'category': 'General', 'teacher': 'Mrs. Blessing Paul', 'periods': 3, 'max_ca1': 20, 'max_ca2': 20, 'max_exam': 60},
-    {'id': 11, 'name': 'Literature in English', 'code': 'LIT', 'category': 'Arts', 'teacher': 'Mr. Chinedu Eze', 'periods': 3, 'max_ca1': 20, 'max_ca2': 20, 'max_exam': 60},
-  ];
+  static final List<Map<String, dynamic>> _defaultStaffList = [];
+  static final List<Map<String, dynamic>> _defaultStudentsList = [];
+  static final List<Map<String, dynamic>> _defaultClassesList = [];
+  static final List<Map<String, dynamic>> _defaultSubjectsList = [];
 }
 
 

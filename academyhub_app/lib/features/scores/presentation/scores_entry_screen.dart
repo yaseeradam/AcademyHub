@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:academyhub_app/core/theme/app_theme.dart';
 import 'package:academyhub_app/core/database/local_db.dart';
@@ -48,95 +49,60 @@ class _ScoresEntryScreenState extends State<ScoresEntryScreen> {
 
     try {
       List<Map<String, dynamic>> studentsList = [];
-      final cached = await LocalDatabase.instance.getStudents();
-      final classCached = cached.where((s) => s['class_id'] == widget.classId).toList();
-
-      if (classCached.isNotEmpty) {
-        studentsList = classCached;
-      } else {
-        final response = await apiClient.dio.get('/teacher/classes/${widget.classId}/students');
-        if (response.statusCode == 200 && response.data != null) {
-          final rawList = response.data['data'] ?? response.data;
+      final response = await apiClient.dio.get('/teacher/classes/${widget.classId}/students');
+      if (response.statusCode == 200 && response.data != null) {
+        final rawList = response.data['data'] ?? response.data;
+        if (rawList is List) {
           studentsList = List<Map<String, dynamic>>.from(rawList);
         }
-      }
-
-      if (studentsList.isEmpty) {
-        studentsList = [
-          {'id': 1, 'first_name': 'Daniel', 'last_name': 'Adebayo', 'admission_number': 'ADM-2024-001'},
-          {'id': 2, 'first_name': 'Sarah', 'last_name': 'Chukwu', 'admission_number': 'ADM-2024-002'},
-          {'id': 3, 'first_name': 'Michael', 'last_name': 'Ibrahim', 'admission_number': 'ADM-2024-003'},
-          {'id': 4, 'first_name': 'Blessing', 'last_name': 'Okafor', 'admission_number': 'ADM-2024-004'},
-          {'id': 5, 'first_name': 'Emmanuel', 'last_name': 'Bello', 'admission_number': 'ADM-2024-005'},
-          {'id': 6, 'first_name': 'Fatima', 'last_name': 'Danjuma', 'admission_number': 'ADM-2024-006'},
-          {'id': 7, 'first_name': 'Chinedu', 'last_name': 'Eze', 'admission_number': 'ADM-2024-007'},
-          {'id': 8, 'first_name': 'Aisha', 'last_name': 'Lawal', 'admission_number': 'ADM-2024-008'},
-          {'id': 9, 'first_name': 'David', 'last_name': 'Kalu', 'admission_number': 'ADM-2024-009'},
-          {'id': 10, 'first_name': 'Grace', 'last_name': 'Audu', 'admission_number': 'ADM-2024-010'},
-        ];
       }
 
       for (var s in studentsList) {
         final id = s['id'] as int;
         _scoresMap[id] = {
-          'ca1': (15 + (id % 5)).toString(),
-          'ca2': (14 + (id % 6)).toString(),
-          'exam': (42 + (id % 18)).toString(),
+          'ca1': '',
+          'ca2': '',
+          'exam': '',
         };
       }
 
       // Fetch existing recorded scores for pre-population
-      final scoresResponse = await apiClient.dio.get(
-        '/teacher/classes/${widget.classId}/scores',
-        queryParameters: {'term': 2, 'session': '2024/2025'},
-      );
-      if (scoresResponse.statusCode == 200 && scoresResponse.data != null) {
-        final List<dynamic> scoresData = scoresResponse.data['data'] ?? [];
-        for (var score in scoresData) {
-          final studentId = score['student_id'] as int?;
-          final subjectId = score['subject_id'] as int?;
-          if (studentId != null && subjectId == widget.subjectId) {
-            _scoresMap[studentId] = {
-              'ca1': score['ca1']?.toString() ?? '',
-              'ca2': score['ca2']?.toString() ?? '',
-              'exam': score['exam']?.toString() ?? '',
-            };
+      try {
+        final scoresResponse = await apiClient.dio.get(
+          '/teacher/classes/${widget.classId}/scores',
+          queryParameters: {'term': 2, 'session': '2024/2025'},
+        );
+        if (scoresResponse.statusCode == 200 && scoresResponse.data != null) {
+          final List<dynamic> scoresData = scoresResponse.data['data'] ?? [];
+          for (var score in scoresData) {
+            final studentId = score['student_id'] as int?;
+            final subjectId = score['subject_id'] as int?;
+            if (studentId != null && (subjectId == null || subjectId == widget.subjectId)) {
+              _scoresMap[studentId] = {
+                'ca1': score['ca1']?.toString() ?? '',
+                'ca2': score['ca2']?.toString() ?? '',
+                'exam': score['exam']?.toString() ?? '',
+              };
+            }
           }
         }
+      } catch (e) {
+        debugPrint('Error loading scores API: $e');
       }
 
-      setState(() {
-        _students = studentsList;
-      });
+      if (mounted) {
+        setState(() {
+          _students = studentsList;
+        });
+      }
     } catch (e) {
       debugPrint('Error loading students or scores: $e');
     } finally {
-      if (_students.isEmpty) {
-        final fallbackList = [
-          {'id': 1, 'first_name': 'Daniel', 'last_name': 'Adebayo', 'admission_number': 'ADM-2024-001'},
-          {'id': 2, 'first_name': 'Sarah', 'last_name': 'Chukwu', 'admission_number': 'ADM-2024-002'},
-          {'id': 3, 'first_name': 'Michael', 'last_name': 'Ibrahim', 'admission_number': 'ADM-2024-003'},
-          {'id': 4, 'first_name': 'Blessing', 'last_name': 'Okafor', 'admission_number': 'ADM-2024-004'},
-          {'id': 5, 'first_name': 'Emmanuel', 'last_name': 'Bello', 'admission_number': 'ADM-2024-005'},
-          {'id': 6, 'first_name': 'Fatima', 'last_name': 'Danjuma', 'admission_number': 'ADM-2024-006'},
-          {'id': 7, 'first_name': 'Chinedu', 'last_name': 'Eze', 'admission_number': 'ADM-2024-007'},
-          {'id': 8, 'first_name': 'Aisha', 'last_name': 'Lawal', 'admission_number': 'ADM-2024-008'},
-          {'id': 9, 'first_name': 'David', 'last_name': 'Kalu', 'admission_number': 'ADM-2024-009'},
-          {'id': 10, 'first_name': 'Grace', 'last_name': 'Audu', 'admission_number': 'ADM-2024-010'},
-        ];
-        for (var s in fallbackList) {
-          final id = s['id'] as int;
-          _scoresMap[id] ??= {
-            'ca1': (15 + (id % 5)).toString(),
-            'ca2': (14 + (id % 6)).toString(),
-            'exam': (42 + (id % 18)).toString(),
-          };
-        }
-        _students = fallbackList;
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
       }
-      setState(() {
-        _isLoading = false;
-      });
     }
   }
 
@@ -177,10 +143,17 @@ class _ScoresEntryScreenState extends State<ScoresEntryScreen> {
         }
       }
     } catch (e) {
+      try {
+        await LocalDatabase.instance.addToQueue(
+          'POST',
+          '/teacher/scores/batch',
+          jsonEncode({'scores': scoresList, 'subject_id': widget.subjectId, 'class_id': widget.classId}),
+        );
+      } catch (_) {}
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Failed to save scores. Saved locally.'),
+            content: Text('Failed to save scores to server. Queued locally for sync.'),
             backgroundColor: AppColors.warningOrange,
           ),
         );

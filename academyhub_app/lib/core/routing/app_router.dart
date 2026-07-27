@@ -12,6 +12,9 @@ import 'package:academyhub_app/features/parent/presentation/fee_payments_screen.
 import 'package:academyhub_app/features/parent/presentation/student_report_card_screen.dart';
 import 'package:academyhub_app/features/homework/presentation/homework_tracker_screen.dart';
 import 'package:academyhub_app/features/timetable/presentation/student_timetable_screen.dart';
+import 'package:academyhub_app/features/classes/presentation/classes_screen.dart';
+import 'package:academyhub_app/features/subjects/presentation/subjects_screen.dart';
+import 'package:academyhub_app/features/students/presentation/students_screen.dart';
 
 final GoRouter appRouter = GoRouter(
   initialLocation: '/',
@@ -35,6 +38,18 @@ final GoRouter appRouter = GoRouter(
     GoRoute(
       path: '/settings',
       builder: (context, state) => const SettingsScreen(),
+    ),
+    GoRoute(
+      path: '/students',
+      builder: (context, state) => const StudentsScreen(),
+    ),
+    GoRoute(
+      path: '/classes',
+      builder: (context, state) => const ClassesScreen(),
+    ),
+    GoRoute(
+      path: '/subjects',
+      builder: (context, state) => const SubjectsScreen(),
     ),
     GoRoute(
       path: '/broadcast-creator',

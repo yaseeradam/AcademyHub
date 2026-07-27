@@ -52,9 +52,6 @@ class _StudentReportCardScreenState extends State<StudentReportCardScreen> {
             });
           }
         }
-        if (_children.isEmpty) {
-          _setFallbackChildren();
-        }
         await _loadResults();
       } else {
         // Student role: load their own results
@@ -63,32 +60,8 @@ class _StudentReportCardScreenState extends State<StudentReportCardScreen> {
       }
     } catch (e) {
       debugPrint('Error loading report card: $e');
-      _setFallbackChildren();
-      _setFallbackSubjects();
     } finally {
       if (mounted) setState(() => _isLoading = false);
-    }
-  }
-
-  void _setFallbackChildren() {
-    if (_children.isEmpty) {
-      _children = [
-        {'name': 'Daniel Adebayo', 'class': 'JSS 2B', 'admNo': 'ADM-2024-001', 'avatar': 'D', 'id': 1},
-        {'name': 'Sarah Adebayo', 'class': 'SSS 1 Science', 'admNo': 'ADM-2024-015', 'avatar': 'S', 'id': 2},
-      ];
-    }
-  }
-
-  void _setFallbackSubjects() {
-    if (_subjectsData.isEmpty) {
-      _subjectsData = [
-        {'subject': 'Mathematics', 'code': 'MTH', 'ca1': 18, 'ca2': 19, 'exam': 54, 'grade': 'A'},
-        {'subject': 'English Language', 'code': 'ENG', 'ca1': 16, 'ca2': 17, 'exam': 50, 'grade': 'B'},
-        {'subject': 'Physics', 'code': 'PHY', 'ca1': 19, 'ca2': 18, 'exam': 56, 'grade': 'A'},
-        {'subject': 'Chemistry', 'code': 'CHM', 'ca1': 17, 'ca2': 16, 'exam': 48, 'grade': 'B'},
-        {'subject': 'Biology', 'code': 'BIO', 'ca1': 18, 'ca2': 20, 'exam': 55, 'grade': 'A'},
-        {'subject': 'Computer Studies', 'code': 'CMP', 'ca1': 20, 'ca2': 19, 'exam': 58, 'grade': 'A+'},
-      ];
     }
   }
 
@@ -123,14 +96,6 @@ class _StudentReportCardScreenState extends State<StudentReportCardScreen> {
       }
     } catch (e) {
       debugPrint('Error loading results: $e');
-    }
-    // Fallback
-    if (mounted) {
-      _setFallbackSubjects();
-      setState(() {
-        _classRank = '3rd / 32';
-        _attendanceRate = '96.2%';
-      });
     }
   }
 

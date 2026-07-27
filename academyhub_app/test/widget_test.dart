@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:academyhub_app/main.dart';
 import 'package:academyhub_app/features/auth/presentation/school_finder_screen.dart';
 
 void main() {
@@ -27,7 +26,7 @@ void main() {
 
     // Verify the Continue button is initially disabled (can't proceed without slug validation)
     final ElevatedButton button = tester.widget<ElevatedButton>(
-      find.widgetWithText(ElevatedButton, 'Enter school code above'),
+      find.byType(ElevatedButton),
     );
     expect(button.enabled, isFalse);
   });

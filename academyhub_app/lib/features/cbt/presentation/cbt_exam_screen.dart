@@ -89,7 +89,10 @@ class _CbtExamScreenState extends State<CbtExamScreen> {
 
           _secondsRemaining = durationMinutes * 60;
           _examStarted = true;
-          _activeExam = _availableExams.firstWhere((e) => e['id'] == examId);
+          _activeExam = _availableExams.firstWhere(
+            (e) => e['id'] == examId,
+            orElse: () => {'id': examId, 'title': 'CBT Exam'},
+          );
         });
 
         _startTimer();
@@ -406,10 +409,7 @@ class _CbtExamScreenState extends State<CbtExamScreen> {
                 ),
               );
             },
-          ),
-        ),
-      ],
-    );
+          );
   }
 
   Widget _examPill(String label, Color color) {
@@ -758,14 +758,32 @@ class _CbtExamScreenState extends State<CbtExamScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.appBackground,
-      appBar: null,
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : _examStarted
-              ? _buildExamArena()
-              : _buildExamList(),
+    return PopScope(
+      canPop: !_examStarted,
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) return;
+        _confirmExit();
+      },
+      child: Scaffold(
+        backgroundColor: AppColors.appBackground,
+        appBar: AppBar(
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back, color: Colors.white),
+            onPressed: _confirmExit,
+          ),
+          title: Text(
+            _examStarted ? (_activeExam?['title'] ?? 'CBT Exam') : 'CBT Exam Portal',
+            style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white, fontSize: 17),
+          ),
+          elevation: 0,
+          backgroundColor: const Color(0xFF1E293B),
+        ),
+        body: _isLoading
+            ? const Center(child: CircularProgressIndicator())
+            : _examStarted
+                ? _buildExamArena()
+                : _buildExamList(),
+      ),
     );
   }
 }

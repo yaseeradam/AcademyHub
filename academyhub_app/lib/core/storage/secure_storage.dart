@@ -4,9 +4,7 @@ class SecureStorage {
   SecureStorage._privateConstructor();
   static final SecureStorage instance = SecureStorage._privateConstructor();
 
-  final _storage = const FlutterSecureStorage(
-    aOptions: AndroidOptions(encryptedSharedPreferences: true),
-  );
+  final _storage = const FlutterSecureStorage();
 
   static const String _keyToken = 'auth_token';
   static const String _keyRole = 'user_role';

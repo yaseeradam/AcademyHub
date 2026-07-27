@@ -90,21 +90,6 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
         }
       }
 
-      if (studentsList.isEmpty) {
-        studentsList = [
-          {'id': 1, 'first_name': 'Daniel', 'last_name': 'Adebayo', 'admission_number': 'ADM-2024-001'},
-          {'id': 2, 'first_name': 'Sarah', 'last_name': 'Chukwu', 'admission_number': 'ADM-2024-002'},
-          {'id': 3, 'first_name': 'Michael', 'last_name': 'Ibrahim', 'admission_number': 'ADM-2024-003'},
-          {'id': 4, 'first_name': 'Blessing', 'last_name': 'Okafor', 'admission_number': 'ADM-2024-004'},
-          {'id': 5, 'first_name': 'Emmanuel', 'last_name': 'Bello', 'admission_number': 'ADM-2024-005'},
-          {'id': 6, 'first_name': 'Fatima', 'last_name': 'Danjuma', 'admission_number': 'ADM-2024-006'},
-          {'id': 7, 'first_name': 'Chinedu', 'last_name': 'Eze', 'admission_number': 'ADM-2024-007'},
-          {'id': 8, 'first_name': 'Aisha', 'last_name': 'Lawal', 'admission_number': 'ADM-2024-008'},
-          {'id': 9, 'first_name': 'David', 'last_name': 'Kalu', 'admission_number': 'ADM-2024-009'},
-          {'id': 10, 'first_name': 'Grace', 'last_name': 'Audu', 'admission_number': 'ADM-2024-010'},
-        ];
-      }
-
       // Initialize default
       final Map<int, String> initialAttendance = {};
       for (var s in studentsList) {
@@ -142,26 +127,11 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
     } catch (e) {
       debugPrint('Error loading attendance students: $e');
     } finally {
-      if (_students.isEmpty) {
-        _students = [
-          {'id': 1, 'first_name': 'Daniel', 'last_name': 'Adebayo', 'admission_number': 'ADM-2024-001'},
-          {'id': 2, 'first_name': 'Sarah', 'last_name': 'Chukwu', 'admission_number': 'ADM-2024-002'},
-          {'id': 3, 'first_name': 'Michael', 'last_name': 'Ibrahim', 'admission_number': 'ADM-2024-003'},
-          {'id': 4, 'first_name': 'Blessing', 'last_name': 'Okafor', 'admission_number': 'ADM-2024-004'},
-          {'id': 5, 'first_name': 'Emmanuel', 'last_name': 'Bello', 'admission_number': 'ADM-2024-005'},
-          {'id': 6, 'first_name': 'Fatima', 'last_name': 'Danjuma', 'admission_number': 'ADM-2024-006'},
-          {'id': 7, 'first_name': 'Chinedu', 'last_name': 'Eze', 'admission_number': 'ADM-2024-007'},
-          {'id': 8, 'first_name': 'Aisha', 'last_name': 'Lawal', 'admission_number': 'ADM-2024-008'},
-          {'id': 9, 'first_name': 'David', 'last_name': 'Kalu', 'admission_number': 'ADM-2024-009'},
-          {'id': 10, 'first_name': 'Grace', 'last_name': 'Audu', 'admission_number': 'ADM-2024-010'},
-        ];
-        for (var s in _students) {
-          _attendanceMap[s['id']] ??= 'present';
-        }
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
       }
-      setState(() {
-        _isLoading = false;
-      });
     }
   }
 

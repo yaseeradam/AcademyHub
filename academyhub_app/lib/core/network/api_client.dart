@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:academyhub_app/core/storage/secure_storage.dart';
+import 'package:academyhub_app/core/routing/app_router.dart';
 
 class ApiClient {
   late final Dio dio;
@@ -34,11 +35,11 @@ class ApiClient {
           return handler.next(options);
         },
         onError: (DioException e, handler) async {
-          // Force logout on 401 Unauthorized
+          // Force logout and redirect on 401 Unauthorized
           if (e.response?.statusCode == 401) {
             await SecureStorage.instance.deleteToken();
             await SecureStorage.instance.deleteRole();
-            // In a production app, this would trigger an event to redirect to login
+            appRouter.go('/login');
           }
           return handler.next(e);
         },
