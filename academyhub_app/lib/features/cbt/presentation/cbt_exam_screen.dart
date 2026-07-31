@@ -47,6 +47,7 @@ class _CbtExamScreenState extends State<CbtExamScreen> {
     try {
       final response = await apiClient.dio.get('/student/exams');
       if (response.statusCode == 200 && response.data != null) {
+        if (!mounted) return;
         setState(() {
           _availableExams = List<dynamic>.from(response.data);
         });
@@ -54,9 +55,11 @@ class _CbtExamScreenState extends State<CbtExamScreen> {
     } catch (e) {
       debugPrint('Error fetching exams: $e');
     } finally {
-      setState(() {
-        _isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
 
@@ -70,7 +73,8 @@ class _CbtExamScreenState extends State<CbtExamScreen> {
         final data = response.data;
         final rawQuestions = List<dynamic>.from(data['questions'] ?? []);
         final durationMinutes = int.tryParse(data['duration_minutes']?.toString() ?? '45') ?? 45;
-        
+
+        if (!mounted) return;
         setState(() {
           _attemptUuid = data['attempt_uuid'];
           _questions = rawQuestions;
@@ -99,15 +103,15 @@ class _CbtExamScreenState extends State<CbtExamScreen> {
       }
     } catch (e) {
       if (!mounted) return;
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to start exam: $e'), backgroundColor: AppColors.dangerRed),
-        );
-      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to start exam: $e'), backgroundColor: AppColors.dangerRed),
+      );
     } finally {
-      setState(() {
-        _isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
 
@@ -161,48 +165,45 @@ class _CbtExamScreenState extends State<CbtExamScreen> {
       if (response.statusCode == 200 && response.data != null) {
         final score = response.data['score'];
         final percent = response.data['percent'];
-        
-        if (mounted) {
-          showDialog(
-            context: context,
-            barrierDismissible: false,
-            builder: (context) => AlertDialog(
-              title: const Text('Exam Completed!'),
-              content: Text(score != null 
-                  ? 'Your exam was successfully submitted.\nScore: $score% ($percent%)' 
-                  : 'Your exam was successfully submitted to school servers.'),
-              actions: [
-                TextButton(
-                  onPressed: () {
-                    Navigator.pop(context); // Close dialog
-                    setState(() {
-                      _examStarted = false;
-                      _activeExam = null;
-                      _attemptUuid = null;
-                      _questions.clear();
-                    });
-                    _fetchExams();
-                  },
-                  child: const Text('Back to Exams'),
-                )
-              ],
-            ),
-          );
-        }
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (context) => AlertDialog(
+            title: const Text('Exam Completed!'),
+            content: Text(score != null 
+                ? 'Your exam was successfully submitted.\nScore: $score% ($percent%)' 
+                : 'Your exam was successfully submitted to school servers.'),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context); // Close dialog
+                  setState(() {
+                    _examStarted = false;
+                    _activeExam = null;
+                    _attemptUuid = null;
+                    _questions.clear();
+                  });
+                  _fetchExams();
+                },
+                child: const Text('Back to Exams'),
+              )
+            ],
+          ),
+        );
       }
     } catch (e) {
       if (!mounted) return;
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to submit exam: $e'), backgroundColor: AppColors.dangerRed),
-        );
-      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to submit exam: $e'), backgroundColor: AppColors.dangerRed),
+      );
       // Resume timer
       _startTimer();
     } finally {
-      setState(() {
-        _isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
 

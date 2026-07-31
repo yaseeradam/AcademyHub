@@ -34,6 +34,7 @@ class Student extends Model
         'passport_photo',
         'status',
         'custom_fields',
+        'password',
     ];
 
     protected $hidden = [

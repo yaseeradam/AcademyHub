@@ -36,7 +36,7 @@ class _HomeworkTrackerScreenState extends State<HomeworkTrackerScreen>
     try {
       final endpoint = (_userRole == 'student')
           ? '/student/homework'
-          : '/teacher/homework';
+          : '/homework';
       final response = await apiClient.dio.get(endpoint);
       if (response.statusCode == 200 && response.data != null) {
         final rawList = List<dynamic>.from(response.data['data'] ?? response.data ?? []);
@@ -51,82 +51,12 @@ class _HomeworkTrackerScreenState extends State<HomeworkTrackerScreen>
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
-    // If still empty, use sensible demo data
-    if (_homeworkList.isEmpty && mounted) {
-      setState(() {
-        _homeworkList = [
-          {
-            'id': '1',
-            'subject': 'General Mathematics',
-            'code': 'MTH',
-            'title': 'Quadratic Equations Exercise 4B',
-            'description': 'Solve problems 1 to 15 on page 104 in your Math workbook. Show all step-by-step workings clearly.',
-            'due_date': 'Tomorrow, 8:00 AM',
-            'is_urgent': true,
-            'teacher': 'Mrs. Florence Adebayo',
-            'is_completed': false,
-            'attachment': 'algebra_handout.pdf',
-          },
-          {
-            'id': '2',
-            'subject': 'Physics',
-            'code': 'PHY',
-            'title': "Newton's Laws of Motion Lab Summary",
-            'description': "Write a 2-page summary on Newton's third law observed in today's laboratory session.",
-            'due_date': 'Friday',
-            'is_urgent': false,
-            'teacher': 'Miss Grace Danjuma',
-            'is_completed': false,
-            'attachment': null,
-          },
-          {
-            'id': '3',
-            'subject': 'English Literature',
-            'code': 'LIT',
-            'title': 'Essay: Themes in "The Lion and the Jewel"',
-            'description': 'Write a 500-word critical essay discussing how traditional values collide with modern ideas in Act 1.',
-            'due_date': 'Monday',
-            'is_urgent': false,
-            'teacher': 'Mr. Chinedu Eze',
-            'is_completed': true,
-            'attachment': 'essay_rubric.pdf',
-          },
-          {
-            'id': '4',
-            'subject': 'Chemistry',
-            'code': 'CHM',
-            'title': 'Periodic Table Valence Calculations',
-            'description': 'Complete worksheet #3 on chemical bonding and valence electron configurations.',
-            'due_date': 'Completed',
-            'is_urgent': false,
-            'teacher': 'Mr. Tunde Bakare',
-            'is_completed': true,
-            'attachment': null,
-          },
-        ];
-        _isLoading = false;
-      });
-    }
   }
 
   Future<void> _toggleComplete(Map<String, dynamic> item) async {
     final newStatus = !(item['is_completed'] == true);
-    // Optimistically update UI
-    setState(() => item['is_completed'] = newStatus);
-    try {
-      await apiClient.dio.post(
-        '/student/homework/${item['id']}/toggle',
-        data: {'is_completed': newStatus},
-      );
-    } catch (e) {
-      // Revert on failure
-      if (mounted) {
-        setState(() => item['is_completed'] = !newStatus);
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Could not update status. Please try again.'), backgroundColor: AppColors.dangerRed),
-        );
-      }
-    }
+    // Optimistically update UI (local state only - no backend endpoint for toggle)
+    if (mounted) setState(() => item['is_completed'] = newStatus);
   }
 
   @override

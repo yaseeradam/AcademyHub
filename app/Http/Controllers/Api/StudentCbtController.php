@@ -24,18 +24,12 @@ class StudentCbtController extends Controller
             return $user;
         }
         if ($user instanceof \App\Models\User) {
-            $student = \App\Models\Student::where('email', $user->email)->first();
-            if ($student) {
-                return $student;
+            // Match by user_id relationship (primary), then email as fallback
+            $student = \App\Models\Student::where('user_id', $user->id)->first();
+            if (!$student) {
+                $student = \App\Models\Student::where('email', $user->email)->first();
             }
-            return \App\Models\Student::first() ?? \App\Models\Student::create([
-                'admission_number' => 'STU-' . rand(1000, 9999),
-                'first_name' => explode(' ', $user->name)[0] ?? 'Student',
-                'last_name' => explode(' ', $user->name)[1] ?? 'User',
-                'class_id' => 1,
-                'status' => 'Active',
-                'email' => $user->email,
-            ]);
+            return $student; // Returns null if no student found — do NOT fallback to Student::first()
         }
         return null;
     }
@@ -48,22 +42,12 @@ class StudentCbtController extends Controller
             return response()->json(['message' => 'Unauthorized or invalid student context.'], 403);
         }
 
-        $examCount = CbtExam::where('class_id', $student->class_id)->orWhereNull('class_id')->count();
-        if ($examCount === 0) {
-            $this->seedSampleExams($student);
-        }
-
         $exams = CbtExam::with(['subject:id,name'])
             ->where(function ($q) use ($student) {
                 $q->where('class_id', $student->class_id)
                   ->orWhereNull('class_id');
             })
             ->get();
-
-        if ($exams->isEmpty()) {
-            $this->seedSampleExams($student);
-            $exams = CbtExam::with(['subject:id,name'])->get();
-        }
 
         $attempts = CbtAttempt::where('student_id', $student->id)
             ->whereIn('exam_id', $exams->pluck('id'))
@@ -200,8 +184,7 @@ class StudentCbtController extends Controller
 
         // Questions retrieval & optional shuffle
         if ($exam->questions->isEmpty()) {
-            $this->seedQuestionsForExam($exam);
-            $exam->load('questions.options');
+            return response()->json(['message' => 'This exam has no questions yet. Please contact your teacher.'], 422);
         }
 
         $questions = $exam->questions;
@@ -219,7 +202,7 @@ class StudentCbtController extends Controller
                 'options' => $q->options->map(function ($o) {
                     return [
                         'id' => $o->id,
-                        'option_text' => $o->option_text ?? '',
+                        'option_text' => $o->label ?? '',
                     ];
                 }),
             ];
@@ -389,10 +372,10 @@ class StudentCbtController extends Controller
             'type' => 'mcq',
             'marks' => 10,
         ]);
-        \App\Models\CbtOption::create(['question_id' => $q1->id, 'option_text' => '12', 'is_correct' => true]);
-        \App\Models\CbtOption::create(['question_id' => $q1->id, 'option_text' => '14', 'is_correct' => false]);
-        \App\Models\CbtOption::create(['question_id' => $q1->id, 'option_text' => '10', 'is_correct' => false]);
-        \App\Models\CbtOption::create(['question_id' => $q1->id, 'option_text' => '16', 'is_correct' => false]);
+        \App\Models\CbtOption::create(['question_id' => $q1->id, 'label' => '12', 'is_correct' => true]);
+        \App\Models\CbtOption::create(['question_id' => $q1->id, 'label' => '14', 'is_correct' => false]);
+        \App\Models\CbtOption::create(['question_id' => $q1->id, 'label' => '10', 'is_correct' => false]);
+        \App\Models\CbtOption::create(['question_id' => $q1->id, 'label' => '16', 'is_correct' => false]);
 
         $q2 = \App\Models\CbtQuestion::create([
             'exam_id' => $exam->id,
@@ -401,10 +384,10 @@ class StudentCbtController extends Controller
             'type' => 'mcq',
             'marks' => 10,
         ]);
-        \App\Models\CbtOption::create(['question_id' => $q2->id, 'option_text' => 'x = 5', 'is_correct' => true]);
-        \App\Models\CbtOption::create(['question_id' => $q2->id, 'option_text' => 'x = 3', 'is_correct' => false]);
-        \App\Models\CbtOption::create(['question_id' => $q2->id, 'option_text' => 'x = 7', 'is_correct' => false]);
-        \App\Models\CbtOption::create(['question_id' => $q2->id, 'option_text' => 'x = 4', 'is_correct' => false]);
+        \App\Models\CbtOption::create(['question_id' => $q2->id, 'label' => 'x = 5', 'is_correct' => true]);
+        \App\Models\CbtOption::create(['question_id' => $q2->id, 'label' => 'x = 3', 'is_correct' => false]);
+        \App\Models\CbtOption::create(['question_id' => $q2->id, 'label' => 'x = 7', 'is_correct' => false]);
+        \App\Models\CbtOption::create(['question_id' => $q2->id, 'label' => 'x = 4', 'is_correct' => false]);
 
         $q3 = \App\Models\CbtQuestion::create([
             'exam_id' => $exam->id,
@@ -413,10 +396,10 @@ class StudentCbtController extends Controller
             'type' => 'mcq',
             'marks' => 10,
         ]);
-        \App\Models\CbtOption::create(['question_id' => $q3->id, 'option_text' => '3.14', 'is_correct' => true]);
-        \App\Models\CbtOption::create(['question_id' => $q3->id, 'option_text' => '3.16', 'is_correct' => false]);
-        \App\Models\CbtOption::create(['question_id' => $q3->id, 'option_text' => '3.12', 'is_correct' => false]);
-        \App\Models\CbtOption::create(['question_id' => $q3->id, 'option_text' => '3.41', 'is_correct' => false]);
+        \App\Models\CbtOption::create(['question_id' => $q3->id, 'label' => '3.14', 'is_correct' => true]);
+        \App\Models\CbtOption::create(['question_id' => $q3->id, 'label' => '3.16', 'is_correct' => false]);
+        \App\Models\CbtOption::create(['question_id' => $q3->id, 'label' => '3.12', 'is_correct' => false]);
+        \App\Models\CbtOption::create(['question_id' => $q3->id, 'label' => '3.41', 'is_correct' => false]);
     }
 
     private function seedQuestionsForExam($exam)
@@ -428,10 +411,10 @@ class StudentCbtController extends Controller
             'type' => 'mcq',
             'marks' => 10,
         ]);
-        \App\Models\CbtOption::create(['question_id' => $q1->id, 'option_text' => 'Structured data storage and retrieval', 'is_correct' => true]);
-        \App\Models\CbtOption::create(['question_id' => $q1->id, 'option_text' => 'Rendering web pages', 'is_correct' => false]);
-        \App\Models\CbtOption::create(['question_id' => $q1->id, 'option_text' => 'Compiling source code', 'is_correct' => false]);
-        \App\Models\CbtOption::create(['question_id' => $q1->id, 'option_text' => 'Sending push notifications', 'is_correct' => false]);
+        \App\Models\CbtOption::create(['question_id' => $q1->id, 'label' => 'Structured data storage and retrieval', 'is_correct' => true]);
+        \App\Models\CbtOption::create(['question_id' => $q1->id, 'label' => 'Rendering web pages', 'is_correct' => false]);
+        \App\Models\CbtOption::create(['question_id' => $q1->id, 'label' => 'Compiling source code', 'is_correct' => false]);
+        \App\Models\CbtOption::create(['question_id' => $q1->id, 'label' => 'Sending push notifications', 'is_correct' => false]);
 
         $q2 = \App\Models\CbtQuestion::create([
             'exam_id' => $exam->id,
@@ -440,9 +423,9 @@ class StudentCbtController extends Controller
             'type' => 'mcq',
             'marks' => 10,
         ]);
-        \App\Models\CbtOption::create(['question_id' => $q2->id, 'option_text' => '120', 'is_correct' => true]);
-        \App\Models\CbtOption::create(['question_id' => $q2->id, 'option_text' => '110', 'is_correct' => false]);
-        \App\Models\CbtOption::create(['question_id' => $q2->id, 'option_text' => '130', 'is_correct' => false]);
-        \App\Models\CbtOption::create(['question_id' => $q2->id, 'option_text' => '100', 'is_correct' => false]);
+        \App\Models\CbtOption::create(['question_id' => $q2->id, 'label' => '120', 'is_correct' => true]);
+        \App\Models\CbtOption::create(['question_id' => $q2->id, 'label' => '110', 'is_correct' => false]);
+        \App\Models\CbtOption::create(['question_id' => $q2->id, 'label' => '130', 'is_correct' => false]);
+        \App\Models\CbtOption::create(['question_id' => $q2->id, 'label' => '100', 'is_correct' => false]);
     }
 }

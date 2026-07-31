@@ -31,27 +31,31 @@ class _SubjectsScreenState extends State<SubjectsScreen> {
       final role = await SecureStorage.instance.getRole();
       _userRole = role ?? 'student';
 
-      String endpoint = '/student/results';
+      String? endpoint;
       if (_userRole == 'teacher') {
         if (widget.classId != null) {
           endpoint = '/teacher/classes/${widget.classId}/subjects';
-        } else {
-          endpoint = '/teacher/subjects';
         }
+        // No classId provided — no valid endpoint for teacher; leave list empty.
+      } else {
+        endpoint = '/student/results';
       }
 
-      final response = await apiClient.dio.get(endpoint);
-      if (response.statusCode == 200 && response.data != null) {
-        final data = response.data;
-        List<dynamic> list = [];
-        if (data is List) {
-          list = data;
-        } else if (data is Map && data.containsKey('data')) {
-          list = List<dynamic>.from(data['data']);
+      if (endpoint != null) {
+        final response = await apiClient.dio.get(endpoint);
+        if (response.statusCode == 200 && response.data != null) {
+          final data = response.data;
+          List<dynamic> list = [];
+          if (data is List) {
+            list = data;
+          } else if (data is Map && data.containsKey('data')) {
+            list = List<dynamic>.from(data['data']);
+          }
+          if (!mounted) return;
+          setState(() {
+            _subjects = list;
+          });
         }
-        setState(() {
-          _subjects = list;
-        });
       }
     } catch (e) {
       debugPrint('Error fetching subjects: $e');

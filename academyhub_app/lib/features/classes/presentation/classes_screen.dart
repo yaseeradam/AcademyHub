@@ -28,22 +28,35 @@ class _ClassesScreenState extends State<ClassesScreen> {
     try {
       final role = await SecureStorage.instance.getRole();
       _userRole = role ?? 'teacher';
-      
-      final endpoint = (_userRole == 'teacher') ? '/teacher/classes' : '/student/classes';
-      final response = await apiClient.dio.get(endpoint);
-      
-      if (response.statusCode == 200 && response.data != null) {
-        final data = response.data;
-        List<dynamic> list = [];
-        if (data is List) {
-          list = data;
-        } else if (data is Map && data.containsKey('data')) {
-          list = List<dynamic>.from(data['data']);
+
+      List<dynamic> list = [];
+      if (_userRole == 'teacher') {
+        final response = await apiClient.dio.get('/teacher/classes');
+        if (response.statusCode == 200 && response.data != null) {
+          final data = response.data;
+          if (data is List) {
+            list = data;
+          } else if (data is Map && data.containsKey('data')) {
+            list = List<dynamic>.from(data['data']);
+          }
         }
-        setState(() {
-          _classes = list;
-        });
+      } else {
+        // Students do not have a /student/classes endpoint.
+        // Fetch class info from the student dashboard instead.
+        final response = await apiClient.dio.get('/student/dashboard');
+        if (response.statusCode == 200 && response.data != null) {
+          final data = response.data;
+          final myClass = (data is Map) ? (data['my_class'] ?? data['class']) : null;
+          if (myClass != null) {
+            list = [myClass];
+          }
+        }
       }
+
+      if (!mounted) return;
+      setState(() {
+        _classes = list;
+      });
     } catch (e) {
       debugPrint('Error fetching classes: $e');
     } finally {

@@ -10,7 +10,19 @@ class AnnouncementController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Announcement::query()->latest('created_at');
+        $user = $request->user();
+        $roleMap = [
+            'student' => ['all', 'students'],
+            'parent'  => ['all', 'parents'],
+            'teacher' => ['all', 'staff'],
+            'admin'   => ['all', 'staff', 'parents', 'students'],
+            'bursar'  => ['all', 'staff'],
+        ];
+        $allowedAudiences = $roleMap[$user->role ?? 'student'] ?? ['all'];
+
+        $query = Announcement::query()
+            ->whereIn('audience', $allowedAudiences)
+            ->latest('created_at');
         $announcements = $query->get();
         return response()->json(['data' => $announcements]);
     }

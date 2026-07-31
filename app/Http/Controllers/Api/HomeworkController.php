@@ -30,8 +30,10 @@ class HomeworkController extends Controller
             $query->whereIn('class_id', $classIds);
         }
 
-        if ($request->term)    $query->whereHas('subject', fn($q) => $q); // passthrough
-        if ($request->session) {} // future filter
+        // Term and session are stored on homework through associated class, filter by due_date range if provided
+        if ($request->due_before) {
+            $query->where('due_date', '<=', $request->due_before);
+        }
 
         return response()->json(['data' => $query->get()]);
     }
@@ -71,7 +73,12 @@ class HomeworkController extends Controller
         $homework = Homework::findOrFail($id);
         abort_unless($user->role === 'admin' || $homework->teacher_id === $user->id, 403);
 
-        $homework->update($request->only(['title', 'content', 'due_date']));
+        $data = $request->validate([
+            'title'    => 'sometimes|string|max:255',
+            'content'  => 'sometimes|string',
+            'due_date' => 'sometimes|date',
+        ]);
+        $homework->update($data);
 
         return response()->json(['data' => $homework]);
     }
@@ -127,7 +134,7 @@ class HomeworkController extends Controller
 
         $data = $request->validate([
             'student_id' => 'required|integer',
-            'grade'      => 'required|string|max:10',
+            'grade'      => 'required|max:10',
             'feedback'   => 'nullable|string',
         ]);
 
@@ -138,5 +145,22 @@ class HomeworkController extends Controller
         $sub->update(['grade' => $data['grade'], 'feedback' => $data['feedback'], 'graded_at' => now()]);
 
         return response()->json(['data' => $sub]);
+    }
+
+    /** GET /api/student/homework */
+    public function studentHomework(Request $request)
+    {
+        $user = $request->user();
+        // Support both Student model direct auth and User with student relation
+        if ($user instanceof \App\Models\Student) {
+            $student = $user;
+        } else {
+            $student = \App\Models\Student::where('user_id', $user->id)->first();
+            if (!$student) {
+                return response()->json(['message' => 'Unauthorized student context.'], 403);
+            }
+        }
+        $hw = $student->getHomeworkForStudent();
+        return response()->json(['data' => $hw]);
     }
 }
