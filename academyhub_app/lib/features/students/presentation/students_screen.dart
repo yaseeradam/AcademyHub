@@ -159,7 +159,7 @@ class _StudentsScreenState extends State<StudentsScreen> {
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 scrollDirection: Axis.horizontal,
                 itemCount: _classOptions.length,
-                separatorBuilder: (_, _i) => const SizedBox(width: 8),
+                separatorBuilder: (_, _) => const SizedBox(width: 8),
                 itemBuilder: (context, i) {
                   final opt = _classOptions[i];
                   final isSelected = _classFilter == opt;
@@ -206,7 +206,7 @@ class _StudentsScreenState extends State<StudentsScreen> {
                         child: ListView.separated(
                           padding: const EdgeInsets.all(16),
                           itemCount: _filtered.length,
-                          separatorBuilder: (_, _i) => const SizedBox(height: 10),
+                          separatorBuilder: (_, _) => const SizedBox(height: 10),
                           itemBuilder: (context, i) => _buildStudentCard(_filtered[i]),
                         ),
                       ),

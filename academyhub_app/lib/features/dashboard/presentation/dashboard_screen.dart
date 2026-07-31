@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:academyhub_app/core/theme/app_theme.dart';
@@ -13,7 +12,6 @@ import 'package:academyhub_app/features/scores/presentation/scores_entry_screen.
 import 'package:academyhub_app/features/homework/presentation/homework_view.dart';
 import 'package:academyhub_app/features/parent/presentation/children_view.dart';
 import 'package:academyhub_app/features/messaging/presentation/chat_view.dart';
-import 'package:academyhub_app/features/students/presentation/student_detail_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -58,20 +56,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   // Admin Students state
   List<dynamic> _adminStudentsList = List<dynamic>.from(_defaultStudentsList);
-  bool _isLoadingAdminStudents = false;
-  String _adminStudentsSearchQuery = '';
 
   // Admin Staff state
   List<dynamic> _adminStaffList = List<dynamic>.from(_defaultStaffList);
-  bool _isLoadingAdminStaff = false;
-  String _adminStaffSearchQuery = '';
-  String _adminStaffRoleFilter = 'all';
-
-  // Classes & Subjects Filter state
-  String _adminClassSearchQuery = '';
-  String _adminClassSectionFilter = 'all';
-  String _adminSubjectSearchQuery = '';
-  String _adminSubjectCategoryFilter = 'all';
 
   @override
   void initState() {
@@ -186,9 +173,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   Future<void> _loadAdminStaff() async {
     if (!mounted) return;
-    setState(() {
-      _isLoadingAdminStaff = true;
-    });
     try {
       final response = await apiClient.dio.get('/admin/users');
       if (response.statusCode == 200 && response.data != null) {
@@ -204,20 +188,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
     } catch (e) {
       debugPrint('Error loading admin staff: $e');
       if (mounted) setState(() => _adminStaffList = _defaultStaffList);
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isLoadingAdminStaff = false;
-        });
-      }
     }
   }
 
   Future<void> _loadAdminStudents() async {
     if (!mounted) return;
-    setState(() {
-      _isLoadingAdminStudents = true;
-    });
     try {
       final response = await apiClient.dio.get('/students');
       if (response.statusCode == 200 && response.data != null) {
@@ -233,12 +208,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
     } catch (e) {
       debugPrint('Error loading admin students: $e');
       if (mounted) setState(() => _adminStudentsList = _defaultStudentsList);
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isLoadingAdminStudents = false;
-        });
-      }
     }
   }
 
@@ -2140,370 +2109,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-
-  Widget _buildAdminStaffContent() {
-    var filtered = _adminStaffList;
-
-    if (_adminStaffRoleFilter != 'all') {
-      filtered = filtered.where((s) => (s['role']?.toString().toLowerCase() ?? '') == _adminStaffRoleFilter).toList();
-    }
-
-    if (_adminStaffSearchQuery.isNotEmpty) {
-      filtered = filtered.where((s) {
-        final name = s['name']?.toString().toLowerCase() ?? '';
-        final email = s['email']?.toString().toLowerCase() ?? '';
-        final query = _adminStaffSearchQuery.toLowerCase();
-        return name.contains(query) || email.contains(query);
-      }).toList();
-    }
-
-    return Column(
-      children: [
-        // Staff Search bar
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
-          child: TextField(
-            style: const TextStyle(fontSize: 13),
-            decoration: InputDecoration(
-              hintText: 'Search staff by name or email address...',
-              fillColor: Colors.white,
-              filled: true,
-              prefixIcon: const Icon(Icons.search, size: 18),
-              contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 16),
-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: const BorderSide(color: AppColors.divider)),
-              enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: const BorderSide(color: AppColors.divider)),
-            ),
-            onChanged: (val) {
-              setState(() {
-                _adminStaffSearchQuery = val.trim();
-              });
-            },
-          ),
-        ),
-
-        // Role filter chips
-        SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-          child: Row(
-            children: [
-              _buildRoleFilterChip('All Staff', 'all'),
-              const SizedBox(width: 8),
-              _buildRoleFilterChip('Teachers', 'teacher'),
-              const SizedBox(width: 8),
-              _buildRoleFilterChip('Admins', 'admin'),
-              const SizedBox(width: 8),
-              _buildRoleFilterChip('Bursars', 'bursar'),
-            ],
-          ),
-        ),
-        const SizedBox(height: 8),
-
-        // Staff List
-        Expanded(
-          child: _isLoadingAdminStaff
-              ? const Center(child: CircularProgressIndicator())
-              : filtered.isEmpty
-                  ? const Center(child: Text('No staff members found.'))
-                  : ListView.builder(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      itemCount: filtered.length,
-                      itemBuilder: (context, index) {
-                        final staff = filtered[index];
-                        final name = staff['name'] ?? 'Staff Member';
-                        final email = staff['email'] ?? 'No email';
-                        final role = (staff['role'] ?? 'teacher').toString().toUpperCase();
-                        final isActive = staff['is_active'] ?? true;
-
-                        Color roleColor = const Color(0xFF10B981);
-                        if (role == 'ADMIN') roleColor = const Color(0xFF7C3AED);
-                        if (role == 'BURSAR') roleColor = const Color(0xFFF59E0B);
-
-                        String initials = '';
-                        final parts = name.split(' ');
-                        if (parts.isNotEmpty && parts[0].isNotEmpty) initials += parts[0][0].toUpperCase();
-                        if (parts.length > 1 && parts[1].isNotEmpty) initials += parts[1][0].toUpperCase();
-                        if (initials.isEmpty) initials = '?';
-
-                        return Card(
-                          margin: const EdgeInsets.only(bottom: 12),
-                          child: ListTile(
-                            leading: CircleAvatar(
-                              backgroundColor: roleColor.withValues(alpha: 0.12),
-                              child: Text(
-                                initials,
-                                style: TextStyle(color: roleColor, fontWeight: FontWeight.bold),
-                              ),
-                            ),
-                            title: Text(name, style: const TextStyle(fontWeight: FontWeight.bold)),
-                            subtitle: Text('$email · $role'),
-                            trailing: Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                              decoration: BoxDecoration(
-                                color: (isActive ? AppColors.successGreen : AppColors.dangerRed).withValues(alpha: 0.12),
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              child: Text(
-                                isActive ? 'Active' : 'Inactive',
-                                style: TextStyle(
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.bold,
-                                  color: isActive ? AppColors.successGreen : AppColors.dangerRed,
-                                ),
-                              ),
-                            ),
-                            onTap: () {
-                              _showAdminStaffDetailSheet(staff);
-                            },
-                          ),
-                        );
-                      },
-                    ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildRoleFilterChip(String label, String key) {
-    final isSelected = _adminStaffRoleFilter == key;
-    return ChoiceChip(
-      label: Text(label, style: TextStyle(fontSize: 11, fontWeight: isSelected ? FontWeight.bold : FontWeight.normal)),
-      selected: isSelected,
-      selectedColor: const Color(0xFF7C3AED).withValues(alpha: 0.15),
-      onSelected: (val) {
-        if (val) {
-          setState(() {
-            _adminStaffRoleFilter = key;
-          });
-        }
-      },
-    );
-  }
-
-  void _showAdminStaffDetailSheet(dynamic staff) {
-    final name = staff['name'] ?? 'Staff Member';
-    final email = staff['email'] ?? 'No email';
-    final role = (staff['role'] ?? 'teacher').toString().toUpperCase();
-    final phone = staff['whatsapp_phone'] ?? staff['phone'] ?? '';
-    final isActive = staff['is_active'] ?? true;
-    final isClassTeacher = staff['is_class_teacher'] ?? false;
-
-    Color roleColor = const Color(0xFF10B981);
-    if (role == 'ADMIN') roleColor = const Color(0xFF7C3AED);
-    if (role == 'BURSAR') roleColor = const Color(0xFFF59E0B);
-
-    String initials = '';
-    final parts = name.split(' ');
-    if (parts.isNotEmpty && parts[0].isNotEmpty) initials += parts[0][0].toUpperCase();
-    if (parts.length > 1 && parts[1].isNotEmpty) initials += parts[1][0].toUpperCase();
-    if (initials.isEmpty) initials = '?';
-
-    showModalBottomSheet(
-      context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
-      builder: (context) {
-        return Padding(
-          padding: const EdgeInsets.all(20.0),
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Center(
-                  child: Container(
-                    width: 40,
-                    height: 4,
-                    decoration: BoxDecoration(
-                      color: AppColors.divider,
-                      borderRadius: BorderRadius.circular(2),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 16),
-
-                // Staff Header Avatar & Info
-                Center(
-                  child: CircleAvatar(
-                    radius: 30,
-                    backgroundColor: roleColor.withValues(alpha: 0.12),
-                    child: Text(
-                      initials,
-                      style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: roleColor),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 12),
-                Text(
-                  name,
-                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 6),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
-                      decoration: BoxDecoration(
-                        color: roleColor.withValues(alpha: 0.12),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Text(role, style: TextStyle(color: roleColor, fontSize: 10, fontWeight: FontWeight.bold)),
-                    ),
-                    const SizedBox(width: 8),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
-                      decoration: BoxDecoration(
-                        color: (isActive ? AppColors.successGreen : AppColors.dangerRed).withValues(alpha: 0.12),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Text(
-                        isActive ? 'ACTIVE ACCOUNT' : 'INACTIVE',
-                        style: TextStyle(
-                          color: isActive ? AppColors.successGreen : AppColors.dangerRed,
-                          fontSize: 10,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-                const Divider(),
-                const SizedBox(height: 12),
-
-                // Quick Action Contacts
-                Row(
-                  children: [
-                    Expanded(
-                      child: OutlinedButton.icon(
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: const Color(0xFF10B981),
-                          side: const BorderSide(color: Color(0xFF10B981)),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                        ),
-                        onPressed: () {
-                          if (phone.isNotEmpty) {
-                            Clipboard.setData(ClipboardData(text: phone));
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text('Phone ($phone) copied to clipboard!'), backgroundColor: AppColors.successGreen),
-                            );
-                          } else {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('No phone number recorded.')),
-                            );
-                          }
-                        },
-                        icon: const Icon(Icons.phone_outlined, size: 16),
-                        label: const Text('Call Staff', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: OutlinedButton.icon(
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: const Color(0xFF25D366),
-                          side: const BorderSide(color: Color(0xFF25D366)),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                        ),
-                        onPressed: () {
-                          if (phone.isNotEmpty) {
-                            Clipboard.setData(ClipboardData(text: phone));
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text('WhatsApp ($phone) copied to clipboard!'), backgroundColor: AppColors.successGreen),
-                            );
-                          } else {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('No WhatsApp phone recorded.')),
-                            );
-                          }
-                        },
-                        icon: const Icon(Icons.chat_bubble_outline, size: 16),
-                        label: const Text('WhatsApp', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: OutlinedButton.icon(
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: const Color(0xFF3B82F6),
-                          side: const BorderSide(color: Color(0xFF3B82F6)),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                        ),
-                        onPressed: () {
-                          if (email.isNotEmpty) {
-                            Clipboard.setData(ClipboardData(text: email));
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text('Email ($email) copied to clipboard!'), backgroundColor: AppColors.successGreen),
-                            );
-                          }
-                        },
-                        icon: const Icon(Icons.email_outlined, size: 16),
-                        label: const Text('Email', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-
-                // Details Card
-                _buildDetailRow('Full Name', name),
-                _buildDetailRow('Email Address', email),
-                _buildDetailRow('Assigned Role', role),
-                _buildDetailRow('WhatsApp / Phone', phone.isNotEmpty ? phone : 'N/A'),
-                _buildDetailRow('Class Teacher Designation', isClassTeacher ? 'Yes' : 'No'),
-                _buildDetailRow('Account Status', isActive ? 'Active' : 'Inactive', isBadge: true),
-                const SizedBox(height: 16),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  void _showAdminStudentDetailSheet(dynamic student) {
-    final fName = student['first_name'] ?? '';
-    final lName = student['last_name'] ?? '';
-    final fullName = '$fName $lName'.trim();
-    final studentId = student['id'];
-
-    if (studentId != null) {
-      StudentDetailScreen.show(context, studentId: studentId, studentName: fullName);
-    }
-  }
-
-  Widget _buildDetailRow(String label, String val, {bool isBadge = false}) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(label, style: const TextStyle(color: AppColors.textSecondary, fontSize: 13, fontWeight: FontWeight.w600)),
-          if (!isBadge)
-            Text(val, style: const TextStyle(color: AppColors.textPrimary, fontSize: 13, fontWeight: FontWeight.bold))
-          else
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-              decoration: BoxDecoration(
-                color: (val == 'Active' ? AppColors.successGreen : AppColors.dangerRed).withValues(alpha: 0.12),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Text(
-                val,
-                style: TextStyle(
-                  color: val == 'Active' ? AppColors.successGreen : AppColors.dangerRed,
-                  fontSize: 11,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-        ],
-      ),
-    );
-  }
 
   Widget _buildAdminAnnouncementsView() {
     return Column(
