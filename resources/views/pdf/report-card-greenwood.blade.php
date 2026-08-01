@@ -4,20 +4,13 @@
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <title>Report Sheet - {{ $student->admission_number }}</title>
     <style>
-        @page { size: A4 portrait; margin: 8mm; }
+        @page { size: A4 portrait; margin: 4mm 6mm; }
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        html, body { height: 100%; margin: 0; padding: 0; }
         body { font-family: DejaVu Sans, Arial, sans-serif; font-size: 8.5px; color: #1e293b; background: #fff; line-height: 1.25; }
 
         /* Outer borders */
-        .page { border: 3px solid #004b49; padding: 6px; background: #fff; display: table; width: 100%; height: 100%; min-height: 100%; }
-        .page-inner { border: 1px solid #c5a059; padding: 6px; position: relative; display: table; width: 100%; height: 100%; min-height: 100%; }
-
-        /* Table-row layout for full-page fill */
-        .rc-top { display: table-row; height: 1px; }
-        .rc-mid { display: table-row; height: 100%; }
-        .rc-bot { display: table-row; height: 1px; }
-        .rc-mid-cell { display: table-cell; height: 100%; vertical-align: top; width: 100%; }
+        .page { border: 3px solid #004b49; padding: 6px; background: #fff; }
+        .page-inner { border: 1px solid #c5a059; padding: 6px; position: relative; }
 
         /* 2-Column Main Layout */
         .main-layout { display: table; width: 100%; border-collapse: collapse; height: 100%; }
@@ -244,16 +237,8 @@
 <div class="page">
     <div class="page-inner">
 
-        {{-- TOP ROW: (empty — sidebar layout used for main content) --}}
-        <div class="rc-top">
-            {{-- Intentionally minimal: sidebar drives the layout --}}
-        </div>
-
-        {{-- MID ROW: Full 2-column layout (sidebar + content) --}}
-        <div class="rc-mid">
-            <div class="rc-mid-cell">
-                <div class="main-layout">
-                    <div class="main-row">
+        <div class="main-layout">
+            <div class="main-row">
                         
                         {{-- LEFT SIDEBAR PANEL --}}
                         <div class="sidebar">

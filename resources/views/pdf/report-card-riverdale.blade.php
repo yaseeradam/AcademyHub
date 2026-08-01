@@ -10,20 +10,13 @@
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <title>Report Sheet - {{ $student->admission_number }}</title>
     <style>
-        @page { size: A4 portrait; margin: 8mm; }
+        @page { size: A4 portrait; margin: 4mm 6mm; }
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        html, body { height: 100%; margin: 0; padding: 0; }
         body { font-family: DejaVu Sans, Arial, sans-serif; font-size: 8.5px; color: #1e293b; background: #fff; line-height: 1.25; }
 
         /* Outer borders */
-        .page { border: 3px solid {{ $themeColor }}; padding: 6px; background: #fff; display: table; width: 100%; height: 100%; min-height: 100%; }
-        .page-inner { border: 1px solid {{ $accentColor }}; padding: 6px; position: relative; display: table; width: 100%; height: 100%; min-height: 100%; }
-
-        /* Table-row layout for full-page fill */
-        .rc-top { display: table-row; height: 1px; }
-        .rc-mid { display: table-row; height: 100%; }
-        .rc-bot { display: table-row; height: 1px; }
-        .rc-mid-cell { display: table-cell; height: 100%; vertical-align: top; width: 100%; }
+        .page { border: 3px solid {{ $themeColor }}; padding: 6px; background: #fff; }
+        .page-inner { border: 1px solid {{ $accentColor }}; padding: 6px; position: relative; }
 
         /* Header Layout */
         .header-table { display: table; width: 100%; border-bottom: 2.5px solid {{ $themeColor }}; padding-bottom: 5px; margin-bottom: 6px; }
@@ -215,8 +208,8 @@
 <div class="page">
     <div class="page-inner">
 
-        {{-- TOP ROW: Header + Student Details --}}
-        <div class="rc-top">
+        {{-- Header + Student Details --}}
+        <div>
             {{-- Header Section --}}
             <div class="header-table">
                 <div class="header-cell logo-wrap">
@@ -296,9 +289,8 @@
             </div>
         </div>
 
-        {{-- MID ROW: Academic Scores + Behavior/Attendance/Remarks + Grading/Principal --}}
-        <div class="rc-mid">
-            <div class="rc-mid-cell">
+        {{-- Academic Scores + Behavior/Attendance/Remarks + Grading/Principal --}}
+        <div>
                 {{-- Academic Performance section --}}
                 <div>
                     <div class="section-header">Academic Performance</div>
@@ -543,10 +535,9 @@
                     </div>
                 @endif
             </div>
-        </div>
 
-        {{-- BOT ROW: School Fees + Next Term + Signatures + Footer --}}
-        <div class="rc-bot">
+        {{-- School Fees + Next Term + Signatures + Footer --}}
+        <div>
             {{-- School Fees Panel --}}
             @if($showSchoolFees && isset($schoolFees))
                 <div style="border: 1px solid {{ $accentColor }}; border-radius: 4px; background: #fffbeb; padding: 8px; margin-bottom: 12px;">
