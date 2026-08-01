@@ -4,16 +4,23 @@
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <title>Report Sheet - {{ $student->admission_number }}</title>
     <style>
-        @page { margin: {{ count($rows) > 12 ? '4mm' : '10mm' }}; }
+        @page { size: A4 portrait; margin: 8mm; }
         * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { height: 100%; margin: 0; padding: 0; }
         body { font-family: "DejaVu Sans", Arial, sans-serif; font-size: 8.5px; color: #334155; background: #fff; line-height: 1.3; }
 
         /* ─── Nordic Minimalist Slate Theme ─── */
-        .page { border: 2px solid #cbd5e1; padding: 12px; background: #fff; }
-        .page-inner { padding: 4px; }
+        .page { border: 2px solid #cbd5e1; padding: 12px; background: #fff; display: table; width: 100%; height: 100%; min-height: 100%; }
+        .page-inner { padding: 4px; display: table; width: 100%; height: 100%; min-height: 100%; }
+
+        /* Table-row layout for full-page fill */
+        .rc-top { display: table-row; height: 1px; }
+        .rc-mid { display: table-row; height: 100%; }
+        .rc-bot { display: table-row; height: 1px; }
+        .rc-mid-cell { display: table-cell; height: 100%; vertical-align: top; width: 100%; }
 
         /* Nordic Stark Header */
-        .header { border-bottom: 1.5px solid #475569; padding-bottom: {{ count($rows) > 12 ? '4px' : '8px' }}; margin-bottom: {{ count($rows) > 12 ? '6px' : '12px' }}; }
+        .header { border-bottom: 1.5px solid #475569; padding-bottom: 4px; margin-bottom: 6px; }
         .header-table { display: table; width: 100%; }
         .header-cell { display: table-cell; vertical-align: middle; }
         .logo-wrap { width: 60px; }
@@ -24,7 +31,7 @@
         .meta-right { font-size: 8px; color: #475569; font-weight: 500; text-align: right; line-height: 1.3; }
 
         /* Nordic Grid Stats */
-        .stats { display: table; width: 100%; margin-bottom: {{ count($rows) > 12 ? '6px' : '12px' }}; border-collapse: collapse; border: 1.5px solid #cbd5e1; border-radius: 4px; overflow: hidden; }
+        .stats { display: table; width: 100%; margin-bottom: 6px; border-collapse: collapse; border: 1.5px solid #cbd5e1; border-radius: 4px; overflow: hidden; }
         .stat { display: table-cell; text-align: center; border-right: 1.5px solid #cbd5e1; padding: 6px 4px; background: #f8fafc; }
         .stat:last-child { border-right: none; }
         .stat.highlight { background: #f1f5f9; }
@@ -32,39 +39,39 @@
         .stat-value { font-size: 12px; font-weight: bold; color: #0f172a; }
 
         /* Table */
-        table.scores { width: 100%; border-collapse: collapse; margin-bottom: {{ count($rows) > 12 ? '6px' : '12px' }}; border: 1.5px solid #cbd5e1; }
-        table.scores th { background: #f1f5f9; color: #334155; padding: {{ count($rows) > 12 ? '2.5px 4px' : '5px 4px' }}; font-size: 7.5px; font-weight: bold; text-transform: uppercase; text-align: center; border: 1.5px solid #cbd5e1; border-bottom: 2px solid #94a3b8; }
-        table.scores td { padding: {{ count($rows) > 12 ? '2px 4px' : '4.5px 4px' }}; border: 1px solid #cbd5e1; text-align: center; font-size: 8px; color: #334155; }
+        table.scores { width: 100%; height: 100%; border-collapse: collapse; margin-bottom: 6px; border: 1.5px solid #cbd5e1; }
+        table.scores th { background: #f1f5f9; color: #334155; padding: 2.5px 4px; font-size: 7.5px; font-weight: bold; text-transform: uppercase; text-align: center; border: 1.5px solid #cbd5e1; border-bottom: 2px solid #94a3b8; }
+        table.scores td { padding: 2px 4px; border: 1px solid #cbd5e1; text-align: center; font-size: 8px; color: #334155; }
         table.scores tr:nth-child(even) td { background: #fafafb; }
         .subj { text-align: left !important; font-weight: bold; color: #1e293b; padding-left: 8px !important; }
         .bold { font-weight: bold; color: #0f172a; }
 
         /* Grading Key */
-        .grading { display: table; width: 100%; border: 1.5px solid #cbd5e1; margin-bottom: {{ count($rows) > 12 ? '6px' : '12px' }}; border-radius: 3px; overflow: hidden; }
+        .grading { display: table; width: 100%; border: 1.5px solid #cbd5e1; margin-bottom: 6px; border-radius: 3px; overflow: hidden; }
         .gr-cell { display: table-cell; padding: 4px; text-align: center; font-size: 7px; font-weight: bold; color: #475569; border-right: 1px solid #cbd5e1; background: #f8fafc; }
         .gr-cell:last-child { border-right: none; }
         .gr-cell strong { color: #1e293b; font-size: 8px; }
 
         /* Attendance */
-        .att { display: table; width: 100%; margin-bottom: {{ count($rows) > 12 ? '6px' : '12px' }}; border: 1.5px solid #cbd5e1; border-radius: 3px; overflow: hidden; }
+        .att { display: table; width: 100%; margin-bottom: 6px; border: 1.5px solid #cbd5e1; border-radius: 3px; overflow: hidden; }
         .att-cell { display: table-cell; width: 33.33%; text-align: center; padding: 5px; border-right: 1px solid #cbd5e1; background: #f8fafc; }
         .att-cell:last-child { border-right: none; }
         .att-label { font-size: 7.5px; font-weight: bold; text-transform: uppercase; color: #475569; margin-bottom: 2px; }
         .att-value { font-size: 12px; font-weight: bold; color: #0f172a; }
 
         /* Remarks */
-        .remarks { border: 1.5px solid #cbd5e1; border-radius: 4px; padding: {{ count($rows) > 12 ? '4px 6px' : '6px 8px' }}; margin-bottom: {{ count($rows) > 12 ? '4px' : '6px' }}; background: #f8fafc; }
-        .remarks-label { font-size: 7.5px; font-weight: bold; color: #1e293b; text-transform: uppercase; letter-spacing: 0.3px; margin-bottom: 2px; border-bottom: 1px solid #cbd5e1; padding-bottom: 2px; }
-        .remarks-text { font-size: 8px; color: #334155; min-height: 16px; line-height: 1.3; }
+        .remarks { border: 1.5px solid #cbd5e1; border-radius: 4px; padding: 3px 5px; margin-bottom: 3px; background: #f8fafc; }
+        .remarks-label { font-size: 7.5px; font-weight: bold; color: #1e293b; text-transform: uppercase; letter-spacing: 0.3px; margin-bottom: 2px; }
+        .remarks-text { font-size: 8px; color: #334155; min-height: 10px; line-height: 1.3; }
 
         /* Next Term */
-        .next-term { background: #475569; color: #fff; text-align: center; padding: 5px; font-size: 8px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: {{ count($rows) > 12 ? '6px' : '12px' }}; border-radius: 3px; }
+        .next-term { background: #475569; color: #fff; text-align: center; padding: 5px; font-size: 8px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; border-radius: 3px; }
 
         /* Signatures */
-        .sigs { display: table; width: 100%; margin-top: {{ count($rows) > 12 ? '4px' : '10px' }}; }
+        .sigs { display: table; width: 100%; margin-top: 4px; }
         .sig { display: table-cell; width: 33.33%; text-align: center; padding: 4px; vertical-align: bottom; }
         .sig-img { max-height: 26px; max-width: 70px; object-fit: contain; margin-bottom: 2px; }
-        .sig-line { border-top: 1.5px solid #475569; margin-top: {{ count($rows) > 12 ? '10px' : '20px' }}; padding-top: 3px; font-size: 8px; font-weight: bold; color: #1e293b; }
+        .sig-line { border-top: 1.5px solid #475569; margin-top: 10px; padding-top: 3px; font-size: 8px; font-weight: bold; color: #1e293b; }
         .sig-line.has-img { margin-top: 2px; }
         .sig-sub { font-size: 6.5px; color: #64748b; font-style: italic; margin-top: 1px; }
 
@@ -98,133 +105,146 @@
 
 <div class="page">
     <div class="page-inner">
-        {{-- Header --}}
-        <div class="header">
-            <div class="header-table">
-                <div class="header-cell logo-wrap">
-                    @if($logoExists)<img class="logo" src="{{ $logoPath }}" alt="">@endif
+
+        {{-- TOP ROW: Header + Student Info + Stats --}}
+        <div class="rc-top">
+            {{-- Header --}}
+            <div class="header">
+                <div class="header-table">
+                    <div class="header-cell logo-wrap">
+                        @if($logoExists)<img class="logo" src="{{ $logoPath }}" alt="">@endif
+                    </div>
+                    <div class="header-cell">
+                        <div class="school-name">{{ $schoolName }}</div>
+                        @if(config('academyhub.school_address'))<div class="school-meta">{{ config('academyhub.school_address') }}</div>@endif
+                        @if(config('academyhub.school_phone'))
+                            <div class="school-meta">Phone: {{ config('academyhub.school_phone') }}</div>
+                        @endif
+                        <div class="badge">Student Roster Assessment</div>
+                    </div>
+                    <div class="header-cell" style="width:130px;">
+                        <div class="meta-right">Session: <strong>{{ $session }}</strong></div>
+                        <div class="meta-right">Term: <strong>Term {{ $term }}</strong></div>
+                        <div class="meta-right">Date: <strong>{{ now()->format('d M, Y') }}</strong></div>
+                    </div>
                 </div>
-                <div class="header-cell">
-                    <div class="school-name">{{ $schoolName }}</div>
-                    @if(config('academyhub.school_address'))<div class="school-meta">{{ config('academyhub.school_address') }}</div>@endif
-                    @if(config('academyhub.school_phone'))
-                        <div class="school-meta">Phone: {{ config('academyhub.school_phone') }}</div>
-                    @endif
-                    <div class="badge">Student Roster Assessment</div>
-                </div>
-                <div class="header-cell" style="width:130px;">
-                    <div class="meta-right">Session: <strong>{{ $session }}</strong></div>
-                    <div class="meta-right">Term: <strong>Term {{ $term }}</strong></div>
-                    <div class="meta-right">Date: <strong>{{ now()->format('d M, Y') }}</strong></div>
-                </div>
+            </div>
+
+            {{-- Student Info --}}
+            @php($siBorderColor = '#cbd5e1') @php($siBgColor = '#f8fafc') @php($siLabelColor = '#475569') @php($siValueColor = '#1e293b') @php($siDotColor = '#cbd5e1')
+            @include('pdf.partials.rc-student-info')
+
+            {{-- Stats --}}
+            <div class="stats">
+                <div class="stat"><div class="stat-label">Total</div><div class="stat-value">{{ $grandTotal }}</div></div>
+                <div class="stat highlight"><div class="stat-label">Average</div><div class="stat-value">{{ number_format($average,1) }}%</div></div>
+                @if($showPosition)<div class="stat"><div class="stat-label">Position</div><div class="stat-value">{{ $position }}</div></div>@endif
+                @if($showClassAverage)
+                <div class="stat"><div class="stat-label">Class Avg</div><div class="stat-value">{{ number_format($classAverage,1) }}%</div></div>
+                <div class="stat"><div class="stat-label">Highest</div><div class="stat-value">{{ number_format($highestAverage??0,1) }}%</div></div>
+                <div class="stat"><div class="stat-label">Lowest</div><div class="stat-value">{{ number_format($lowestAverage??0,1) }}%</div></div>
+                @endif
             </div>
         </div>
 
-        {{-- Student Info --}}
-        @php($siBorderColor = '#cbd5e1') @php($siBgColor = '#f8fafc') @php($siLabelColor = '#475569') @php($siValueColor = '#1e293b') @php($siDotColor = '#cbd5e1')
-        @include('pdf.partials.rc-student-info')
+        {{-- MID ROW: Scores Table + Grading Key + Attendance + Psychomotor --}}
+        <div class="rc-mid">
+            <div class="rc-mid-cell">
+                {{-- Scores Table --}}
+                <table class="scores">
+                    <thead>
+                        <tr>
+                            <th style="width:32%;text-align:left;padding-left:8px;">Subject</th>
+                            <th style="width:10%;">CA1<br/>({{ config('academyhub.results_ca1_max',20) }})</th>
+                            <th style="width:10%;">CA2<br/>({{ config('academyhub.results_ca2_max',20) }})</th>
+                            <th style="width:10%;">Exam<br/>({{ config('academyhub.results_exam_max',60) }})</th>
+                            <th style="width:10%;">Total</th>
+                            <th style="width:9%;">Grade</th>
+                            @if($showClassAverage)<th style="width:9%;">Avg</th>@endif
+                            @if($showPosition)<th style="width:9%;">Pos</th>@endif
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($rows as $r)
+                        <tr>
+                            <td class="subj">{{ $r['subject']?->name ?? '-' }}</td>
+                            <td>{{ $r['ca1'] ?? '' }}</td>
+                            <td>{{ $r['ca2'] ?? '' }}</td>
+                            <td>{{ $r['exam'] ?? '' }}</td>
+                            <td class="bold">{{ $r['total'] ?? '' }}</td>
+                            <td class="bold">{{ $r['grade'] ?? '' }}</td>
+                            @if($showClassAverage)<td>{{ $r['class_avg'] ?? '—' }}</td>@endif
+                            @if($showPosition)<td>{{ $r['position'] ?? '—' }}</td>@endif
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
 
-        {{-- Stats --}}
-        <div class="stats">
-            <div class="stat"><div class="stat-label">Total</div><div class="stat-value">{{ $grandTotal }}</div></div>
-            <div class="stat highlight"><div class="stat-label">Average</div><div class="stat-value">{{ number_format($average,1) }}%</div></div>
-            @if($showPosition)<div class="stat"><div class="stat-label">Position</div><div class="stat-value">{{ $position }}</div></div>@endif
-            @if($showClassAverage)
-            <div class="stat"><div class="stat-label">Class Avg</div><div class="stat-value">{{ number_format($classAverage,1) }}%</div></div>
-            <div class="stat"><div class="stat-label">Highest</div><div class="stat-value">{{ number_format($highestAverage??0,1) }}%</div></div>
-            <div class="stat"><div class="stat-label">Lowest</div><div class="stat-value">{{ number_format($lowestAverage??0,1) }}%</div></div>
+                {{-- Grading Key --}}
+                @if($showGradingKey)
+                <div class="grading">
+                    <div class="gr-cell"><strong>A:</strong> 70-100 (Excellent)</div>
+                    <div class="gr-cell"><strong>B:</strong> 60-69 (Very Good)</div>
+                    <div class="gr-cell"><strong>C:</strong> 50-59 (Good)</div>
+                    <div class="gr-cell"><strong>D:</strong> 40-49 (Pass)</div>
+                    <div class="gr-cell"><strong>F:</strong> 0-39 (Fail)</div>
+                </div>
+                @endif
+
+                {{-- Attendance --}}
+                @if($showAttendance)
+                <div class="att">
+                    <div class="att-cell"><div class="att-label">Times Opened</div><div class="att-value">{{ $timesOpened ?? '—' }}</div></div>
+                    <div class="att-cell"><div class="att-label">Times Present</div><div class="att-value">{{ $timesPresent ?? '—' }}</div></div>
+                    <div class="att-cell"><div class="att-label">Times Absent</div><div class="att-value">{{ $timesAbsent ?? '—' }}</div></div>
+                </div>
+                @endif
+
+                {{-- Psychomotor --}}
+                @php($rcBorderColor='#cbd5e1') @php($rcBgLight='#f8fafc') @php($rcTitleColor='#475569') @php($rcLabelColor='#475569')
+                @include('pdf.partials.rc-psychomotor')
+            </div>
+        </div>
+
+        {{-- BOT ROW: Remarks + School Fees + Next Term + Signatures + Footer --}}
+        <div class="rc-bot">
+            {{-- Remarks --}}
+            @if($showTeacherRemarks)
+            <div class="remarks"><div class="remarks-label">Class Teacher's Remarks</div><div class="remarks-text">{{ $teacherRemarks ?? 'No remarks provided.' }}</div></div>
             @endif
-        </div>
+            @if($showPrincipalRemarks)
+            <div class="remarks"><div class="remarks-label">Principal's Remarks</div><div class="remarks-text">{{ $principalRemarks ?? 'No remarks provided.' }}</div></div>
+            @endif
 
-        {{-- Scores Table --}}
-        <table class="scores">
-            <thead>
-                <tr>
-                    <th style="width:32%;text-align:left;padding-left:8px;">Subject</th>
-                    <th style="width:10%;">CA1<br/>({{ config('academyhub.results_ca1_max',20) }})</th>
-                    <th style="width:10%;">CA2<br/>({{ config('academyhub.results_ca2_max',20) }})</th>
-                    <th style="width:10%;">Exam<br/>({{ config('academyhub.results_exam_max',60) }})</th>
-                    <th style="width:10%;">Total</th>
-                    <th style="width:9%;">Grade</th>
-                    @if($showClassAverage)<th style="width:9%;">Avg</th>@endif
-                    @if($showPosition)<th style="width:9%;">Pos</th>@endif
-                </tr>
-            </thead>
-            <tbody>
-                @foreach($rows as $r)
-                <tr>
-                    <td class="subj">{{ $r['subject']?->name ?? '-' }}</td>
-                    <td>{{ $r['ca1'] ?? '' }}</td>
-                    <td>{{ $r['ca2'] ?? '' }}</td>
-                    <td>{{ $r['exam'] ?? '' }}</td>
-                    <td class="bold">{{ $r['total'] ?? '' }}</td>
-                    <td class="bold">{{ $r['grade'] ?? '' }}</td>
-                    @if($showClassAverage)<td>{{ $r['class_avg'] ?? '—' }}</td>@endif
-                    @if($showPosition)<td>{{ $r['position'] ?? '—' }}</td>@endif
-                </tr>
-                @endforeach
-            </tbody>
-        </table>
+            {{-- School Fees --}}
+            @php($rcBorderColor='#cbd5e1') @php($rcBgLight='#f8fafc') @php($rcTitleColor='#475569') @php($rcLabelColor='#475569')
+            @include('pdf.partials.rc-school-fees')
 
-        {{-- Grading Key --}}
-        @if($showGradingKey)
-        <div class="grading">
-            <div class="gr-cell"><strong>A:</strong> 70-100 (Excellent)</div>
-            <div class="gr-cell"><strong>B:</strong> 60-69 (Very Good)</div>
-            <div class="gr-cell"><strong>C:</strong> 50-59 (Good)</div>
-            <div class="gr-cell"><strong>D:</strong> 40-49 (Pass)</div>
-            <div class="gr-cell"><strong>F:</strong> 0-39 (Fail)</div>
-        </div>
-        @endif
+            {{-- Next Term --}}
+            @if($showNextTermDate)
+            <div class="next-term">Next Term Begins: {{ $nextTermDate ?? 'To be announced' }}</div>
+            @endif
 
-        {{-- Attendance --}}
-        @if($showAttendance)
-        <div class="att">
-            <div class="att-cell"><div class="att-label">Times Opened</div><div class="att-value">{{ $timesOpened ?? '—' }}</div></div>
-            <div class="att-cell"><div class="att-label">Times Present</div><div class="att-value">{{ $timesPresent ?? '—' }}</div></div>
-            <div class="att-cell"><div class="att-label">Times Absent</div><div class="att-value">{{ $timesAbsent ?? '—' }}</div></div>
-        </div>
-        @endif
-
-        {{-- Psychomotor --}}
-        @php($rcBorderColor='#cbd5e1') @php($rcBgLight='#f8fafc') @php($rcTitleColor='#475569') @php($rcLabelColor='#475569')
-        @include('pdf.partials.rc-psychomotor')
-
-        {{-- Remarks --}}
-        @if($showTeacherRemarks)
-        <div class="remarks"><div class="remarks-label">Class Teacher's Remarks</div><div class="remarks-text">{{ $teacherRemarks ?? 'No remarks provided.' }}</div></div>
-        @endif
-        @if($showPrincipalRemarks)
-        <div class="remarks"><div class="remarks-label">Principal's Remarks</div><div class="remarks-text">{{ $principalRemarks ?? 'No remarks provided.' }}</div></div>
-        @endif
-
-        {{-- School Fees --}}
-        @php($rcBorderColor='#cbd5e1') @php($rcBgLight='#f8fafc') @php($rcTitleColor='#475569') @php($rcLabelColor='#475569')
-        @include('pdf.partials.rc-school-fees')
-
-        {{-- Next Term --}}
-        @if($showNextTermDate)
-        <div class="next-term">Next Term Begins: {{ $nextTermDate ?? 'To be announced' }}</div>
-        @endif
-
-        {{-- Signatures --}}
-        @if($showSignatures)
-        <div class="sigs">
-            <div class="sig">
-                @if(($signatureImages['teacher']??null) && file_exists($signatureImages['teacher']))<img src="{{ $signatureImages['teacher'] }}" class="sig-img" /><div class="sig-line has-img">Class Teacher</div>
-                @else<div class="sig-line">Class Teacher</div>@endif
-                <div class="sig-sub">Signature & Date</div>
+            {{-- Signatures --}}
+            @if($showSignatures)
+            <div class="sigs">
+                <div class="sig">
+                    @if(($signatureImages['teacher']??null) && file_exists($signatureImages['teacher']))<img src="{{ $signatureImages['teacher'] }}" class="sig-img" /><div class="sig-line has-img">Class Teacher</div>
+                    @else<div class="sig-line">Class Teacher</div>@endif
+                    <div class="sig-sub">Signature &amp; Date</div>
+                </div>
+                <div class="sig">
+                    @if(($signatureImages['principal']??null) && file_exists($signatureImages['principal']))<img src="{{ $signatureImages['principal'] }}" class="sig-img" /><div class="sig-line has-img">Principal</div>
+                    @else<div class="sig-line">Principal</div>@endif
+                    <div class="sig-sub">Signature &amp; Stamp</div>
+                </div>
+                <div class="sig"><div class="sig-line">Parent/Guardian</div><div class="sig-sub">Signature &amp; Date</div></div>
             </div>
-            <div class="sig">
-                @if(($signatureImages['principal']??null) && file_exists($signatureImages['principal']))<img src="{{ $signatureImages['principal'] }}" class="sig-img" /><div class="sig-line has-img">Principal</div>
-                @else<div class="sig-line">Principal</div>@endif
-                <div class="sig-sub">Signature & Stamp</div>
-            </div>
-            <div class="sig"><div class="sig-line">Parent/Guardian</div><div class="sig-sub">Signature & Date</div></div>
-        </div>
-        @endif
+            @endif
 
-        <div class="footer">Generated {{ now()->format('d M Y, g:i A') }} • {{ $schoolName }} • Powered by AcademyHub SMS</div>
+            <div class="footer">Generated {{ now()->format('d M Y, g:i A') }} • {{ $schoolName }} • Powered by AcademyHub SMS</div>
+        </div>
+
     </div>
 </div>
 </body>

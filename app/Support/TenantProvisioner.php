@@ -19,9 +19,8 @@ class TenantProvisioner
     {
         $this->ensureSettingsFile($tenant);
         $this->ensureAcademicCalendar($tenant);
-        $this->ensureDefaultClassesAndSections($tenant);
-        $this->ensureDefaultSubjects($tenant);
-        $this->ensureDefaultFeeStructures($tenant);
+        // Classes, sections, subjects and fee structures are NOT auto-created.
+        // Each school adds their own after onboarding.
     }
 
     private function ensureSettingsFile(Tenant $tenant): void
@@ -104,77 +103,8 @@ class TenantProvisioner
         }
     }
 
-    private function ensureDefaultClassesAndSections(Tenant $tenant): void
-    {
-        $classRows = [
-            ['name' => 'JSS 1', 'level' => 1],
-            ['name' => 'JSS 2', 'level' => 2],
-            ['name' => 'JSS 3', 'level' => 3],
-            ['name' => 'SSS 1', 'level' => 4],
-            ['name' => 'SSS 2', 'level' => 5],
-            ['name' => 'SSS 3', 'level' => 6],
-        ];
-
-        foreach ($classRows as $row) {
-            $class = SchoolClass::query()->firstOrCreate(
-                ['tenant_id' => $tenant->id, 'name' => $row['name']],
-                ['level' => $row['level']]
-            );
-
-            foreach (['A', 'B', 'C'] as $sectionName) {
-                Section::query()->firstOrCreate([
-                    'tenant_id' => $tenant->id,
-                    'class_id' => $class->id,
-                    'name' => $sectionName,
-                ]);
-            }
-        }
-    }
-
-    private function ensureDefaultSubjects(Tenant $tenant): void
-    {
-        $subjects = [
-            ['name' => 'Mathematics', 'code' => 'MTH'],
-            ['name' => 'English Language', 'code' => 'ENG'],
-            ['name' => 'Basic Science', 'code' => 'BSC'],
-            ['name' => 'Social Studies', 'code' => 'SOS'],
-        ];
-
-        foreach ($subjects as $subject) {
-            Subject::query()->firstOrCreate(
-                ['tenant_id' => $tenant->id, 'code' => $subject['code']],
-                ['name' => $subject['name']]
-            );
-        }
-    }
-
-    private function ensureDefaultFeeStructures(Tenant $tenant): void
-    {
-        $defaultTuitionByClassLevel = [
-            1 => 40000,
-            2 => 45000,
-            3 => 45000,
-            4 => 55000,
-            5 => 55000,
-            6 => 60000,
-        ];
-
-        $classes = SchoolClass::query()->where('tenant_id', $tenant->id)->get();
-        foreach ($classes as $class) {
-            $amount = $defaultTuitionByClassLevel[(int) ($class->level ?? 0)] ?? 50000;
-
-            FeeStructure::query()->firstOrCreate(
-                [
-                    'tenant_id' => $tenant->id,
-                    'class_id' => $class->id,
-                    'category' => 'Tuition',
-                    'term' => null,
-                    'session' => null,
-                ],
-                [
-                    'amount_due' => $amount,
-                ]
-            );
-        }
-    }
+    // ensureDefaultClassesAndSections(), ensureDefaultSubjects() and
+    // ensureDefaultFeeStructures() have been intentionally removed.
+    // Schools must create their own classes, sections, subjects and fee
+    // structures through the admin interface after onboarding.
 }

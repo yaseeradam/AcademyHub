@@ -70,10 +70,16 @@ class ReportCardService
      */
     public function build(Student $student, int $term, string $session, array $optionsOverrides = []): array
     {
+        // Load current (actual) class & section for display on the report card header.
         $student->load(['schoolClass', 'section']);
 
+        // Preserve the student's actual class_id and section_id for display.
+        // These are always shown on the report card exactly as registered.
+        $displayClassId   = (int) $student->class_id;
+        $displaySectionId = (int) ($student->section_id ?? 0);
+
         // Scores are recorded against the class the student was in at the time of
-        // result entry. If the student has since been moved to another class, we
+        // result entry. If the student has since been moved to another class we
         // must still find those scores and use the original class context for
         // subjects, class averages and positions.
         $scoreClassId = Score::query()
@@ -82,10 +88,11 @@ class ReportCardService
             ->where('session', $session)
             ->value('class_id');
 
-        // Use the class recorded on the score records (the class the student was
-        // in when the results were entered) for all class-scoped lookups.
-        $student->class_id = (int) ($scoreClassId ?: $student->class_id);
-        $student->load(['schoolClass', 'section']);
+        // Use the score-entry class ONLY for internal calculations
+        // (subjects list, class averages, positions). Do NOT change the
+        // display class/section — the student's registered class is always shown.
+        $calcClassId = (int) ($scoreClassId ?: $displayClassId);
+        $student->class_id = $calcClassId;
 
         $subjects = $this->subjectsForClass($student->class_id);
         $subjectIds = $subjects->pluck('id');
@@ -245,6 +252,13 @@ class ReportCardService
             ];
         }
 
+        // Restore the student's actual registered class and section so the
+        // report card header shows the correct class/section name (e.g. "Basic 5 Abyad")
+        // rather than the class that was active when scores were entered.
+        $student->class_id   = $displayClassId;
+        $student->section_id = $displaySectionId ?: null;
+        $student->load(['schoolClass', 'section']);
+
         return [
             'student' => $student,
             'term' => $term,
@@ -269,6 +283,7 @@ class ReportCardService
             'signatureImages' => $signatureImages,
         ];
     }
+
 
     /**
      * @return array{0:int|null,1:int|null,2:int|null} times opened, present, absent.
