@@ -4,14 +4,15 @@
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
         <title>Report Sheet - {{ $student->admission_number }}</title>
         <style>
-            @page { margin: 4mm 6mm; }
+            @page { size: A4 portrait; margin: 3mm 5mm; }
             * { margin: 0; padding: 0; box-sizing: border-box; }
+            tr, table, div, p { page-break-inside: avoid; }
             body {
                 font-family: DejaVu Sans, Arial, sans-serif;
-                font-size: 9px;
+                font-size: 8px;
                 color: #1e293b;
                 background: #fff;
-                line-height: 1.25;
+                line-height: 1.18;
             }
 
             /* ─── Elegant Navy & Gold ─── */

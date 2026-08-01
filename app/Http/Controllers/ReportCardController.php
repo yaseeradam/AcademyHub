@@ -99,7 +99,10 @@ class ReportCardController extends Controller
         $useCache = false;
         if (file_exists($fullPath) && app()->environment() !== 'testing') {
             $cacheTimestamp = filemtime($fullPath);
-            $stale = false;
+            $viewPath = resource_path('views/' . str_replace('.', '/', $view) . '.blade.php');
+            if (file_exists($viewPath) && $cacheTimestamp < filemtime($viewPath)) {
+                $stale = true;
+            }
 
             if ($lastScoreTimestamp !== null && $cacheTimestamp < $lastScoreTimestamp) {
                 $stale = true;
@@ -141,7 +144,12 @@ class ReportCardController extends Controller
 
         $pdf = Pdf::loadView($view, [
             ...$data,
-        ])->setPaper('a4');
+        ])->setPaper('a4', 'portrait')->setOptions([
+            'dpi' => 72,
+            'isHtml5ParserEnabled' => true,
+            'isPhpEnabled' => false,
+            'defaultFont' => 'dejavu sans',
+        ]);
 
         $output = $pdf->output();
 

@@ -4,9 +4,10 @@
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <title>Report Sheet - {{ $student->admission_number }}</title>
     <style>
-        @page { margin: 4mm 6mm; }
+        @page { size: A4 portrait; margin: 3mm 5mm; }
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: Georgia, Times, serif; font-size: 8.5px; color: #1e293b; background: #fff; line-height: 1.25; }
+        tr, table, div, p { page-break-inside: avoid; }
+        body { font-family: Georgia, Times, serif; font-size: 8px; color: #1e293b; background: #fff; line-height: 1.18; }
 
         /* ─── Heritage Royal Academic Theme ─── */
         .page { border: 4px double #a16207; padding: 6px; background: #fff; }

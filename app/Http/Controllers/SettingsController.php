@@ -540,7 +540,12 @@ class SettingsController extends Controller
                 return response(view($view, $data));
             }
 
-            $pdf = Pdf::loadView($view, $data)->setPaper('a4');
+            $pdf = Pdf::loadView($view, $data)->setPaper('a4', 'portrait')->setOptions([
+                'dpi' => 72,
+                'isHtml5ParserEnabled' => true,
+                'isPhpEnabled' => false,
+                'defaultFont' => 'dejavu sans',
+            ]);
 
             return response($pdf->output(), 200, [
                 'Content-Type' => 'application/pdf',

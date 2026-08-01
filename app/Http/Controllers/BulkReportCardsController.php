@@ -123,7 +123,12 @@ class BulkReportCardsController extends Controller
 
                 $pdf = Pdf::loadView($view, [
                     ...$payload,
-                ])->setPaper('a4');
+                ])->setPaper('a4', 'portrait')->setOptions([
+                    'dpi' => 72,
+                    'isHtml5ParserEnabled' => true,
+                    'isPhpEnabled' => false,
+                    'defaultFont' => 'dejavu sans',
+                ]);
 
                 $safeAdm = preg_replace('/[^A-Za-z0-9\\-_.]+/', '-', (string) $student->admission_number) ?: (string) $student->id;
                 $filename = "report-card-{$safeAdm}-{$safeSession}-T{$term}.pdf";
@@ -194,7 +199,12 @@ class BulkReportCardsController extends Controller
 
         $pdf = Pdf::loadView($view, [
             ...$payload,
-        ])->setPaper('a4');
+        ])->setPaper('a4', 'portrait')->setOptions([
+            'dpi' => 72,
+            'isHtml5ParserEnabled' => true,
+            'isPhpEnabled' => false,
+            'defaultFont' => 'dejavu sans',
+        ]);
 
         return $pdf->stream("preview-report-card-{$student->id}.pdf");
     }
