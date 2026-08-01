@@ -104,13 +104,18 @@
 
     <!-- Add/Edit Form Modal -->
     @if($showForm)
-        <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm" wire:click.self="resetForm">
-            <div class="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
-                <div class="mb-6">
-                    <h3 class="text-lg font-semibold text-gray-900">
-                        {{ $editingField ? 'Edit Field' : 'Add Field' }}
-                    </h3>
-                    <p class="mt-1 text-sm text-gray-500">Fields will appear on the selected form during registration.</p>
+        <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm" wire:click.self="resetForm">
+            <div class="w-full max-w-xl max-h-[90vh] overflow-y-auto rounded-2xl bg-white p-6 shadow-xl">
+                <div class="mb-5 flex items-start justify-between border-b border-gray-100 pb-4">
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-900">
+                            {{ $editingField ? 'Edit Field' : 'Add Field' }}
+                        </h3>
+                        <p class="mt-0.5 text-xs text-gray-500">Fields will appear on the selected form during registration.</p>
+                    </div>
+                    <button type="button" wire:click="resetForm" class="rounded-lg p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition-colors">
+                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
                 </div>
 
                 <form wire:submit="saveField" class="space-y-4">
@@ -118,42 +123,42 @@
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">Add to Form</label>
                         <div class="grid grid-cols-3 gap-3">
-                            <label class="relative flex cursor-pointer items-center rounded-xl border-2 p-3 transition-all
+                            <label class="relative flex cursor-pointer items-center rounded-xl border-2 p-2.5 transition-all
                                 {{ $formType === 'student' ? 'border-blue-500 bg-blue-50 ring-1 ring-blue-500' : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50' }}">
                                 <input type="radio" wire:model.live="formType" value="student" class="sr-only">
-                                <div class="flex items-center gap-2.5">
-                                    <div class="flex h-8 w-8 items-center justify-center rounded-lg {{ $formType === 'student' ? 'bg-blue-500 text-white' : 'bg-gray-100 text-gray-500' }}">
-                                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"/></svg>
+                                <div class="flex items-center gap-2">
+                                    <div class="flex h-7 w-7 items-center justify-center rounded-lg {{ $formType === 'student' ? 'bg-blue-500 text-white' : 'bg-gray-100 text-gray-500' }}">
+                                        <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"/></svg>
                                     </div>
                                     <div>
-                                        <div class="text-sm font-semibold {{ $formType === 'student' ? 'text-blue-900' : 'text-gray-900' }}">Student</div>
-                                        <div class="text-xs {{ $formType === 'student' ? 'text-blue-600' : 'text-gray-500' }}">Registration form</div>
+                                        <div class="text-xs font-semibold {{ $formType === 'student' ? 'text-blue-900' : 'text-gray-900' }}">Student</div>
+                                        <div class="text-[10px] {{ $formType === 'student' ? 'text-blue-600' : 'text-gray-500' }}">Registration</div>
                                     </div>
                                 </div>
                             </label>
-                            <label class="relative flex cursor-pointer items-center rounded-xl border-2 p-3 transition-all
+                            <label class="relative flex cursor-pointer items-center rounded-xl border-2 p-2.5 transition-all
                                 {{ $formType === 'teacher' ? 'border-purple-500 bg-purple-50 ring-1 ring-purple-500' : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50' }}">
                                 <input type="radio" wire:model.live="formType" value="teacher" class="sr-only">
-                                <div class="flex items-center gap-2.5">
-                                    <div class="flex h-8 w-8 items-center justify-center rounded-lg {{ $formType === 'teacher' ? 'bg-purple-500 text-white' : 'bg-gray-100 text-gray-500' }}">
-                                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                                <div class="flex items-center gap-2">
+                                    <div class="flex h-7 w-7 items-center justify-center rounded-lg {{ $formType === 'teacher' ? 'bg-purple-500 text-white' : 'bg-gray-100 text-gray-500' }}">
+                                        <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
                                     </div>
                                     <div>
-                                        <div class="text-sm font-semibold {{ $formType === 'teacher' ? 'text-purple-900' : 'text-gray-900' }}">Teacher</div>
-                                        <div class="text-xs {{ $formType === 'teacher' ? 'text-purple-600' : 'text-gray-500' }}">Staff form</div>
+                                        <div class="text-xs font-semibold {{ $formType === 'teacher' ? 'text-purple-900' : 'text-gray-900' }}">Teacher</div>
+                                        <div class="text-[10px] {{ $formType === 'teacher' ? 'text-purple-600' : 'text-gray-500' }}">Staff form</div>
                                     </div>
                                 </div>
                             </label>
-                            <label class="relative flex cursor-pointer items-center rounded-xl border-2 p-3 transition-all
+                            <label class="relative flex cursor-pointer items-center rounded-xl border-2 p-2.5 transition-all
                                 {{ $formType === 'parent' ? 'border-green-500 bg-green-50 ring-1 ring-green-500' : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50' }}">
                                 <input type="radio" wire:model.live="formType" value="parent" class="sr-only">
-                                <div class="flex items-center gap-2.5">
-                                    <div class="flex h-8 w-8 items-center justify-center rounded-lg {{ $formType === 'parent' ? 'bg-green-500 text-white' : 'bg-gray-100 text-gray-500' }}">
-                                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                                <div class="flex items-center gap-2">
+                                    <div class="flex h-7 w-7 items-center justify-center rounded-lg {{ $formType === 'parent' ? 'bg-green-500 text-white' : 'bg-gray-100 text-gray-500' }}">
+                                        <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                                     </div>
                                     <div>
-                                        <div class="text-sm font-semibold {{ $formType === 'parent' ? 'text-green-900' : 'text-gray-900' }}">Parent</div>
-                                        <div class="text-xs {{ $formType === 'parent' ? 'text-green-600' : 'text-gray-500' }}">Parent form</div>
+                                        <div class="text-xs font-semibold {{ $formType === 'parent' ? 'text-green-900' : 'text-gray-900' }}">Parent</div>
+                                        <div class="text-[10px] {{ $formType === 'parent' ? 'text-green-600' : 'text-gray-500' }}">Parent form</div>
                                     </div>
                                 </div>
                             </label>
@@ -161,57 +166,60 @@
                         @error('formType') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
                     </div>
 
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700">Field Name</label>
-                        <input wire:model="name" type="text" placeholder="e.g. middle_name" 
-                               class="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-blue-500 focus:ring-blue-500">
-                        <p class="mt-1 text-xs text-gray-500">Use lowercase letters and underscores only</p>
-                        @error('name') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
-                    </div>
+                    <!-- 2-Column Grid for Field Inputs -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                        <div>
+                            <label class="block text-xs font-medium text-gray-700">Field Name</label>
+                            <input wire:model="name" type="text" placeholder="e.g. middle_name" 
+                                   class="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-blue-500 focus:ring-blue-500">
+                            <p class="mt-0.5 text-[10px] text-gray-500">Lowercase & underscores only</p>
+                            @error('name') <p class="mt-0.5 text-xs text-red-600">{{ $message }}</p> @enderror
+                        </div>
 
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700">Display Label</label>
-                        <input wire:model="label" type="text" placeholder="e.g. Middle Name" 
-                               class="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-blue-500 focus:ring-blue-500">
-                        @error('label') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
-                    </div>
+                        <div>
+                            <label class="block text-xs font-medium text-gray-700">Display Label</label>
+                            <input wire:model="label" type="text" placeholder="e.g. Middle Name" 
+                                   class="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-blue-500 focus:ring-blue-500">
+                            @error('label') <p class="mt-0.5 text-xs text-red-600">{{ $message }}</p> @enderror
+                        </div>
 
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700">Field Type</label>
-                        <select wire:model.live="type" class="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-blue-500 focus:ring-blue-500">
-                            <option value="text">Text</option>
-                            <option value="number">Number</option>
-                            <option value="date">Date</option>
-                            <option value="select">Dropdown</option>
-                            <option value="textarea">Textarea</option>
-                            <option value="checkbox">Checkbox</option>
-                        </select>
-                        @error('type') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
+                        <div>
+                            <label class="block text-xs font-medium text-gray-700">Field Type</label>
+                            <select wire:model.live="type" class="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-blue-500 focus:ring-blue-500">
+                                <option value="text">Text</option>
+                                <option value="number">Number</option>
+                                <option value="date">Date</option>
+                                <option value="select">Dropdown</option>
+                                <option value="textarea">Textarea</option>
+                                <option value="checkbox">Checkbox</option>
+                            </select>
+                            @error('type') <p class="mt-0.5 text-xs text-red-600">{{ $message }}</p> @enderror
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-medium text-gray-700">Placeholder</label>
+                            <input wire:model="placeholder" type="text" placeholder="Enter placeholder text" 
+                                   class="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-blue-500 focus:ring-blue-500">
+                            @error('placeholder') <p class="mt-0.5 text-xs text-red-600">{{ $message }}</p> @enderror
+                        </div>
                     </div>
 
                     @if($type === 'select')
                         <div>
-                            <label class="block text-sm font-medium text-gray-700">Options</label>
-                            <textarea wire:model="options" rows="3" placeholder="Option 1&#10;Option 2&#10;Option 3" 
+                            <label class="block text-xs font-medium text-gray-700">Options</label>
+                            <textarea wire:model="options" rows="2.5" placeholder="Option 1&#10;Option 2&#10;Option 3" 
                                       class="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-blue-500 focus:ring-blue-500"></textarea>
-                            <p class="mt-1 text-xs text-gray-500">One option per line</p>
-                            @error('options') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
+                            <p class="mt-0.5 text-[10px] text-gray-500">One option per line</p>
+                            @error('options') <p class="mt-0.5 text-xs text-red-600">{{ $message }}</p> @enderror
                         </div>
                     @endif
 
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700">Placeholder</label>
-                        <input wire:model="placeholder" type="text" placeholder="Enter placeholder text" 
-                               class="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-blue-500 focus:ring-blue-500">
-                        @error('placeholder') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
+                    <div class="flex items-center pt-1">
+                        <input wire:model="required" type="checkbox" id="required" class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                        <label for="required" class="ml-2 text-xs font-medium text-gray-700">Required field</label>
                     </div>
 
-                    <div class="flex items-center">
-                        <input wire:model="required" type="checkbox" id="required" class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
-                        <label for="required" class="ml-2 text-sm text-gray-700">Required field</label>
-                    </div>
-
-                    <div class="flex gap-3 pt-4">
+                    <div class="flex gap-3 pt-3 border-t border-gray-100">
                         <button type="submit" 
                                 class="flex-1 rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50 flex items-center justify-center gap-2 transition-all"
                                 wire:loading.attr="disabled"
