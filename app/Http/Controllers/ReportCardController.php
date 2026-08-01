@@ -99,10 +99,7 @@ class ReportCardController extends Controller
         $useCache = false;
         if (file_exists($fullPath) && app()->environment() !== 'testing') {
             $cacheTimestamp = filemtime($fullPath);
-            $viewPath = resource_path('views/' . str_replace('.', '/', $view) . '.blade.php');
-            if (file_exists($viewPath) && $cacheTimestamp < filemtime($viewPath)) {
-                $stale = true;
-            }
+            $stale = false;
 
             if ($lastScoreTimestamp !== null && $cacheTimestamp < $lastScoreTimestamp) {
                 $stale = true;
