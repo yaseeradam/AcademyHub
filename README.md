@@ -27,8 +27,7 @@
     <a href="#-key-features"><b>🌟 Key Features</b></a> •
     <a href="#-system-architecture"><b>📐 Architecture</b></a> •
     <a href="#-roles--permissions-matrix"><b>🔐 Roles & Access</b></a> •
-    <a href="#-quick-start--installation"><b>⚡ Quick Start</b></a> •
-    <a href="#-demo-credentials-seeded"><b>🔑 Demo Logins</b></a>
+    <a href="#-quick-start--installation"><b>⚡ Quick Start</b></a>
   </p>
 
 </div>
@@ -209,21 +208,6 @@ npm run build
 # 6. Start local development server
 php artisan serve
 ```
-
----
-
-## 🔑 Demo Credentials (Seeded)
-
-> [!NOTE]
-> Demo accounts are generated automatically when running `php artisan db:seed`.
-
-| Account Type | Username / Email | Password |
-| :--- | :--- | :--- |
-| 🛡️ **Administrator** | `admin@academyhub.local` | `password` |
-| 💳 **Bursar** | `bursar@academyhub.local` | `password` |
-| 👨‍🏫 **Teacher** | `teacher@academyhub.local` | `password` |
-| 🎓 **Student** | `STU20240001` *(Admission No.)* | `john0001` *(firstname + last 4 digits)* |
-| 👨‍👩‍👧 **Parent** | Registered Parent Phone / Email | `password` |
 
 ---
 
