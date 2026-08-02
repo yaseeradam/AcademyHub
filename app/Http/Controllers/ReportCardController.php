@@ -71,14 +71,11 @@ class ReportCardController extends Controller
 
         $student->load(['schoolClass', 'section']);
 
-        $template = (string) config('academyhub.report_card_template', 'compact');
-        $safeTemplate = preg_replace('/[^a-z0-9_-]/i', '', $template) ?: 'compact';
-        $sessionSlug = str_replace('/', '-', $session);
-        $storageDir = storage_path("app/public/report-cards/{$sessionSlug}/T{$term}/{$safeTemplate}");
-        $filename = 'report-card-' . $student->admission_number . '-' . $sessionSlug . '-T' . $term . '.pdf';
-        $fullPath = "{$storageDir}/{$filename}";
+        $view = ReportCardService::viewForTemplate($template);
+        $viewPath = resource_path('views/' . str_replace('.', '/', $view) . '.blade.php');
+        $viewTimestamp = file_exists($viewPath) ? filemtime($viewPath) : null;
 
-        // Cache invalidation: regenerate when scores, settings, student details, or attendance change.
+        // Cache invalidation: regenerate when scores, settings, student details, view template, or attendance change.
         $lastScoreAt = \App\Models\Score::where('student_id', $student->id)
             ->where('term', $term)
             ->where('session', $session)
@@ -101,7 +98,7 @@ class ReportCardController extends Controller
         $viewTimestamp = file_exists($viewPath) ? filemtime($viewPath) : null;
 
         $useCache = false;
-        if (file_exists($fullPath) && app()->environment() !== 'testing') {
+        if (file_exists($fullPath) && app()->environment() !== 'testing' && !$request->has('nocache')) {
             $cacheTimestamp = filemtime($fullPath);
             $stale = false;
 

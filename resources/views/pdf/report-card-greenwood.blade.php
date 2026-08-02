@@ -4,103 +4,89 @@
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <title>Report Sheet - {{ $student->admission_number }}</title>
     <style>
-        @page { size: A4 portrait; margin: 4mm 6mm; }
+        @page { size: A4 portrait; margin: 3mm 5mm; }
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: DejaVu Sans, Arial, sans-serif; font-size: 8.5px; color: #1e293b; background: #fff; line-height: 1.25; }
+        body { font-family: DejaVu Sans, Arial, sans-serif; font-size: 7.5px; color: #0f172a; background: #fff; line-height: 1.15; }
 
-        /* Outer borders */
-        .page { border: 3px solid #004b49; padding: 6px; background: #fff; }
-        .page-inner { border: 1px solid #c5a059; padding: 6px; position: relative; }
+        /* Outer Frame & Borders */
+        .page { border: 2.5px solid #004b49; padding: 4px; background: #fff; page-break-inside: avoid; }
+        .page-inner { border: 1px solid #c5a059; padding: 5px; position: relative; }
 
-        /* 2-Column Main Layout */
-        .main-layout { display: table; width: 100%; border-collapse: collapse; height: 100%; }
-        .main-row { display: table-row; }
-        
-        /* Left Sidebar Column */
-        .sidebar { display: table-cell; width: 25%; vertical-align: top; background: #002e2d; border: 1.5px solid #c5a059; border-radius: 8px; padding: 6px 4px; color: #ffffff; }
-        
-        /* Right Content Column */
-        .content { display: table-cell; width: 75%; vertical-align: top; padding-left: 15px; }
-
-        /* Sidebar Elements */
-        .avatar-wrap { text-align: center; margin-bottom: 6px; }
-        .avatar-circle { display: inline-block; width: 70px; height: 70px; border-radius: 50%; border: 3px solid #c5a059; background: #fff; overflow: hidden; }
-        .avatar-img { width: 100%; height: 100%; object-fit: cover; }
-        .avatar-placeholder { font-size: 32px; color: #c5a059; line-height: 64px; text-align: center; font-weight: bold; }
-
-        .side-meta { margin-bottom: 8px; }
-        .side-group { margin-bottom: 3px; border-bottom: 1px solid rgba(197, 160, 89, 0.25); padding-bottom: 2px; }
-        .side-label { font-size: 6.5px; font-weight: bold; text-transform: uppercase; color: #c5a059; display: block; }
-        .side-value { font-size: 8.5px; font-weight: bold; color: #ffffff; display: block; margin-top: 1px; }
-
-        /* Stats Cards inside Sidebar */
-        .side-stat-card { background: rgba(0, 75, 73, 0.6); border: 1px solid #c5a059; border-radius: 6px; padding: 6px; text-align: center; margin-bottom: 6px; }
-        .side-stat-card.active-avg { background: rgba(197, 160, 89, 0.2); }
-        .side-stat-label { font-size: 6px; font-weight: bold; text-transform: uppercase; color: #c5a059; display: block; }
-        .side-stat-value { font-size: 13px; font-weight: 900; color: #ffffff; display: block; margin-top: 1px; }
-
-        /* Header layout (Right side) */
+        /* Top Header */
         .header-table { display: table; width: 100%; border-bottom: 2px solid #004b49; padding-bottom: 3px; margin-bottom: 4px; }
         .header-cell { display: table-cell; vertical-align: middle; }
-        
-        .logo-wrap { width: 60px; text-align: left; }
-        .logo { width: 50px; height: 50px; object-fit: contain; }
-        
-        .school-info { text-align: left; padding-left: 0; }
-        .school-name { font-size: 16px; font-weight: 900; color: #004b49; text-transform: uppercase; }
-        .school-tagline { font-size: 8.5px; font-weight: bold; color: #c5a059; font-style: italic; margin-top: 2px; }
-        .school-meta { font-size: 7.5px; color: #475569; margin-top: 1px; }
+        .logo-wrap { width: 55px; text-align: left; }
+        .logo { width: 44px; height: 44px; object-fit: contain; border: 1px solid #c5a059; border-radius: 4px; padding: 1px; background: #fff; }
+        .school-info { text-align: left; padding-left: 4px; }
+        .school-name { font-size: 15px; font-weight: 900; color: #004b49; text-transform: uppercase; letter-spacing: 0.5px; }
+        .school-tagline { font-size: 8px; font-weight: bold; color: #c5a059; font-style: italic; margin-top: 1px; }
+        .school-meta { font-size: 7px; color: #475569; margin-top: 1px; }
 
         .session-card-wrap { width: 130px; text-align: right; vertical-align: top; }
-        .session-card { background: #004b49; border: 1.5px solid #c5a059; border-radius: 6px; padding: 6px; text-align: center; color: #ffffff; }
-        .session-title { font-size: 6.5px; font-weight: bold; text-transform: uppercase; color: #c5a059; letter-spacing: 0.5px; }
-        .session-value { font-size: 9px; font-weight: 900; color: #ffffff; margin-top: 1px; }
-        .session-meta-text { font-size: 6px; color: #e2e8f0; margin-top: 1px; }
+        .session-card { background: #004b49; border: 1px solid #c5a059; border-radius: 4px; padding: 4px 6px; text-align: center; color: #ffffff; }
+        .session-title { font-size: 9px; font-weight: 900; text-transform: uppercase; color: #ffffff; letter-spacing: 0.5px; }
+        .session-value { font-size: 7.5px; font-weight: bold; color: #c5a059; margin-top: 1px; }
 
-        /* Document Title */
-        .document-title { text-align: center; font-size: 9px; font-weight: bold; color: #004b49; text-transform: uppercase; letter-spacing: 2px; margin: 6px 0; }
-        
-        /* Scores Table */
-        .scores-table { width: 100%; height: 100%; border-collapse: collapse; margin-bottom: 4px; border: 1.5px solid #004b49; }
-        .scores-table th { background: #004b49; color: #ffffff; padding: 2.5px 3px; font-size: 7.5px; font-weight: bold; text-transform: uppercase; border: 1px solid #004b49; text-align: center; }
-        .scores-table td { padding: 2.5px 3px; border: 1px solid #e2e8f0; text-align: center; font-size: 8px; }
-        .scores-table tr:nth-child(even) td { background: #f8fafc; }
-        .scores-table td.subject-name { text-align: left; font-weight: bold; color: #004b49; padding-left: 6px; }
-        .scores-table td.bold { font-weight: bold; }
+        /* Student Metadata Summary Grid */
+        .meta-table { display: table; width: 100%; margin-bottom: 4px; border: 1px solid #004b49; border-radius: 3px; border-collapse: collapse; overflow: hidden; }
+        .meta-row { display: table-row; }
+        .meta-cell { display: table-cell; padding: 3px 5px; font-size: 7.5px; border-right: 1px solid #e2e8f0; border-bottom: 1px solid #e2e8f0; vertical-align: middle; }
+        .meta-cell:last-child { border-right: none; }
+        .meta-label { font-weight: 800; color: #004b49; text-transform: uppercase; font-size: 6.5px; display: block; margin-bottom: 1px; }
+        .meta-value { font-weight: 700; color: #0f172a; font-size: 8px; }
+        .stat-highlight { background: #f0faf9; text-align: center; }
+        .stat-highlight .meta-value { color: #004b49; font-weight: 900; font-size: 9px; }
 
-        /* Inline Scale Bar */
-        .inline-scale-bar { border: 1px solid #c5a059; background: #f0faf9; padding: 4px; font-size: 6.5px; color: #004b49; margin-bottom: 8px; border-radius: 4px; text-align: center; }
+        /* Section Titles */
+        .section-header { background: #004b49; color: #ffffff; padding: 2.5px 6px; font-weight: bold; font-size: 7.5px; letter-spacing: 0.5px; text-transform: uppercase; margin-bottom: 2px; border-radius: 2px; }
 
-        /* 2-Column Footer elements */
-        .footer-cols-table { display: table; width: 100%; margin-bottom: 4px; table-layout: fixed; }
-        .footer-cols-row { display: table-row; }
-        .footer-cols-cell { display: table-cell; vertical-align: top; }
+        /* Academic Scores Table */
+        table.scores-table { width: 100%; border-collapse: collapse; margin-bottom: 4px; border: 1px solid #004b49; }
+        table.scores-table th { background: #004b49; color: #ffffff; padding: 2.5px 3px; font-size: 7px; font-weight: bold; text-transform: uppercase; text-align: center; border: 1px solid #004b49; }
+        table.scores-table td { padding: 2px 3px; border: 1px solid #cbd5e1; text-align: center; font-size: 7.5px; }
+        table.scores-table tr:nth-child(even) td { background: #f8fafc; }
+        table.scores-table td.subject-name { text-align: left; font-weight: bold; color: #004b49; padding-left: 5px; }
+        table.scores-table td.bold { font-weight: 900; color: #004b49; }
 
-        /* Progress bars */
-        .progress-container { width: 100%; background: #e2e8f0; border-radius: 2px; height: 4px; overflow: hidden; margin-top: 1px; }
-        .progress-bar { background: #004b49; height: 100%; }
+        /* Middle Grid Layout (Attendance + Affective + Grading Scale) */
+        .middle-grid { display: table; width: 100%; margin-bottom: 4px; table-layout: fixed; }
+        .middle-row { display: table-row; }
+        .middle-cell { display: table-cell; vertical-align: top; padding-right: 4px; }
+        .middle-cell:last-child { padding-right: 0; }
 
-        /* Remarks Box */
-        .remarks-container { display: table; width: 100%; margin-bottom: 8px; table-layout: fixed; }
+        .sub-table { width: 100%; border-collapse: collapse; border: 1px solid #004b49; font-size: 7px; }
+        .sub-table th { background: #004b49; color: #ffffff; padding: 2px 4px; font-size: 6.5px; text-transform: uppercase; font-weight: bold; text-align: center; }
+        .sub-table td { padding: 2px 4px; border: 1px solid #cbd5e1; color: #334155; }
+        .sub-table td.val { text-align: center; font-weight: bold; color: #004b49; }
+
+        .scale-box { border: 1px solid #c5a059; background: #fffbeb; padding: 3px 5px; border-radius: 3px; font-size: 6.5px; color: #78350f; }
+        .scale-box-title { font-weight: 900; text-transform: uppercase; color: #004b49; margin-bottom: 2px; font-size: 6.5px; border-bottom: 1px solid #c5a059; padding-bottom: 1px; }
+
+        /* Remarks & Signatures Grid */
+        .remarks-grid { display: table; width: 100%; margin-bottom: 3px; table-layout: fixed; }
         .remarks-row { display: table-row; }
-        .remarks-cell { display: table-cell; vertical-align: top; width: 33.33%; }
-        .remarks-box { border: 1px solid #c5a059; border-radius: 4px; background: #ffffff; min-height: 20px; padding: 3px; margin-right: 8px; }
-        .remarks-cell:last-child .remarks-box { margin-right: 0; }
-        .remarks-header { font-size: 6.5px; font-weight: bold; text-transform: uppercase; color: #004b49; border-bottom: 1px solid rgba(197, 160, 89, 0.2); padding-bottom: 2px; margin-bottom: 2px; }
-        .remarks-content { font-size: 7px; color: #334155; line-height: 1.3; }
+        .remarks-cell { display: table-cell; vertical-align: top; padding-right: 4px; }
+        .remarks-cell:last-child { padding-right: 0; }
 
-        /* Bottom Row Boxes */
-        .bottom-boxes-table { display: table; width: 100%; margin-top: 3px; border-top: 1px solid #004b49; padding-top: 3px; }
-        .bottom-boxes-row { display: table-row; }
-        .bottom-boxes-cell { display: table-cell; vertical-align: middle; }
+        .remarks-box { border: 1px solid #004b49; border-radius: 3px; background: #ffffff; padding: 3px 5px; min-height: 48px; }
+        .remarks-title { font-size: 6.5px; font-weight: 900; text-transform: uppercase; color: #004b49; border-bottom: 1px solid #e2e8f0; padding-bottom: 1px; margin-bottom: 2px; }
+        .remarks-text { font-size: 7px; color: #334155; line-height: 1.25; min-height: 22px; }
+        .sig-container { margin-top: 2px; text-align: center; border-top: 1px dashed #cbd5e1; padding-top: 1px; }
+        .sig-img { max-height: 18px; max-width: 75px; object-fit: contain; display: block; margin: 0 auto; }
+        .sig-name { font-size: 7px; font-weight: 800; color: #004b49; }
+        .sig-role { font-size: 5.5px; color: #64748b; font-style: italic; }
 
-        /* Gold Seal */
-        .gold-seal { width: 62px; height: 62px; border-radius: 50%; border: 3px double #c5a059; background: #004b49; color: #c5a059; padding: 2px; text-align: center; display: inline-block; }
+        /* Next Term & Fees Banner */
+        .fees-banner { border: 1px solid #c5a059; background: #fffbeb; padding: 3px 6px; border-radius: 3px; margin-bottom: 3px; font-size: 7px; color: #78350f; }
+        .resumes-banner { background: #004b49; color: #ffffff; text-align: center; padding: 2.5px; font-size: 7.5px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; border-radius: 2px; margin-bottom: 3px; }
 
-        /* Dark Tagline Bar */
-        .tagline-bar { background: #004b49; color: #c5a059; font-weight: bold; font-size: 8px; text-align: center; padding: 2px; letter-spacing: 2px; text-transform: uppercase; margin-top: 3px; border-radius: 3px; }
+        /* Signatures & Footer Line */
+        .parent-sig-table { display: table; width: 100%; margin-top: 3px; border-top: 1px solid #cbd5e1; padding-top: 3px; }
+        .parent-sig-cell { display: table-cell; width: 50%; font-size: 7px; font-weight: 800; color: #004b49; vertical-align: bottom; }
+        .parent-sig-line { width: 140px; border-bottom: 1px solid #004b49; display: inline-block; }
 
-        .watermark { position: fixed; top: 50%; left: 50%; transform: translate(-50%,-50%); z-index: -1; opacity: 0.02; width: 300px; height: 300px; }
+        .footer { border-top: 1px solid #004b49; margin-top: 3px; padding-top: 2px; text-align: center; font-size: 6.5px; color: #004b49; font-weight: bold; }
+        .watermark { position: fixed; top: 50%; left: 50%; transform: translate(-50%,-50%); z-index: -1; opacity: 0.03; width: 260px; height: 260px; }
     </style>
 </head>
 <body>
@@ -117,19 +103,19 @@
     }
     
     $opts = $rcOptions ?? [];
-    $showPosition         = $opts['show_position'] ?? true;
-    $showAttendance         = $opts['show_attendance'] ?? true;
-    $showGradingKey         = $opts['show_grading_key'] ?? true;
-    $showClassAverage       = $opts['show_class_average'] ?? true;
-    $showWatermark          = $opts['show_watermark'] ?? true;
-    $showNextTermDate       = $opts['show_next_term_date'] ?? true;
-    $showTeacherRemarks     = $opts['show_teacher_remarks'] ?? true;
-    $showPrincipalRemarks   = $opts['show_principal_remarks'] ?? true;
-    $showPsychomotor        = $opts['show_psychomotor'] ?? false;
-    $showSchoolFees         = $opts['show_school_fees'] ?? false;
-    $showSignatures         = $opts['show_signatures'] ?? false;
+    $showPosition       = $opts['show_position'] ?? true;
+    $showAttendance     = $opts['show_attendance'] ?? true;
+    $showGradingKey     = $opts['show_grading_key'] ?? true;
+    $showClassAverage   = $opts['show_class_average'] ?? true;
+    $showWatermark      = $opts['show_watermark'] ?? true;
+    $showNextTermDate   = $opts['show_next_term_date'] ?? true;
+    $showTeacherRemarks = $opts['show_teacher_remarks'] ?? true;
+    $showPrincipalRemarks = $opts['show_principal_remarks'] ?? true;
+    $showPsychomotor    = $opts['show_psychomotor'] ?? false;
+    $showSchoolFees     = $opts['show_school_fees'] ?? false;
+    $showSignatures     = $opts['show_signatures'] ?? false;
 
-    // 1. Resolve Homeroom Teacher dynamically
+    // Resolve Homeroom Teacher
     $homeroomTeacher = null;
     if (!empty($rows) && count($rows) > 0) {
         $firstRow = collect($rows)->first();
@@ -151,461 +137,278 @@
             $homeroomTeacher = $allocation->teacher->name;
         }
     }
-    $homeroomTeacher = $homeroomTeacher ?? 'Ms. Emily Johnson';
+    $homeroomTeacher = $homeroomTeacher ?? 'Class Teacher';
 
-    // 2. (Dates range removed as requested)
-
-    // 3. Attendance summaries
+    // Attendance Calculations
     $enrolled = $timesOpened ?? 0;
     $present = $timesPresent ?? 0;
     $absent = $timesAbsent ?? 0;
-    $tardy = 0;
-    
-    if (isset($student) && isset($term) && isset($session)) {
-        $sectionId = (int) ($student->section_id ?? 0);
-        if ($sectionId > 0) {
-            $tardy = (int) \App\Models\AttendanceMark::query()
-                ->join('attendance_sheets', 'attendance_sheets.id', '=', 'attendance_marks.sheet_id')
-                ->where('attendance_marks.student_id', $student->id)
-                ->where('attendance_sheets.class_id', $student->class_id)
-                ->where('attendance_sheets.section_id', $sectionId)
-                ->where('attendance_sheets.term', $term)
-                ->where('attendance_sheets.session', $session)
-                ->where('attendance_marks.status', 'Late')
-                ->count();
-        }
-    }
-    
     $attendanceRate = $enrolled > 0 ? round(($present / $enrolled) * 100) : 0;
 
-    // 4. Psychomotor Trait mapping
-    $pt = get_defined_vars()['psychomotorTraits'] ?? [];
-    $getTraitRating = function($traitName, $studentAverage) use ($pt) {
-        foreach ($pt as $name => $rating) {
-            if (stripos($name, $traitName) !== false) {
-                if (is_numeric($rating)) {
-                    $val = (int)$rating;
-                    if ($val > 5) $val = 5;
-                    return $val;
-                }
-                if (stripos($rating, 'excellent') !== false) return 5;
-                if (stripos($rating, 'very good') !== false) return 4.5;
-                if (stripos($rating, 'good') !== false) return 4;
-                if (stripos($rating, 'average') !== false) return 3;
-                if (stripos($rating, 'fair') !== false) return 2;
-                return 1;
-            }
-        }
-        
-        if ($studentAverage >= 90) return 5;
-        if ($studentAverage >= 80) return 4;
-        if ($studentAverage >= 70) return 3.5;
-        return 3;
+    // Helper for performance label
+    $getPerformanceText = function($total) {
+        if ($total >= 80) return '★ Excellent';
+        if ($total >= 70) return '★ Very Good';
+        if ($total >= 60) return '★ Good';
+        if ($total >= 50) return 'Pass';
+        return 'Needs Work';
     };
-    
-    $getRatingText = function($rating) {
-        if ($rating >= 5) return 'Excellent';
-        if ($rating >= 4) return 'Good';
-        if ($rating >= 3) return 'Average';
-        if ($rating >= 2) return 'Fair';
-        return 'Poor';
-    };
-
-    // 5. Resolve Passport Photo
-    $photoSrc = null;
-    if ($student->passport_photo) {
-        if (filter_var($student->passport_photo, FILTER_VALIDATE_URL)) {
-            // Convert Dicebear SVG to PNG for DomPDF compatibility
-            $photoSrc = str_replace('/svg?', '/png?', $student->passport_photo);
-        } else {
-            $cleaned = str_replace('\\', '/', $student->passport_photo);
-            if (str_starts_with($cleaned, 'uploads/')) {
-                $cleaned = substr($cleaned, 8);
-            }
-            $localPath = public_path('uploads/' . $cleaned);
-            if (file_exists($localPath)) {
-                $photoSrc = $localPath;
-            }
-        }
-    }
 @endphp
 
-{{-- @if($logoExists && $showWatermark)
+@if($logoExists && $showWatermark)
     <div class="watermark"><img src="{{ $logoPath }}" alt="" style="width:100%;height:100%;object-fit:contain;" /></div>
-@endif --}}
+@endif
 
 <div class="page">
     <div class="page-inner">
 
-        <div class="main-layout">
-            <div class="main-row">
-                        
-                        {{-- LEFT SIDEBAR PANEL --}}
-                        <div class="sidebar">
-                            @if($photoSrc)
-                                <div class="avatar-wrap">
-                                    <div class="avatar-circle">
-                                        <img src="{{ $photoSrc }}" class="avatar-img" alt="Photo" />
-                                    </div>
-                                </div>
-                            @endif
-                            
-                            <div class="side-meta">
-                                <div class="side-group">
-                                    <span class="side-label">Student Name:</span>
-                                    <span class="side-value">{{ $student->full_name }}</span>
-                                </div>
-                                <div class="side-group">
-                                    <span class="side-label">Admission No:</span>
-                                    <span class="side-value">{{ $student->admission_number }}</span>
-                                </div>
-                                <div class="side-group">
-                                    <span class="side-label">Class / Section:</span>
-                                    <span class="side-value">{{ $student->schoolClass?->name ?? 'N/A' }}{{ $student->section?->name ? ' - ' . $student->section->name : '' }}</span>
-                                </div>
-                                <div class="side-group">
-                                    <span class="side-label">Gender:</span>
-                                    <span class="side-value">{{ $student->gender ?? 'N/A' }}</span>
-                                </div>
-                                <div class="side-group">
-                                    <span class="side-label">Date of Birth:</span>
-                                    <span class="side-value">{{ $student->dob ? ($student->dob instanceof \Carbon\Carbon ? $student->dob->format('d M, Y') : \Carbon\Carbon::parse((string)$student->dob)->format('d M, Y')) : 'N/A' }}</span>
-                                </div>
-                                <div class="side-group" style="border-bottom: none;">
-                                    <span class="side-label">No. in Class:</span>
-                                    <span class="side-value">{{ $totalStudents ?? '23' }}</span>
-                                </div>
-                            </div>
-                            
-                            <div style="margin-top: 15px;">
-                                <div class="side-stat-card">
-                                    <span class="side-stat-label">Total Score</span>
-                                    <span class="side-stat-value">{{ $grandTotal }}</span>
-                                </div>
-                                <div class="side-stat-card active-avg">
-                                    <span class="side-stat-label">Average Score</span>
-                                    <span class="side-stat-value">{{ number_format($average, 1) }}%</span>
-                                </div>
-                                @if($showPosition)
-                                    <div class="side-stat-card">
-                                        <span class="side-stat-label">Class Position</span>
-                                        <span class="side-stat-value">{{ $position }}</span>
-                                    </div>
-                                @endif
-                                @if($showClassAverage)
-                                    <div class="side-stat-card">
-                                        <span class="side-stat-label">Class Average</span>
-                                        <span class="side-stat-value">{{ number_format($classAverage, 1) }}%</span>
-                                    </div>
-                                    <div class="side-stat-card">
-                                        <span class="side-stat-label">Lowest Score</span>
-                                        <span class="side-stat-value">{{ number_format($lowestAverage ?? 0, 1) }}%</span>
-                                    </div>
-                                @endif
-                            </div>
-                        </div>
-
-                        {{-- RIGHT MAIN CONTENT PANEL --}}
-                        <div class="content">
-                            
-                            {{-- Header Section --}}
-                            <div class="header-table">
-                                {{-- <div class="header-cell logo-wrap">
-                                    @if($logoExists)
-                                        <img class="logo" src="{{ $logoPath }}" alt="Logo">
-                                    @endif
-                                </div> --}}
-                                <div class="header-cell school-info">
-                                    <div class="school-name">{{ $schoolName }}</div>
-                                    @if(config('academyhub.school_address'))
-                                        <div class="school-meta">{{ config('academyhub.school_address') }}</div>
-                                    @endif
-                                    @if(config('academyhub.school_phone'))
-                                        <div class="school-meta">
-                                            Phone: {{ config('academyhub.school_phone') }}
-                                        </div>
-                                    @endif
-                                    <div class="school-tagline">Raising Leaders, Building Futures</div>
-                                </div>
-                                <div class="header-cell session-card-wrap">
-                                    <div class="session-card">
-                                        <div class="session-title">Academic Session</div>
-                                        <div class="session-value">{{ $session }}</div>
-                                        <div class="session-meta-text">Term: Term {{ $term }}</div>
-                                        <div class="session-meta-text">Date: {{ now()->format('jS F, Y') }}</div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {{-- Document Title --}}
-                            <div class="document-title">
-                                ✦ Official Report of Learning ✦
-                            </div>
-
-                            {{-- Scores Table --}}
-                            <table class="scores-table">
-                                <thead>
-                                    <tr>
-                                        <th style="width: 32%; text-align: left; padding-left: 6px;">Subject</th>
-                                        <th style="width: 10%;">CA1<br/>(20)</th>
-                                        <th style="width: 10%;">CA2<br/>(20)</th>
-                                        <th style="width: 10%;">Exam<br/>(60)</th>
-                                        <th style="width: 12%;">Total<br/>(100)</th>
-                                        <th style="width: 8%;">Grade</th>
-                                        @if($showClassAverage)<th style="width: 9%;">Average</th>@endif
-                                        @if($showPosition)<th style="width: 9%;">Position</th>@endif
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach($rows as $r)
-                                        <tr>
-                                            <td class="subject-name">{{ $r['subject']?->name ?? '-' }}</td>
-                                            <td>{{ $r['ca1'] ?? '' }}</td>
-                                            <td>{{ $r['ca2'] ?? '' }}</td>
-                                            <td>{{ $r['exam'] ?? '' }}</td>
-                                            <td class="bold">{{ $r['total'] ?? '' }}</td>
-                                            <td class="bold">{{ $r['grade'] ?? '-' }}</td>
-                                            @if($showClassAverage)<td>{{ $r['class_avg'] ?? '-' }}</td>@endif
-                                            @if($showPosition)<td>{{ $r['position'] ?? '-' }}</td>@endif
-                                        </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
-
-                            {{-- Horizontal Scale Bar --}}
-                            @if($showGradingKey)
-                                <div class="inline-scale-bar">
-                                    <strong>GRADE SCALE:</strong> 
-                                    A (70-100) Excellent | 
-                                    B (60-69) Very Good | 
-                                    C (50-59) Good | 
-                                    D (40-49) Fair | 
-                                    E (30-39) Poor | 
-                                    F (0-29) Fail
-                                </div>
-                            @endif
-
-                            {{-- Attendance & Psychomotor --}}
-                            @php
-                                $colsCount = 0;
-                                if ($showAttendance) $colsCount++;
-                                if ($showPsychomotor) $colsCount++;
-                                $blockWidth = $colsCount > 0 ? (100 / $colsCount) . '%' : '100%';
-                            @endphp
-
-                            @if($colsCount > 0)
-                                <div class="footer-cols-table">
-                                    <div class="footer-cols-row">
-                                        
-                                        {{-- Attendance --}}
-                                        @if($showAttendance)
-                                            <div class="footer-cols-cell" style="width: {{ $blockWidth }}; padding-right: 6px;">
-                                                <table style="width: 100%; border-collapse: collapse; border: 1.5px solid #004b49;">
-                                                    <thead>
-                                                        <tr style="background: #004b49; color: #ffffff;">
-                                                            <th colspan="2" style="padding: 4px 6px; font-size: 7.5px; font-weight: bold; text-align: center; text-transform: uppercase;">Attendance &amp; Punctuality</th>
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody>
-                                                        <tr>
-                                                            <td style="padding: 4.5px 6px; border: 1px solid #e2e8f0; font-weight: bold; color: #475569;">Times Opened:</td>
-                                                            <td style="text-align: right; padding-right: 6px; border: 1px solid #e2e8f0; font-weight: bold; color: #004b49;">{{ $enrolled }}</td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td style="padding: 4.5px 6px; border: 1px solid #e2e8f0; font-weight: bold; color: #475569;">Times Present:</td>
-                                                            <td style="text-align: right; padding-right: 6px; border: 1px solid #e2e8f0; font-weight: bold; color: #004b49;">{{ $present }}</td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td style="padding: 4.5px 6px; border: 1px solid #e2e8f0; font-weight: bold; color: #475569;">Times Absent:</td>
-                                                            <td style="text-align: right; padding-right: 6px; border: 1px solid #e2e8f0; font-weight: bold; color: #004b49;">{{ $absent }}</td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td style="padding: 4.5px 6px; border: 1px solid #e2e8f0; font-weight: bold; color: #475569;">Punctuality:</td>
-                                                            <td style="text-align: right; padding-right: 6px; border: 1px solid #e2e8f0; font-weight: bold; color: #004b49;">{{ $getRatingText($getTraitRating('Punctuality', $average)) }}</td>
-                                                        </tr>
-                                                    </tbody>
-                                                </table>
-                                            </div>
-                                        @endif
-
-                                        {{-- Affective Domain / Psychomotor --}}
-                                        @if($showPsychomotor)
-                                            <div class="footer-cols-cell" style="width: {{ $blockWidth }}; padding-left: 6px;">
-                                                <table style="width: 100%; border-collapse: collapse; border: 1.5px solid #004b49;">
-                                                    <thead>
-                                                        <tr style="background: #004b49; color: #ffffff;">
-                                                            <th colspan="3" style="padding: 4px 6px; font-size: 7.5px; font-weight: bold; text-align: center; text-transform: uppercase;">Affective Skills</th>
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody>
-                                                        @php
-                                                            $skillsList = [
-                                                                'Handwriting' => 'Handwriting',
-                                                                'Verbal Fluency' => 'Verbal Fluency',
-                                                                'Games / Sports' => 'Sports',
-                                                                'Calm/Demeanor' => 'Relationship',
-                                                                'Musical Skills' => 'Musical',
-                                                            ];
-                                                        @endphp
-                                                        @foreach($skillsList as $label => $keyName)
-                                                            @php
-                                                                $rVal = $getTraitRating($keyName, $average);
-                                                                $percentage = ($rVal / 5) * 100;
-                                                            @endphp
-                                                            <tr>
-                                                                <td style="padding: 3.5px 6px; border: 1px solid #e2e8f0; font-size: 7.5px; font-weight: bold; color: #475569; width: 40%;">{{ $label }}</td>
-                                                                <td style="padding: 3.5px 6px; border: 1px solid #e2e8f0; font-size: 7px; color: #004b49; width: 25%; font-weight: bold;">{{ $getRatingText($rVal) }}</td>
-                                                                <td style="padding: 3.5px 6px; border: 1px solid #e2e8f0; width: 35%;">
-                                                                    <div class="progress-container">
-                                                                        <div class="progress-bar" style="width: {{ $percentage }}%;"></div>
-                                                                    </div>
-                                                                </td>
-                                                            </tr>
-                                                        @endforeach
-                                                    </tbody>
-                                                </table>
-                                            </div>
-                                        @endif
-
-                                    </div>
-                                </div>
-                            @endif
-
-                            {{-- Remarks block --}}
-                            @php
-                                $remarksCount = 0;
-                                if ($showTeacherRemarks) $remarksCount++;
-                                if ($showPrincipalRemarks) $remarksCount++;
-                                if ($showSignatures) $remarksCount++;
-                                $remWidth = $remarksCount > 0 ? (100 / $remarksCount) . '%' : '100%';
-                            @endphp
-
-                            @if($remarksCount > 0)
-                                <div class="remarks-container">
-                                    <div class="remarks-row">
-                                        
-                                        {{-- Teacher Remark --}}
-                                        @if($showTeacherRemarks)
-                                            <div class="remarks-cell" style="width: {{ $remWidth }};">
-                                                <div class="remarks-box">
-                                                    <div class="remarks-header">Teacher's Remark</div>
-                                                    <div class="remarks-content" style="margin-bottom: 4px;">
-                                                        {{ $teacherRemarks ?? 'A bright and respectful student. She demonstrates potential and should continue to put in more effort.' }}
-                                                    </div>
-                                                    <div style="margin-top: 5px; text-align: center;">
-                                                        @if(($signatureImages['teacher'] ?? null) && file_exists($signatureImages['teacher']))
-                                                            <img src="{{ $signatureImages['teacher'] }}" style="max-height: 25px; max-width: 90px; object-fit: contain; display: block; margin: 0 auto 2px auto;" />
-                                                        @else
-                                                            <div style="font-family: 'Times New Roman', Times, serif; font-size: 11px; font-style: italic; color: #004b49; font-weight: bold; line-height: 1; margin-bottom: 2px;">Emily Johnson</div>
-                                                        @endif
-                                                    </div>
-                                                    <div style="border-top: 1px solid #e2e8f0; padding-top: 2px; font-size: 6px; color: #64748b; font-weight: bold; text-transform: uppercase;">
-                                                        Class Teacher: {{ $homeroomTeacher }}
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        @endif
-
-                                        {{-- Principal Comment --}}
-                                        @if($showPrincipalRemarks)
-                                            <div class="remarks-cell" style="width: {{ $remWidth }};">
-                                                <div class="remarks-box">
-                                                    <div class="remarks-header">Principal's Comment</div>
-                                                    <div class="remarks-content" style="margin-bottom: 4px;">
-                                                        {{ $principalRemarks ?? 'Keep up the good work. Consistency, discipline and focus will lead you to excellence.' }}
-                                                    </div>
-                                                    <div style="margin-top: 5px; text-align: center;">
-                                                        @if(($signatureImages['principal'] ?? null) && file_exists($signatureImages['principal']))
-                                                            <img src="{{ $signatureImages['principal'] }}" style="max-height: 25px; max-width: 90px; object-fit: contain; display: block; margin: 0 auto 2px auto;" />
-                                                        @else
-                                                            <div style="font-family: 'Times New Roman', Times, serif; font-size: 11px; font-style: italic; color: #004b49; font-weight: bold; line-height: 1; margin-bottom: 2px;">Rebecca Carter</div>
-                                                        @endif
-                                                    </div>
-                                                    <div style="border-top: 1px solid #e2e8f0; padding-top: 2px; font-size: 6px; color: #64748b; font-weight: bold; text-transform: uppercase;">
-                                                        Principal: Dr. Rebecca Carter
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        @endif
-
-                                        {{-- Parent Signature --}}
-                                        @if($showSignatures)
-                                            <div class="remarks-cell" style="width: {{ $remWidth }};">
-                                                <div class="remarks-box" style="margin-right: 0;">
-                                                    <div class="remarks-header">Parent / Guardian</div>
-                                                    <div style="margin-top: 15px; border-bottom: 1px solid #475569; width: 100%;"></div>
-                                                    <div style="font-size: 6px; color: #64748b; font-weight: bold; margin-top: 2px;">
-                                                        SIGNATURE
-                                                    </div>
-                                                    <div style="margin-top: 8px; border-bottom: 1px solid #475569; width: 100%;"></div>
-                                                    <div style="font-size: 6px; color: #64748b; font-weight: bold; margin-top: 2px;">
-                                                        DATE
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        @endif
-
-                                    </div>
-                                </div>
-                            @endif
-
-                        </div>
-                    </div>
+        <!-- Top Header -->
+        <div class="header-table">
+            <div class="header-cell logo-wrap">
+                @if($logoExists)
+                    <img class="logo" src="{{ $logoPath }}" alt="Logo">
+                @endif
+            </div>
+            <div class="header-cell school-info">
+                <div class="school-name">{{ $schoolName }}</div>
+                @if(config('academyhub.school_address'))
+                    <div class="school-meta">{{ config('academyhub.school_address') }}</div>
+                @endif
+                @if(config('academyhub.school_phone'))
+                    <div class="school-meta">Tel: {{ config('academyhub.school_phone') }}</div>
+                @endif
+                <div class="school-tagline">{{ config('academyhub.school_motto') ?: 'Learn Today, Lead Tomorrow' }}</div>
+            </div>
+            <div class="header-cell session-card-wrap">
+                <div class="session-card">
+                    <div class="session-title">REPORT SHEET</div>
+                    <div class="session-value">{{ $session }} • Term {{ $term }}</div>
                 </div>
             </div>
         </div>
 
-        {{-- BOT ROW: Bottom boxes + School Fees + Tagline --}}
-        <div class="rc-bot">
-            {{-- Bottom row with grading scale, calendar dates, gold seal --}}
-            <div class="bottom-boxes-table">
-                <div class="bottom-boxes-row">
-                    
-                    {{-- Grading Scale General --}}
-                    <div class="bottom-boxes-cell" style="width: 35%; text-align: left;">
-                        {{-- General Grading Scale removed (already shown at top of the page) --}}
-                    </div>
+        <!-- Student Meta Summary Grid -->
+        <div class="meta-table">
+            <div class="meta-row">
+                <div class="meta-cell">
+                    <span class="meta-label">Student Name:</span>
+                    <span class="meta-value">{{ $student->full_name }}</span>
+                </div>
+                <div class="meta-cell">
+                    <span class="meta-label">Reporting Period:</span>
+                    <span class="meta-value">Term {{ $term }}</span>
+                </div>
+                <div class="meta-cell stat-highlight">
+                    <span class="meta-label">Total Score:</span>
+                    <span class="meta-value">{{ $grandTotal }}</span>
+                </div>
+            </div>
+            <div class="meta-row">
+                <div class="meta-cell">
+                    <span class="meta-label">Grade / Class:</span>
+                    <span class="meta-value">{{ $student->schoolClass?->name ?? 'N/A' }}{{ $student->section?->name ? ' - ' . $student->section->name : '' }}</span>
+                </div>
+                <div class="meta-cell">
+                    <span class="meta-label">Academic Year:</span>
+                    <span class="meta-value">{{ $session }}</span>
+                </div>
+                <div class="meta-cell stat-highlight">
+                    <span class="meta-label">Average Score:</span>
+                    <span class="meta-value">{{ number_format($average, 1) }}%</span>
+                </div>
+            </div>
+            <div class="meta-row">
+                <div class="meta-cell">
+                    <span class="meta-label">Student ID:</span>
+                    <span class="meta-value">{{ $student->admission_number }}</span>
+                </div>
+                <div class="meta-cell">
+                    <span class="meta-label">Gender:</span>
+                    <span class="meta-value">{{ $student->gender ?? 'N/A' }}</span>
+                </div>
+                <div class="meta-cell stat-highlight">
+                    <span class="meta-label">Class Position:</span>
+                    <span class="meta-value">{{ $showPosition ? $position : '-' }}</span>
+                </div>
+            </div>
+        </div>
 
-                    {{-- Next Term Resumes Box --}}
-                    <div class="bottom-boxes-cell" style="width: 40%; text-align: center;">
-                        @if($showNextTermDate && isset($nextTermDate))
-                            <div style="background: #004b49; border: 1.5px solid #c5a059; border-radius: 6px; padding: 8px; color: #ffffff; width: 95%; margin: 0 auto; text-align: center;">
-                                <div style="font-size: 6px; font-weight: bold; text-transform: uppercase; color: #c5a059; letter-spacing: 0.5px;">Next Term Resumes</div>
-                                <div style="font-size: 8.5px; font-weight: 950; color: #ffffff; margin-top: 2px; margin-bottom: 4px;">{{ $nextTermDate }}</div>
-                                <div style="border-top: 1.5px solid #c5a059; width: 30%; margin: 4px auto 0 auto; padding-top: 3px; font-size: 5.5px; color: #e2e8f0; font-weight: bold; text-transform: uppercase;">
-                                    Date Confirmed
-                                </div>
-                            </div>
-                        @endif
-                    </div>
+        <!-- Academic Performance Table Section -->
+        <div class="section-header">ACADEMIC PERFORMANCE</div>
+        <table class="scores-table">
+            <thead>
+                <tr>
+                    <th style="width: 32%; text-align: left; padding-left: 5px;">SUBJECT</th>
+                    <th style="width: 10%;">CA1</th>
+                    <th style="width: 10%;">CA2</th>
+                    <th style="width: 10%;">EXAM</th>
+                    <th style="width: 12%;">TOTAL</th>
+                    <th style="width: 8%;">GRADE</th>
+                    <th style="width: 18%;">PERFORMANCE</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach($rows as $r)
+                    <tr>
+                        <td class="subject-name">{{ $r['subject']?->name ?? '-' }}</td>
+                        <td>{{ $r['ca1'] ?? '-' }}</td>
+                        <td>{{ $r['ca2'] ?? '-' }}</td>
+                        <td>{{ $r['exam'] ?? '-' }}</td>
+                        <td class="bold">{{ $r['total'] ?? '-' }}</td>
+                        <td class="bold">{{ $r['grade'] ?? '-' }}</td>
+                        <td style="font-weight: 700; color: #004b49;">{{ $getPerformanceText($r['total'] ?? 0) }}</td>
+                    </tr>
+                @endforeach
+            </tbody>
+        </table>
 
-                    {{-- Gold Seal --}}
-                    <div class="bottom-boxes-cell" style="width: 25%; text-align: right;">
-                        <div class="gold-seal">
-                            <div style="font-size: 5px; font-weight: bold; text-transform: uppercase; margin-top: 10px; color: #c5a059;">{{ $schoolName }}</div>
-                            <div style="font-size: 4px; text-transform: uppercase; color: #ffffff; margin-top: 1px;">Official Seal</div>
-                            <div style="font-size: 6px; color: #c5a059; margin-top: 2px;">★</div>
-                            <div style="font-size: 4.5px; text-transform: uppercase; color: #c5a059; margin-top: 1px;">Benin City</div>
+        <!-- Middle Grid: Attendance & Affective & Grading Scale -->
+        <div class="middle-grid">
+            <div class="middle-row">
+                <!-- Attendance -->
+                @if($showAttendance)
+                    <div class="middle-cell" style="width: 32%;">
+                        <table class="sub-table">
+                            <thead>
+                                <tr>
+                                    <th colspan="2">ATTENDANCE</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Days Enrolled</td>
+                                    <td class="val">{{ $enrolled }}</td>
+                                </tr>
+                                <tr>
+                                    <td>Days Present</td>
+                                    <td class="val">{{ $present }}</td>
+                                </tr>
+                                <tr>
+                                    <td>Days Absent</td>
+                                    <td class="val">{{ $absent }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Attendance Rate</strong></td>
+                                    <td class="val" style="color: #004b49; font-weight: 900;">{{ $attendanceRate }}%</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                @endif
+
+                <!-- Affective & Behavior Domain -->
+                <div class="middle-cell" style="width: 36%;">
+                    <table class="sub-table">
+                        <thead>
+                            <tr>
+                                <th>BEHAVIOR &amp; WORK HABITS</th>
+                                <th>GRADE</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>Attitude</td><td class="val">B+</td></tr>
+                            <tr><td>Class Participation</td><td class="val">B+</td></tr>
+                            <tr><td>Completes Assignments</td><td class="val">B+</td></tr>
+                            <tr><td>Works Independently</td><td class="val">B+</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Grading Scale Box -->
+                @if($showGradingKey)
+                    <div class="middle-cell" style="width: 32%;">
+                        <div class="scale-box">
+                            <div class="scale-box-title">GRADING SCALE</div>
+                            <div><strong>A+</strong> 97-100% | <strong>B+</strong> 87-89% | <strong>C+</strong> 77-79%</div>
+                            <div><strong>A</strong> 93-96% | <strong>B</strong> 83-86% | <strong>C</strong> 73-76%</div>
+                            <div><strong>A-</strong> 90-92% | <strong>B-</strong> 80-82% | <strong>D</strong> 70-72%</div>
+                            <div><strong>F</strong> Below 70%</div>
                         </div>
                     </div>
+                @endif
+            </div>
+        </div>
 
+        <!-- Remarks & Comments Grid -->
+        @php
+            $remarksCount = 0;
+            if ($showTeacherRemarks) $remarksCount++;
+            if ($showPrincipalRemarks) $remarksCount++;
+            $remWidth = $remarksCount > 0 ? (100 / $remarksCount) . '%' : '100%';
+        @endphp
+
+        @if($remarksCount > 0)
+            <div class="remarks-grid">
+                <div class="remarks-row">
+                    @if($showTeacherRemarks)
+                        <div class="remarks-cell" style="width: {{ $remWidth }};">
+                            <div class="remarks-box">
+                                <div class="remarks-title">TEACHER COMMENTS</div>
+                                <div class="remarks-text">
+                                    {{ $teacherRemarks ?? 'An excellent student with outstanding academic performance. Keep it up!' }}
+                                </div>
+                                <div class="sig-container">
+                                    @if(($signatureImages['teacher'] ?? null) && file_exists($signatureImages['teacher']))
+                                        <img src="{{ $signatureImages['teacher'] }}" class="sig-img" alt="Teacher Signature" />
+                                    @endif
+                                    <div class="sig-name">{{ $homeroomTeacher }}</div>
+                                    <div class="sig-role">Class Teacher</div>
+                                </div>
+                            </div>
+                        </div>
+                    @endif
+
+                    @if($showPrincipalRemarks)
+                        <div class="remarks-cell" style="width: {{ $remWidth }};">
+                            <div class="remarks-box">
+                                <div class="remarks-title">PRINCIPAL'S REMARKS</div>
+                                <div class="remarks-text">
+                                    {{ $principalRemarks ?? 'A commendable result. Continue to strive for excellence.' }}
+                                </div>
+                                <div class="sig-container">
+                                    @if(($signatureImages['principal'] ?? null) && file_exists($signatureImages['principal']))
+                                        <img src="{{ $signatureImages['principal'] }}" class="sig-img" alt="Principal Signature" />
+                                    @endif
+                                    <div class="sig-name">Dr. Rebecca Carter</div>
+                                    <div class="sig-role">Principal</div>
+                                </div>
+                            </div>
+                        </div>
+                    @endif
                 </div>
             </div>
+        @endif
 
-            {{-- School Fees Panel (Optional) --}}
-            @if($showSchoolFees && isset($schoolFees))
-                <div style="border: 1px solid #c5a059; border-radius: 4px; background: #fffbeb; padding: 6px; margin-top: 8px; color: #78350f; font-size: 7.5px;">
-                    <strong>Next Term Fees Information:</strong> 
-                    Amount: {{ $schoolFees['currency'] }}{{ number_format($schoolFees['amount'], 2) }} | 
-                    Bank: {{ $schoolFees['bank_name'] }} | 
-                    Account: {{ $schoolFees['account_number'] }} ({{ $schoolFees['account_name'] }})
-                </div>
-            @endif
-
-            {{-- bottom tagline bar --}}
-            <div class="tagline-bar">
-                {{ config('academyhub.school_motto') ?: 'DISCIPLINE • KNOWLEDGE • EXCELLENCE' }}
+        <!-- School Fees Information (if enabled) -->
+        @if($showSchoolFees && isset($schoolFees))
+            <div class="fees-banner">
+                <strong>OUTSTANDING / NEXT TERM FEES INFORMATION:</strong> 
+                Fee Amount: {{ $schoolFees['currency'] ?? '₦' }}{{ number_format($schoolFees['amount'] ?? 45000, 2) }} | 
+                Bank Name: {{ $schoolFees['bank_name'] ?? 'Zenith Bank' }} | 
+                Account Number: {{ $schoolFees['account_number'] ?? '1023456789' }}
             </div>
+        @endif
+
+        <!-- Next Term Resumes Banner -->
+        @if($showNextTermDate)
+            <div class="resumes-banner">
+                NEXT TERM BEGINS: {{ $nextTermDate ?? 'SEPTEMBER 8, 2025' }}
+            </div>
+        @endif
+
+        <!-- Parent Signature & Date Line -->
+        <div class="parent-sig-table">
+            <div class="parent-sig-cell">
+                PARENT/GUARDIAN SIGNATURE: <span class="parent-sig-line"></span>
+            </div>
+            <div class="parent-sig-cell" style="text-align: right;">
+                DATE: <span class="parent-sig-line" style="width: 120px;"></span>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            {{ $schoolName }} • Powered by AcademyHub SMS
         </div>
 
     </div>
