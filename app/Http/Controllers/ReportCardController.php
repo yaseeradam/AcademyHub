@@ -96,6 +96,10 @@ class ReportCardController extends Controller
 
         $studentTimestamp = $student->updated_at ? $student->updated_at->timestamp : null;
 
+        $view = ReportCardService::viewForTemplate($template);
+        $viewPath = resource_path('views/' . str_replace('.', '/', $view) . '.blade.php');
+        $viewTimestamp = file_exists($viewPath) ? filemtime($viewPath) : null;
+
         $useCache = false;
         if (file_exists($fullPath) && app()->environment() !== 'testing') {
             $cacheTimestamp = filemtime($fullPath);
@@ -114,6 +118,10 @@ class ReportCardController extends Controller
             }
 
             if ($studentTimestamp !== null && $cacheTimestamp < $studentTimestamp) {
+                $stale = true;
+            }
+
+            if ($viewTimestamp !== null && $cacheTimestamp < $viewTimestamp) {
                 $stale = true;
             }
 

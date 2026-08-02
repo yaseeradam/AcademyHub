@@ -2,82 +2,73 @@
 <html lang="en">
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-    <title>Report Sheet - {{ $student->admission_number }}</title>
+    <title>Permanent Record - {{ $student->admission_number }}</title>
     <style>
-        @page { margin: 4mm 6mm; }
+        @page { margin: 10mm 0; }
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: DejaVu Sans, Arial, sans-serif; font-size: 8.5px; color: #0f172a; background: #fff; line-height: 1.25; }
+        body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 8.5pt; color: #1e293b; background: #ffffff; line-height: 1.35; }
 
-        /* ─── Compact Space-Saving Premium Style ─── */
-        .page { border: 2.5px double #0284c7; padding: 6px; background: #fff; }
-        .page-inner { border: 1px solid #bae6fd; padding: 6px; }
+        /* ─── 90% Main Page Wrapper (Centered with 5% Left & 5% Right Margins) ─── */
+        .page { width: 90%; margin: 0 auto; background: #ffffff; }
 
-        .header { border-bottom: 2px solid #0284c7; padding-bottom: 3px; margin-bottom: 4px; }
-        .header-table { display: table; width: 100%; }
-        .header-cell { display: table-cell; vertical-align: middle; }
-        .logo-wrap { width: 60px; }
-        .logo { width: 48px; height: 48px; object-fit: contain; border: 1.5px solid #0284c7; border-radius: 5px; padding: 2px; background: #fff; }
-        .school-name { font-size: 15px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; color: #0369a1; }
-        .school-meta { margin-top: 1px; font-size: 7.5px; color: #64748b; font-weight: 600; }
-        .badge { display: inline-block; margin-top: 3px; background: #0284c7; color: #fff; padding: 2px 8px; border-radius: 3px; font-size: 7.5px; font-weight: 800; letter-spacing: 0.5px; text-transform: uppercase; }
-        .meta-right { font-size: 7.5px; color: #64748b; font-weight: 600; text-align: right; line-height: 1.3; }
+        /* ─── Header Banner (Spans 100% of the 90% Centered Wrapper) ─── */
+        .banner { background: #1e3a8a; color: #ffffff; text-align: center; padding: 18px 16px 14px 16px; width: 100%; margin-bottom: 22px; border-radius: 3px; }
+        .banner-title { font-size: 22pt; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; color: #ffffff; line-height: 1.1; margin-bottom: 4px; }
+        .banner-subtitle { font-size: 8.5pt; font-weight: 600; text-transform: uppercase; letter-spacing: 2.5px; color: #93c5fd; }
 
-        /* Stats Block */
-        .stats { display: table; width: 100%; margin-bottom: 4px; }
-        .stat { display: table-cell; padding: 1px; }
-        .stat-inner { background: #bae6fd; border: 1px solid #7dd3fc; border-radius: 3px; text-align: center; padding: 4px 2px; }
-        .stat-inner.green { background: #dcfce7; border-color: #86efac; }
-        .stat-inner.green .stat-value { color: #15803d; }
-        .stat-inner.blue { background: #dbeafe; border-color: #93c5fd; }
-        .stat-inner.blue .stat-value { color: #1d4ed8; }
-        .stat-inner.purple { background: #f3e8ff; border-color: #d8b4fe; }
-        .stat-inner.purple .stat-value { color: #6b21a8; }
-        .stat-inner.teal { background: #ccfbf1; border-color: #99f6e4; }
-        .stat-inner.teal .stat-value { color: #0f766e; }
-        .stat-inner.rose { background: #ffe4e6; border-color: #fecdd3; }
-        .stat-inner.rose .stat-value { color: #be123c; }
-        .stat-label { font-size: 6px; color: #0369a1; font-weight: 700; text-transform: uppercase; margin-bottom: 1px; }
-        .stat-value { font-size: 12px; font-weight: 900; color: #0c4a6e; }
+        .container { width: 100%; }
 
-        /* Table */
-        table.scores { width: 100%; border-collapse: collapse; margin-bottom: 4px; border: 1px solid #bae6fd; }
-        table.scores th { background: #0284c7; color: #fff; padding: 2.5px 3px; font-size: 7px; font-weight: 800; text-transform: uppercase; text-align: center; border: 1px solid #0284c7; }
-        table.scores td { padding: 2px 3px; border: 1px solid #e2e8f0; text-align: center; font-size: 8px; }
-        table.scores tr:nth-child(even) td { background: #f8fafc; }
-        .subj { text-align: left !important; font-weight: 700; color: #0369a1; padding-left: 5px !important; }
-        .bold { font-weight: 800; color: #0f172a; }
+        /* ─── Student Profile Section (Circular Photo + Light Grey Pills) ─── */
+        .student-profile { display: table; width: 100%; margin-bottom: 22px; }
+        .photo-cell { display: table-cell; width: 78px; vertical-align: middle; padding-right: 18px; }
+        .photo { width: 68px; height: 68px; border-radius: 50%; object-fit: cover; display: block; }
+        .photo-placeholder { width: 68px; height: 68px; border-radius: 50%; background: #f1f5f9; border: 1px solid #cbd5e1; text-align: center; line-height: 66px; font-size: 22pt; font-weight: 800; color: #64748b; }
 
-        /* Grading Key */
-        .grading { display: table; width: 100%; border: 1px solid #bae6fd; margin-bottom: 4px; border-radius: 3px; overflow: hidden; }
-        .gr-cell { display: table-cell; padding: 3px 2px; text-align: center; font-size: 6.5px; font-weight: 600; color: #475569; border-right: 1px solid #bae6fd; background: #f8fafc; }
-        .gr-cell:last-child { border-right: none; }
-        .gr-cell strong { color: #0369a1; font-size: 7.5px; }
+        .info-cell { display: table-cell; vertical-align: middle; }
 
-        /* Attendance */
-        .att { display: table; width: 100%; margin-bottom: 4px; border: 1px solid #bae6fd; border-radius: 3px; overflow: hidden; }
-        .att-cell { display: table-cell; width: 33.33%; text-align: center; padding: 3px; border-right: 1px solid #bae6fd; background: #f0f9ff; }
-        .att-cell:last-child { border-right: none; }
-        .att-label { font-size: 7px; font-weight: 800; text-transform: uppercase; color: #0369a1; margin-bottom: 1px; }
-        .att-value { font-size: 11px; font-weight: 900; color: #0f172a; }
+        .pill-row { display: table; width: 100%; margin-bottom: 7px; }
+        .pill-row:last-child { margin-bottom: 0; }
+        .pill-col { display: table-cell; padding-right: 8px; }
+        .pill-col:last-child { padding-right: 0; }
 
-        /* Remarks */
-        .remarks { border: 1px solid #bae6fd; border-radius: 3px; padding: 3px 5px; margin-bottom: 3px; background: #f0f9ff; }
-        .remarks-label { font-size: 7px; font-weight: 850; color: #0369a1; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 1px; }
-        .remarks-text { font-size: 7.5px; color: #334155; line-height: 1.2; }
+        .pill { background: #f1f5f9; border-radius: 4px; padding: 6px 12px; font-size: 8.5pt; color: #334155; }
+        .pill strong { font-weight: 700; color: #0f172a; }
+        .pill span.label { color: #64748b; font-weight: 500; }
 
-        /* Next Term */
-        .next-term { background: #0284c7; color: #fff; text-align: center; padding: 4px; font-size: 8px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 3px; border-radius: 3px; }
+        /* ─── Academic Record Table ─── */
+        table.scores-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; table-layout: fixed; }
+        table.scores-table th { background: #f8fafc; color: #0f172a; padding: 9px 8px; font-size: 7.5pt; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; border-bottom: 1px solid #e2e8f0; border-top: 1px solid #e2e8f0; text-align: center; }
+        table.scores-table th.subj-th { text-align: left; padding-left: 12px; width: 34%; }
+        table.scores-table td { padding: 8px 8px; border-bottom: 1px solid #f1f5f9; text-align: center; font-size: 8.5pt; color: #334155; }
+        table.scores-table tr:nth-child(even) td { background: #fafafa; }
+        table.scores-table td.subj-td { text-align: left; padding-left: 12px; font-weight: 600; color: #0f172a; word-wrap: break-word; }
+        table.scores-table td.bold { font-weight: 700; color: #0f172a; }
 
-        /* Signatures */
-        .sigs { display: table; width: 100%; margin-top: 3px; }
-        .sig { display: table-cell; width: 33.33%; text-align: center; padding: 2px; vertical-align: bottom; }
-        .sig-img { max-height: 24px; max-width: 65px; object-fit: contain; margin-bottom: 1px; }
-        .sig-line { border-top: 1.5px solid #0284c7; margin-top: 8px; padding-top: 1px; font-size: 7.5px; font-weight: 800; color: #0369a1; }
-        .sig-line.has-img { margin-top: 1px; }
-        .sig-sub { font-size: 6px; color: #64748b; font-style: italic; }
+        /* ─── Intermediate Achievement Legend Box ─── */
+        .legend-box { background: #f8fafc; border-radius: 4px; overflow: hidden; margin-bottom: 16px; border: 1px solid #f1f5f9; }
+        .legend-header { background: #f1f5f9; text-align: center; font-size: 8pt; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: #0f172a; padding: 6px; }
+        .legend-body { display: table; width: 100%; padding: 8px 0; }
+        .legend-item { display: table-cell; text-align: center; font-size: 7.5pt; color: #475569; font-weight: 500; padding: 2px 4px; }
+        .legend-item strong { color: #0f172a; font-weight: 700; }
 
-        .footer { margin-top: 4px; border-top: 1px solid #bae6fd; padding-top: 2px; text-align: center; font-size: 6.5px; color: #94a3b8; }
-        .watermark { position: fixed; top: 50%; left: 50%; transform: translate(-50%,-50%); z-index: -1; opacity: 0.02; width: 280px; height: 280px; }
+        /* ─── Remarks Cards ─── */
+        .remark-card { background: #f8fafc; border-radius: 4px; border: 1px solid #f1f5f9; padding: 9px 12px; margin-bottom: 10px; }
+        .remark-title { font-size: 7.5pt; font-weight: 700; text-transform: uppercase; color: #1e3a8a; letter-spacing: 0.5px; margin-bottom: 3px; }
+        .remark-body { font-size: 8.5pt; color: #334155; line-height: 1.3; }
+
+        /* ─── Next Term Bar ─── */
+        .next-term-bar { background: #1e3a8a; color: #ffffff; text-align: center; padding: 8px; font-size: 8.5pt; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; width: 100%; margin-bottom: 14px; border-radius: 3px; }
+
+        /* ─── Signatures Table ─── */
+        .sigs-table { display: table; width: 100%; margin-top: 12px; }
+        .sig-cell { display: table-cell; width: 33.33%; text-align: center; padding: 0 8px; vertical-align: bottom; }
+        .sig-img { max-height: 28px; max-width: 80px; object-fit: contain; margin-bottom: 2px; }
+        .sig-line { border-top: 1px solid #94a3b8; margin-top: 16px; padding-top: 3px; font-size: 8pt; font-weight: 700; color: #0f172a; }
+        .sig-line.has-img { margin-top: 2px; }
+        .sig-sub { font-size: 6.5pt; color: #64748b; font-style: italic; }
+
+        .footer { margin-top: 14px; text-align: center; font-size: 7pt; color: #94a3b8; }
+        .watermark { position: fixed; top: 50%; left: 50%; transform: translate(-50%,-50%); z-index: -1; opacity: 0.03; width: 260px; height: 260px; }
     </style>
 </head>
 <body>
@@ -85,7 +76,37 @@
     $schoolName = config('academyhub.school_name', config('app.name', 'AcademyHub'));
     $logo = config('academyhub.school_logo');
     $logoPath = $logo ? public_path('uploads/'.str_replace('\\', '/', $logo)) : null;
-    $logoExists = $logoPath && file_exists($logoPath);
+    
+    // Base64 helper for DomPDF bulletproof image embedding
+    $toBase64 = function(?string $path): ?string {
+        if (!$path || !file_exists($path)) {
+            return null;
+        }
+        $ext = strtolower(pathinfo($path, PATHINFO_EXTENSION));
+        $mime = match($ext) {
+            'jpg', 'jpeg' => 'image/jpeg',
+            'png' => 'image/png',
+            'webp' => 'image/webp',
+            'svg' => 'image/svg+xml',
+            default => 'image/png',
+        };
+        $data = @file_get_contents($path);
+        return $data ? 'data:' . $mime . ';base64,' . base64_encode($data) : null;
+    };
+
+    $logoDataUri = $toBase64($logoPath);
+
+    // Resolve student photo and encode as Base64 Data URI
+    $photoDataUri = null;
+    if ($student->passport_photo) {
+        $cleanRel = str_replace('\\', '/', $student->passport_photo);
+        if (file_exists(public_path('uploads/' . $cleanRel))) {
+            $photoDataUri = $toBase64(public_path('uploads/' . $cleanRel));
+        } elseif (file_exists(public_path($cleanRel))) {
+            $photoDataUri = $toBase64(public_path($cleanRel));
+        }
+    }
+
     $opts = $rcOptions ?? [];
     $showPosition       = $opts['show_position'] ?? true;
     $showAttendance     = $opts['show_attendance'] ?? true;
@@ -100,74 +121,90 @@
     $showSignatures     = $opts['show_signatures'] ?? false;
 @endphp
 
-@if($logoExists && $showWatermark)
-    <div class="watermark"><img src="{{ $logoPath }}" alt="" style="width:100%;height:100%;object-fit:contain;" /></div>
+@if($logoDataUri && $showWatermark)
+    <div class="watermark"><img src="{{ $logoDataUri }}" alt="" style="width:100%;height:100%;object-fit:contain;" /></div>
 @endif
 
 <div class="page">
-    <div class="page-inner">
+    {{-- Header Banner (Spans 100% of 90% Wrapper) --}}
+    <div class="banner">
+        <div class="banner-title">Permanent Record</div>
+        <div class="banner-subtitle">INTERMEDIATE GRADE</div>
+    </div>
 
-        {{-- Header --}}
-        <div class="header">
-            <div class="header-table">
-                <div class="header-cell logo-wrap">
-                    @if($logoExists)<img class="logo" src="{{ $logoPath }}" alt="">@endif
+    <div class="container">
+        {{-- Student Profile Section (Circular Photo + Light Grey Pills) --}}
+        <div class="student-profile">
+            <div class="photo-cell">
+                @if($photoDataUri)
+                    <img class="photo" src="{{ $photoDataUri }}" alt="Student Photo" />
+                @else
+                    <div class="photo-placeholder">{{ strtoupper(substr($student->first_name ?? 'S', 0, 1)) }}</div>
+                @endif
+            </div>
+            <div class="info-cell">
+                <div class="pill-row">
+                    <div class="pill-col" style="width: 100%;">
+                        <div class="pill">
+                            <span class="label">Student Name:</span> <strong>{{ $student->full_name }}</strong>
+                        </div>
+                    </div>
                 </div>
-                <div class="header-cell">
-                    <div class="school-name">{{ $schoolName }}</div>
-                    @if(config('academyhub.school_address'))<div class="school-meta">{{ config('academyhub.school_address') }}</div>@endif
-                    @if(config('academyhub.school_phone'))
-                        <div class="school-meta">Phone: {{ config('academyhub.school_phone') }}</div>
-                    @endif
-                    <div class="badge">Student Report Sheet</div>
+                <div class="pill-row">
+                    <div class="pill-col" style="width: 50%;">
+                        <div class="pill">
+                            <span class="label">Date of birthday:</span> <strong>{{ $student->dob ? \Carbon\Carbon::parse($student->dob)->format('d/m/Y') : ($student->date_of_birth ? \Carbon\Carbon::parse($student->date_of_birth)->format('d/m/Y') : 'N/A') }}</strong>
+                        </div>
+                    </div>
+                    <div class="pill-col" style="width: 25%;">
+                        <div class="pill">
+                            <span class="label">Male:</span> <strong>{{ strtolower($student->gender) === 'male' ? 'X' : '' }}</strong>
+                        </div>
+                    </div>
+                    <div class="pill-col" style="width: 25%;">
+                        <div class="pill">
+                            <span class="label">Female:</span> <strong>{{ strtolower($student->gender) === 'female' ? 'X' : '' }}</strong>
+                        </div>
+                    </div>
                 </div>
-                <div class="header-cell" style="width:130px;">
-                    <div class="meta-right">Session: <strong>{{ $session }}</strong></div>
-                    <div class="meta-right">Term: <strong>Term {{ $term }}</strong></div>
-                    <div class="meta-right">Date: <strong>{{ now()->format('d M, Y') }}</strong></div>
+                <div class="pill-row">
+                    <div class="pill-col" style="width: 50%;">
+                        <div class="pill">
+                            <span class="label">Admission No:</span> <strong>{{ $student->admission_number }}</strong>
+                        </div>
+                    </div>
+                    <div class="pill-col" style="width: 50%;">
+                        <div class="pill">
+                            <span class="label">Class / Section:</span> <strong>{{ $student->schoolClass?->name }} {{ $student->section?->name ? '('.$student->section->name.')' : '' }}</strong>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
 
-        {{-- Student Info --}}
-        @php($siBorderColor = '#0284c7') @php($siBgColor = '#f0f9ff') @php($siLabelColor = '#0369a1') @php($siValueColor = '#0f172a') @php($siDotColor = '#bae6fd')
-        @include('pdf.partials.rc-student-info')
-
-        {{-- Stats --}}
-        <div class="stats">
-            <div class="stat"><div class="stat-inner"><div class="stat-label">Total</div><div class="stat-value">{{ $grandTotal }}</div></div></div>
-            <div class="stat"><div class="stat-inner green"><div class="stat-label">Average</div><div class="stat-value">{{ number_format($average,1) }}%</div></div></div>
-            @if($showPosition)<div class="stat"><div class="stat-inner blue"><div class="stat-label">Position</div><div class="stat-value">{{ $position }}</div></div></div>@endif
-            @if($showClassAverage)
-            <div class="stat"><div class="stat-inner purple"><div class="stat-label">Class Avg</div><div class="stat-value">{{ number_format($classAverage,1) }}%</div></div></div>
-            <div class="stat"><div class="stat-inner teal"><div class="stat-label">Highest</div><div class="stat-value">{{ number_format($highestAverage??0,1) }}%</div></div></div>
-            <div class="stat"><div class="stat-inner rose"><div class="stat-label">Lowest</div><div class="stat-value">{{ number_format($lowestAverage??0,1) }}%</div></div></div>
-            @endif
-        </div>
-
-        {{-- Scores Table --}}
-        <table class="scores">
+        {{-- Academic Record Table --}}
+        <table class="scores-table">
             <thead>
                 <tr>
-                    <th style="width:32%;text-align:left;padding-left:5px;">Subject</th>
-                    <th style="width:10%;">CA1<br/>({{ config('academyhub.results_ca1_max',20) }})</th>
-                    <th style="width:10%;">CA2<br/>({{ config('academyhub.results_ca2_max',20) }})</th>
-                    <th style="width:10%;">Exam<br/>({{ config('academyhub.results_exam_max',60) }})</th>
-                    <th style="width:10%;">Total</th>
-                    <th style="width:9%;">Grade</th>
-                    @if($showClassAverage)<th style="width:9%;">Avg</th>@endif
-                    @if($showPosition)<th style="width:9%;">Pos</th>@endif
+                    <th class="subj-th">ACADEMIC RECORD</th>
+                    <th style="width:10%;">CA 1 ({{ config('academyhub.results_ca1_max',20) }})</th>
+                    <th style="width:10%;">CA 2 ({{ config('academyhub.results_ca2_max',20) }})</th>
+                    <th style="width:10%;">EXAM ({{ config('academyhub.results_exam_max',60) }})</th>
+                    <th style="width:9%;">TOTAL</th>
+                    <th style="width:9%;">GRADE</th>
+                    @if($showClassAverage)<th style="width:10%;">CLASS AVG</th>@endif
+                    @if($showPosition)<th style="width:8%;">POS</th>@endif
                 </tr>
             </thead>
             <tbody>
                 @foreach($rows as $r)
                 <tr>
-                    <td class="subj">{{ $r['subject']?->name ?? '-' }}</td>
-                    <td>{{ $r['ca1'] ?? '' }}</td>
-                    <td>{{ $r['ca2'] ?? '' }}</td>
-                    <td>{{ $r['exam'] ?? '' }}</td>
-                    <td class="bold">{{ $r['total'] ?? '' }}</td>
-                    <td class="bold">{{ $r['grade'] ?? '' }}</td>
+                    <td class="subj-td">{{ $r['subject']?->name ?? '-' }}</td>
+                    <td>{{ $r['ca1'] ?? '-' }}</td>
+                    <td>{{ $r['ca2'] ?? '-' }}</td>
+                    <td>{{ $r['exam'] ?? '-' }}</td>
+                    <td class="bold">{{ $r['total'] ?? '-' }}</td>
+                    <td class="bold">{{ $r['grade'] ?? '-' }}</td>
                     @if($showClassAverage)<td>{{ $r['class_avg'] ?? '—' }}</td>@endif
                     @if($showPosition)<td>{{ $r['position'] ?? '—' }}</td>@endif
                 </tr>
@@ -175,64 +212,60 @@
             </tbody>
         </table>
 
-        {{-- Grading Key --}}
+        {{-- Intermediate Achievement Legend Box --}}
         @if($showGradingKey)
-        <div class="grading">
-            <div class="gr-cell"><strong>A:</strong> 70-100 (Excellent)</div>
-            <div class="gr-cell"><strong>B:</strong> 60-69 (Very Good)</div>
-            <div class="gr-cell"><strong>C:</strong> 50-59 (Good)</div>
-            <div class="gr-cell"><strong>D:</strong> 40-49 (Pass)</div>
-            <div class="gr-cell"><strong>F:</strong> 0-39 (Fail)</div>
+        <div class="legend-box">
+            <div class="legend-header">INTERMEDIATE ACHIEVEMENT</div>
+            <div class="legend-body">
+                <div class="legend-item"><strong>A</strong> = Excellent (70-100%)</div>
+                <div class="legend-item"><strong>B</strong> = Above Average (60-69%)</div>
+                <div class="legend-item"><strong>C</strong> = Average (50-59%)</div>
+                <div class="legend-item"><strong>D</strong> = Below Average (40-49%)</div>
+                <div class="legend-item"><strong>U</strong> = Unsatisfactory (0-39%)</div>
+            </div>
         </div>
         @endif
-
-        {{-- Attendance --}}
-        @if($showAttendance)
-        <div class="att">
-            <div class="att-cell"><div class="att-label">Times Opened</div><div class="att-value">{{ $timesOpened ?? '—' }}</div></div>
-            <div class="att-cell"><div class="att-label">Times Present</div><div class="att-value">{{ $timesPresent ?? '—' }}</div></div>
-            <div class="att-cell"><div class="att-label">Times Absent</div><div class="att-value">{{ $timesAbsent ?? '—' }}</div></div>
-        </div>
-        @endif
-
-        {{-- Psychomotor --}}
-        @php($rcBorderColor='#0284c7') @php($rcBgLight='#f0f9ff') @php($rcTitleColor='#0369a1') @php($rcLabelColor='#0369a1')
-        @include('pdf.partials.rc-psychomotor')
 
         {{-- Remarks --}}
-        @if($showTeacherRemarks)
-        <div class="remarks"><div class="remarks-label">Class Teacher's Remarks</div><div class="remarks-text">{{ $teacherRemarks ?? 'No remarks provided.' }}</div></div>
-        @endif
-        @if($showPrincipalRemarks)
-        <div class="remarks"><div class="remarks-label">Principal's Remarks</div><div class="remarks-text">{{ $principalRemarks ?? 'No remarks provided.' }}</div></div>
+        @if($showTeacherRemarks && !empty($teacherRemarks))
+        <div class="remark-card">
+            <div class="remark-title">TEACHER'S REMARKS</div>
+            <div class="remark-body">{{ $teacherRemarks }}</div>
+        </div>
         @endif
 
-        {{-- School Fees --}}
-        @include('pdf.partials.rc-school-fees')
+        @if($showPrincipalRemarks && !empty($principalRemarks))
+        <div class="remark-card">
+            <div class="remark-title">PRINCIPAL'S REMARKS</div>
+            <div class="remark-body">{{ $principalRemarks }}</div>
+        </div>
+        @endif
 
-        {{-- Next Term --}}
+        {{-- Next Term Bar --}}
         @if($showNextTermDate)
-        <div class="next-term">Next Term Begins: {{ $nextTermDate ?? 'To be announced' }}</div>
+        <div class="next-term-bar">NEXT TERM RESUMES: {{ strtoupper($nextTermDate ?? 'TO BE ANNOUNCED') }}</div>
         @endif
 
         {{-- Signatures --}}
         @if($showSignatures)
-        <div class="sigs">
-            <div class="sig">
-                @if(($signatureImages['teacher']??null) && file_exists($signatureImages['teacher']))<img src="{{ $signatureImages['teacher'] }}" class="sig-img" /><div class="sig-line has-img">Class Teacher</div>
+        <div class="sigs-table">
+            <div class="sig-cell">
+                @php($tSigUri = $toBase64($signatureImages['teacher'] ?? null))
+                @if($tSigUri)<img src="{{ $tSigUri }}" class="sig-img" /><div class="sig-line has-img">Class Teacher</div>
                 @else<div class="sig-line">Class Teacher</div>@endif
                 <div class="sig-sub">Signature &amp; Date</div>
             </div>
-            <div class="sig">
-                @if(($signatureImages['principal']??null) && file_exists($signatureImages['principal']))<img src="{{ $signatureImages['principal'] }}" class="sig-img" /><div class="sig-line has-img">Principal</div>
+            <div class="sig-cell">
+                @php($pSigUri = $toBase64($signatureImages['principal'] ?? null))
+                @if($pSigUri)<img src="{{ $pSigUri }}" class="sig-img" /><div class="sig-line has-img">Principal</div>
                 @else<div class="sig-line">Principal</div>@endif
                 <div class="sig-sub">Signature &amp; Stamp</div>
             </div>
-            <div class="sig"><div class="sig-line">Parent/Guardian</div><div class="sig-sub">Signature &amp; Date</div></div>
+            <div class="sig-cell"><div class="sig-line">Parent/Guardian</div><div class="sig-sub">Signature &amp; Date</div></div>
         </div>
         @endif
 
-        <div class="footer">Generated {{ now()->format('d M Y, g:i A') }} • {{ $schoolName }} • Powered by AcademyHub SMS</div>
+        <div class="footer">Generated {{ now()->format('d M Y, g:i A') }} &bull; {{ $schoolName }} &bull; Powered by AcademyHub SMS</div>
     </div>
 </div>
 </body>
