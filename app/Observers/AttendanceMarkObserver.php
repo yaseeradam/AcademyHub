@@ -19,11 +19,6 @@ class AttendanceMarkObserver
             \App\Support\StudentPerformanceService::clearCache($mark->student_id);
         }
 
-        // Only trigger proactive notifications for 'Absent' status
-        if ($mark->status !== 'A') {
-            return;
-        }
-
         $student = $mark->student;
         if (!$student) {
             return;
@@ -35,12 +30,43 @@ class AttendanceMarkObserver
             ->whereNotNull('whatsapp_phone')
             ->get();
 
-        foreach ($parents as $parent) {
-            $sheetDate = $mark->sheet && $mark->sheet->date 
-                ? $mark->sheet->date->toDateString() 
-                : today()->toDateString();
+        if ($parents->isEmpty()) {
+            return;
+        }
 
-            $message = "🔔 *Attendance Alert:* Your child, *{$student->full_name}*, has been marked *Absent* today ({$sheetDate}). Please contact the school administration if this is an error.";
+        $sheetDate = ($mark->sheet && $mark->sheet->date) 
+            ? $mark->sheet->date->toDateString() 
+            : today()->toDateString();
+
+        $statusClean = strtoupper(trim((string) $mark->status));
+
+        $statusText = match ($statusClean) {
+            'P', 'PRESENT' => 'Present',
+            'L', 'LATE' => 'Late',
+            'A', 'ABSENT' => 'Absent',
+            'E', 'EXCUSED' => 'Excused',
+            default => $mark->status
+        };
+
+        $icon = match ($statusText) {
+            'Present' => '✅',
+            'Late' => '⚠️',
+            'Absent' => '❌',
+            'Excused' => 'ℹ️',
+            default => '📅'
+        };
+
+        if ($statusText === 'Present') {
+            $message = "{$icon} *Attendance Alert:* Your child, *{$student->full_name}*, has been marked *Present* in school today ({$sheetDate}).";
+        } elseif ($statusText === 'Late') {
+            $message = "{$icon} *Attendance Alert:* Your child, *{$student->full_name}*, was marked *Late* in school today ({$sheetDate}).";
+        } elseif ($statusText === 'Absent') {
+            $message = "{$icon} *Attendance Alert:* Your child, *{$student->full_name}*, has been marked *Absent* today ({$sheetDate}). Please contact the school administration if this is an error.";
+        } else {
+            $message = "{$icon} *Attendance Alert:* Your child, *{$student->full_name}*, attendance status is marked *{$statusText}* today ({$sheetDate}).";
+        }
+
+        foreach ($parents as $parent) {
             WhatsAppService::sendMessage($parent->whatsapp_phone, $message);
         }
     }

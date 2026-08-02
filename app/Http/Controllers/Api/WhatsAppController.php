@@ -262,9 +262,7 @@ class WhatsAppController extends Controller
         $parent->load([
             'students.schoolClass',
             'students.attendanceMarks' => function ($q) {
-                $q->whereHas('sheet', function ($sq) {
-                    $sq->whereDate('date', today());
-                });
+                $q->with('sheet')->latest()->limit(5);
             },
             'students.scores' => function ($q) {
                 $q->with('subject');
@@ -325,6 +323,7 @@ class WhatsAppController extends Controller
                 'active_term' => \App\Models\AcademicTerm::activeTermNumber(),
                 'active_term_name' => \App\Models\AcademicTerm::active() ? \App\Models\AcademicTerm::active()->name : 'First Term',
                 'active_session' => \App\Models\AcademicTerm::activeSessionName() ?: date('Y') . '/' . (date('Y') + 1),
+                'today_date' => today()->format('l, F j, Y'),
             ],
             'school' => [
                 'name' => config('academyhub.school_name'),
@@ -334,7 +333,31 @@ class WhatsAppController extends Controller
             'upcoming_events' => $events,
             'recent_announcements' => $announcements,
             'students' => $parent->students->map(function ($student) use ($dayOfWeek, $onlinePaymentActive) {
-                $attendance = $student->attendanceMarks->first();
+                $todayMark = $student->attendanceMarks->first(function ($m) {
+                    return $m->sheet && \Carbon\Carbon::parse($m->sheet->date)->isToday();
+                });
+
+                $attendanceTodayText = 'Not Marked Yet Today (Roll call pending)';
+                if ($todayMark) {
+                    if ($todayMark->status === 'P') $attendanceTodayText = 'Present';
+                    elseif ($todayMark->status === 'L') $attendanceTodayText = 'Late';
+                    elseif ($todayMark->status === 'A') $attendanceTodayText = 'Absent';
+                }
+
+                $attendanceHistory = $student->attendanceMarks->map(function ($m) {
+                    $dateStr = $m->sheet ? \Carbon\Carbon::parse($m->sheet->date)->format('D, M j, Y') : 'Unknown Date';
+                    $statusText = match($m->status) {
+                        'P' => 'Present',
+                        'L' => 'Late',
+                        'A' => 'Absent',
+                        default => $m->status
+                    };
+                    return [
+                        'date' => $dateStr,
+                        'status' => $statusText,
+                    ];
+                })->values()->all();
+
                 $apiKey = config('services.whatsapp.api_key');
                 $activeTermNumber = \App\Models\AcademicTerm::activeTermNumber();
                 $activeSessionName = \App\Models\AcademicTerm::activeSessionName() ?: date('Y') . '/' . (date('Y') + 1);
@@ -416,7 +439,8 @@ class WhatsAppController extends Controller
                     'name' => $student->full_name,
                     'admission_number' => $student->admission_number,
                     'class' => $student->schoolClass?->name,
-                    'attendance_today' => $attendance ? $attendance->status : null,
+                    'attendance_today' => $attendanceTodayText,
+                    'recent_attendance_history' => $attendanceHistory,
                     'report_card_url' => $reportCardUrl,
                     'tuition_fees' => [
                         'amount_due'          => $amountDue,
@@ -2332,180 +2356,6 @@ class WhatsAppController extends Controller
             return;
         }
 
-        // 8. Handle Parent Custom Keywords
-        if ($userRole === 'parent') {
-            if ($textLower === 'attendance') {
-                $user->load(['students.attendanceMarks' => function ($q) {
-                    $q->whereHas('sheet', function ($sq) {
-                        $sq->whereDate('date', today());
-                    });
-                }]);
-                $reply = "📅 *Today's Attendance*\n\n";
-                foreach ($user->students as $s) {
-                    $attendance = $s->attendanceMarks->first();
-                    $status = $attendance && in_array($attendance->status, ['P', 'L']) ? '✅ Present' : '❌ Absent';
-                    $reply .= "• *{$s->full_name}*: {$status}\n";
-                }
-                $this->sendMetaMessage($phone, $reply);
-                return;
-            }
-
-            if ($textLower === 'results') {
-                $activeTermNumber = \App\Models\AcademicTerm::activeTermNumber();
-                $activeSessionName = \App\Models\AcademicTerm::activeSessionName() ?: date('Y') . '/' . (date('Y') + 1);
-
-                $user->load(['students' => function($q) use ($activeTermNumber, $activeSessionName) {
-                    $q->with(['scores' => function($sq) use ($activeTermNumber, $activeSessionName) {
-                        $sq->where('term', $activeTermNumber)
-                           ->where('session', $activeSessionName)
-                           ->with('subject');
-                    }]);
-                }]);
-
-                $reply = "📊 *Latest Academic Results (Term {$activeTermNumber})*\n\n";
-                foreach ($user->students as $s) {
-                    $reply .= "👨‍🎓 *{$s->full_name}*\n";
-                    
-                    $studentClassIds = \App\Models\Score::where('student_id', $s->id)
-                        ->where('term', $activeTermNumber)
-                        ->where('session', $activeSessionName)
-                        ->pluck('class_id')
-                        ->unique()
-                        ->filter()
-                        ->push($s->class_id)
-                        ->toArray();
-
-                    $isPublished = \App\Models\ResultPublication::whereIn('class_id', $studentClassIds)
-                        ->where('term', $activeTermNumber)
-                        ->where('session', $activeSessionName)
-                        ->exists();
-                        
-                    if (!$isPublished) {
-                        $reply .= "⚠️ Results have not been officially published yet by the school administration.\n\n";
-                        continue;
-                    }
-
-                    if ($s->scores->isNotEmpty()) {
-                        foreach ($s->scores as $score) {
-                            $reply .= "• {$score->subject?->name}: *{$score->total}/100*\n";
-                        }
-                    } else {
-                        $reply .= "No recent scores available.\n";
-                    }
-                    $reply .= "\n";
-                }
-                $this->sendMetaMessage($phone, trim($reply));
-                return;
-            }
-
-            if ($textLower === 'fees') {
-                $activeTermNumber = \App\Models\AcademicTerm::activeTermNumber();
-                $activeSessionName = \App\Models\AcademicTerm::activeSessionName() ?: date('Y') . '/' . (date('Y') + 1);
-                $apiKey = config('services.whatsapp.api_key');
-
-                $reply = "💰 *Outstanding Tuition Fees (Term {$activeTermNumber} - {$activeSessionName})*\n\n";
-                foreach ($user->students as $s) {
-                    $feeStructure = \App\Models\FeeStructure::where('class_id', $s->class_id)
-                        ->where('term', $activeTermNumber)
-                        ->where('session', $activeSessionName)
-                        ->first();
-
-                    $amountDue = $feeStructure ? (float) $feeStructure->amount_due : 0.0;
-
-                    $amountPaid = (float) \App\Models\Transaction::where('student_id', $s->id)
-                        ->where('type', 'Income')
-                        ->where('term', $activeTermNumber)
-                        ->where('session', $activeSessionName)
-                        ->where('is_void', false)
-                        ->sum('amount_paid');
-
-                    $outstandingBalance = max(0.0, $amountDue - $amountPaid);
-
-                    $reply .= "👨‍🎓 *{$s->full_name}*\n" .
-                              "• Amount Due: *₦" . number_format($amountDue, 2) . "*\n" .
-                              "• Amount Paid: *₦" . number_format($amountPaid, 2) . "*\n" .
-                              "• Outstanding Balance: *₦" . number_format($outstandingBalance, 2) . "*\n";
-
-                    if ($outstandingBalance > 0) {
-                        $gatewayActive = $tenant->activeMarketplaceComponents()->where('slug', 'payment-gateway')->exists();
-                        $subaccountStatus = $tenant->settings['payment_gateway']['subaccount_status'] ?? 'not_submitted';
-                        $onlinePaymentActive = $gatewayActive && ($subaccountStatus === 'approved');
-
-                        if ($onlinePaymentActive) {
-                            $paymentUrl = \Illuminate\Support\Facades\URL::temporarySignedRoute(
-                                'whatsapp.pay',
-                                now()->addHours(24),
-                                [
-                                    'studentId' => $s->id,
-                                    'term'      => $activeTermNumber,
-                                    'session'   => $activeSessionName,
-                                    'amount'    => $outstandingBalance,
-                                    'key'       => $apiKey
-                                ]
-                            );
-                            $reply .= "🔗 *Pay Online:* {$paymentUrl}\n";
-                        } else {
-                            $reply .= "⚠️ *Status:* Online payment setup is pending. Please pay at the school finance office.\n";
-                        }
-                    } else {
-                        $reply .= "✅ *Status:* Fully Paid\n";
-                    }
-                    $reply .= "\n";
-                }
-                $this->sendMetaMessage($phone, trim($reply));
-                return;
-            }
-
-            if ($textLower === 'homework') {
-                $reply = "📝 *Active Assignments*\n\n";
-                foreach ($user->students as $s) {
-                    $reply .= "👨‍🎓 *{$s->full_name}*\n";
-                    $homework = $s->getHomeworkForStudent();
-                    if ($homework->isNotEmpty()) {
-                        foreach ($homework as $hw) {
-                            $status = $hw->submissions->isNotEmpty() ? '✅ Submitted' : '⏳ Pending';
-                            $reply .= "• *{$hw->subject?->name}*: {$hw->title}\n" .
-                                      "  - Due Date: {$hw->due_date}\n" .
-                                      "  - Status: {$status}\n";
-                        }
-                    } else {
-                        $reply .= "No active assignments.\n";
-                    }
-                    $reply .= "\n";
-                }
-                $this->sendMetaMessage($phone, trim($reply));
-                return;
-            }
-
-            if ($textLower === 'timetable') {
-                $dayOfWeek = now()->dayOfWeekIso;
-                $days = [1 => 'Monday', 2 => 'Tuesday', 3 => 'Wednesday', 4 => 'Thursday', 5 => 'Friday', 6 => 'Saturday', 7 => 'Sunday'];
-                $dayName = $days[$dayOfWeek] ?? 'Today';
-
-                $reply = "📅 *Timetable ({$dayName})*\n\n";
-                foreach ($user->students as $s) {
-                    $reply .= "👨‍🎓 *{$s->full_name}*\n";
-                    $timetable = \App\Models\TimetableEntry::where('class_id', $s->class_id)
-                        ->where('day_of_week', $dayOfWeek)
-                        ->with('subject')
-                        ->orderBy('starts_at')
-                        ->get();
-
-                    if ($timetable->isNotEmpty()) {
-                        foreach ($timetable as $t) {
-                            $reply .= "• *{$t->starts_at} - {$t->ends_at}*: {$t->subject?->name} (Room: {$t->room})\n";
-                        }
-                    } else {
-                        $reply .= "No classes scheduled for today.\n";
-                    }
-                    $reply .= "\n";
-                }
-                $this->sendMetaMessage($phone, trim($reply));
-                return;
-            }
-
-        }
-
         // 9. Standard Menu / Help
         if ($textLower === 'menu' || $textLower === 'help') {
             $schoolName = config('academyhub.school_name') ?: 'AcademyHub';
@@ -2614,7 +2464,7 @@ class WhatsAppController extends Controller
                   "15. PROACTIVE FEE ALERTS & GATEWAY RESILIENCY: When a parent asks about fees or outstanding balances and a student has an outstanding_balance greater than 0: Check if 'online_payment_enabled' is true in the child's `tuition_fees` context. If it is true, add a polite, warm urgency note encouraging online payment and mention that they can pay using the checkout link provided. If it is false or disabled, you MUST NOT offer or link to any online payment checkout; instead, politely state the outstanding balance, tell them that online payment setup is currently pending review by the school administration, and advise them to pay manually at the school finance office. If the balance is 0, congratulate them warmly. Never be harsh or threatening — use empathetic, supportive language only.\n" .
                   "16. HOMEWORK DEADLINE AWARENESS: When a parent or student asks about homework, check the due_date of each assignment against today's date. If any assignment's due date is today, flag it with '⚠️ *DUE TODAY*'. If the due date has already passed (overdue), flag it with '🔴 *OVERDUE*'. Never treat overdue assignments the same as regular pending ones.\n" .
                   "17. TYPO & LANGUAGE TOLERANCE: Users may send informal, broken English, Pidgin English, or messages with spelling mistakes (e.g. 'wats my pikin score', 'I wan see fee', 'wetin be attendance'). You MUST interpret the intent correctly, respond in standard English, and never ask the user to rephrase unless the message is completely ambiguous even after reasonable interpretation.\n" .
-                  "18. ATTENDANCE PATTERN INSIGHT: If a parent asks about attendance and the student is marked Absent, proactively mention it with concern and suggest the parent contact the school if the absence is unexpected. If marked Present, acknowledge it positively. If Late, mention it gently. Always explain the status in plain language ('✅ Present', '⚠️ Late', '❌ Absent') — never return raw status codes like 'P', 'A', or 'L'.\n" .
+                  "18. ATTENDANCE PATTERN INSIGHT: When asked about attendance (or follow-up questions like 'check again' or 'check my child\'s attendance for today'): Check each student's `attendance_today` and `recent_attendance_history` in the context. Always explicitly state the student's full name, the date (e.g. Monday, Aug 3), and plain language status: '✅ Present', '⚠️ Late', '❌ Absent', or '⏳ Not marked yet today'. If a parent says 'check again' or asks for re-checking, reassure them naturally that you have re-verified today's class roll call, state the current recorded status clearly, and suggest contacting the school office if the child is actually in school." .
                   "19. STAFF ROLE SENSITIVITY: When responding to a teacher, focus answers on their teaching schedule, the classes they manage, and student academic data relevant to them. When responding to a bursar or admin, include financial summaries where relevant. Do not show sensitive financial data to teachers. Do not show academic scores to bursars unless they specifically ask. Always respect the role boundary defined in the context.\n" .
                   "20. AVOID REPETITION IN MULTI-CHILD RESPONSES: If a parent has multiple children and the answer is the same for all of them (e.g. 'No timetable today', 'All fees paid'), do NOT repeat the same line for each child separately. Instead, summarize once naturally (e.g. 'None of your children have classes today' or 'All your children's fees are fully paid').\n" .
                   "21. SMART CLARIFICATION (NOT INTERROGATION): If you genuinely cannot determine the user's intent from their message, ask exactly ONE short, clear clarifying question. Never ask multiple questions at once. Identify the single most critical missing piece of information and ask only that.\n" .
