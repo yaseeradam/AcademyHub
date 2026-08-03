@@ -135,19 +135,26 @@ class ReportCardService
                 return $pos;
             });
 
-        $rows = $subjects->map(function (Subject $subject) use ($scores, $subjectClassAvgs, $subjectPositions) {
+        $rows = $subjects->map(function (Subject $subject) use ($scores, $subjectClassAvgs, $subjectPositions, $allClassScores) {
             /** @var \App\Models\Score|null $score */
             $score = $scores->get($subject->id);
 
+            $subjClassScores = $allClassScores->where('subject_id', $subject->id);
+            $subjHighest = $subjClassScores->max('total');
+            $subjLowest  = $subjClassScores->min('total');
+
             return [
-                'subject'   => $subject,
-                'ca1'       => $score?->ca1 ?? null,
-                'ca2'       => $score?->ca2 ?? null,
-                'exam'      => $score?->exam ?? null,
-                'total'     => $score?->total ?? null,
-                'grade'     => $score?->grade ?? ($score ? Score::gradeForTotal((int) $score->total, max(0, (int) config('academyhub.results_ca1_max', 20)) + max(0, (int) config('academyhub.results_ca2_max', 20)) + max(0, (int) config('academyhub.results_exam_max', 60))) : null),
-                'class_avg' => $subjectClassAvgs->get($subject->id),
-                'position'  => $score ? $subjectPositions->get($subject->id) : null,
+                'subject'        => $subject,
+                'ca1'            => $score?->ca1 ?? null,
+                'ca2'            => $score?->ca2 ?? null,
+                'exam'           => $score?->exam ?? null,
+                'total'          => $score?->total ?? null,
+                'grade'          => $score?->grade ?? ($score ? Score::gradeForTotal((int) $score->total, max(0, (int) config('academyhub.results_ca1_max', 20)) + max(0, (int) config('academyhub.results_ca2_max', 20)) + max(0, (int) config('academyhub.results_exam_max', 60))) : null),
+                'class_avg'      => $subjectClassAvgs->get($subject->id),
+                'position'       => $score ? $subjectPositions->get($subject->id) : null,
+                'highest'        => $subjHighest !== null ? (int) $subjHighest : null,
+                'lowest'         => $subjLowest !== null ? (int) $subjLowest : null,
+                'teacher_remark' => $score?->remarks ?? null,
             ];
         });
 
@@ -176,6 +183,21 @@ class ReportCardService
 
         [$highestAverage, $lowestAverage] = $this->highestLowestAverage($student->class_id, $subjectIds, $term, $session);
 
+        // Cumulative annual summary for 1st, 2nd, 3rd term
+        $cumulativeSummary = [];
+        for ($t = 1; $t <= 3; $t++) {
+            $tScores = Score::where('student_id', $student->id)
+                ->where('session', $session)
+                ->where('term', $t)
+                ->get();
+            $tTotal = $tScores->sum('total');
+            $tCount = max(1, $tScores->count());
+            $cumulativeSummary["term_{$t}"] = [
+                'total'   => $tScores->isNotEmpty() ? $tTotal : null,
+                'average' => $tScores->isNotEmpty() ? round($tTotal / $tCount, 1) : null,
+            ];
+        }
+
         $principalRemarks = $this->generateAIRemarks(
             $student,
             $rows,
@@ -203,18 +225,23 @@ class ReportCardService
         // Report card display options — read directly from settings.json to avoid
         // stale in-process config cache (config() is populated once at boot).
         $rcOptions = [
-            'show_position'         => isset($optionsOverrides['show_position']) ? (bool) $optionsOverrides['show_position'] : $this->settingBool('rc_show_position', true),
-            'show_attendance'       => isset($optionsOverrides['show_attendance']) ? (bool) $optionsOverrides['show_attendance'] : $this->settingBool('rc_show_attendance', true),
-            'show_grading_key'      => isset($optionsOverrides['show_grading_key']) ? (bool) $optionsOverrides['show_grading_key'] : $this->settingBool('rc_show_grading_key', true),
-            'show_class_average'    => isset($optionsOverrides['show_class_average']) ? (bool) $optionsOverrides['show_class_average'] : $this->settingBool('rc_show_class_average', true),
-            'show_watermark'        => isset($optionsOverrides['show_watermark']) ? (bool) $optionsOverrides['show_watermark'] : $this->settingBool('rc_show_watermark', true),
-            'show_next_term_date'   => isset($optionsOverrides['show_next_term_date']) ? (bool) $optionsOverrides['show_next_term_date'] : $this->settingBool('rc_show_next_term_date', true),
-            'show_teacher_remarks'  => isset($optionsOverrides['show_teacher_remarks']) ? (bool) $optionsOverrides['show_teacher_remarks'] : $this->settingBool('rc_show_teacher_remarks', true),
-            'show_principal_remarks'=> isset($optionsOverrides['show_principal_remarks']) ? (bool) $optionsOverrides['show_principal_remarks'] : $this->settingBool('rc_show_principal_remarks', true),
-            'show_psychomotor'      => isset($optionsOverrides['show_psychomotor']) ? (bool) $optionsOverrides['show_psychomotor'] : $this->settingBool('rc_show_psychomotor', false),
-            'psychomotor_style'     => isset($optionsOverrides['psychomotor_style']) ? (string) $optionsOverrides['psychomotor_style'] : ($this->settings()['rc_psychomotor_style'] ?? 'progress'),
-            'show_school_fees'      => isset($optionsOverrides['show_school_fees']) ? (bool) $optionsOverrides['show_school_fees'] : $this->settingBool('rc_show_school_fees', false),
-            'show_signatures'       => isset($optionsOverrides['show_signatures']) ? (bool) $optionsOverrides['show_signatures'] : $this->settingBool('rc_show_signatures', false),
+            'show_position'                  => isset($optionsOverrides['show_position']) ? (bool) $optionsOverrides['show_position'] : $this->settingBool('rc_show_position', true),
+            'show_attendance'                => isset($optionsOverrides['show_attendance']) ? (bool) $optionsOverrides['show_attendance'] : $this->settingBool('rc_show_attendance', true),
+            'show_grading_key'               => isset($optionsOverrides['show_grading_key']) ? (bool) $optionsOverrides['show_grading_key'] : $this->settingBool('rc_show_grading_key', true),
+            'show_class_average'             => isset($optionsOverrides['show_class_average']) ? (bool) $optionsOverrides['show_class_average'] : $this->settingBool('rc_show_class_average', true),
+            'show_watermark'                 => isset($optionsOverrides['show_watermark']) ? (bool) $optionsOverrides['show_watermark'] : $this->settingBool('rc_show_watermark', true),
+            'show_next_term_date'            => isset($optionsOverrides['show_next_term_date']) ? (bool) $optionsOverrides['show_next_term_date'] : $this->settingBool('rc_show_next_term_date', true),
+            'show_teacher_remarks'           => isset($optionsOverrides['show_teacher_remarks']) ? (bool) $optionsOverrides['show_teacher_remarks'] : $this->settingBool('rc_show_teacher_remarks', true),
+            'show_principal_remarks'         => isset($optionsOverrides['show_principal_remarks']) ? (bool) $optionsOverrides['show_principal_remarks'] : $this->settingBool('rc_show_principal_remarks', true),
+            'show_psychomotor'               => isset($optionsOverrides['show_psychomotor']) ? (bool) $optionsOverrides['show_psychomotor'] : $this->settingBool('rc_show_psychomotor', false),
+            'psychomotor_style'              => isset($optionsOverrides['psychomotor_style']) ? (string) $optionsOverrides['psychomotor_style'] : ($this->settings()['rc_psychomotor_style'] ?? 'progress'),
+            'show_school_fees'               => isset($optionsOverrides['show_school_fees']) ? (bool) $optionsOverrides['show_school_fees'] : $this->settingBool('rc_show_school_fees', false),
+            'show_signatures'                => isset($optionsOverrides['show_signatures']) ? (bool) $optionsOverrides['show_signatures'] : $this->settingBool('rc_show_signatures', false),
+            'show_class_highest_lowest'      => isset($optionsOverrides['show_class_highest_lowest']) ? (bool) $optionsOverrides['show_class_highest_lowest'] : $this->settingBool('rc_show_class_highest_lowest', false),
+            'show_subject_teacher_remarks'   => isset($optionsOverrides['show_subject_teacher_remarks']) ? (bool) $optionsOverrides['show_subject_teacher_remarks'] : $this->settingBool('rc_show_subject_teacher_remarks', false),
+            'show_qr_code'                   => isset($optionsOverrides['show_qr_code']) ? (bool) $optionsOverrides['show_qr_code'] : $this->settingBool('rc_show_qr_code', true),
+            'show_cumulative_summary'        => isset($optionsOverrides['show_cumulative_summary']) ? (bool) $optionsOverrides['show_cumulative_summary'] : $this->settingBool('rc_show_cumulative_summary', false),
+            'show_color_badges'              => isset($optionsOverrides['show_color_badges']) ? (bool) $optionsOverrides['show_color_badges'] : $this->settingBool('rc_show_color_badges', true),
         ];
 
         // School fees data — also read from settings.json directly
@@ -281,6 +308,7 @@ class ReportCardService
             'rcOptions' => $rcOptions,
             'schoolFees' => $schoolFees,
             'signatureImages' => $signatureImages,
+            'cumulativeSummary' => $cumulativeSummary,
         ];
     }
 

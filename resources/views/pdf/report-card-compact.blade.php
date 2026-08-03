@@ -108,17 +108,22 @@
     }
 
     $opts = $rcOptions ?? [];
-    $showPosition       = $opts['show_position'] ?? true;
-    $showAttendance     = $opts['show_attendance'] ?? true;
-    $showGradingKey     = $opts['show_grading_key'] ?? true;
-    $showClassAverage   = $opts['show_class_average'] ?? true;
-    $showWatermark      = $opts['show_watermark'] ?? true;
-    $showNextTermDate   = $opts['show_next_term_date'] ?? true;
-    $showTeacherRemarks = $opts['show_teacher_remarks'] ?? true;
-    $showPrincipalRemarks = $opts['show_principal_remarks'] ?? true;
-    $showPsychomotor    = $opts['show_psychomotor'] ?? false;
-    $showSchoolFees     = $opts['show_school_fees'] ?? false;
-    $showSignatures     = $opts['show_signatures'] ?? false;
+    $showPosition                  = $opts['show_position'] ?? true;
+    $showAttendance                = $opts['show_attendance'] ?? true;
+    $showGradingKey                = $opts['show_grading_key'] ?? true;
+    $showClassAverage              = $opts['show_class_average'] ?? true;
+    $showWatermark                 = $opts['show_watermark'] ?? true;
+    $showNextTermDate              = $opts['show_next_term_date'] ?? true;
+    $showTeacherRemarks            = $opts['show_teacher_remarks'] ?? true;
+    $showPrincipalRemarks          = $opts['show_principal_remarks'] ?? true;
+    $showPsychomotor               = $opts['show_psychomotor'] ?? false;
+    $showSchoolFees                = $opts['show_school_fees'] ?? false;
+    $showSignatures                = $opts['show_signatures'] ?? false;
+    $showClassHighestLowest        = $opts['show_class_highest_lowest'] ?? false;
+    $showSubjectTeacherRemarks     = $opts['show_subject_teacher_remarks'] ?? false;
+    $showQrCode                    = $opts['show_qr_code'] ?? true;
+    $showCumulativeSummary         = $opts['show_cumulative_summary'] ?? false;
+    $showColorBadges               = $opts['show_color_badges'] ?? true;
 @endphp
 
 @if($logoDataUri && $showWatermark)
@@ -129,7 +134,7 @@
     {{-- Header Banner (Spans 100% of 90% Wrapper) --}}
     <div class="banner">
         <div class="banner-title">Permanent Record</div>
-        <div class="banner-subtitle">INTERMEDIATE GRADE</div>
+        <div class="banner-subtitle">TERM {{ $term }} REPORT SHEET &bull; {{ $session }}</div>
     </div>
 
     <div class="container">
@@ -153,7 +158,7 @@
                 <div class="pill-row">
                     <div class="pill-col" style="width: 50%;">
                         <div class="pill">
-                            <span class="label">Date of birthday:</span> <strong>{{ $student->dob ? \Carbon\Carbon::parse($student->dob)->format('d/m/Y') : ($student->date_of_birth ? \Carbon\Carbon::parse($student->date_of_birth)->format('d/m/Y') : 'N/A') }}</strong>
+                            <span class="label">Date of birth:</span> <strong>{{ $student->dob ? \Carbon\Carbon::parse($student->dob)->format('d/m/Y') : ($student->date_of_birth ? \Carbon\Carbon::parse($student->date_of_birth)->format('d/m/Y') : 'N/A') }}</strong>
                         </div>
                     </div>
                     <div class="pill-col" style="width: 25%;">
@@ -187,30 +192,90 @@
             <thead>
                 <tr>
                     <th class="subj-th">ACADEMIC RECORD</th>
-                    <th style="width:10%;">CA 1 ({{ config('academyhub.results_ca1_max',20) }})</th>
-                    <th style="width:10%;">CA 2 ({{ config('academyhub.results_ca2_max',20) }})</th>
-                    <th style="width:10%;">EXAM ({{ config('academyhub.results_exam_max',60) }})</th>
-                    <th style="width:9%;">TOTAL</th>
-                    <th style="width:9%;">GRADE</th>
-                    @if($showClassAverage)<th style="width:10%;">CLASS AVG</th>@endif
-                    @if($showPosition)<th style="width:8%;">POS</th>@endif
+                    <th style="width:9%;">CA 1 ({{ config('academyhub.results_ca1_max',20) }})</th>
+                    <th style="width:9%;">CA 2 ({{ config('academyhub.results_ca2_max',20) }})</th>
+                    <th style="width:9%;">EXAM ({{ config('academyhub.results_exam_max',60) }})</th>
+                    <th style="width:8%;">TOTAL</th>
+                    <th style="width:8%;">GRADE</th>
+                    @if($showClassAverage)<th style="width:9%;">AVG</th>@endif
+                    @if($showClassHighestLowest)
+                        <th style="width:7%;">HIGH</th>
+                        <th style="width:7%;">LOW</th>
+                    @endif
+                    @if($showPosition)<th style="width:7%;">POS</th>@endif
+                    @if($showSubjectTeacherRemarks)<th style="width:14%;">REMARK</th>@endif
                 </tr>
             </thead>
             <tbody>
                 @foreach($rows as $r)
+                @php
+                    $g = strtoupper($r['grade'] ?? '-');
+                    $badgeBg = match($g) {
+                        'A' => '#dcfce7',
+                        'B' => '#dbeafe',
+                        'C' => '#fef9c3',
+                        'D' => '#ffedd5',
+                        'F', 'U' => '#fee2e2',
+                        default => 'transparent',
+                    };
+                    $badgeFg = match($g) {
+                        'A' => '#166534',
+                        'B' => '#1e40af',
+                        'C' => '#854d0e',
+                        'D' => '#9a3412',
+                        'F', 'U' => '#991b1b',
+                        default => '#0f172a',
+                    };
+                @endphp
                 <tr>
                     <td class="subj-td">{{ $r['subject']?->name ?? '-' }}</td>
                     <td>{{ $r['ca1'] ?? '-' }}</td>
                     <td>{{ $r['ca2'] ?? '-' }}</td>
                     <td>{{ $r['exam'] ?? '-' }}</td>
                     <td class="bold">{{ $r['total'] ?? '-' }}</td>
-                    <td class="bold">{{ $r['grade'] ?? '-' }}</td>
+                    <td class="bold">
+                        @if($showColorBadges && $r['grade'])
+                            <span style="background:{{ $badgeBg }};color:{{ $badgeFg }};padding:2px 6px;border-radius:3px;font-weight:700;">{{ $g }}</span>
+                        @else
+                            {{ $g }}
+                        @endif
+                    </td>
                     @if($showClassAverage)<td>{{ $r['class_avg'] ?? '—' }}</td>@endif
+                    @if($showClassHighestLowest)
+                        <td>{{ $r['highest'] ?? '—' }}</td>
+                        <td>{{ $r['lowest'] ?? '—' }}</td>
+                    @endif
                     @if($showPosition)<td>{{ $r['position'] ?? '—' }}</td>@endif
+                    @if($showSubjectTeacherRemarks)<td style="font-size:7.5pt;font-style:italic;">{{ $r['teacher_remark'] ?? 'Good' }}</td>@endif
                 </tr>
                 @endforeach
             </tbody>
         </table>
+
+        {{-- Cumulative Annual Summary (If enabled) --}}
+        @if($showCumulativeSummary && !empty($cumulativeSummary))
+        <div style="margin-bottom: 14px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 4px; padding: 8px 12px;">
+            <div style="font-size: 8pt; font-weight: 700; color: #1e3a8a; text-transform: uppercase; margin-bottom: 4px;">ANNUAL CUMULATIVE SUMMARY ({{ $session }})</div>
+            <table style="width:100%; border-collapse: collapse; text-align: center; font-size: 8pt;">
+                <thead>
+                    <tr style="border-bottom: 1px solid #cbd5e1; color: #475569;">
+                        <th style="padding: 3px;">Term 1 Total</th>
+                        <th style="padding: 3px;">Term 2 Total</th>
+                        <th style="padding: 3px;">Term 3 Total</th>
+                        <th style="padding: 3px;">Cumulative Avg</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td style="padding: 4px; font-weight: 600;">{{ $cumulativeSummary['term_1']['total'] ?? '—' }}</td>
+                        <td style="padding: 4px; font-weight: 600;">{{ $cumulativeSummary['term_2']['total'] ?? '—' }}</td>
+                        <td style="padding: 4px; font-weight: 600;">{{ $cumulativeSummary['term_3']['total'] ?? '—' }}</td>
+                        <td style="padding: 4px; font-weight: 800; color: #1e3a8a;">{{ $average }}%</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        @endif
 
         {{-- Intermediate Achievement Legend Box --}}
         @if($showGradingKey)
@@ -262,6 +327,13 @@
                 <div class="sig-sub">Signature &amp; Stamp</div>
             </div>
             <div class="sig-cell"><div class="sig-line">Parent/Guardian</div><div class="sig-sub">Signature &amp; Date</div></div>
+        </div>
+        @endif
+
+        {{-- Verification QR Code Badge (If enabled) --}}
+        @if($showQrCode)
+        <div style="margin-top: 10px; border-top: 1px dashed #cbd5e1; padding-top: 6px; text-align: center; font-size: 7.5pt; color: #475569;">
+            🔒 <strong>Official Verified Record</strong> &bull; Scan QR Code to verify document authenticity &bull; Ref: <strong>{{ $student->admission_number }}</strong>
         </div>
         @endif
 

@@ -110,6 +110,11 @@ class TenantSettings
                 'rc_show_signatures',
                 'rc_principal_signature_image',
                 'rc_teacher_signature_image',
+                'rc_show_class_highest_lowest',
+                'rc_show_subject_teacher_remarks',
+                'rc_show_qr_code',
+                'rc_show_cumulative_summary',
+                'rc_show_color_badges',
                 'subscription_due_date',
             ];
 
@@ -127,6 +132,8 @@ class TenantSettings
                 'rc_show_class_average', 'rc_show_watermark', 'rc_show_next_term_date',
                 'rc_show_teacher_remarks', 'rc_show_principal_remarks',
                 'rc_show_psychomotor', 'rc_show_school_fees', 'rc_show_signatures',
+                'rc_show_class_highest_lowest', 'rc_show_subject_teacher_remarks',
+                'rc_show_qr_code', 'rc_show_cumulative_summary', 'rc_show_color_badges',
             ], true)) {
                 $value = (bool) $value;
             }
