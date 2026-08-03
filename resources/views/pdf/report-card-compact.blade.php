@@ -4,71 +4,74 @@
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <title>Permanent Record - {{ $student->admission_number }}</title>
     <style>
-        @page { margin: 10mm 0; }
+        @page { size: A4 portrait; margin: 4mm 0; }
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 8.5pt; color: #1e293b; background: #ffffff; line-height: 1.35; }
+        body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 7.5pt; color: #1e293b; background: #ffffff; line-height: 1.2; }
 
-        /* ─── 90% Main Page Wrapper (Centered with 5% Left & 5% Right Margins) ─── */
-        .page { width: 90%; margin: 0 auto; background: #ffffff; }
+        /* ─── 92% Main Page Wrapper (Centered with 4% Left & 4% Right Margins) ─── */
+        .page { width: 92%; margin: 0 auto; background: #ffffff; }
 
-        /* ─── Header Banner (Spans 100% of the 90% Centered Wrapper) ─── */
-        .banner { background: #1e3a8a; color: #ffffff; text-align: center; padding: 18px 16px 14px 16px; width: 100%; margin-bottom: 22px; border-radius: 3px; }
-        .banner-title { font-size: 22pt; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; color: #ffffff; line-height: 1.1; margin-bottom: 4px; }
-        .banner-subtitle { font-size: 8.5pt; font-weight: 600; text-transform: uppercase; letter-spacing: 2.5px; color: #93c5fd; }
+        /* ─── Header Banner ─── */
+        .banner { background: #1e3a8a; color: #ffffff; text-align: center; padding: 10px 12px 8px 12px; width: 100%; margin-bottom: 10px; border-radius: 3px; }
+        .banner-title { font-size: 15pt; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; color: #ffffff; line-height: 1.1; margin-bottom: 2px; }
+        .banner-subtitle { font-size: 7.5pt; font-weight: 600; text-transform: uppercase; letter-spacing: 2px; color: #93c5fd; }
 
         .container { width: 100%; }
 
-        /* ─── Student Profile Section (Circular Photo + Light Grey Pills) ─── */
-        .student-profile { display: table; width: 100%; margin-bottom: 22px; }
-        .photo-cell { display: table-cell; width: 78px; vertical-align: middle; padding-right: 18px; }
-        .photo { width: 68px; height: 68px; border-radius: 50%; object-fit: cover; display: block; }
-        .photo-placeholder { width: 68px; height: 68px; border-radius: 50%; background: #f1f5f9; border: 1px solid #cbd5e1; text-align: center; line-height: 66px; font-size: 22pt; font-weight: 800; color: #64748b; }
+        /* ─── Student Profile Section ─── */
+        .student-profile { display: table; width: 100%; margin-bottom: 10px; }
+        .photo-cell { display: table-cell; width: 56px; vertical-align: middle; padding-right: 12px; }
+        .photo { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; display: block; }
+        .photo-placeholder { width: 50px; height: 50px; border-radius: 50%; background: #f1f5f9; border: 1px solid #cbd5e1; text-align: center; line-height: 48px; font-size: 16pt; font-weight: 800; color: #64748b; }
 
         .info-cell { display: table-cell; vertical-align: middle; }
 
-        .pill-row { display: table; width: 100%; margin-bottom: 7px; }
+        .pill-row { display: table; width: 100%; margin-bottom: 4px; }
         .pill-row:last-child { margin-bottom: 0; }
-        .pill-col { display: table-cell; padding-right: 8px; }
+        .pill-col { display: table-cell; padding-right: 6px; }
         .pill-col:last-child { padding-right: 0; }
 
-        .pill { background: #f1f5f9; border-radius: 4px; padding: 6px 12px; font-size: 8.5pt; color: #334155; }
+        .pill { background: #f1f5f9; border-radius: 3px; padding: 4px 8px; font-size: 7.5pt; color: #334155; }
         .pill strong { font-weight: 700; color: #0f172a; }
         .pill span.label { color: #64748b; font-weight: 500; }
 
         /* ─── Academic Record Table ─── */
-        table.scores-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; table-layout: fixed; }
-        table.scores-table th { background: #f8fafc; color: #0f172a; padding: 9px 8px; font-size: 7.5pt; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; border-bottom: 1px solid #e2e8f0; border-top: 1px solid #e2e8f0; text-align: center; }
-        table.scores-table th.subj-th { text-align: left; padding-left: 12px; width: 34%; }
-        table.scores-table td { padding: 8px 8px; border-bottom: 1px solid #f1f5f9; text-align: center; font-size: 8.5pt; color: #334155; }
+        table.scores-table { width: 100%; border-collapse: collapse; margin-bottom: 8px; table-layout: fixed; }
+        table.scores-table th { background: #f8fafc; color: #0f172a; padding: 5px 4px; font-size: 7pt; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; border-bottom: 1px solid #e2e8f0; border-top: 1px solid #e2e8f0; text-align: center; }
+        table.scores-table th.subj-th { text-align: left; padding-left: 8px; width: 30%; }
+        table.scores-table td { padding: 4px 4px; border-bottom: 1px solid #f1f5f9; text-align: center; font-size: 7.5pt; color: #334155; }
         table.scores-table tr:nth-child(even) td { background: #fafafa; }
-        table.scores-table td.subj-td { text-align: left; padding-left: 12px; font-weight: 600; color: #0f172a; word-wrap: break-word; }
+        table.scores-table td.subj-td { text-align: left; padding-left: 8px; font-weight: 600; color: #0f172a; word-wrap: break-word; }
         table.scores-table td.bold { font-weight: 700; color: #0f172a; }
 
         /* ─── Intermediate Achievement Legend Box ─── */
-        .legend-box { background: #f8fafc; border-radius: 4px; overflow: hidden; margin-bottom: 16px; border: 1px solid #f1f5f9; }
-        .legend-header { background: #f1f5f9; text-align: center; font-size: 8pt; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: #0f172a; padding: 6px; }
-        .legend-body { display: table; width: 100%; padding: 8px 0; }
-        .legend-item { display: table-cell; text-align: center; font-size: 7.5pt; color: #475569; font-weight: 500; padding: 2px 4px; }
+        .legend-box { background: #f8fafc; border-radius: 3px; overflow: hidden; margin-bottom: 8px; border: 1px solid #f1f5f9; }
+        .legend-header { background: #f1f5f9; text-align: center; font-size: 7pt; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: #0f172a; padding: 4px; }
+        .legend-body { display: table; width: 100%; padding: 4px 0; }
+        .legend-item { display: table-cell; text-align: center; font-size: 7pt; color: #475569; font-weight: 500; padding: 1px 3px; }
         .legend-item strong { color: #0f172a; font-weight: 700; }
 
         /* ─── Remarks Cards ─── */
-        .remark-card { background: #f8fafc; border-radius: 4px; border: 1px solid #f1f5f9; padding: 9px 12px; margin-bottom: 10px; }
-        .remark-title { font-size: 7.5pt; font-weight: 700; text-transform: uppercase; color: #1e3a8a; letter-spacing: 0.5px; margin-bottom: 3px; }
-        .remark-body { font-size: 8.5pt; color: #334155; line-height: 1.3; }
+        .remark-card { background: #f8fafc; border-radius: 3px; border: 1px solid #f1f5f9; padding: 5px 8px; margin-bottom: 6px; }
+        .remark-title { font-size: 7pt; font-weight: 700; text-transform: uppercase; color: #1e3a8a; letter-spacing: 0.5px; margin-bottom: 2px; }
+        .remark-body { font-size: 7.5pt; color: #334155; line-height: 1.2; }
 
         /* ─── Next Term Bar ─── */
-        .next-term-bar { background: #1e3a8a; color: #ffffff; text-align: center; padding: 8px; font-size: 8.5pt; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; width: 100%; margin-bottom: 14px; border-radius: 3px; }
+        .next-term-bar { background: #1e3a8a; color: #ffffff; text-align: center; padding: 5px; font-size: 7.5pt; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; width: 100%; margin-bottom: 8px; border-radius: 3px; }
 
         /* ─── Signatures Table ─── */
-        .sigs-table { display: table; width: 100%; margin-top: 12px; }
-        .sig-cell { display: table-cell; width: 33.33%; text-align: center; padding: 0 8px; vertical-align: bottom; }
-        .sig-img { max-height: 28px; max-width: 80px; object-fit: contain; margin-bottom: 2px; }
-        .sig-line { border-top: 1px solid #94a3b8; margin-top: 16px; padding-top: 3px; font-size: 8pt; font-weight: 700; color: #0f172a; }
-        .sig-line.has-img { margin-top: 2px; }
-        .sig-sub { font-size: 6.5pt; color: #64748b; font-style: italic; }
+        .sigs-table { display: table; width: 100%; margin-top: 6px; }
+        .sig-cell { display: table-cell; width: 33.33%; text-align: center; padding: 0 6px; vertical-align: bottom; }
+        .sig-img { max-height: 22px; max-width: 70px; object-fit: contain; margin-bottom: 1px; }
+        .sig-line { border-top: 1px solid #94a3b8; margin-top: 8px; padding-top: 2px; font-size: 7.5pt; font-weight: 700; color: #0f172a; }
+        .sig-line.has-img { margin-top: 1px; }
+        .sig-sub { font-size: 6pt; color: #64748b; font-style: italic; }
 
-        .footer { margin-top: 14px; text-align: center; font-size: 7pt; color: #94a3b8; }
-        .watermark { position: fixed; top: 50%; left: 50%; transform: translate(-50%,-50%); z-index: -1; opacity: 0.03; width: 260px; height: 260px; }
+        .footer { margin-top: 6px; text-align: center; font-size: 6.5pt; color: #94a3b8; }
+        .watermark { position: fixed; top: 50%; left: 50%; transform: translate(-50%,-50%); z-index: -1; opacity: 0.03; width: 220px; height: 220px; }
+
+        /* ─── Prevent Unwanted Page Breaks ─── */
+        tr, table, div.remark-card, div.legend-box, div.student-profile { page-break-inside: avoid !important; }
     </style>
 </head>
 <body>
