@@ -10,77 +10,77 @@
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <title>Report Sheet - {{ $student->admission_number }}</title>
     <style>
-        @page { size: A4 portrait; margin: 4mm 6mm; }
+        @page { size: A4 portrait; margin: 2.5mm 4mm; }
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: DejaVu Sans, Arial, sans-serif; font-size: 8.5px; color: #1e293b; background: #fff; line-height: 1.25; }
+        body { font-family: DejaVu Sans, Arial, sans-serif; font-size: 7.5px; color: #1e293b; background: #fff; line-height: 1.2; }
 
         /* Outer borders */
-        .page { border: 3px solid {{ $themeColor }}; padding: 6px; background: #fff; }
-        .page-inner { border: 1px solid {{ $accentColor }}; padding: 6px; position: relative; }
+        .page { border: 2px solid {{ $themeColor }}; padding: 3px; background: #fff; }
+        .page-inner { border: 1px solid {{ $accentColor }}; padding: 3px; position: relative; }
 
         /* Header Layout */
-        .header-table { display: table; width: 100%; border-bottom: 2.5px solid {{ $themeColor }}; padding-bottom: 5px; margin-bottom: 6px; }
+        .header-table { display: table; width: 100%; border-bottom: 2px solid {{ $themeColor }}; padding-bottom: 3px; margin-bottom: 4px; }
         .header-cell { display: table-cell; vertical-align: middle; }
         
         /* Logo (Crest) */
-        .logo-wrap { width: 75px; text-align: left; }
-        .logo { width: 55px; height: 55px; object-fit: contain; border: 1.5px solid {{ $accentColor }}; border-radius: 6px; padding: 3px; background: #fff; }
+        .logo-wrap { width: 55px; text-align: left; }
+        .logo { width: 42px; height: 42px; object-fit: contain; border: 1px solid {{ $accentColor }}; border-radius: 4px; padding: 2px; background: #fff; }
         
         /* School Info Centered */
-        .school-info { text-align: center; padding: 0 10px; }
-        .school-name { font-size: 18px; font-weight: 900; color: {{ $themeColor }}; letter-spacing: 0.5px; text-transform: uppercase; margin-bottom: 2px; }
-        .school-tagline { font-size: 9px; font-weight: bold; font-style: italic; color: {{ $accentColor }}; margin-top: 4px; letter-spacing: 0.25px; }
-        .school-meta { font-size: 8px; color: #475569; font-weight: 600; margin-top: 1px; }
+        .school-info { text-align: center; padding: 0 6px; }
+        .school-name { font-size: 14px; font-weight: 900; color: {{ $themeColor }}; letter-spacing: 0.5px; text-transform: uppercase; margin-bottom: 1px; }
+        .school-tagline { font-size: 7.5px; font-weight: bold; font-style: italic; color: {{ $accentColor }}; margin-top: 2px; letter-spacing: 0.25px; }
+        .school-meta { font-size: 7px; color: #475569; font-weight: 600; margin-top: 0.5px; }
 
         /* Report Card Ribbon */
-        .ribbon-wrap { width: 150px; text-align: right; vertical-align: top; }
-        .ribbon { background: {{ $themeColor }}; color: #ffffff; padding: 6px 10px; font-weight: bold; font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; text-align: center; border-radius: 4px; }
-        .ribbon-sub { background: {{ $bgLight }}; color: {{ $themeColor }}; padding: 4px; font-size: 8.5px; font-weight: 800; text-align: center; margin-top: 4px; border-radius: 4px; border: 1px solid {{ $themeColor }}; }
-        .ribbon-sub span { font-size: 7px; font-weight: normal; color: #475569; display: block; margin-top: 1px; }
+        .ribbon-wrap { width: 120px; text-align: right; vertical-align: top; }
+        .ribbon { background: {{ $themeColor }}; color: #ffffff; padding: 4px 8px; font-weight: bold; font-size: 9.5px; text-transform: uppercase; letter-spacing: 1px; text-align: center; border-radius: 3px; }
+        .ribbon-sub { background: {{ $bgLight }}; color: {{ $themeColor }}; padding: 3px; font-size: 7.5px; font-weight: 800; text-align: center; margin-top: 3px; border-radius: 3px; border: 1px solid {{ $themeColor }}; }
+        .ribbon-sub span { font-size: 6.5px; font-weight: normal; color: #475569; display: block; margin-top: 0.5px; }
 
         /* Student & Class Details block */
-        .meta-table { display: table; width: 100%; margin-bottom: 6px; border-collapse: collapse; }
+        .meta-table { display: table; width: 100%; margin-bottom: 4px; border-collapse: collapse; }
         .meta-row { display: table-row; }
         .meta-cell { display: table-cell; width: 50%; vertical-align: top; }
-        .meta-cell:first-child { padding-right: 15px; }
-        .meta-cell:last-child { padding-left: 15px; }
+        .meta-cell:first-child { padding-right: 8px; }
+        .meta-cell:last-child { padding-left: 8px; }
         
-        .field-group { display: table; width: 100%; margin-bottom: 3px; border-bottom: 1px solid #e2e8f0; padding-bottom: 1.5px; }
-        .field-label { display: table-cell; width: 35%; font-weight: bold; color: {{ $themeColor }}; font-size: 8px; text-transform: uppercase; }
-        .field-value { display: table-cell; width: 65%; font-weight: 600; color: #334155; padding-left: 6px; font-size: 8.5px; }
+        .field-group { display: table; width: 100%; margin-bottom: 2px; border-bottom: 1px solid #e2e8f0; padding-bottom: 1px; }
+        .field-label { display: table-cell; width: 35%; font-weight: bold; color: {{ $themeColor }}; font-size: 7.5px; text-transform: uppercase; }
+        .field-value { display: table-cell; width: 65%; font-weight: 600; color: #334155; padding-left: 4px; font-size: 7.5px; }
 
         /* Section Headings */
-        .section-header { background: {{ $themeColor }}; color: #ffffff; padding: 4px 8px; font-weight: bold; font-size: 8.5px; letter-spacing: 0.5px; border-radius: 3px 3px 0 0; text-transform: uppercase; }
+        .section-header { background: {{ $themeColor }}; color: #ffffff; padding: 3px 6px; font-weight: bold; font-size: 7.5px; letter-spacing: 0.5px; border-radius: 2px 2px 0 0; text-transform: uppercase; }
 
         /* Academic Scores Table */
-        .scores-table { width: 100%; height: 100%; border-collapse: collapse; margin-bottom: 6px; border: 1px solid {{ $accentColor }}; }
-        .scores-table th { background: {{ $themeColor }}; color: #ffffff; padding: 2.5px 4px; font-size: 8px; font-weight: bold; text-transform: uppercase; text-align: center; border: 1px solid {{ $themeColor }}; }
-        .scores-table td { padding: 2px 4px; border: 1px solid #e2e8f0; text-align: center; font-size: 8px; }
+        .scores-table { width: 100%; border-collapse: collapse; margin-bottom: 4px; border: 1px solid {{ $accentColor }}; }
+        .scores-table th { background: {{ $themeColor }}; color: #ffffff; padding: 2px 3px; font-size: 7.5px; font-weight: bold; text-transform: uppercase; text-align: center; border: 1px solid {{ $themeColor }}; }
+        .scores-table td { padding: 1.5px 3px; border: 1px solid #e2e8f0; text-align: center; font-size: 7.5px; }
         .scores-table tr:nth-child(even) td { background: #f8fafc; }
         .scores-table td.subject-name { text-align: left; font-weight: bold; color: {{ $themeColor }}; }
         .scores-table td.bold { font-weight: bold; }
         .scores-table td.performance-cell { font-weight: bold; color: {{ $themeColor }}; }
 
         /* Bottom Row Columns: Behavior, Attendance, Remarks */
-        .bottom-table { display: table; width: 100%; margin-bottom: 6px; table-layout: fixed; }
+        .bottom-table { display: table; width: 100%; margin-bottom: 4px; table-layout: fixed; }
         .bottom-row { display: table-row; }
         .bottom-cell { display: table-cell; vertical-align: top; }
 
         /* Principal & Grading Block Row */
-        .footer-blocks-table { display: table; width: 100%; margin-bottom: 6px; table-layout: fixed; }
+        .footer-blocks-table { display: table; width: 100%; margin-bottom: 4px; table-layout: fixed; }
         .footer-blocks-row { display: table-row; }
         .footer-blocks-cell { display: table-cell; vertical-align: top; }
 
         /* Parent Signatures & Footer */
-        .bottom-sigs-table { display: table; width: 100%; margin-top: 8px; border-bottom: 2px solid {{ $themeColor }}; padding-bottom: 4px; }
+        .bottom-sigs-table { display: table; width: 100%; margin-top: 4px; border-bottom: 1.5px solid {{ $themeColor }}; padding-bottom: 2px; }
         .bottom-sigs-row { display: table-row; }
         .bottom-sigs-cell { display: table-cell; width: 50%; vertical-align: bottom; }
         .bottom-sigs-cell:last-child { text-align: right; }
-        .sig-line { width: 220px; border-bottom: 1.5px solid {{ $themeColor }}; display: inline-block; }
+        .sig-line { width: 180px; border-bottom: 1px solid {{ $themeColor }}; display: inline-block; }
         
-        .footer-tagline { text-align: center; font-size: 8px; font-weight: bold; color: {{ $themeColor }}; margin-top: 6px; letter-spacing: 0.5px; }
+        .footer-tagline { text-align: center; font-size: 7px; font-weight: bold; color: {{ $themeColor }}; margin-top: 4px; letter-spacing: 0.5px; }
 
-        .watermark { position: fixed; top: 50%; left: 50%; transform: translate(-50%,-50%); z-index: -1; opacity: 0.03; width: 320px; height: 320px; }
+        .watermark { position: fixed; top: 50%; left: 50%; transform: translate(-50%,-50%); z-index: -1; opacity: 0.03; width: 240px; height: 240px; }
     </style>
 </head>
 <body>
@@ -88,13 +88,43 @@
 @php
     $schoolName = config('academyhub.school_name', config('app.name', 'AcademyHub'));
     $logo = config('academyhub.school_logo');
-    $logoPath = $logo ? public_path('uploads/'.str_replace('\\', '/', $logo)) : null;
-    $logoExists = $logoPath && file_exists($logoPath);
     
-    if (!$logoExists) {
-        $logoPath = public_path('academy.png');
-        $logoExists = $logoPath && file_exists($logoPath);
+    $toBase64 = function(?string $path): ?string {
+        if (!$path || !file_exists($path)) {
+            return null;
+        }
+        $ext = strtolower(pathinfo($path, PATHINFO_EXTENSION));
+        $mime = match($ext) {
+            'jpg', 'jpeg' => 'image/jpeg',
+            'png' => 'image/png',
+            'webp' => 'image/webp',
+            'svg' => 'image/svg+xml',
+            default => 'image/png',
+        };
+        $data = @file_get_contents($path);
+        return $data ? 'data:' . $mime . ';base64,' . base64_encode($data) : null;
+    };
+
+    $logoCandidates = array_filter([
+        $logo ? public_path('uploads/' . str_replace('\\', '/', $logo)) : null,
+        $logo ? public_path(str_replace('\\', '/', $logo)) : null,
+        $logo ? storage_path('app/public/' . str_replace('\\', '/', $logo)) : null,
+        public_path('academy.png'),
+        public_path('logo.png'),
+        public_path('images/logo.png'),
+        public_path('uploads/school_logo.png'),
+    ]);
+
+    $logoPath = null;
+    foreach ($logoCandidates as $cand) {
+        if ($cand && file_exists($cand)) {
+            $logoPath = $cand;
+            break;
+        }
     }
+
+    $logoDataUri = $logoPath ? $toBase64($logoPath) : null;
+    $logoExists = (bool) $logoDataUri;
     
     $opts = $rcOptions ?? [];
     $showPosition         = $opts['show_position'] ?? true;
@@ -132,8 +162,6 @@
         }
     }
     $homeroomTeacher = $homeroomTeacher ?? 'Ms. Emily Johnson';
-
-    // 2. (Dates range removed as requested)
 
     // 3. Attendance summaries
     $enrolled = $timesOpened ?? 90;
@@ -202,7 +230,7 @@
 @endphp
 
 @if($logoExists && $showWatermark)
-    <div class="watermark"><img src="{{ $logoPath }}" alt="" style="width:100%;height:100%;object-fit:contain;" /></div>
+    <div class="watermark"><img src="{{ $logoDataUri }}" alt="" style="width:100%;height:100%;object-fit:contain;" /></div>
 @endif
 
 <div class="page">
@@ -214,7 +242,7 @@
             <div class="header-table">
                 <div class="header-cell logo-wrap">
                     @if($logoExists)
-                        <img class="logo" src="{{ $logoPath }}" alt="Logo">
+                        <img class="logo" src="{{ $logoDataUri }}" alt="Logo">
                     @endif
                 </div>
                 <div class="header-cell school-info">

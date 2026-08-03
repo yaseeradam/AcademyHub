@@ -94,13 +94,43 @@
 @php
     $schoolName = config('academyhub.school_name', config('app.name', 'AcademyHub'));
     $logo = config('academyhub.school_logo');
-    $logoPath = $logo ? public_path('uploads/'.str_replace('\\', '/', $logo)) : null;
-    $logoExists = $logoPath && file_exists($logoPath);
     
-    if (!$logoExists) {
-        $logoPath = public_path('academy.png');
-        $logoExists = $logoPath && file_exists($logoPath);
+    $toBase64 = function(?string $path): ?string {
+        if (!$path || !file_exists($path)) {
+            return null;
+        }
+        $ext = strtolower(pathinfo($path, PATHINFO_EXTENSION));
+        $mime = match($ext) {
+            'jpg', 'jpeg' => 'image/jpeg',
+            'png' => 'image/png',
+            'webp' => 'image/webp',
+            'svg' => 'image/svg+xml',
+            default => 'image/png',
+        };
+        $data = @file_get_contents($path);
+        return $data ? 'data:' . $mime . ';base64,' . base64_encode($data) : null;
+    };
+
+    $logoCandidates = array_filter([
+        $logo ? public_path('uploads/' . str_replace('\\', '/', $logo)) : null,
+        $logo ? public_path(str_replace('\\', '/', $logo)) : null,
+        $logo ? storage_path('app/public/' . str_replace('\\', '/', $logo)) : null,
+        public_path('academy.png'),
+        public_path('logo.png'),
+        public_path('images/logo.png'),
+        public_path('uploads/school_logo.png'),
+    ]);
+
+    $logoPath = null;
+    foreach ($logoCandidates as $cand) {
+        if ($cand && file_exists($cand)) {
+            $logoPath = $cand;
+            break;
+        }
     }
+
+    $logoDataUri = $logoPath ? $toBase64($logoPath) : null;
+    $logoExists = (bool) $logoDataUri;
     
     $opts = $rcOptions ?? [];
     $showPosition       = $opts['show_position'] ?? true;
@@ -146,7 +176,7 @@
     $attendanceRate = $enrolled > 0 ? round(($present / $enrolled) * 100) : 0;
 
     // Helper for performance label
-    $getPerformanceText = function($total) {
+    $performanceTag = function($total) {
         if ($total >= 80) return '★ Excellent';
         if ($total >= 70) return '★ Very Good';
         if ($total >= 60) return '★ Good';
@@ -156,7 +186,7 @@
 @endphp
 
 @if($logoExists && $showWatermark)
-    <div class="watermark"><img src="{{ $logoPath }}" alt="" style="width:100%;height:100%;object-fit:contain;" /></div>
+    <div class="watermark"><img src="{{ $logoDataUri }}" alt="" style="width:100%;height:100%;object-fit:contain;" /></div>
 @endif
 
 <div class="page">
@@ -166,7 +196,7 @@
         <div class="header-table">
             <div class="header-cell logo-wrap">
                 @if($logoExists)
-                    <img class="logo" src="{{ $logoPath }}" alt="Logo">
+                    <img class="logo" src="{{ $logoDataUri }}" alt="Logo">
                 @endif
             </div>
             <div class="header-cell school-info">
