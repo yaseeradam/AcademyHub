@@ -291,6 +291,9 @@ class ReportCardService
         $principalName = $rawSettings['rc_principal_name'] ?? config('academyhub.rc_principal_name');
         $principalTitle = $rawSettings['rc_principal_title'] ?? config('academyhub.rc_principal_title', 'Principal');
 
+        $verifyUrl = url('/results/verify/' . urlencode($student->admission_number ?? 'ADM001'));
+        $qrCodeUri = $this->generateQrCodeDataUri($verifyUrl);
+
         return [
             'student' => $student,
             'term' => $term,
@@ -316,6 +319,7 @@ class ReportCardService
             'cumulativeSummary' => $cumulativeSummary,
             'principalName' => $principalName,
             'principalTitle' => $principalTitle,
+            'qrCodeUri' => $qrCodeUri,
         ];
     }
 
@@ -610,5 +614,19 @@ class ReportCardService
         }
 
         return 'Needs intensive home study and close monitoring.';
+    }
+
+    private function generateQrCodeDataUri(string $data): string
+    {
+        try {
+            $qrApiUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=120x120&margin=1&data=' . urlencode($data);
+            $ctx = stream_context_create(['http' => ['timeout' => 2]]);
+            $imgData = @file_get_contents($qrApiUrl, false, $ctx);
+            if ($imgData && strlen($imgData) > 100) {
+                return 'data:image/png;base64,' . base64_encode($imgData);
+            }
+        } catch (\Throwable) {}
+
+        return 'data:image/svg+xml;base64,' . base64_encode(\App\Support\QrCodeGenerator::generateSvg($data));
     }
 }

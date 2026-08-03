@@ -314,7 +314,12 @@
 
         {{-- QR Code --}}
         @if($showQrCode)
-        <div style="margin-top:4px;border-top:1px dashed #991b1b;padding-top:4px;text-align:center;font-size:7px;color:#991b1b;">&#128274; <strong>Official Verified Record</strong> &bull; Ref: <strong>{{ $student->admission_number }}</strong></div>
+        <div style="margin-top:4px;border-top:1px dashed #991b1b;padding-top:4px;text-align:center;">
+            @if(!empty($qrCodeUri))
+                <img src="{{ $qrCodeUri }}" style="width: 42px; height: 42px; display: block; margin: 0 auto 2px auto;" alt="QR" />
+            @endif
+            <div style="font-size:7px;color:#991b1b;">&#128274; <strong>Official Verified Record</strong> &bull; Ref: <strong>{{ $student->admission_number }}</strong></div>
+        </div>
         @endif
 
         <div class="footer">Generated {{ now()->format('d M Y, g:i A') }} &bull; {{ $schoolName }} &bull; Powered by AcademyHub SMS</div>

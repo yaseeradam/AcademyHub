@@ -473,7 +473,12 @@
 
         {{-- QR Code --}}
         @if($showQrCode)
-        <div style="margin-top:3px;border-top:1px dashed #004b49;padding-top:3px;text-align:center;font-size:7px;color:#004b49;">&#128274; <strong>Official Verified Record</strong> &bull; Ref: <strong>{{ $student->admission_number }}</strong></div>
+        <div style="margin-top:3px;border-top:1px dashed #004b49;padding-top:3px;text-align:center;">
+            @if(!empty($qrCodeUri))
+                <img src="{{ $qrCodeUri }}" style="width: 42px; height: 42px; display: block; margin: 0 auto 2px auto;" alt="QR" />
+            @endif
+            <div style="font-size:7px;color:#004b49;">&#128274; <strong>Official Verified Record</strong> &bull; Ref: <strong>{{ $student->admission_number }}</strong></div>
+        </div>
         @endif
 
         <!-- School Fees Information (if enabled) -->

@@ -570,6 +570,7 @@ class SettingsController extends Controller
                     'principal' => null,
                     'teacher'   => null,
                 ],
+                'qrCodeUri' => 'data:image/svg+xml;base64,' . base64_encode(\App\Support\QrCodeGenerator::generateSvg(url('/results/verify/ADM001'))),
             ];
 
             if (request()->boolean('html')) {

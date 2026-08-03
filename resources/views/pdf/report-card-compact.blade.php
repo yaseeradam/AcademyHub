@@ -352,8 +352,13 @@
 
         {{-- Verification QR Code Badge (If enabled) --}}
         @if($showQrCode)
-        <div style="margin-top: 10px; border-top: 1px dashed #cbd5e1; padding-top: 6px; text-align: center; font-size: 7.5pt; color: #475569;">
-            🔒 <strong>Official Verified Record</strong> &bull; Scan QR Code to verify document authenticity &bull; Ref: <strong>{{ $student->admission_number }}</strong>
+        <div style="margin-top: 6px; border-top: 1px dashed #cbd5e1; padding-top: 4px; text-align: center;">
+            @if(!empty($qrCodeUri))
+                <img src="{{ $qrCodeUri }}" style="width: 42px; height: 42px; display: block; margin: 0 auto 2px auto;" alt="QR" />
+            @endif
+            <div style="font-size: 7.5pt; color: #475569;">
+                &#128274; <strong>Official Verified Record</strong> &bull; Scan QR Code to verify document authenticity &bull; Ref: <strong>{{ $student->admission_number }}</strong>
+            </div>
         </div>
         @endif
 
