@@ -454,10 +454,14 @@ class WhatsAppController extends Controller
                     'active_homework' => $homework,
                     'recent_scores' => $student->scores->map(function ($score) {
                         return [
-                            'subject' => $score->subject?->name,
-                            'total_score' => $score->total,
-                            'term' => $score->term ?? null,
-                            'session' => $score->session ?? null,
+                            'subject'     => $score->subject?->name,
+                            'ca1_score'   => (int) $score->ca1,
+                            'ca2_score'   => (int) $score->ca2,
+                            'exam_score'  => (int) $score->exam,
+                            'total_score' => (int) $score->total,
+                            'grade'       => $score->grade ?: 'N/A',
+                            'term'        => $score->term ?? null,
+                            'session'     => $score->session ?? null,
                         ];
                     })->values()->all(),
                 ];
@@ -662,10 +666,14 @@ class WhatsAppController extends Controller
                 'published_results' => $publishedResults,
                 'recent_scores' => $student->scores->map(function ($score) {
                     return [
-                        'subject' => $score->subject?->name,
-                        'total_score' => $score->total,
-                        'term' => $score->term ?? null,
-                        'session' => $score->session ?? null,
+                        'subject'     => $score->subject?->name,
+                        'ca1_score'   => (int) $score->ca1,
+                        'ca2_score'   => (int) $score->ca2,
+                        'exam_score'  => (int) $score->exam,
+                        'total_score' => (int) $score->total,
+                        'grade'       => $score->grade ?: 'N/A',
+                        'term'        => $score->term ?? null,
+                        'session'     => $score->session ?? null,
                     ];
                 })->values()->all(),
             ];
@@ -784,10 +792,14 @@ class WhatsAppController extends Controller
             ->get()
             ->map(function ($score) {
                 return [
-                    'subject' => $score->subject?->name,
-                    'total_score' => $score->total,
-                    'term' => $score->term,
-                    'session' => $score->session,
+                    'subject'     => $score->subject?->name,
+                    'ca1_score'   => (int) $score->ca1,
+                    'ca2_score'   => (int) $score->ca2,
+                    'exam_score'  => (int) $score->exam,
+                    'total_score' => (int) $score->total,
+                    'grade'       => $score->grade ?: 'N/A',
+                    'term'        => $score->term,
+                    'session'     => $score->session,
                 ];
             })->values()->all();
 
@@ -1880,6 +1892,26 @@ class WhatsAppController extends Controller
                     $this->loadTenantSettings($tenant);
                 }
 
+                // Verify if broadsheet results are officially published for this student's class, term, and session
+                $studentClassIds = \App\Models\Score::where('student_id', $studentObj->id)
+                    ->where('term', $term)
+                    ->where('session', $session)
+                    ->pluck('class_id')
+                    ->unique()
+                    ->filter()
+                    ->push($studentObj->class_id)
+                    ->toArray();
+
+                $isPublished = \App\Models\ResultPublication::whereIn('class_id', $studentClassIds)
+                    ->where('term', $term)
+                    ->where('session', $session)
+                    ->exists();
+
+                if (!$isPublished) {
+                    $this->sendMetaMessage($phone, "⚠️ *Report Card Unavailable*\n\nThe official report card for Term {$term} ({$session}) has not been published yet by the school administration.");
+                    return;
+                }
+
                 $apiKey = config('services.whatsapp.api_key');
                 $reportUrl = route('whatsapp.report-card', [
                     'studentId' => $studentObj->id,
@@ -2467,7 +2499,7 @@ class WhatsAppController extends Controller
                   "   - Resolve the <academic_session> in YYYY/YYYY format (e.g. '2026/2027'). If a previous session is mentioned (e.g. 'last year', '2025/2026'), resolve it. If no session is specified, default to the active session from the academic_system metadata.\n" .
                   "   - You can output multiple SEND_PDF tags if they request report cards for multiple children or multiple terms in a single prompt.\n" .
                   "11. INTENT DETECTION & SUPPORT TICKETS: If the user indicates they want to report an issue, log a complaint, offer feedback, report missing grades/attendance, or request a call back from the school administration, you MUST append a hidden tag at the very end of your response: '[SUPPORT_TICKET_DETECTED: <message>]' where <message> is a clear, concise 1-sentence summary of the user's actual problem or concern. Do not include this tag for standard information questions (e.g. asking for grades, schedules, or events).\n" .
-                  "12. HANDLING STUDENT RESULTS: If asked about student results, academic performance, report cards, or scores: Check if the child name or admission number is specified in the question. If not, and there are multiple children listed in the context, ask the user to specify which student they are asking about. If the student is identified, verify if the results for the requested term and session are officially published (existence of a record matching that term and session in the student's `published_results` list). If the results are NOT published, you MUST politely inform the user that the academic results for that term/session have not been officially published yet by the school administration, instead of saying you don't have access to this information. If the results ARE published, list the scores from the `recent_scores` data matching the requested term/session, always listing the subject name and score (e.g., Mathematics: 85/100).\n" .
+                  "12. HANDLING STUDENT RESULTS & SCORES: If asked about student results, academic performance, report cards, or scores: Check if the child name or admission number is specified in the question. If not, and there are multiple children listed in the context, ask the user to specify which student they are asking about. If the student is identified, verify if the results for the requested term and session are officially published (existence of a record matching that term and session in the student's `published_results` list). If the results for that term/session are NOT published in `published_results`, you MUST state clearly that the report card / results for that term are not available yet because they have not been published by the school administration, and do NOT output any scores or PDF download tags. If the results ARE published, list each subject showing its full score breakdown from `recent_scores` including CA1, CA2, Exam score, Total score, and Grade (e.g., • *Mathematics*: CA1: 15, CA2: 15, Exam: 50, Total: *80/100* — Grade A).\n" .
                   "13. ACTIVE SESSION STUDENT: If 'active_session_student_id' is set in the context (not null), this indicates the student the parent has been actively chatting about or selected recently. Prioritize this student in your answers unless the user names a different child. Additionally, if your answer resolves to or discusses a specific single student from the context, you MUST append a hidden tag at the very end of your response: '[ACTIVE_STUDENT_SELECTED: <student_id>]' where <student_id> is that student's ID from the context. Do not append this tag if you are talking about multiple children or general school information.\n" .
                   "14. BROADCASTS & ANNOUNCEMENTS: If the user is an admin or superadmin and explicitly requests to send a broadcast, post a notice, publish an announcement, or notify a group of users (students, parents, staff, or everyone) about a message:\n" .
                   "    - First check if the user has provided the actual content/body text of the broadcast/announcement. If they have NOT provided the message content yet, do NOT generate any '[CREATE_ANNOUNCEMENT]' tag. Instead, politely ask them what the message content is first.\n" .
