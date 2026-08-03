@@ -1833,12 +1833,20 @@ class WhatsAppController extends Controller
         $textLower = strtolower(trim($text));
 
         if ($buttonId) {
-            if ($buttonId === 'menu_attendance') {
-                $textLower = 'attendance';
-            } elseif ($buttonId === 'menu_results') {
-                $textLower = 'results';
-            } elseif ($buttonId === 'menu_fees') {
-                $textLower = 'fees';
+            $map = [
+                'menu_attendance'    => 'check attendance',
+                'menu_results'       => 'show results',
+                'menu_fees'          => 'check tuition fees',
+                'menu_homework'      => 'check active homework',
+                'menu_timetable'     => 'show today timetable',
+                'menu_report'        => 'download report card',
+                'menu_contact'       => 'contact information',
+                'menu_announcements' => 'show announcements',
+                'menu_stats'         => 'school stats summary',
+            ];
+            if (isset($map[$buttonId])) {
+                $text = $map[$buttonId];
+                $textLower = strtolower($text);
             }
         }
 
@@ -2357,55 +2365,62 @@ class WhatsAppController extends Controller
         }
 
         // 9. Standard Menu / Help
-        if ($textLower === 'menu' || $textLower === 'help') {
+        if (in_array($textLower, ['menu', 'help', 'start', 'options', 'services'])) {
             $schoolName = config('academyhub.school_name') ?: 'AcademyHub';
+            
             if ($userRole === 'parent') {
-                $messageText = "👋 Welcome to the *{$schoolName}* WhatsApp Portal!\n\nPlease select one of the quick options below, or chat with me naturally:";
+                $messageText = "👋 Welcome to the *{$schoolName}* WhatsApp Service Hub!\n\nTap the button below to open the Quick Services Menu, or simply reply to chat with me naturally:";
+                
+                $listSections = [
+                    [
+                        'title' => 'Academic & Attendance',
+                        'rows' => [
+                            ['id' => 'menu_attendance', 'title' => '📅 Attendance Check', 'description' => "Check today's roll call status"],
+                            ['id' => 'menu_results', 'title' => '📊 Academic Results', 'description' => 'View published grades & scores'],
+                            ['id' => 'menu_report', 'title' => '📄 PDF Report Card', 'description' => 'Download official PDF report'],
+                            ['id' => 'menu_homework', 'title' => '📝 Active Assignments', 'description' => 'View child homework due dates'],
+                        ]
+                    ],
+                    [
+                        'title' => 'Finance & Operations',
+                        'rows' => [
+                            ['id' => 'menu_fees', 'title' => '💰 Fees & Online Pay', 'description' => 'Check balance & pay online'],
+                            ['id' => 'menu_timetable', 'title' => '📅 Today\'s Timetable', 'description' => 'View class schedule for children'],
+                            ['id' => 'menu_contact', 'title' => '☎️ School Contact Info', 'description' => 'Get phone numbers & email'],
+                        ]
+                    ]
+                ];
+
+                $this->sendMetaMessage($phone, $messageText, null, null, null, $listSections, 'Quick Services 📱');
+                return;
+            } elseif ($userRole === 'student') {
+                $messageText = "👋 Welcome *{$user->name}*!\n\nSelect a quick option below:";
                 $buttons = [
-                    ['id' => 'menu_attendance', 'title' => '📅 Attendance'],
-                    ['id' => 'menu_results', 'title' => '📊 Term Results'],
-                    ['id' => 'menu_fees', 'title' => '💰 Fees & Invoices'],
+                    ['id' => 'menu_homework', 'title' => '📝 Homework'],
+                    ['id' => 'menu_timetable', 'title' => '📅 Timetable'],
+                    ['id' => 'menu_results', 'title' => '📊 My Results'],
+                ];
+                $this->sendMetaMessage($phone, $messageText, null, null, $buttons);
+                return;
+            } elseif (in_array($userRole, ['admin', 'superadmin'])) {
+                $messageText = "🎒 *{$schoolName} Admin Portal*\n\nSelect an administrative quick action:";
+                $buttons = [
+                    ['id' => 'broadcast', 'title' => '📢 Send Broadcast'],
+                    ['id' => 'menu_stats', 'title' => '📊 School Dashboard'],
+                    ['id' => 'menu_contact', 'title' => '☎️ Contact Info'],
+                ];
+                $this->sendMetaMessage($phone, $messageText, null, null, $buttons);
+                return;
+            } else {
+                $messageText = "🎒 *{$schoolName} Staff Portal*\n\nSelect a quick action:";
+                $buttons = [
+                    ['id' => 'menu_timetable', 'title' => '📅 My Schedule'],
+                    ['id' => 'menu_stats', 'title' => '📊 School Stats'],
+                    ['id' => 'menu_contact', 'title' => '☎️ Contact Details'],
                 ];
                 $this->sendMetaMessage($phone, $messageText, null, null, $buttons);
                 return;
             }
-            $reply = "====================================\n" .
-                     "       🎒  *{$schoolName}*      \n" .
-                     "====================================\n\n" .
-                     "🤖 *HubGenie Virtual Assistant*\n\n" .
-                     "You can chat with me naturally about schedules, events, grades, or use these keywords:\n\n";
-
-            if ($userRole === 'parent') {
-                $reply .= "📅 *attendance* - View today's child attendance\n" .
-                          "📊 *results*    - View latest term scores\n" .
-                          "💰 *fees*       - View outstanding tuition balance & checkout links\n" .
-                          "📝 *homework*   - View active child assignments & status\n" .
-                          "📅 *timetable*  - View today's class schedule for children\n" .
-                          "📄 *report*     - Download Official PDF Report Card for any term\n" .
-                          "☎️ *contact*     - Get school contact and details\n" .
-                          "🔔 *subscribe*   - Opt-in to automatic notifications\n" .
-                          "🔕 *unsubscribe* - Opt-out of notifications\n" .
-                          "🔒 *logout*      - Disconnect your account\n\n" .
-                          "------------------------------------\n" .
-                          "💡 _E.g., try asking: \"What homework does Abdullahi Bala have due?\"_";
-            } elseif (in_array($userRole, ['admin', 'superadmin'])) {
-                $reply .= "📢 *broadcast*   - Send announcement to Parents/Staff\n" .
-                          "🔔 *subscribe*   - Opt-in to automated alerts\n" .
-                          "🔕 *unsubscribe* - Opt-out of alerts\n" .
-                          "☎️ *contact*     - Get school contact details\n" .
-                          "🔒 *logout*      - Disconnect your admin session\n\n" .
-                          "------------------------------------\n" .
-                          "💡 _E.g., try asking: \"How many students are active in the school?\"_";
-            } else {
-                $reply .= "🔔 *subscribe*   - Opt-in to automated alerts\n" .
-                          "🔕 *unsubscribe* - Opt-out of alerts\n" .
-                          "☎️ *contact*     - Get school contact details\n" .
-                          "🔒 *logout*      - Disconnect your session\n\n" .
-                          "------------------------------------\n" .
-                          "💡 _E.g., try asking: \"What classes do I teach today?\"_";
-            }
-            $this->sendMetaMessage($phone, $reply);
-            return;
         }
 
         // 10. Natural Language AI Fallback
@@ -2610,7 +2625,15 @@ class WhatsAppController extends Controller
 
             // Send the text answer first
             if (!empty($answer)) {
-                $this->sendMetaMessage($phone, $answer);
+                $quickButtons = null;
+                if ($userRole === 'parent' && empty($pdfRequests)) {
+                    $quickButtons = [
+                        ['id' => 'menu_attendance', 'title' => '📅 Attendance'],
+                        ['id' => 'menu_results', 'title' => '📊 Term Results'],
+                        ['id' => 'menu_fees', 'title' => '💰 Fees & Pay'],
+                    ];
+                }
+                $this->sendMetaMessage($phone, $answer, null, null, $quickButtons);
             }
 
             // Natively dispatch each requested PDF report card
@@ -2686,7 +2709,7 @@ class WhatsAppController extends Controller
         }
     }
 
-    private function sendMetaMessage(string $toPhone, string $messageText, ?string $mediaUrl = null, ?string $filename = null, ?array $buttons = null): bool
+    private function sendMetaMessage(string $toPhone, string $messageText, ?string $mediaUrl = null, ?string $filename = null, ?array $buttons = null, ?array $listSections = null, ?string $listButtonText = 'Select Service 📱'): bool
     {
         try {
             $token = config('services.whatsapp.token');
@@ -2705,7 +2728,19 @@ class WhatsAppController extends Controller
                 'to' => $toPhone,
             ];
 
-            if ($buttons) {
+            if ($listSections) {
+                $payload['type'] = 'interactive';
+                $payload['interactive'] = [
+                    'type' => 'list',
+                    'body' => [
+                        'text' => $messageText
+                    ],
+                    'action' => [
+                        'button' => substr($listButtonText ?: 'Select Option', 0, 20),
+                        'sections' => $listSections
+                    ]
+                ];
+            } elseif ($buttons) {
                 $payload['type'] = 'interactive';
                 $payload['interactive'] = [
                     'type' => 'button',
@@ -2719,7 +2754,7 @@ class WhatsAppController extends Controller
                                 'id' => $btn['id'],
                                 'title' => substr($btn['title'], 0, 20)
                             ]
-                        ], $buttons)
+                        ], array_slice($buttons, 0, 3))
                     ]
                 ];
             } elseif ($mediaUrl) {
