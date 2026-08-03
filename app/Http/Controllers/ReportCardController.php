@@ -17,7 +17,9 @@ class ReportCardController extends Controller
     public function download(Request $request, Student $student): Response
     {
         $user = $request->user();
-        $tenant = $user ? $user->tenant : null;
+        abort_unless($user, 401);
+
+        $tenant = $user->tenant;
 
         if ($tenant && $tenant->isSubscriptionExpired()) {
             abort(403, 'Your school\'s subscription has expired. Please contact school administration.');

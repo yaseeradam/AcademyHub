@@ -62,9 +62,9 @@
         .att-value { font-size: 11px; font-weight: bold; color: #450a0a; }
 
         /* Remarks */
-        .remarks { border: 1.5px solid #991b1b; border-radius: 3px; padding: 3px 5px; margin-bottom: 3px; background: #fffbeb; }
-        .remarks-label { font-size: 7px; font-weight: bold; color: #7f1d1d; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 1px; }
-        .remarks-text { font-size: 7.5px; color: #450a0a; line-height: 1.25; font-style: italic; }
+        .remarks { border: 1.5px solid #991b1b; border-radius: 3px; padding: 5px 8px; margin-bottom: 5px; background: #fffbeb; min-height: 55px; }
+        .remarks-label { font-size: 7.5px; font-weight: bold; color: #7f1d1d; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 2px; }
+        .remarks-text { font-size: 8px; color: #450a0a; line-height: 1.3; font-style: italic; min-height: 32px; }
 
         /* Next Term Banner */
         .next-term { background: #7f1d1d; border: 1px solid #d97706; color: #fffbeb; text-align: center; padding: 4px; font-size: 8px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; border-radius: 3px; }
@@ -85,8 +85,44 @@
 @php
     $schoolName = config('academyhub.school_name', config('app.name', 'AcademyHub'));
     $logo = config('academyhub.school_logo');
-    $logoPath = $logo ? public_path('uploads/'.str_replace('\\', '/', $logo)) : null;
-    $logoExists = $logoPath && file_exists($logoPath);
+    
+    $toBase64 = function(?string $path): ?string {
+        if (!$path || !file_exists($path)) {
+            return null;
+        }
+        $ext = strtolower(pathinfo($path, PATHINFO_EXTENSION));
+        $mime = match($ext) {
+            'jpg', 'jpeg' => 'image/jpeg',
+            'png' => 'image/png',
+            'webp' => 'image/webp',
+            'svg' => 'image/svg+xml',
+            default => 'image/png',
+        };
+        $data = @file_get_contents($path);
+        return $data ? 'data:' . $mime . ';base64,' . base64_encode($data) : null;
+    };
+
+    $logoCandidates = array_filter([
+        $logo ? public_path('uploads/' . str_replace('\\', '/', $logo)) : null,
+        $logo ? public_path(str_replace('\\', '/', $logo)) : null,
+        $logo ? storage_path('app/public/' . str_replace('\\', '/', $logo)) : null,
+        public_path('academy.png'),
+        public_path('logo.png'),
+        public_path('images/logo.png'),
+        public_path('uploads/school_logo.png'),
+    ]);
+
+    $logoPath = null;
+    foreach ($logoCandidates as $cand) {
+        if ($cand && file_exists($cand)) {
+            $logoPath = $cand;
+            break;
+        }
+    }
+
+    $logoDataUri = $logoPath ? $toBase64($logoPath) : null;
+    $logoExists = (bool) $logoDataUri;
+
     $opts = $rcOptions ?? [];
     $showPosition       = $opts['show_position'] ?? true;
     $showAttendance     = $opts['show_attendance'] ?? true;
@@ -102,7 +138,7 @@
 @endphp
 
 @if($logoExists && $showWatermark)
-    <div class="watermark"><img src="{{ $logoPath }}" alt="" style="width:100%;height:100%;object-fit:contain;" /></div>
+    <div class="watermark"><img src="{{ $logoDataUri }}" alt="" style="width:100%;height:100%;object-fit:contain;" /></div>
 @endif
 
 <div class="page">
@@ -112,7 +148,7 @@
         <div class="header">
             <div class="header-table">
                 <div class="header-cell logo-wrap">
-                    @if($logoExists)<img class="logo" src="{{ $logoPath }}" alt="">@endif
+                    @if($logoExists)<img class="logo" src="{{ $logoDataUri }}" alt="">@endif
                 </div>
                 <div class="header-cell">
                     <div class="school-name">{{ $schoolName }}</div>
