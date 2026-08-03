@@ -342,9 +342,9 @@
             </div>
             <div class="sig-cell">
                 @php($pSigUri = $toBase64($signatureImages['principal'] ?? null))
-                @if($pSigUri)<img src="{{ $pSigUri }}" class="sig-img" /><div class="sig-line has-img">Principal</div>
-                @else<div class="sig-line">Principal</div>@endif
-                <div class="sig-sub">Signature &amp; Stamp</div>
+                @if($pSigUri)<img src="{{ $pSigUri }}" class="sig-img" /><div class="sig-line has-img">{{ $principalTitle ?? 'Principal' }}</div>
+                @else<div class="sig-line">{{ $principalTitle ?? 'Principal' }}</div>@endif
+                <div class="sig-sub">{{ $principalName ? $principalName . ' &bull; ' : '' }}Signature &amp; Stamp</div>
             </div>
             <div class="sig-cell"><div class="sig-line">Parent/Guardian</div><div class="sig-sub">Signature &amp; Date</div></div>
         </div>

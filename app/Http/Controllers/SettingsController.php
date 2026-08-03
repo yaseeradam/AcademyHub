@@ -308,6 +308,8 @@ class SettingsController extends Controller
                 'rc_show_qr_code' => ['nullable', 'boolean'],
                 'rc_show_cumulative_summary' => ['nullable', 'boolean'],
                 'rc_show_color_badges' => ['nullable', 'boolean'],
+                'rc_principal_name' => ['nullable', 'string', 'max:150'],
+                'rc_principal_title' => ['nullable', 'string', 'max:100'],
             ]);
 
             $settingsPath = $this->settingsPath();
@@ -315,6 +317,8 @@ class SettingsController extends Controller
 
             // All templates are now free
             $settings['report_card_template'] = (string) $data['report_card_template'];
+            $settings['rc_principal_name'] = $data['rc_principal_name'] ?? null;
+            $settings['rc_principal_title'] = $data['rc_principal_title'] ?? null;
 
             // Boolean toggles - explicitly handle unchecked state
             $boolKeys = [

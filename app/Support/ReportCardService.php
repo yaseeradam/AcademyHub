@@ -286,6 +286,10 @@ class ReportCardService
         $student->section_id = $displaySectionId ?: null;
         $student->load(['schoolClass', 'section']);
 
+        $rawSettings = $this->settings();
+        $principalName = $rawSettings['rc_principal_name'] ?? config('academyhub.rc_principal_name');
+        $principalTitle = $rawSettings['rc_principal_title'] ?? config('academyhub.rc_principal_title', 'Principal');
+
         return [
             'student' => $student,
             'term' => $term,
@@ -309,6 +313,8 @@ class ReportCardService
             'schoolFees' => $schoolFees,
             'signatureImages' => $signatureImages,
             'cumulativeSummary' => $cumulativeSummary,
+            'principalName' => $principalName,
+            'principalTitle' => $principalTitle,
         ];
     }
 

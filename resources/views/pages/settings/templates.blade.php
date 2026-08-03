@@ -36,6 +36,8 @@
         $rcShowSignatures = old('rc_show_signatures', config('academyhub.rc_show_signatures', false));
         $rcPrincipalSignatureImage = config('academyhub.rc_principal_signature_image');
         $rcTeacherSignatureImage = config('academyhub.rc_teacher_signature_image');
+        $rcPrincipalName = old('rc_principal_name', config('academyhub.rc_principal_name', ''));
+        $rcPrincipalTitle = old('rc_principal_title', config('academyhub.rc_principal_title', 'Principal'));
     @endphp
 
     <div class="space-y-6"
@@ -583,6 +585,27 @@
                 </label>
 
                 <div x-show="showSignatures" x-transition class="space-y-4">
+                    {{-- Principal Details --}}
+                    <div class="rounded-2xl border border-rose-200 bg-white/90 p-5 shadow-sm">
+                        <div class="text-sm font-bold text-gray-900 mb-3">Principal / Head Teacher Name &amp; Title</div>
+                        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                            <div>
+                                <label class="text-xs font-bold uppercase tracking-wider text-gray-600">Principal's Full Name</label>
+                                <input name="rc_principal_name" type="text"
+                                    class="mt-1 w-full rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-semibold text-gray-900 shadow-sm focus:ring-2 focus:ring-rose-500 focus:border-rose-500"
+                                    value="{{ $rcPrincipalName }}" placeholder="e.g. Dr. Rebecca Carter or Hajia Fatima Usman" />
+                                <div class="mt-1 text-[10px] text-gray-500">Official name to print under Principal's signature block</div>
+                            </div>
+                            <div>
+                                <label class="text-xs font-bold uppercase tracking-wider text-gray-600">Designation / Title</label>
+                                <input name="rc_principal_title" type="text"
+                                    class="mt-1 w-full rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-semibold text-gray-900 shadow-sm focus:ring-2 focus:ring-rose-500 focus:border-rose-500"
+                                    value="{{ $rcPrincipalTitle }}" placeholder="e.g. Principal or Head Teacher" />
+                                <div class="mt-1 text-[10px] text-gray-500">Designation title (e.g. Principal, Headmistress, Director)</div>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                         {{-- Principal Signature --}}
                         <div class="rounded-2xl border border-rose-200 bg-white/90 p-5 shadow-sm">

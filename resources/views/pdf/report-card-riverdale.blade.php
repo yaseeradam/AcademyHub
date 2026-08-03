@@ -565,10 +565,10 @@
                                             @if(($signatureImages['principal'] ?? null) && file_exists($signatureImages['principal']))
                                                 <img src="{{ $signatureImages['principal'] }}" style="max-height: 25px; max-width: 90px; object-fit: contain; display: block; margin: 0 auto;" />
                                             @else
-                                                <div style="font-family: 'Times New Roman', Times, serif; font-size: 13px; font-style: italic; color: {{ $themeColor }}; font-weight: bold; letter-spacing: 0.5px; line-height: 1;">Rebecca Carter</div>
+                                                <div style="font-family: 'Times New Roman', Times, serif; font-size: 13px; font-style: italic; color: {{ $themeColor }}; font-weight: bold; letter-spacing: 0.5px; line-height: 1;">{{ $principalName ?: 'Principal' }}</div>
                                             @endif
-                                            <div style="border-top: 1px solid {{ $themeColor }}; width: 100%; margin-top: 1px; padding-top: 1px; font-size: 7px; font-weight: bold; color: {{ $themeColor }}; text-transform: uppercase;">Dr. Rebecca Carter</div>
-                                            <div style="font-size: 6px; color: #64748b; margin-top: 0.5px;">Principal</div>
+                                            <div style="border-top: 1px solid {{ $themeColor }}; width: 100%; margin-top: 1px; padding-top: 1px; font-size: 7px; font-weight: bold; color: {{ $themeColor }}; text-transform: uppercase;">{{ $principalName ?: 'Principal' }}</div>
+                                            <div style="font-size: 6px; color: #64748b; margin-top: 0.5px;">{{ $principalTitle ?: 'Principal' }}</div>
                                         </div>
                                     </div>
                                 </div>

@@ -115,6 +115,8 @@ class TenantSettings
                 'rc_show_qr_code',
                 'rc_show_cumulative_summary',
                 'rc_show_color_badges',
+                'rc_principal_name',
+                'rc_principal_title',
                 'subscription_due_date',
             ];
 
