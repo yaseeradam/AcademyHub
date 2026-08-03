@@ -73,10 +73,13 @@ class ReportCardController extends Controller
 
         $student->load(['schoolClass', 'section']);
 
+        $data = app(ReportCardService::class)->build($student, $term, $session);
+
         $template = (string) $request->query('template', config('academyhub.report_card_template', 'compact'));
         $safeTemplate = preg_replace('/[^a-z0-9_-]/i', '', $template) ?: 'compact';
+        $optionsHash = substr(md5(json_encode($data['rcOptions'] ?? [])), 0, 10);
         $storageDir = storage_path('app/academyhub/report_cards');
-        $filename = "report-card-{$student->admission_number}-term-{$term}-{$safeTemplate}.pdf";
+        $filename = "report-card-{$student->admission_number}-term-{$term}-{$safeTemplate}-{$optionsHash}.pdf";
         $fullPath = "{$storageDir}/{$filename}";
 
         $view = ReportCardService::viewForTemplate($safeTemplate);
@@ -143,8 +146,6 @@ class ReportCardController extends Controller
                 'Cache-Control' => 'no-cache, no-store, must-revalidate',
             ]);
         }
-
-        $data = app(ReportCardService::class)->build($student, $term, $session);
 
         $view = ReportCardService::viewForTemplate($template);
 
