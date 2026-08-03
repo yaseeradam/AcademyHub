@@ -308,6 +308,7 @@ class SettingsController extends Controller
                 'rc_show_qr_code' => ['nullable', 'boolean'],
                 'rc_show_cumulative_summary' => ['nullable', 'boolean'],
                 'rc_show_color_badges' => ['nullable', 'boolean'],
+                'rc_show_performance' => ['nullable', 'boolean'],
                 'rc_principal_name' => ['nullable', 'string', 'max:150'],
                 'rc_principal_title' => ['nullable', 'string', 'max:100'],
             ]);
@@ -328,6 +329,7 @@ class SettingsController extends Controller
                 'rc_show_psychomotor', 'rc_show_school_fees', 'rc_show_signatures',
                 'rc_show_class_highest_lowest', 'rc_show_subject_teacher_remarks',
                 'rc_show_qr_code', 'rc_show_cumulative_summary', 'rc_show_color_badges',
+                'rc_show_performance',
             ];
             foreach ($boolKeys as $key) {
                 // A hidden input with value="0" is always submitted; the checkbox
@@ -554,6 +556,7 @@ class SettingsController extends Controller
                     'show_qr_code' => true,
                     'show_cumulative_summary' => true,
                     'show_color_badges' => true,
+                    'show_performance' => true,
                 ],
 
                 'schoolFees' => [

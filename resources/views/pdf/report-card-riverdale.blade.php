@@ -158,6 +158,7 @@
     $showQrCode                    = $opts['show_qr_code'] ?? true;
     $showCumulativeSummary         = $opts['show_cumulative_summary'] ?? false;
     $showColorBadges               = $opts['show_color_badges'] ?? true;
+    $showPerformance               = $opts['show_performance'] ?? false;
 
     // 1. Resolve Homeroom Teacher dynamically
     $homeroomTeacher = null;
@@ -358,7 +359,7 @@
                                 @endif
                                 @if($showPosition)<th style="width: 6%;">Pos</th>@endif
                                 @if($showSubjectTeacherRemarks)<th style="width: 10%; text-align: left; padding-left: 4px;">Remark</th>@endif
-                                <th style="width: 14%;">Performance</th>
+                                @if($showPerformance)<th style="width: 14%;">Performance</th>@endif
                             </tr>
                         </thead>
                         <tbody>
@@ -394,13 +395,15 @@
                                     @endif
                                     @if($showPosition)<td>{{ $r['position'] ?? '-' }}</td>@endif
                                     @if($showSubjectTeacherRemarks)<td style="font-size:7px;text-align:left;padding-left:4px;font-style:italic;">{{ $r['teacher_remark'] ?? 'Good' }}</td>@endif
-                                    <td class="performance-cell">
-                                        @if($r['total'])
-                                            <span style="color: {{ $accentColor }};">★</span> {{ $perfText }}
-                                        @else
-                                            -
-                                        @endif
-                                    </td>
+                                    @if($showPerformance)
+                                        <td class="performance-cell">
+                                            @if($r['total'])
+                                                <span style="color: {{ $accentColor }};">★</span> {{ $perfText }}
+                                            @else
+                                                -
+                                            @endif
+                                        </td>
+                                    @endif
                                 </tr>
                             @endforeach
                         </tbody>

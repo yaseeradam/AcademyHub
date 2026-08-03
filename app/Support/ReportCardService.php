@@ -242,6 +242,7 @@ class ReportCardService
             'show_qr_code'                   => isset($optionsOverrides['show_qr_code']) ? (bool) $optionsOverrides['show_qr_code'] : $this->settingBool('rc_show_qr_code', true),
             'show_cumulative_summary'        => isset($optionsOverrides['show_cumulative_summary']) ? (bool) $optionsOverrides['show_cumulative_summary'] : $this->settingBool('rc_show_cumulative_summary', false),
             'show_color_badges'              => isset($optionsOverrides['show_color_badges']) ? (bool) $optionsOverrides['show_color_badges'] : $this->settingBool('rc_show_color_badges', true),
+            'show_performance'               => isset($optionsOverrides['show_performance']) ? (bool) $optionsOverrides['show_performance'] : $this->settingBool('rc_show_performance', false),
         ];
 
         // School fees data — also read from settings.json directly

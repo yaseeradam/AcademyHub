@@ -25,6 +25,7 @@
         $rcShowQrCode = old('rc_show_qr_code', config('academyhub.rc_show_qr_code', true));
         $rcShowCumulativeSummary = old('rc_show_cumulative_summary', config('academyhub.rc_show_cumulative_summary', false));
         $rcShowColorBadges = old('rc_show_color_badges', config('academyhub.rc_show_color_badges', true));
+        $rcShowPerformance = old('rc_show_performance', config('academyhub.rc_show_performance', false));
 
         $rcSchoolFeesAccountNumber = old('rc_school_fees_account_number', config('academyhub.rc_school_fees_account_number'));
         $rcSchoolFeesBankName = old('rc_school_fees_bank_name', config('academyhub.rc_school_fees_bank_name'));
@@ -452,6 +453,16 @@
                         <div>
                             <div class="text-sm font-bold text-gray-900">Verification QR Badge</div>
                             <div class="text-xs text-gray-500">Show official verification badge at footer</div>
+                        </div>
+                    </label>
+
+                    {{-- Subject Performance Rating --}}
+                    <label class="flex items-center gap-3 rounded-2xl border border-gray-200 bg-white/80 p-4 shadow-sm cursor-pointer hover:border-violet-300 transition">
+                        <input type="hidden" name="rc_show_performance" value="0" />
+                        <input type="checkbox" name="rc_show_performance" value="1" class="h-5 w-5 rounded-lg border-gray-300 text-violet-600 focus:ring-violet-500" @checked($rcShowPerformance) />
+                        <div>
+                            <div class="text-sm font-bold text-gray-900">Subject Performance Rating</div>
+                            <div class="text-xs text-gray-500">Show performance rating column (e.g. Excellent, Good, Pass)</div>
                         </div>
                     </label>
 

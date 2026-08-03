@@ -149,6 +149,7 @@
     $showQrCode                    = $opts['show_qr_code'] ?? true;
     $showCumulativeSummary         = $opts['show_cumulative_summary'] ?? false;
     $showColorBadges               = $opts['show_color_badges'] ?? true;
+    $showPerformance               = $opts['show_performance'] ?? false;
 
     // Resolve Homeroom Teacher
     $homeroomTeacher = null;
@@ -286,7 +287,7 @@
                     @endif
                     @if($showPosition)<th style="width: 6%;">POS</th>@endif
                     @if($showSubjectTeacherRemarks)<th style="width: 10%; text-align: left; padding-left: 4px;">REMARK</th>@endif
-                    <th style="width: 14%;">PERFORMANCE</th>
+                    @if($showPerformance)<th style="width: 14%;">PERFORMANCE</th>@endif
                 </tr>
             </thead>
             <tbody>
@@ -316,7 +317,7 @@
                         @endif
                         @if($showPosition)<td>{{ $r['position'] ?? '-' }}</td>@endif
                         @if($showSubjectTeacherRemarks)<td style="font-size:7px;text-align:left;padding-left:4px;font-style:italic;">{{ $r['teacher_remark'] ?? 'Good' }}</td>@endif
-                        <td style="font-weight: 700; color: #004b49;">{{ $getPerformanceText($r['total'] ?? 0) }}</td>
+                        @if($showPerformance)<td style="font-weight: 700; color: #004b49;">{{ $getPerformanceText($r['total'] ?? 0) }}</td>@endif
                     </tr>
                 @endforeach
             </tbody>
