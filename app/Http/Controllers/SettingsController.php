@@ -521,6 +521,19 @@ class SettingsController extends Controller
                 'teacherRemarks' => 'An excellent student with outstanding academic performance. Keep it up!',
                 'principalRemarks' => 'A commendable result. Continue to strive for excellence.',
                 'nextTermDate' => 'September 8, 2025',
+                'principalName' => config('academyhub.rc_principal_name', ''),
+                'principalTitle' => config('academyhub.rc_principal_title', 'Principal'),
+                'psychomotorTraits' => [
+                    'Handwriting' => 4,
+                    'Creativity' => 5,
+                    'Sports' => 3,
+                    'Punctuality' => 5,
+                ],
+                'cumulativeSummary' => [
+                    'term_1' => ['total' => 420, 'average' => 84.0],
+                    'term_2' => ['total' => 410, 'average' => 82.0],
+                    'term_3' => ['total' => 430, 'average' => 86.0],
+                ],
                 'rcOptions' => [
                     'show_position' => true,
                     'show_attendance' => true,
@@ -533,7 +546,13 @@ class SettingsController extends Controller
                     'show_psychomotor' => true,
                     'show_school_fees' => true,
                     'show_signatures' => true,
+                    'show_class_highest_lowest' => true,
+                    'show_subject_teacher_remarks' => true,
+                    'show_qr_code' => true,
+                    'show_cumulative_summary' => true,
+                    'show_color_badges' => true,
                 ],
+
                 'schoolFees' => [
                     'amount'         => 45000.00,
                     'account_number' => '1023456789',

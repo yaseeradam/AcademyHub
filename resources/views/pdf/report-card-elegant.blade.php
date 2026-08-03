@@ -458,27 +458,48 @@
                 <table class="scores">
                     <thead>
                         <tr>
-                            <th style="width: 30%; text-align: left; padding-left: 6px;">Subject</th>
-                            <th style="width: 10%;">CA1</th>
-                            <th style="width: 10%;">CA2</th>
-                            <th style="width: 10%;">Exam</th>
-                            <th style="width: 10%;">Total</th>
-                            <th style="width: 10%;">Grade</th>
-                            @if($showClassAverage)<th style="width: 10%;">Class Avg</th>@endif
-                            @if($showPosition)<th style="width: 10%;">Position</th>@endif
+                            <th style="width: 28%; text-align: left; padding-left: 6px;">Subject</th>
+                            <th style="width: 9%;">CA1</th>
+                            <th style="width: 9%;">CA2</th>
+                            <th style="width: 9%;">Exam</th>
+                            <th style="width: 9%;">Total</th>
+                            <th style="width: 8%;">Grade</th>
+                            @if($showClassAverage)<th style="width: 8%;">Avg</th>@endif
+                            @if($showClassHighestLowest)
+                                <th style="width: 6%;">High</th>
+                                <th style="width: 6%;">Low</th>
+                            @endif
+                            @if($showPosition)<th style="width: 6%;">Pos</th>@endif
+                            @if($showSubjectTeacherRemarks)<th style="width: 10%; text-align: left; padding-left: 4px;">Remark</th>@endif
                         </tr>
                     </thead>
                     <tbody>
                         @foreach ($rows as $row)
+                            @php
+                                $g = strtoupper($row['grade'] ?? '-');
+                                $badgeBg = match($g) { 'A'=>'#dcfce7','B'=>'#dbeafe','C'=>'#fef9c3','D'=>'#ffedd5','F','U'=>'#fee2e2',default=>'transparent' };
+                                $badgeFg = match($g) { 'A'=>'#166534','B'=>'#1e40af','C'=>'#854d0e','D'=>'#9a3412','F','U'=>'#991b1b',default=>'#1e3a5f' };
+                            @endphp
                             <tr>
-                                <td class="subj">{{ $row['subject']->name }}</td>
+                                <td class="subj">{{ $row['subject']->name ?? '-' }}</td>
                                 <td>{{ $row['ca1'] ?? '—' }}</td>
                                 <td>{{ $row['ca2'] ?? '—' }}</td>
                                 <td>{{ $row['exam'] ?? '—' }}</td>
                                 <td class="bold">{{ $row['total'] ?? '—' }}</td>
-                                <td class="bold">{{ $row['grade'] ?? '—' }}</td>
+                                <td class="bold">
+                                    @if($showColorBadges && ($row['grade'] ?? null))
+                                        <span style="background:{{ $badgeBg }};color:{{ $badgeFg }};padding:1px 4px;border-radius:2px;font-weight:bold;">{{ $g }}</span>
+                                    @else
+                                        {{ $row['grade'] ?? '—' }}
+                                    @endif
+                                </td>
                                 @if($showClassAverage)<td>{{ $row['class_avg'] ?? '—' }}</td>@endif
+                                @if($showClassHighestLowest)
+                                    <td>{{ $row['highest'] ?? '—' }}</td>
+                                    <td>{{ $row['lowest'] ?? '—' }}</td>
+                                @endif
                                 @if($showPosition)<td>{{ $row['position'] ?? '—' }}</td>@endif
+                                @if($showSubjectTeacherRemarks)<td style="font-size:7px;text-align:left;padding-left:4px;font-style:italic;">{{ $row['teacher_remark'] ?? 'Good' }}</td>@endif
                             </tr>
                         @endforeach
                     </tbody>
@@ -508,6 +529,22 @@
                         <div class="att-label">Times Absent</div>
                         <div class="att-value">{{ $timesAbsent ?? '—' }}</div>
                     </div>
+                </div>
+                @endif
+
+                {{-- Cumulative Summary --}}
+                @if($showCumulativeSummary && !empty($cumulativeSummary))
+                <div style="border:1.5px solid #1e3a5f;border-radius:3px;background:#f8fafc;padding:5px 8px;margin-bottom:5px;">
+                    <div style="font-size:7.5px;font-weight:bold;text-transform:uppercase;color:#1e3a5f;margin-bottom:3px;">Annual Cumulative Summary ({{ $session }})</div>
+                    <table style="width:100%;border-collapse:collapse;text-align:center;font-size:8px;">
+                        <thead><tr style="border-bottom:1px solid #bfdbfe;color:#1e3a5f;"><th style="padding:2px;">Term 1</th><th style="padding:2px;">Term 2</th><th style="padding:2px;">Term 3</th><th style="padding:2px;">Cumulative Avg</th></tr></thead>
+                        <tbody><tr>
+                            <td style="padding:3px;font-weight:600;">{{ $cumulativeSummary['term_1']['total'] ?? '—' }}</td>
+                            <td style="padding:3px;font-weight:600;">{{ $cumulativeSummary['term_2']['total'] ?? '—' }}</td>
+                            <td style="padding:3px;font-weight:600;">{{ $cumulativeSummary['term_3']['total'] ?? '—' }}</td>
+                            <td style="padding:3px;font-weight:800;">{{ $average }}%</td>
+                        </tr></tbody>
+                    </table>
                 </div>
                 @endif
 
@@ -551,8 +588,8 @@
                         @if(($signatureImages['principal'] ?? null) && file_exists($signatureImages['principal']))
                             <img src="{{ $signatureImages['principal'] }}" alt="Principal Signature" style="max-height: 30px; max-width: 80px; object-fit: contain; margin-bottom: 2px;" />
                         @endif
-                        <div class="sig-line">Principal</div>
-                        <div class="sig-sub">Signature &amp; Stamp</div>
+                        <div class="sig-line">{{ $principalTitle ?? 'Principal' }}</div>
+                        <div class="sig-sub">{{ $principalName ? $principalName . ' &bull; ' : '' }}Signature &amp; Stamp</div>
                     </div>
                     <div class="sig">
                         <div class="sig-line">Parent/Guardian</div>
@@ -561,8 +598,13 @@
                 </div>
                 @endif
 
+                {{-- QR Code --}}
+                @if($showQrCode)
+                <div style="margin-top:4px;border-top:1px dashed #1e3a5f;padding-top:4px;text-align:center;font-size:7px;color:#1e3a5f;">&#128274; <strong>Official Verified Record</strong> &bull; Ref: <strong>{{ $student->admission_number }}</strong></div>
+                @endif
+
                 <div class="footer">
-                    Generated on {{ now()->format('l, F j, Y \a\t g:i A') }} • {{ $schoolName }} • Powered by AcademyHub SMS
+                    Generated on {{ now()->format('l, F j, Y \a\t g:i A') }} &bull; {{ $schoolName }} &bull; Powered by AcademyHub SMS
                 </div>
 
             </div>

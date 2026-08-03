@@ -345,30 +345,34 @@
                     <table class="scores-table">
                         <thead>
                             <tr>
-                                <th style="width: 32%; text-align: left; padding-left: 8px;">Subject</th>
-                                <th style="width: 10%;">CA1</th>
-                                <th style="width: 10%;">CA2</th>
-                                <th style="width: 10%;">Exam</th>
-                                <th style="width: 10%;">Total</th>
-                                <th style="width: 10%;">Grade</th>
-                                <th style="width: 18%;">Performance</th>
+                                <th style="width: 28%; text-align: left; padding-left: 8px;">Subject</th>
+                                <th style="width: 9%;">CA1</th>
+                                <th style="width: 9%;">CA2</th>
+                                <th style="width: 9%;">Exam</th>
+                                <th style="width: 9%;">Total</th>
+                                <th style="width: 8%;">Grade</th>
+                                @if($showClassAverage)<th style="width: 7%;">Avg</th>@endif
+                                @if($showClassHighestLowest)
+                                    <th style="width: 6%;">High</th>
+                                    <th style="width: 6%;">Low</th>
+                                @endif
+                                @if($showPosition)<th style="width: 6%;">Pos</th>@endif
+                                @if($showSubjectTeacherRemarks)<th style="width: 10%; text-align: left; padding-left: 4px;">Remark</th>@endif
+                                <th style="width: 14%;">Performance</th>
                             </tr>
                         </thead>
                         <tbody>
                             @foreach($rows as $r)
                                 @php
                                     $totalScore = $r['total'] ?? 0;
-                                    if ($totalScore >= 90) {
-                                        $perfText = 'Excellent';
-                                    } elseif ($totalScore >= 80) {
-                                        $perfText = 'Very Good';
-                                    } elseif ($totalScore >= 70) {
-                                        $perfText = 'Good';
-                                    } elseif ($totalScore >= 50) {
-                                        $perfText = 'Satisfactory';
-                                    } else {
-                                        $perfText = 'Needs Improvement';
-                                    }
+                                    if ($totalScore >= 90) { $perfText = 'Excellent'; }
+                                    elseif ($totalScore >= 80) { $perfText = 'Very Good'; }
+                                    elseif ($totalScore >= 70) { $perfText = 'Good'; }
+                                    elseif ($totalScore >= 50) { $perfText = 'Satisfactory'; }
+                                    else { $perfText = 'Needs Improvement'; }
+                                    $g = strtoupper($r['grade'] ?? '-');
+                                    $badgeBg = match($g) { 'A'=>'#dcfce7','B'=>'#dbeafe','C'=>'#fef9c3','D'=>'#ffedd5','F','U'=>'#fee2e2',default=>'transparent' };
+                                    $badgeFg = match($g) { 'A'=>'#166534','B'=>'#1e40af','C'=>'#854d0e','D'=>'#9a3412','F','U'=>'#991b1b',default=>$themeColor };
                                 @endphp
                                 <tr>
                                     <td class="subject-name" style="padding-left: 8px;">{{ $r['subject']?->name ?? '-' }}</td>
@@ -376,7 +380,20 @@
                                     <td>{{ $r['ca2'] ?? '-' }}</td>
                                     <td>{{ $r['exam'] ?? '-' }}</td>
                                     <td class="bold">{{ $r['total'] ?? '-' }}</td>
-                                    <td class="bold">{{ $r['grade'] ?? '-' }}</td>
+                                    <td class="bold">
+                                        @if($showColorBadges && ($r['grade'] ?? null))
+                                            <span style="background:{{ $badgeBg }};color:{{ $badgeFg }};padding:1px 4px;border-radius:2px;font-weight:bold;">{{ $g }}</span>
+                                        @else
+                                            {{ $r['grade'] ?? '-' }}
+                                        @endif
+                                    </td>
+                                    @if($showClassAverage)<td>{{ $r['class_avg'] ?? '-' }}</td>@endif
+                                    @if($showClassHighestLowest)
+                                        <td>{{ $r['highest'] ?? '-' }}</td>
+                                        <td>{{ $r['lowest'] ?? '-' }}</td>
+                                    @endif
+                                    @if($showPosition)<td>{{ $r['position'] ?? '-' }}</td>@endif
+                                    @if($showSubjectTeacherRemarks)<td style="font-size:7px;text-align:left;padding-left:4px;font-style:italic;">{{ $r['teacher_remark'] ?? 'Good' }}</td>@endif
                                     <td class="performance-cell">
                                         @if($r['total'])
                                             <span style="color: {{ $accentColor }};">★</span> {{ $perfText }}
@@ -484,21 +501,19 @@
                             {{-- Teacher Comments block --}}
                             @if($showTeacherRemarks)
                                 <div class="bottom-cell" style="width: {{ $colWidth }}; padding-left: 8px;">
-                                    <div style="border: 1px solid {{ $accentColor }}; min-height: 78px; background: #ffffff; position: relative; border-radius: 3px; overflow: hidden;">
+                                    <div style="border: 1px solid {{ $accentColor }}; background: #ffffff; position: relative; border-radius: 3px; overflow: hidden;">
                                         <div style="background: {{ $themeColor }}; color: #ffffff; padding: 5px 8px; font-size: 8.5px; font-weight: bold; text-align: center; text-transform: uppercase;">
                                             Teacher Comments
                                         </div>
-                                        <div style="padding: 7px 10px; font-size: 8.5px; line-height: 1.4; color: #334155; width: 62%; float: left; padding-bottom: 20px;">
+                                        <div style="padding: 7px 10px; font-size: 8.5px; line-height: 1.4; color: #334155;">
                                             {{ $teacherRemarks ?? 'No remarks provided.' }}
                                         </div>
-                                        <div style="position: absolute; right: 10px; bottom: 6px; text-align: center; width: 110px;">
+                                        <div style="text-align: center; border-top: 1px dashed #cbd5e1; padding: 4px 8px;">
                                             @if(($signatureImages['teacher'] ?? null) && file_exists($signatureImages['teacher']))
                                                 <img src="{{ $signatureImages['teacher'] }}" style="max-height: 28px; max-width: 95px; object-fit: contain; display: block; margin: 0 auto;" />
-                                            @else
-                                                <div style="font-family: 'Times New Roman', Times, serif; font-size: 13px; font-style: italic; color: {{ $themeColor }}; font-weight: bold; letter-spacing: 0.5px; line-height: 1;">Emily Johnson</div>
                                             @endif
-                                            <div style="border-top: 1px solid {{ $themeColor }}; width: 100%; margin-top: 1px; padding-top: 1px; font-size: 7px; font-weight: bold; color: {{ $themeColor }}; text-transform: uppercase;">{{ $homeroomTeacher }}</div>
-                                            <div style="font-size: 6px; color: #64748b; margin-top: 0.5px;">Class Teacher</div>
+                                            <div style="font-size: 7px; font-weight: bold; color: {{ $themeColor }}; text-transform: uppercase;">{{ $homeroomTeacher }}</div>
+                                            <div style="font-size: 6px; color: #64748b;">Class Teacher</div>
                                         </div>
                                     </div>
                                 </div>
@@ -559,21 +574,21 @@
                             {{-- Principal's Remarks --}}
                             @if($showPrincipalRemarks)
                                 <div class="footer-blocks-cell" style="width: {{ $footerColWidth }}; padding-left: 8px; position: relative;">
-                                    <div style="border: 1px solid {{ $accentColor }}; border-radius: 4px; overflow: hidden; background: #ffffff; min-height: 40px; position: relative;">
+                                    <div style="border: 1px solid {{ $accentColor }}; border-radius: 4px; overflow: hidden; background: #ffffff; position: relative;">
                                         <div style="background: {{ $themeColor }}; color: #ffffff; padding: 4px 8px; font-size: 8px; font-weight: bold; text-transform: uppercase;">
                                             Principal's Remarks
                                         </div>
-                                        <div style="padding: 5px 8px; font-size: 8px; line-height: 1.35; color: #334155; width: 62%; float: left; padding-bottom: 18px;">
+                                        <div style="padding: 5px 8px; font-size: 8px; line-height: 1.35; color: #334155;">
                                             {{ $principalRemarks ?? 'No remarks provided.' }}
                                         </div>
-                                        <div style="position: absolute; right: 10px; bottom: 6px; text-align: center; width: 110px;">
+                                        <div style="text-align: center; border-top: 1px dashed #cbd5e1; padding: 4px 8px;">
                                             @if(($signatureImages['principal'] ?? null) && file_exists($signatureImages['principal']))
                                                 <img src="{{ $signatureImages['principal'] }}" style="max-height: 25px; max-width: 90px; object-fit: contain; display: block; margin: 0 auto;" />
                                             @else
-                                                <div style="font-family: 'Times New Roman', Times, serif; font-size: 13px; font-style: italic; color: {{ $themeColor }}; font-weight: bold; letter-spacing: 0.5px; line-height: 1;">{{ $principalName ?: 'Principal' }}</div>
+                                                <div style="font-family: 'Times New Roman', Times, serif; font-size: 13px; font-style: italic; color: {{ $themeColor }}; font-weight: bold; letter-spacing: 0.5px; line-height: 1;">{{ $principalName ?: ($principalTitle ?? 'Principal') }}</div>
                                             @endif
-                                            <div style="border-top: 1px solid {{ $themeColor }}; width: 100%; margin-top: 1px; padding-top: 1px; font-size: 7px; font-weight: bold; color: {{ $themeColor }}; text-transform: uppercase;">{{ $principalName ?: 'Principal' }}</div>
-                                            <div style="font-size: 6px; color: #64748b; margin-top: 0.5px;">{{ $principalTitle ?: 'Principal' }}</div>
+                                            <div style="font-size: 7px; font-weight: bold; color: {{ $themeColor }}; text-transform: uppercase;">{{ $principalName ?: ($principalTitle ?? 'Principal') }}</div>
+                                            <div style="font-size: 6px; color: #64748b; margin-top: 0.5px;">{{ $principalTitle ?? 'Principal' }}</div>
                                         </div>
                                     </div>
                                 </div>
@@ -584,48 +599,65 @@
                 @endif
             </div>
 
-        {{-- School Fees + Next Term + Signatures + Footer --}}
-        <div>
-            {{-- School Fees Panel --}}
-            @if($showSchoolFees && isset($schoolFees))
-                <div style="border: 1px solid {{ $accentColor }}; border-radius: 4px; background: #fffbeb; padding: 8px; margin-bottom: 12px;">
-                    <div style="font-size: 8.5px; font-weight: bold; color: #92400e; text-transform: uppercase; margin-bottom: 4px;">Outstanding / Next Term Fees Information</div>
-                    <table style="width: 100%; font-size: 8px; color: #78350f;">
-                        <tr>
-                            <td style="width: 25%;"><strong>Fee Amount:</strong> {{ $schoolFees['currency'] }}{{ number_format($schoolFees['amount'], 2) }}</td>
-                            <td style="width: 35%;"><strong>Bank Name:</strong> {{ $schoolFees['bank_name'] }}</td>
-                            <td style="width: 40%;"><strong>Account Number / Name:</strong> {{ $schoolFees['account_number'] }} ({{ $schoolFees['account_name'] }})</td>
-                        </tr>
-                    </table>
-                </div>
-            @endif
+        {{-- School Fees Panel --}}
+        @if($showSchoolFees && isset($schoolFees))
+            <div style="border: 1px solid {{ $accentColor }}; border-radius: 4px; background: #fffbeb; padding: 8px; margin-bottom: 8px;">
+                <div style="font-size: 8.5px; font-weight: bold; color: #92400e; text-transform: uppercase; margin-bottom: 4px;">Outstanding / Next Term Fees Information</div>
+                <table style="width: 100%; font-size: 8px; color: #78350f;">
+                    <tr>
+                        <td style="width: 25%;"><strong>Fee Amount:</strong> {{ $schoolFees['currency'] }}{{ number_format($schoolFees['amount'], 2) }}</td>
+                        <td style="width: 35%;"><strong>Bank Name:</strong> {{ $schoolFees['bank_name'] }}</td>
+                        <td style="width: 40%;"><strong>Account Number / Name:</strong> {{ $schoolFees['account_number'] }} ({{ $schoolFees['account_name'] }})</td>
+                    </tr>
+                </table>
+            </div>
+        @endif
 
-            {{-- Next Term Dates block --}}
-            @if($showNextTermDate && isset($nextTermDate))
-                <div style="background: {{ $themeColor }}; color: #ffffff; text-align: center; padding: 4.5px; font-size: 8px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px; border-radius: 3px;">
-                    Next Term Begins: {{ $nextTermDate }}
-                </div>
-            @endif
+        {{-- Next Term Dates block --}}
+        @if($showNextTermDate && isset($nextTermDate))
+            <div style="background: {{ $themeColor }}; color: #ffffff; text-align: center; padding: 4.5px; font-size: 8px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; border-radius: 3px;">
+                Next Term Begins: {{ $nextTermDate }}
+            </div>
+        @endif
 
-            {{-- Parent Signature block --}}
-            @if($showSignatures)
-                <div class="bottom-sigs-table">
-                    <div class="bottom-sigs-row">
-                        <div class="bottom-sigs-cell">
-                            <span style="font-size: 8px; font-weight: bold; color: {{ $themeColor }}; text-transform: uppercase;">Parent/Guardian Signature:</span>
-                            <span class="sig-line"></span>
-                        </div>
-                        <div class="bottom-sigs-cell">
-                            <span style="font-size: 8px; font-weight: bold; color: {{ $themeColor }}; text-transform: uppercase;">Date:</span>
-                            <span class="sig-line" style="width: 120px;"></span>
-                        </div>
+        {{-- Parent Signature block --}}
+        @if($showSignatures)
+            <div class="bottom-sigs-table">
+                <div class="bottom-sigs-row">
+                    <div class="bottom-sigs-cell">
+                        <span style="font-size: 8px; font-weight: bold; color: {{ $themeColor }}; text-transform: uppercase;">Parent/Guardian Signature:</span>
+                        <span class="sig-line"></span>
+                    </div>
+                    <div class="bottom-sigs-cell">
+                        <span style="font-size: 8px; font-weight: bold; color: {{ $themeColor }}; text-transform: uppercase;">Date:</span>
+                        <span class="sig-line" style="width: 120px;"></span>
                     </div>
                 </div>
-            @endif
+            </div>
+        @endif
 
-            <div class="footer-tagline">{{ $schoolName }} • Powered by AcademyHub SMS</div>
+        {{-- Cumulative Summary --}}
+        @if($showCumulativeSummary && !empty($cumulativeSummary))
+        <div style="border:1px solid {{ $accentColor }};border-radius:4px;background:#fffbeb;padding:5px 8px;margin-bottom:8px;">
+            <div style="font-size:8px;font-weight:bold;text-transform:uppercase;color:{{ $themeColor }};margin-bottom:3px;">Annual Cumulative Summary ({{ $session }})</div>
+            <table style="width:100%;border-collapse:collapse;text-align:center;font-size:8px;">
+                <thead><tr style="border-bottom:1px solid {{ $accentColor }};color:{{ $themeColor }};"><th style="padding:2px;">Term 1</th><th style="padding:2px;">Term 2</th><th style="padding:2px;">Term 3</th><th style="padding:2px;">Cumulative Avg</th></tr></thead>
+                <tbody><tr>
+                    <td style="padding:3px;font-weight:600;">{{ $cumulativeSummary['term_1']['total'] ?? '—' }}</td>
+                    <td style="padding:3px;font-weight:600;">{{ $cumulativeSummary['term_2']['total'] ?? '—' }}</td>
+                    <td style="padding:3px;font-weight:600;">{{ $cumulativeSummary['term_3']['total'] ?? '—' }}</td>
+                    <td style="padding:3px;font-weight:800;">{{ $average }}%</td>
+                </tr></tbody>
+            </table>
         </div>
+        @endif
 
+        {{-- QR Code --}}
+        @if($showQrCode)
+        <div style="margin-bottom:4px;text-align:center;font-size:7px;color:{{ $themeColor }};border:1px dashed {{ $accentColor }};border-radius:3px;padding:3px;">&#128274; <strong>Official Verified Record</strong> &bull; Ref: <strong>{{ $student->admission_number }}</strong></div>
+        @endif
+
+        <div class="footer-tagline">{{ $schoolName }} &bull; Powered by AcademyHub SMS</div>
     </div>
 </div>
 </body>

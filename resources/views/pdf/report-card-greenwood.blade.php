@@ -68,9 +68,9 @@
         .remarks-cell { display: table-cell; vertical-align: top; padding-right: 4px; }
         .remarks-cell:last-child { padding-right: 0; }
 
-        .remarks-box { border: 1px solid #004b49; border-radius: 3px; background: #ffffff; padding: 5px 8px; min-height: 65px; }
+        .remarks-box { border: 1px solid #004b49; border-radius: 3px; background: #ffffff; padding: 5px 8px; }
         .remarks-title { font-size: 7.5px; font-weight: 900; text-transform: uppercase; color: #004b49; border-bottom: 1px solid #e2e8f0; padding-bottom: 2px; margin-bottom: 3px; }
-        .remarks-text { font-size: 8px; color: #334155; line-height: 1.35; min-height: 35px; }
+        .remarks-text { font-size: 8px; color: #334155; line-height: 1.35; }
         .sig-container { margin-top: 2px; text-align: center; border-top: 1px dashed #cbd5e1; padding-top: 1px; }
         .sig-img { max-height: 18px; max-width: 75px; object-fit: contain; display: block; margin: 0 auto; }
         .sig-name { font-size: 7px; font-weight: 800; color: #004b49; }
@@ -273,24 +273,49 @@
         <table class="scores-table">
             <thead>
                 <tr>
-                    <th style="width: 32%; text-align: left; padding-left: 5px;">SUBJECT</th>
-                    <th style="width: 10%;">CA1</th>
-                    <th style="width: 10%;">CA2</th>
-                    <th style="width: 10%;">EXAM</th>
-                    <th style="width: 12%;">TOTAL</th>
-                    <th style="width: 8%;">GRADE</th>
-                    <th style="width: 18%;">PERFORMANCE</th>
+                    <th style="width: 28%; text-align: left; padding-left: 5px;">SUBJECT</th>
+                    <th style="width: 9%;">CA1</th>
+                    <th style="width: 9%;">CA2</th>
+                    <th style="width: 9%;">EXAM</th>
+                    <th style="width: 10%;">TOTAL</th>
+                    <th style="width: 7%;">GRADE</th>
+                    @if($showClassAverage)<th style="width: 8%;">AVG</th>@endif
+                    @if($showClassHighestLowest)
+                        <th style="width: 6%;">HIGH</th>
+                        <th style="width: 6%;">LOW</th>
+                    @endif
+                    @if($showPosition)<th style="width: 6%;">POS</th>@endif
+                    @if($showSubjectTeacherRemarks)<th style="width: 10%; text-align: left; padding-left: 4px;">REMARK</th>@endif
+                    <th style="width: 14%;">PERFORMANCE</th>
                 </tr>
             </thead>
             <tbody>
                 @foreach($rows as $r)
+                    @php
+                        $g = strtoupper($r['grade'] ?? '-');
+                        $badgeBg = match($g) { 'A'=>'#dcfce7','B'=>'#dbeafe','C'=>'#fef9c3','D'=>'#ffedd5','F','U'=>'#fee2e2',default=>'transparent' };
+                        $badgeFg = match($g) { 'A'=>'#166534','B'=>'#1e40af','C'=>'#854d0e','D'=>'#9a3412','F','U'=>'#991b1b',default=>'#004b49' };
+                    @endphp
                     <tr>
                         <td class="subject-name">{{ $r['subject']?->name ?? '-' }}</td>
                         <td>{{ $r['ca1'] ?? '-' }}</td>
                         <td>{{ $r['ca2'] ?? '-' }}</td>
                         <td>{{ $r['exam'] ?? '-' }}</td>
                         <td class="bold">{{ $r['total'] ?? '-' }}</td>
-                        <td class="bold">{{ $r['grade'] ?? '-' }}</td>
+                        <td class="bold">
+                            @if($showColorBadges && ($r['grade'] ?? null))
+                                <span style="background:{{ $badgeBg }};color:{{ $badgeFg }};padding:1px 4px;border-radius:2px;font-weight:bold;">{{ $g }}</span>
+                            @else
+                                {{ $r['grade'] ?? '-' }}
+                            @endif
+                        </td>
+                        @if($showClassAverage)<td>{{ $r['class_avg'] ?? '-' }}</td>@endif
+                        @if($showClassHighestLowest)
+                            <td>{{ $r['highest'] ?? '-' }}</td>
+                            <td>{{ $r['lowest'] ?? '-' }}</td>
+                        @endif
+                        @if($showPosition)<td>{{ $r['position'] ?? '-' }}</td>@endif
+                        @if($showSubjectTeacherRemarks)<td style="font-size:7px;text-align:left;padding-left:4px;font-style:italic;">{{ $r['teacher_remark'] ?? 'Good' }}</td>@endif
                         <td style="font-weight: 700; color: #004b49;">{{ $getPerformanceText($r['total'] ?? 0) }}</td>
                     </tr>
                 @endforeach
@@ -332,14 +357,28 @@
                 @endif
 
                 <!-- Affective & Behavior Domain -->
+                @if($showPsychomotor && !empty($psychomotorTraits))
                 <div class="middle-cell" style="width: 36%;">
                     <table class="sub-table">
                         <thead>
                             <tr>
                                 <th>BEHAVIOR &amp; WORK HABITS</th>
-                                <th>GRADE</th>
+                                <th>SCORE</th>
                             </tr>
                         </thead>
+                        <tbody>
+                            @foreach($psychomotorTraits as $trait => $score)
+                            <tr><td>{{ $trait }}</td><td class="val">{{ $score }}/5</td></tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+                @elseif(!$showPsychomotor)
+                {{-- hidden --}}
+                @else
+                <div class="middle-cell" style="width: 36%;">
+                    <table class="sub-table">
+                        <thead><tr><th>BEHAVIOR &amp; WORK HABITS</th><th>GRADE</th></tr></thead>
                         <tbody>
                             <tr><td>Attitude</td><td class="val">B+</td></tr>
                             <tr><td>Class Participation</td><td class="val">B+</td></tr>
@@ -348,6 +387,7 @@
                         </tbody>
                     </table>
                 </div>
+                @endif
 
                 <!-- Grading Scale Box -->
                 @if($showGradingKey)
@@ -404,14 +444,35 @@
                                     @if(($signatureImages['principal'] ?? null) && file_exists($signatureImages['principal']))
                                         <img src="{{ $signatureImages['principal'] }}" class="sig-img" alt="Principal Signature" />
                                     @endif
-                                    <div class="sig-name">Dr. Rebecca Carter</div>
-                                    <div class="sig-role">Principal</div>
+                                    <div class="sig-name">{{ $principalName ?: ($principalTitle ?? 'Principal') }}</div>
+                                    <div class="sig-role">{{ $principalTitle ?? 'Principal' }}</div>
                                 </div>
                             </div>
                         </div>
                     @endif
                 </div>
             </div>
+        @endif
+
+        {{-- Cumulative Summary --}}
+        @if($showCumulativeSummary && !empty($cumulativeSummary))
+        <div style="border:1px solid #004b49;border-radius:3px;background:#f0fdf4;padding:5px 8px;margin-bottom:3px;">
+            <div style="font-size:7.5px;font-weight:900;text-transform:uppercase;color:#004b49;margin-bottom:3px;">Annual Cumulative Summary ({{ $session }})</div>
+            <table style="width:100%;border-collapse:collapse;text-align:center;font-size:8px;">
+                <thead><tr style="border-bottom:1px solid #bbf7d0;color:#004b49;"><th style="padding:2px;">Term 1</th><th style="padding:2px;">Term 2</th><th style="padding:2px;">Term 3</th><th style="padding:2px;">Cumulative Avg</th></tr></thead>
+                <tbody><tr>
+                    <td style="padding:3px;font-weight:600;">{{ $cumulativeSummary['term_1']['total'] ?? '—' }}</td>
+                    <td style="padding:3px;font-weight:600;">{{ $cumulativeSummary['term_2']['total'] ?? '—' }}</td>
+                    <td style="padding:3px;font-weight:600;">{{ $cumulativeSummary['term_3']['total'] ?? '—' }}</td>
+                    <td style="padding:3px;font-weight:800;">{{ $average }}%</td>
+                </tr></tbody>
+            </table>
+        </div>
+        @endif
+
+        {{-- QR Code --}}
+        @if($showQrCode)
+        <div style="margin-top:3px;border-top:1px dashed #004b49;padding-top:3px;text-align:center;font-size:7px;color:#004b49;">&#128274; <strong>Official Verified Record</strong> &bull; Ref: <strong>{{ $student->admission_number }}</strong></div>
         @endif
 
         <!-- School Fees Information (if enabled) -->

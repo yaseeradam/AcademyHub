@@ -72,9 +72,9 @@
         .legend-item strong { color: #0f172a; font-weight: 700; }
 
         /* ─── Remarks Cards ─── */
-        .remark-card { background: #f8fafc; border-radius: 5px; border: 1px solid #e2e8f0; padding: 12px 16px; margin-bottom: 14px; min-height: 65px; }
-        .remark-title { font-size: 8pt; font-weight: 800; text-transform: uppercase; color: #1e3a8a; letter-spacing: 0.5px; margin-bottom: 5px; }
-        .remark-body { font-size: 9pt; color: #1e293b; line-height: 1.4; font-style: italic; min-height: 42px; }
+        .remark-card { background: #f8fafc; border-radius: 5px; border: 1px solid #e2e8f0; padding: 10px 14px; margin-bottom: 10px; }
+        .remark-title { font-size: 8pt; font-weight: 800; text-transform: uppercase; color: #1e3a8a; letter-spacing: 0.5px; margin-bottom: 4px; }
+        .remark-body { font-size: 9pt; color: #1e293b; line-height: 1.4; font-style: italic; }
 
         /* ─── Next Term Bar ─── */
         .next-term-bar { background: #1e3a8a; color: #ffffff; text-align: center; padding: 8px; font-size: 8.5pt; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; width: 100%; margin-bottom: 14px; border-radius: 3px; }
@@ -217,13 +217,13 @@
                     <th style="width:9%;">EXAM ({{ config('academyhub.results_exam_max',60) }})</th>
                     <th style="width:8%;">TOTAL</th>
                     <th style="width:8%;">GRADE</th>
-                    @if($showClassAverage)<th style="width:9%;">AVG</th>@endif
+                    @if($showClassAverage)<th style="width:8%;">AVG</th>@endif
                     @if($showClassHighestLowest)
-                        <th style="width:7%;">HIGH</th>
-                        <th style="width:7%;">LOW</th>
+                        <th style="width:6%;">HIGH</th>
+                        <th style="width:6%;">LOW</th>
                     @endif
-                    @if($showPosition)<th style="width:7%;">POS</th>@endif
-                    @if($showSubjectTeacherRemarks)<th style="width:14%;">REMARK</th>@endif
+                    @if($showPosition)<th style="width:6%;">POS</th>@endif
+                    @if($showSubjectTeacherRemarks)<th style="width:12%;">REMARK</th>@endif
                 </tr>
             </thead>
             <tbody>
