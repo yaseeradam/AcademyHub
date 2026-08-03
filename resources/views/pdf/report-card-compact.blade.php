@@ -36,25 +36,45 @@
         .pill span.label { color: #64748b; font-weight: 500; }
 
         /* ─── Academic Record Table ─── */
-        table.scores-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; table-layout: fixed; }
-        table.scores-table th { background: #f8fafc; color: #0f172a; padding: 9px 8px; font-size: 7.5pt; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; border-bottom: 1px solid #e2e8f0; border-top: 1px solid #e2e8f0; text-align: center; }
+        @php
+            $rowCount = count($rows ?? []);
+            $padY = match(true) {
+                $rowCount >= 16 => '3px',
+                $rowCount >= 12 => '5px',
+                $rowCount >= 9  => '7px',
+                default         => '9.5px',
+            };
+            $padX = match(true) {
+                $rowCount >= 16 => '4px',
+                $rowCount >= 12 => '6px',
+                $rowCount >= 9  => '8px',
+                default         => '10px',
+            };
+            $fontSize = match(true) {
+                $rowCount >= 16 => '7.5pt',
+                $rowCount >= 12 => '8pt',
+                default         => '8.5pt',
+            };
+        @endphp
+        table.scores-table { width: 100%; border-collapse: collapse; margin-bottom: 16px; table-layout: fixed; }
+        table.scores-table th { background: #f8fafc; color: #0f172a; padding: {{ $padY }} {{ $padX }}; font-size: 7.5pt; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; border-bottom: 1px solid #e2e8f0; border-top: 1px solid #e2e8f0; text-align: center; }
         table.scores-table th.subj-th { text-align: left; padding-left: 12px; width: 34%; }
-        table.scores-table td { padding: 8px 8px; border-bottom: 1px solid #f1f5f9; text-align: center; font-size: 8.5pt; color: #334155; }
+        table.scores-table td { padding: {{ $padY }} {{ $padX }}; border-bottom: 1px solid #f1f5f9; text-align: center; font-size: {{ $fontSize }}; color: #334155; }
         table.scores-table tr:nth-child(even) td { background: #fafafa; }
         table.scores-table td.subj-td { text-align: left; padding-left: 12px; font-weight: 600; color: #0f172a; word-wrap: break-word; }
         table.scores-table td.bold { font-weight: 700; color: #0f172a; }
 
         /* ─── Intermediate Achievement Legend Box ─── */
-        .legend-box { background: #f8fafc; border-radius: 4px; overflow: hidden; margin-bottom: 16px; border: 1px solid #f1f5f9; }
+        .legend-box { background: #f8fafc; border-radius: 4px; overflow: hidden; margin-bottom: 14px; border: 1px solid #f1f5f9; }
         .legend-header { background: #f1f5f9; text-align: center; font-size: 8pt; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: #0f172a; padding: 6px; }
         .legend-body { display: table; width: 100%; padding: 8px 0; }
         .legend-item { display: table-cell; text-align: center; font-size: 7.5pt; color: #475569; font-weight: 500; padding: 2px 4px; }
         .legend-item strong { color: #0f172a; font-weight: 700; }
 
         /* ─── Remarks Cards ─── */
-        .remark-card { background: #f8fafc; border-radius: 4px; border: 1px solid #f1f5f9; padding: 9px 12px; margin-bottom: 10px; }
-        .remark-title { font-size: 7.5pt; font-weight: 700; text-transform: uppercase; color: #1e3a8a; letter-spacing: 0.5px; margin-bottom: 3px; }
-        .remark-body { font-size: 8.5pt; color: #334155; line-height: 1.3; }
+        .remark-card { background: #f8fafc; border-radius: 5px; border: 1px solid #e2e8f0; padding: 12px 16px; margin-bottom: 14px; min-height: 65px; }
+        .remark-title { font-size: 8pt; font-weight: 800; text-transform: uppercase; color: #1e3a8a; letter-spacing: 0.5px; margin-bottom: 5px; }
+        .remark-body { font-size: 9pt; color: #1e293b; line-height: 1.4; font-style: italic; min-height: 42px; }
 
         /* ─── Next Term Bar ─── */
         .next-term-bar { background: #1e3a8a; color: #ffffff; text-align: center; padding: 8px; font-size: 8.5pt; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; width: 100%; margin-bottom: 14px; border-radius: 3px; }

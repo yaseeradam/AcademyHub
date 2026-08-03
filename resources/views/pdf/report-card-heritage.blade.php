@@ -62,9 +62,9 @@
         .att-value { font-size: 11px; font-weight: bold; color: #0f172a; }
 
         /* Remarks */
-        .remarks { border: 1.5px solid #a16207; padding: 3px 5px; margin-bottom: 3px; background: #fffbeb; }
-        .remarks-label { font-size: 7px; font-weight: bold; color: #1e3a8a; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 1px; }
-        .remarks-text { font-size: 7.5px; color: #334155; line-height: 1.25; font-style: italic; }
+        .remarks { border: 1.5px solid #a16207; padding: 6px 10px; margin-bottom: 6px; background: #fffbeb; min-height: 58px; border-radius: 3px; }
+        .remarks-label { font-size: 8px; font-weight: bold; color: #1e3a8a; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 3px; }
+        .remarks-text { font-size: 8.5px; color: #334155; line-height: 1.35; font-style: italic; min-height: 35px; }
 
         /* Next Term */
         .next-term { background: #1e3a8a; border: 1.5px solid #a16207; color: #fef08a; text-align: center; padding: 4px; font-size: 8px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 3px; }

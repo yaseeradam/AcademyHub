@@ -244,24 +244,27 @@
         }
 
         .remarks-box {
-            border: 1px solid #d1d5db;
-            padding: 3px 5px;
-            margin-bottom: 3px;
+            border: 1px solid #9ca3af;
+            padding: 6px 10px;
+            margin-bottom: 6px;
+            min-height: 55px;
+            background: #fafafa;
         }
 
         .remarks-label {
-            font-size: 7px;
+            font-size: 8px;
             font-weight: 800;
-            color: #374151;
+            color: #111827;
             text-transform: uppercase;
             letter-spacing: 0.5px;
-            margin-bottom: 1px;
+            margin-bottom: 3px;
         }
 
         .remarks-text {
-            font-size: 8px;
+            font-size: 8.5px;
             color: #374151;
-            line-height: 1.25;
+            line-height: 1.35;
+            min-height: 35px;
         }
 
         .next-term {

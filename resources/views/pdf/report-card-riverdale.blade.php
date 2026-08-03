@@ -53,9 +53,24 @@
         .section-header { background: {{ $themeColor }}; color: #ffffff; padding: 3px 6px; font-weight: bold; font-size: 7.5px; letter-spacing: 0.5px; border-radius: 2px 2px 0 0; text-transform: uppercase; }
 
         /* Academic Scores Table */
-        .scores-table { width: 100%; border-collapse: collapse; margin-bottom: 4px; border: 1px solid {{ $accentColor }}; }
-        .scores-table th { background: {{ $themeColor }}; color: #ffffff; padding: 2px 3px; font-size: 7.5px; font-weight: bold; text-transform: uppercase; text-align: center; border: 1px solid {{ $themeColor }}; }
-        .scores-table td { padding: 1.5px 3px; border: 1px solid #e2e8f0; text-align: center; font-size: 7.5px; }
+        @php
+            $rowCount = count($rows ?? []);
+            $padY = match(true) {
+                $rowCount >= 16 => '1px',
+                $rowCount >= 12 => '2px',
+                $rowCount >= 9  => '3px',
+                default         => '4.5px',
+            };
+            $padX = match(true) {
+                $rowCount >= 16 => '2.5px',
+                $rowCount >= 12 => '3.5px',
+                $rowCount >= 9  => '4.5px',
+                default         => '6px',
+            };
+        @endphp
+        .scores-table { width: 100%; border-collapse: collapse; margin-bottom: 6px; border: 1px solid {{ $accentColor }}; }
+        .scores-table th { background: {{ $themeColor }}; color: #ffffff; padding: {{ $padY }} {{ $padX }}; font-size: 7.5px; font-weight: bold; text-transform: uppercase; text-align: center; border: 1px solid {{ $themeColor }}; }
+        .scores-table td { padding: {{ $padY }} {{ $padX }}; border: 1px solid #e2e8f0; text-align: center; font-size: 7.5px; }
         .scores-table tr:nth-child(even) td { background: #f8fafc; }
         .scores-table td.subject-name { text-align: left; font-weight: bold; color: {{ $themeColor }}; }
         .scores-table td.bold { font-weight: bold; }
@@ -464,16 +479,16 @@
                             {{-- Teacher Comments block --}}
                             @if($showTeacherRemarks)
                                 <div class="bottom-cell" style="width: {{ $colWidth }}; padding-left: 8px;">
-                                    <div style="border: 1px solid {{ $accentColor }}; min-height: 60px; background: #ffffff; position: relative;">
-                                        <div style="background: {{ $themeColor }}; color: #ffffff; padding: 4.5px 6px; font-size: 8px; font-weight: bold; text-align: center; text-transform: uppercase;">
+                                    <div style="border: 1px solid {{ $accentColor }}; min-height: 78px; background: #ffffff; position: relative; border-radius: 3px; overflow: hidden;">
+                                        <div style="background: {{ $themeColor }}; color: #ffffff; padding: 5px 8px; font-size: 8.5px; font-weight: bold; text-align: center; text-transform: uppercase;">
                                             Teacher Comments
                                         </div>
-                                        <div style="padding: 5px 8px; font-size: 8px; line-height: 1.35; color: #334155; width: 62%; float: left; padding-bottom: 18px;">
+                                        <div style="padding: 7px 10px; font-size: 8.5px; line-height: 1.4; color: #334155; width: 62%; float: left; padding-bottom: 20px;">
                                             {{ $teacherRemarks ?? 'No remarks provided.' }}
                                         </div>
                                         <div style="position: absolute; right: 10px; bottom: 6px; text-align: center; width: 110px;">
                                             @if(($signatureImages['teacher'] ?? null) && file_exists($signatureImages['teacher']))
-                                                <img src="{{ $signatureImages['teacher'] }}" style="max-height: 25px; max-width: 90px; object-fit: contain; display: block; margin: 0 auto;" />
+                                                <img src="{{ $signatureImages['teacher'] }}" style="max-height: 28px; max-width: 95px; object-fit: contain; display: block; margin: 0 auto;" />
                                             @else
                                                 <div style="font-family: 'Times New Roman', Times, serif; font-size: 13px; font-style: italic; color: {{ $themeColor }}; font-weight: bold; letter-spacing: 0.5px; line-height: 1;">Emily Johnson</div>
                                             @endif

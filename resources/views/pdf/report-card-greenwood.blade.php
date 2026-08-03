@@ -68,9 +68,9 @@
         .remarks-cell { display: table-cell; vertical-align: top; padding-right: 4px; }
         .remarks-cell:last-child { padding-right: 0; }
 
-        .remarks-box { border: 1px solid #004b49; border-radius: 3px; background: #ffffff; padding: 3px 5px; min-height: 48px; }
-        .remarks-title { font-size: 6.5px; font-weight: 900; text-transform: uppercase; color: #004b49; border-bottom: 1px solid #e2e8f0; padding-bottom: 1px; margin-bottom: 2px; }
-        .remarks-text { font-size: 7px; color: #334155; line-height: 1.25; min-height: 22px; }
+        .remarks-box { border: 1px solid #004b49; border-radius: 3px; background: #ffffff; padding: 5px 8px; min-height: 65px; }
+        .remarks-title { font-size: 7.5px; font-weight: 900; text-transform: uppercase; color: #004b49; border-bottom: 1px solid #e2e8f0; padding-bottom: 2px; margin-bottom: 3px; }
+        .remarks-text { font-size: 8px; color: #334155; line-height: 1.35; min-height: 35px; }
         .sig-container { margin-top: 2px; text-align: center; border-top: 1px dashed #cbd5e1; padding-top: 1px; }
         .sig-img { max-height: 18px; max-width: 75px; object-fit: contain; display: block; margin: 0 auto; }
         .sig-name { font-size: 7px; font-weight: 800; color: #004b49; }
