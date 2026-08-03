@@ -487,16 +487,19 @@ class SettingsController extends Controller
                 'first_name' => 'Jane',
                 'last_name' => 'Doe',
                 'admission_number' => 'ADM/001',
+                'gender' => 'Female',
+                'class_id' => 1,
+                'section_id' => 1,
                 'schoolClass' => new Fluent(['name' => 'JSS 1']),
                 'section' => new Fluent(['name' => 'A']),
             ]);
 
             $rows = collect([
-                ['subject' => new Fluent(['name' => 'Mathematics']), 'ca1' => 18, 'ca2' => 19, 'exam' => 55, 'total' => 92, 'grade' => 'A'],
-                ['subject' => new Fluent(['name' => 'English']), 'ca1' => 16, 'ca2' => 18, 'exam' => 50, 'total' => 84, 'grade' => 'A'],
-                ['subject' => new Fluent(['name' => 'Basic Science']), 'ca1' => 15, 'ca2' => 14, 'exam' => 49, 'total' => 78, 'grade' => 'B'],
-                ['subject' => new Fluent(['name' => 'Social Studies']), 'ca1' => 17, 'ca2' => 15, 'exam' => 45, 'total' => 77, 'grade' => 'B'],
-                ['subject' => new Fluent(['name' => 'Computer Studies']), 'ca1' => 19, 'ca2' => 18, 'exam' => 52, 'total' => 89, 'grade' => 'A'],
+                ['subject' => new Fluent(['id' => 1, 'name' => 'Mathematics']), 'ca1' => 18, 'ca2' => 19, 'exam' => 55, 'total' => 92, 'grade' => 'A', 'class_avg' => 70, 'highest' => 95, 'lowest' => 40, 'position' => 1, 'teacher_remark' => 'Excellent'],
+                ['subject' => new Fluent(['id' => 2, 'name' => 'English']), 'ca1' => 16, 'ca2' => 18, 'exam' => 50, 'total' => 84, 'grade' => 'A', 'class_avg' => 68, 'highest' => 90, 'lowest' => 45, 'position' => 2, 'teacher_remark' => 'Very Good'],
+                ['subject' => new Fluent(['id' => 3, 'name' => 'Basic Science']), 'ca1' => 15, 'ca2' => 14, 'exam' => 49, 'total' => 78, 'grade' => 'B', 'class_avg' => 65, 'highest' => 88, 'lowest' => 35, 'position' => 5, 'teacher_remark' => 'Good'],
+                ['subject' => new Fluent(['id' => 4, 'name' => 'Social Studies']), 'ca1' => 17, 'ca2' => 15, 'exam' => 45, 'total' => 77, 'grade' => 'B', 'class_avg' => 62, 'highest' => 85, 'lowest' => 40, 'position' => 6, 'teacher_remark' => 'Good'],
+                ['subject' => new Fluent(['id' => 5, 'name' => 'Computer Studies']), 'ca1' => 19, 'ca2' => 18, 'exam' => 52, 'total' => 89, 'grade' => 'A', 'class_avg' => 72, 'highest' => 92, 'lowest' => 50, 'position' => 1, 'teacher_remark' => 'Excellent'],
             ]);
 
             $grandTotal = (int) $rows->sum(fn($r) => (int) ($r['total'] ?? 0));

@@ -181,7 +181,7 @@
     $attendanceRate = $enrolled > 0 ? round(($present / $enrolled) * 100) : 0;
 
     // Helper for performance label
-    $performanceTag = function($total) {
+    $getPerformanceText = function($total) {
         if ($total >= 80) return '★ Excellent';
         if ($total >= 70) return '★ Very Good';
         if ($total >= 60) return '★ Good';
