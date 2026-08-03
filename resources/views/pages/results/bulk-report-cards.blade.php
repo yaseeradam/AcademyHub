@@ -156,7 +156,12 @@
                                     'show_psychomotor' => 'Psychomotor Traits',
                                     'show_attendance' => 'Attendance Summary',
                                     'show_position' => 'Student Rank/Position',
-                                    'show_class_average' => 'Class Statistics'
+                                    'show_class_average' => 'Class Average',
+                                    'show_class_highest_lowest' => 'Class Highest & Lowest',
+                                    'show_subject_teacher_remarks' => 'Subject Teacher Remarks',
+                                    'show_cumulative_summary' => 'Cumulative Annual Summary',
+                                    'show_color_badges' => 'Color Grade Badges',
+                                    'show_qr_code' => 'Verification QR Badge'
                                 ] as $opt => $label)
                                     <label class="flex items-center gap-3 cursor-pointer group">
                                         <div class="relative flex items-center">

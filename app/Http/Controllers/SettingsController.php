@@ -303,6 +303,11 @@ class SettingsController extends Controller
                 'rc_teacher_signature_image' => ['nullable', 'image', 'max:2048'],
                 'rc_principal_signature_remove' => ['nullable', 'boolean'],
                 'rc_teacher_signature_remove' => ['nullable', 'boolean'],
+                'rc_show_class_highest_lowest' => ['nullable', 'boolean'],
+                'rc_show_subject_teacher_remarks' => ['nullable', 'boolean'],
+                'rc_show_qr_code' => ['nullable', 'boolean'],
+                'rc_show_cumulative_summary' => ['nullable', 'boolean'],
+                'rc_show_color_badges' => ['nullable', 'boolean'],
             ]);
 
             $settingsPath = $this->settingsPath();
@@ -317,6 +322,8 @@ class SettingsController extends Controller
                 'rc_show_class_average', 'rc_show_watermark', 'rc_show_next_term_date',
                 'rc_show_teacher_remarks', 'rc_show_principal_remarks',
                 'rc_show_psychomotor', 'rc_show_school_fees', 'rc_show_signatures',
+                'rc_show_class_highest_lowest', 'rc_show_subject_teacher_remarks',
+                'rc_show_qr_code', 'rc_show_cumulative_summary', 'rc_show_color_badges',
             ];
             foreach ($boolKeys as $key) {
                 // A hidden input with value="0" is always submitted; the checkbox

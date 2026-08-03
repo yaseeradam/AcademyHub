@@ -20,6 +20,11 @@
         $rcPsychomotorStyle = old('rc_psychomotor_style', config('academyhub.rc_psychomotor_style', 'progress'));
         $rcShowSchoolFees = old('rc_show_school_fees', config('academyhub.rc_show_school_fees', false));
         
+        $rcShowClassHighestLowest = old('rc_show_class_highest_lowest', config('academyhub.rc_show_class_highest_lowest', false));
+        $rcShowSubjectTeacherRemarks = old('rc_show_subject_teacher_remarks', config('academyhub.rc_show_subject_teacher_remarks', false));
+        $rcShowQrCode = old('rc_show_qr_code', config('academyhub.rc_show_qr_code', true));
+        $rcShowCumulativeSummary = old('rc_show_cumulative_summary', config('academyhub.rc_show_cumulative_summary', false));
+        $rcShowColorBadges = old('rc_show_color_badges', config('academyhub.rc_show_color_badges', true));
 
         $rcSchoolFeesAccountNumber = old('rc_school_fees_account_number', config('academyhub.rc_school_fees_account_number'));
         $rcSchoolFeesBankName = old('rc_school_fees_bank_name', config('academyhub.rc_school_fees_bank_name'));
@@ -395,6 +400,56 @@
                         <div>
                             <div class="text-sm font-bold text-gray-900">Principal's Remarks</div>
                             <div class="text-xs text-gray-500">Show principal/head teacher comment</div>
+                        </div>
+                    </label>
+
+                    {{-- Subject Teacher Remarks --}}
+                    <label class="flex items-center gap-3 rounded-2xl border border-gray-200 bg-white/80 p-4 shadow-sm cursor-pointer hover:border-violet-300 transition">
+                        <input type="hidden" name="rc_show_subject_teacher_remarks" value="0" />
+                        <input type="checkbox" name="rc_show_subject_teacher_remarks" value="1" class="h-5 w-5 rounded-lg border-gray-300 text-violet-600 focus:ring-violet-500" @checked($rcShowSubjectTeacherRemarks) />
+                        <div>
+                            <div class="text-sm font-bold text-gray-900">Subject Teacher Remarks</div>
+                            <div class="text-xs text-gray-500">Show per-subject teacher comments</div>
+                        </div>
+                    </label>
+
+                    {{-- Class Highest & Lowest --}}
+                    <label class="flex items-center gap-3 rounded-2xl border border-gray-200 bg-white/80 p-4 shadow-sm cursor-pointer hover:border-violet-300 transition">
+                        <input type="hidden" name="rc_show_class_highest_lowest" value="0" />
+                        <input type="checkbox" name="rc_show_class_highest_lowest" value="1" class="h-5 w-5 rounded-lg border-gray-300 text-violet-600 focus:ring-violet-500" @checked($rcShowClassHighestLowest) />
+                        <div>
+                            <div class="text-sm font-bold text-gray-900">Class Highest &amp; Lowest</div>
+                            <div class="text-xs text-gray-500">Show class highest &amp; lowest subject scores</div>
+                        </div>
+                    </label>
+
+                    {{-- Cumulative Summary --}}
+                    <label class="flex items-center gap-3 rounded-2xl border border-gray-200 bg-white/80 p-4 shadow-sm cursor-pointer hover:border-violet-300 transition">
+                        <input type="hidden" name="rc_show_cumulative_summary" value="0" />
+                        <input type="checkbox" name="rc_show_cumulative_summary" value="1" class="h-5 w-5 rounded-lg border-gray-300 text-violet-600 focus:ring-violet-500" @checked($rcShowCumulativeSummary) />
+                        <div>
+                            <div class="text-sm font-bold text-gray-900">Cumulative Annual Summary</div>
+                            <div class="text-xs text-gray-500">Show Term 1, 2, 3 totals &amp; annual average</div>
+                        </div>
+                    </label>
+
+                    {{-- Color Grade Badges --}}
+                    <label class="flex items-center gap-3 rounded-2xl border border-gray-200 bg-white/80 p-4 shadow-sm cursor-pointer hover:border-violet-300 transition">
+                        <input type="hidden" name="rc_show_color_badges" value="0" />
+                        <input type="checkbox" name="rc_show_color_badges" value="1" class="h-5 w-5 rounded-lg border-gray-300 text-violet-600 focus:ring-violet-500" @checked($rcShowColorBadges) />
+                        <div>
+                            <div class="text-sm font-bold text-gray-900">Color Grade Badges</div>
+                            <div class="text-xs text-gray-500">Highlight A-F grades with color pills</div>
+                        </div>
+                    </label>
+
+                    {{-- Security QR Code --}}
+                    <label class="flex items-center gap-3 rounded-2xl border border-gray-200 bg-white/80 p-4 shadow-sm cursor-pointer hover:border-violet-300 transition">
+                        <input type="hidden" name="rc_show_qr_code" value="0" />
+                        <input type="checkbox" name="rc_show_qr_code" value="1" class="h-5 w-5 rounded-lg border-gray-300 text-violet-600 focus:ring-violet-500" @checked($rcShowQrCode) />
+                        <div>
+                            <div class="text-sm font-bold text-gray-900">Verification QR Badge</div>
+                            <div class="text-xs text-gray-500">Show official verification badge at footer</div>
                         </div>
                     </label>
 
