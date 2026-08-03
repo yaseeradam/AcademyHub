@@ -1231,11 +1231,16 @@ class WhatsAppController extends Controller
         $student->load(['schoolClass', 'section']);
         $data = app(\App\Support\ReportCardService::class)->build($student, $term, $session);
 
-        $view = \App\Support\ReportCardService::viewForTemplate($template);
+        $view = \App\Support\ReportCardService::viewForTemplate($safeTemplate);
 
         $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView($view, [
             ...$data,
-        ])->setPaper('a4');
+        ])->setPaper('a4', 'portrait')->setOptions([
+            'dpi' => 72,
+            'isHtml5ParserEnabled' => true,
+            'isPhpEnabled' => false,
+            'defaultFont' => 'dejavu sans',
+        ]);
 
         $pdfOutput = $pdf->output();
 
