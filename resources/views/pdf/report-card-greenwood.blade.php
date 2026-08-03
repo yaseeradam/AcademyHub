@@ -421,7 +421,7 @@
                             <div class="remarks-box">
                                 <div class="remarks-title">TEACHER COMMENTS</div>
                                 <div class="remarks-text">
-                                    {{ $teacherRemarks ?? 'An excellent student with outstanding academic performance. Keep it up!' }}
+                                    {{ $teacherRemarks ?? 'An excellent student with outstanding performance.' }}
                                 </div>
                                 <div class="sig-container">
                                     @if(($signatureImages['teacher'] ?? null) && file_exists($signatureImages['teacher']))

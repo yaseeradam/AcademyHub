@@ -523,7 +523,7 @@ class SettingsController extends Controller
                 'timesOpened' => 65,
                 'timesPresent' => 60,
                 'timesAbsent' => 5,
-                'teacherRemarks' => 'An excellent student with outstanding academic performance. Keep it up!',
+                'teacherRemarks' => 'An excellent student with outstanding academic performance.',
                 'principalRemarks' => 'A commendable result. Continue to strive for excellence.',
                 'nextTermDate' => 'September 8, 2025',
                 'principalName' => config('academyhub.rc_principal_name', ''),

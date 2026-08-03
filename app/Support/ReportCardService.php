@@ -551,7 +551,7 @@ class ReportCardService
         $attendanceText = $opened > 0 ? "Present {$present} days out of {$opened} school days opened." : "Attendance not recorded.";
 
         if ($role === 'teacher') {
-            $systemInstruction = "You are a professional class teacher. Write a concise, personalized, and encouraging comment (exactly 1-2 sentences) for a student's terminal report card. Identify their main strength (best subject) and area for improvement (lowest subject) based on their grades. Mention their attendance if they have been absent. Output ONLY the plain comment, no prefixes, no quotation marks.";
+            $systemInstruction = "You are a class teacher. Write a very brief, concise, and encouraging comment (exactly 1 short sentence, maximum 15 words) for a student's terminal report card. Highlight their key performance. Output ONLY the plain comment, no prefixes, no quotation marks.";
             $prompt = "Student: {$student->full_name}\n" .
                       "Grades: {$subjectsList}\n" .
                       "Attendance: {$attendanceText}";
@@ -575,7 +575,7 @@ class ReportCardService
                         ['role' => 'user', 'content' => $prompt]
                     ],
                     'temperature' => 0.6,
-                    'max_tokens'  => 150,
+                    'max_tokens'  => 65,
                 ]);
 
             if ($response->successful()) {
@@ -594,21 +594,21 @@ class ReportCardService
     private function generateTeacherRemarksFallback(float $average, int $position, int $totalStudents): string
     {
         if ($average >= 70) {
-            return 'An exceptionally brilliant term. Has shown outstanding work ethic and active participation in class.';
+            return 'An exceptionally brilliant term with outstanding work ethic.';
         }
 
         if ($average >= 60) {
-            return 'A very good performance. Consistent and dedicated. Keep up the high standard.';
+            return 'Very good performance. Consistent and dedicated to studies.';
         }
 
         if ($average >= 50) {
-            return 'A satisfactory result. Shows good potential, but needs to be more consistent to achieve top grades.';
+            return 'Satisfactory result. Shows good potential with more focus.';
         }
 
         if ($average >= 40) {
-            return 'Fair performance. Needs to show more dedication and put in extra study hours next term.';
+            return 'Fair effort. Extra study hours required next term.';
         }
 
-        return 'Poor academic standing. Requires intensive home study and close monitoring to improve.';
+        return 'Needs intensive home study and close monitoring.';
     }
 }
