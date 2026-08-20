@@ -190,3 +190,10 @@ Route::prefix('whatsapp')
         Route::get('checkout',              [WhatsAppController::class, 'checkout'])->name('whatsapp.pay')->middleware('signed');
         Route::post('checkout/process',     [WhatsAppController::class, 'processPayment'])->name('whatsapp.pay.process');
     });
+
+// Public ZKTeco K40 ADMS Push Endpoints (No Auth middleware so hardware can post directly)
+Route::get('/iclock/cdata', [\App\Http\Controllers\Api\ZkTecoController::class, 'handshake']);
+Route::post('/iclock/cdata', [\App\Http\Controllers\Api\ZkTecoController::class, 'receivePunch']);
+Route::get('/zkteco/iclock', [\App\Http\Controllers\Api\ZkTecoController::class, 'handshake']);
+Route::post('/zkteco/punch', [\App\Http\Controllers\Api\ZkTecoController::class, 'receivePunch']);
+

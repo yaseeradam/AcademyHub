@@ -1,4 +1,4 @@
-<div class="space-y-6">
+<div class="space-y-6" wire:poll.10s>
     {{-- Hero Banner --}}
     <div class="relative overflow-hidden rounded-3xl shadow-2xl" style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);">
         <div class="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-blue-500/10 via-transparent to-transparent"></div>
