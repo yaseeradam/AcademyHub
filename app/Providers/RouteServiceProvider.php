@@ -25,6 +25,11 @@ class RouteServiceProvider extends ServiceProvider
     public function boot(): void
     {
         RateLimiter::for('api', function (Request $request) {
+            // ZKTeco K40 ADMS device bypass — hardware pushes many punches during morning rush
+            if ($request->is('api/iclock/*') || $request->is('api/zkteco/*') || $request->is('iclock/*')) {
+                return Limit::perMinute(600)->by($request->ip());
+            }
+
             // WhatsApp bot key bypass check
             $isWhatsAppBot = false;
             $expectedKey = config('services.whatsapp.api_key');

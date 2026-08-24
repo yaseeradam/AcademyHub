@@ -494,3 +494,21 @@ Route::get('/deploy-clear-cache/{key}', function (string $key) {
     ]);
 })->withoutMiddleware(\App\Http\Middleware\TenantDiscovery::class);
 
+/*
+|--------------------------------------------------------------------------
+| ZKTeco K40 ADMS Push Endpoints (Root-level)
+|--------------------------------------------------------------------------
+|
+| ZKTeco ADMS firmware hardcodes push requests to /iclock/cdata (no /api prefix).
+| These root-level routes catch those requests and forward to ZkTecoController.
+| We strip web middleware that would block hardware device HTTP calls.
+|
+*/
+Route::match(['get', 'post'], '/iclock/cdata', [\App\Http\Controllers\Api\ZkTecoController::class, 'handleAdms'])
+    ->withoutMiddleware([
+        \App\Http\Middleware\VerifyCsrfToken::class,
+        \Illuminate\Session\Middleware\StartSession::class,
+        \App\Http\Middleware\CheckSubscriptionStatus::class,
+    ]);
+
+

@@ -6,23 +6,26 @@ use App\Http\Controllers\Controller;
 use App\Models\AttendanceMark;
 use App\Models\AttendanceSheet;
 use App\Models\Student;
+use App\Models\Tenant;
+use App\Models\User;
 use App\Models\AcademicSession;
 use App\Models\AcademicTerm;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
 class ZkTecoController extends Controller
 {
     /**
-     * ADMS Handshake / Heartbeat (GET /iclock/cdata or GET /api/iclock/cdata)
+     * ADMS Handshake / Heartbeat (GET /api/iclock/cdata)
      * Device pings server to initialize push connection.
      */
     public function handshake(Request $request)
     {
         $sn = $request->input('SN', $request->query('sn', 'UNKNOWN'));
-        
+
         Log::info("ZKTeco K40 ADMS Handshake received from SN: {$sn}");
 
         // Return device configuration parameters expected by ZKTeco ADMS firmware
@@ -41,13 +44,32 @@ class ZkTecoController extends Controller
     }
 
     /**
-     * ADMS Real-time Punch Log Receiver (POST /iclock/cdata or POST /api/iclock/cdata)
+     * Unified ADMS handler for root-level /iclock/cdata route.
+     * ZKTeco firmware sends both GET (handshake) and POST (punch data) to the same URL.
+     */
+    public function handleAdms(Request $request)
+    {
+        if ($request->isMethod('post')) {
+            return $this->receivePunch($request);
+        }
+        return $this->handshake($request);
+    }
+
+
+    /**
+     * ADMS Real-time Punch Log Receiver (POST /api/iclock/cdata)
      * Device POSTs data immediately when a student scans finger or card.
+     *
+     * Multi-Tenancy: If the global TenantDiscovery middleware has already resolved
+     * a tenant (via domain or X-Tenant-Slug header), queries are automatically scoped.
+     * For single-tenant deployments where no tenant resolves (e.g. device hits a
+     * bare local IP), BelongsToTenant scope is transparently skipped and all records
+     * are visible — which is correct for single-tenant.
      */
     public function receivePunch(Request $request)
     {
         $content = $request->getContent();
-        
+
         if (empty($content)) {
             $content = $request->input('data', '');
         }
@@ -65,6 +87,11 @@ class ZkTecoController extends Controller
         $sessionName = AcademicSession::activeName() ?? date('Y') . '/' . (date('Y') + 1);
         $lateThreshold = config('academyhub.late_threshold_time', '08:15:00');
 
+        // Find a valid system user for 'taken_by' (first admin user, or null-safe)
+        $systemUserId = Cache::remember('zkteco_system_user_id', 3600, function () {
+            return User::where('role', 'admin')->orderBy('id')->value('id') ?? User::orderBy('id')->value('id');
+        });
+
         $processedCount = 0;
 
         foreach ($lines as $line) {
@@ -77,8 +104,8 @@ class ZkTecoController extends Controller
             if (count($parts) < 2) continue;
 
             $userId = trim($parts[0]);
-            
-            // Reconstruct timestamp from space-separated parts if needed
+
+            // Reconstruct timestamp from space-separated parts
             $datePart = $parts[1] ?? '';
             $timePart = $parts[2] ?? '';
 
@@ -109,6 +136,7 @@ class ZkTecoController extends Controller
             // 1. Create or retrieve daily attendance sheet for student's class
             $sheet = AttendanceSheet::firstOrCreate(
                 [
+                    'tenant_id'  => $student->tenant_id,
                     'class_id'   => $student->class_id,
                     'section_id' => $student->section_id,
                     'date'       => $dateStr,
@@ -116,13 +144,14 @@ class ZkTecoController extends Controller
                     'session'    => $sessionName,
                 ],
                 [
-                    'taken_by'   => 1, // System User ID
+                    'taken_by'   => $systemUserId,
                 ]
             );
 
             // 2. Record or update Attendance Mark
-            $mark = AttendanceMark::updateOrCreate(
+            AttendanceMark::updateOrCreate(
                 [
+                    'tenant_id'  => $student->tenant_id,
                     'sheet_id'   => $sheet->id,
                     'student_id' => $student->id,
                 ],
@@ -134,9 +163,14 @@ class ZkTecoController extends Controller
 
             $processedCount++;
 
-            // 3. Trigger WhatsApp Notification to Parent if phone number exists
+            // 3. Send WhatsApp notification — with duplicate prevention
+            //    Cache key prevents re-sending for the same student on the same day
             if (!empty($student->guardian_phone)) {
-                $this->sendWhatsAppAttendanceAlert($student, $punchTime, $status);
+                $alertCacheKey = "zk_wa_alert_{$student->id}_{$dateStr}";
+                if (!Cache::has($alertCacheKey)) {
+                    Cache::put($alertCacheKey, true, now()->endOfDay());
+                    $this->sendWhatsAppAttendanceAlert($student, $punchTime, $status);
+                }
             }
         }
 
@@ -146,9 +180,9 @@ class ZkTecoController extends Controller
     }
 
     /**
-     * Send WhatsApp Message to Guardian
+     * Send WhatsApp Message to Guardian (non-blocking, short timeout).
      */
-    private function sendWhatsAppAttendanceAlert(Student $student, Carbon $punchTime, string $status)
+    private function sendWhatsAppAttendanceAlert(Student $student, Carbon $punchTime, string $status): void
     {
         $schoolName = config('academyhub.school_name') ?: config('app.name', 'AcademyHub');
         $phone = preg_replace('/\D/', '', $student->guardian_phone);
@@ -177,7 +211,7 @@ class ZkTecoController extends Controller
                 Http::withHeaders([
                     'Authorization' => 'Bearer ' . $token,
                     'Content-Type'  => 'application/json',
-                ])->timeout(5)->post("https://graph.facebook.com/v19.0/{$phoneId}/messages", [
+                ])->timeout(3)->connectTimeout(2)->post("https://graph.facebook.com/v19.0/{$phoneId}/messages", [
                     'messaging_product' => 'whatsapp',
                     'to'                => $phone,
                     'type'              => 'text',
@@ -186,6 +220,7 @@ class ZkTecoController extends Controller
                 Log::info("WhatsApp Biometric Alert sent to guardian of student {$student->id} ({$phone})");
             }
         } catch (\Throwable $e) {
+            // Non-blocking: log the error but don't disrupt attendance recording
             Log::error("WhatsApp Biometric Alert Failed for Student {$student->id}: " . $e->getMessage());
         }
     }

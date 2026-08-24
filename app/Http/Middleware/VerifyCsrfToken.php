@@ -13,5 +13,8 @@ class VerifyCsrfToken extends Middleware
      */
     protected $except = [
         'log-error',
+        'iclock/*',         // ZKTeco K40 ADMS push (root-level)
+        'api/iclock/*',     // ZKTeco K40 ADMS push (api-prefixed)
+        'api/zkteco/*',     // ZKTeco alternative endpoints
     ];
 }

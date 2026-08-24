@@ -4,11 +4,13 @@ namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
 use App\Models\Student;
+use App\Models\User;
 use App\Models\AttendanceSheet;
 use App\Models\AttendanceMark;
 use App\Models\AcademicSession;
 use App\Models\AcademicTerm;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
@@ -64,6 +66,11 @@ class SyncZkTecoAttendance extends Command
         $sessionName = AcademicSession::activeName() ?? date('Y') . '/' . (date('Y') + 1);
         $lateThreshold = config('academyhub.late_threshold_time', '08:15:00');
 
+        // Find a valid system user for 'taken_by'
+        $systemUserId = Cache::remember('zkteco_system_user_id', 3600, function () {
+            return User::where('role', 'admin')->orderBy('id')->value('id') ?? User::orderBy('id')->value('id');
+        });
+
         $syncedCount = 0;
 
         foreach ($attendanceLogs as $log) {
@@ -94,6 +101,7 @@ class SyncZkTecoAttendance extends Command
             // 1. Create or retrieve daily attendance sheet for student's class
             $sheet = AttendanceSheet::firstOrCreate(
                 [
+                    'tenant_id'  => $student->tenant_id,
                     'class_id'   => $student->class_id,
                     'section_id' => $student->section_id,
                     'date'       => $dateStr,
@@ -101,13 +109,14 @@ class SyncZkTecoAttendance extends Command
                     'session'    => $sessionName,
                 ],
                 [
-                    'taken_by'   => 1, // System User ID
+                    'taken_by'   => $systemUserId,
                 ]
             );
 
             // 2. Record or update student's attendance mark
-            $mark = AttendanceMark::updateOrCreate(
+            AttendanceMark::updateOrCreate(
                 [
+                    'tenant_id'  => $student->tenant_id,
                     'sheet_id'   => $sheet->id,
                     'student_id' => $student->id,
                 ],
@@ -119,9 +128,13 @@ class SyncZkTecoAttendance extends Command
 
             $syncedCount++;
 
-            // 3. Trigger WhatsApp Notification to Parent
+            // 3. Trigger WhatsApp Notification to Parent (with duplicate prevention)
             if (!empty($student->guardian_phone)) {
-                $this->sendWhatsAppAttendanceAlert($student, $punchTime, $status);
+                $alertCacheKey = "zk_wa_alert_{$student->id}_{$dateStr}";
+                if (!Cache::has($alertCacheKey)) {
+                    Cache::put($alertCacheKey, true, now()->endOfDay());
+                    $this->sendWhatsAppAttendanceAlert($student, $punchTime, $status);
+                }
             }
         }
 
@@ -158,7 +171,7 @@ class SyncZkTecoAttendance extends Command
                 Http::withHeaders([
                     'Authorization' => 'Bearer ' . $token,
                     'Content-Type'  => 'application/json',
-                ])->timeout(5)->post("https://graph.facebook.com/v19.0/{$phoneId}/messages", [
+                ])->timeout(3)->connectTimeout(2)->post("https://graph.facebook.com/v19.0/{$phoneId}/messages", [
                     'messaging_product' => 'whatsapp',
                     'to'                => $phone,
                     'type'              => 'text',
