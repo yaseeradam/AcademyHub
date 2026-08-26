@@ -1,0 +1,31 @@
+# Docker
+docker-compose.override.yml
+.env.docker.local
+
+# Dependencies
+/node_modules
+/vendor
+
+# Build artifacts
+/public/build
+/public/hot
+
+# Environment
+.env
+.env.backup
+.env.production
+
+# Storage (persisted via Docker volumes)
+/storage/*.key
+/storage/logs/*
+!/storage/logs/.gitignore
+
+# IDE
+.idea
+.vscode
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
