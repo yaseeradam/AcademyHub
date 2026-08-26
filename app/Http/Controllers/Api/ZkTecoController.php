@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\AttendanceMark;
 use App\Models\AttendanceSheet;
 use App\Models\Student;
+use App\Models\TeacherAttendanceSheet;
+use App\Models\TeacherAttendanceMark;
 use App\Models\Tenant;
 use App\Models\User;
 use App\Models\AcademicSession;
@@ -119,13 +121,55 @@ class ZkTecoController extends Controller
                 continue;
             }
 
+            // ── Try matching as a Teacher/Staff first ──────────────────────────
+            // Teachers use their User ID or email prefix as their K40 enrollment ID
+            $teacher = User::whereIn('role', ['teacher', 'admin', 'bursar'])
+                ->where('is_active', true)
+                ->where(function ($q) use ($userId) {
+                    $q->where('id', $userId)
+                      ->orWhere('email', 'like', $userId . '@%');
+                })
+                ->first();
+
+            if ($teacher) {
+                // Staff/Teacher attendance — no WhatsApp notification
+                $staffSheet = TeacherAttendanceSheet::firstOrCreate(
+                    [
+                        'tenant_id'  => $teacher->tenant_id,
+                        'date'       => $dateStr,
+                        'term'       => $termNumber,
+                        'session'    => $sessionName,
+                    ],
+                    [
+                        'taken_by'   => $systemUserId,
+                    ]
+                );
+
+                TeacherAttendanceMark::updateOrCreate(
+                    [
+                        'tenant_id'  => $teacher->tenant_id,
+                        'sheet_id'   => $staffSheet->id,
+                        'teacher_id' => $teacher->id,
+                    ],
+                    [
+                        'status'     => $status,
+                        'note'       => 'Biometric scan at ' . $punchTime->format('g:i A'),
+                    ]
+                );
+
+                $processedCount++;
+                Log::info("ZKTeco: Staff {$teacher->name} (ID:{$teacher->id}) marked {$status} at {$punchTime->format('g:i A')}");
+                continue;
+            }
+
+            // ── Try matching as a Student ────────────────────────────────────────
             // Find matching student by Admission Number or Database ID
             $student = Student::where('admission_number', $userId)
                 ->orWhere('id', $userId)
                 ->first();
 
             if (!$student) {
-                Log::warning("ZKTeco ADMS Sync: No student found for User ID/Admission Number: {$userId}");
+                Log::warning("ZKTeco ADMS Sync: No student or staff found for User ID: {$userId}");
                 continue;
             }
 
@@ -163,8 +207,7 @@ class ZkTecoController extends Controller
 
             $processedCount++;
 
-            // 3. Send WhatsApp notification — with duplicate prevention
-            //    Cache key prevents re-sending for the same student on the same day
+            // 3. Send WhatsApp notification — with duplicate prevention (students only)
             if (!empty($student->guardian_phone)) {
                 $alertCacheKey = "zk_wa_alert_{$student->id}_{$dateStr}";
                 if (!Cache::has($alertCacheKey)) {

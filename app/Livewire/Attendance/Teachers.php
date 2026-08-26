@@ -310,7 +310,7 @@ class Teachers extends Component
 
     public function render()
     {
-        abort_unless(auth()->user()?->role === 'admin' || auth()->user()?->role === 'teacher', 403);
+        abort_unless(auth()->user()?->role === 'admin', 403);
 
         return view('livewire.attendance.teachers');
     }

@@ -7,6 +7,8 @@ use App\Models\Student;
 use App\Models\User;
 use App\Models\AttendanceSheet;
 use App\Models\AttendanceMark;
+use App\Models\TeacherAttendanceSheet;
+use App\Models\TeacherAttendanceMark;
 use App\Models\AcademicSession;
 use App\Models\AcademicTerm;
 use Illuminate\Support\Carbon;
@@ -84,19 +86,58 @@ class SyncZkTecoAttendance extends Command
                 continue;
             }
 
-            // Find matching student by Admission Number or Database ID
+            $dateStr = $punchTime->format('Y-m-d');
+            $timeStr = $punchTime->format('H:i:s');
+            $status  = ($timeStr > $lateThreshold) ? 'Late' : 'Present';
+
+            // ── Try matching as a Teacher/Staff first ──────────────────────────
+            $teacher = User::whereIn('role', ['teacher', 'admin', 'bursar'])
+                ->where('is_active', true)
+                ->where(function ($q) use ($userId) {
+                    $q->where('id', $userId)
+                      ->orWhere('email', 'like', $userId . '@%');
+                })
+                ->first();
+
+            if ($teacher) {
+                $staffSheet = TeacherAttendanceSheet::firstOrCreate(
+                    [
+                        'tenant_id'  => $teacher->tenant_id,
+                        'date'       => $dateStr,
+                        'term'       => $termNumber,
+                        'session'    => $sessionName,
+                    ],
+                    [
+                        'taken_by'   => $systemUserId,
+                    ]
+                );
+
+                TeacherAttendanceMark::updateOrCreate(
+                    [
+                        'tenant_id'  => $teacher->tenant_id,
+                        'sheet_id'   => $staffSheet->id,
+                        'teacher_id' => $teacher->id,
+                    ],
+                    [
+                        'status'     => $status,
+                        'note'       => "Biometric scan on K40 at {$punchTime->format('g:i A')}",
+                    ]
+                );
+
+                $syncedCount++;
+                $this->info("Staff {$teacher->name} (ID:{$teacher->id}) marked {$status}");
+                continue;
+            }
+
+            // ── Try matching as a Student ────────────────────────────────────────
             $student = Student::where('admission_number', $userId)
                 ->orWhere('id', $userId)
                 ->first();
 
             if (!$student) {
-                $this->warn("Skipping User ID {$userId}: No matching student found in database.");
+                $this->warn("Skipping User ID {$userId}: No matching student or staff found in database.");
                 continue;
             }
-
-            $dateStr = $punchTime->format('Y-m-d');
-            $timeStr = $punchTime->format('H:i:s');
-            $status  = ($timeStr > $lateThreshold) ? 'Late' : 'Present';
 
             // 1. Create or retrieve daily attendance sheet for student's class
             $sheet = AttendanceSheet::firstOrCreate(

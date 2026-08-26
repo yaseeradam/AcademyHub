@@ -1,5 +1,5 @@
 <div
-    class="space-y-6"
+    class="space-y-6" wire:poll.10s
     x-data="{
         init() {},
         onKeydown(e) {
