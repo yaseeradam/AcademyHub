@@ -13,13 +13,25 @@ until php -r "try { new PDO('mysql:host='.getenv('DB_HOST').';port='.getenv('DB_
 done
 echo "  ✓ Database connected"
 
+# ── Ensure .env exists ──────────────────────────────────────────────────────
+if [ ! -f /var/www/html/.env ]; then
+    if [ -f /var/www/html/.env.docker ]; then
+        cp /var/www/html/.env.docker /var/www/html/.env
+    elif [ -f /var/www/html/.env.example ]; then
+        cp /var/www/html/.env.example /var/www/html/.env
+    else
+        touch /var/www/html/.env
+    fi
+fi
+
 # ── Generate APP_KEY if missing ─────────────────────────────────────────────
 if [ -z "$APP_KEY" ] || [ "$APP_KEY" = "" ]; then
-    echo "[2/6] Generating application key..."
+    echo "[2/7] Generating application key..."
     php artisan key:generate --force
-    echo "  ✓ Application key generated"
+    export APP_KEY=$(grep '^APP_KEY=' /var/www/html/.env | cut -d '=' -f2-)
+    echo "  ✓ Application key generated ($APP_KEY)"
 else
-    echo "[2/6] Application key already set ✓"
+    echo "[2/7] Application key already set ✓"
 fi
 
 # ── Run Migrations ─────────────────────────────────────────────────────────

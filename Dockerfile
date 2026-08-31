@@ -9,7 +9,7 @@ FROM node:20-alpine AS assets
 WORKDIR /build
 
 COPY package.json package-lock.json* ./
-RUN npm ci --ignore-scripts
+RUN npm install --ignore-scripts
 
 COPY vite.config.js tailwind.config.js postcss.config.js ./
 COPY resources/ resources/
@@ -18,7 +18,7 @@ RUN npm run build
 
 
 # ── Stage 2: PHP application ────────────────────────────────────────────────
-FROM php:8.3-fpm-alpine
+FROM php:8.4-fpm-alpine
 
 LABEL maintainer="AcademyHub <dev@academyhub.com>"
 LABEL description="AcademyHub School Management System"
@@ -101,7 +101,7 @@ COPY --chown=www-data:www-data . .
 COPY --from=assets --chown=www-data:www-data /build/public/build public/build
 
 # Install PHP dependencies (production only)
-RUN composer install --no-dev --optimize-autoloader --no-interaction --no-progress \
+RUN composer install --no-dev --optimize-autoloader --no-interaction --no-progress --ignore-platform-reqs \
     && composer clear-cache
 
 # Create required directories and set permissions

@@ -2,6 +2,9 @@
 docker-compose.override.yml
 .env.docker.local
 
+# Flutter mobile app (not part of the web Docker image)
+/academyhub_app
+
 # Dependencies
 /node_modules
 /vendor
@@ -19,6 +22,16 @@ docker-compose.override.yml
 /storage/*.key
 /storage/logs/*
 !/storage/logs/.gitignore
+
+# Not needed in production image
+/.git
+/.github
+/docs
+/tests
+/scratch
+/scripts
+*.md
+!README.md
 
 # IDE
 .idea
