@@ -15,10 +15,10 @@
   - Removed `@premium` Blade directive
 
 **Environment Variables Removed:**
-- `MYACADEMY_SCHOOL_ID`
-- `MYACADEMY_LICENSE_PUBLIC_KEY`
-- `MYACADEMY_MODE`
-- `MYACADEMY_PREMIUM_ENFORCE`
+- `ACADEMYHUB_SCHOOL_ID`
+- `ACADEMYHUB_LICENSE_PUBLIC_KEY`
+- `ACADEMYHUB_MODE`
+- `ACADEMYHUB_PREMIUM_ENFORCE`
 
 ### 2. Documentation Updated
 

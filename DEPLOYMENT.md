@@ -151,11 +151,11 @@ MAIL_ENCRYPTION=tls
 MAIL_FROM_ADDRESS=noreply@yourdomain.com
 MAIL_FROM_NAME="${APP_NAME}"
 
-MYACADEMY_ADMIN_EMAIL=admin@yourdomain.com
-MYACADEMY_ADMIN_PASSWORD=secure_admin_password
+ACADEMYHUB_ADMIN_EMAIL=admin@yourdomain.com
+ACADEMYHUB_ADMIN_PASSWORD=secure_admin_password
 
-MYACADEMY_MYSQLDUMP=/usr/bin/mysqldump
-MYACADEMY_MYSQL=/usr/bin/mysql
+ACADEMYHUB_MYSQLDUMP=/usr/bin/mysqldump
+ACADEMYHUB_MYSQL=/usr/bin/mysql
 ```
 
 ### 5. Application Setup

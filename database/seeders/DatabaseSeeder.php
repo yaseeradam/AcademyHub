@@ -23,10 +23,10 @@ class DatabaseSeeder extends Seeder
         // Superadmin (main domain only).
         // This account does not belong to any tenant.
         User::query()->updateOrCreate(
-            ['email' => env('MYACADEMY_ADMIN_EMAIL', 'admin@academyhub.local')],
+            ['email' => env('ACADEMYHUB_ADMIN_EMAIL', 'admin@academyhub.local')],
             [
                 'name'           => 'Super Admin',
-                'password'       => Hash::make(env('MYACADEMY_ADMIN_PASSWORD', 'password')),
+                'password'       => Hash::make(env('ACADEMYHUB_ADMIN_PASSWORD', 'password')),
                 'role'           => 'admin',
                 'is_active'      => true,
                 'is_super_admin' => true,

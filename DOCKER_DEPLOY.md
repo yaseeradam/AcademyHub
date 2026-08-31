@@ -67,7 +67,7 @@ nano .env
 ```env
 # Your school name
 APP_NAME=AcademyHub
-MYACADEMY_SCHOOL_NAME="Frontal Minds Academy"
+ACADEMYHUB_SCHOOL_NAME="Frontal Minds Academy"
 
 # For LOCAL (offline) deployment:
 APP_URL=http://192.168.1.100
@@ -79,8 +79,8 @@ DB_PASSWORD=your_secure_password_here
 DB_ROOT_PASSWORD=your_root_password_here
 
 # Admin login
-MYACADEMY_ADMIN_EMAIL=admin@school.com
-MYACADEMY_ADMIN_PASSWORD=your_admin_password
+ACADEMYHUB_ADMIN_EMAIL=admin@school.com
+ACADEMYHUB_ADMIN_PASSWORD=your_admin_password
 
 # Optional: WhatsApp (leave empty for offline-only)
 WHATSAPP_API_KEY=
@@ -171,8 +171,8 @@ hostname -I
 ```
 
 ### Login with your admin credentials:
-- **Email:** The email you set in `.env` (`MYACADEMY_ADMIN_EMAIL`)
-- **Password:** The password you set in `.env` (`MYACADEMY_ADMIN_PASSWORD`)
+- **Email:** The email you set in `.env` (`ACADEMYHUB_ADMIN_EMAIL`)
+- **Password:** The password you set in `.env` (`ACADEMYHUB_ADMIN_PASSWORD`)
 
 ---
 

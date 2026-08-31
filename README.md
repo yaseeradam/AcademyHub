@@ -192,8 +192,8 @@ DB_DATABASE=academyhub
 DB_USERNAME=root
 DB_PASSWORD=your_secure_password
 
-MYACADEMY_ADMIN_EMAIL=admin@academyhub.local
-MYACADEMY_ADMIN_PASSWORD=your_admin_password
+ACADEMYHUB_ADMIN_EMAIL=admin@academyhub.local
+ACADEMYHUB_ADMIN_PASSWORD=your_admin_password
 ```
 </details>
 

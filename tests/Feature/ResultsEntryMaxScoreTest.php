@@ -62,7 +62,7 @@ class ResultsEntryMaxScoreTest extends TestCase
     {
         $this->seed();
 
-        $admin = User::query()->where('email', env('MYACADEMY_ADMIN_EMAIL', 'admin@academyhub.local'))->firstOrFail();
+        $admin = User::query()->where('email', env('ACADEMYHUB_ADMIN_EMAIL', 'admin@academyhub.local'))->firstOrFail();
         $class = SchoolClass::query()->where('name', 'JSS 2')->firstOrFail();
         $subject = Subject::query()->where('code', 'MTH')->firstOrFail();
         $student = Student::query()->where('class_id', $class->id)->firstOrFail();
