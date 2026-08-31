@@ -23,24 +23,29 @@ else
 fi
 
 # ── Run Migrations ─────────────────────────────────────────────────────────
-echo "[3/6] Running database migrations..."
+echo "[3/7] Running database migrations..."
 php artisan migrate --force 2>&1
 echo "  ✓ Migrations complete"
 
+# ── Seed superadmin & marketplace (safe to re-run — uses updateOrCreate) ──
+echo "[4/7] Seeding superadmin account..."
+php artisan db:seed --force 2>&1
+echo "  ✓ Superadmin seeded"
+
 # ── Storage link ────────────────────────────────────────────────────────────
-echo "[4/6] Ensuring storage symlink..."
+echo "[5/7] Ensuring storage symlink..."
 php artisan storage:link 2>/dev/null || true
 echo "  ✓ Storage linked"
 
 # ── Cache optimization ──────────────────────────────────────────────────────
-echo "[5/6] Caching configuration..."
+echo "[6/7] Caching configuration..."
 php artisan config:cache
 php artisan route:cache
 php artisan view:cache
 echo "  ✓ Caches built"
 
 # ── Fix permissions ─────────────────────────────────────────────────────────
-echo "[6/6] Setting permissions..."
+echo "[7/7] Setting permissions..."
 chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
 chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
 echo "  ✓ Permissions set"
