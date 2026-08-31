@@ -147,9 +147,9 @@ $activeShadow = "shadow-{$accent}-200";
             <div class="flex items-center gap-3">
                 <div class="flex h-12 w-12 flex-shrink-0 items-center justify-center overflow-hidden rounded-xl bg-violet-50 ring-2 ring-violet-100">
                     @if($schoolLogo)
-                        <img src="{{ asset('uploads/'.str_replace('\\','/',$schoolLogo)) }}" alt="Logo" class="h-full w-full object-contain p-1"/>
+                        <img src="{{ asset('uploads/'.str_replace('\\','/',$schoolLogo)) }}" alt="Logo" class="max-h-full max-w-full object-contain p-1"/>
                     @else
-                        <img src="{{ asset('full.png') }}" alt="AcademyHub" class="h-full w-full object-contain p-0.5"/>
+                        <img src="{{ asset('full.png') }}" alt="AcademyHub" class="max-h-full max-w-full object-contain p-0.5"/>
                     @endif
                 </div>
                 <div class="min-w-0">
@@ -188,9 +188,9 @@ $activeShadow = "shadow-{$accent}-200";
             <div class="flex items-center" x-bind:class="sidebarCollapsed ? 'justify-center' : 'gap-3'">
                 <div class="flex flex-shrink-0 items-center justify-center overflow-hidden rounded-xl bg-violet-50 ring-2 ring-violet-100 transition-all duration-300" x-bind:class="sidebarCollapsed ? 'h-10 w-10' : 'h-12 w-12'">
                     @if($schoolLogo)
-                        <img src="{{ asset('uploads/'.str_replace('\\','/',$schoolLogo)) }}" alt="Logo" class="h-full w-full object-contain p-1"/>
+                        <img src="{{ asset('uploads/'.str_replace('\\','/',$schoolLogo)) }}" alt="Logo" class="max-h-full max-w-full object-contain p-1"/>
                     @else
-                        <img src="{{ asset('full.png') }}" alt="AcademyHub" class="h-full w-full object-contain p-0.5"/>
+                        <img src="{{ asset('full.png') }}" alt="AcademyHub" class="max-h-full max-w-full object-contain p-0.5"/>
                     @endif
                 </div>
                 <div class="min-w-0" x-show="!sidebarCollapsed" x-transition.opacity>
@@ -627,7 +627,8 @@ $activeShadow = "shadow-{$accent}-200";
 </script>
 
 {{-- Livewire navigation loading overlay --}}
-<div x-data="{ loading: false }"
+<div x-cloak
+     x-data="{ loading: false }"
      x-on:livewire:navigating.window="loading = true"
      x-on:livewire:navigated.window="loading = false"
      x-show="loading" style="display:none"
@@ -641,12 +642,12 @@ $activeShadow = "shadow-{$accent}-200";
     <div class="flex flex-col items-center gap-5">
         {{-- Logo pulse --}}
         <div class="relative flex items-center justify-center">
-            <div class="absolute h-20 w-20 rounded-2xl bg-violet-400/20 animate-ping" style="animation-duration:1.8s;"></div>
-            <div class="relative flex h-16 w-16 items-center justify-center rounded-2xl bg-white shadow-xl ring-1 ring-violet-100">
+            <div class="absolute h-20 w-36 rounded-2xl bg-violet-400/20 animate-ping" style="animation-duration:1.8s;"></div>
+            <div class="relative flex h-16 w-36 items-center justify-center rounded-2xl bg-white p-2 shadow-xl ring-1 ring-violet-100 overflow-hidden">
                 @if($schoolLogo)
-                    <img src="{{ asset('uploads/'.str_replace('\\','/',$schoolLogo)) }}" alt="Logo" class="h-10 w-10 object-contain"/>
+                    <img src="{{ asset('uploads/'.str_replace('\\','/',$schoolLogo)) }}" alt="Logo" class="max-h-full max-w-full object-contain"/>
                 @else
-                    <img src="{{ asset('full.png') }}" alt="AcademyHub" class="h-10 w-10 object-contain"/>
+                    <img src="{{ asset('full.png') }}" alt="AcademyHub" class="max-h-full max-w-full object-contain"/>
                 @endif
             </div>
         </div>
