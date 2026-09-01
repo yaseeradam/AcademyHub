@@ -147,9 +147,9 @@ $activeShadow = "shadow-{$accent}-200";
             <div class="flex items-center gap-3">
                 <div class="flex h-12 w-12 flex-shrink-0 items-center justify-center overflow-hidden rounded-xl bg-violet-50 ring-2 ring-violet-100">
                     @if($schoolLogo)
-                        <img src="{{ asset('uploads/'.str_replace('\\','/',$schoolLogo)) }}" alt="Logo" class="max-h-full max-w-full object-contain p-1"/>
+                        <img src="{{ asset('uploads/'.str_replace('\\','/',$schoolLogo)) }}" alt="Logo" class="max-h-10 max-w-10 h-auto w-auto object-contain p-1"/>
                     @else
-                        <img src="{{ asset('full.png') }}" alt="AcademyHub" class="max-h-full max-w-full object-contain p-0.5"/>
+                        <img src="{{ asset('full.png') }}" alt="AcademyHub" class="max-h-10 max-w-10 h-auto w-auto object-contain p-0.5"/>
                     @endif
                 </div>
                 <div class="min-w-0">
@@ -186,11 +186,11 @@ $activeShadow = "shadow-{$accent}-200";
         {{-- Branding --}}
         <div class="mx-3 mt-4 mb-2 rounded-2xl bg-white shadow-sm transition-all duration-300" x-bind:class="sidebarCollapsed ? 'p-2 mx-2' : 'p-4'">
             <div class="flex items-center" x-bind:class="sidebarCollapsed ? 'justify-center' : 'gap-3'">
-                <div class="flex flex-shrink-0 items-center justify-center overflow-hidden rounded-xl bg-violet-50 ring-2 ring-violet-100 transition-all duration-300" x-bind:class="sidebarCollapsed ? 'h-10 w-10' : 'h-12 w-12'">
+                <div class="flex h-12 w-12 flex-shrink-0 items-center justify-center overflow-hidden rounded-xl bg-violet-50 ring-2 ring-violet-100 transition-all duration-300" x-bind:class="sidebarCollapsed ? '!h-10 !w-10' : '!h-12 !w-12'">
                     @if($schoolLogo)
-                        <img src="{{ asset('uploads/'.str_replace('\\','/',$schoolLogo)) }}" alt="Logo" class="max-h-full max-w-full object-contain p-1"/>
+                        <img src="{{ asset('uploads/'.str_replace('\\','/',$schoolLogo)) }}" alt="Logo" class="max-h-10 max-w-10 h-auto w-auto object-contain p-1"/>
                     @else
-                        <img src="{{ asset('full.png') }}" alt="AcademyHub" class="max-h-full max-w-full object-contain p-0.5"/>
+                        <img src="{{ asset('full.png') }}" alt="AcademyHub" class="max-h-10 max-w-10 h-auto w-auto object-contain p-0.5"/>
                     @endif
                 </div>
                 <div class="min-w-0" x-show="!sidebarCollapsed" x-transition.opacity>
