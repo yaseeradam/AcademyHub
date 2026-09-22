@@ -1,0 +1,490 @@
+<?php
+
+namespace App\Livewire\Attendance;
+
+use App\Models\AcademicSession;
+use App\Models\AcademicTerm;
+use App\Models\AttendanceMark;
+use App\Models\AttendanceSheet;
+use App\Models\SchoolClass;
+use App\Models\Section;
+use App\Models\Student;
+use App\Models\SubjectAllocation;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
+use Livewire\Attributes\Layout;
+use Livewire\Attributes\Title;
+use Livewire\Component;
+
+#[Layout('layouts.app')]
+#[Title('Attendance')]
+class Index extends Component
+{
+    use \App\Traits\DispatchesModals;
+
+    public ?int $classId = null;
+    public ?int $sectionId = null;
+    public string $date = '';
+    public ?int $term = null;
+    public string $session = '';
+
+    public ?int $sheetId = null;
+
+    public string $tool = 'Absent';
+    public string $search = '';
+    public bool $onlyExceptions = false;
+    public bool $showModal = false;
+
+    /**
+     * @var array<int, array{status:string, note:string|null}>
+     */
+    public array $marks = [];
+
+    public function mount(): void
+    {
+        $this->date = now()->toDateString();
+        $this->session = $this->session ?: $this->defaultSession();
+        $this->term = $this->term ?: $this->defaultTerm();
+
+        // Auto-select class with records today or first class so screen is never blank
+        $todaySheet = AttendanceSheet::where('date', $this->date)->latest()->first();
+        if ($todaySheet) {
+            $this->classId = $todaySheet->class_id;
+            $this->sectionId = $todaySheet->section_id;
+        } else {
+            $firstClass = $this->getClasses()->first();
+            if ($firstClass) {
+                $this->classId = $firstClass->id;
+                $this->sectionId = Section::where('class_id', $this->classId)->orderBy('name')->value('id');
+            }
+        }
+
+        $this->syncSheetFromSelection();
+    }
+
+    public function exportCsv(): \Symfony\Component\HttpFoundation\StreamedResponse
+    {
+        $records = $this->getDateRecords();
+        $dateStr = $this->date;
+        $filename = "attendance_records_{$dateStr}.csv";
+
+        return response()->streamDownload(function () use ($records, $dateStr) {
+            $out = fopen('php://output', 'wb');
+            fputcsv($out, [
+                'Student ID',
+                'Full Name',
+                'ADM No',
+                'Class',
+                'Section',
+                'Date',
+                'Punch Time',
+                'Status',
+                'Verification Note',
+            ]);
+
+            foreach ($records as $m) {
+                $punchTime = $this->formatPunchTime($m->status, $m->note, $m->updated_at ?? $m->created_at);
+                fputcsv($out, [
+                    $m->student_id,
+                    $m->student?->full_name ?? 'Unknown Student',
+                    $m->student?->admission_number ?? 'N/A',
+                    $m->student?->schoolClass?->name ?? 'N/A',
+                    $m->student?->section?->name ?? 'A',
+                    $dateStr,
+                    $punchTime,
+                    $m->status,
+                    $m->note ?? '',
+                ]);
+            }
+            fclose($out);
+        }, $filename, [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+            'Cache-Control' => 'no-cache, no-store, must-revalidate',
+        ]);
+    }
+
+    private function formatPunchTime(?string $status, ?string $note, mixed $timestamp): string
+    {
+        if (strcasecmp($status ?? '', 'Absent') === 0 && empty($note)) {
+            return '-';
+        }
+
+        if (!empty($note) && preg_match('/\b(\d{1,2}:\d{2}\s*(?:AM|PM))\b/i', $note, $matches)) {
+            return strtoupper($matches[1]);
+        }
+
+        if ($timestamp) {
+            $tz = config('app.timezone', 'Africa/Lagos');
+            return \Carbon\Carbon::parse($timestamp)->timezone($tz)->format('g:i A');
+        }
+
+        return '-';
+    }
+
+    private function getDateRecords()
+    {
+        return AttendanceMark::query()
+            ->with(['student.schoolClass', 'student.section', 'student.user', 'sheet'])
+            ->whereHas('sheet', fn($q) => $q->where('date', $this->date))
+            ->get()
+            ->sortBy(fn($m) => $m->student?->last_name);
+    }
+
+    private function getClasses()
+    {
+        $user = auth()->user();
+        if ($user && $user->role === 'teacher') {
+            $classIds = SubjectAllocation::where('teacher_id', $user->id)
+                ->pluck('class_id')
+                ->unique();
+            return SchoolClass::whereIn('id', $classIds)->orderBy('level')->get();
+        }
+        return SchoolClass::query()->orderBy('level')->get();
+    }
+
+    private function getSections()
+    {
+        if (!$this->classId) {
+            return collect();
+        }
+        return Section::query()
+            ->where('class_id', $this->classId)
+            ->orderBy('name')
+            ->get();
+    }
+
+    private function getStudents()
+    {
+        if (!$this->classId || !$this->sectionId) {
+            return collect();
+        }
+        return Student::query()
+            ->where('class_id', $this->classId)
+            ->where('section_id', $this->sectionId)
+            ->where('status', 'Active')
+            ->orderBy('last_name')
+            ->get();
+    }
+
+    private function getVisibleStudents($students)
+    {
+        $query = trim($this->search);
+        if ($query !== '') {
+            $q = mb_strtolower($query);
+            $students = $students->filter(function (Student $student) use ($q, $query) {
+                $name = mb_strtolower($student->full_name);
+                $adm  = (string) ($student->admission_number ?? '');
+                return str_contains($name, $q) || str_contains($adm, $query);
+            });
+        }
+        if ($this->onlyExceptions) {
+            $students = $students->filter(function (Student $student) {
+                return ((string) ($this->marks[$student->id]['status'] ?? 'Present')) !== 'Present';
+            });
+        }
+        return $students->values();
+    }
+
+    private function getMarkCounts($students): array
+    {
+        $counts = ['Present' => 0, 'Absent' => 0, 'Late' => 0, 'Excused' => 0];
+        foreach ($students as $student) {
+            $status = (string) ($this->marks[$student->id]['status'] ?? 'Present');
+            if (!array_key_exists($status, $counts)) {
+                $status = 'Present';
+            }
+            $counts[$status]++;
+        }
+        return $counts;
+    }
+
+    public function updatedClassId(): void
+    {
+        $this->sectionId = null;
+        if ($this->classId) {
+            $this->sectionId = Section::query()
+                ->where('class_id', $this->classId)
+                ->orderBy('name')
+                ->value('id');
+        }
+        $this->syncSheetFromSelection();
+    }
+
+    public function updatedSectionId(): void
+    {
+        $this->syncSheetFromSelection();
+    }
+
+    public function updatedDate(): void
+    {
+        $this->syncSheetFromSelection();
+    }
+
+    public function updatedTerm(): void
+    {
+        $this->syncSheetFromSelection();
+    }
+
+    public function updatedSession(): void
+    {
+        $this->syncSheetFromSelection();
+    }
+
+    public function setTool(string $tool): void
+    {
+        if (!in_array($tool, ['Present', 'Absent', 'Late', 'Excused'], true)) {
+            return;
+        }
+
+        $this->tool = $tool;
+    }
+
+    public function applyTool(int $studentId): void
+    {
+        $tool = $this->tool;
+        if (!in_array($tool, ['Present', 'Absent', 'Late', 'Excused'], true)) {
+            $tool = 'Absent';
+        }
+
+        $current = (string) ($this->marks[$studentId]['status'] ?? 'Present');
+
+        if ($tool === 'Present') {
+            $this->marks[$studentId]['status'] = 'Present';
+            return;
+        }
+
+        $this->marks[$studentId]['status'] = $current === $tool ? 'Present' : $tool;
+    }
+
+    public function start(): void
+    {
+        [$section] = $this->validateSelection();
+
+        if (!$section) {
+            $this->dispatch('alert', message: 'Please select a valid section.', type: 'error');
+            return;
+        }
+
+        $sheet = AttendanceSheet::query()->firstOrCreate(
+            [
+                'class_id' => $this->classId,
+                'section_id' => $section->id,
+                'date' => $this->date,
+                'term' => $this->term,
+                'session' => $this->session,
+            ],
+            [
+                'taken_by' => auth()->id(),
+            ],
+        );
+
+        $this->sheetId = $sheet->id;
+        $this->loadMarks($sheet);
+    }
+
+    public function save(): void
+    {
+        [$section] = $this->validateSelection();
+
+        $sheet = AttendanceSheet::query()->firstOrCreate(
+            [
+                'class_id' => $this->classId,
+                'section_id' => $section->id,
+                'date' => $this->date,
+                'term' => $this->term,
+                'session' => $this->session,
+            ],
+            [
+                'taken_by' => auth()->id(),
+            ],
+        );
+
+        $this->sheetId = $sheet->id;
+
+        DB::transaction(function () use ($sheet) {
+            foreach ($this->getStudents() as $student) {
+                $row = $this->marks[$student->id] ?? [];
+                $status = (string) ($row['status'] ?? 'Present');
+                $note = $row['note'] ?? null;
+
+                if (!in_array($status, ['Present', 'Absent', 'Late', 'Excused'], true)) {
+                    throw ValidationException::withMessages([
+                        'marks' => "Invalid attendance status for {$student->full_name}.",
+                    ]);
+                }
+
+                AttendanceMark::query()->updateOrCreate(
+                    [
+                        'sheet_id' => $sheet->id,
+                        'student_id' => $student->id,
+                    ],
+                    [
+                        'status' => $status,
+                        'note' => $note ? (string) $note : null,
+                    ],
+                );
+            }
+        });
+
+        $this->dispatch('alert', message: 'Attendance saved successfully.', type: 'success');
+        $this->dispatchSuccessModal('Attendance Saved', 'The attendance sheet has been updated and registered successfully.');
+    }
+
+    public function markAll(string $status): void
+    {
+        if (!in_array($status, ['Present', 'Absent', 'Late', 'Excused'], true)) {
+            return;
+        }
+
+        foreach ($this->getStudents() as $student) {
+            $this->marks[$student->id]['status'] = $status;
+        }
+    }
+
+    public function cycleStatus(int $studentId): void
+    {
+        $order = ['Present', 'Absent', 'Late', 'Excused'];
+        $current = (string) ($this->marks[$studentId]['status'] ?? 'Present');
+        $index = array_search($current, $order, true);
+        $next = $order[$index === false ? 0 : ($index + 1) % count($order)];
+
+        $this->marks[$studentId]['status'] = $next;
+    }
+
+    public function setMark(int $studentId, string $status): void
+    {
+        if (!in_array($status, ['Present', 'Absent', 'Late', 'Excused'], true)) {
+            return;
+        }
+
+        $this->marks[$studentId]['status'] = $status;
+    }
+
+    private function loadMarks(AttendanceSheet $sheet): void
+    {
+        $this->marks = [];
+        $existing = AttendanceMark::query()
+            ->where('sheet_id', $sheet->id)
+            ->get()
+            ->keyBy('student_id');
+        $students = $this->getStudents();
+        foreach ($students as $student) {
+            $mark = $existing->get($student->id);
+            $this->marks[$student->id] = [
+                'status' => $mark?->status ?? 'Present',
+                'note'   => $mark?->note,
+            ];
+        }
+    }
+
+    private function resetSheet(): void
+    {
+        $this->sheetId = null;
+        $this->marks = [];
+    }
+
+    /**
+     * @return array{0: \App\Models\Section}
+     */
+    private function validateSelection(): array
+    {
+        $this->validate([
+            'classId'   => ['required', 'integer', Rule::exists('classes', 'id')->where('tenant_id', auth()->user()?->tenant_id)],
+            'sectionId' => ['required', 'integer', Rule::exists('sections', 'id')],
+            'date'      => ['required', 'date'],
+            'term'      => ['required', 'integer', 'between:1,3'],
+            'session'   => ['required', 'string', 'max:9', 'regex:/^\d{4}\/\d{4}$/'],
+        ]);
+
+        // Teachers may only record attendance for classes they are assigned to.
+        // Admins and bursars have unrestricted access.
+        $user = auth()->user();
+        if ($user?->role === 'teacher') {
+            $allowedClassIds = $this->getClasses()->pluck('id')->toArray();
+            if (!in_array($this->classId, $allowedClassIds, true)) {
+                throw ValidationException::withMessages([
+                    'classId' => 'You are not authorized to record attendance for this class.',
+                ]);
+            }
+        }
+
+        $section = Section::query()
+            ->where('id', $this->sectionId)
+            ->where('class_id', $this->classId)
+            ->first();
+
+        if (!$section) {
+            throw ValidationException::withMessages([
+                'sectionId' => 'Please select a valid section for the chosen class.',
+            ]);
+        }
+
+        return [$section];
+    }
+
+    private function syncSheetFromSelection(): void
+    {
+        $this->sheetId = null;
+        $this->marks = [];
+
+        if (!$this->classId || !$this->sectionId || !$this->date || !$this->term || !$this->session) {
+            return;
+        }
+
+        $sheet = AttendanceSheet::query()
+            ->where('class_id', $this->classId)
+            ->where('section_id', $this->sectionId)
+            ->where('date', $this->date)
+            ->where('term', $this->term)
+            ->where('session', $this->session)
+            ->first();
+
+        if (!$sheet) {
+            // Pre-initialize empty marks for active students to ensure secure binding
+            $students = $this->getStudents();
+            foreach ($students as $student) {
+                $this->marks[$student->id] = [
+                    'status' => 'Present',
+                    'note'   => null,
+                ];
+            }
+            return;
+        }
+
+        $this->sheetId = $sheet->id;
+        $this->loadMarks($sheet);
+    }
+
+    private function defaultSession(): string
+    {
+        $active = AcademicSession::activeName();
+        if ($active) {
+            return $active;
+        }
+
+        $year = (int) now()->format('Y');
+        $next = $year + 1;
+
+        return "{$year}/{$next}";
+    }
+
+    private function defaultTerm(): int
+    {
+        return AcademicTerm::activeTermNumber();
+    }
+
+    public function render()
+    {
+        $students       = $this->getStudents();
+        $visibleStudents = $this->getVisibleStudents($students);
+        $markCounts     = $this->getMarkCounts($students);
+        $classes        = $this->getClasses();
+        $sections       = $this->getSections();
+        $dateRecords    = $this->getDateRecords();
+
+        return view('livewire.attendance.index', compact(
+            'students', 'visibleStudents', 'markCounts', 'classes', 'sections', 'dateRecords'
+        ));
+    }
+}

@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Fee Payments &amp; Invoices - AcademyHub</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "secondary-fixed": "#d8e2ff",
+                      "secondary": "#adc6ff",
+                      "on-error": "#690005",
+                      "on-primary-fixed-variant": "#653e00",
+                      "tertiary-container": "#c0a1ff",
+                      "secondary-fixed-dim": "#adc6ff",
+                      "on-surface": "#dae2fd",
+                      "primary-container": "#f59e0b",
+                      "primary": "#ffc174",
+                      "surface": "#0b1326",
+                      "inverse-surface": "#dae2fd",
+                      "tertiary-fixed": "#eaddff",
+                      "surface-container-low": "#131b2e",
+                      "on-secondary-fixed": "#001a42",
+                      "surface-bright": "#31394d",
+                      "outline": "#a08e7a",
+                      "surface-tint": "#ffb95f",
+                      "on-secondary-container": "#e6ecff",
+                      "surface-container-lowest": "#060e20",
+                      "on-primary": "#472a00",
+                      "secondary-container": "#0566d9",
+                      "on-tertiary-fixed-variant": "#5a00c6",
+                      "background": "#0b1326",
+                      "on-tertiary-container": "#5600be",
+                      "error-container": "#93000a",
+                      "primary-fixed": "#ffddb8",
+                      "on-primary-container": "#613b00",
+                      "inverse-on-surface": "#283044",
+                      "surface-container-high": "#222a3d",
+                      "surface-container": "#171f33",
+                      "on-surface-variant": "#d8c3ad",
+                      "surface-container-highest": "#2d3449",
+                      "tertiary": "#d8c3ff",
+                      "on-primary-fixed": "#2a1700",
+                      "on-tertiary": "#3f008e",
+                      "primary-fixed-dim": "#ffb95f",
+                      "on-secondary": "#002e6a",
+                      "inverse-primary": "#855300",
+                      "error": "#ffb4ab",
+                      "surface-dim": "#0b1326",
+                      "surface-variant": "#2d3449",
+                      "on-tertiary-fixed": "#25005a",
+                      "on-background": "#dae2fd",
+                      "outline-variant": "#534434",
+                      "on-error-container": "#ffdad6",
+                      "tertiary-fixed-dim": "#d2bbff",
+                      "on-secondary-fixed-variant": "#004395"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "base": "8px",
+                      "stack-sm": "12px",
+                      "gutter": "16px",
+                      "section-gap": "40px",
+                      "container-padding": "24px",
+                      "stack-md": "24px"
+              },
+              "fontFamily": {
+                      "headline-md": [
+                              "Plus Jakarta Sans"
+                      ],
+                      "display": [
+                              "Plus Jakarta Sans"
+                      ],
+                      "label-md": [
+                              "Plus Jakarta Sans"
+                      ],
+                      "title-lg": [
+                              "Plus Jakarta Sans"
+                      ],
+                      "headline-lg-mobile": [
+                              "Plus Jakarta Sans"
+                      ],
+                      "headline-lg": [
+                              "Plus Jakarta Sans"
+                      ],
+                      "body-md": [
+                              "Plus Jakarta Sans"
+                      ],
+                      "body-lg": [
+                              "Plus Jakarta Sans"
+                      ],
+                      "label-sm": [
+                              "Plus Jakarta Sans"
+                      ]
+              },
+              "fontSize": {
+                      "headline-md": [
+                              "24px",
+                              {
+                                      "lineHeight": "32px",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "display": [
+                              "48px",
+                              {
+                                      "lineHeight": "1.2",
+                                      "letterSpacing": "-0.02em",
+                                      "fontWeight": "800"
+                              }
+                      ],
+                      "label-md": [
+                              "14px",
+                              {
+                                      "lineHeight": "20px",
+                                      "letterSpacing": "0.02em",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "title-lg": [
+                              "20px",
+                              {
+                                      "lineHeight": "28px",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "headline-lg-mobile": [
+                              "24px",
+                              {
+                                      "lineHeight": "32px",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "headline-lg": [
+                              "32px",
+                              {
+                                      "lineHeight": "40px",
+                                      "letterSpacing": "-0.01em",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "body-md": [
+                              "16px",
+                              {
+                                      "lineHeight": "24px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "body-lg": [
+                              "18px",
+                              {
+                                      "lineHeight": "28px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "label-sm": [
+                              "12px",
+                              {
+                                      "lineHeight": "16px",
+                                      "fontWeight": "500"
+                              }
+                      ]
+              }
+            }
+          }
+        }
+    </script>
+<style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        
+        /* Subtle glow for primary buttons */
+        .btn-glow {
+            box-shadow: 0 0 20px rgba(245, 158, 11, 0.2);
+            transition: box-shadow 0.3s ease, transform 0.2s ease;
+        }
+        .btn-glow:focus-visible, .btn-glow:hover {
+            box-shadow: 0 0 30px rgba(245, 158, 11, 0.4);
+            transform: translateY(-2px);
+        }
+
+        /* Glassmorphic panel effect */
+        .glass-panel {
+            background: linear-gradient(145deg, rgba(49, 57, 77, 0.6) 0%, rgba(23, 31, 51, 0.8) 100%);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background min-h-screen flex selection:bg-primary/30 selection:text-primary-fixed">
+<!-- Desktop Sidebar Navigation (Hidden on Mobile) -->
+<aside class="hidden md:flex flex-col py-stack-md h-full w-[280px] fixed left-0 top-0 z-[60] bg-surface dark:bg-surface-container-low border-r border-outline-variant/10 shadow-xl transition-all duration-300 ease-in-out">
+<!-- Header Profile -->
+<div class="px-6 mb-8 flex items-center gap-4">
+<div class="w-12 h-12 rounded-full overflow-hidden bg-surface-variant flex-shrink-0">
+<img alt="Principal Avatar" class="w-full h-full object-cover" data-alt="A highly detailed close-up portrait of a professional academic administrator, subtle professional studio lighting, dark mode aesthetic with deep slate tones and soft amber highlights, clean corporate background, sharp focus on facial features, 8k resolution, photorealistic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBZVmp9APH9O2T-jgzQ_HloRDqXOdLzkxURqxOWCmhtIyNVU-lyqH0CBEcBWZf-EVq6GuMPhKOCQ2mEW3llYftOYolSzsX2Y21c7c5_L6rnjLxPu6zUnqTiLJe8YyZoRhz1gJSwL-y77-Swvmjp1lKgfbEVI7Yv-TWBiMGZXb19nYqxWmEVYwXXomMffP-QRIOMZh74dF4AMwQYRRBrXf69ryhRPXGAgTxTLutyJveBYmgH5jOiAWC9KoKzMxgL25vlKb51Nk7xBTk"/>
+</div>
+<div class="flex flex-col">
+<span class="font-label-md text-label-md font-bold text-on-surface">AcademyHub Admin</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">St. Peter's College</span>
+</div>
+</div>
+<!-- Navigation Links -->
+<nav class="flex-1 flex flex-col gap-2">
+<a class="flex items-center gap-4 text-on-surface-variant px-6 py-3 hover:bg-surface-container-highest transition-colors font-label-md text-label-md" href="#">
+<span class="material-symbols-outlined">grid_view</span>
+                Dashboard
+            </a>
+<a class="flex items-center gap-4 text-on-surface-variant px-6 py-3 hover:bg-surface-container-highest transition-colors font-label-md text-label-md" href="#">
+<span class="material-symbols-outlined">mail</span>
+                Messages
+            </a>
+<a class="flex items-center gap-4 text-on-surface-variant px-6 py-3 hover:bg-surface-container-highest transition-colors font-label-md text-label-md" href="#">
+<span class="material-symbols-outlined">assignment</span>
+                Assignments
+            </a>
+<a class="flex items-center gap-4 text-on-surface-variant px-6 py-3 hover:bg-surface-container-highest transition-colors font-label-md text-label-md" href="#">
+<span class="material-symbols-outlined">event_available</span>
+                Attendance
+            </a>
+<a class="flex items-center gap-4 text-on-surface-variant px-6 py-3 hover:bg-surface-container-highest transition-colors font-label-md text-label-md" href="#">
+<span class="material-symbols-outlined">analytics</span>
+                Reports
+            </a>
+<!-- Payments conceptually falls here or under dashboard, leaving inactive for exact match rules -->
+</nav>
+<div class="mt-auto px-6">
+<a class="flex items-center gap-4 text-error px-6 py-3 hover:bg-error/10 rounded-lg transition-colors font-label-md text-label-md mt-4" href="#">
+<span class="material-symbols-outlined">logout</span>
+                Logout
+            </a>
+<div class="mt-4 pt-4 border-t border-outline-variant/10 text-center">
+<span class="font-label-sm text-label-sm text-on-surface-variant/50">v2.4.0</span>
+</div>
+</div>
+</aside>
+<!-- Main Content Wrapper -->
+<div class="flex-1 flex flex-col w-full md:pl-[280px]">
+<!-- TopAppBar (Visible on all sizes, adjusted for desktop) -->
+<header class="w-full top-0 sticky bg-surface dark:bg-surface-container border-b border-outline-variant/10 shadow-sm dark:shadow-none z-40">
+<div class="flex items-center justify-between px-gutter h-16 w-full">
+<button class="text-on-surface-variant active:scale-95 duration-200 hover:bg-surface-container-high transition-colors p-2 rounded-full flex items-center justify-center md:hidden">
+<span class="material-symbols-outlined">arrow_back</span>
+</button>
+<h1 class="font-headline-md text-headline-md font-bold text-primary md:hidden">AcademyHub</h1>
+<!-- Desktop Title Alignment -->
+<h1 class="hidden md:block font-title-lg text-title-lg font-bold text-on-surface ml-4">Payments &amp; Invoices</h1>
+<div class="w-8 h-8 rounded-full overflow-hidden bg-surface-variant active:scale-95 duration-200 hover:bg-surface-container-high transition-colors cursor-pointer ml-auto">
+<img alt="User Profile" class="w-full h-full object-cover" data-alt="A highly detailed close-up portrait of a professional academic user, subtle professional lighting, dark mode aesthetic with deep slate tones and soft amber highlights, clean corporate background, 8k resolution, photorealistic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBOV-CFaOMgwYSPu7ZzVBHsV2yfoqZxjvwjd51BEgeFPQSaIZFrQWSdGUYKYIdUyHy58OgJz3jPA91Ankrqpx5tLVXLFJxHNm-mSbxoGsn2z2iRMnVE5ikPoa7vo-DVj-y2GQIClS2v5AUf4TubXw8e7KC6Wx73xqGV6tzSpozCd45a7aDW7dNIWUUXfvbLpKQ4ukcPhFPMyUqUN9DOaa0LktaYPVxV4IFfcKKSm76z7s-sZ7-deSQVBsIFCvlsKxomrHPvZ9dDvu0"/>
+</div>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="flex-1 p-container-padding pb-32 md:pb-container-padding flex flex-col gap-stack-md max-w-5xl mx-auto w-full">
+<!-- Header Section -->
+<div class="flex flex-col gap-2 mb-2">
+<h2 class="font-headline-lg-mobile md:font-headline-lg text-on-surface">Financial Overview</h2>
+<p class="font-body-md text-body-md text-on-surface-variant">Manage your tuition, fees, and transaction history.</p>
+</div>
+<!-- Balance Card (Top Card) -->
+<div class="relative w-full rounded-[24px] bg-gradient-to-b from-surface-bright to-surface-container border border-white/5 p-6 md:p-8 overflow-hidden shadow-lg group">
+<!-- Decorative glowing orb -->
+<div class="absolute -top-24 -right-24 w-64 h-64 bg-primary/10 rounded-full blur-3xl group-hover:bg-primary/20 transition-all duration-700"></div>
+<div class="relative z-10 flex flex-col gap-6">
+<div class="flex justify-between items-start">
+<div class="flex flex-col gap-1">
+<span class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Total Outstanding Balance</span>
+<span class="font-display text-display text-primary tracking-tight">₦45,000.00</span>
+</div>
+<div class="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center border border-primary/20">
+<span class="material-symbols-outlined text-primary text-2xl" style="font-variation-settings: 'FILL' 1;">account_balance_wallet</span>
+</div>
+</div>
+<div class="flex items-center gap-2 mb-2">
+<span class="w-2 h-2 rounded-full bg-error animate-pulse"></span>
+<span class="font-label-md text-label-md text-on-surface">Includes Term 2 Tuition &amp; Lab Fees</span>
+</div>
+<button class="w-full md:w-auto md:px-12 min-h-[56px] rounded-xl bg-primary text-on-primary font-bold font-label-md text-label-md flex items-center justify-center gap-2 btn-glow">
+<span class="material-symbols-outlined">lock</span>
+                        PAY TOTAL NOW
+                    </button>
+</div>
+</div>
+<!-- Two Column Layout for Desktop -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-stack-md mt-4">
+<!-- History List (Left/Main Column) -->
+<div class="lg:col-span-2 flex flex-col gap-4">
+<h3 class="font-title-lg text-title-lg text-on-surface mb-2">Recent Invoices</h3>
+<!-- Invoice Item 1 (Unpaid) -->
+<div class="glass-panel rounded-[16px] p-5 border border-white/5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-surface-container-high transition-colors cursor-pointer group">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-xl bg-surface-container-highest flex items-center justify-center group-hover:bg-surface border border-white/5 transition-colors">
+<span class="material-symbols-outlined text-on-surface-variant">receipt_long</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-md text-label-md text-on-surface">Term 2 Tuition Fee</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Invoice #INV-2023-089 • Due: Oct 15</span>
+</div>
+</div>
+<div class="flex items-center justify-between sm:justify-end sm:flex-col sm:items-end gap-2 sm:gap-1">
+<span class="font-title-lg text-title-lg text-on-surface">₦35,000.00</span>
+<div class="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-error/10 border border-error/20">
+<span class="w-1.5 h-1.5 rounded-full bg-error"></span>
+<span class="font-label-sm text-label-sm text-error">Unpaid</span>
+</div>
+</div>
+</div>
+<!-- Invoice Item 2 (Unpaid) -->
+<div class="glass-panel rounded-[16px] p-5 border border-white/5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-surface-container-high transition-colors cursor-pointer group">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-xl bg-surface-container-highest flex items-center justify-center group-hover:bg-surface border border-white/5 transition-colors">
+<span class="material-symbols-outlined text-on-surface-variant">science</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-md text-label-md text-on-surface">Science Lab Equipment Fee</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Invoice #INV-2023-090 • Due: Oct 20</span>
+</div>
+</div>
+<div class="flex items-center justify-between sm:justify-end sm:flex-col sm:items-end gap-2 sm:gap-1">
+<span class="font-title-lg text-title-lg text-on-surface">₦10,000.00</span>
+<div class="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-error/10 border border-error/20">
+<span class="w-1.5 h-1.5 rounded-full bg-error"></span>
+<span class="font-label-sm text-label-sm text-error">Unpaid</span>
+</div>
+</div>
+</div>
+<!-- Invoice Item 3 (Paid) -->
+<div class="glass-panel rounded-[16px] p-5 border border-white/5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-surface-container-high transition-colors cursor-pointer group opacity-75">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-xl bg-surface-container-highest flex items-center justify-center group-hover:bg-surface border border-white/5 transition-colors">
+<span class="material-symbols-outlined text-on-surface-variant">menu_book</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-md text-label-md text-on-surface">Term 1 Library Access</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Invoice #INV-2023-012 • Paid: Sep 01</span>
+</div>
+</div>
+<div class="flex items-center justify-between sm:justify-end sm:flex-col sm:items-end gap-2 sm:gap-1">
+<span class="font-title-lg text-title-lg text-on-surface line-through text-on-surface-variant">₦5,000.00</span>
+<div class="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-emerald-500/10 border border-emerald-500/20">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+<span class="font-label-sm text-label-sm text-emerald-400">Paid</span>
+</div>
+</div>
+</div>
+<button class="w-full py-4 mt-2 rounded-xl border-2 border-outline-variant/30 text-primary font-label-md text-label-md hover:bg-surface-container-high transition-colors flex items-center justify-center gap-2">
+                        View Full History
+                        <span class="material-symbols-outlined text-sm">arrow_forward</span>
+</button>
+</div>
+<!-- Bank Details (Right Column) -->
+<div class="flex flex-col gap-4">
+<h3 class="font-title-lg text-title-lg text-on-surface mb-2">Direct Bank Transfer</h3>
+<div class="rounded-[24px] bg-surface-container-low border border-white/5 p-6 flex flex-col gap-6">
+<p class="font-body-sm text-body-sm text-on-surface-variant">
+                            You can make direct transfers to the institution's official account. Please use your Student ID as the payment reference.
+                        </p>
+<div class="flex flex-col gap-4">
+<!-- Detail Item -->
+<div class="flex flex-col gap-1">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Bank Name</span>
+<span class="font-label-md text-label-md text-on-surface">Guaranty Trust Bank (GTB)</span>
+</div>
+<!-- Detail Item -->
+<div class="flex flex-col gap-1">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Account Name</span>
+<span class="font-label-md text-label-md text-on-surface">AcademyHub Institution Ltd</span>
+</div>
+<!-- Detail Item (Copyable) -->
+<div class="flex flex-col gap-1">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Account Number</span>
+<div class="flex items-center justify-between bg-surface-container p-3 rounded-lg border border-white/5">
+<span class="font-title-lg text-title-lg text-primary tracking-widest font-mono">0123456789</span>
+<button class="p-2 rounded-md hover:bg-surface-bright transition-colors text-on-surface-variant" title="Copy Account Number">
+<span class="material-symbols-outlined">content_copy</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+<!-- Mobile Bottom Navigation (Hidden on md+) -->
+<nav class="fixed bottom-0 w-full z-50 rounded-t-xl bg-surface dark:bg-surface-container-high border-t border-outline-variant/10 shadow-[0_-4px_12px_rgba(0,0,0,0.05)] dark:shadow-none md:hidden">
+<div class="flex justify-around items-center h-20 px-4 pb-safe">
+<!-- Home -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary active:scale-90 transition-transform w-16" href="#">
+<span class="material-symbols-outlined mb-1">dashboard</span>
+<span class="font-label-sm text-label-sm">Home</span>
+</a>
+<!-- Academic -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary active:scale-90 transition-transform w-16" href="#">
+<span class="material-symbols-outlined mb-1">school</span>
+<span class="font-label-sm text-label-sm">Academic</span>
+</a>
+<!-- Payments (ACTIVE) -->
+<a class="flex flex-col items-center justify-center bg-primary-container text-on-primary-container rounded-full px-4 py-1 active:scale-90 transition-transform w-20" href="#">
+<span class="material-symbols-outlined mb-1" style="font-variation-settings: 'FILL' 1;">payments</span>
+<span class="font-label-sm text-label-sm font-bold">Payments</span>
+</a>
+<!-- Settings -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary active:scale-90 transition-transform w-16" href="#">
+<span class="material-symbols-outlined mb-1">settings</span>
+<span class="font-label-sm text-label-sm">Settings</span>
+</a>
+</div>
+</nav>
+</body></html>

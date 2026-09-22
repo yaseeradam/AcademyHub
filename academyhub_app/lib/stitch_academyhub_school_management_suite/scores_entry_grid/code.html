@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>AcademyHub - Scores Entry</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "secondary-fixed": "#d8e2ff",
+                        "secondary": "#adc6ff",
+                        "on-error": "#690005",
+                        "on-primary-fixed-variant": "#653e00",
+                        "tertiary-container": "#c0a1ff",
+                        "secondary-fixed-dim": "#adc6ff",
+                        "on-surface": "#dae2fd",
+                        "primary-container": "#f59e0b",
+                        "primary": "#ffc174",
+                        "surface": "#0b1326",
+                        "inverse-surface": "#dae2fd",
+                        "tertiary-fixed": "#eaddff",
+                        "surface-container-low": "#131b2e",
+                        "on-secondary-fixed": "#001a42",
+                        "surface-bright": "#31394d",
+                        "outline": "#a08e7a",
+                        "surface-tint": "#ffb95f",
+                        "on-secondary-container": "#e6ecff",
+                        "surface-container-lowest": "#060e20",
+                        "on-primary": "#472a00",
+                        "secondary-container": "#0566d9",
+                        "on-tertiary-fixed-variant": "#5a00c6",
+                        "background": "#0b1326",
+                        "on-tertiary-container": "#5600be",
+                        "error-container": "#93000a",
+                        "primary-fixed": "#ffddb8",
+                        "on-primary-container": "#613b00",
+                        "inverse-on-surface": "#283044",
+                        "surface-container-high": "#222a3d",
+                        "surface-container": "#171f33",
+                        "on-surface-variant": "#d8c3ad",
+                        "surface-container-highest": "#2d3449",
+                        "tertiary": "#d8c3ff",
+                        "on-primary-fixed": "#2a1700",
+                        "on-tertiary": "#3f008e",
+                        "primary-fixed-dim": "#ffb95f",
+                        "on-secondary": "#002e6a",
+                        "inverse-primary": "#855300",
+                        "error": "#ffb4ab",
+                        "surface-dim": "#0b1326",
+                        "surface-variant": "#2d3449",
+                        "on-tertiary-fixed": "#25005a",
+                        "on-background": "#dae2fd",
+                        "outline-variant": "#534434",
+                        "on-error-container": "#ffdad6",
+                        "tertiary-fixed-dim": "#d2bbff",
+                        "on-secondary-fixed-variant": "#004395"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "base": "8px",
+                        "stack-sm": "12px",
+                        "gutter": "16px",
+                        "section-gap": "40px",
+                        "container-padding": "24px",
+                        "stack-md": "24px"
+                    },
+                    "fontFamily": {
+                        "headline-md": ["Plus Jakarta Sans"],
+                        "display": ["Plus Jakarta Sans"],
+                        "label-md": ["Plus Jakarta Sans"],
+                        "title-lg": ["Plus Jakarta Sans"],
+                        "headline-lg-mobile": ["Plus Jakarta Sans"],
+                        "headline-lg": ["Plus Jakarta Sans"],
+                        "body-md": ["Plus Jakarta Sans"],
+                        "body-lg": ["Plus Jakarta Sans"],
+                        "label-sm": ["Plus Jakarta Sans"]
+                    },
+                    "fontSize": {
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "display": ["48px", { "lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "800" }],
+                        "label-md": ["14px", { "lineHeight": "20px", "letterSpacing": "0.02em", "fontWeight": "600" }],
+                        "title-lg": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "headline-lg-mobile": ["24px", { "lineHeight": "32px", "fontWeight": "700" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "700" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+                        "label-sm": ["12px", { "lineHeight": "16px", "fontWeight": "500" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .glass-panel {
+            background: rgba(19, 27, 46, 0.7);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .score-input {
+            appearance: none;
+            -webkit-appearance: none;
+        }
+        
+        .score-input::-webkit-outer-spin-button,
+        .score-input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface font-body-md min-h-screen flex flex-col relative overflow-x-hidden selection:bg-primary/30">
+<!-- TopAppBar -->
+<header class="bg-surface dark:bg-surface-container border-b border-outline-variant/10 shadow-sm dark:shadow-none w-full top-0 sticky z-[40]">
+<div class="flex items-center justify-between px-gutter h-16 w-full">
+<div class="flex items-center gap-4">
+<button aria-label="Go back" class="p-2 rounded-full hover:bg-surface-container-high transition-colors active:scale-95 duration-200 text-primary dark:text-primary-fixed-dim">
+<span class="material-symbols-outlined" data-icon="arrow_back">arrow_back</span>
+</button>
+<div class="flex flex-col">
+<h1 class="font-headline-md text-headline-md font-bold text-primary">Mathematics · Grade 10</h1>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Scores Entry</span>
+</div>
+</div>
+<button aria-label="User Profile" class="flex items-center justify-center h-10 w-10 rounded-full overflow-hidden hover:bg-surface-container-high transition-colors active:scale-95 duration-200 border border-outline-variant/20">
+<img alt="User Profile" class="h-full w-full object-cover" data-alt="A professional headshot of a teacher or administrator. Modern corporate lighting with a subtle glowing dark mode background featuring Slate-900 tones and a hint of Amber. The person is looking directly at the camera with a calm, institutional authority." src="https://lh3.googleusercontent.com/aida-public/AB6AXuC1oNLKMmXtR8WlainXJOAe3viP9LRom06oo6HmqFoaYRoXudcRFWZpUe__zeNPnIAkvPYtNjHnuoO9pDY0gOF-fjEL5qYKsDDH7jBFUoVk_Nu6Hw0VGHHbOvsec3KunI044FZL6QzHwLM72_s3JyWBp7r-j-Uee12MYwIQ14KY7n5YSFk3jhuOz-0ugsna4-fBZnKAgGXfG7VS6QUK3Tit6pGd3kdpUafdFNzplMR3FCNhIonDxWLd2G4BgHg6roRBGG0TDdXIXzM"/>
+</button>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="flex-1 overflow-y-auto pb-[280px]"> <!-- Padding for keypad overlay -->
+<div class="max-w-7xl mx-auto w-full px-gutter md:px-[48px] py-stack-md">
+<!-- Table Header (Desktop Only) -->
+<div class="hidden md:grid grid-cols-[1fr_auto_auto_auto] gap-4 mb-4 px-4 items-end">
+<div class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider pl-[60px]">Student Details</div>
+<div class="font-label-md text-label-md text-on-surface-variant text-center w-24">CA 1 <br/><span class="font-label-sm text-label-sm opacity-70">Max 20</span></div>
+<div class="font-label-md text-label-md text-on-surface-variant text-center w-24">CA 2 <br/><span class="font-label-sm text-label-sm opacity-70">Max 20</span></div>
+<div class="font-label-md text-label-md text-on-surface-variant text-center w-24 pr-4">EXAM <br/><span class="font-label-sm text-label-sm opacity-70">Max 60</span></div>
+</div>
+<!-- Student Grid -->
+<div class="space-y-stack-sm flex flex-col">
+<!-- Student Row 1 -->
+<div class="bg-surface-container-low rounded-[24px] border border-white/10 p-4 flex flex-col md:flex-row md:items-center gap-4 transition-all hover:bg-surface-container relative overflow-hidden group">
+<div class="absolute inset-0 bg-gradient-to-b from-surface-variant/20 to-transparent pointer-events-none rounded-[24px]"></div>
+<div class="flex items-center gap-4 flex-1 z-10">
+<div class="h-12 w-12 rounded-full overflow-hidden border border-outline-variant/30 flex-shrink-0">
+<img alt="Student Photo" class="h-full w-full object-cover" data-alt="A portrait of a high school student in a neat academic uniform. The lighting is soft and focused, echoing a premium corporate identity against a dark Slate background. The mood is studious and reliable." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDyli9MZnVFdXWN4grFI7-LkUs4pp6TOB5QbEUzveILJ1iAF6Zz9Rg74oj7PN8L6pUSSbdavyZSGvbArgdxRzhO6kq8Rn1fFUC9DGLhdq3YaoFxnCsI4KpCIkDA7LbY-gVPXc9qeQaUiF8lBBFc9btCGalQG4TgnsxYmXFbhN9F6JMHaC-uNjj5ObNei_Ic_RJUAbn56mGKfb8VJBJp86Xh67XnrEsYBbbpuEISzccwxOtWSFh2G0Y-4_QQTGo_cmpiJz605Ho2ltI"/>
+</div>
+<div class="flex flex-col">
+<h3 class="font-title-lg text-title-lg text-on-surface">Alex Carter</h3>
+<span class="font-label-md text-label-md text-on-surface-variant font-mono">ADM-2021-001</span>
+</div>
+</div>
+<div class="flex items-center gap-3 md:gap-4 justify-between md:justify-end z-10 w-full md:w-auto">
+<!-- CA 1 Box (Filled) -->
+<div class="flex flex-col items-center">
+<span class="md:hidden font-label-sm text-label-sm text-on-surface-variant mb-1">CA 1 (20)</span>
+<div class="w-16 h-14 md:w-24 md:h-16 bg-surface-container-highest rounded-xl border border-primary/30 flex items-center justify-center cursor-pointer transition-colors hover:border-primary">
+<span class="font-headline-lg-mobile text-headline-lg-mobile md:font-headline-lg md:text-headline-lg font-bold text-primary">18</span>
+</div>
+</div>
+<!-- CA 2 Box (Empty/Focused) -->
+<div class="flex flex-col items-center">
+<span class="md:hidden font-label-sm text-label-sm text-on-surface-variant mb-1">CA 2 (20)</span>
+<div class="w-16 h-14 md:w-24 md:h-16 bg-surface-container-highest rounded-xl border-2 border-primary shadow-[0_0_15px_rgba(245,158,11,0.2)] flex items-center justify-center cursor-text relative overflow-hidden">
+<div class="absolute inset-0 bg-primary/5"></div>
+<span class="font-headline-lg-mobile text-headline-lg-mobile md:font-headline-lg md:text-headline-lg font-bold text-primary animate-pulse">_</span>
+</div>
+</div>
+<!-- Exam Box (Empty) -->
+<div class="flex flex-col items-center">
+<span class="md:hidden font-label-sm text-label-sm text-on-surface-variant mb-1">EXAM (60)</span>
+<div class="w-16 h-14 md:w-24 md:h-16 bg-surface-container-highest rounded-xl border border-white/10 flex items-center justify-center cursor-pointer transition-colors hover:border-outline-variant">
+<span class="font-headline-md text-headline-md text-on-surface-variant opacity-50">-</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Student Row 2 -->
+<div class="bg-surface-container-low rounded-[24px] border border-white/10 p-4 flex flex-col md:flex-row md:items-center gap-4 transition-all hover:bg-surface-container relative overflow-hidden group">
+<div class="absolute inset-0 bg-gradient-to-b from-surface-variant/20 to-transparent pointer-events-none rounded-[24px]"></div>
+<div class="flex items-center gap-4 flex-1 z-10">
+<div class="h-12 w-12 rounded-full overflow-hidden border border-outline-variant/30 flex-shrink-0">
+<img alt="Student Photo" class="h-full w-full object-cover" data-alt="A portrait of a high school student with a confident expression. Captured in a modern, dark luminescent style with Slate-900 background and very subtle rim lighting. Academic and professional tone." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBMo5vlrZPI4ZYt-3G25uY0OgJck81ygAGycwrcpQPqoppi7xtRo1hbyvVJ0FUWXpTOTlLpagj8r_e4QOGZLui6nPRisTX5dyM4LrsrM1Vpz2LwZHFe3jz2xKlVPato2ljlS9wG3qNtryTRo_-Afw75SSlhIxoIhXFU_nIJg_XGo_Hq_WYgsMTEtnN4wqr3fKPW22FF6aB4WEkvLIAQsUIW9RtELVv7AmEYdw5YyPv9fTLRGB_DMV_K6FXHbsF45Z5bmZmKKqImeSU"/>
+</div>
+<div class="flex flex-col">
+<h3 class="font-title-lg text-title-lg text-on-surface">Elena Rodriguez</h3>
+<span class="font-label-md text-label-md text-on-surface-variant font-mono">ADM-2021-042</span>
+</div>
+</div>
+<div class="flex items-center gap-3 md:gap-4 justify-between md:justify-end z-10 w-full md:w-auto">
+<!-- CA 1 Box (Filled) -->
+<div class="flex flex-col items-center">
+<span class="md:hidden font-label-sm text-label-sm text-on-surface-variant mb-1">CA 1 (20)</span>
+<div class="w-16 h-14 md:w-24 md:h-16 bg-surface-container-highest rounded-xl border border-primary/30 flex items-center justify-center cursor-pointer transition-colors hover:border-primary">
+<span class="font-headline-lg-mobile text-headline-lg-mobile md:font-headline-lg md:text-headline-lg font-bold text-primary">20</span>
+</div>
+</div>
+<!-- CA 2 Box (Filled) -->
+<div class="flex flex-col items-center">
+<span class="md:hidden font-label-sm text-label-sm text-on-surface-variant mb-1">CA 2 (20)</span>
+<div class="w-16 h-14 md:w-24 md:h-16 bg-surface-container-highest rounded-xl border border-primary/30 flex items-center justify-center cursor-pointer transition-colors hover:border-primary">
+<span class="font-headline-lg-mobile text-headline-lg-mobile md:font-headline-lg md:text-headline-lg font-bold text-primary">19</span>
+</div>
+</div>
+<!-- Exam Box (Filled) -->
+<div class="flex flex-col items-center">
+<span class="md:hidden font-label-sm text-label-sm text-on-surface-variant mb-1">EXAM (60)</span>
+<div class="w-16 h-14 md:w-24 md:h-16 bg-surface-container-highest rounded-xl border border-primary/30 flex items-center justify-center cursor-pointer transition-colors hover:border-primary">
+<span class="font-headline-lg-mobile text-headline-lg-mobile md:font-headline-lg md:text-headline-lg font-bold text-primary">55</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Student Row 3 -->
+<div class="bg-surface-container-low rounded-[24px] border border-white/10 p-4 flex flex-col md:flex-row md:items-center gap-4 transition-all hover:bg-surface-container relative overflow-hidden group">
+<div class="absolute inset-0 bg-gradient-to-b from-surface-variant/20 to-transparent pointer-events-none rounded-[24px]"></div>
+<div class="flex items-center gap-4 flex-1 z-10">
+<div class="h-12 w-12 rounded-full overflow-hidden border border-outline-variant/30 flex-shrink-0">
+<img alt="Student Photo" class="h-full w-full object-cover" data-alt="A portrait of a focused student in academic attire. Dark mode aesthetic with Slate-800 to 900 gradient background, ensuring a clean, institutional look that feels modern and premium." src="https://lh3.googleusercontent.com/aida-public/AB6AXuD8RYvzud9Eg9Q3V-_swc_1x5rfKqgV9gwjoxk9QGRgGglyRljQYGNj5mmO6jSBDeIjvvRplWQFObo80HZY0urz3wlOCl2_c0AE33frOO42YfnAdVKMs-CAb1eYOMoEQJnPm8DHKKe3aQQFRcpM6DvqB4xEwiOINpPqhUGTCxPOy99ak0yAzdf3htGNzzon-FjYSPRYYpeKLAzmbwJZn65eYhMAnwxW_Lr9LObaKl1m3tQA6oYTWWVsNAroNT0hQQf593hpk7204H4"/>
+</div>
+<div class="flex flex-col">
+<h3 class="font-title-lg text-title-lg text-on-surface">Marcus Chen</h3>
+<span class="font-label-md text-label-md text-on-surface-variant font-mono">ADM-2021-088</span>
+</div>
+</div>
+<div class="flex items-center gap-3 md:gap-4 justify-between md:justify-end z-10 w-full md:w-auto">
+<!-- CA 1 Box (Empty) -->
+<div class="flex flex-col items-center">
+<span class="md:hidden font-label-sm text-label-sm text-on-surface-variant mb-1">CA 1 (20)</span>
+<div class="w-16 h-14 md:w-24 md:h-16 bg-surface-container-highest rounded-xl border border-white/10 flex items-center justify-center cursor-pointer transition-colors hover:border-outline-variant">
+<span class="font-headline-md text-headline-md text-on-surface-variant opacity-50">-</span>
+</div>
+</div>
+<!-- CA 2 Box (Empty) -->
+<div class="flex flex-col items-center">
+<span class="md:hidden font-label-sm text-label-sm text-on-surface-variant mb-1">CA 2 (20)</span>
+<div class="w-16 h-14 md:w-24 md:h-16 bg-surface-container-highest rounded-xl border border-white/10 flex items-center justify-center cursor-pointer transition-colors hover:border-outline-variant">
+<span class="font-headline-md text-headline-md text-on-surface-variant opacity-50">-</span>
+</div>
+</div>
+<!-- Exam Box (Empty) -->
+<div class="flex flex-col items-center">
+<span class="md:hidden font-label-sm text-label-sm text-on-surface-variant mb-1">EXAM (60)</span>
+<div class="w-16 h-14 md:w-24 md:h-16 bg-surface-container-highest rounded-xl border border-white/10 flex items-center justify-center cursor-pointer transition-colors hover:border-outline-variant">
+<span class="font-headline-md text-headline-md text-on-surface-variant opacity-50">-</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Numeric Keypad Overlay -->
+<div class="fixed bottom-0 left-0 w-full z-50 glass-panel rounded-t-[24px] border-t border-white/10 shadow-[0_-10px_40px_rgba(0,0,0,0.5)] transform transition-transform duration-300">
+<div class="max-w-md mx-auto p-4 pb-safe flex flex-col gap-4">
+<!-- Keypad Header / Status -->
+<div class="flex justify-between items-center px-2">
+<span class="font-label-md text-label-md text-on-surface-variant">Entering for <span class="text-on-surface">Alex Carter (CA 2)</span></span>
+<div class="flex items-center gap-2">
+<span class="font-label-sm text-label-sm text-primary">Max: 20</span>
+</div>
+</div>
+<!-- Keypad Grid -->
+<div class="grid grid-cols-3 gap-2">
+<!-- Row 1 -->
+<button class="bg-surface-container-highest hover:bg-surface-bright active:scale-95 transition-all h-14 rounded-xl flex items-center justify-center font-headline-lg-mobile text-headline-lg-mobile font-bold text-on-surface border border-white/5">1</button>
+<button class="bg-surface-container-highest hover:bg-surface-bright active:scale-95 transition-all h-14 rounded-xl flex items-center justify-center font-headline-lg-mobile text-headline-lg-mobile font-bold text-on-surface border border-white/5">2</button>
+<button class="bg-surface-container-highest hover:bg-surface-bright active:scale-95 transition-all h-14 rounded-xl flex items-center justify-center font-headline-lg-mobile text-headline-lg-mobile font-bold text-on-surface border border-white/5">3</button>
+<!-- Row 2 -->
+<button class="bg-surface-container-highest hover:bg-surface-bright active:scale-95 transition-all h-14 rounded-xl flex items-center justify-center font-headline-lg-mobile text-headline-lg-mobile font-bold text-on-surface border border-white/5">4</button>
+<button class="bg-surface-container-highest hover:bg-surface-bright active:scale-95 transition-all h-14 rounded-xl flex items-center justify-center font-headline-lg-mobile text-headline-lg-mobile font-bold text-on-surface border border-white/5">5</button>
+<button class="bg-surface-container-highest hover:bg-surface-bright active:scale-95 transition-all h-14 rounded-xl flex items-center justify-center font-headline-lg-mobile text-headline-lg-mobile font-bold text-on-surface border border-white/5">6</button>
+<!-- Row 3 -->
+<button class="bg-surface-container-highest hover:bg-surface-bright active:scale-95 transition-all h-14 rounded-xl flex items-center justify-center font-headline-lg-mobile text-headline-lg-mobile font-bold text-on-surface border border-white/5">7</button>
+<button class="bg-surface-container-highest hover:bg-surface-bright active:scale-95 transition-all h-14 rounded-xl flex items-center justify-center font-headline-lg-mobile text-headline-lg-mobile font-bold text-on-surface border border-white/5">8</button>
+<button class="bg-surface-container-highest hover:bg-surface-bright active:scale-95 transition-all h-14 rounded-xl flex items-center justify-center font-headline-lg-mobile text-headline-lg-mobile font-bold text-on-surface border border-white/5">9</button>
+<!-- Row 4 -->
+<button aria-label="Next Input" class="bg-surface-container-low hover:bg-surface-container active:scale-95 transition-all h-14 rounded-xl flex items-center justify-center text-on-surface-variant border border-white/5">
+<span class="material-symbols-outlined" data-icon="keyboard_tab">keyboard_tab</span>
+</button>
+<button class="bg-surface-container-highest hover:bg-surface-bright active:scale-95 transition-all h-14 rounded-xl flex items-center justify-center font-headline-lg-mobile text-headline-lg-mobile font-bold text-on-surface border border-white/5">0</button>
+<button aria-label="Backspace" class="bg-surface-container-low hover:bg-surface-container active:scale-95 transition-all h-14 rounded-xl flex items-center justify-center text-error border border-white/5">
+<span class="material-symbols-outlined" data-icon="backspace">backspace</span>
+</button>
+</div>
+<!-- Action Button -->
+<button class="w-full h-[56px] bg-primary text-on-primary font-label-md text-label-md font-bold rounded-xl shadow-[0_4px_20px_rgba(245,158,11,0.3)] hover:bg-primary-fixed-dim active:scale-95 transition-all flex items-center justify-center gap-2 mt-2">
+<span class="material-symbols-outlined" data-icon="check">check</span>
+                Confirm &amp; Next
+            </button>
+</div>
+</div>
+</body></html>

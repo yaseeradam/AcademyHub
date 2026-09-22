@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>AcademyHub - Login &amp; School Finder</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "secondary-fixed": "#d8e2ff",
+                        "secondary": "#adc6ff",
+                        "on-error": "#690005",
+                        "on-primary-fixed-variant": "#653e00",
+                        "tertiary-container": "#c0a1ff",
+                        "secondary-fixed-dim": "#adc6ff",
+                        "on-surface": "#dae2fd",
+                        "primary-container": "#f59e0b",
+                        "primary": "#ffc174",
+                        "surface": "#0b1326",
+                        "inverse-surface": "#dae2fd",
+                        "tertiary-fixed": "#eaddff",
+                        "surface-container-low": "#131b2e",
+                        "on-secondary-fixed": "#001a42",
+                        "surface-bright": "#31394d",
+                        "outline": "#a08e7a",
+                        "surface-tint": "#ffb95f",
+                        "on-secondary-container": "#e6ecff",
+                        "surface-container-lowest": "#060e20",
+                        "on-primary": "#472a00",
+                        "secondary-container": "#0566d9",
+                        "on-tertiary-fixed-variant": "#5a00c6",
+                        "background": "#0b1326",
+                        "on-tertiary-container": "#5600be",
+                        "error-container": "#93000a",
+                        "primary-fixed": "#ffddb8",
+                        "on-primary-container": "#613b00",
+                        "inverse-on-surface": "#283044",
+                        "surface-container-high": "#222a3d",
+                        "surface-container": "#171f33",
+                        "on-surface-variant": "#d8c3ad",
+                        "surface-container-highest": "#2d3449",
+                        "tertiary": "#d8c3ff",
+                        "on-primary-fixed": "#2a1700",
+                        "on-tertiary": "#3f008e",
+                        "primary-fixed-dim": "#ffb95f",
+                        "on-secondary": "#002e6a",
+                        "inverse-primary": "#855300",
+                        "error": "#ffb4ab",
+                        "surface-dim": "#0b1326",
+                        "surface-variant": "#2d3449",
+                        "on-tertiary-fixed": "#25005a",
+                        "on-background": "#dae2fd",
+                        "outline-variant": "#534434",
+                        "on-error-container": "#ffdad6",
+                        "tertiary-fixed-dim": "#d2bbff",
+                        "on-secondary-fixed-variant": "#004395"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "base": "8px",
+                        "stack-sm": "12px",
+                        "gutter": "16px",
+                        "section-gap": "40px",
+                        "container-padding": "24px",
+                        "stack-md": "24px",
+                        "stack-lg": "32px"
+                    },
+                    "fontFamily": {
+                        "headline-md": ["Plus Jakarta Sans"],
+                        "display": ["Plus Jakarta Sans"],
+                        "label-md": ["Plus Jakarta Sans"],
+                        "title-lg": ["Plus Jakarta Sans"],
+                        "headline-lg-mobile": ["Plus Jakarta Sans"],
+                        "headline-lg": ["Plus Jakarta Sans"],
+                        "body-md": ["Plus Jakarta Sans"],
+                        "body-lg": ["Plus Jakarta Sans"],
+                        "label-sm": ["Plus Jakarta Sans"]
+                    },
+                    "fontSize": {
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "display": ["48px", { "lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "800" }],
+                        "label-md": ["14px", { "lineHeight": "20px", "letterSpacing": "0.02em", "fontWeight": "600" }],
+                        "title-lg": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "headline-lg-mobile": ["24px", { "lineHeight": "32px", "fontWeight": "700" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "700" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+                        "label-sm": ["12px", { "lineHeight": "16px", "fontWeight": "500" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .recessed-input {
+            box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.2);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background min-h-screen flex items-center justify-center p-4">
+<!-- Main Container -->
+<main class="w-full max-w-[480px] flex flex-col items-center gap-stack-lg">
+<!-- Header / Brand -->
+<header class="flex flex-col items-center text-center">
+<div class="h-16 w-16 bg-surface-container-high rounded-full flex items-center justify-center mb-stack-sm relative shadow-lg">
+<div class="absolute inset-0 bg-primary opacity-20 rounded-full blur-md"></div>
+<span class="material-symbols-outlined text-primary text-[32px] z-10" data-icon="school">school</span>
+</div>
+<h1 class="font-headline-lg text-headline-lg text-primary tracking-tight">AcademyHub</h1>
+<p class="font-body-md text-body-md text-on-surface-variant mt-1">Your School Portal</p>
+</header>
+<!-- Login Card -->
+<div class="w-full bg-surface-container rounded-[24px] p-container-padding border border-white/10 shadow-2xl relative overflow-hidden">
+<!-- Subtle gradient overlay -->
+<div class="absolute inset-0 bg-gradient-to-b from-surface-container-highest/20 to-transparent pointer-events-none"></div>
+<!-- Role Selector -->
+<div class="flex border-b border-outline-variant/30 mb-stack-md relative z-10">
+<button class="flex-1 pb-3 text-center relative font-label-md text-label-md text-primary">
+                    Parent
+                    <div class="absolute bottom-[-1px] left-0 w-full h-[2px] bg-primary rounded-t-full"></div>
+</button>
+<button class="flex-1 pb-3 text-center text-on-surface-variant font-label-md text-label-md hover:text-on-surface transition-colors">
+                    Student
+                </button>
+<button class="flex-1 pb-3 text-center text-on-surface-variant font-label-md text-label-md hover:text-on-surface transition-colors">
+                    Staff
+                </button>
+</div>
+<!-- Form -->
+<form class="flex flex-col gap-stack-md relative z-10" onsubmit="event.preventDefault();">
+<!-- School Code Input -->
+<div class="flex flex-col gap-base">
+<label class="font-label-sm text-label-sm text-on-surface-variant flex justify-between items-center">
+                        School Code
+                    </label>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant z-10" data-icon="domain">domain</span>
+<input class="w-full bg-surface-container-low border border-outline-variant/30 rounded-2xl py-4 pl-12 pr-12 font-body-md text-body-md text-on-surface focus:outline-none focus:border-primary/50 recessed-input transition-colors" readonly="" type="text" value="SPC-992"/>
+<div class="absolute right-4 top-1/2 -translate-y-1/2 flex items-center justify-center bg-green-500/10 text-green-400 rounded-full h-6 px-2 gap-1">
+<span class="material-symbols-outlined text-[14px]" data-icon="check_circle">check_circle</span>
+<span class="font-label-sm text-[10px] uppercase font-bold tracking-wider">Verified</span>
+</div>
+</div>
+</div>
+<!-- Admission/Email Input -->
+<div class="flex flex-col gap-base">
+<label class="font-label-sm text-label-sm text-on-surface-variant">Admission Number / Email</label>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant z-10" data-icon="person">person</span>
+<input class="w-full bg-surface-container-lowest border border-outline-variant/30 rounded-2xl py-4 pl-12 pr-4 font-body-md text-body-md text-on-surface placeholder:text-on-surface-variant/50 focus:outline-none focus:border-primary/50 recessed-input transition-colors focus:ring-1 focus:ring-primary/50" placeholder="Enter your ID or email" type="text"/>
+</div>
+</div>
+<!-- Password Input -->
+<div class="flex flex-col gap-base">
+<label class="font-label-sm text-label-sm text-on-surface-variant">Password</label>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant z-10" data-icon="lock">lock</span>
+<input class="w-full bg-surface-container-lowest border border-outline-variant/30 rounded-2xl py-4 pl-12 pr-12 font-body-md text-body-md text-on-surface placeholder:text-on-surface-variant/50 focus:outline-none focus:border-primary/50 recessed-input transition-colors focus:ring-1 focus:ring-primary/50" placeholder="Enter your password" type="password"/>
+<button class="absolute right-4 top-1/2 -translate-y-1/2 text-on-surface-variant hover:text-primary transition-colors focus:outline-none" type="button">
+<span class="material-symbols-outlined" data-icon="visibility">visibility</span>
+</button>
+</div>
+</div>
+<!-- Submit Button -->
+<button class="w-full bg-primary text-surface-container-lowest font-label-md text-label-md font-bold rounded-2xl min-h-[56px] flex items-center justify-center gap-2 mt-2 hover:bg-primary-fixed transition-all relative group overflow-hidden focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background" type="submit">
+<div class="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
+<span class="relative z-10">LOG IN</span>
+<span class="material-symbols-outlined relative z-10 text-[20px]" data-icon="arrow_forward">arrow_forward</span>
+<!-- Glow effect -->
+<div class="absolute inset-0 rounded-2xl bg-primary opacity-30 blur-xl group-focus:opacity-60 transition-opacity"></div>
+</button>
+</form>
+</div>
+<!-- Footer Links -->
+<footer class="flex flex-col items-center gap-4 w-full">
+<a class="font-label-sm text-label-sm text-on-surface-variant hover:text-primary transition-colors" href="#">Forgot Password?</a>
+<div class="w-12 h-[1px] bg-outline-variant/30"></div>
+<a class="font-label-sm text-label-sm text-on-surface-variant flex items-center gap-1 hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined text-[16px]" data-icon="support_agent">support_agent</span>
+                Need help? Contact Admin
+            </a>
+</footer>
+</main>
+<script>
+        // Simple script for tab switching visual effect (no actual logic needed for static mock)
+        document.querySelectorAll('.role-selector button').forEach(button => {
+            button.addEventListener('click', () => {
+                // Remove active styling from all
+                document.querySelectorAll('.role-selector button').forEach(b => {
+                    b.classList.remove('text-primary');
+                    b.classList.add('text-on-surface-variant');
+                    const underline = b.querySelector('.bg-primary');
+                    if(underline) underline.remove();
+                });
+                // Add to clicked
+                button.classList.remove('text-on-surface-variant');
+                button.classList.add('text-primary');
+                button.innerHTML += '<div class="absolute bottom-[-1px] left-0 w-full h-[2px] bg-primary rounded-t-full"></div>';
+            });
+        });
+    </script>
+</body></html>

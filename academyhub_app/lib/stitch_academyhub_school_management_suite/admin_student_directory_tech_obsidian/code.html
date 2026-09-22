@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&amp;family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            obsidian: "#080D1A",
+            "obsidian-card": "#0D1527",
+            "cyan-glow": "#06B6D4",
+            "emerald-glow": "#10B981",
+            "amber-alert": "#F59E0B"
+          },
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace']
+          }
+        }
+      }
+    };
+  </script>
+<style>
+    @layer base {
+      html, body {
+        width: 100vw;
+        margin: 0;
+        padding: 0;
+        background-color: #080D1A;
+      }
+      body {
+        overscroll-behavior: none;
+      }
+      .pb-safe {
+        padding-bottom: env(safe-area-inset-bottom, 12px);
+      }
+      .pt-safe {
+        padding-top: env(safe-area-inset-top, 0px);
+      }
+    }
+    ::-webkit-scrollbar {
+      display: none;
+    }
+    .neon-border-cyan {
+      box-shadow: 0 0 15px -3px rgba(6, 182, 212, 0.15), inset 0 0 0 1px rgba(6, 182, 212, 0.2);
+    }
+    .neon-border-amber {
+      box-shadow: 0 0 15px -3px rgba(245, 158, 11, 0.15), inset 0 0 0 1px rgba(245, 158, 11, 0.25);
+    }
+    .hud-grid {
+      background-image: radial-gradient(rgba(6, 182, 212, 0.08) 1px, transparent 1px);
+      background-size: 16px 16px;
+    }
+  </style>
+</head>
+<body class="bg-obsidian font-sans text-slate-200 flex flex-col antialiased selection:bg-cyan-500 selection:text-black min-h-screen">
+<!-- Tech Header Bar -->
+<header class="fixed top-0 w-full z-50 pt-safe bg-[#080D1A]/90 backdrop-blur-xl border-b border-cyan-500/20">
+<div class="h-16 px-4 flex items-center justify-between gap-2">
+<!-- Title & Live Status -->
+<div class="flex items-center gap-2.5 min-w-0">
+<div class="w-8 h-8 rounded-lg bg-cyan-500/10 border border-cyan-500/40 flex items-center justify-center shrink-0 shadow-[0_0_10px_rgba(6,182,212,0.3)]">
+<span class="material-symbols-outlined text-cyan-400 text-[18px]">terminal</span>
+</div>
+<div class="flex flex-col min-w-0">
+<div class="flex items-center gap-1.5">
+<span class="font-mono text-[10px] text-cyan-400 font-bold uppercase tracking-wider">STUDENT DIRECTORY // ADMIN</span>
+<span class="inline-flex items-center gap-1 px-1.5 py-0.2 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-[9px] font-mono text-emerald-400 font-medium">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span>
+              LIVE SYNC
+            </span>
+</div>
+<div class="flex items-center gap-1 text-slate-100 font-bold text-sm tracking-tight truncate">
+<span>Apex Heights Int'l</span>
+<span class="material-symbols-outlined text-[16px] text-slate-400">arrow_drop_down</span>
+</div>
+</div>
+</div>
+<!-- Quick Action Controls -->
+<div class="flex items-center gap-1.5 shrink-0">
+<button aria-label="Notifications" class="relative w-9 h-9 rounded-lg bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-300 hover:text-cyan-400 hover:border-cyan-500/40 transition-all">
+<span class="material-symbols-outlined text-[19px]">notifications</span>
+<span class="absolute 1.5 top-1.5 right-1.5 w-2 h-2 rounded-full bg-cyan-400 ring-2 ring-[#080D1A]"></span>
+</button>
+<div class="w-9 h-9 rounded-lg bg-gradient-to-tr from-cyan-600 to-cyan-400 p-[1px] shrink-0">
+<div class="w-full h-full rounded-[7px] bg-[#080D1A] flex items-center justify-center overflow-hidden">
+<span class="font-mono text-xs font-bold text-cyan-300">AD</span>
+</div>
+</div>
+</div>
+</div>
+</header>
+<!-- Main Directory Body -->
+<main class="flex flex-col relative w-full px-4 pt-20 pb-28 min-h-screen hud-grid">
+<div class="flex flex-col w-full gap-3.5">
+<!-- Compact HUD Metric Cards -->
+<div class="grid grid-cols-3 gap-2">
+<!-- Metric 1 -->
+<div class="p-2.5 rounded-xl bg-slate-900/90 border border-slate-800/80 backdrop-blur flex flex-col justify-between relative overflow-hidden">
+<div class="flex items-center justify-between text-[10px] font-mono text-slate-400 uppercase tracking-tight">
+<span>Enrolled</span>
+<span class="text-cyan-400 font-bold">+12</span>
+</div>
+<div class="mt-1 flex items-baseline gap-1">
+<span class="font-mono text-xl font-extrabold text-white tracking-tight">842</span>
+<span class="text-[10px] text-slate-500 font-mono">active</span>
+</div>
+<div class="w-full h-1 bg-slate-800/80 rounded-full mt-1.5 overflow-hidden">
+<div class="w-full h-full bg-gradient-to-r from-cyan-500 to-blue-500"></div>
+</div>
+</div>
+<!-- Metric 2 -->
+<div class="p-2.5 rounded-xl bg-slate-900/90 border border-slate-800/80 backdrop-blur flex flex-col justify-between relative overflow-hidden">
+<div class="flex items-center justify-between text-[10px] font-mono text-slate-400 uppercase tracking-tight">
+<span>Avg Attend</span>
+<span class="text-emerald-400 font-bold">↑0.8%</span>
+</div>
+<div class="mt-1 flex items-baseline gap-0.5">
+<span class="font-mono text-xl font-extrabold text-emerald-400 tracking-tight">98.4</span>
+<span class="text-xs text-emerald-500 font-mono">%</span>
+</div>
+<div class="w-full h-1 bg-slate-800/80 rounded-full mt-1.5 overflow-hidden">
+<div class="w-[98.4%] h-full bg-emerald-400"></div>
+</div>
+</div>
+<!-- Metric 3 -->
+<div class="p-2.5 rounded-xl bg-slate-900/90 border border-slate-800/80 backdrop-blur flex flex-col justify-between relative overflow-hidden">
+<div class="flex items-center justify-between text-[10px] font-mono text-slate-400 uppercase tracking-tight">
+<span>In Arrears</span>
+<span class="text-amber-400 font-bold">14 fee</span>
+</div>
+<div class="mt-1 flex items-baseline gap-1">
+<span class="font-mono text-xl font-extrabold text-amber-400 tracking-tight">₦630k</span>
+</div>
+<div class="w-full h-1 bg-slate-800/80 rounded-full mt-1.5 overflow-hidden">
+<div class="w-[18%] h-full bg-amber-400"></div>
+</div>
+</div>
+</div>
+<!-- Cybernetic Search & Filters -->
+<div class="flex flex-col gap-2">
+<!-- Search Input with Integrated Actions -->
+<div class="relative flex items-center w-full group">
+<span class="material-symbols-outlined absolute left-3.5 text-cyan-400/70 text-[19px] pointer-events-none group-focus-within:text-cyan-400 transition-colors">search</span>
+<input class="w-full h-11 pl-10 pr-16 rounded-xl bg-slate-900/90 border border-slate-800/90 text-slate-100 placeholder:text-slate-500 font-mono text-xs focus:outline-none focus:border-cyan-500/60 focus:ring-1 focus:ring-cyan-500/40 transition-all shadow-inner" placeholder="SEARCH // ID, NAME, CLASS..." type="text"/>
+<div class="absolute right-2 flex items-center gap-1">
+<button aria-label="Filter options" class="h-7 w-7 rounded-lg bg-slate-800/80 border border-slate-700/60 flex items-center justify-center text-slate-400 hover:text-cyan-400 transition-colors">
+<span class="material-symbols-outlined text-[15px]">tune</span>
+</button>
+</div>
+</div>
+<!-- Filter Chips with Neon Badges -->
+<div class="flex items-center gap-1.5 overflow-x-auto pb-0.5 -mx-4 px-4 no-scrollbar">
+<button class="shrink-0 h-7 px-3 rounded-lg bg-cyan-500 text-black font-mono text-[11px] font-bold flex items-center gap-1.5 shadow-[0_0_12px_rgba(6,182,212,0.4)]">
+<span>ALL</span>
+<span class="bg-black/20 px-1 py-0.2 rounded text-[10px]">842</span>
+</button>
+<button class="shrink-0 h-7 px-2.5 rounded-lg bg-slate-900/80 border border-slate-800 text-slate-300 hover:border-cyan-500/40 hover:text-cyan-400 font-mono text-[11px] font-medium flex items-center gap-1.5 transition-all">
+<span>GR-10</span>
+<span class="text-cyan-400/80 text-[10px]">124</span>
+</button>
+<button class="shrink-0 h-7 px-2.5 rounded-lg bg-slate-900/80 border border-slate-800 text-slate-300 hover:border-cyan-500/40 hover:text-cyan-400 font-mono text-[11px] font-medium flex items-center gap-1.5 transition-all">
+<span>GR-11</span>
+<span class="text-slate-500 text-[10px]">118</span>
+</button>
+<button class="shrink-0 h-7 px-2.5 rounded-lg bg-slate-900/80 border border-slate-800 text-slate-300 hover:border-cyan-500/40 hover:text-cyan-400 font-mono text-[11px] font-medium flex items-center gap-1.5 transition-all">
+<span>GR-12</span>
+<span class="text-slate-500 text-[10px]">98</span>
+</button>
+<button class="shrink-0 h-7 px-2.5 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-400 font-mono text-[11px] font-semibold flex items-center gap-1.5 transition-all">
+<span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"></span>
+<span>UNPAID</span>
+<span class="text-amber-300 text-[10px]">14</span>
+</button>
+</div>
+</div>
+<!-- Action & Viewport Header -->
+<div class="flex items-center justify-between gap-2 pt-0.5">
+<div class="flex items-center gap-1.5">
+<span class="font-mono text-[11px] text-cyan-400 font-semibold tracking-wide">[RECORD SET]</span>
+<span class="text-xs text-slate-400 font-medium">Cohort 10-A/B</span>
+<span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-slate-800 text-slate-400">124</span>
+</div>
+<div class="flex items-center gap-1.5">
+<button aria-label="Export Data" class="h-8 px-2.5 rounded-lg bg-slate-900 border border-slate-800 text-slate-300 hover:text-cyan-400 hover:border-cyan-500/40 font-mono text-[11px] flex items-center gap-1 transition-all">
+<span class="material-symbols-outlined text-[15px]">download</span>
+<span>CSV</span>
+</button>
+<button class="h-8 px-3 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-600 text-black font-mono text-[11px] font-bold flex items-center gap-1 shadow-[0_0_12px_rgba(6,182,212,0.35)] active:scale-95 transition-all">
+<span class="material-symbols-outlined text-[16px] text-black">person_add</span>
+<span>ENROLL</span>
+</button>
+</div>
+</div>
+<!-- Student Records Feed -->
+<div class="flex flex-col gap-3 mt-0.5">
+<!-- Student Record 1: Amara Okafor -->
+<div class="flex flex-col p-3.5 rounded-2xl bg-slate-900/90 border border-slate-800/90 hover:border-cyan-500/40 neon-border-cyan transition-all gap-3 relative">
+<!-- Main ID row -->
+<div class="flex items-start gap-3">
+<div class="relative shrink-0">
+<div class="w-13 h-13 p-0.5 rounded-full bg-gradient-to-tr from-cyan-400 via-blue-500 to-emerald-400 shadow-[0_0_10px_rgba(6,182,212,0.4)]">
+<img alt="Amara Okafor" class="w-12 h-12 rounded-full object-cover" src="https://lh3.googleusercontent.com/aida/AEtjO1UpobiZXc99nJdXMkO8o5lNlWz-uNfjF5kDwuVze-G8Nmmtbe0SMKhZcz3PUWJO1Fc4xQ84YPfrC4ev_1_aBPWJKsach2XdMDw3heCd3R9YqAOp7mswONiFIVt_WKM9M563k7OQSaOYPa5mHGI-WnugNts9u1chdvupjwQpv3kdacoRhpkaV0O9RaCXiCEXlzX8R7ugbizNfl8dIFjAzq1DCai6a-rwOkEp-2lQr38XB_rmQ-I8sqEXSQ"/>
+</div>
+<span class="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-emerald-400 ring-2 ring-slate-900" title="Active"></span>
+</div>
+<div class="flex flex-col flex-1 min-w-0">
+<div class="flex items-center justify-between gap-1">
+<h2 class="font-bold text-base text-white truncate tracking-tight">Amara Okafor</h2>
+<div class="flex items-center gap-1 shrink-0">
+<span class="px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 font-mono text-[10px] font-semibold flex items-center gap-1 shadow-[0_0_8px_rgba(16,185,129,0.2)]">
+<span class="w-1 h-1 rounded-full bg-emerald-400"></span>
+                    CLEARED
+                  </span>
+<button aria-label="Menu" class="text-slate-500 hover:text-slate-200 p-0.5">
+<span class="material-symbols-outlined text-[18px]">more_vert</span>
+</button>
+</div>
+</div>
+<div class="flex items-center gap-2 mt-0.5 flex-wrap">
+<span class="font-mono text-xs text-cyan-400 font-semibold bg-cyan-950/60 px-1.5 py-0.2 rounded border border-cyan-800/40">ADM-2023-014</span>
+<span class="text-[11px] text-slate-400 flex items-center gap-1">
+<span class="material-symbols-outlined text-[13px] text-amber-400">shield</span>
+                  Phoenix House
+                </span>
+</div>
+</div>
+</div>
+<!-- Academic Stream HUD pill -->
+<div class="flex items-center justify-between bg-slate-950/70 rounded-xl p-2 border border-slate-800/60 text-xs">
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-cyan-400 shadow-[0_0_6px_#06b6d4]"></span>
+<span class="font-medium text-slate-300">Grade 10 · Blue</span>
+<span class="font-mono text-[10px] text-cyan-400 uppercase bg-cyan-900/30 px-1.5 py-0.2 rounded border border-cyan-700/30">Science Major</span>
+</div>
+<div class="flex items-center gap-1 font-mono text-[11px] text-emerald-400 font-bold">
+<span>99.2%</span>
+<span class="text-[9px] text-slate-500 font-normal">ATTEND</span>
+</div>
+</div>
+<!-- Action Dock -->
+<div class="grid grid-cols-3 gap-1.5 pt-0.5">
+<a class="h-8 rounded-lg bg-slate-800/90 border border-slate-700/70 hover:border-cyan-500/50 hover:bg-slate-700 text-slate-200 text-xs font-medium flex items-center justify-center gap-1.5 transition-all" href="tel:+2348000000000">
+<span class="material-symbols-outlined text-[15px] text-cyan-400">call</span>
+<span>Voice</span>
+</a>
+<a class="h-8 rounded-lg bg-slate-800/90 border border-slate-700/70 hover:border-emerald-500/50 hover:bg-slate-700 text-slate-200 text-xs font-medium flex items-center justify-center gap-1.5 transition-all" href="#">
+<span class="material-symbols-outlined text-[15px] text-emerald-400">chat</span>
+<span>Notify</span>
+</a>
+<button class="h-8 rounded-lg bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 hover:bg-cyan-500/20 text-xs font-mono font-medium flex items-center justify-center gap-1 transition-all">
+<span class="material-symbols-outlined text-[15px]">analytics</span>
+<span>Ledger</span>
+</button>
+</div>
+</div>
+<!-- Student Record 2: Daniel Kim (Arrears alert) -->
+<div class="flex flex-col p-3.5 rounded-2xl bg-slate-900/90 border border-amber-500/30 neon-border-amber transition-all gap-3 relative">
+<div class="flex items-start gap-3">
+<div class="relative shrink-0">
+<div class="w-13 h-13 p-0.5 rounded-full bg-gradient-to-tr from-amber-500 via-orange-500 to-red-500 shadow-[0_0_10px_rgba(245,158,11,0.35)]">
+<img alt="Daniel Kim" class="w-12 h-12 rounded-full object-cover" src="https://lh3.googleusercontent.com/aida/AEtjO1ULLIG4_yfJ1GNHmKABMX-OiXvOqFcXrbExBes3mk3xp21oy0h5czajqrb3o49i3lcTn576gb8cePD4O2jnUBsMCGA3Mwa0uts1hHEeRn6EBUAnDtZR_qQB_Hcq53OsalyIMZx-n81A5U68eUGxsRadqkEpVp1dvrtgk4nEOkVJDuqP5HJN5bh4pD5RqUtjQiyZ4dRHCWDSU5k2hOf_jkYnfqSeWDxBDkbKvghD-dlsgwH6vPfyKjvsGIQ"/>
+</div>
+<span class="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-amber-400 ring-2 ring-slate-900" title="Notice Active"></span>
+</div>
+<div class="flex flex-col flex-1 min-w-0">
+<div class="flex items-center justify-between gap-1">
+<h2 class="font-bold text-base text-white truncate tracking-tight">Daniel Kim</h2>
+<div class="flex items-center gap-1 shrink-0">
+<span class="px-2 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/40 text-amber-400 font-mono text-[10px] font-bold flex items-center gap-1 shadow-[0_0_8px_rgba(245,158,11,0.25)]">
+<span class="w-1 h-1 rounded-full bg-amber-400 animate-pulse"></span>
+                    ₦45,000 DUE
+                  </span>
+<button aria-label="Menu" class="text-slate-500 hover:text-slate-200 p-0.5">
+<span class="material-symbols-outlined text-[18px]">more_vert</span>
+</button>
+</div>
+</div>
+<div class="flex items-center gap-2 mt-0.5 flex-wrap">
+<span class="font-mono text-xs text-cyan-400 font-semibold bg-cyan-950/60 px-1.5 py-0.2 rounded border border-cyan-800/40">ADM-2023-089</span>
+<span class="text-[11px] text-slate-400 flex items-center gap-1">
+<span class="material-symbols-outlined text-[13px] text-cyan-400">shield</span>
+                  Falcon House
+                </span>
+</div>
+</div>
+</div>
+<!-- Academic Stream HUD pill -->
+<div class="flex items-center justify-between bg-slate-950/70 rounded-xl p-2 border border-slate-800/60 text-xs">
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-amber-400 shadow-[0_0_6px_#f59e0b]"></span>
+<span class="font-medium text-slate-300">Grade 10 · Gold</span>
+<span class="font-mono text-[10px] text-amber-400 uppercase bg-amber-900/30 px-1.5 py-0.2 rounded border border-amber-700/30">Arts &amp; Design</span>
+</div>
+<div class="flex items-center gap-1 font-mono text-[11px] text-slate-300 font-bold">
+<span>94.8%</span>
+<span class="text-[9px] text-slate-500 font-normal">ATTEND</span>
+</div>
+</div>
+<!-- Alert Fast Action Strip -->
+<div class="flex items-center gap-1.5 pt-0.5">
+<button class="flex-1 h-8 rounded-lg bg-amber-500/15 border border-amber-500/40 text-amber-300 hover:bg-amber-500/25 font-mono text-xs font-semibold flex items-center justify-center gap-1.5 transition-all">
+<span class="material-symbols-outlined text-[16px] text-amber-400">notifications_active</span>
+<span>DISPATCH REMINDER</span>
+</button>
+<a class="h-8 px-3 rounded-lg bg-slate-800 border border-slate-700 hover:text-cyan-400 text-slate-300 flex items-center justify-center transition-colors" href="tel:+2348000000001">
+<span class="material-symbols-outlined text-[16px]">call</span>
+</a>
+<button class="h-8 px-3 rounded-lg bg-slate-800 border border-slate-700 hover:text-cyan-400 text-slate-300 font-mono text-xs flex items-center justify-center transition-colors">
+<span class="material-symbols-outlined text-[16px]">receipt_long</span>
+</button>
+</div>
+</div>
+<!-- Student Record 3: Lucas Vance (Honors) -->
+<div class="flex flex-col p-3.5 rounded-2xl bg-slate-900/90 border border-slate-800/90 hover:border-cyan-500/40 neon-border-cyan transition-all gap-3 relative">
+<div class="flex items-start gap-3">
+<div class="relative shrink-0">
+<div class="w-13 h-13 p-0.5 rounded-full bg-gradient-to-tr from-cyan-400 via-indigo-500 to-purple-500 shadow-[0_0_10px_rgba(99,102,241,0.35)]">
+<img alt="Lucas Vance" class="w-12 h-12 rounded-full object-cover" src="https://lh3.googleusercontent.com/aida/AEtjO1XvZP0HkNQ-Ae2BagoQuTu0szOyG7ylCeB4M-3jMRKl2qo_0P1odWV5ywlJ6N4CsGXrvqy62ASdRTlZ1uHnNl5-iB8VYCBGa7xApsq54ZPERYeKu5tvhPzqF3vtD5Er2SuL_foghfeNPeHL9AkRZOWH_hCdc63QQWJg5cV61WpspFDi3fSrB4rCpZWgwb0BgbOeFAFJRbM4va9KOYsqiD3lKODHAPpuu5j8C7tRUTnADeprnzoO2_uJoQ"/>
+</div>
+<span class="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-emerald-400 ring-2 ring-slate-900" title="Active"></span>
+</div>
+<div class="flex flex-col flex-1 min-w-0">
+<div class="flex items-center justify-between gap-1">
+<h2 class="font-bold text-base text-white truncate tracking-tight">Lucas Vance</h2>
+<div class="flex items-center gap-1 shrink-0">
+<span class="px-2 py-0.5 rounded-full bg-cyan-500/10 border border-cyan-500/40 text-cyan-300 font-mono text-[10px] font-semibold flex items-center gap-1 shadow-[0_0_8px_rgba(6,182,212,0.2)]">
+<span class="material-symbols-outlined text-[12px] text-cyan-400">verified</span>
+                    HONORS ROLL
+                  </span>
+<button aria-label="Menu" class="text-slate-500 hover:text-slate-200 p-0.5">
+<span class="material-symbols-outlined text-[18px]">more_vert</span>
+</button>
+</div>
+</div>
+<div class="flex items-center gap-2 mt-0.5 flex-wrap">
+<span class="font-mono text-xs text-cyan-400 font-semibold bg-cyan-950/60 px-1.5 py-0.2 rounded border border-cyan-800/40">ADM-2022-105</span>
+<span class="text-[11px] text-slate-400 flex items-center gap-1">
+<span class="material-symbols-outlined text-[13px] text-emerald-400">shield</span>
+                  Emerald House
+                </span>
+</div>
+</div>
+</div>
+<!-- Academic Stream HUD pill -->
+<div class="flex items-center justify-between bg-slate-950/70 rounded-xl p-2 border border-slate-800/60 text-xs">
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_6px_#10b981]"></span>
+<span class="font-medium text-slate-300">Grade 11 · Emerald</span>
+<span class="font-mono text-[10px] text-emerald-400 uppercase bg-emerald-900/30 px-1.5 py-0.2 rounded border border-emerald-700/30">Science &amp; Robotics</span>
+</div>
+<div class="flex items-center gap-1 font-mono text-[11px] text-emerald-400 font-bold">
+<span>98.2%</span>
+<span class="text-[9px] text-slate-500 font-normal">ATTEND</span>
+</div>
+</div>
+<!-- Action Dock -->
+<div class="grid grid-cols-3 gap-1.5 pt-0.5">
+<a class="h-8 rounded-lg bg-slate-800/90 border border-slate-700/70 hover:border-cyan-500/50 hover:bg-slate-700 text-slate-200 text-xs font-medium flex items-center justify-center gap-1.5 transition-all" href="tel:+2348000000002">
+<span class="material-symbols-outlined text-[15px] text-cyan-400">call</span>
+<span>Voice</span>
+</a>
+<a class="h-8 rounded-lg bg-slate-800/90 border border-slate-700/70 hover:border-emerald-500/50 hover:bg-slate-700 text-slate-200 text-xs font-medium flex items-center justify-center gap-1.5 transition-all" href="#">
+<span class="material-symbols-outlined text-[15px] text-emerald-400">chat</span>
+<span>Notify</span>
+</a>
+<button class="h-8 rounded-lg bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 hover:bg-cyan-500/20 text-xs font-mono font-medium flex items-center justify-center gap-1 transition-all">
+<span class="material-symbols-outlined text-[15px]">badge</span>
+<span>Ledger</span>
+</button>
+</div>
+</div>
+</div>
+<!-- High-Tech Pagination Controls -->
+<div class="flex flex-col items-center justify-center py-3 gap-2 mt-1">
+<p class="font-mono text-[11px] text-slate-400">
+          INDEX <span class="text-cyan-400 font-bold">1-3</span> OF <span class="text-white font-bold">842</span> ENTRIES // PG 1
+        </p>
+<div class="flex items-center gap-1.5">
+<button class="h-8 px-2.5 rounded-lg bg-slate-900 border border-slate-800 text-slate-400 hover:text-cyan-400 text-xs font-mono flex items-center gap-1 transition-colors">
+<span class="material-symbols-outlined text-[16px]">chevron_left</span>
+<span>PREV</span>
+</button>
+<div class="flex items-center gap-1">
+<span class="w-8 h-8 rounded-lg bg-cyan-500 text-black font-mono text-xs font-bold flex items-center justify-center shadow-[0_0_10px_rgba(6,182,212,0.4)]">01</span>
+<button class="w-8 h-8 rounded-lg bg-slate-900 border border-slate-800 hover:border-cyan-500/40 text-slate-400 hover:text-cyan-400 font-mono text-xs flex items-center justify-center transition-colors">02</button>
+<button class="w-8 h-8 rounded-lg bg-slate-900 border border-slate-800 hover:border-cyan-500/40 text-slate-400 hover:text-cyan-400 font-mono text-xs flex items-center justify-center transition-colors">03</button>
+</div>
+<button class="h-8 px-2.5 rounded-lg bg-slate-900 border border-slate-800 text-slate-400 hover:text-cyan-400 text-xs font-mono flex items-center gap-1 transition-colors">
+<span>NEXT</span>
+<span class="material-symbols-outlined text-[16px]">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+</main>
+<!-- Neo-Floating Dock Navigation -->
+<nav class="fixed bottom-3 left-4 right-4 z-50 pb-safe">
+<div class="h-14 px-4 bg-[#0D1527]/90 backdrop-blur-xl border border-cyan-500/30 rounded-2xl flex justify-around items-center shadow-[0_8px_30px_rgba(0,0,0,0.6),0_0_15px_rgba(6,182,212,0.15)]">
+<a class="flex flex-col items-center justify-center gap-0.5 text-slate-400 hover:text-cyan-400 transition-colors" data-path="dashboard-home" href="#">
+<span class="material-symbols-outlined text-[20px]">grid_view</span>
+<span class="font-mono text-[9px] uppercase tracking-wider">Home</span>
+</a>
+<a class="flex flex-col items-center justify-center gap-0.5 text-slate-400 hover:text-cyan-400 transition-colors" data-path="academic-records" href="#">
+<span class="material-symbols-outlined text-[20px]">school</span>
+<span class="font-mono text-[9px] uppercase tracking-wider">Courses</span>
+</a>
+<!-- Active Tab with Neon Under-Glow -->
+<a aria-current="page" class="relative flex flex-col items-center justify-center gap-0.5 text-cyan-400 transition-colors font-bold" data-path="timetable-and-students" href="#">
+<div class="absolute -top-3 w-8 h-1 bg-cyan-400 rounded-full shadow-[0_0_10px_#06b6d4]"></div>
+<span class="material-symbols-outlined text-[22px] drop-shadow-[0_0_8px_rgba(6,182,212,0.6)]">badge</span>
+<span class="font-mono text-[9px] uppercase tracking-wider">Directory</span>
+</a>
+<a class="flex flex-col items-center justify-center gap-0.5 text-slate-400 hover:text-cyan-400 transition-colors" data-path="portal-settings" href="#">
+<span class="material-symbols-outlined text-[20px]">tune</span>
+<span class="font-mono text-[9px] uppercase tracking-wider">Config</span>
+</a>
+</div>
+</nav>
+</body></html>

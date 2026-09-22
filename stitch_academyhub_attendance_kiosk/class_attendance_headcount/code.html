@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Plus+Jakarta+Sans:wght@600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config={darkMode:"class",theme:{extend:{colors:{"on-surface-variant":"#534434","outline":"#867461","on-surface":"#191c1e","surface-dim":"#d8dadc","on-error":"#ffffff","on-error-container":"#93000a","on-tertiary":"#ffffff","surface-container-low":"#f2f4f6","secondary-fixed-dim":"#bec6e0","surface-bright":"#f7f9fb","on-secondary":"#ffffff","inverse-on-surface":"#eff1f3","secondary":"#565e74","error":"#ba1a1a","surface-tint":"#855300","primary":"#855300","on-secondary-container":"#5c647a","outline-variant":"#d8c3ad","on-tertiary-fixed-variant":"#3c475a","surface":"#f7f9fb","on-secondary-fixed-variant":"#3f465c","on-primary-container":"#613b00","on-primary-fixed":"#2a1700","surface-container-highest":"#e0e3e5","tertiary-fixed-dim":"#bcc7de","inverse-primary":"#ffb95f","error-container":"#ffdad6","surface-container-lowest":"#ffffff","on-tertiary-fixed":"#111c2d","on-primary-fixed-variant":"#653e00","on-primary":"#ffffff","on-tertiary-container":"#394457","secondary-fixed":"#dae2fd","secondary-container":"#dae2fd","on-secondary-fixed":"#131b2e","background":"#f7f9fb","inverse-surface":"#2d3133","surface-variant":"#e0e3e5","tertiary":"#545f73","primary-fixed-dim":"#ffb95f","primary-container":"#f59e0b","surface-container-high":"#e6e8ea","surface-container":"#eceef0","tertiary-container":"#a6b1c8","primary-fixed":"#ffddb8","tertiary-fixed":"#d8e3fb","on-background":"#191c1e"},borderRadius:{DEFAULT:"0.25rem",lg:"0.5rem",xl:"0.75rem",full:"9999px"},spacing:{"space-sm":"0.75rem","space-md":"1.25rem","space-xs":"0.375rem","space-xl":"2.5rem","space-lg":"1.75rem",margin:"2rem",gutter:"1.5rem"},fontFamily:{"label-numeric-keypad":["Plus Jakarta Sans"],"label-action":["Plus Jakarta Sans"],"body-xl":["Inter"],"body-md":["Inter"],"display-kiosk-mobile":["Plus Jakarta Sans"],"headline-xl":["Plus Jakarta Sans"],"headline-sm":["Plus Jakarta Sans"],"body-sm":["Inter"],"headline-xl-mobile":["Plus Jakarta Sans"],"headline-lg":["Plus Jakarta Sans"],"body-lg":["Inter"],"label-badge":["Plus Jakarta Sans"],"headline-md":["Plus Jakarta Sans"],"display-kiosk":["Plus Jakarta Sans"]},fontSize:{"label-numeric-keypad":["32px",{lineHeight:"32px",fontWeight:"700"}],"label-action":["16px",{lineHeight:"20px",letterSpacing:"0.01em",fontWeight:"700"}],"body-xl":["20px",{lineHeight:"28px",fontWeight:"400"}],"body-md":["14px",{lineHeight:"20px",fontWeight:"400"}],"display-kiosk-mobile":["32px",{lineHeight:"40px",letterSpacing:"-0.02em",fontWeight:"800"}],"headline-xl":["36px",{lineHeight:"44px",letterSpacing:"-0.02em",fontWeight:"700"}],"headline-sm":["18px",{lineHeight:"24px",fontWeight:"600"}],"body-sm":["12px",{lineHeight:"16px",fontWeight:"500"}],"headline-xl-mobile":["26px",{lineHeight:"32px",letterSpacing:"-0.01em",fontWeight:"700"}],"headline-lg":["28px",{lineHeight:"36px",letterSpacing:"-0.01em",fontWeight:"700"}],"body-lg":["16px",{lineHeight:"24px",fontWeight:"400"}],"label-badge":["13px",{lineHeight:"16px",letterSpacing:"0.04em",fontWeight:"700"}],"headline-md":["22px",{lineHeight:"28px",fontWeight:"600"}],"display-kiosk":["48px",{lineHeight:"56px",letterSpacing:"-0.03em",fontWeight:"800"}]}}}};</script></head><body class="bg-surface font-body-md text-on-surface antialiased min-h-screen"><header class="fixed top-0 w-full z-50 bg-inverse-surface shadow-[0_4px_20px_rgba(0,0,0,0.25)]"><div class="h-20 w-full px-gutter flex items-center justify-between gap-space-md"><div class="flex items-center gap-space-md shrink-0"><img alt="AcademyGate Logo" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDMV4CipPYrKC8aUqDpvQBpQyO7MmjhMXbCnEjS0BvVAGq0JgusMiiTXUthew9aiiMMTgw42SEep576aP6Y4xaT3hEOroCYB67OextWKESyxns8Gvomfjg2xciCAuKJ3P4Aa7TfreajLqY6pk0bMYovYWxPagQRBrDaZHeCRyfq87L9k6bllQ4yw-om6yHhDUaRvWWNyatj0GRf7P_6CMPwi2V65TngNtg8nmoXAUy1Znxss6cwBCql9Q"/><div class="flex flex-col"><span class="font-headline-sm text-headline-sm font-bold text-inverse-on-surface tracking-tight leading-none">AI ACADEMY</span><span class="font-body-sm text-body-sm text-primary-fixed font-semibold tracking-wider uppercase mt-1">ATTENDANCE KIOSK &amp; GATE MONITOR</span></div></div><nav class="hidden xl:flex items-center gap-2 p-1.5 bg-surface-container-highest/10 rounded-xl" data-active-classes="bg-primary-container text-on-primary-container font-bold rounded-xl"><a class="px-space-md py-2.5 rounded-xl font-label-action text-label-action text-inverse-on-surface/80 hover:text-inverse-on-surface hover:bg-surface-container-highest/20 transition-all" data-path="live-gate-monitor" href="#">Live Gate Monitor</a><a aria-current="page" class="px-space-md py-2.5 transition-all bg-primary-container text-on-primary-container font-bold rounded-xl" data-path="class-attendance" href="#">Class Attendance</a><a class="px-space-md py-2.5 rounded-xl font-label-action text-label-action text-inverse-on-surface/80 hover:text-inverse-on-surface hover:bg-surface-container-highest/20 transition-all" data-path="student-directory" href="#">Student Directory</a><a class="px-space-md py-2.5 rounded-xl font-label-action text-label-action text-inverse-on-surface/80 hover:text-inverse-on-surface hover:bg-surface-container-highest/20 transition-all" data-path="reports-export" href="#">Reports &amp; Export</a></nav><div class="flex items-center gap-space-md shrink-0"><div class="hidden lg:flex items-center gap-2 px-3 py-1.5 bg-inverse-surface/90 border border-outline-variant/30 rounded-full shadow-inner"><span class="inline-block w-2.5 h-2.5 rounded-full bg-primary-container animate-pulse"></span><span class="font-body-sm text-body-sm font-semibold tracking-tight text-inverse-on-surface">07:48:22 AM · THU, 24 OCT</span></div><div class="hidden 2xl:flex items-center gap-2"><div class="flex items-center gap-1.5 px-3 py-1 bg-surface-container-lowest/10 border border-outline-variant/20 rounded-full"><span class="w-2 h-2 rounded-full bg-emerald-500"></span><span class="font-body-sm text-body-sm text-inverse-on-surface font-medium">Gate 1 (K40-1)</span></div><div class="flex items-center gap-1.5 px-3 py-1 bg-surface-container-lowest/10 border border-outline-variant/20 rounded-full"><span class="w-2 h-2 rounded-full bg-emerald-500"></span><span class="font-body-sm text-body-sm text-inverse-on-surface font-medium">Gate 2 (K40-2)</span></div></div><button class="p-2 rounded-xl text-inverse-on-surface/80 hover:text-inverse-on-surface hover:bg-surface-container-highest/20 transition-colors" title="Fullscreen Wall TV Mode" type="button"><span class="material-symbols-outlined text-2xl">tv</span></button><div class="flex items-center gap-3 pl-space-sm border-l border-outline-variant/20"><div class="hidden md:flex flex-col text-right"><span class="font-body-sm text-body-sm font-bold text-inverse-on-surface leading-tight">Officer Ngozi A.</span><span class="font-body-sm text-body-sm text-inverse-on-surface/60 leading-none">Gate Desk 1</span></div><img alt="Profile" class="w-8 h-8 rounded-full object-cover ring-2 ring-primary-container" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAKv09nhQCuVMGprlfImS9zYYjqsVW0bMRS2nUKDCcDExAZHKntrMKdDF-4dTuN-4mrDEZjGHF5wC4yZLhZEbhsLkXwuycpS14tMTImK22u24tebGaHwQxbMaY3alCbsLoUzsndVIoUCDbJBG1_ZzA-GQQVL0uTDrYS-uxS-ZnquPpbHzLBtDaOhxgn1E3vyap5qeDZNW7OoZVHds60jaW6T_kBnDNavWPKGTtzKOsbIFZDpdvY3jJuaA"/></div></div></div></header><main class="w-full pt-20 bg-surface min-h-[calc(100vh-5rem)]"><div class="w-full max-w-[1440px] mx-auto p-gutter"><div class="flex flex-col w-full">
+<!-- Interactive Control Header -->
+<div class="flex flex-col xl:flex-row xl:items-center justify-between gap-space-md mb-space-lg">
+<div class="flex flex-wrap items-center gap-space-sm">
+<div class="flex items-center gap-3 px-space-md py-2.5 bg-surface-container-lowest rounded-xl shadow-sm">
+<span class="material-symbols-outlined text-primary-container" style="font-variation-settings: 'FILL' 1;">calendar_today</span>
+<div class="flex flex-col">
+<span class="font-body-sm text-body-sm text-secondary uppercase font-semibold tracking-wider">Attendance Scope</span>
+<span class="font-headline-sm text-headline-sm text-on-surface font-bold">Thursday, October 24, 2024</span>
+</div>
+</div>
+<button class="group flex items-center gap-2 px-space-md py-2.5 bg-surface-container-lowest hover:bg-surface-container rounded-xl shadow-sm transition-all text-on-surface" id="refreshBtn" type="button">
+<span class="material-symbols-outlined text-primary group-hover:rotate-180 transition-transform duration-500">sync</span>
+<span class="font-body-md text-body-md font-semibold">Live Refresh</span>
+<span class="px-2 py-0.5 rounded-full bg-surface-container-high text-secondary font-body-sm text-body-sm" id="timeAgo">Updated 10s ago</span>
+</button>
+</div>
+<div class="flex items-center gap-space-sm self-start xl:self-auto">
+<button class="flex items-center gap-2 px-space-md py-2.5 bg-surface-container-lowest hover:bg-surface-container text-on-surface rounded-xl shadow-sm transition-all" type="button">
+<span class="material-symbols-outlined text-secondary">tune</span>
+<span class="font-label-action text-label-action">Class Filters</span>
+</button>
+<button class="flex items-center gap-2 px-space-md py-2.5 bg-primary-container hover:bg-amber-600 text-on-primary-container rounded-xl shadow-sm transition-all" type="button">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">file_download</span>
+<span class="font-label-action text-label-action">Export Summary</span>
+</button>
+</div>
+</div>
+<!-- KPI Overview Strip (5 Cards) -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-5 gap-space-md mb-space-xl">
+<!-- 1. Total Enrolled -->
+<div class="relative overflow-hidden bg-surface-container-lowest p-space-md rounded-2xl shadow-sm flex flex-col justify-between">
+<div class="absolute -right-4 -bottom-4 w-24 h-24 bg-primary-fixed/40 rounded-full blur-xl pointer-events-none"></div>
+<div class="flex items-center justify-between mb-space-sm">
+<span class="font-body-sm text-body-sm font-semibold tracking-wider uppercase text-secondary">Total Enrolled</span>
+<div class="w-10 h-10 rounded-xl bg-primary-fixed flex items-center justify-center text-primary">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">school</span>
+</div>
+</div>
+<div>
+<div class="flex items-baseline gap-2">
+<span class="font-headline-xl text-headline-xl text-on-surface font-extrabold">210</span>
+<span class="font-body-md text-body-md text-secondary font-medium">Students</span>
+</div>
+<div class="mt-3 flex items-center gap-2 text-primary font-body-sm text-body-sm font-semibold">
+<span class="w-2 h-2 rounded-full bg-primary-container"></span>
+<span>100% capacity registered</span>
+</div>
+</div>
+</div>
+<!-- 2. Present (On Time) -->
+<div class="relative overflow-hidden bg-surface-container-lowest p-space-md rounded-2xl shadow-sm flex flex-col justify-between">
+<div class="absolute -right-4 -bottom-4 w-24 h-24 bg-emerald-100 rounded-full blur-xl pointer-events-none"></div>
+<div class="flex items-center justify-between mb-space-sm">
+<span class="font-body-sm text-body-sm font-semibold tracking-wider uppercase text-secondary">Present (On Time)</span>
+<div class="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center text-emerald-700">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">verified</span>
+</div>
+</div>
+<div>
+<div class="flex items-baseline gap-2">
+<span class="font-headline-xl text-headline-xl text-on-surface font-extrabold">176</span>
+<span class="font-label-badge text-label-badge text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded-full font-bold">83.8%</span>
+</div>
+<div class="mt-3 flex items-center gap-1.5 text-emerald-700 font-body-sm text-body-sm font-semibold">
+<span class="material-symbols-outlined text-base font-bold">trending_up</span>
+<span>+4.2% vs yesterday (07:45 cutoff)</span>
+</div>
+</div>
+</div>
+<!-- 3. Late Arrivals -->
+<div class="relative overflow-hidden bg-surface-container-lowest p-space-md rounded-2xl shadow-sm flex flex-col justify-between">
+<div class="absolute -right-4 -bottom-4 w-24 h-24 bg-orange-100 rounded-full blur-xl pointer-events-none"></div>
+<div class="flex items-center justify-between mb-space-sm">
+<span class="font-body-sm text-body-sm font-semibold tracking-wider uppercase text-secondary">Late Arrivals</span>
+<div class="w-10 h-10 rounded-xl bg-orange-100 flex items-center justify-center text-orange-700">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">schedule</span>
+</div>
+</div>
+<div>
+<div class="flex items-baseline gap-2">
+<span class="font-headline-xl text-headline-xl text-on-surface font-extrabold">14</span>
+<span class="font-label-badge text-label-badge text-orange-800 bg-orange-100 px-2 py-0.5 rounded-full font-bold">6.7%</span>
+</div>
+<div class="mt-3 flex items-center gap-2 text-orange-800 font-body-sm text-body-sm font-semibold">
+<span class="w-2 h-2 rounded-full bg-orange-500 animate-ping"></span>
+<span>Flagged: Parent SMS dispatched</span>
+</div>
+</div>
+</div>
+<!-- 4. Departed (Checked Out) -->
+<div class="relative overflow-hidden bg-surface-container-lowest p-space-md rounded-2xl shadow-sm flex flex-col justify-between">
+<div class="absolute -right-4 -bottom-4 w-24 h-24 bg-secondary-fixed rounded-full blur-xl pointer-events-none"></div>
+<div class="flex items-center justify-between mb-space-sm">
+<span class="font-body-sm text-body-sm font-semibold tracking-wider uppercase text-secondary">Departed Early</span>
+<div class="w-10 h-10 rounded-xl bg-secondary-container flex items-center justify-center text-on-secondary-fixed-variant">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">output</span>
+</div>
+</div>
+<div>
+<div class="flex items-baseline gap-2">
+<span class="font-headline-xl text-headline-xl text-on-surface font-extrabold">8</span>
+<span class="font-label-badge text-label-badge text-on-secondary-container bg-secondary-fixed px-2 py-0.5 rounded-full font-bold">3.8%</span>
+</div>
+<div class="mt-3 flex items-center gap-1.5 text-secondary font-body-sm text-body-sm">
+<span class="material-symbols-outlined text-base">medical_services</span>
+<span class="truncate">Sick bay &amp; authorized exit</span>
+</div>
+</div>
+</div>
+<!-- 5. Absent Today -->
+<div class="relative overflow-hidden bg-surface-container-lowest p-space-md rounded-2xl shadow-sm flex flex-col justify-between">
+<div class="absolute -right-4 -bottom-4 w-24 h-24 bg-error-container/60 rounded-full blur-xl pointer-events-none"></div>
+<div class="flex items-center justify-between mb-space-sm">
+<span class="font-body-sm text-body-sm font-semibold tracking-wider uppercase text-secondary">Absent Today</span>
+<div class="w-10 h-10 rounded-xl bg-error-container flex items-center justify-center text-error">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">person_off</span>
+</div>
+</div>
+<div>
+<div class="flex items-baseline justify-between gap-2">
+<div class="flex items-baseline gap-2">
+<span class="font-headline-xl text-headline-xl text-error font-extrabold">12</span>
+<span class="font-label-badge text-label-badge text-error bg-error-container px-2 py-0.5 rounded-full font-bold">5.7%</span>
+</div>
+</div>
+<div class="mt-3">
+<button class="w-full py-1.5 px-3 bg-error text-on-error hover:bg-red-800 rounded-lg font-body-sm text-body-sm font-bold flex items-center justify-center gap-1.5 transition-colors shadow-sm" type="button">
+<span class="material-symbols-outlined text-sm">send</span>
+<span>Batch Notify (12)</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Class Breakdown Grid Header -->
+<div class="flex items-center justify-between mb-space-md">
+<div class="flex items-center gap-3">
+<h2 class="font-headline-lg text-headline-lg text-on-surface font-bold tracking-tight">Class Arm Attendance</h2>
+<span class="px-3 py-1 bg-surface-container-high text-secondary rounded-full font-body-sm text-body-sm font-semibold">6 Primary Sections</span>
+</div>
+<div class="hidden sm:flex items-center gap-4 text-secondary font-body-sm text-body-sm">
+<span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-emerald-600"></span>Present</span>
+<span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-orange-500"></span>Late</span>
+<span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-error"></span>Absent</span>
+<span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-secondary"></span>Departed</span>
+</div>
+</div>
+<!-- 6 Distinct Class Arm Cards -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-space-md mb-space-xl">
+<!-- 1. Nursery 1 Gold -->
+<div class="bg-surface-container-lowest rounded-2xl p-space-md shadow-sm flex flex-col justify-between transition-all hover:shadow-md">
+<div>
+<div class="flex items-start justify-between gap-2 mb-3">
+<div>
+<span class="px-2.5 py-0.5 rounded-full bg-primary-fixed text-on-primary-fixed text-body-sm font-body-sm font-bold uppercase tracking-wider">Early Years</span>
+<h3 class="font-headline-md text-headline-md text-on-surface font-bold mt-1">Nursery 1 Gold</h3>
+</div>
+<div class="text-right">
+<span class="font-headline-lg text-headline-lg font-black text-emerald-700">94.3%</span>
+<span class="block font-body-sm text-body-sm text-secondary">33 / 35 Checked-In</span>
+</div>
+</div>
+<div class="flex items-center gap-2 mb-4 text-secondary">
+<img class="w-6 h-6 rounded-full object-cover" data-alt="Warm portrait of primary school female educator Mrs Folake smiling in formal teaching attire against a neutral classroom backdrop" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC4oQnWA0qV_1msH-pX9JSkKBI23rBgSbrAcGQjZqCCPf48TlgdU62t6lq3TXaKqifLsgsxGjGD8ykBcN-snKDpYHlDD7gx7Gs2VfEs93AILcLoIz2V-O-dCNsVG7ZvYE_VgctL8ruzYsX5v6nJsf6u6KH4XGeJbh0PVJGdfAW37R64QolObFRXHvpAfCaqSgIVanY6mfkjdtqdYq4K4ghTTzBj5uf9m6hcuG7J6CY7qi9ZYQV-2g6KZA"/>
+<span class="font-body-sm text-body-sm font-medium text-on-surface">Mrs. Folake</span>
+<span class="text-secondary/40 font-bold">·</span>
+<span class="font-body-sm text-body-sm text-secondary">Room 101</span>
+</div>
+<!-- Progress bar composite -->
+<div class="w-full h-3 bg-surface-container rounded-full overflow-hidden flex mb-4">
+<div class="h-full bg-emerald-600" style="width: 94.3%;" title="94.3% Present"></div>
+<div class="h-full bg-orange-500" style="width: 0%;" title="0% Late"></div>
+<div class="h-full bg-error" style="width: 5.7%;" title="5.7% Absent"></div>
+</div>
+<!-- Sub Breakdown Badges -->
+<div class="grid grid-cols-4 gap-1.5 mb-4 text-center">
+<div class="p-2 bg-emerald-50 rounded-xl">
+<span class="block font-headline-sm text-headline-sm font-bold text-emerald-800">33</span>
+<span class="font-body-sm text-body-sm font-medium text-emerald-700">Present</span>
+</div>
+<div class="p-2 bg-surface-container rounded-xl">
+<span class="block font-headline-sm text-headline-sm font-bold text-secondary">0</span>
+<span class="font-body-sm text-body-sm font-medium text-secondary">Late</span>
+</div>
+<div class="p-2 bg-error-container rounded-xl">
+<span class="block font-headline-sm text-headline-sm font-bold text-error">2</span>
+<span class="font-body-sm text-body-sm font-medium text-error">Absent</span>
+</div>
+<div class="p-2 bg-surface-container rounded-xl">
+<span class="block font-headline-sm text-headline-sm font-bold text-secondary">0</span>
+<span class="font-body-sm text-body-sm font-medium text-secondary">Exit</span>
+</div>
+</div>
+</div>
+<a class="w-full py-2 px-3 bg-surface-container-low hover:bg-surface-container text-on-surface font-label-action text-label-action font-semibold rounded-xl flex items-center justify-center gap-1 transition-colors" href="#">
+<span>View Class Sheet</span>
+<span class="material-symbols-outlined text-sm">arrow_forward</span>
+</a>
+</div>
+<!-- 2. Nursery 1 Green -->
+<div class="bg-surface-container-lowest rounded-2xl p-space-md shadow-sm flex flex-col justify-between transition-all hover:shadow-md">
+<div>
+<div class="flex items-start justify-between gap-2 mb-3">
+<div>
+<span class="px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-900 text-body-sm font-body-sm font-bold uppercase tracking-wider">Early Years</span>
+<h3 class="font-headline-md text-headline-md text-on-surface font-bold mt-1">Nursery 1 Green</h3>
+</div>
+<div class="text-right">
+<span class="font-headline-lg text-headline-lg font-black text-emerald-700">91.2%</span>
+<span class="block font-body-sm text-body-sm text-secondary">31 / 34 Checked-In</span>
+</div>
+</div>
+<div class="flex items-center gap-2 mb-4 text-secondary">
+<img class="w-6 h-6 rounded-full object-cover" data-alt="Portrait of young professional African school teacher Miss Chinwe wearing glasses and smart teaching attire in classroom" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBrQsH0usDSHQj6Vu_bbkE7kxwNVFqvMVIKcnqUg6JyqOANj-KT_GWw3s0wW2W29WG2k8mWsxbDCYnyqwQMmEURJMn8yfYPnX1qvmIK2-wUu2Dpy_a2IeGk1qRRp0NWwq9YVTECj0KXNZPzn9l1Iy23pBkoztov_FqZ1E7esdrQH9iOlrLraBnwqjUN0SL9AXfaCgrZROiF_JSFnct1qIklC04_c-4ziflmHZsxlTdAXlSzkjS8Cvyo9Q"/>
+<span class="font-body-sm text-body-sm font-medium text-on-surface">Miss Chinwe</span>
+<span class="text-secondary/40 font-bold">·</span>
+<span class="font-body-sm text-body-sm text-secondary">Room 102</span>
+</div>
+<div class="w-full h-3 bg-surface-container rounded-full overflow-hidden flex mb-4">
+<div class="h-full bg-emerald-600" style="width: 88.3%;"></div>
+<div class="h-full bg-orange-500" style="width: 2.9%;"></div>
+<div class="h-full bg-error" style="width: 8.8%;"></div>
+</div>
+<div class="grid grid-cols-4 gap-1.5 mb-4 text-center">
+<div class="p-2 bg-emerald-50 rounded-xl">
+<span class="block font-headline-sm text-headline-sm font-bold text-emerald-800">30</span>
+<span class="font-body-sm text-body-sm font-medium text-emerald-700">On Time</span>
+</div>
+<div class="p-2 bg-orange-50 rounded-xl">
+<span class="block font-headline-sm text-headline-sm font-bold text-orange-800">1</span>
+<span class="font-body-sm text-body-sm font-medium text-orange-700">Late</span>
+</div>
+<div class="p-2 bg-error-container rounded-xl">
+<span class="block font-headline-sm text-headline-sm font-bold text-error">2</span>
+<span class="font-body-sm text-body-sm font-medium text-error">Absent</span>
+</div>
+<div class="p-2 bg-secondary-container rounded-xl">
+<span class="block font-headline-sm text-headline-sm font-bold text-on-secondary-container">1</span>
+<span class="font-body-sm text-body-sm font-medium text-on-secondary-container">Exit</span>
+</div>
+</div>
+</div>
+<a class="w-full py-2 px-3 bg-surface-container-low hover:bg-surface-container text-on-surface font-label-action text-label-action font-semibold rounded-xl flex items-center justify-center gap-1 transition-colors" href="#">
+<span>View Class Sheet</span>
+<span class="material-symbols-outlined text-sm">arrow_forward</span>
+</a>
+</div>
+<!-- 3. Nursery 1 Silver -->
+<div class="bg-surface-container-lowest rounded-2xl p-space-md shadow-sm flex flex-col justify-between transition-all hover:shadow-md">
+<div>
+<div class="flex items-start justify-between gap-2 mb-3">
+<div>
+<span class="px-2.5 py-0.5 rounded-full bg-surface-container-high text-secondary text-body-sm font-body-sm font-bold uppercase tracking-wider">Early Years</span>
+<h3 class="font-headline-md text-headline-md text-on-surface font-bold mt-1">Nursery 1 Silver</h3>
+</div>
+<div class="text-right">
+<span class="font-headline-lg text-headline-lg font-black text-emerald-700">90.9%</span>
+<span class="block font-body-sm text-body-sm text-secondary">30 / 33 Checked-In</span>
+</div>
+</div>
+<div class="flex items-center gap-2 mb-4 text-secondary">
+<img class="w-6 h-6 rounded-full object-cover" data-alt="Headshot of cheerful male elementary teacher Mr Usman in collared navy polo shirt in school computer lab setting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC2ODk25K3kgfwwY0J0IIoKh0tV8_cppMcr845wOq3MIUcVAMQrLJIHwoRhr5wSfl9DhLI2CkyIvAAtoPGWRnoCb0NwMpmRBcP2ANy9aARxrg225Sk2hMHi2LacARZzS3OB1JWWsgpXCb3MbGqsQBEba2h1j135Dh4d5iXSadu5IOLuLWWUkE2h4bpNmAN2i7flRvoSBxa6aNS3MG4lQ7zRSet6RavEjJEGE_CySKSsnd-YYevUHw3UZA"/>
+<span class="font-body-sm text-body-sm font-medium text-on-surface">Mr. Usman</span>
+<span class="text-secondary/40 font-bold">·</span>
+<span class="font-body-sm text-body-sm text-secondary">Room 103</span>
+</div>
+<div class="w-full h-3 bg-surface-container rounded-full overflow-hidden flex mb-4">
+<div class="h-full bg-emerald-600" style="width: 90.9%;"></div>
+<div class="h-full bg-orange-500" style="width: 0%;"></div>
+<div class="h-full bg-error" style="width: 9.1%;"></div>
+</div>
+<div class="grid grid-cols-4 gap-1.5 mb-4 text-center">
+<div class="p-2 bg-emerald-50 rounded-xl">
+<span class="block font-headline-sm text-headline-sm font-bold text-emerald-800">30</span>
+<span class="font-body-sm text-body-sm font-medium text-emerald-700">Present</span>
+</div>
+<div class="p-2 bg-surface-container rounded-xl">
+<span class="block font-headline-sm text-headline-sm font-bold text-secondary">0</span>
+<span class="font-body-sm text-body-sm font-medium text-secondary">Late</span>
+</div>
+<div class="p-2 bg-error-container rounded-xl">
+<span class="block font-headline-sm text-headline-sm font-bold text-error">3</span>
+<span class="font-body-sm text-body-sm font-medium text-error">Absent</span>
+</div>
+<div class="p-2 bg-surface-container rounded-xl">
+<span class="block font-headline-sm text-headline-sm font-bold text-secondary">0</span>
+<span class="font-body-sm text-body-sm font-medium text-secondary">Exit</span>
+</div>
+</div>
+</div>
+<a class="w-full py-2 px-3 bg-surface-container-low hover:bg-surface-container text-on-surface font-label-action text-label-action font-semibold rounded-xl flex items-center justify-center gap-1 transition-colors" href="#">
+<span>View Class Sheet</span>
+<span class="material-symbols-outlined text-sm">arrow_forward</span>
+</a>
+</div>
+<!-- 4. Basic 1 Gold -->
+<div class="bg-surface-container-lowest rounded-2xl p-space-md shadow-sm flex flex-col justify-between transition-all hover:shadow-md">
+<div>
+<div class="flex items-start justify-between gap-2 mb-3">
+<div>
+<span class="px-2.5 py-0.5 rounded-full bg-primary-fixed text-on-primary-fixed text-body-sm font-body-sm font-bold uppercase tracking-wider">Primary Grade</span>
+<h3 class="font-headline-md text-headline-md text-on-surface font-bold mt-1">Basic 1 Gold</h3>
+</div>
+<div class="text-right">
+<span class="font-headline-lg text-headline-lg font-black text-emerald-700">94.4%</span>
+<span class="block font-body-sm text-body-sm text-secondary">34 / 36 Checked-In</span>
+</div>
+</div>
+<div class="flex items-center gap-2 mb-4 text-secondary">
+<img class="w-6 h-6 rounded-full object-cover" data-alt="Portrait of senior female teacher Mrs Adesina wearing traditional patterned scarf and eyeglasses in organized primary school library" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBSskDCgSYT8xAkJP_2NAqORmdJd7MznsG8l33Tq5LAIoFKHwSYTvqrXkZdDdDBK3eDgB-dWcZn4FJvodKoaRuq2DTVItlRiUUwTgP_GzOmkAeAhk714XHy3hb3s3x13-qkaBPMaYJzqcTpQi5WmD6vvVY57_GuvhsiJaP_3dU03VYJlc1poNdguMEfdICL68HKPqKwWGyaWezMmlqsr1IG7Zo3AgrBE1_oqtbB_hx51tsvnvWhdbyRyg"/>
+<span class="font-body-sm text-body-sm font-medium text-on-surface">Mrs. Adesina</span>
+<span class="text-secondary/40 font-bold">·</span>
+<span class="font-body-sm text-body-sm text-secondary">Room 201</span>
+</div>
+<div class="w-full h-3 bg-surface-container rounded-full overflow-hidden flex mb-4">
+<div class="h-full bg-emerald-600" style="width: 94.4%;"></div>
+<div class="h-full bg-orange-500" style="width: 0%;"></div>
+<div class="h-full bg-error" style="width: 5.6%;"></div>
+</div>
+<div class="grid grid-cols-4 gap-1.5 mb-4 text-center">
+<div class="p-2 bg-emerald-50 rounded-xl">
+<span class="block font-headline-sm text-headline-sm font-bold text-emerald-800">34</span>
+<span class="font-body-sm text-body-sm font-medium text-emerald-700">Present</span>
+</div>
+<div class="p-2 bg-surface-container rounded-xl">
+<span class="block font-headline-sm text-headline-sm font-bold text-secondary">0</span>
+<span class="font-body-sm text-body-sm font-medium text-secondary">Late</span>
+</div>
+<div class="p-2 bg-error-container rounded-xl">
+<span class="block font-headline-sm text-headline-sm font-bold text-error">2</span>
+<span class="font-body-sm text-body-sm font-medium text-error">Absent</span>
+</div>
+<div class="p-2 bg-secondary-container rounded-xl">
+<span class="block font-headline-sm text-headline-sm font-bold text-on-secondary-container">2</span>
+<span class="font-body-sm text-body-sm font-medium text-on-secondary-container">Exit</span>
+</div>
+</div>
+</div>
+<a class="w-full py-2 px-3 bg-surface-container-low hover:bg-surface-container text-on-surface font-label-action text-label-action font-semibold rounded-xl flex items-center justify-center gap-1 transition-colors" href="#">
+<span>View Class Sheet</span>
+<span class="material-symbols-outlined text-sm">arrow_forward</span>
+</a>
+</div>
+<!-- 5. Basic 1 Silver -->
+<div class="bg-surface-container-lowest rounded-2xl p-space-md shadow-sm flex flex-col justify-between transition-all hover:shadow-md">
+<div>
+<div class="flex items-start justify-between gap-2 mb-3">
+<div>
+<span class="px-2.5 py-0.5 rounded-full bg-surface-container-high text-secondary text-body-sm font-body-sm font-bold uppercase tracking-wider">Primary Grade</span>
+<h3 class="font-headline-md text-headline-md text-on-surface font-bold mt-1">Basic 1 Silver</h3>
+</div>
+<div class="text-right">
+<span class="font-headline-lg text-headline-lg font-black text-emerald-700">88.9%</span>
+<span class="block font-body-sm text-body-sm text-secondary">32 / 36 Checked-In</span>
+</div>
+</div>
+<div class="flex items-center gap-2 mb-4 text-secondary">
+<img class="w-6 h-6 rounded-full object-cover" data-alt="Portrait of male teacher Mr Nnamdi in light blue shirt holding educational tablet in brightly lit classroom" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCxapTy87y3GyTHB5G4crZPfmBCmIgdpaMCPENK68Kw2y4loCwKOqXSb7c754UTyM5wyezOU7Rwfhx1L7U5T055Ql-YX3Mr_uQXj4KNhkirHoXgMEWjExstjSnJZFz7sluxEwGU7EYZ7obFhBLjQZ8KVWn9tEoC1VmKeoyUp7RPo9BqptDajjLWTE9feEHw3zoVLz9qxDMoNTJZxqBT5Se5B4Z4vGr-CzxsqHd-KVt8afxpGwVUfQhvbQ"/>
+<span class="font-body-sm text-body-sm font-medium text-on-surface">Mr. Nnamdi</span>
+<span class="text-secondary/40 font-bold">·</span>
+<span class="font-body-sm text-body-sm text-secondary">Room 202</span>
+</div>
+<div class="w-full h-3 bg-surface-container rounded-full overflow-hidden flex mb-4">
+<div class="h-full bg-emerald-600" style="width: 83.3%;"></div>
+<div class="h-full bg-orange-500" style="width: 5.6%;"></div>
+<div class="h-full bg-error" style="width: 11.1%;"></div>
+</div>
+<div class="grid grid-cols-4 gap-1.5 mb-4 text-center">
+<div class="p-2 bg-emerald-50 rounded-xl">
+<span class="block font-headline-sm text-headline-sm font-bold text-emerald-800">30</span>
+<span class="font-body-sm text-body-sm font-medium text-emerald-700">On Time</span>
+</div>
+<div class="p-2 bg-orange-50 rounded-xl">
+<span class="block font-headline-sm text-headline-sm font-bold text-orange-800">2</span>
+<span class="font-body-sm text-body-sm font-medium text-orange-700">Late</span>
+</div>
+<div class="p-2 bg-error-container rounded-xl">
+<span class="block font-headline-sm text-headline-sm font-bold text-error">2</span>
+<span class="font-body-sm text-body-sm font-medium text-error">Absent</span>
+</div>
+<div class="p-2 bg-secondary-container rounded-xl">
+<span class="block font-headline-sm text-headline-sm font-bold text-on-secondary-container">2</span>
+<span class="font-body-sm text-body-sm font-medium text-on-secondary-container">Exit</span>
+</div>
+</div>
+</div>
+<a class="w-full py-2 px-3 bg-surface-container-low hover:bg-surface-container text-on-surface font-label-action text-label-action font-semibold rounded-xl flex items-center justify-center gap-1 transition-colors" href="#">
+<span>View Class Sheet</span>
+<span class="material-symbols-outlined text-sm">arrow_forward</span>
+</a>
+</div>
+<!-- 6. Basic 2 Gold -->
+<div class="bg-surface-container-lowest rounded-2xl p-space-md shadow-sm flex flex-col justify-between transition-all hover:shadow-md">
+<div>
+<div class="flex items-start justify-between gap-2 mb-3">
+<div>
+<span class="px-2.5 py-0.5 rounded-full bg-primary-fixed text-on-primary-fixed text-body-sm font-body-sm font-bold uppercase tracking-wider">Primary Grade</span>
+<h3 class="font-headline-md text-headline-md text-on-surface font-bold mt-1">Basic 2 Gold</h3>
+</div>
+<div class="text-right">
+<span class="font-headline-lg text-headline-lg font-black text-emerald-700">97.2%</span>
+<span class="block font-body-sm text-body-sm text-secondary">35 / 36 Checked-In</span>
+</div>
+</div>
+<div class="flex items-center gap-2 mb-4 text-secondary">
+<img class="w-6 h-6 rounded-full object-cover" data-alt="Portrait of senior head teacher Mrs Balogun smiling warmly with gold lapel pin inside high school administrative wing" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCBpe4ucmJGK8cF17H2oSNViQUvWoaI-JAAu3Du194yWU45mLpByOWVORP4vs5dkvKxguyYIzuRK0giGRoX_oPytiTSgyLHgyzyd9MFNiVF-5hBt3qkSHR75bmUJ5eRh4TukjRCPlVrGNbbVmBABS7n-oE3iUdy9rBb9-67NaOZyr2-xFVcadtvJZ1LgGJKQc6hrSwbUuie-NfB9P1FVcHQAqHkI1EeLW2VpxPVDf8vPs_S34tjFOHGFA"/>
+<span class="font-body-sm text-body-sm font-medium text-on-surface">Mrs. Balogun</span>
+<span class="text-secondary/40 font-bold">·</span>
+<span class="font-body-sm text-body-sm text-secondary">Room 203</span>
+</div>
+<div class="w-full h-3 bg-surface-container rounded-full overflow-hidden flex mb-4">
+<div class="h-full bg-emerald-600" style="width: 97.2%;"></div>
+<div class="h-full bg-orange-500" style="width: 0%;"></div>
+<div class="h-full bg-error" style="width: 2.8%;"></div>
+</div>
+<div class="grid grid-cols-4 gap-1.5 mb-4 text-center">
+<div class="p-2 bg-emerald-50 rounded-xl">
+<span class="block font-headline-sm text-headline-sm font-bold text-emerald-800">35</span>
+<span class="font-body-sm text-body-sm font-medium text-emerald-700">Present</span>
+</div>
+<div class="p-2 bg-surface-container rounded-xl">
+<span class="block font-headline-sm text-headline-sm font-bold text-secondary">0</span>
+<span class="font-body-sm text-body-sm font-medium text-secondary">Late</span>
+</div>
+<div class="p-2 bg-error-container rounded-xl">
+<span class="block font-headline-sm text-headline-sm font-bold text-error">1</span>
+<span class="font-body-sm text-body-sm font-medium text-error">Absent</span>
+</div>
+<div class="p-2 bg-secondary-container rounded-xl">
+<span class="block font-headline-sm text-headline-sm font-bold text-on-secondary-container">3</span>
+<span class="font-body-sm text-body-sm font-medium text-on-secondary-container">Exit</span>
+</div>
+</div>
+</div>
+<a class="w-full py-2 px-3 bg-surface-container-low hover:bg-surface-container text-on-surface font-label-action text-label-action font-semibold rounded-xl flex items-center justify-center gap-1 transition-colors" href="#">
+<span>View Class Sheet</span>
+<span class="material-symbols-outlined text-sm">arrow_forward</span>
+</a>
+</div>
+</div>
+<!-- Bottom Operational Section (Two-Column Layout) -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-space-md items-start">
+<!-- Left Column: Punch Influx Trend Graph (7 Cols) -->
+<div class="lg:col-span-7 bg-surface-container-lowest rounded-2xl p-space-md shadow-sm">
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-space-md">
+<div>
+<h3 class="font-headline-md text-headline-md text-on-surface font-bold">Punch Influx &amp; Turnstile Load</h3>
+<p class="font-body-sm text-body-sm text-secondary">Peak gate traffic recorded between 07:00 AM and 08:30 AM</p>
+</div>
+<div class="flex items-center gap-2">
+<span class="px-2.5 py-1 rounded-md bg-emerald-100 text-emerald-800 font-body-sm text-body-sm font-bold">Normal Flow</span>
+</div>
+</div>
+<!-- Turnstile Distribution Inline SVG Chart -->
+<div class="w-full h-48 mb-space-sm flex flex-col justify-end">
+<svg class="w-full h-full text-primary" fill="none" preserveaspectratio="none" viewbox="0 0 500 150">
+<defs>
+<lineargradient id="chartGradient" x1="0" x2="0" y1="0" y2="1">
+<stop offset="0%" stop-color="#f59e0b" stop-opacity="0.35"></stop>
+<stop offset="100%" stop-color="#f59e0b" stop-opacity="0.0"></stop>
+</lineargradient>
+</defs>
+<!-- Grid lines -->
+<line stroke="#f2f4f6" stroke-dasharray="4 4" stroke-width="1" x1="0" x2="500" y1="30" y2="30"></line>
+<line stroke="#f2f4f6" stroke-dasharray="4 4" stroke-width="1" x1="0" x2="500" y1="75" y2="75"></line>
+<line stroke="#f2f4f6" stroke-dasharray="4 4" stroke-width="1" x1="0" x2="500" y1="120" y2="120"></line>
+<!-- Area fill -->
+<path d="M0,140 L35,135 L70,120 L105,95 L140,50 L175,15 L210,22 L245,65 L280,105 L315,125 L350,135 L385,138 L420,140 L455,142 L500,142 L500,150 L0,150 Z" fill="url(#chartGradient)"></path>
+<!-- Curve stroke -->
+<path d="M0,140 L35,135 L70,120 L105,95 L140,50 L175,15 L210,22 L245,65 L280,105 L315,125 L350,135 L385,138 L420,140 L455,142 L500,142" stroke="#f59e0b" stroke-linecap="round" stroke-linejoin="round" stroke-width="3"></path>
+<!-- Threshold line (Late cut-off at 07:45 - x=245) -->
+<line stroke="#f97316" stroke-dasharray="3 3" stroke-width="2" x1="245" x2="245" y1="0" y2="150"></line>
+<text fill="#f97316" font-family="Plus Jakarta Sans" font-size="10" font-weight="700" x="250" y="20">07:45 Cutoff</text>
+<!-- High point dot -->
+<circle cx="175" cy="15" fill="#f59e0b" r="5" stroke="#ffffff" stroke-width="2"></circle>
+</svg>
+</div>
+<!-- X-Axis Labels -->
+<div class="flex justify-between text-secondary font-body-sm text-body-sm px-1 pt-2 border-t-0">
+<span>07:00</span>
+<span>07:15</span>
+<span>07:30</span>
+<span class="text-orange-700 font-bold">07:45 (Bell)</span>
+<span>08:00</span>
+<span>08:15</span>
+<span>08:30</span>
+</div>
+<div class="mt-space-md grid grid-cols-3 gap-space-sm pt-space-sm bg-surface-container-low p-space-sm rounded-xl">
+<div>
+<span class="block font-body-sm text-body-sm text-secondary">Peak Traffic Window</span>
+<span class="font-headline-sm text-headline-sm font-bold text-on-surface">07:25 - 07:40</span>
+</div>
+<div>
+<span class="block font-body-sm text-body-sm text-secondary">Average Scan Time</span>
+<span class="font-headline-sm text-headline-sm font-bold text-on-surface">1.2 seconds</span>
+</div>
+<div>
+<span class="block font-body-sm text-body-sm text-secondary">Peak Throughput</span>
+<span class="font-headline-sm text-headline-sm font-bold text-primary">64 students / 10m</span>
+</div>
+</div>
+</div>
+<!-- Right Column: Absentee Quick-Action Queue (5 Cols) -->
+<div class="lg:col-span-5 bg-surface-container-lowest rounded-2xl p-space-md shadow-sm">
+<div class="flex items-center justify-between mb-space-md">
+<div>
+<div class="flex items-center gap-2">
+<h3 class="font-headline-md text-headline-md text-on-surface font-bold">Absentee Queue</h3>
+<span class="w-2.5 h-2.5 rounded-full bg-error animate-pulse"></span>
+</div>
+<p class="font-body-sm text-body-sm text-secondary">12 pending guardian contact verifications</p>
+</div>
+<button class="text-error hover:bg-error-container/50 px-2.5 py-1 rounded-lg font-body-sm text-body-sm font-bold transition-colors" type="button">
+          Call All
+        </button>
+</div>
+<!-- Contact Action List -->
+<div class="flex flex-col gap-space-sm">
+<!-- Student 1 -->
+<div class="p-3 bg-surface-container-low hover:bg-surface-container rounded-xl flex items-center justify-between gap-3 transition-colors">
+<div class="flex items-center gap-3 min-w-0">
+<div class="w-10 h-10 rounded-full bg-error-container text-error flex items-center justify-center font-bold text-sm shrink-0">
+              TB
+            </div>
+<div class="min-w-0">
+<span class="font-body-md text-body-md font-bold text-on-surface block truncate">Tariq Bello</span>
+<span class="font-body-sm text-body-sm text-secondary block truncate">Nursery 1 Gold · Mr. Bello (Father)</span>
+</div>
+</div>
+<div class="flex items-center gap-1 shrink-0">
+<button class="p-2 rounded-lg bg-surface-container-lowest hover:bg-emerald-50 text-emerald-700 shadow-sm transition-colors" title="Call Guardian" type="button">
+<span class="material-symbols-outlined text-base">call</span>
+</button>
+<button class="p-2 rounded-lg bg-surface-container-lowest hover:bg-primary-fixed text-primary shadow-sm transition-colors" title="Send SMS" type="button">
+<span class="material-symbols-outlined text-base">chat</span>
+</button>
+</div>
+</div>
+<!-- Student 2 -->
+<div class="p-3 bg-surface-container-low hover:bg-surface-container rounded-xl flex items-center justify-between gap-3 transition-colors">
+<div class="flex items-center gap-3 min-w-0">
+<div class="w-10 h-10 rounded-full bg-error-container text-error flex items-center justify-center font-bold text-sm shrink-0">
+              ZE
+            </div>
+<div class="min-w-0">
+<span class="font-body-md text-body-md font-bold text-on-surface block truncate">Zainab Eze</span>
+<span class="font-body-sm text-body-sm text-secondary block truncate">Basic 1 Silver · Dr. Eze (Mother)</span>
+</div>
+</div>
+<div class="flex items-center gap-1 shrink-0">
+<button class="p-2 rounded-lg bg-surface-container-lowest hover:bg-emerald-50 text-emerald-700 shadow-sm transition-colors" title="Call Guardian" type="button">
+<span class="material-symbols-outlined text-base">call</span>
+</button>
+<button class="p-2 rounded-lg bg-surface-container-lowest hover:bg-primary-fixed text-primary shadow-sm transition-colors" title="Send SMS" type="button">
+<span class="material-symbols-outlined text-base">chat</span>
+</button>
+</div>
+</div>
+<!-- Student 3 -->
+<div class="p-3 bg-surface-container-low hover:bg-surface-container rounded-xl flex items-center justify-between gap-3 transition-colors">
+<div class="flex items-center gap-3 min-w-0">
+<div class="w-10 h-10 rounded-full bg-error-container text-error flex items-center justify-center font-bold text-sm shrink-0">
+              DA
+            </div>
+<div class="min-w-0">
+<span class="font-body-md text-body-md font-bold text-on-surface block truncate">David Adeyemi</span>
+<span class="font-body-sm text-body-sm text-secondary block truncate">Nursery 1 Silver · Pastor Adeyemi</span>
+</div>
+</div>
+<div class="flex items-center gap-1 shrink-0">
+<span class="px-2.5 py-1 bg-amber-100 text-amber-900 rounded-md font-body-sm text-body-sm font-semibold">SMS Sent</span>
+</div>
+</div>
+<!-- Student 4 -->
+<div class="p-3 bg-surface-container-low hover:bg-surface-container rounded-xl flex items-center justify-between gap-3 transition-colors">
+<div class="flex items-center gap-3 min-w-0">
+<div class="w-10 h-10 rounded-full bg-error-container text-error flex items-center justify-center font-bold text-sm shrink-0">
+              FO
+            </div>
+<div class="min-w-0">
+<span class="font-body-md text-body-md font-bold text-on-surface block truncate">Farida Olatunji</span>
+<span class="font-body-sm text-body-sm text-secondary block truncate">Basic 2 Gold · Mrs. Olatunji</span>
+</div>
+</div>
+<div class="flex items-center gap-1 shrink-0">
+<button class="p-2 rounded-lg bg-surface-container-lowest hover:bg-emerald-50 text-emerald-700 shadow-sm transition-colors" title="Call Guardian" type="button">
+<span class="material-symbols-outlined text-base">call</span>
+</button>
+<button class="p-2 rounded-lg bg-surface-container-lowest hover:bg-primary-fixed text-primary shadow-sm transition-colors" title="Send SMS" type="button">
+<span class="material-symbols-outlined text-base">chat</span>
+</button>
+</div>
+</div>
+</div>
+<button class="w-full mt-4 py-2 text-center text-primary font-body-sm text-body-sm font-bold hover:underline flex items-center justify-center gap-1" type="button">
+<span>View Remaining 8 Unverified Students</span>
+<span class="material-symbols-outlined text-base">expand_more</span>
+</button>
+</div>
+</div>
+</div>
+<script>
+  // Simple Live Refresh Counter micro-interaction
+  (function() {
+    let seconds = 10;
+    const timeAgoEl = document.getElementById('timeAgo');
+    const refreshBtn = document.getElementById('refreshBtn');
+
+    setInterval(() => {
+      seconds++;
+      if (timeAgoEl) {
+        timeAgoEl.textContent = `Updated ${seconds}s ago`;
+      }
+    }, 1000);
+
+    if (refreshBtn) {
+      refreshBtn.addEventListener('click', () => {
+        seconds = 0;
+        if (timeAgoEl) {
+          timeAgoEl.textContent = 'Updated just now';
+        }
+      });
+    }
+  })();
+</script></div></main><footer class="w-full bg-surface-container-low py-6 border-t border-outline-variant/30"><div class="w-full max-w-[1440px] mx-auto px-gutter flex flex-col sm:flex-row items-center justify-between gap-4"><div class="flex items-center gap-3"><span class="font-headline-sm text-headline-sm font-bold text-on-surface">AcademyGate</span><span class="font-body-sm text-body-sm text-secondary">© 2024 AI Academy Attendance &amp; Security Services.</span></div><div class="flex items-center gap-6"><span class="font-body-sm text-body-sm text-secondary font-medium">Encrypted RFID/Biometric Feed Active</span><span class="font-body-sm text-body-sm text-secondary font-mono text-xs">Terminal OS v4.2.1</span></div></div></footer></body></html>

@@ -1,0 +1,320 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <title>Report Sheet - {{ $student->admission_number }}</title>
+    <style>
+        @page { margin: 4mm 6mm; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: "DejaVu Sans", Arial, sans-serif; font-size: 8.5px; color: #334155; background: #fff; line-height: 1.25; }
+
+        /* ─── Nordic Minimalist Slate Theme ─── */
+        .page { border: 2px solid #cbd5e1; padding: 6px; background: #fff; }
+        .page-inner { padding: 4px; }
+
+        /* Nordic Stark Header */
+        .header { border-bottom: 1.5px solid #475569; padding-bottom: 3px; margin-bottom: 4px; }
+        .header-table { display: table; width: 100%; }
+        .header-cell { display: table-cell; vertical-align: middle; }
+        .logo-wrap { width: 55px; }
+        .logo { width: 44px; height: 44px; object-fit: contain; filter: grayscale(100%); opacity: 0.85; border: 1px solid #cbd5e1; border-radius: 4px; padding: 2px; }
+        .school-name { font-size: 15px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; color: #1e293b; }
+        .school-meta { margin-top: 1px; font-size: 7.5px; color: #64748b; font-weight: 500; }
+        .badge { display: inline-block; margin-top: 3px; background: #475569; color: #fff; padding: 2px 7px; border-radius: 3px; font-size: 7px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; }
+        .meta-right { font-size: 7.5px; color: #475569; font-weight: 500; text-align: right; line-height: 1.3; }
+
+        /* Nordic Grid Stats */
+        .stats { display: table; width: 100%; margin-bottom: 4px; border-collapse: collapse; border: 1.5px solid #cbd5e1; border-radius: 3px; overflow: hidden; }
+        .stat { display: table-cell; text-align: center; border-right: 1.5px solid #cbd5e1; padding: 4px 2px; background: #f8fafc; }
+        .stat:last-child { border-right: none; }
+        .stat.highlight { background: #f1f5f9; }
+        .stat-label { font-size: 6px; color: #475569; font-weight: bold; text-transform: uppercase; letter-spacing: 0.3px; margin-bottom: 1px; }
+        .stat-value { font-size: 11px; font-weight: bold; color: #0f172a; }
+
+        /* Table */
+        table.scores { width: 100%; border-collapse: collapse; margin-bottom: 4px; border: 1.5px solid #cbd5e1; }
+        table.scores th { background: #f1f5f9; color: #334155; padding: 2.5px 3px; font-size: 7.5px; font-weight: bold; text-transform: uppercase; text-align: center; border: 1.5px solid #cbd5e1; border-bottom: 2px solid #94a3b8; }
+        table.scores td { padding: 2px 3px; border: 1px solid #cbd5e1; text-align: center; font-size: 8px; color: #334155; }
+        table.scores tr:nth-child(even) td { background: #fafafb; }
+        .subj { text-align: left !important; font-weight: bold; color: #1e293b; padding-left: 6px !important; }
+        .bold { font-weight: bold; color: #0f172a; }
+
+        /* Grading Key */
+        .grading { display: table; width: 100%; border: 1.5px solid #cbd5e1; margin-bottom: 4px; border-radius: 3px; overflow: hidden; }
+        .gr-cell { display: table-cell; padding: 3px 2px; text-align: center; font-size: 6.5px; font-weight: bold; color: #475569; border-right: 1px solid #cbd5e1; background: #f8fafc; }
+        .gr-cell:last-child { border-right: none; }
+        .gr-cell strong { color: #1e293b; font-size: 7.5px; }
+
+        /* Attendance */
+        .att { display: table; width: 100%; margin-bottom: 4px; border: 1.5px solid #cbd5e1; border-radius: 3px; overflow: hidden; }
+        .att-cell { display: table-cell; width: 33.33%; text-align: center; padding: 4px; border-right: 1px solid #cbd5e1; background: #f8fafc; }
+        .att-cell:last-child { border-right: none; }
+        .att-label { font-size: 7px; font-weight: bold; text-transform: uppercase; color: #475569; margin-bottom: 1px; }
+        .att-value { font-size: 11px; font-weight: bold; color: #0f172a; }
+
+        /* Remarks */
+        .remarks { border: 1.5px solid #cbd5e1; border-radius: 3px; padding: 5px 8px; margin-bottom: 5px; background: #f8fafc; }
+        .remarks-label { font-size: 7.5px; font-weight: bold; color: #1e293b; text-transform: uppercase; letter-spacing: 0.3px; margin-bottom: 2px; }
+        .remarks-text { font-size: 8px; color: #334155; line-height: 1.3; }
+
+        /* Next Term */
+        .next-term { background: #475569; color: #fff; text-align: center; padding: 4px; font-size: 8px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; border-radius: 3px; }
+
+        /* Signatures */
+        .sigs { display: table; width: 100%; margin-top: 3px; }
+        .sig { display: table-cell; width: 33.33%; text-align: center; padding: 3px; vertical-align: bottom; }
+        .sig-img { max-height: 24px; max-width: 65px; object-fit: contain; margin-bottom: 1px; }
+        .sig-line { border-top: 1.5px solid #475569; margin-top: 8px; padding-top: 2px; font-size: 7.5px; font-weight: bold; color: #1e293b; }
+        .sig-line.has-img { margin-top: 1px; }
+        .sig-sub { font-size: 6px; color: #64748b; font-style: italic; }
+
+        .footer { margin-top: 4px; border-top: 1px solid #cbd5e1; padding-top: 2px; text-align: center; font-size: 6.5px; color: #94a3b8; }
+        .watermark { position: fixed; top: 50%; left: 50%; transform: translate(-50%,-50%); z-index: -1; opacity: 0.02; width: 280px; height: 280px; }
+    </style>
+</head>
+<body>
+@php
+    $schoolName = config('academyhub.school_name', config('app.name', 'AcademyHub'));
+    $logo = config('academyhub.school_logo');
+    
+    $toBase64 = function(?string $path): ?string {
+        if (!$path || !file_exists($path)) {
+            return null;
+        }
+        $ext = strtolower(pathinfo($path, PATHINFO_EXTENSION));
+        $mime = match($ext) {
+            'jpg', 'jpeg' => 'image/jpeg',
+            'png' => 'image/png',
+            'webp' => 'image/webp',
+            'svg' => 'image/svg+xml',
+            default => 'image/png',
+        };
+        $data = @file_get_contents($path);
+        return $data ? 'data:' . $mime . ';base64,' . base64_encode($data) : null;
+    };
+
+    $logoCandidates = array_filter([
+        $logo ? public_path('uploads/' . str_replace('\\', '/', $logo)) : null,
+        $logo ? public_path(str_replace('\\', '/', $logo)) : null,
+        $logo ? storage_path('app/public/' . str_replace('\\', '/', $logo)) : null,
+        public_path('academy.png'),
+        public_path('logo.png'),
+        public_path('images/logo.png'),
+        public_path('uploads/school_logo.png'),
+    ]);
+
+    $logoPath = null;
+    foreach ($logoCandidates as $cand) {
+        if ($cand && file_exists($cand)) {
+            $logoPath = $cand;
+            break;
+        }
+    }
+
+    $logoDataUri = $logoPath ? $toBase64($logoPath) : null;
+    $logoExists = (bool) $logoDataUri;
+
+    $opts = $rcOptions ?? [];
+    $showPosition                  = $opts['show_position'] ?? true;
+    $showAttendance                = $opts['show_attendance'] ?? true;
+    $showGradingKey                = $opts['show_grading_key'] ?? true;
+    $showClassAverage              = $opts['show_class_average'] ?? true;
+    $showWatermark                 = $opts['show_watermark'] ?? true;
+    $showNextTermDate              = $opts['show_next_term_date'] ?? true;
+    $showTeacherRemarks            = $opts['show_teacher_remarks'] ?? true;
+    $showPrincipalRemarks          = $opts['show_principal_remarks'] ?? true;
+    $showPsychomotor               = $opts['show_psychomotor'] ?? false;
+    $showSchoolFees                = $opts['show_school_fees'] ?? false;
+    $showSignatures                = $opts['show_signatures'] ?? false;
+    $showClassHighestLowest        = $opts['show_class_highest_lowest'] ?? false;
+    $showSubjectTeacherRemarks     = $opts['show_subject_teacher_remarks'] ?? false;
+    $showQrCode                    = $opts['show_qr_code'] ?? true;
+    $showCumulativeSummary         = $opts['show_cumulative_summary'] ?? false;
+    $showColorBadges               = $opts['show_color_badges'] ?? true;
+@endphp
+
+@if($logoExists && $showWatermark)
+    <div class="watermark"><img src="{{ $logoDataUri }}" alt="" style="width:100%;height:100%;object-fit:contain;" /></div>
+@endif
+
+<div class="page">
+    <div class="page-inner">
+
+        {{-- Header --}}
+        <div class="header">
+            <div class="header-table">
+                <div class="header-cell logo-wrap">
+                    @if($logoExists)<img class="logo" src="{{ $logoDataUri }}" alt="">@endif
+                </div>
+                <div class="header-cell">
+                    <div class="school-name">{{ $schoolName }}</div>
+                    @if(config('academyhub.school_address'))<div class="school-meta">{{ config('academyhub.school_address') }}</div>@endif
+                    @if(config('academyhub.school_phone'))
+                        <div class="school-meta">Phone: {{ config('academyhub.school_phone') }}</div>
+                    @endif
+                    <div class="badge">Student Roster Assessment</div>
+                </div>
+                <div class="header-cell" style="width:130px;">
+                    <div class="meta-right">Session: <strong>{{ $session }}</strong></div>
+                    <div class="meta-right">Term: <strong>Term {{ $term }}</strong></div>
+                    <div class="meta-right">Date: <strong>{{ now()->format('d M, Y') }}</strong></div>
+                </div>
+            </div>
+        </div>
+
+        {{-- Student Info --}}
+        @php($siBorderColor = '#cbd5e1') @php($siBgColor = '#f8fafc') @php($siLabelColor = '#475569') @php($siValueColor = '#1e293b') @php($siDotColor = '#cbd5e1')
+        @include('pdf.partials.rc-student-info')
+
+        {{-- Stats --}}
+        <div class="stats">
+            <div class="stat"><div class="stat-label">Total</div><div class="stat-value">{{ $grandTotal }}</div></div>
+            <div class="stat highlight"><div class="stat-label">Average</div><div class="stat-value">{{ number_format($average,1) }}%</div></div>
+            @if($showPosition)<div class="stat"><div class="stat-label">Position</div><div class="stat-value">{{ $position }}</div></div>@endif
+            @if($showClassAverage)
+            <div class="stat"><div class="stat-label">Class Avg</div><div class="stat-value">{{ number_format($classAverage,1) }}%</div></div>
+            <div class="stat"><div class="stat-label">Highest</div><div class="stat-value">{{ number_format($highestAverage??0,1) }}%</div></div>
+            <div class="stat"><div class="stat-label">Lowest</div><div class="stat-value">{{ number_format($lowestAverage??0,1) }}%</div></div>
+            @endif
+        </div>
+
+        {{-- Scores Table --}}
+        <table class="scores">
+            <thead>
+                <tr>
+                    <th style="width:28%;text-align:left;padding-left:6px;">Subject</th>
+                    <th style="width:9%;">CA1<br/>({{ config('academyhub.results_ca1_max',20) }})</th>
+                    <th style="width:9%;">CA2<br/>({{ config('academyhub.results_ca2_max',20) }})</th>
+                    <th style="width:9%;">Exam<br/>({{ config('academyhub.results_exam_max',60) }})</th>
+                    <th style="width:9%;">Total</th>
+                    <th style="width:8%;">Grade</th>
+                    @if($showClassAverage)<th style="width:8%;">Avg</th>@endif
+                    @if($showClassHighestLowest)
+                        <th style="width:6%;">High</th>
+                        <th style="width:6%;">Low</th>
+                    @endif
+                    @if($showPosition)<th style="width:6%;">Pos</th>@endif
+                    @if($showSubjectTeacherRemarks)<th style="width:10%;text-align:left;padding-left:4px;">Remark</th>@endif
+                </tr>
+            </thead>
+            <tbody>
+                @foreach($rows as $r)
+                @php
+                    $g = strtoupper($r['grade'] ?? '-');
+                    $badgeBg = match($g) { 'A'=>'#dcfce7','B'=>'#dbeafe','C'=>'#fef9c3','D'=>'#ffedd5','F','U'=>'#fee2e2',default=>'transparent' };
+                    $badgeFg = match($g) { 'A'=>'#166534','B'=>'#1e40af','C'=>'#854d0e','D'=>'#9a3412','F','U'=>'#991b1b',default=>'#0f172a' };
+                @endphp
+                <tr>
+                    <td class="subj">{{ $r['subject']?->name ?? '-' }}</td>
+                    <td>{{ $r['ca1'] ?? '' }}</td>
+                    <td>{{ $r['ca2'] ?? '' }}</td>
+                    <td>{{ $r['exam'] ?? '' }}</td>
+                    <td class="bold">{{ $r['total'] ?? '' }}</td>
+                    <td class="bold">
+                        @if($showColorBadges && ($r['grade'] ?? null))
+                            <span style="background:{{ $badgeBg }};color:{{ $badgeFg }};padding:1px 4px;border-radius:2px;font-weight:bold;">{{ $g }}</span>
+                        @else
+                            {{ $r['grade'] ?? '' }}
+                        @endif
+                    </td>
+                    @if($showClassAverage)<td>{{ $r['class_avg'] ?? '—' }}</td>@endif
+                    @if($showClassHighestLowest)
+                        <td>{{ $r['highest'] ?? '—' }}</td>
+                        <td>{{ $r['lowest'] ?? '—' }}</td>
+                    @endif
+                    @if($showPosition)<td>{{ $r['position'] ?? '—' }}</td>@endif
+                    @if($showSubjectTeacherRemarks)<td style="font-size:7px;text-align:left;padding-left:4px;font-style:italic;">{{ $r['teacher_remark'] ?? 'Good' }}</td>@endif
+                </tr>
+                @endforeach
+            </tbody>
+        </table>
+
+        {{-- Grading Key --}}
+        @if($showGradingKey)
+        <div class="grading">
+            <div class="gr-cell"><strong>A:</strong> 70-100 (Excellent)</div>
+            <div class="gr-cell"><strong>B:</strong> 60-69 (Very Good)</div>
+            <div class="gr-cell"><strong>C:</strong> 50-59 (Good)</div>
+            <div class="gr-cell"><strong>D:</strong> 40-49 (Pass)</div>
+            <div class="gr-cell"><strong>F:</strong> 0-39 (Fail)</div>
+        </div>
+        @endif
+
+        {{-- Attendance --}}
+        @if($showAttendance)
+        <div class="att">
+            <div class="att-cell"><div class="att-label">Times Opened</div><div class="att-value">{{ $timesOpened ?? '—' }}</div></div>
+            <div class="att-cell"><div class="att-label">Times Present</div><div class="att-value">{{ $timesPresent ?? '—' }}</div></div>
+            <div class="att-cell"><div class="att-label">Times Absent</div><div class="att-value">{{ $timesAbsent ?? '—' }}</div></div>
+        </div>
+        @endif
+
+        {{-- Cumulative Summary --}}
+        @if($showCumulativeSummary && !empty($cumulativeSummary))
+        <div style="border:1.5px solid #cbd5e1;border-radius:3px;background:#f8fafc;padding:5px 8px;margin-bottom:5px;">
+            <div style="font-size:7.5px;font-weight:bold;text-transform:uppercase;color:#475569;margin-bottom:3px;">Annual Cumulative Summary ({{ $session }})</div>
+            <table style="width:100%;border-collapse:collapse;text-align:center;font-size:8px;">
+                <thead><tr style="border-bottom:1px solid #cbd5e1;color:#475569;"><th style="padding:2px;">Term 1</th><th style="padding:2px;">Term 2</th><th style="padding:2px;">Term 3</th><th style="padding:2px;">Cumulative Avg</th></tr></thead>
+                <tbody><tr>
+                    <td style="padding:3px;font-weight:600;">{{ $cumulativeSummary['term_1']['total'] ?? '—' }}</td>
+                    <td style="padding:3px;font-weight:600;">{{ $cumulativeSummary['term_2']['total'] ?? '—' }}</td>
+                    <td style="padding:3px;font-weight:600;">{{ $cumulativeSummary['term_3']['total'] ?? '—' }}</td>
+                    <td style="padding:3px;font-weight:800;">{{ $average }}%</td>
+                </tr></tbody>
+            </table>
+        </div>
+        @endif
+
+        {{-- Psychomotor --}}
+        @php($rcBorderColor='#cbd5e1') @php($rcBgLight='#f8fafc') @php($rcTitleColor='#475569') @php($rcLabelColor='#475569')
+        @include('pdf.partials.rc-psychomotor')
+
+        {{-- Remarks --}}
+        @if($showTeacherRemarks)
+        <div class="remarks"><div class="remarks-label">Class Teacher's Remarks</div><div class="remarks-text">{{ $teacherRemarks ?? 'No remarks provided.' }}</div></div>
+        @endif
+        @if($showPrincipalRemarks)
+        <div class="remarks"><div class="remarks-label">Principal's Remarks</div><div class="remarks-text">{{ $principalRemarks ?? 'No remarks provided.' }}</div></div>
+        @endif
+
+        {{-- School Fees --}}
+        @php($rcBorderColor='#cbd5e1') @php($rcBgLight='#f8fafc') @php($rcTitleColor='#475569') @php($rcLabelColor='#475569')
+        @include('pdf.partials.rc-school-fees')
+
+        {{-- Next Term --}}
+        @if($showNextTermDate)
+        <div class="next-term">Next Term Begins: {{ $nextTermDate ?? 'To be announced' }}</div>
+        @endif
+
+        {{-- Signatures --}}
+        @if($showSignatures)
+        <div class="sigs">
+            <div class="sig">
+                @if(($signatureImages['teacher']??null) && file_exists($signatureImages['teacher']))<img src="{{ $signatureImages['teacher'] }}" class="sig-img" /><div class="sig-line has-img">Class Teacher</div>
+                @else<div class="sig-line">Class Teacher</div>@endif
+                <div class="sig-sub">Signature &amp; Date</div>
+            </div>
+            <div class="sig">
+                @if(($signatureImages['principal']??null) && file_exists($signatureImages['principal']))<img src="{{ $signatureImages['principal'] }}" class="sig-img" /><div class="sig-line has-img">{{ $principalTitle ?? 'Principal' }}</div>
+                @else<div class="sig-line">{{ $principalTitle ?? 'Principal' }}</div>@endif
+                <div class="sig-sub">{{ $principalName ? $principalName . ' &bull; ' : '' }}Signature &amp; Stamp</div>
+            </div>
+            <div class="sig"><div class="sig-line">Parent/Guardian</div><div class="sig-sub">Signature &amp; Date</div></div>
+        </div>
+        @endif
+
+        {{-- QR Code --}}
+        @if($showQrCode)
+        <div style="margin-top:4px;border-top:1px dashed #cbd5e1;padding-top:4px;text-align:center;">
+            @if(!empty($qrCodeUri))
+                <img src="{{ $qrCodeUri }}" style="width: 42px; height: 42px; display: block; margin: 0 auto 2px auto;" alt="QR" />
+            @endif
+            <div style="font-size:7px;color:#94a3b8;">&#128274; <strong>Official Verified Record</strong> &bull; Ref: <strong>{{ $student->admission_number }}</strong></div>
+        </div>
+        @endif
+
+        <div class="footer">Generated {{ now()->format('d M Y, g:i A') }} &bull; {{ $schoolName }} &bull; Powered by AcademyHub SMS</div>
+    </div>
+</div>
+</body>
+</html>

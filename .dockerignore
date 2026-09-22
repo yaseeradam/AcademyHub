@@ -1,0 +1,44 @@
+# Docker
+docker-compose.override.yml
+.env.docker.local
+
+# Flutter mobile app (not part of the web Docker image)
+/academyhub_app
+
+# Dependencies
+/node_modules
+/vendor
+
+# Build artifacts
+/public/build
+/public/hot
+
+# Environment
+.env
+.env.backup
+.env.production
+
+# Storage (persisted via Docker volumes)
+/storage/*.key
+/storage/logs/*
+!/storage/logs/.gitignore
+
+# Not needed in production image
+/.git
+/.github
+/docs
+/tests
+/scratch
+/scripts
+*.md
+!README.md
+
+# IDE
+.idea
+.vscode
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db

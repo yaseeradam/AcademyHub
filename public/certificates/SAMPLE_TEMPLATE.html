@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Sample Certificate Template</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: 'Georgia', serif;
+            background: #f0f0f0;
+            padding: 20px;
+        }
+        .certificate {
+            width: 1754px;
+            height: 1240px;
+            background: linear-gradient(135deg, #ffffff 0%, #f7fafc 100%);
+            margin: 0 auto;
+            position: relative;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        /* Outer border - Gold */
+        .border-outer {
+            position: absolute;
+            top: 40px;
+            left: 40px;
+            right: 40px;
+            bottom: 40px;
+            border: 8px solid #d4af37;
+            border-radius: 10px;
+        }
+        /* Inner border - Navy */
+        .border-inner {
+            position: absolute;
+            top: 60px;
+            left: 60px;
+            right: 60px;
+            bottom: 60px;
+            border: 3px solid #2c5282;
+        }
+        /* Decorative corners */
+        .corner {
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            border: 3px solid #d4af37;
+        }
+        .corner-tl { top: 80px; left: 80px; border-right: none; border-bottom: none; }
+        .corner-tr { top: 80px; right: 80px; border-left: none; border-bottom: none; }
+        .corner-bl { bottom: 80px; left: 80px; border-right: none; border-top: none; }
+        .corner-br { bottom: 80px; right: 80px; border-left: none; border-top: none; }
+        
+        /* Content areas */
+        .logo-area {
+            position: absolute;
+            top: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            text-align: center;
+        }
+        .logo-placeholder {
+            width: 120px;
+            height: 120px;
+            background: #e2e8f0;
+            border: 3px dashed #cbd5e0;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #64748b;
+            font-size: 14px;
+            margin: 0 auto;
+        }
+        
+        .certificate-type {
+            position: absolute;
+            top: 280px;
+            left: 0;
+            right: 0;
+            text-align: center;
+            font-size: 28px;
+            font-weight: bold;
+            color: #2c5282;
+            letter-spacing: 8px;
+            text-transform: uppercase;
+        }
+        
+        .title-area {
+            position: absolute;
+            top: 380px;
+            left: 0;
+            right: 0;
+            text-align: center;
+            font-size: 42px;
+            font-weight: bold;
+            color: #2c5282;
+            padding: 0 200px;
+        }
+        .title-placeholder {
+            background: #fef3c7;
+            border: 2px dashed #f59e0b;
+            padding: 20px;
+            border-radius: 8px;
+        }
+        
+        .presented-to {
+            position: absolute;
+            top: 480px;
+            left: 0;
+            right: 0;
+            text-align: center;
+            font-size: 20px;
+            color: #4a5568;
+            font-style: italic;
+        }
+        
+        .name-area {
+            position: absolute;
+            top: 520px;
+            left: 0;
+            right: 0;
+            text-align: center;
+            font-size: 56px;
+            font-weight: bold;
+            color: #1a1a1a;
+            padding: 0 200px;
+        }
+        .name-placeholder {
+            background: #dbeafe;
+            border: 2px dashed #3b82f6;
+            padding: 20px;
+            border-radius: 8px;
+            border-bottom: 3px solid #1a1a1a;
+        }
+        
+        .description-area {
+            position: absolute;
+            top: 640px;
+            left: 0;
+            right: 0;
+            text-align: center;
+            font-size: 18px;
+            color: #4a5568;
+            padding: 0 250px;
+            line-height: 1.6;
+        }
+        .description-placeholder {
+            background: #f0fdf4;
+            border: 2px dashed #22c55e;
+            padding: 15px;
+            border-radius: 8px;
+        }
+        
+        .date-area {
+            position: absolute;
+            top: 760px;
+            left: 0;
+            right: 0;
+            text-align: center;
+            font-size: 16px;
+            color: #4a5568;
+        }
+        .date-placeholder {
+            background: #fce7f3;
+            border: 2px dashed #ec4899;
+            padding: 10px 30px;
+            border-radius: 8px;
+            display: inline-block;
+        }
+        
+        .signature-area {
+            position: absolute;
+            bottom: 150px;
+            left: 200px;
+            right: 200px;
+            display: flex;
+            justify-content: space-between;
+        }
+        .signature-box {
+            text-align: center;
+        }
+        .signature-line {
+            width: 250px;
+            height: 80px;
+            border-bottom: 2px solid #1a1a1a;
+            margin-bottom: 10px;
+            background: #f8fafc;
+            border: 2px dashed #94a3b8;
+        }
+        .signature-label {
+            font-size: 14px;
+            color: #64748b;
+            font-weight: bold;
+        }
+        
+        .seal-area {
+            position: absolute;
+            bottom: 120px;
+            right: 150px;
+        }
+        .seal-placeholder {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            background: #fef3c7;
+            border: 3px dashed #f59e0b;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #92400e;
+            font-size: 12px;
+            text-align: center;
+            font-weight: bold;
+        }
+        
+        .watermark {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-45deg);
+            font-size: 120px;
+            color: rgba(0,0,0,0.03);
+            font-weight: bold;
+            pointer-events: none;
+        }
+        
+        .instructions {
+            max-width: 1754px;
+            margin: 30px auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .instructions h2 {
+            color: #2c5282;
+            margin-bottom: 15px;
+        }
+        .instructions ul {
+            margin-left: 20px;
+            line-height: 1.8;
+        }
+        .instructions code {
+            background: #f1f5f9;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+    <div class="certificate">
+        <!-- Borders -->
+        <div class="border-outer"></div>
+        <div class="border-inner"></div>
+        
+        <!-- Decorative corners -->
+        <div class="corner corner-tl"></div>
+        <div class="corner corner-tr"></div>
+        <div class="corner corner-bl"></div>
+        <div class="corner corner-br"></div>
+        
+        <!-- Watermark -->
+        <div class="watermark">SAMPLE</div>
+        
+        <!-- Logo area -->
+        <div class="logo-area">
+            <div class="logo-placeholder">School<br>Logo</div>
+        </div>
+        
+        <!-- Certificate type -->
+        <div class="certificate-type">Certificate</div>
+        
+        <!-- Title area (system fills this) -->
+        <div class="title-area">
+            <div class="title-placeholder">Certificate of Achievement</div>
+        </div>
+        
+        <!-- Presented to -->
+        <div class="presented-to">This is to certify that</div>
+        
+        <!-- Name area (system fills this) -->
+        <div class="name-area">
+            <div class="name-placeholder">STUDENT NAME HERE</div>
+        </div>
+        
+        <!-- Description area (system fills this) -->
+        <div class="description-area">
+            <div class="description-placeholder">
+                Has demonstrated outstanding performance and dedication<br>
+                in academic excellence during the academic session
+            </div>
+        </div>
+        
+        <!-- Date area (system fills this) -->
+        <div class="date-area">
+            <div class="date-placeholder">Date: January 15, 2025</div>
+        </div>
+        
+        <!-- Signatures -->
+        <div class="signature-area">
+            <div class="signature-box">
+                <div class="signature-line"></div>
+                <div class="signature-label">Principal's Signature</div>
+            </div>
+            <div class="signature-box">
+                <div class="signature-line"></div>
+                <div class="signature-label">Class Teacher's Signature</div>
+            </div>
+        </div>
+        
+        <!-- School seal -->
+        <div class="seal-area">
+            <div class="seal-placeholder">SCHOOL<br>SEAL</div>
+        </div>
+    </div>
+    
+    <div class="instructions">
+        <h2>📋 Certificate Template Guide</h2>
+        <ul>
+            <li><strong>Size:</strong> 1754 x 1240 pixels (A4 landscape)</li>
+            <li><strong>Colored areas</strong> show where the system will add text automatically</li>
+            <li><strong>Yellow box:</strong> Certificate title (e.g., "Certificate of Achievement")</li>
+            <li><strong>Blue box:</strong> Student name (automatically filled)</li>
+            <li><strong>Green box:</strong> Description text (customizable)</li>
+            <li><strong>Pink box:</strong> Issue date (automatically filled)</li>
+            <li><strong>Keep borders and decorations</strong> - remove only the colored placeholder boxes</li>
+            <li><strong>Export as PNG</strong> from your design tool (Canva, Photoshop, etc.)</li>
+            <li><strong>Upload</strong> via More Features → Certificates → Upload Template</li>
+        </ul>
+        
+        <h2 style="margin-top: 25px;">🎨 Design Tips</h2>
+        <ul>
+            <li>Use this as a reference for positioning</li>
+            <li>Replace borders with more decorative designs</li>
+            <li>Add school colors, patterns, or textures</li>
+            <li>Include school motto or emblem</li>
+            <li>Use elegant fonts (Playfair Display, Cinzel, etc.)</li>
+            <li>Keep 200px margins for text overlay</li>
+        </ul>
+        
+        <h2 style="margin-top: 25px;">📁 Save As</h2>
+        <ul>
+            <li><code>achievement.png</code> - For academic excellence</li>
+            <li><code>completion.png</code> - For course completion</li>
+            <li><code>excellence.png</code> - For top performers</li>
+        </ul>
+    </div>
+</body>
+</html>

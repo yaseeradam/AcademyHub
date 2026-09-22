@@ -1,0 +1,165 @@
+/* MyAcademy Amber Theme - Professional CBT Style */
+
+/* Primary Buttons */
+.btn-primary,
+button[type="submit"]:not(.btn-outline):not(.btn-secondary) {
+    @apply rounded-xl bg-amber-500 px-5 py-2.5 text-sm font-bold text-white shadow-md hover:bg-amber-600 transition-all;
+}
+
+/* Secondary Buttons */
+.btn-secondary,
+.btn-outline {
+    @apply rounded-xl bg-slate-100 px-5 py-2.5 text-sm font-bold text-slate-700 hover:bg-slate-200 transition-all;
+}
+
+/* Cards */
+.card,
+.card-interactive {
+    @apply rounded-2xl bg-white p-5 shadow-md ring-1 ring-slate-100 transition-all;
+}
+
+.card-interactive:hover {
+    @apply shadow-lg;
+}
+
+/* Form Inputs */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+input[type="date"],
+input[type="time"],
+select,
+textarea {
+    @apply rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-800 shadow-sm focus:border-amber-400 focus:ring-2 focus:ring-amber-300 transition-all;
+}
+
+/* Badges */
+.badge {
+    @apply inline-flex items-center gap-2 rounded-full bg-amber-50 px-3 py-1.5 text-xs font-bold text-amber-700;
+}
+
+.badge-success {
+    @apply bg-emerald-50 text-emerald-700;
+}
+
+.badge-error {
+    @apply bg-rose-50 text-rose-700;
+}
+
+.badge-warning {
+    @apply bg-orange-50 text-orange-700;
+}
+
+/* Tables */
+table {
+    @apply w-full;
+}
+
+thead {
+    @apply bg-amber-50;
+}
+
+th {
+    @apply px-4 py-3 text-left text-xs font-bold uppercase tracking-wider text-slate-700;
+}
+
+td {
+    @apply px-4 py-3 text-sm text-slate-800;
+}
+
+tr {
+    @apply border-b border-slate-100;
+}
+
+tbody tr:hover {
+    @apply bg-amber-50/50;
+}
+
+/* Alerts */
+.alert {
+    @apply rounded-xl p-4 text-sm font-semibold;
+}
+
+.alert-success {
+    @apply bg-emerald-50 text-emerald-800 ring-1 ring-emerald-200;
+}
+
+.alert-error {
+    @apply bg-rose-50 text-rose-800 ring-1 ring-rose-200;
+}
+
+.alert-warning {
+    @apply bg-amber-50 text-amber-800 ring-1 ring-amber-200;
+}
+
+.alert-info {
+    @apply bg-blue-50 text-blue-800 ring-1 ring-blue-200;
+}
+
+/* Modal */
+.modal-overlay {
+    @apply fixed inset-0 z-50 flex items-center justify-center bg-black/50;
+}
+
+.modal-content {
+    @apply w-full max-w-md rounded-2xl bg-white p-6 shadow-xl;
+}
+
+/* Tabs */
+.tab {
+    @apply rounded-xl px-4 py-2.5 text-sm font-bold transition-all;
+}
+
+.tab-active {
+    @apply bg-amber-500 text-white shadow-md;
+}
+
+.tab-inactive {
+    @apply text-slate-700 hover:bg-amber-50;
+}
+
+/* Progress Bar */
+.progress-bar {
+    @apply h-2 w-full overflow-hidden rounded-full bg-slate-100;
+}
+
+.progress-fill {
+    @apply h-full rounded-full bg-amber-500 transition-all duration-500;
+}
+
+/* Dropdown */
+.dropdown-menu {
+    @apply rounded-xl bg-white shadow-xl ring-1 ring-slate-100 py-2;
+}
+
+.dropdown-item {
+    @apply px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-amber-50 transition-colors;
+}
+
+/* Checkbox & Radio */
+input[type="checkbox"],
+input[type="radio"] {
+    @apply h-4 w-4 rounded border-slate-300 text-amber-500 focus:ring-amber-400;
+}
+
+/* Links — no global override; colors set via Tailwind classes on each element */
+
+/* Headings */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    @apply font-black text-slate-900;
+}
+
+/* Sidebar Active State Override */
+.sidebar-active {
+    @apply bg-amber-500 text-white shadow-md !important;
+}
+
+.sidebar-inactive {
+    @apply text-slate-700 hover:bg-amber-50 !important;
+}

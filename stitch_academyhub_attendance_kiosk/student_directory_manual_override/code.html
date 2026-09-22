@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Plus+Jakarta+Sans:wght@600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config={darkMode:"class",theme:{extend:{colors:{"on-surface-variant":"#534434","outline":"#867461","on-surface":"#191c1e","surface-dim":"#d8dadc","on-error":"#ffffff","on-error-container":"#93000a","on-tertiary":"#ffffff","surface-container-low":"#f2f4f6","secondary-fixed-dim":"#bec6e0","surface-bright":"#f7f9fb","on-secondary":"#ffffff","inverse-on-surface":"#eff1f3","secondary":"#565e74","error":"#ba1a1a","surface-tint":"#855300","primary":"#855300","on-secondary-container":"#5c647a","outline-variant":"#d8c3ad","on-tertiary-fixed-variant":"#3c475a","surface":"#f7f9fb","on-secondary-fixed-variant":"#3f465c","on-primary-container":"#613b00","on-primary-fixed":"#2a1700","surface-container-highest":"#e0e3e5","tertiary-fixed-dim":"#bcc7de","inverse-primary":"#ffb95f","error-container":"#ffdad6","surface-container-lowest":"#ffffff","on-tertiary-fixed":"#111c2d","on-primary-fixed-variant":"#653e00","on-primary":"#ffffff","on-tertiary-container":"#394457","secondary-fixed":"#dae2fd","secondary-container":"#dae2fd","on-secondary-fixed":"#131b2e","background":"#f7f9fb","inverse-surface":"#2d3133","surface-variant":"#e0e3e5","tertiary":"#545f73","primary-fixed-dim":"#ffb95f","primary-container":"#f59e0b","surface-container-high":"#e6e8ea","surface-container":"#eceef0","tertiary-container":"#a6b1c8","primary-fixed":"#ffddb8","tertiary-fixed":"#d8e3fb","on-background":"#191c1e"},borderRadius:{DEFAULT:"0.25rem",lg:"0.5rem",xl:"0.75rem",full:"9999px"},spacing:{"space-sm":"0.75rem","space-md":"1.25rem","space-xs":"0.375rem","space-xl":"2.5rem","space-lg":"1.75rem",margin:"2rem",gutter:"1.5rem"},fontFamily:{"label-numeric-keypad":["Plus Jakarta Sans"],"label-action":["Plus Jakarta Sans"],"body-xl":["Inter"],"body-md":["Inter"],"display-kiosk-mobile":["Plus Jakarta Sans"],"headline-xl":["Plus Jakarta Sans"],"headline-sm":["Plus Jakarta Sans"],"body-sm":["Inter"],"headline-xl-mobile":["Plus Jakarta Sans"],"headline-lg":["Plus Jakarta Sans"],"body-lg":["Inter"],"label-badge":["Plus Jakarta Sans"],"headline-md":["Plus Jakarta Sans"],"display-kiosk":["Plus Jakarta Sans"]},fontSize:{"label-numeric-keypad":["32px",{lineHeight:"32px",fontWeight:"700"}],"label-action":["16px",{lineHeight:"20px",letterSpacing:"0.01em",fontWeight:"700"}],"body-xl":["20px",{lineHeight:"28px",fontWeight:"400"}],"body-md":["14px",{lineHeight:"20px",fontWeight:"400"}],"display-kiosk-mobile":["32px",{lineHeight:"40px",letterSpacing:"-0.02em",fontWeight:"800"}],"headline-xl":["36px",{lineHeight:"44px",letterSpacing:"-0.02em",fontWeight:"700"}],"headline-sm":["18px",{lineHeight:"24px",fontWeight:"600"}],"body-sm":["12px",{lineHeight:"16px",fontWeight:"500"}],"headline-xl-mobile":["26px",{lineHeight:"32px",letterSpacing:"-0.01em",fontWeight:"700"}],"headline-lg":["28px",{lineHeight:"36px",letterSpacing:"-0.01em",fontWeight:"700"}],"body-lg":["16px",{lineHeight:"24px",fontWeight:"400"}],"label-badge":["13px",{lineHeight:"16px",letterSpacing:"0.04em",fontWeight:"700"}],"headline-md":["22px",{lineHeight:"28px",fontWeight:"600"}],"display-kiosk":["48px",{lineHeight:"56px",letterSpacing:"-0.03em",fontWeight:"800"}]}}}};</script></head><body class="bg-surface font-body-md text-on-surface antialiased min-h-screen"><header class="fixed top-0 w-full z-50 bg-inverse-surface shadow-[0_4px_20px_rgba(0,0,0,0.25)]"><div class="h-20 w-full px-gutter flex items-center justify-between gap-space-md"><div class="flex items-center gap-space-md shrink-0"><img alt="AcademyGate Logo" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDMV4CipPYrKC8aUqDpvQBpQyO7MmjhMXbCnEjS0BvVAGq0JgusMiiTXUthew9aiiMMTgw42SEep576aP6Y4xaT3hEOroCYB67OextWKESyxns8Gvomfjg2xciCAuKJ3P4Aa7TfreajLqY6pk0bMYovYWxPagQRBrDaZHeCRyfq87L9k6bllQ4yw-om6yHhDUaRvWWNyatj0GRf7P_6CMPwi2V65TngNtg8nmoXAUy1Znxss6cwBCql9Q"/><div class="flex flex-col"><span class="font-headline-sm text-headline-sm font-bold text-inverse-on-surface tracking-tight leading-none">AI ACADEMY</span><span class="font-body-sm text-body-sm text-primary-fixed font-semibold tracking-wider uppercase mt-1">ATTENDANCE KIOSK &amp; GATE MONITOR</span></div></div><nav class="hidden xl:flex items-center gap-2 p-1.5 bg-surface-container-highest/10 rounded-xl" data-active-classes="bg-primary-container text-on-primary-container font-bold rounded-xl"><a class="px-space-md py-2.5 rounded-xl font-label-action text-label-action text-inverse-on-surface/80 hover:text-inverse-on-surface hover:bg-surface-container-highest/20 transition-all" data-path="live-gate-monitor" href="#">Live Gate Monitor</a><a class="px-space-md py-2.5 rounded-xl font-label-action text-label-action text-inverse-on-surface/80 hover:text-inverse-on-surface hover:bg-surface-container-highest/20 transition-all" data-path="class-attendance" href="#">Class Attendance</a><a aria-current="page" class="px-space-md py-2.5 transition-all bg-primary-container text-on-primary-container font-bold rounded-xl" data-path="student-directory" href="#">Student Directory</a><a class="px-space-md py-2.5 rounded-xl font-label-action text-label-action text-inverse-on-surface/80 hover:text-inverse-on-surface hover:bg-surface-container-highest/20 transition-all" data-path="reports-export" href="#">Reports &amp; Export</a></nav><div class="flex items-center gap-space-md shrink-0"><div class="hidden lg:flex items-center gap-2 px-3 py-1.5 bg-inverse-surface/90 border border-outline-variant/30 rounded-full shadow-inner"><span class="inline-block w-2.5 h-2.5 rounded-full bg-primary-container animate-pulse"></span><span class="font-body-sm text-body-sm font-semibold tracking-tight text-inverse-on-surface">07:48:22 AM · THU, 24 OCT</span></div><div class="hidden 2xl:flex items-center gap-2"><div class="flex items-center gap-1.5 px-3 py-1 bg-surface-container-lowest/10 border border-outline-variant/20 rounded-full"><span class="w-2 h-2 rounded-full bg-emerald-500"></span><span class="font-body-sm text-body-sm text-inverse-on-surface font-medium">Gate 1 (K40-1)</span></div><div class="flex items-center gap-1.5 px-3 py-1 bg-surface-container-lowest/10 border border-outline-variant/20 rounded-full"><span class="w-2 h-2 rounded-full bg-emerald-500"></span><span class="font-body-sm text-body-sm text-inverse-on-surface font-medium">Gate 2 (K40-2)</span></div></div><button class="p-2 rounded-xl text-inverse-on-surface/80 hover:text-inverse-on-surface hover:bg-surface-container-highest/20 transition-colors" title="Fullscreen Wall TV Mode" type="button"><span class="material-symbols-outlined text-2xl">tv</span></button><div class="flex items-center gap-3 pl-space-sm border-l border-outline-variant/20"><div class="hidden md:flex flex-col text-right"><span class="font-body-sm text-body-sm font-bold text-inverse-on-surface leading-tight">Officer Ngozi A.</span><span class="font-body-sm text-body-sm text-inverse-on-surface/60 leading-none">Gate Desk 1</span></div><img alt="Profile" class="w-8 h-8 rounded-full object-cover ring-2 ring-primary-container" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAKv09nhQCuVMGprlfImS9zYYjqsVW0bMRS2nUKDCcDExAZHKntrMKdDF-4dTuN-4mrDEZjGHF5wC4yZLhZEbhsLkXwuycpS14tMTImK22u24tebGaHwQxbMaY3alCbsLoUzsndVIoUCDbJBG1_ZzA-GQQVL0uTDrYS-uxS-ZnquPpbHzLBtDaOhxgn1E3vyap5qeDZNW7OoZVHds60jaW6T_kBnDNavWPKGTtzKOsbIFZDpdvY3jJuaA"/></div></div></div></header><main class="w-full pt-20 bg-surface min-h-[calc(100vh-5rem)]"><div class="w-full max-w-[1440px] mx-auto p-gutter"><div class="flex flex-col w-full gap-6">
+<!-- Top Search & Quick Action Bar -->
+<div class="flex flex-col gap-4">
+<div class="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4">
+<!-- Search Box with Hotkey -->
+<div class="relative flex-1 group">
+<div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-outline group-focus-within:text-primary transition-colors">
+<span class="material-symbols-outlined text-2xl">search</span>
+</div>
+<input class="w-full h-14 pl-12 pr-28 rounded-2xl bg-surface-container-lowest text-on-surface placeholder:text-outline font-body-lg text-body-lg shadow-sm focus:outline-none focus:bg-surface-container-lowest transition-all" id="studentSearchInput" placeholder="Type student name, K40 ID (e.g. 265), admission number (ADM-2024-089), or parent phone..." type="text"/>
+<div class="absolute inset-y-0 right-3 flex items-center gap-1 pointer-events-none">
+<kbd class="hidden sm:inline-flex items-center gap-0.5 px-2.5 py-1 rounded-lg bg-surface-container text-outline font-body-sm text-body-sm font-semibold shadow-inner">
+<span class="text-xs">⌘</span>K
+          </kbd>
+</div>
+</div>
+<!-- Action Button -->
+<button class="h-14 px-6 rounded-2xl bg-primary-container text-on-primary-container font-label-action text-label-action flex items-center justify-center gap-2 hover:opacity-95 active:scale-[0.98] transition-all shadow-md shrink-0" id="btnOpenEmergency" type="button">
+<span class="material-symbols-outlined text-2xl">person_add</span>
+<span>+ Register Emergency Visitor / Guest Pickup</span>
+</button>
+</div>
+<!-- Tiered Filter Rows -->
+<div class="flex flex-col gap-2.5">
+<!-- Fast Filter Pills: Grade/Class -->
+<div class="flex items-center gap-2 overflow-x-auto pb-1 text-nowrap scrollbar-none">
+<span class="text-outline font-body-sm text-body-sm uppercase tracking-wider font-bold pr-2 flex items-center gap-1">
+<span class="material-symbols-outlined text-base">filter_list</span> Class:
+        </span>
+<button class="filter-class-btn px-4 py-2 rounded-xl font-label-badge text-label-badge bg-inverse-surface text-inverse-on-surface shadow-sm transition-all" data-class="all">All Classes</button>
+<button class="filter-class-btn px-4 py-2 rounded-xl font-label-badge text-label-badge bg-surface-container-lowest text-on-surface hover:bg-surface-container shadow-sm transition-all" data-class="n1-gold">Nursery 1 Gold</button>
+<button class="filter-class-btn px-4 py-2 rounded-xl font-label-badge text-label-badge bg-surface-container-lowest text-on-surface hover:bg-surface-container shadow-sm transition-all" data-class="n1-green">Nursery 1 Green</button>
+<button class="filter-class-btn px-4 py-2 rounded-xl font-label-badge text-label-badge bg-surface-container-lowest text-on-surface hover:bg-surface-container shadow-sm transition-all" data-class="n1-silver">Nursery 1 Silver</button>
+<button class="filter-class-btn px-4 py-2 rounded-xl font-label-badge text-label-badge bg-surface-container-lowest text-on-surface hover:bg-surface-container shadow-sm transition-all" data-class="b1-gold">Basic 1 Gold</button>
+<button class="filter-class-btn px-4 py-2 rounded-xl font-label-badge text-label-badge bg-surface-container-lowest text-on-surface hover:bg-surface-container shadow-sm transition-all" data-class="b1-silver">Basic 1 Silver</button>
+<button class="filter-class-btn px-4 py-2 rounded-xl font-label-badge text-label-badge bg-surface-container-lowest text-on-surface hover:bg-surface-container shadow-sm transition-all" data-class="b2-gold">Basic 2 Gold</button>
+</div>
+<!-- Fast Filter Pills: Live Status -->
+<div class="flex items-center gap-2 overflow-x-auto pb-1 text-nowrap scrollbar-none">
+<span class="text-outline font-body-sm text-body-sm uppercase tracking-wider font-bold pr-2 flex items-center gap-1">
+<span class="material-symbols-outlined text-base">signal_cellular_alt</span> Status:
+        </span>
+<button class="filter-status-btn px-3.5 py-1.5 rounded-full font-label-badge text-label-badge bg-surface-container-highest text-on-surface transition-all flex items-center gap-1.5" data-status="all">
+<span class="w-2 h-2 rounded-full bg-outline"></span> All (210)
+        </button>
+<button class="filter-status-btn px-3.5 py-1.5 rounded-full font-label-badge text-label-badge bg-surface-container-lowest text-on-surface hover:bg-surface-container transition-all flex items-center gap-1.5 shadow-sm" data-status="present">
+<span class="w-2 h-2 rounded-full bg-emerald-600"></span> Present (176)
+        </button>
+<button class="filter-status-btn px-3.5 py-1.5 rounded-full font-label-badge text-label-badge bg-surface-container-lowest text-on-surface hover:bg-surface-container transition-all flex items-center gap-1.5 shadow-sm" data-status="late">
+<span class="w-2 h-2 rounded-full bg-amber-500"></span> Late (14)
+        </button>
+<button class="filter-status-btn px-3.5 py-1.5 rounded-full font-label-badge text-label-badge bg-surface-container-lowest text-on-surface hover:bg-surface-container transition-all flex items-center gap-1.5 shadow-sm" data-status="absent">
+<span class="w-2 h-2 rounded-full bg-rose-600"></span> Absent / Unscanned (12)
+        </button>
+<button class="filter-status-btn px-3.5 py-1.5 rounded-full font-label-badge text-label-badge bg-surface-container-lowest text-on-surface hover:bg-surface-container transition-all flex items-center gap-1.5 shadow-sm" data-status="departed">
+<span class="w-2 h-2 rounded-full bg-blue-600"></span> Departed (8)
+        </button>
+</div>
+</div>
+</div>
+<!-- Operational Split Layout: Left 65% Directory & List / Right 35% Manual Override Console -->
+<div class="grid grid-cols-1 xl:grid-cols-12 gap-6 items-start">
+<!-- Left Roster Table & Card List -->
+<div class="xl:col-span-8 flex flex-col gap-4">
+<!-- Header Meta Banner -->
+<div class="bg-surface-container-lowest rounded-2xl p-4 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-xl bg-primary-fixed flex items-center justify-center text-on-primary-fixed">
+<span class="material-symbols-outlined text-2xl">badge</span>
+</div>
+<div>
+<span class="font-headline-sm text-headline-sm text-on-surface block leading-tight">Student Access Roster</span>
+<span class="font-body-sm text-body-sm text-secondary">Showing 7 filtered records · Direct biometric sync active</span>
+</div>
+</div>
+<div class="flex items-center gap-2 text-secondary font-body-sm text-body-sm">
+<span class="inline-flex items-center gap-1 px-3 py-1 bg-surface-container rounded-lg">
+<span class="material-symbols-outlined text-base text-primary">touch_app</span> Touch-optimized: 56px actions
+          </span>
+</div>
+</div>
+<!-- Student Records Container -->
+<div class="flex flex-col gap-3" id="studentListContainer">
+<!-- Record 1: Chidiebere Emmanuel Okafor -->
+<div class="student-card bg-surface-container-lowest rounded-2xl p-4 sm:p-5 shadow-sm hover:shadow-md transition-all flex flex-col lg:flex-row lg:items-center justify-between gap-4" data-class="b1-gold" data-id="265" data-name="Chidiebere Emmanuel Okafor" data-status="present">
+<div class="flex items-center gap-4 min-w-0">
+<img class="w-14 h-14 rounded-2xl object-cover shrink-0 bg-surface-container" data-alt="A portrait of a primary school Nigerian boy named Chidiebere with a cheerful expression wearing a neat navy and yellow Academy blazer, soft natural classroom lighting, highly detailed photo portrait." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBOwshcRc9_2oZm1oNaiBdQ0ULkvd9RmujShc1fD_9rO2lb2JBUq2v9ZYJmSS8l3JMK3CFiwr8qUK_64ayaEzoBxJ92vJFKUQ7xatxnuaQVOha70mOIqZjAH2ctyxn_faZ2zm6Gvj5Dq4_SKZ1eEPq3JPeM_xomGy7yjMmU5OqS6kyiEhn8f6W_r19dkrVuSxIJzUBBPSqR81BDFdy3ocY30GSv1nsbIc7e4wk8-pnm6Ulbnhap4LhDaA"/>
+<div class="flex flex-col min-w-0">
+<div class="flex items-center gap-2 flex-wrap">
+<span class="font-headline-sm text-headline-sm text-on-surface font-bold truncate">Chidiebere Emmanuel Okafor</span>
+<span class="px-2.5 py-0.5 rounded-lg bg-surface-container text-on-surface font-body-sm text-body-sm font-semibold">ID: #265</span>
+</div>
+<div class="flex items-center gap-3 mt-1 flex-wrap text-secondary font-body-sm text-body-sm">
+<span class="font-semibold text-primary">Basic 1 Gold</span>
+<span>•</span>
+<span>ADM-2023-114</span>
+<span>•</span>
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-sm">family_restroom</span> Dr. K. Okafor (+234 803 451 9822)</span>
+</div>
+<div class="mt-2 flex items-center gap-2">
+<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 font-label-badge text-label-badge">
+<span class="w-2 h-2 rounded-full bg-emerald-600"></span> Present (07:48 AM - Gate 1)
+                </span>
+</div>
+</div>
+</div>
+<!-- Action Buttons -->
+<div class="flex items-center gap-2 shrink-0 self-end lg:self-center">
+<button class="btn-select-override h-12 px-4 rounded-xl bg-surface-container-high text-on-surface font-label-action text-label-action hover:bg-surface-container-highest transition-colors flex items-center gap-1.5" onclick="selectStudentForOverride('265', 'Chidiebere Emmanuel Okafor', 'Basic 1 Gold', 'ADM-2023-114')">
+<span class="material-symbols-outlined text-xl">logout</span> Check Out
+            </button>
+<a class="h-12 w-12 rounded-xl bg-surface-container-low text-on-surface hover:bg-surface-container flex items-center justify-center transition-colors" href="tel:+2348034519822" title="Call Guardian">
+<span class="material-symbols-outlined text-xl">call</span>
+</a>
+<button class="h-12 w-12 rounded-xl bg-surface-container-low text-on-surface hover:bg-surface-container flex items-center justify-center transition-colors" title="View Profile">
+<span class="material-symbols-outlined text-xl">visibility</span>
+</button>
+</div>
+</div>
+<!-- Record 2: Amina Bello -->
+<div class="student-card bg-surface-container-lowest rounded-2xl p-4 sm:p-5 shadow-sm hover:shadow-md transition-all flex flex-col lg:flex-row lg:items-center justify-between gap-4" data-class="n1-gold" data-id="104" data-name="Amina Bello" data-status="present">
+<div class="flex items-center gap-4 min-w-0">
+<img class="w-14 h-14 rounded-2xl object-cover shrink-0 bg-surface-container" data-alt="A portrait of a 4-year-old Nigerian girl named Amina with beaded hair braids, smiling brightly in an early childhood uniform, bright morning light, warm authentic educational setting." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBOi-0F8FoBgzpIUchIFDX7ffLAFPDguKBxI6_yF-AAX1NxWcjqQKHW8JwTPesRNC5eaEIFfEWspKvlxUk9rkFaGrE0cVHgm-nBLL4Bx3ip27Wk1dj2F_VUQJ1wBHLt-iojkvOSU3l3k3-88pLkmPtCrWcTVdiUtjk9B6_WaazQrm8qpKGOV3LI752be0CNNqI7j0wmRNTluTVjdb_SRScQQLJAXXYbJeFt8q7VhLVNhmDTYQzJJ9IaoQ"/>
+<div class="flex flex-col min-w-0">
+<div class="flex items-center gap-2 flex-wrap">
+<span class="font-headline-sm text-headline-sm text-on-surface font-bold truncate">Amina Bello</span>
+<span class="px-2.5 py-0.5 rounded-lg bg-surface-container text-on-surface font-body-sm text-body-sm font-semibold">ID: #104</span>
+</div>
+<div class="flex items-center gap-3 mt-1 flex-wrap text-secondary font-body-sm text-body-sm">
+<span class="font-semibold text-primary">Nursery 1 Gold</span>
+<span>•</span>
+<span>ADM-2024-012</span>
+<span>•</span>
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-sm">family_restroom</span> Alh. Bello (+234 802 334 1120)</span>
+</div>
+<div class="mt-2 flex items-center gap-2">
+<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 font-label-badge text-label-badge">
+<span class="w-2 h-2 rounded-full bg-emerald-600"></span> Present (07:47 AM - Gate 1)
+                </span>
+</div>
+</div>
+</div>
+<!-- Action Buttons -->
+<div class="flex items-center gap-2 shrink-0 self-end lg:self-center">
+<button class="btn-select-override h-12 px-4 rounded-xl bg-surface-container-high text-on-surface font-label-action text-label-action hover:bg-surface-container-highest transition-colors flex items-center gap-1.5" onclick="selectStudentForOverride('104', 'Amina Bello', 'Nursery 1 Gold', 'ADM-2024-012')">
+<span class="material-symbols-outlined text-xl">logout</span> Check Out
+            </button>
+<a class="h-12 w-12 rounded-xl bg-surface-container-low text-on-surface hover:bg-surface-container flex items-center justify-center transition-colors" href="tel:+2348023341120" title="Call Guardian">
+<span class="material-symbols-outlined text-xl">call</span>
+</a>
+</div>
+</div>
+<!-- Record 3: Zainab Musa -->
+<div class="student-card bg-surface-container-lowest rounded-2xl p-4 sm:p-5 shadow-sm hover:shadow-md transition-all flex flex-col lg:flex-row lg:items-center justify-between gap-4" data-class="b1-silver" data-id="189" data-name="Zainab Musa" data-status="late">
+<div class="flex items-center gap-4 min-w-0">
+<img class="w-14 h-14 rounded-2xl object-cover shrink-0 bg-surface-container" data-alt="A portrait of a primary school girl named Zainab Musa with a neat school hijab, gentle smile, clear soft natural lighting, school backdrop." src="https://lh3.googleusercontent.com/aida-public/AB6AXuD201CboHgyUWd--vIr-NmkmgCCG1K0JqLoC3dZtj-Bqkr7XhS_q_-xh0ENyODO6WrcInJ2HGgBjL_GRF4OAEf5xtY2-71RAjl2vYyk9qODuC1DCR2yorQiNUqr0HyuQoMudUfUKRTggnZ2OdMlslAWhPq0OS1cF4uBW4N5mfhjOmn3bMH6yZhrvG1s1GSKKvQCfIHL0UaGNg2-KGMheGbU84farwfqk_UWWcpHKCBzlexRJcVREFELUQ"/>
+<div class="flex flex-col min-w-0">
+<div class="flex items-center gap-2 flex-wrap">
+<span class="font-headline-sm text-headline-sm text-on-surface font-bold truncate">Zainab Musa</span>
+<span class="px-2.5 py-0.5 rounded-lg bg-surface-container text-on-surface font-body-sm text-body-sm font-semibold">ID: #189</span>
+</div>
+<div class="flex items-center gap-3 mt-1 flex-wrap text-secondary font-body-sm text-body-sm">
+<span class="font-semibold text-primary">Basic 1 Silver</span>
+<span>•</span>
+<span>ADM-2023-205</span>
+<span>•</span>
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-sm">family_restroom</span> Mrs. H. Musa (+234 805 771 9901)</span>
+</div>
+<div class="mt-2 flex items-center gap-2">
+<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-50 text-amber-800 font-label-badge text-label-badge">
+<span class="w-2 h-2 rounded-full bg-amber-500"></span> Late Arrival (07:45 AM - Gate 1)
+                </span>
+</div>
+</div>
+</div>
+<!-- Action Buttons -->
+<div class="flex items-center gap-2 shrink-0 self-end lg:self-center">
+<button class="btn-select-override h-12 px-4 rounded-xl bg-surface-container-high text-on-surface font-label-action text-label-action hover:bg-surface-container-highest transition-colors flex items-center gap-1.5" onclick="selectStudentForOverride('189', 'Zainab Musa', 'Basic 1 Silver', 'ADM-2023-205')">
+<span class="material-symbols-outlined text-xl">logout</span> Check Out
+            </button>
+<a class="h-12 w-12 rounded-xl bg-surface-container-low text-on-surface hover:bg-surface-container flex items-center justify-center transition-colors" href="tel:+2348057719901" title="Call Guardian">
+<span class="material-symbols-outlined text-xl">call</span>
+</a>
+</div>
+</div>
+<!-- Record 4: Favour Nwachukwu -->
+<div class="student-card bg-surface-container-lowest rounded-2xl p-4 sm:p-5 shadow-sm hover:shadow-md transition-all flex flex-col lg:flex-row lg:items-center justify-between gap-4" data-class="n1-green" data-id="088" data-name="Favour Nwachukwu" data-status="absent">
+<div class="flex items-center gap-4 min-w-0">
+<img class="w-14 h-14 rounded-2xl object-cover shrink-0 bg-surface-container" data-alt="A portrait of an energetic young nursery school boy named Favour, big friendly eyes, school polo shirt, bright educational ambiance." src="https://lh3.googleusercontent.com/aida-public/AB6AXuARCmYWesRFdjrS4OtVGPobzbHaC_zfkT767fWZUkP8wQbUuz1eaHLvdy9fyqG-5dSFiLN2jl4Nh3p39tnQbNyZAr7KuJD8g0r8c1_eJrUQe4bXYIppMb7jjD39Ea3oe_Ngv6wLSpMPBlQNBOAxXtbd2azCKLgsclWgjtbuqZIed8q9RXWJthhOKLfexC9g0MZTzB0kGc9FgO6Zi54x6SZ5otPh9lh7AhDfPIvbthIbDiovp9NMWAChnw"/>
+<div class="flex flex-col min-w-0">
+<div class="flex items-center gap-2 flex-wrap">
+<span class="font-headline-sm text-headline-sm text-on-surface font-bold truncate">Favour Nwachukwu</span>
+<span class="px-2.5 py-0.5 rounded-lg bg-surface-container text-on-surface font-body-sm text-body-sm font-semibold">ID: #088</span>
+</div>
+<div class="flex items-center gap-3 mt-1 flex-wrap text-secondary font-body-sm text-body-sm">
+<span class="font-semibold text-primary">Nursery 1 Green</span>
+<span>•</span>
+<span>ADM-2024-044</span>
+<span>•</span>
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-sm">family_restroom</span> Engr. C. Nwachukwu (+234 809 123 4567)</span>
+</div>
+<div class="mt-2 flex items-center gap-2">
+<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-50 text-rose-700 font-label-badge text-label-badge">
+<span class="w-2 h-2 rounded-full bg-rose-600"></span> Not Scanned Yet
+                </span>
+</div>
+</div>
+</div>
+<!-- Action Buttons -->
+<div class="flex items-center gap-2 shrink-0 self-end lg:self-center">
+<button class="h-12 px-4 rounded-xl bg-primary-container text-on-primary-container font-label-action text-label-action hover:opacity-90 transition-opacity flex items-center gap-1.5 shadow-sm" onclick="selectStudentForOverride('088', 'Favour Nwachukwu', 'Nursery 1 Green', 'ADM-2024-044')">
+<span class="material-symbols-outlined text-xl">how_to_reg</span> Manual Check In (Arrival)
+            </button>
+<a class="h-12 w-12 rounded-xl bg-surface-container-low text-on-surface hover:bg-surface-container flex items-center justify-center transition-colors" href="tel:+2348091234567" title="Call Guardian">
+<span class="material-symbols-outlined text-xl">call</span>
+</a>
+</div>
+</div>
+<!-- Record 5: David Oladipo -->
+<div class="student-card bg-surface-container-lowest rounded-2xl p-4 sm:p-5 shadow-sm hover:shadow-md transition-all flex flex-col lg:flex-row lg:items-center justify-between gap-4" data-class="b2-gold" data-id="302" data-name="David Oladipo" data-status="present">
+<div class="flex items-center gap-4 min-w-0">
+<img class="w-14 h-14 rounded-2xl object-cover shrink-0 bg-surface-container" data-alt="A portrait of an 8-year-old student named David with styled clean haircut and smiling confident expression, wearing school uniform tie and cardigan." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAZWUSV_FN9MkIv55RuykiAMSQ8mCLsQbnok2AN19ch4FLLjGDVbLqqS2HUnqYu3bi882wH2moBHUg7CciJtNbmo7yWtjBmQVm9kGuWxO07_9Lz93dssHFPdE7OyAPKJZFoNgMMq3-DN9BKtMKD6TR4malpCGXE1l_BUaSEaW2RxEzKHFQC6KNg53oDw7tgQIAbqDw5LqVfrQWMN4boDCnv8fBHkq3o8fsAZw0v882NKMHxeWi6vsHbYA"/>
+<div class="flex flex-col min-w-0">
+<div class="flex items-center gap-2 flex-wrap">
+<span class="font-headline-sm text-headline-sm text-on-surface font-bold truncate">David Oladipo</span>
+<span class="px-2.5 py-0.5 rounded-lg bg-surface-container text-on-surface font-body-sm text-body-sm font-semibold">ID: #302</span>
+</div>
+<div class="flex items-center gap-3 mt-1 flex-wrap text-secondary font-body-sm text-body-sm">
+<span class="font-semibold text-primary">Basic 2 Gold</span>
+<span>•</span>
+<span>ADM-2022-067</span>
+<span>•</span>
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-sm">family_restroom</span> Pastor Oladipo (+234 818 900 1234)</span>
+</div>
+<div class="mt-2 flex items-center gap-2">
+<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 font-label-badge text-label-badge">
+<span class="w-2 h-2 rounded-full bg-emerald-600"></span> Present (07:46 AM - Gate 2)
+                </span>
+</div>
+</div>
+</div>
+<!-- Action Buttons -->
+<div class="flex items-center gap-2 shrink-0 self-end lg:self-center">
+<button class="btn-select-override h-12 px-4 rounded-xl bg-surface-container-high text-on-surface font-label-action text-label-action hover:bg-surface-container-highest transition-colors flex items-center gap-1.5" onclick="selectStudentForOverride('302', 'David Oladipo', 'Basic 2 Gold', 'ADM-2022-067')">
+<span class="material-symbols-outlined text-xl">logout</span> Check Out
+            </button>
+<a class="h-12 w-12 rounded-xl bg-surface-container-low text-on-surface hover:bg-surface-container flex items-center justify-center transition-colors" href="tel:+2348189001234" title="Call Guardian">
+<span class="material-symbols-outlined text-xl">call</span>
+</a>
+</div>
+</div>
+<!-- Record 6: Tariq Abubakar -->
+<div class="student-card bg-surface-container-lowest rounded-2xl p-4 sm:p-5 shadow-sm hover:shadow-md transition-all flex flex-col lg:flex-row lg:items-center justify-between gap-4" data-class="n1-silver" data-id="042" data-name="Tariq Abubakar" data-status="departed">
+<div class="flex items-center gap-4 min-w-0">
+<img class="w-14 h-14 rounded-2xl object-cover shrink-0 bg-surface-container" data-alt="A portrait of a five year old Nigerian boy named Tariq, gentle resting face, comfortable school sweatshirt, warm soft institutional daylight." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBVweLiymr9i3774JvvNLcyHrlKjf79HwZiNo0jZTHOVX8mp_F6O3oOMkYboYAKve4_96VAX9jVK0F3bXcPTiILX_iEOSGik_UgApxSD67U5WB--H-4lXSdZkXUXnoH9CDGUT7_IyBkmBvGcUAaMdSJy1X-4gxq8vVRoXxxr27I4geeEm3pulqneKeluAVHU49wHc3ofWxfAbn2gyqZPxECkhhsStIvvGdpsAQROe-3tXSTRkTrWa-GLw"/>
+<div class="flex flex-col min-w-0">
+<div class="flex items-center gap-2 flex-wrap">
+<span class="font-headline-sm text-headline-sm text-on-surface font-bold truncate">Tariq Abubakar</span>
+<span class="px-2.5 py-0.5 rounded-lg bg-surface-container text-on-surface font-body-sm text-body-sm font-semibold">ID: #042</span>
+</div>
+<div class="flex items-center gap-3 mt-1 flex-wrap text-secondary font-body-sm text-body-sm">
+<span class="font-semibold text-primary">Nursery 1 Silver</span>
+<span>•</span>
+<span>ADM-2024-099</span>
+<span>•</span>
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-sm">family_restroom</span> Capt. Abubakar (+234 803 999 8888)</span>
+</div>
+<div class="mt-2 flex items-center gap-2">
+<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-50 text-blue-700 font-label-badge text-label-badge">
+<span class="w-2 h-2 rounded-full bg-blue-600"></span> Departed (11:30 AM Sick Bay)
+                </span>
+</div>
+</div>
+</div>
+<!-- Action Buttons -->
+<div class="flex items-center gap-2 shrink-0 self-end lg:self-center">
+<button class="h-12 px-4 rounded-xl bg-surface-container-high text-on-surface font-label-action text-label-action hover:bg-surface-container-highest transition-colors flex items-center gap-1.5" onclick="selectStudentForOverride('042', 'Tariq Abubakar', 'Nursery 1 Silver', 'ADM-2024-099')">
+<span class="material-symbols-outlined text-xl">login</span> Re-Admit
+            </button>
+<a class="h-12 w-12 rounded-xl bg-surface-container-low text-on-surface hover:bg-surface-container flex items-center justify-center transition-colors" href="tel:+2348039998888" title="Call Guardian">
+<span class="material-symbols-outlined text-xl">call</span>
+</a>
+</div>
+</div>
+<!-- Record 7: Somtochukwu Eze -->
+<div class="student-card bg-surface-container-lowest rounded-2xl p-4 sm:p-5 shadow-sm hover:shadow-md transition-all flex flex-col lg:flex-row lg:items-center justify-between gap-4" data-class="n1-silver" data-id="155" data-name="Somtochukwu Eze" data-status="absent">
+<div class="flex items-center gap-4 min-w-0">
+<img class="w-14 h-14 rounded-2xl object-cover shrink-0 bg-surface-container" data-alt="A portrait of a cheerful Nigerian elementary girl named Somtochukwu with short neat hair, wearing school uniform sweater, natural smiling expression in school setting." src="https://lh3.googleusercontent.com/aida-public/AB6AXuArKKDc49gzX5PHHeSthCDrfO8lnVkZymw2gEs53hSvPouNP_eqSxk1iPQIoqacqfyDG1SLLTpfDm9bccWFCVY0T65rtfM6fcIQPQqkT70RUCI_7BtOMzL0lkXmEE1pXWRXb15kn6MzI5YZi5lxyeoDmvzR15D2tK67zIoaNv5Xe_l4KsUyvdn10iMisBO0rXpSVJV5Fn4Z6wvCM6xXI2wgW5ZraJzNOhYofl3s69s9g_MtmsFESDLgyg"/>
+<div class="flex flex-col min-w-0">
+<div class="flex items-center gap-2 flex-wrap">
+<span class="font-headline-sm text-headline-sm text-on-surface font-bold truncate">Somtochukwu Eze</span>
+<span class="px-2.5 py-0.5 rounded-lg bg-surface-container text-on-surface font-body-sm text-body-sm font-semibold">ID: #155</span>
+</div>
+<div class="flex items-center gap-3 mt-1 flex-wrap text-secondary font-body-sm text-body-sm">
+<span class="font-semibold text-primary">Nursery 1 Silver</span>
+<span>•</span>
+<span>ADM-2024-031</span>
+<span>•</span>
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-sm">family_restroom</span> Guardian (+234 812 443 9011)</span>
+</div>
+<div class="mt-2 flex items-center gap-2">
+<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-50 text-rose-700 font-label-badge text-label-badge">
+<span class="w-2 h-2 rounded-full bg-rose-600"></span> Not Scanned Yet
+                </span>
+</div>
+</div>
+</div>
+<!-- Action Buttons -->
+<div class="flex items-center gap-2 shrink-0 self-end lg:self-center">
+<button class="h-12 px-4 rounded-xl bg-primary-container text-on-primary-container font-label-action text-label-action hover:opacity-90 transition-opacity flex items-center gap-1.5 shadow-sm" onclick="selectStudentForOverride('155', 'Somtochukwu Eze', 'Nursery 1 Silver', 'ADM-2024-031')">
+<span class="material-symbols-outlined text-xl">how_to_reg</span> Manual Check In (Arrival)
+            </button>
+<a class="h-12 w-12 rounded-xl bg-surface-container-low text-on-surface hover:bg-surface-container flex items-center justify-center transition-colors" href="tel:+2348124439011" title="Call Guardian">
+<span class="material-symbols-outlined text-xl">call</span>
+</a>
+</div>
+</div>
+</div>
+</div>
+<!-- Right 35%: Manual Attendance Override Desk Panel -->
+<div class="xl:col-span-4 sticky top-24">
+<div class="bg-surface-container-lowest rounded-2xl shadow-xl overflow-hidden">
+<!-- Console Header -->
+<div class="bg-inverse-surface p-5 text-inverse-on-surface flex items-center justify-between">
+<div class="flex items-center gap-2.5">
+<span class="w-3 h-3 rounded-full bg-primary-container animate-pulse"></span>
+<span class="font-headline-sm text-headline-sm font-bold tracking-tight">Manual Override Desk</span>
+</div>
+<span class="px-2.5 py-1 rounded-md bg-surface-container-highest/20 font-body-sm text-body-sm font-mono text-primary-fixed">K40-BYPASS</span>
+</div>
+<!-- Selected Student Target Info -->
+<div class="p-5 flex flex-col gap-5">
+<div class="p-4 rounded-xl bg-surface-container-low flex items-center gap-3" id="selectedStudentCard">
+<div class="w-12 h-12 rounded-xl bg-primary-container text-on-primary-container flex items-center justify-center font-bold text-xl shrink-0" id="overrideAvatarInitial">
+              FN
+            </div>
+<div class="flex flex-col min-w-0 flex-1">
+<span class="font-headline-sm text-headline-sm font-bold truncate text-on-surface" id="overrideStudentName">Favour Nwachukwu</span>
+<span class="font-body-sm text-body-sm text-secondary truncate" id="overrideStudentSub">Nursery 1 Green · K40 ID: #088</span>
+</div>
+<span class="material-symbols-outlined text-outline text-2xl">verified_user</span>
+</div>
+<!-- Physical Condition / Exception Reason Quick Select -->
+<div class="flex flex-col gap-2">
+<label class="font-body-sm text-body-sm font-bold uppercase tracking-wider text-secondary flex items-center gap-1">
+<span class="material-symbols-outlined text-base">report_problem</span> Override Justification (One-Click):
+            </label>
+<div class="grid grid-cols-2 gap-2" id="reasonButtonGroup">
+<button class="reason-btn px-3 py-3 rounded-xl font-label-badge text-label-badge bg-surface-container text-on-surface text-left flex items-start gap-2 hover:bg-surface-container-high transition-colors active:scale-[0.98]" data-reason="Sensor Read Failure" type="button">
+<span class="material-symbols-outlined text-lg text-primary shrink-0">fingerprint</span>
+<span class="leading-snug">Sensor Read Failure</span>
+</button>
+<button class="reason-btn px-3 py-3 rounded-xl font-label-badge text-label-badge bg-surface-container text-on-surface text-left flex items-start gap-2 hover:bg-surface-container-high transition-colors active:scale-[0.98]" data-reason="Parent Dropoff (Late)" type="button">
+<span class="material-symbols-outlined text-lg text-amber-600 shrink-0">car_crash</span>
+<span class="leading-snug">Parent Dropoff (Late)</span>
+</button>
+<button class="reason-btn px-3 py-3 rounded-xl font-label-badge text-label-badge bg-surface-container text-on-surface text-left flex items-start gap-2 hover:bg-surface-container-high transition-colors active:scale-[0.98]" data-reason="Official School Bus Delay" type="button">
+<span class="material-symbols-outlined text-lg text-blue-600 shrink-0">directions_bus</span>
+<span class="leading-snug">School Bus Delay</span>
+</button>
+<button class="reason-btn px-3 py-3 rounded-xl font-label-badge text-label-badge bg-surface-container text-on-surface text-left flex items-start gap-2 hover:bg-surface-container-high transition-colors active:scale-[0.98]" data-reason="Medical Appointment" type="button">
+<span class="material-symbols-outlined text-lg text-rose-600 shrink-0">medical_services</span>
+<span class="leading-snug">Medical Appt.</span>
+</button>
+</div>
+</div>
+<!-- Secondary Physical Hand Condition Quick Badges -->
+<div class="flex items-center gap-2 flex-wrap">
+<span class="font-body-sm text-body-sm text-outline font-semibold">Physical State:</span>
+<span class="px-2.5 py-1 rounded-lg bg-surface-container-low text-secondary text-xs font-semibold">Injured Finger / Bandage</span>
+<span class="px-2.5 py-1 rounded-lg bg-surface-container-low text-secondary text-xs font-semibold">Wet / Oily Hands</span>
+<span class="px-2.5 py-1 rounded-lg bg-surface-container-low text-secondary text-xs font-semibold">Badge Damaged</span>
+</div>
+<!-- Notification Toggles -->
+<div class="bg-surface-container-low rounded-xl p-3 flex flex-col gap-2">
+<label class="flex items-center justify-between cursor-pointer">
+<span class="flex items-center gap-2 font-body-sm text-body-sm text-on-surface font-semibold">
+<span class="material-symbols-outlined text-emerald-600 text-lg">sms</span> Instant Parent WhatsApp / SMS Dispatch
+              </span>
+<input checked="" class="w-5 h-5 rounded accent-primary-container cursor-pointer" id="smsTriggerToggle" type="checkbox"/>
+</label>
+<label class="flex items-center justify-between cursor-pointer">
+<span class="flex items-center gap-2 font-body-sm text-body-sm text-on-surface font-semibold">
+<span class="material-symbols-outlined text-secondary text-lg">admin_panel_settings</span> Log Security Desk Authorization
+              </span>
+<input checked="" class="w-5 h-5 rounded accent-primary-container cursor-pointer" disabled="" type="checkbox"/>
+</label>
+</div>
+<!-- Main Override Actions (Dual Arrival / Departure) -->
+<div class="flex flex-col gap-2 pt-2">
+<button class="w-full h-14 rounded-2xl bg-primary-container text-on-primary-container font-label-action text-label-action flex items-center justify-center gap-2 shadow-md hover:opacity-95 active:scale-[0.99] transition-all" id="btnCommitCheckIn" type="button">
+<span class="material-symbols-outlined text-2xl">check_circle</span>
+<span>Confirm Manual Check-In (Arrival)</span>
+</button>
+<button class="w-full h-12 rounded-xl bg-inverse-surface text-inverse-on-surface font-label-action text-label-action flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.99] transition-all" id="btnCommitCheckOut" type="button">
+<span class="material-symbols-outlined text-xl">logout</span>
+<span>Authorize Manual Departure / Pickup</span>
+</button>
+</div>
+<!-- Guard Sign-off notice -->
+<div class="flex items-center gap-2 pt-2 text-outline font-body-sm text-body-sm justify-center">
+<span class="material-symbols-outlined text-base">lock</span>
+<span>Officer Ngozi A. logged into Gate Desk 1</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Emergency Visitor / Guest Pickup Registration Modal (Hidden State by default) -->
+<div class="fixed inset-0 z-50 bg-inverse-surface/60 backdrop-blur-sm hidden items-center justify-center p-4" id="emergencyModal">
+<div class="w-full max-w-lg bg-surface-container-lowest rounded-3xl p-6 shadow-2xl flex flex-col gap-5">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2.5">
+<div class="w-10 h-10 rounded-xl bg-amber-100 text-amber-900 flex items-center justify-center">
+<span class="material-symbols-outlined text-2xl">person_pin</span>
+</div>
+<div>
+<h3 class="font-headline-sm text-headline-sm font-bold text-on-surface">Emergency Visitor / Guest Pickup</h3>
+<p class="font-body-sm text-body-sm text-secondary">Authorized Gate Pass &amp; Temporary RFID Token</p>
+</div>
+</div>
+<button class="w-10 h-10 rounded-xl bg-surface-container text-outline hover:text-on-surface flex items-center justify-center transition-colors" id="btnCloseModal">
+<span class="material-symbols-outlined text-2xl">close</span>
+</button>
+</div>
+<div class="flex flex-col gap-4">
+<div>
+<label class="font-body-sm text-body-sm font-bold text-on-surface block mb-1">Visitor Full Name</label>
+<input class="w-full h-12 px-4 rounded-xl bg-surface-container-low text-on-surface font-body-md text-body-md focus:outline-none" placeholder="e.g. Chief Anthony Okafor" type="text"/>
+</div>
+<div class="grid grid-cols-2 gap-3">
+<div>
+<label class="font-body-sm text-body-sm font-bold text-on-surface block mb-1">Phone Number</label>
+<input class="w-full h-12 px-4 rounded-xl bg-surface-container-low text-on-surface font-body-md text-body-md focus:outline-none" placeholder="+234 803 000 0000" type="tel"/>
+</div>
+<div>
+<label class="font-body-sm text-body-sm font-bold text-on-surface block mb-1">Pickup Authorization Code</label>
+<input class="w-full h-12 px-4 rounded-xl bg-surface-container-low text-on-surface font-body-md text-body-md focus:outline-none" placeholder="OTP / Code" type="text"/>
+</div>
+</div>
+<div>
+<label class="font-body-sm text-body-sm font-bold text-on-surface block mb-1">Student Assigned</label>
+<select class="w-full h-12 px-4 rounded-xl bg-surface-container-low text-on-surface font-body-md text-body-md focus:outline-none">
+<option>Chidiebere Okafor (Basic 1 Gold - #265)</option>
+<option>Amina Bello (Nursery 1 Gold - #104)</option>
+<option>Favour Nwachukwu (Nursery 1 Green - #088)</option>
+<option>David Oladipo (Basic 2 Gold - #302)</option>
+</select>
+</div>
+</div>
+<div class="flex items-center justify-end gap-3 pt-3">
+<button class="h-12 px-5 rounded-xl bg-surface-container text-on-surface font-label-action text-label-action hover:bg-surface-container-high transition-colors" id="btnCancelModal">
+          Cancel
+        </button>
+<button class="h-12 px-6 rounded-xl bg-primary-container text-on-primary-container font-label-action text-label-action shadow-md hover:opacity-95 transition-opacity" id="btnConfirmVisitor">
+          Print Gate Pass &amp; Log Entry
+        </button>
+</div>
+</div>
+</div>
+</div>
+<script>
+  // Filter and Interaction Script
+  let activeReason = "Sensor Read Failure";
+
+  // Fast Class Filter functionality
+  const classButtons = document.querySelectorAll('.filter-class-btn');
+  classButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      classButtons.forEach(b => {
+        b.classList.remove('bg-inverse-surface', 'text-inverse-on-surface');
+        b.classList.add('bg-surface-container-lowest', 'text-on-surface');
+      });
+      btn.classList.remove('bg-surface-container-lowest', 'text-on-surface');
+      btn.classList.add('bg-inverse-surface', 'text-inverse-on-surface');
+
+      const classFilter = btn.getAttribute('data-class');
+      filterStudentRows(classFilter, null);
+    });
+  });
+
+  // Fast Status Filter functionality
+  const statusButtons = document.querySelectorAll('.filter-status-btn');
+  statusButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      statusButtons.forEach(b => {
+        b.classList.remove('bg-surface-container-highest', 'text-on-surface', 'font-bold');
+        b.classList.add('bg-surface-container-lowest', 'text-on-surface');
+      });
+      btn.classList.remove('bg-surface-container-lowest');
+      btn.classList.add('bg-surface-container-highest', 'font-bold');
+
+      const statusFilter = btn.getAttribute('data-status');
+      filterStudentRows(null, statusFilter);
+    });
+  });
+
+  let currentClassFilter = 'all';
+  let currentStatusFilter = 'all';
+
+  function filterStudentRows(classVal, statusVal) {
+    if (classVal !== null) currentClassFilter = classVal;
+    if (statusVal !== null) currentStatusFilter = statusVal;
+
+    const cards = document.querySelectorAll('.student-card');
+    cards.forEach(card => {
+      const matchClass = (currentClassFilter === 'all' || card.getAttribute('data-class') === currentClassFilter);
+      const matchStatus = (currentStatusFilter === 'all' || card.getAttribute('data-status') === currentStatusFilter);
+      card.style.display = (matchClass && matchStatus) ? 'flex' : 'none';
+    });
+  }
+
+  // Reason selector buttons
+  const reasonButtons = document.querySelectorAll('.reason-btn');
+  reasonButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      reasonButtons.forEach(b => {
+        b.classList.remove('bg-primary-fixed', 'text-on-primary-fixed-variant', 'font-bold');
+        b.classList.add('bg-surface-container', 'text-on-surface');
+      });
+      btn.classList.remove('bg-surface-container', 'text-on-surface');
+      btn.classList.add('bg-primary-fixed', 'text-on-primary-fixed-variant', 'font-bold');
+      activeReason = btn.getAttribute('data-reason');
+    });
+  });
+
+  // Highlight default reason
+  if (reasonButtons.length > 0) {
+    reasonButtons[0].classList.remove('bg-surface-container', 'text-on-surface');
+    reasonButtons[0].classList.add('bg-primary-fixed', 'text-on-primary-fixed-variant', 'font-bold');
+  }
+
+  // Quick Override Select trigger
+  function selectStudentForOverride(id, name, className, adm) {
+    document.getElementById('overrideStudentName').innerText = name;
+    document.getElementById('overrideStudentSub').innerText = className + ' · K40 ID: #' + id;
+    
+    // Initials for avatar
+    const initials = name.split(' ').map(n => n[0]).slice(0, 2).join('');
+    document.getElementById('overrideAvatarInitial').innerText = initials;
+
+    // Visual feedback highlight
+    const panel = document.getElementById('selectedStudentCard');
+    panel.classList.add('bg-primary-fixed/30');
+    setTimeout(() => {
+      panel.classList.remove('bg-primary-fixed/30');
+    }, 400);
+  }
+
+  // Search input live query
+  const searchInput = document.getElementById('studentSearchInput');
+  searchInput.addEventListener('input', (e) => {
+    const val = e.target.value.toLowerCase().trim();
+    const cards = document.querySelectorAll('.student-card');
+    cards.forEach(card => {
+      const text = card.innerText.toLowerCase();
+      const id = card.getAttribute('data-id') || '';
+      if (text.includes(val) || id.includes(val)) {
+        card.style.display = 'flex';
+      } else {
+        card.style.display = 'none';
+      }
+    });
+  });
+
+  // Global Hotkey ⌘K or Ctrl+K focus search
+  window.addEventListener('keydown', (e) => {
+    if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+      e.preventDefault();
+      searchInput.focus();
+      searchInput.select();
+    }
+  });
+
+  // Modal Handlers
+  const modal = document.getElementById('emergencyModal');
+  const btnOpenEmergency = document.getElementById('btnOpenEmergency');
+  const btnCloseModal = document.getElementById('btnCloseModal');
+  const btnCancelModal = document.getElementById('btnCancelModal');
+  const btnConfirmVisitor = document.getElementById('btnConfirmVisitor');
+
+  function openModal() {
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+  }
+  function closeModal() {
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+  }
+
+  if (btnOpenEmergency) btnOpenEmergency.addEventListener('click', openModal);
+  if (btnCloseModal) btnCloseModal.addEventListener('click', closeModal);
+  if (btnCancelModal) btnCancelModal.addEventListener('click', closeModal);
+  if (btnConfirmVisitor) {
+    btnConfirmVisitor.addEventListener('click', () => {
+      alert('Emergency Guest Entry Logged & Printable Pass Dispatched.');
+      closeModal();
+    });
+  }
+
+  // Action feedback buttons
+  const commitCheckIn = document.getElementById('btnCommitCheckIn');
+  const commitCheckOut = document.getElementById('btnCommitCheckOut');
+  if (commitCheckIn) {
+    commitCheckIn.addEventListener('click', () => {
+      const studentName = document.getElementById('overrideStudentName').innerText;
+      alert(`Manual Check-In recorded for ${studentName}.\nReason: ${activeReason}\nWhatsApp/SMS Notification Queued.`);
+    });
+  }
+  if (commitCheckOut) {
+    commitCheckOut.addEventListener('click', () => {
+      const studentName = document.getElementById('overrideStudentName').innerText;
+      alert(`Manual Departure authorized for ${studentName}.\nGuardian verified at Desk 1.`);
+    });
+  }
+</script></div></main><footer class="w-full bg-surface-container-low py-6 border-t border-outline-variant/30"><div class="w-full max-w-[1440px] mx-auto px-gutter flex flex-col sm:flex-row items-center justify-between gap-4"><div class="flex items-center gap-3"><span class="font-headline-sm text-headline-sm font-bold text-on-surface">AcademyGate</span><span class="font-body-sm text-body-sm text-secondary">© 2024 AI Academy Attendance &amp; Security Services.</span></div><div class="flex items-center gap-6"><span class="font-body-sm text-body-sm text-secondary font-medium">Encrypted RFID/Biometric Feed Active</span><span class="font-body-sm text-body-sm text-secondary font-mono text-xs">Terminal OS v4.2.1</span></div></div></footer></body></html>

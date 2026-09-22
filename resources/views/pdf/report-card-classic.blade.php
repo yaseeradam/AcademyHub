@@ -1,0 +1,646 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <title>Report Sheet - {{ $student->admission_number }}</title>
+    <style>
+        @page { margin: 4mm 6mm; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: DejaVu Sans, Arial, sans-serif;
+            font-size: 9px;
+            color: #111827;
+            background: white;
+            line-height: 1.2;
+        }
+
+        /* ─── Classic Traditional ─── */
+        .page {
+            border: 2px solid #111827;
+            padding: 4px;
+            background: white;
+        }
+
+        .page-inner {
+            border: 1px solid #6b7280;
+            padding: 6px;
+        }
+
+        .header {
+            text-align: center;
+            padding-bottom: 4px;
+            margin-bottom: 6px;
+            border-bottom: 3px double #111827;
+        }
+
+        .header-table {
+            display: table;
+            width: 100%;
+        }
+
+        .header-cell {
+            display: table-cell;
+            vertical-align: middle;
+        }
+
+        .logo-cell {
+            width: 70px;
+            text-align: center;
+        }
+
+        .logo {
+            width: 54px;
+            height: 54px;
+            object-fit: contain;
+            border: 1.5px solid #374151;
+            border-radius: 4px;
+            padding: 2px;
+            background: white;
+        }
+
+        .school-name {
+            font-size: 18px;
+            font-weight: 800;
+            color: #111827;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 2px;
+        }
+
+        .school-info {
+            font-size: 8px;
+            color: #4b5563;
+            margin-bottom: 1px;
+        }
+
+        .report-title {
+            display: inline-block;
+            margin-top: 4px;
+            font-size: 11px;
+            font-weight: 800;
+            color: #111827;
+            border: 1.5px solid #111827;
+            padding: 3px 14px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .meta-row {
+            display: table;
+            width: 100%;
+            margin-bottom: 4px;
+        }
+
+        .meta-cell {
+            display: table-cell;
+            width: 33.33%;
+            font-size: 9px;
+        }
+
+        .meta-label {
+            font-weight: 800;
+            color: #111827;
+            text-transform: uppercase;
+            font-size: 8px;
+            display: inline;
+        }
+
+        .meta-value {
+            font-weight: 700;
+            color: #374151;
+        }
+
+        .summary-row {
+            display: table;
+            width: 100%;
+            margin-bottom: 6px;
+            border: 1px solid #d1d5db;
+        }
+
+        .summary-cell {
+            display: table-cell;
+            width: 25%;
+            text-align: center;
+            padding: 5px 3px;
+            border-right: 1px solid #d1d5db;
+        }
+
+        .summary-cell:last-child {
+            border-right: none;
+        }
+
+        .summary-label {
+            font-size: 7px;
+            font-weight: 800;
+            color: #374151;
+            text-transform: uppercase;
+            margin-bottom: 2px;
+        }
+
+        .summary-value {
+            font-size: 14px;
+            font-weight: 800;
+            color: #111827;
+        }
+
+        table.scores {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 4px;
+            border: 1px solid #374151;
+        }
+
+        table.scores th {
+            background: #111827;
+            color: white;
+            padding: 3px 4px;
+            text-align: center;
+            font-size: 7.5px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border: 1px solid #374151;
+        }
+
+        table.scores td {
+            padding: 2px 4px;
+            text-align: center;
+            font-size: 8.5px;
+            border: 1px solid #d1d5db;
+        }
+
+        table.scores tr:nth-child(even) {
+            background: #f9fafb;
+        }
+
+        .subj {
+            text-align: left;
+            font-weight: 700;
+            padding-left: 6px;
+        }
+
+        .bold {
+            font-weight: 800;
+        }
+
+        .grading-row {
+            display: table;
+            width: 100%;
+            border: 1px solid #d1d5db;
+            margin-bottom: 4px;
+        }
+
+        .gr-cell {
+            display: table-cell;
+            padding: 3px 3px;
+            text-align: center;
+            font-size: 7px;
+            font-weight: 600;
+            color: #4b5563;
+            border-right: 1px solid #d1d5db;
+        }
+
+        .gr-cell:last-child {
+            border-right: none;
+        }
+
+        .gr-cell strong {
+            font-size: 8px;
+            color: #111827;
+        }
+
+        .att-row {
+            display: table;
+            width: 100%;
+            margin-bottom: 4px;
+            border: 1px solid #d1d5db;
+        }
+
+        .att-cell {
+            display: table-cell;
+            width: 33.33%;
+            text-align: center;
+            padding: 4px;
+            border-right: 1px solid #d1d5db;
+        }
+
+        .att-cell:last-child {
+            border-right: none;
+        }
+
+        .att-label {
+            font-size: 7px;
+            font-weight: 800;
+            color: #374151;
+            text-transform: uppercase;
+            margin-bottom: 2px;
+        }
+
+        .att-value {
+            font-size: 12px;
+            font-weight: 800;
+            color: #111827;
+        }
+
+        .remarks-box {
+            border: 1px solid #9ca3af;
+            padding: 6px 10px;
+            margin-bottom: 6px;
+            background: #fafafa;
+        }
+
+        .remarks-label {
+            font-size: 8px;
+            font-weight: 800;
+            color: #111827;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 3px;
+        }
+
+        .remarks-text {
+            font-size: 8.5px;
+            color: #374151;
+            line-height: 1.35;
+        }
+
+        .next-term {
+            background: #111827;
+            color: white;
+            text-align: center;
+            padding: 4px;
+            font-size: 8.5px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 4px;
+        }
+
+        .signatures {
+            display: table;
+            width: 100%;
+            margin-top: 4px;
+        }
+
+        .sig {
+            display: table-cell;
+            width: 33.33%;
+            text-align: center;
+            padding: 3px;
+            vertical-align: bottom;
+        }
+
+        .sig-line {
+            border-top: 1.5px solid #111827;
+            margin-top: 8px;
+            padding-top: 2px;
+            font-size: 8px;
+            font-weight: 800;
+            color: #111827;
+        }
+
+        .sig-sub {
+            font-size: 6.5px;
+            color: #6b7280;
+            font-style: italic;
+        }
+
+        .footer {
+            margin-top: 4px;
+            border-top: 1.5px double #111827;
+            padding-top: 3px;
+            text-align: center;
+            font-size: 6.5px;
+            color: #9ca3af;
+        }
+
+        .watermark {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: -1;
+            opacity: 0.03;
+            width: 350px;
+            height: 350px;
+        }
+    </style>
+</head>
+
+<body>
+    @php
+        $schoolName = config('academyhub.school_name', config('app.name', 'AcademyHub'));
+        $logo = config('academyhub.school_logo');
+        
+        $toBase64 = function(?string $path): ?string {
+            if (!$path || !file_exists($path)) {
+                return null;
+            }
+            $ext = strtolower(pathinfo($path, PATHINFO_EXTENSION));
+            $mime = match($ext) {
+                'jpg', 'jpeg' => 'image/jpeg',
+                'png' => 'image/png',
+                'webp' => 'image/webp',
+                'svg' => 'image/svg+xml',
+                default => 'image/png',
+            };
+            $data = @file_get_contents($path);
+            return $data ? 'data:' . $mime . ';base64,' . base64_encode($data) : null;
+        };
+
+        $logoCandidates = array_filter([
+            $logo ? public_path('uploads/' . str_replace('\\', '/', $logo)) : null,
+            $logo ? public_path(str_replace('\\', '/', $logo)) : null,
+            $logo ? storage_path('app/public/' . str_replace('\\', '/', $logo)) : null,
+            public_path('academy.png'),
+            public_path('logo.png'),
+            public_path('images/logo.png'),
+            public_path('uploads/school_logo.png'),
+        ]);
+
+        $logoPath = null;
+        foreach ($logoCandidates as $cand) {
+            if ($cand && file_exists($cand)) {
+                $logoPath = $cand;
+                break;
+            }
+        }
+
+        $logoDataUri = $logoPath ? $toBase64($logoPath) : null;
+        $logoExists = (bool) $logoDataUri;
+
+        $opts = $rcOptions ?? [];
+        $showPosition                  = $opts['show_position'] ?? true;
+        $showAttendance                = $opts['show_attendance'] ?? true;
+        $showGradingKey                = $opts['show_grading_key'] ?? true;
+        $showClassAverage              = $opts['show_class_average'] ?? true;
+        $showWatermark                 = $opts['show_watermark'] ?? true;
+        $showNextTermDate              = $opts['show_next_term_date'] ?? true;
+        $showTeacherRemarks            = $opts['show_teacher_remarks'] ?? true;
+        $showPrincipalRemarks          = $opts['show_principal_remarks'] ?? true;
+        $showPsychomotor               = $opts['show_psychomotor'] ?? false;
+        $showSchoolFees                = $opts['show_school_fees'] ?? false;
+        $showSignatures                = $opts['show_signatures'] ?? false;
+        $showClassHighestLowest        = $opts['show_class_highest_lowest'] ?? false;
+        $showSubjectTeacherRemarks     = $opts['show_subject_teacher_remarks'] ?? false;
+        $showQrCode                    = $opts['show_qr_code'] ?? true;
+        $showCumulativeSummary         = $opts['show_cumulative_summary'] ?? false;
+        $showColorBadges               = $opts['show_color_badges'] ?? true;
+    @endphp
+
+    @if($logoExists && $showWatermark)
+        <div class="watermark">
+            <img src="{{ $logoDataUri }}" alt="" style="width: 100%; height: 100%; object-fit: contain;" />
+        </div>
+    @endif
+
+    <div class="page">
+        <div class="page-inner">
+
+            <div class="header">
+                <div class="header-table">
+                    @if($logoExists)
+                        <div class="header-cell logo-cell">
+                            <img src="{{ $logoDataUri }}" alt="Logo" class="logo" />
+                        </div>
+                    @endif
+                    <div class="header-cell" style="text-align: center;">
+                        <div class="school-name">{{ $schoolName }}</div>
+                        @if(config('academyhub.school_motto'))
+                            <div class="school-info" style="font-style: italic;">"{{ config('academyhub.school_motto') }}"
+                            </div>
+                        @endif
+                        @if(config('academyhub.school_address'))
+                            <div class="school-info">{{ config('academyhub.school_address') }}</div>
+                        @endif
+                        @if(config('academyhub.school_phone'))
+                            <div class="school-info">
+                                Phone: {{ config('academyhub.school_phone') }}
+                            </div>
+                        @endif
+                        <div class="report-title">Student Report Sheet</div>
+                    </div>
+                    @if($logoExists)
+                        <div class="header-cell logo-cell">
+                            <img src="{{ $logoPath }}" alt="Logo" class="logo" />
+                        </div>
+                    @endif
+                </div>
+            </div>
+
+            <div class="meta-row">
+                <div class="meta-cell"><span class="meta-label">Session: </span><span
+                        class="meta-value">{{ $session }}</span></div>
+                <div class="meta-cell" style="text-align: center;"><span class="meta-label">Term: </span><span
+                        class="meta-value">Term {{ $term }}</span></div>
+                <div class="meta-cell" style="text-align: right;"><span class="meta-label">Date: </span><span
+                        class="meta-value">{{ now()->format('d/m/Y') }}</span></div>
+            </div>
+
+            @php($siBorderColor = '#374151')
+            @php($siBgColor = '#f9fafb')
+            @php($siLabelColor = '#374151')
+            @php($siValueColor = '#1f2937')
+            @php($siDotColor = '#d1d5db')
+            @include('pdf.partials.rc-student-info')
+
+            <div class="summary-row">
+                <div class="summary-cell">
+                    <div class="summary-label">Total Score</div>
+                    <div class="summary-value">{{ $grandTotal }}</div>
+                </div>
+                <div class="summary-cell">
+                    <div class="summary-label">Average</div>
+                    <div class="summary-value">{{ number_format($average, 1) }}%</div>
+                </div>
+                @if($showPosition)
+                <div class="summary-cell">
+                    <div class="summary-label">Position</div>
+                    <div class="summary-value">{{ $position }}</div>
+                </div>
+                @endif
+                @if($showClassAverage)
+                <div class="summary-cell">
+                    <div class="summary-label">Class Average</div>
+                    <div class="summary-value">{{ number_format($classAverage, 1) }}%</div>
+                </div>
+                @endif
+            </div>
+
+            <table class="scores">
+                <thead>
+                    <tr>
+                        <th style="width: 28%; text-align: left; padding-left: 6px;">Subject</th>
+                        <th style="width: 9%;">CA1</th>
+                        <th style="width: 9%;">CA2</th>
+                        <th style="width: 9%;">Exam</th>
+                        <th style="width: 9%;">Total</th>
+                        <th style="width: 8%;">Grade</th>
+                        @if($showClassAverage)<th style="width: 8%;">Avg</th>@endif
+                        @if($showClassHighestLowest)
+                            <th style="width: 6%;">High</th>
+                            <th style="width: 6%;">Low</th>
+                        @endif
+                        @if($showPosition)<th style="width: 6%;">Pos</th>@endif
+                        @if($showSubjectTeacherRemarks)<th style="width: 12%; text-align: left; padding-left: 4px;">Remark</th>@endif
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach ($rows as $row)
+                        @php
+                            $g = strtoupper($row['grade'] ?? '-');
+                            $badgeBg = match($g) {
+                                'A' => '#dcfce7', 'B' => '#dbeafe', 'C' => '#fef9c3',
+                                'D' => '#ffedd5', 'F','U' => '#fee2e2', default => 'transparent',
+                            };
+                            $badgeFg = match($g) {
+                                'A' => '#166534', 'B' => '#1e40af', 'C' => '#854d0e',
+                                'D' => '#9a3412', 'F','U' => '#991b1b', default => '#111827',
+                            };
+                        @endphp
+                        <tr>
+                            <td class="subj">{{ $row['subject']->name ?? '-' }}</td>
+                            <td>{{ $row['ca1'] ?? '—' }}</td>
+                            <td>{{ $row['ca2'] ?? '—' }}</td>
+                            <td>{{ $row['exam'] ?? '—' }}</td>
+                            <td class="bold">{{ $row['total'] ?? '—' }}</td>
+                            <td class="bold">
+                                @if($showColorBadges && ($row['grade'] ?? null))
+                                    <span style="background:{{ $badgeBg }};color:{{ $badgeFg }};padding:1px 4px;border-radius:2px;font-weight:700;">{{ $g }}</span>
+                                @else
+                                    {{ $row['grade'] ?? '—' }}
+                                @endif
+                            </td>
+                            @if($showClassAverage)<td>{{ $row['class_avg'] ?? '—' }}</td>@endif
+                            @if($showClassHighestLowest)
+                                <td>{{ $row['highest'] ?? '—' }}</td>
+                                <td>{{ $row['lowest'] ?? '—' }}</td>
+                            @endif
+                            @if($showPosition)<td>{{ $row['position'] ?? '—' }}</td>@endif
+                            @if($showSubjectTeacherRemarks)<td style="font-size: 7px; text-align: left; padding-left: 4px; font-style: italic;">{{ $row['teacher_remark'] ?? 'Good' }}</td>@endif
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+
+            @if($showGradingKey)
+            <div class="grading-row">
+                <div class="gr-cell"><strong>A:</strong> 70-100 (Excellent)</div>
+                <div class="gr-cell"><strong>B:</strong> 60-69 (Very Good)</div>
+                <div class="gr-cell"><strong>C:</strong> 50-59 (Good)</div>
+                <div class="gr-cell"><strong>D:</strong> 40-49 (Pass)</div>
+                <div class="gr-cell"><strong>F:</strong> 0-39 (Fail)</div>
+            </div>
+            @endif
+
+            @if($showAttendance)
+            <div class="att-row">
+                <div class="att-cell">
+                    <div class="att-label">Times Opened</div>
+                    <div class="att-value">{{ $timesOpened ?? '—' }}</div>
+                </div>
+                <div class="att-cell">
+                    <div class="att-label">Times Present</div>
+                    <div class="att-value">{{ $timesPresent ?? '—' }}</div>
+                </div>
+                <div class="att-cell">
+                    <div class="att-label">Times Absent</div>
+                    <div class="att-value">{{ $timesAbsent ?? '—' }}</div>
+                </div>
+            </div>
+            @endif
+
+            {{-- Cumulative Annual Summary --}}
+            @if($showCumulativeSummary && !empty($cumulativeSummary))
+            <div style="border: 1px solid #d1d5db; padding: 5px 8px; margin-bottom: 6px; background: #f9fafb;">
+                <div style="font-size: 7.5px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 3px; color: #111827;">Annual Cumulative Summary ({{ $session }})</div>
+                <table style="width: 100%; border-collapse: collapse; text-align: center; font-size: 8px;">
+                    <thead>
+                        <tr style="border-bottom: 1px solid #d1d5db; color: #374151;">
+                            <th style="padding: 2px;">Term 1 Total</th>
+                            <th style="padding: 2px;">Term 2 Total</th>
+                            <th style="padding: 2px;">Term 3 Total</th>
+                            <th style="padding: 2px;">Cumulative Avg</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td style="padding: 3px; font-weight: 600;">{{ $cumulativeSummary['term_1']['total'] ?? '—' }}</td>
+                            <td style="padding: 3px; font-weight: 600;">{{ $cumulativeSummary['term_2']['total'] ?? '—' }}</td>
+                            <td style="padding: 3px; font-weight: 600;">{{ $cumulativeSummary['term_3']['total'] ?? '—' }}</td>
+                            <td style="padding: 3px; font-weight: 800;">{{ $average }}%</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            @endif
+
+            @php($rcBorderColor = '#374151')
+            @php($rcBgLight = '#f9fafb')
+            @php($rcTitleColor = '#374151')
+            @php($rcLabelColor = '#374151')
+            @include('pdf.partials.rc-psychomotor')
+            @include('pdf.partials.rc-school-fees')
+
+            @if($showTeacherRemarks)
+            <div class="remarks-box">
+                <div class="remarks-label">Class Teacher's Remarks</div>
+                <div class="remarks-text">{{ $teacherRemarks ?? 'No remarks provided.' }}</div>
+            </div>
+            @endif
+
+            @if($showPrincipalRemarks)
+            <div class="remarks-box">
+                <div class="remarks-label">Principal's Remarks</div>
+                <div class="remarks-text">{{ $principalRemarks ?? 'No remarks provided.' }}</div>
+            </div>
+            @endif
+
+            @if($showNextTermDate)
+            <div class="next-term">
+                Next Term Begins: {{ $nextTermDate ?? 'To be announced' }}
+            </div>
+            @endif
+
+            @if($showSignatures)
+            <div class="signatures">
+                <div class="sig">
+                    @if(($signatureImages['teacher'] ?? null) && file_exists($signatureImages['teacher']))
+                        <img src="{{ $signatureImages['teacher'] }}" alt="Teacher Signature" style="max-height: 30px; max-width: 80px; object-fit: contain; margin-bottom: 2px;" />
+                    @endif
+                    <div class="sig-line">Class Teacher</div>
+                    <div class="sig-sub">Signature &amp; Date</div>
+                </div>
+                <div class="sig">
+                    @if(($signatureImages['principal'] ?? null) && file_exists($signatureImages['principal']))
+                        <img src="{{ $signatureImages['principal'] }}" alt="Principal Signature" style="max-height: 30px; max-width: 80px; object-fit: contain; margin-bottom: 2px;" />
+                    @endif
+                    <div class="sig-line">{{ $principalTitle ?? 'Principal' }}</div>
+                    <div class="sig-sub">{{ $principalName ? $principalName . ' &bull; ' : '' }}Signature &amp; Stamp</div>
+                </div>
+                <div class="sig">
+                    <div class="sig-line">Parent/Guardian</div>
+                    <div class="sig-sub">Signature &amp; Date</div>
+                </div>
+            </div>
+            @endif
+
+            @if($showQrCode)
+            <div style="margin-top: 4px; border-top: 1px dashed #9ca3af; padding-top: 4px; text-align: center;">
+                @if(!empty($qrCodeUri))
+                    <img src="{{ $qrCodeUri }}" style="width: 42px; height: 42px; display: block; margin: 0 auto 2px auto;" alt="QR" />
+                @endif
+                <div style="font-size: 7px; color: #9ca3af;">
+                    &#128274; <strong>Official Verified Record</strong> &bull; Ref: <strong>{{ $student->admission_number }}</strong>
+                </div>
+            </div>
+            @endif
+
+            <div class="footer">
+                Generated on {{ now()->format('l, F j, Y \a\t g:i A') }} &bull; {{ $schoolName }} &bull; Powered by AcademyHub SMS
+            </div>
+        </div>
+    </div>
+</body>
+</html>

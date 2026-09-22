@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Plus+Jakarta+Sans:wght@600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config={darkMode:"class",theme:{extend:{colors:{"on-surface-variant":"#534434","outline":"#867461","on-surface":"#191c1e","surface-dim":"#d8dadc","on-error":"#ffffff","on-error-container":"#93000a","on-tertiary":"#ffffff","surface-container-low":"#f2f4f6","secondary-fixed-dim":"#bec6e0","surface-bright":"#f7f9fb","on-secondary":"#ffffff","inverse-on-surface":"#eff1f3","secondary":"#565e74","error":"#ba1a1a","surface-tint":"#855300","primary":"#855300","on-secondary-container":"#5c647a","outline-variant":"#d8c3ad","on-tertiary-fixed-variant":"#3c475a","surface":"#f7f9fb","on-secondary-fixed-variant":"#3f465c","on-primary-container":"#613b00","on-primary-fixed":"#2a1700","surface-container-highest":"#e0e3e5","tertiary-fixed-dim":"#bcc7de","inverse-primary":"#ffb95f","error-container":"#ffdad6","surface-container-lowest":"#ffffff","on-tertiary-fixed":"#111c2d","on-primary-fixed-variant":"#653e00","on-primary":"#ffffff","on-tertiary-container":"#394457","secondary-fixed":"#dae2fd","secondary-container":"#dae2fd","on-secondary-fixed":"#131b2e","background":"#f7f9fb","inverse-surface":"#2d3133","surface-variant":"#e0e3e5","tertiary":"#545f73","primary-fixed-dim":"#ffb95f","primary-container":"#f59e0b","surface-container-high":"#e6e8ea","surface-container":"#eceef0","tertiary-container":"#a6b1c8","primary-fixed":"#ffddb8","tertiary-fixed":"#d8e3fb","on-background":"#191c1e"},borderRadius:{DEFAULT:"0.25rem",lg:"0.5rem",xl:"0.75rem",full:"9999px"},spacing:{"space-sm":"0.75rem","space-md":"1.25rem","space-xs":"0.375rem","space-xl":"2.5rem","space-lg":"1.75rem",margin:"2rem",gutter:"1.5rem"},fontFamily:{"label-numeric-keypad":["Plus Jakarta Sans"],"label-action":["Plus Jakarta Sans"],"body-xl":["Inter"],"body-md":["Inter"],"display-kiosk-mobile":["Plus Jakarta Sans"],"headline-xl":["Plus Jakarta Sans"],"headline-sm":["Plus Jakarta Sans"],"body-sm":["Inter"],"headline-xl-mobile":["Plus Jakarta Sans"],"headline-lg":["Plus Jakarta Sans"],"body-lg":["Inter"],"label-badge":["Plus Jakarta Sans"],"headline-md":["Plus Jakarta Sans"],"display-kiosk":["Plus Jakarta Sans"]},fontSize:{"label-numeric-keypad":["32px",{lineHeight:"32px",fontWeight:"700"}],"label-action":["16px",{lineHeight:"20px",letterSpacing:"0.01em",fontWeight:"700"}],"body-xl":["20px",{lineHeight:"28px",fontWeight:"400"}],"body-md":["14px",{lineHeight:"20px",fontWeight:"400"}],"display-kiosk-mobile":["32px",{lineHeight:"40px",letterSpacing:"-0.02em",fontWeight:"800"}],"headline-xl":["36px",{lineHeight:"44px",letterSpacing:"-0.02em",fontWeight:"700"}],"headline-sm":["18px",{lineHeight:"24px",fontWeight:"600"}],"body-sm":["12px",{lineHeight:"16px",fontWeight:"500"}],"headline-xl-mobile":["26px",{lineHeight:"32px",letterSpacing:"-0.01em",fontWeight:"700"}],"headline-lg":["28px",{lineHeight:"36px",letterSpacing:"-0.01em",fontWeight:"700"}],"body-lg":["16px",{lineHeight:"24px",fontWeight:"400"}],"label-badge":["13px",{lineHeight:"16px",letterSpacing:"0.04em",fontWeight:"700"}],"headline-md":["22px",{lineHeight:"28px",fontWeight:"600"}],"display-kiosk":["48px",{lineHeight:"56px",letterSpacing:"-0.03em",fontWeight:"800"}]}}}};</script></head><body class="bg-surface font-body-md text-on-surface antialiased min-h-screen"><header class="fixed top-0 w-full z-50 bg-inverse-surface shadow-[0_4px_20px_rgba(0,0,0,0.25)]"><div class="h-20 w-full px-gutter flex items-center justify-between gap-space-md"><div class="flex items-center gap-space-md shrink-0"><img alt="AcademyGate Logo" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDMV4CipPYrKC8aUqDpvQBpQyO7MmjhMXbCnEjS0BvVAGq0JgusMiiTXUthew9aiiMMTgw42SEep576aP6Y4xaT3hEOroCYB67OextWKESyxns8Gvomfjg2xciCAuKJ3P4Aa7TfreajLqY6pk0bMYovYWxPagQRBrDaZHeCRyfq87L9k6bllQ4yw-om6yHhDUaRvWWNyatj0GRf7P_6CMPwi2V65TngNtg8nmoXAUy1Znxss6cwBCql9Q"/><div class="flex flex-col"><span class="font-headline-sm text-headline-sm font-bold text-inverse-on-surface tracking-tight leading-none">AI ACADEMY</span><span class="font-body-sm text-body-sm text-primary-fixed font-semibold tracking-wider uppercase mt-1">ATTENDANCE KIOSK &amp; GATE MONITOR</span></div></div><nav class="hidden xl:flex items-center gap-2 p-1.5 bg-surface-container-highest/10 rounded-xl" data-active-classes="bg-primary-container text-on-primary-container font-bold rounded-xl"><a class="px-space-md py-2.5 rounded-xl font-label-action text-label-action text-inverse-on-surface/80 hover:text-inverse-on-surface hover:bg-surface-container-highest/20 transition-all" data-path="live-gate-monitor" href="#">Live Gate Monitor</a><a class="px-space-md py-2.5 rounded-xl font-label-action text-label-action text-inverse-on-surface/80 hover:text-inverse-on-surface hover:bg-surface-container-highest/20 transition-all" data-path="class-attendance" href="#">Class Attendance</a><a class="px-space-md py-2.5 rounded-xl font-label-action text-label-action text-inverse-on-surface/80 hover:text-inverse-on-surface hover:bg-surface-container-highest/20 transition-all" data-path="student-directory" href="#">Student Directory</a><a class="px-space-md py-2.5 rounded-xl font-label-action text-label-action text-inverse-on-surface/80 hover:text-inverse-on-surface hover:bg-surface-container-highest/20 transition-all" data-path="reports-export" href="#">Reports &amp; Export</a></nav><div class="flex items-center gap-space-md shrink-0"><div class="hidden lg:flex items-center gap-2 px-3 py-1.5 bg-inverse-surface/90 border border-outline-variant/30 rounded-full shadow-inner"><span class="inline-block w-2.5 h-2.5 rounded-full bg-primary-container animate-pulse"></span><span class="font-body-sm text-body-sm font-semibold tracking-tight text-inverse-on-surface">07:48:22 AM · THU, 24 OCT</span></div><div class="hidden 2xl:flex items-center gap-2"><div class="flex items-center gap-1.5 px-3 py-1 bg-surface-container-lowest/10 border border-outline-variant/20 rounded-full"><span class="w-2 h-2 rounded-full bg-emerald-500"></span><span class="font-body-sm text-body-sm text-inverse-on-surface font-medium">Gate 1 (K40-1)</span></div><div class="flex items-center gap-1.5 px-3 py-1 bg-surface-container-lowest/10 border border-outline-variant/20 rounded-full"><span class="w-2 h-2 rounded-full bg-emerald-500"></span><span class="font-body-sm text-body-sm text-inverse-on-surface font-medium">Gate 2 (K40-2)</span></div></div><button class="p-2 rounded-xl text-inverse-on-surface/80 hover:text-inverse-on-surface hover:bg-surface-container-highest/20 transition-colors" title="Fullscreen Wall TV Mode" type="button"><span class="material-symbols-outlined text-2xl">tv</span></button><div class="flex items-center gap-3 pl-space-sm border-l border-outline-variant/20"><div class="hidden md:flex flex-col text-right"><span class="font-body-sm text-body-sm font-bold text-inverse-on-surface leading-tight">Officer Ngozi A.</span><span class="font-body-sm text-body-sm text-inverse-on-surface/60 leading-none">Gate Desk 1</span></div><img alt="Profile" class="w-8 h-8 rounded-full object-cover ring-2 ring-primary-container" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAKv09nhQCuVMGprlfImS9zYYjqsVW0bMRS2nUKDCcDExAZHKntrMKdDF-4dTuN-4mrDEZjGHF5wC4yZLhZEbhsLkXwuycpS14tMTImK22u24tebGaHwQxbMaY3alCbsLoUzsndVIoUCDbJBG1_ZzA-GQQVL0uTDrYS-uxS-ZnquPpbHzLBtDaOhxgn1E3vyap5qeDZNW7OoZVHds60jaW6T_kBnDNavWPKGTtzKOsbIFZDpdvY3jJuaA"/></div></div></div></header><main class="w-full pt-20 bg-surface min-h-[calc(100vh-5rem)]"><div class="w-full max-w-[1440px] mx-auto p-gutter"><div class="flex flex-col w-full">
+<!-- Operational Breadcrumb & Top Command Bar -->
+<section class="w-full mb-space-lg flex flex-col xl:flex-row xl:items-center xl:justify-between gap-space-md">
+<div class="flex flex-col">
+<div class="flex items-center gap-2 mb-1">
+<span class="font-body-sm text-body-sm font-semibold tracking-wider uppercase text-primary">Compliance Registry</span>
+<span class="text-secondary/40 font-body-sm text-body-sm">/</span>
+<span class="font-body-sm text-body-sm text-secondary font-medium">Ministry Official Archive v4.2</span>
+</div>
+<h1 class="font-headline-xl text-headline-xl text-on-surface tracking-tight leading-none">Attendance &amp; PDF Export Center</h1>
+</div>
+<!-- Quick Mode Actions / Hotkeys -->
+<div class="flex flex-wrap items-center gap-space-sm">
+<button class="h-12 px-space-md rounded-xl bg-surface-container-lowest text-on-surface shadow-sm hover:bg-surface-container-high transition-all flex items-center gap-2.5 font-label-action text-label-action" onclick="window.print()" type="button">
+<span class="material-symbols-outlined text-primary text-xl">print</span>
+<span>Print Gatekeeper Log</span>
+</button>
+<button class="h-12 px-space-md rounded-xl bg-surface-container-lowest text-on-surface shadow-sm hover:bg-surface-container-high transition-all flex items-center gap-2.5 font-label-action text-label-action" id="btnCsvExport" type="button">
+<span class="material-symbols-outlined text-secondary text-xl">table_view</span>
+<span>Export Excel / CSV</span>
+</button>
+<button class="h-12 px-space-lg rounded-xl bg-primary-container text-on-primary-container shadow-md hover:bg-primary-fixed-dim active:scale-[0.98] transition-all flex items-center gap-2.5 font-label-action text-label-action" id="btnPdfExport" type="button">
+<span class="material-symbols-outlined text-on-primary-container text-xl">picture_as_pdf</span>
+<span>1-Click Export to PDF Mark Sheet</span>
+</button>
+</div>
+</section>
+<!-- Filter & Configuration Strip -->
+<div class="w-full bg-surface-container-lowest rounded-2xl p-space-md shadow-sm mb-space-lg flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-space-md">
+<div class="grid grid-cols-1 sm:grid-cols-3 gap-space-md w-full lg:w-3/4">
+<!-- Date Range Selector -->
+<div class="flex flex-col gap-1.5">
+<label class="font-body-sm text-body-sm font-bold text-secondary uppercase tracking-wider">Audit Date Horizon</label>
+<div class="relative">
+<select class="w-full h-11 pl-10 pr-8 bg-surface-container-low rounded-xl text-on-surface font-body-md text-body-md font-semibold focus:outline-none focus:bg-surface-container-lowest cursor-pointer transition-colors appearance-none">
+<option selected="">October 24, 2024 (Today)</option>
+<option>This Week (Oct 21 - Oct 25)</option>
+<option>This Term (Michaelmas Term 2024)</option>
+<option>Custom Date Range Archive...</option>
+</select>
+<span class="material-symbols-outlined absolute left-3 top-2.5 text-secondary text-lg pointer-events-none">calendar_month</span>
+<span class="material-symbols-outlined absolute right-3 top-2.5 text-secondary text-lg pointer-events-none">expand_more</span>
+</div>
+</div>
+<!-- Class Hierarchy Selector -->
+<div class="flex flex-col gap-1.5">
+<label class="font-body-sm text-body-sm font-bold text-secondary uppercase tracking-wider">Cohort / Division</label>
+<div class="relative">
+<select class="w-full h-11 pl-10 pr-8 bg-surface-container-low rounded-xl text-on-surface font-body-md text-body-md font-semibold focus:outline-none focus:bg-surface-container-lowest cursor-pointer transition-colors appearance-none">
+<option selected="">All Classes (Whole School)</option>
+<option>Nursery 1 &amp; 2 (Early Years)</option>
+<option>Basic 1 - Emerald</option>
+<option>Basic 2 - Gold</option>
+<option>Basic 3 - Sapphire</option>
+<option>Basic 4 - Diamond</option>
+<option>Basic 5 - Platinum (Terminal Exam)</option>
+</select>
+<span class="material-symbols-outlined absolute left-3 top-2.5 text-secondary text-lg pointer-events-none">domain</span>
+<span class="material-symbols-outlined absolute right-3 top-2.5 text-secondary text-lg pointer-events-none">expand_more</span>
+</div>
+</div>
+<!-- Influx / Session Stream -->
+<div class="flex flex-col gap-1.5">
+<label class="font-body-sm text-body-sm font-bold text-secondary uppercase tracking-wider">Session Stream</label>
+<div class="relative">
+<select class="w-full h-11 pl-10 pr-8 bg-surface-container-low rounded-xl text-on-surface font-body-md text-body-md font-semibold focus:outline-none focus:bg-surface-container-lowest cursor-pointer transition-colors appearance-none">
+<option selected="">Morning Influx &amp; Afternoon Departures</option>
+<option>Morning Ingress (06:30 - 08:30)</option>
+<option>Late Admissions Queue Only</option>
+<option>Afternoon Exits (14:00 - 16:30)</option>
+</select>
+<span class="material-symbols-outlined absolute left-3 top-2.5 text-secondary text-lg pointer-events-none">swap_vert</span>
+<span class="material-symbols-outlined absolute right-3 top-2.5 text-secondary text-lg pointer-events-none">expand_more</span>
+</div>
+</div>
+</div>
+<!-- Status Snapshot Badges -->
+<div class="flex items-center gap-3 self-end lg:self-center shrink-0 pt-2 lg:pt-0">
+<div class="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-surface-container font-body-sm text-body-sm font-medium text-secondary">
+<span class="w-2 h-2 rounded-full bg-primary animate-ping"></span>
+<span>Auto-Sync 30s</span>
+</div>
+<div class="p-2 bg-surface-container-low text-secondary rounded-xl hover:text-on-surface cursor-pointer" title="Refresh Live Data">
+<span class="material-symbols-outlined text-xl">refresh</span>
+</div>
+</div>
+</div>
+<!-- Real-Time Metric & Attendance Yield Counters -->
+<div class="grid grid-cols-2 md:grid-cols-5 gap-space-sm mb-space-lg">
+<div class="bg-surface-container-lowest p-space-md rounded-2xl shadow-sm flex flex-col justify-between">
+<div class="flex items-center justify-between text-secondary mb-1">
+<span class="font-body-sm text-body-sm font-bold tracking-wide uppercase">Enrolled Pupils</span>
+<span class="material-symbols-outlined text-secondary text-lg">school</span>
+</div>
+<div class="flex items-baseline gap-2">
+<span class="font-headline-xl text-headline-xl font-bold text-on-surface leading-none">210</span>
+<span class="font-body-sm text-body-sm text-secondary font-medium">100% Base</span>
+</div>
+</div>
+<div class="bg-surface-container-lowest p-space-md rounded-2xl shadow-sm flex flex-col justify-between">
+<div class="flex items-center justify-between text-secondary mb-1">
+<span class="font-body-sm text-body-sm font-bold tracking-wide uppercase text-on-surface">Verified Present</span>
+<span class="w-2.5 h-2.5 rounded-full bg-emerald-600"></span>
+</div>
+<div class="flex items-baseline gap-2">
+<span class="font-headline-xl text-headline-xl font-bold text-on-surface leading-none">176</span>
+<span class="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-800 font-label-badge text-label-badge">83.8%</span>
+</div>
+</div>
+<div class="bg-surface-container-lowest p-space-md rounded-2xl shadow-sm flex flex-col justify-between">
+<div class="flex items-center justify-between text-secondary mb-1">
+<span class="font-body-sm text-body-sm font-bold tracking-wide uppercase">Late Arrival</span>
+<span class="w-2.5 h-2.5 rounded-full bg-primary-container"></span>
+</div>
+<div class="flex items-baseline gap-2">
+<span class="font-headline-xl text-headline-xl font-bold text-on-surface leading-none">14</span>
+<span class="px-2 py-0.5 rounded-full bg-primary-fixed text-on-primary-fixed-variant font-label-badge text-label-badge">6.7%</span>
+</div>
+</div>
+<div class="bg-surface-container-lowest p-space-md rounded-2xl shadow-sm flex flex-col justify-between">
+<div class="flex items-center justify-between text-secondary mb-1">
+<span class="font-body-sm text-body-sm font-bold tracking-wide uppercase">Unexplained Absent</span>
+<span class="w-2.5 h-2.5 rounded-full bg-error"></span>
+</div>
+<div class="flex items-baseline gap-2">
+<span class="font-headline-xl text-headline-xl font-bold text-error leading-none">12</span>
+<span class="px-2 py-0.5 rounded-full bg-error-container text-on-error-container font-label-badge text-label-badge">5.7%</span>
+</div>
+</div>
+<div class="bg-surface-container-lowest p-space-md rounded-2xl shadow-sm flex flex-col justify-between col-span-2 md:col-span-1">
+<div class="flex items-center justify-between text-secondary mb-1">
+<span class="font-body-sm text-body-sm font-bold tracking-wide uppercase">Departed Early</span>
+<span class="w-2.5 h-2.5 rounded-full bg-tertiary"></span>
+</div>
+<div class="flex items-baseline gap-2">
+<span class="font-headline-xl text-headline-xl font-bold text-on-surface leading-none">8</span>
+<span class="px-2 py-0.5 rounded-full bg-tertiary-fixed text-on-tertiary-fixed-variant font-label-badge text-label-badge">3.8%</span>
+</div>
+</div>
+</div>
+<!-- Mark Sheet Paper Canvas Container (PDF Physical Format Simulator) -->
+<div class="w-full bg-surface-container-lowest rounded-2xl shadow-xl overflow-hidden mb-space-xl">
+<!-- Institutional Document Header -->
+<div class="p-space-lg bg-inverse-surface text-inverse-on-surface relative overflow-hidden">
+<!-- Ambient watermark seal background -->
+<div class="absolute right-0 top-0 translate-x-12 -translate-y-12 pointer-events-none opacity-5">
+<span class="material-symbols-outlined text-[280px]">verified_user</span>
+</div>
+<div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-space-md relative z-10">
+<div class="flex items-center gap-space-md">
+<div class="w-16 h-16 rounded-xl bg-surface-container-lowest/10 p-2 flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-primary-fixed-dim text-4xl">local_police</span>
+</div>
+<div class="flex flex-col">
+<div class="flex items-center gap-2">
+<span class="px-2 py-0.5 rounded bg-primary-container text-on-primary-container font-label-badge text-label-badge">FORM 4-B STATUTORY COMPLIANCE</span>
+<span class="font-body-sm text-body-sm text-inverse-on-surface/70">MINISTRY ID: FME/LAG/PRI/9882</span>
+</div>
+<h2 class="font-headline-lg text-headline-lg tracking-tight font-bold text-inverse-on-surface mt-1">
+              AI ACADEMY PRIMARY &amp; NURSERY SCHOOL — DAILY ATTENDANCE AUDIT LOG
+            </h2>
+<p class="font-body-sm text-body-sm text-inverse-on-surface/80">
+              Campus Main Perimeter Gates • ZK-Teco K40 Biometric Optical Nodes (Feed A &amp; B)
+            </p>
+</div>
+</div>
+<div class="flex flex-col md:text-right shrink-0 bg-surface-container-lowest/10 p-3 rounded-xl backdrop-blur-sm">
+<span class="font-body-sm text-body-sm text-primary-fixed font-bold tracking-wider uppercase">Official Audit Stamp</span>
+<span class="font-headline-sm text-headline-sm font-bold text-inverse-on-surface">24 OCT 2024</span>
+<span class="font-body-sm text-body-sm text-inverse-on-surface/60">Generated: 07:52:14 AM (West Africa Time)</span>
+</div>
+</div>
+<!-- Quick Document Telemetry Strip -->
+<div class="mt-space-md pt-3 border-t border-inverse-on-surface/15 flex flex-wrap items-center justify-between gap-4 font-body-sm text-body-sm text-inverse-on-surface/80">
+<div class="flex items-center gap-6">
+<span><strong class="text-inverse-on-surface">Supervising Official:</strong> Officer Ngozi A. (ID #GK-04)</span>
+<span><strong class="text-inverse-on-surface">Terminal Sync:</strong> K40 Gate Array (Active Lock)</span>
+<span><strong class="text-inverse-on-surface">Roll Verification:</strong> 210 Pupils Total</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+<span class="font-mono text-xs">HASH: 8A4F-C099-E762B-AI-ACADEMY</span>
+</div>
+</div>
+</div>
+<!-- Attendance Mark Sheet Table -->
+<div class="w-full overflow-x-auto">
+<table class="w-full text-left text-on-surface">
+<thead>
+<tr class="bg-surface-container text-secondary font-label-badge text-label-badge uppercase tracking-wider border-b border-surface-container-high">
+<th class="py-3 px-4 w-12 text-center">S/N</th>
+<th class="py-3 px-4">Roll No</th>
+<th class="py-3 px-4">Terminal ID</th>
+<th class="py-3 px-6">Pupil Identity</th>
+<th class="py-3 px-4">Cohort &amp; Arm</th>
+<th class="py-3 px-4">In-Time (Gate)</th>
+<th class="py-3 px-4">Out-Time</th>
+<th class="py-3 px-4">Daily Status</th>
+<th class="py-3 px-4">Guardian Dispatch</th>
+<th class="py-3 px-6">Scan Modality</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-surface-container font-body-md text-body-md">
+<!-- Row 1: On-Time Fingerprint -->
+<tr class="hover:bg-surface-container-low/60 transition-colors">
+<td class="py-3.5 px-4 font-mono text-xs text-secondary text-center">001</td>
+<td class="py-3.5 px-4 font-mono text-xs font-semibold text-on-surface">ROL-2024-001</td>
+<td class="py-3.5 px-4 font-mono text-xs text-secondary">K40-0891</td>
+<td class="py-3.5 px-6">
+<div class="flex items-center gap-3">
+<img class="w-9 h-9 rounded-full object-cover shrink-0" data-alt="Close up sharp professional student passport photo of an 8-year-old Nigerian schoolgirl named Chisom with neatly braided hair, wearing a clean crisp burgundy and amber school blazer, neutral studio lighting, soft gray school backdrop." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBeJKfAd_dSPABqxXpBpCxkuaDDftW_tNM3xYY2q1nvxLNCIi8pGHt1qsLxCfPDkYKMX9phMkAn_IfhmYiPAwQ4jcAJVzh7_2oZU_bWvXTQQYYFvAjAQN0vYipn_G__AUGur5HqUvHpfemCAAvf5bbU4QTt6jlA8Yk9SR5iNV4m9E6QubmlMQRFBJ5U5-_fJWjbk6wasBSLfdT0xyH1UoommNzYWo2-YJzMrDa6Ik6Sg5Y1SBm6OwfnXA"/>
+<div class="flex flex-col">
+<span class="font-headline-sm text-body-lg font-bold text-on-surface leading-tight">Chisom Okafor</span>
+<span class="font-body-sm text-body-sm text-secondary">ID: AIA-24-9012</span>
+</div>
+</div>
+</td>
+<td class="py-3.5 px-4 font-medium text-on-surface">Basic 5 • Platinum</td>
+<td class="py-3.5 px-4 font-mono text-xs font-semibold text-on-surface">
+              07:14:22 AM
+              <span class="block text-[11px] text-secondary font-normal">Turnstile Gate 1</span>
+</td>
+<td class="py-3.5 px-4 font-mono text-xs text-secondary">—</td>
+<td class="py-3.5 px-4">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-800 font-label-badge text-label-badge">
+<span class="w-2 h-2 rounded-full bg-emerald-600"></span>
+                On-Time
+              </span>
+</td>
+<td class="py-3.5 px-4">
+<div class="flex items-center gap-1.5 text-emerald-700 font-body-sm text-body-sm">
+<span class="material-symbols-outlined text-base">check_circle</span>
+<span>SMS Sent (07:15)</span>
+</div>
+</td>
+<td class="py-3.5 px-6">
+<div class="flex items-center gap-2 font-body-sm text-body-sm text-on-surface font-medium">
+<span class="material-symbols-outlined text-primary text-base">fingerprint</span>
+<span>Biometric Thumb</span>
+</div>
+</td>
+</tr>
+<!-- Row 2: Late RFID Card -->
+<tr class="bg-surface-container-low/30 hover:bg-surface-container-low/60 transition-colors">
+<td class="py-3.5 px-4 font-mono text-xs text-secondary text-center">002</td>
+<td class="py-3.5 px-4 font-mono text-xs font-semibold text-on-surface">ROL-2024-002</td>
+<td class="py-3.5 px-4 font-mono text-xs text-secondary">K40-0894</td>
+<td class="py-3.5 px-6">
+<div class="flex items-center gap-3">
+<img class="w-9 h-9 rounded-full object-cover shrink-0" data-alt="Passport size high resolution portrait of a 7-year-old West African schoolboy named Tunde smiling gently, dressed in navy tie and school collar uniform, clean lighting with slate amber classroom ambiance." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDkSpJADoYZaa0DOzyJK4Eo1PTluAjuz_kfJhbB16G-BJvh03a65U04rEoJSc1--ZHeP8cwyjEBvhvEZ6trFgqWO6QnpKxszAVeAUyYJJ3Etho5sCOgruHvLtcab0xF6wWllVR2N86FrJGg_xZOL6jViXRtWMZ7UcGqLzHX0NFPIh-n2Hff5Pfirst6AoQoS-IcASA4Q2DwrJffzq8Sno_oml4e9DQShPn5ukIV-qXS5G_qJjE5_upW2g"/>
+<div class="flex flex-col">
+<span class="font-headline-sm text-body-lg font-bold text-on-surface leading-tight">Tunde Adeleke</span>
+<span class="font-body-sm text-body-sm text-secondary">ID: AIA-24-8841</span>
+</div>
+</div>
+</td>
+<td class="py-3.5 px-4 font-medium text-on-surface">Basic 4 • Diamond</td>
+<td class="py-3.5 px-4 font-mono text-xs font-semibold text-on-surface">
+              07:44:09 AM
+              <span class="block text-[11px] text-primary font-normal">+14m Tardy Slip</span>
+</td>
+<td class="py-3.5 px-4 font-mono text-xs text-secondary">—</td>
+<td class="py-3.5 px-4">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-primary-fixed text-on-primary-fixed-variant font-label-badge text-label-badge">
+<span class="w-2 h-2 rounded-full bg-primary-container"></span>
+                Late (Flagged)
+              </span>
+</td>
+<td class="py-3.5 px-4">
+<div class="flex items-center gap-1.5 text-primary-container font-body-sm text-body-sm font-medium">
+<span class="material-symbols-outlined text-base">outgoing_mail</span>
+<span>Late Notice Delivered</span>
+</div>
+</td>
+<td class="py-3.5 px-6">
+<div class="flex items-center gap-2 font-body-sm text-body-sm text-on-surface font-medium">
+<span class="material-symbols-outlined text-secondary text-base">contactless</span>
+<span>Mifare RFID Card</span>
+</div>
+</td>
+</tr>
+<!-- Row 3: Absent -->
+<tr class="hover:bg-surface-container-low/60 transition-colors">
+<td class="py-3.5 px-4 font-mono text-xs text-secondary text-center">003</td>
+<td class="py-3.5 px-4 font-mono text-xs font-semibold text-on-surface">ROL-2024-003</td>
+<td class="py-3.5 px-4 font-mono text-xs text-secondary">—</td>
+<td class="py-3.5 px-6">
+<div class="flex items-center gap-3">
+<img class="w-9 h-9 rounded-full object-cover shrink-0" data-alt="Official portrait photograph of a 9-year-old student named Amina with hijab in deep navy school color, calm studious expression, front facing educational registry photograph style." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAHZREKjU-DyqXm0-IB9O2J1cAupUYnA0u_N78btpjL39vLTg9OzIYq3INvGGnvJ8W1k6PcbOqIi5RwZ1cqqFMiJTJfcQxjKYUP2g8-44TUu_P3fzFdsWNLzVdl0Wk7rYDbhQyLYNpgNdcNXITB6qlwIbSdS-xmQjs6jcaBLNW5ChoCHmS3pj-Aejojtl14K4M_BwSZ_Gg1cpQmVR4fGkS5SKYtwXU2KiwDyUz8g2xBwOK7jguIBScdYQ"/>
+<div class="flex flex-col">
+<span class="font-headline-sm text-body-lg font-bold text-on-surface leading-tight">Amina Bello</span>
+<span class="font-body-sm text-body-sm text-secondary">ID: AIA-24-7120</span>
+</div>
+</div>
+</td>
+<td class="py-3.5 px-4 font-medium text-on-surface">Basic 5 • Platinum</td>
+<td class="py-3.5 px-4 font-mono text-xs text-error font-semibold">NOT LOGGED</td>
+<td class="py-3.5 px-4 font-mono text-xs text-secondary">—</td>
+<td class="py-3.5 px-4">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-error-container text-on-error-container font-label-badge text-label-badge">
+<span class="w-2 h-2 rounded-full bg-error"></span>
+                Absent Unexcused
+              </span>
+</td>
+<td class="py-3.5 px-4">
+<div class="flex items-center gap-1.5 text-error font-body-sm text-body-sm font-semibold">
+<span class="material-symbols-outlined text-base">call</span>
+<span>Call Escalated (No Resp)</span>
+</div>
+</td>
+<td class="py-3.5 px-6">
+<span class="font-body-sm text-body-sm text-secondary">— (Zero Capture)</span>
+</td>
+</tr>
+<!-- Row 4: On-Time / Departed Early (Doctor's Note) -->
+<tr class="bg-surface-container-low/30 hover:bg-surface-container-low/60 transition-colors">
+<td class="py-3.5 px-4 font-mono text-xs text-secondary text-center">004</td>
+<td class="py-3.5 px-4 font-mono text-xs font-semibold text-on-surface">ROL-2024-004</td>
+<td class="py-3.5 px-4 font-mono text-xs text-secondary">K40-0891</td>
+<td class="py-3.5 px-6">
+<div class="flex items-center gap-3">
+<div class="w-9 h-9 rounded-full bg-surface-container flex items-center justify-center font-bold text-on-surface text-sm">
+                  EK
+                </div>
+<div class="flex flex-col">
+<span class="font-headline-sm text-body-lg font-bold text-on-surface leading-tight">Emeka Kalu</span>
+<span class="font-body-sm text-body-sm text-secondary">ID: AIA-24-9104</span>
+</div>
+</div>
+</td>
+<td class="py-3.5 px-4 font-medium text-on-surface">Basic 3 • Sapphire</td>
+<td class="py-3.5 px-4 font-mono text-xs font-semibold text-on-surface">07:05:40 AM</td>
+<td class="py-3.5 px-4 font-mono text-xs font-semibold text-tertiary">07:45:10 AM (Exited)</td>
+<td class="py-3.5 px-4">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-tertiary-fixed text-on-tertiary-fixed-variant font-label-badge text-label-badge">
+<span class="w-2 h-2 rounded-full bg-tertiary"></span>
+                Departed Early
+              </span>
+</td>
+<td class="py-3.5 px-4">
+<div class="flex items-center gap-1.5 text-secondary font-body-sm text-body-sm">
+<span class="material-symbols-outlined text-base">verified</span>
+<span>Parent Signed Out</span>
+</div>
+</td>
+<td class="py-3.5 px-6">
+<div class="flex items-center gap-2 font-body-sm text-body-sm text-on-surface font-medium">
+<span class="material-symbols-outlined text-primary text-base">admin_panel_settings</span>
+<span>Officer Override (PIN)</span>
+</div>
+</td>
+</tr>
+<!-- Row 5: On-Time QR Code / Nursery -->
+<tr class="hover:bg-surface-container-low/60 transition-colors">
+<td class="py-3.5 px-4 font-mono text-xs text-secondary text-center">005</td>
+<td class="py-3.5 px-4 font-mono text-xs font-semibold text-on-surface">ROL-2024-005</td>
+<td class="py-3.5 px-4 font-mono text-xs text-secondary">K40-0892</td>
+<td class="py-3.5 px-6">
+<div class="flex items-center gap-3">
+<div class="w-9 h-9 rounded-full bg-secondary-fixed flex items-center justify-center font-bold text-on-secondary-fixed text-sm">
+                  FM
+                </div>
+<div class="flex flex-col">
+<span class="font-headline-sm text-body-lg font-bold text-on-surface leading-tight">Fatimah Mohammed</span>
+<span class="font-body-sm text-body-sm text-secondary">ID: AIA-24-6302</span>
+</div>
+</div>
+</td>
+<td class="py-3.5 px-4 font-medium text-on-surface">Nursery 2 • Rose</td>
+<td class="py-3.5 px-4 font-mono text-xs font-semibold text-on-surface">
+              07:22:15 AM
+              <span class="block text-[11px] text-secondary font-normal">Nursery Gate Kiosk</span>
+</td>
+<td class="py-3.5 px-4 font-mono text-xs text-secondary">—</td>
+<td class="py-3.5 px-4">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-800 font-label-badge text-label-badge">
+<span class="w-2 h-2 rounded-full bg-emerald-600"></span>
+                On-Time
+              </span>
+</td>
+<td class="py-3.5 px-4">
+<div class="flex items-center gap-1.5 text-emerald-700 font-body-sm text-body-sm">
+<span class="material-symbols-outlined text-base">check_circle</span>
+<span>WhatsApp Delivered</span>
+</div>
+</td>
+<td class="py-3.5 px-6">
+<div class="flex items-center gap-2 font-body-sm text-body-sm text-on-surface font-medium">
+<span class="material-symbols-outlined text-secondary text-base">qr_code_scanner</span>
+<span>Pupil Lanyard QR</span>
+</div>
+</td>
+</tr>
+<!-- Row 6: On-Time -->
+<tr class="bg-surface-container-low/30 hover:bg-surface-container-low/60 transition-colors">
+<td class="py-3.5 px-4 font-mono text-xs text-secondary text-center">006</td>
+<td class="py-3.5 px-4 font-mono text-xs font-semibold text-on-surface">ROL-2024-006</td>
+<td class="py-3.5 px-4 font-mono text-xs text-secondary">K40-0891</td>
+<td class="py-3.5 px-6">
+<div class="flex items-center gap-3">
+<div class="w-9 h-9 rounded-full bg-surface-container flex items-center justify-center font-bold text-on-surface text-sm">
+                  DJ
+                </div>
+<div class="flex flex-col">
+<span class="font-headline-sm text-body-lg font-bold text-on-surface leading-tight">David Joshua</span>
+<span class="font-body-sm text-body-sm text-secondary">ID: AIA-24-8110</span>
+</div>
+</div>
+</td>
+<td class="py-3.5 px-4 font-medium text-on-surface">Basic 2 • Gold</td>
+<td class="py-3.5 px-4 font-mono text-xs font-semibold text-on-surface">07:28:44 AM</td>
+<td class="py-3.5 px-4 font-mono text-xs text-secondary">—</td>
+<td class="py-3.5 px-4">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-800 font-label-badge text-label-badge">
+<span class="w-2 h-2 rounded-full bg-emerald-600"></span>
+                On-Time
+              </span>
+</td>
+<td class="py-3.5 px-4">
+<div class="flex items-center gap-1.5 text-emerald-700 font-body-sm text-body-sm">
+<span class="material-symbols-outlined text-base">check_circle</span>
+<span>SMS Sent (07:29)</span>
+</div>
+</td>
+<td class="py-3.5 px-6">
+<div class="flex items-center gap-2 font-body-sm text-body-sm text-on-surface font-medium">
+<span class="material-symbols-outlined text-primary text-base">fingerprint</span>
+<span>Biometric Thumb</span>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Table Pagination & Record Counter Footer -->
+<div class="p-space-md bg-surface-container-low flex flex-col sm:flex-row items-center justify-between gap-4 font-body-sm text-body-sm text-secondary">
+<div class="flex items-center gap-2">
+<span>Displaying records <strong class="text-on-surface">1 – 6</strong> of 210 filtered students</span>
+<span class="text-secondary/40">•</span>
+<span>Audit page 1 of 35</span>
+</div>
+<div class="flex items-center gap-1.5">
+<button class="px-3 py-1.5 rounded-lg bg-surface-container-lowest text-on-surface font-semibold shadow-sm hover:bg-surface-container-high transition-colors disabled:opacity-40" disabled="">Previous</button>
+<button class="px-3 py-1.5 rounded-lg bg-primary-container text-on-primary-container font-bold shadow-sm">1</button>
+<button class="px-3 py-1.5 rounded-lg bg-surface-container-lowest text-on-surface font-semibold hover:bg-surface-container-high transition-colors">2</button>
+<button class="px-3 py-1.5 rounded-lg bg-surface-container-lowest text-on-surface font-semibold hover:bg-surface-container-high transition-colors">3</button>
+<span class="px-2">...</span>
+<button class="px-3 py-1.5 rounded-lg bg-surface-container-lowest text-on-surface font-semibold hover:bg-surface-container-high transition-colors">35</button>
+<button class="px-3 py-1.5 rounded-lg bg-surface-container-lowest text-on-surface font-semibold shadow-sm hover:bg-surface-container-high transition-colors">Next</button>
+</div>
+</div>
+<!-- Statutory Sign-Off Block (Ministry Audit Requirement) -->
+<div class="p-space-lg bg-surface-container border-t border-surface-container-high">
+<div class="grid grid-cols-1 md:grid-cols-2 gap-space-xl">
+<!-- Duty Gatekeeper Certification -->
+<div class="flex flex-col bg-surface-container-lowest p-space-md rounded-xl shadow-sm">
+<div class="flex items-center justify-between mb-space-md">
+<span class="font-body-sm text-body-sm font-bold tracking-wider uppercase text-secondary">Gatekeeper Verification</span>
+<span class="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 font-label-badge text-label-badge flex items-center gap-1">
+<span class="material-symbols-outlined text-xs">verified</span> Logged On-Duty
+            </span>
+</div>
+<div class="flex items-end justify-between pt-6 border-b border-surface-container-high pb-2">
+<div class="flex flex-col">
+<span class="font-headline-sm text-headline-sm font-bold text-on-surface">Officer Ngozi A.</span>
+<span class="font-body-sm text-body-sm text-secondary">Badge #GK-401 • Gate Desk 1 Terminal</span>
+</div>
+<div class="font-mono text-xs text-primary font-semibold tracking-wider">
+              AUTHENTICATED BIOMETRICALLY
+            </div>
+</div>
+<div class="flex items-center justify-between text-[11px] text-secondary mt-2">
+<span>Duty Turnout: 06:15 AM</span>
+<span>Sign-off: 24-Oct-2024 07:52:11 WAT</span>
+</div>
+</div>
+<!-- Head of School / Ministry Inspector Sign-off -->
+<div class="flex flex-col bg-surface-container-lowest p-space-md rounded-xl shadow-sm">
+<div class="flex items-center justify-between mb-space-md">
+<span class="font-body-sm text-body-sm font-bold tracking-wider uppercase text-secondary">Head of School / Principal Verification</span>
+<span class="px-2 py-0.5 rounded bg-primary-fixed text-on-primary-fixed-variant font-label-badge text-label-badge flex items-center gap-1">
+<span class="material-symbols-outlined text-xs">lock</span> Cryptographic Seal
+            </span>
+</div>
+<div class="flex items-end justify-between pt-6 border-b border-surface-container-high pb-2">
+<div class="flex flex-col">
+<span class="font-headline-sm text-headline-sm font-bold text-on-surface">Dr. (Mrs.) E. Alabi</span>
+<span class="font-body-sm text-body-sm text-secondary">Principal &amp; Chief Academic Officer, AI Academy</span>
+</div>
+<div class="h-8 flex items-center">
+<span class="font-mono text-xs bg-surface-container px-2 py-1 rounded text-secondary font-medium">STATUS: ELECTRONICALLY SIGNED</span>
+</div>
+</div>
+<div class="flex items-center justify-between text-[11px] text-secondary mt-2">
+<span>Registry File: ARCHIVE/2024/MICH/WK04</span>
+<span>Ministry Token: 994-EA-77</span>
+</div>
+</div>
+</div>
+<!-- Watermark Bottom Bar -->
+<div class="mt-space-lg pt-space-sm border-t border-surface-container-high/60 flex flex-col sm:flex-row items-center justify-between gap-2 text-center sm:text-left">
+<span class="font-mono text-xs text-secondary">Generated on 24-Oct-2024 07:52 AM via AcademyGate K40 Cloud Sync</span>
+<div class="flex items-center gap-4 text-xs font-mono text-secondary">
+<span>SHA-256 VALIDATED</span>
+<span>•</span>
+<span>COMPLIANT WITH SUBEB STATUTORY ATTENDANCE ACT</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Interactive Export Toast / Confirmation Simulation -->
+<div class="fixed bottom-8 right-8 z-50 transform translate-y-24 opacity-0 transition-all duration-300 pointer-events-none" id="exportFeedback">
+<div class="bg-inverse-surface text-inverse-on-surface px-space-lg py- space-md rounded-2xl shadow-2xl flex items-center gap-space-md border border-primary-container/30">
+<div class="w-10 h-10 rounded-xl bg-primary-container flex items-center justify-center text-on-primary-container">
+<span class="material-symbols-outlined text-2xl animate-spin">sync</span>
+</div>
+<div class="flex flex-col">
+<span class="font-headline-sm text-body-lg font-bold text-inverse-on-surface" id="feedbackTitle">Generating PDF Mark Sheet...</span>
+<span class="font-body-sm text-body-sm text-inverse-on-surface/70" id="feedbackSubtitle">Compiling 210 pupil records with cryptographic checksums.</span>
+</div>
+</div>
+</div>
+<script>
+    (function() {
+      const btnPdf = document.getElementById('btnPdfExport');
+      const btnCsv = document.getElementById('btnCsvExport');
+      const feedback = document.getElementById('exportFeedback');
+      const title = document.getElementById('feedbackTitle');
+      const subtitle = document.getElementById('feedbackSubtitle');
+
+      function triggerToast(actionTitle, actionSub) {
+        if (!feedback) return;
+        title.textContent = actionTitle;
+        subtitle.textContent = actionSub;
+        feedback.classList.remove('translate-y-24', 'opacity-0', 'pointer-events-none');
+        feedback.classList.add('translate-y-0', 'opacity-100');
+
+        setTimeout(() => {
+          feedback.classList.add('translate-y-24', 'opacity-0', 'pointer-events-none');
+          feedback.classList.remove('translate-y-0', 'opacity-100');
+        }, 3200);
+      }
+
+      if (btnPdf) {
+        btnPdf.addEventListener('click', () => {
+          triggerToast('Rendering Statutory PDF Mark Sheet', 'Downloading "AI_Academy_Attendance_24Oct2024.pdf" (600 DPI High Fidelity)...');
+        });
+      }
+
+      if (btnCsv) {
+        btnCsv.addEventListener('click', () => {
+          triggerToast('Exporting Ministry Roster Data', 'Exporting formatted XLSX & CSV for state compliance registry...');
+        });
+      }
+    })();
+  </script>
+</div></div></main><footer class="w-full bg-surface-container-low py-6 border-t border-outline-variant/30"><div class="w-full max-w-[1440px] mx-auto px-gutter flex flex-col sm:flex-row items-center justify-between gap-4"><div class="flex items-center gap-3"><span class="font-headline-sm text-headline-sm font-bold text-on-surface">AcademyGate</span><span class="font-body-sm text-body-sm text-secondary">© 2024 AI Academy Attendance &amp; Security Services.</span></div><div class="flex items-center gap-6"><span class="font-body-sm text-body-sm text-secondary font-medium">Encrypted RFID/Biometric Feed Active</span><span class="font-body-sm text-body-sm text-secondary font-mono text-xs">Terminal OS v4.2.1</span></div></div></footer></body></html>

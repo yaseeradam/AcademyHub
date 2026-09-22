@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Submit Homework - AcademyHub</title>
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Theme Configuration -->
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "secondary-fixed": "#d8e2ff",
+                        "secondary": "#adc6ff",
+                        "on-error": "#690005",
+                        "on-primary-fixed-variant": "#653e00",
+                        "tertiary-container": "#c0a1ff",
+                        "secondary-fixed-dim": "#adc6ff",
+                        "on-surface": "#dae2fd",
+                        "primary-container": "#f59e0b",
+                        "primary": "#ffc174",
+                        "surface": "#0b1326",
+                        "inverse-surface": "#dae2fd",
+                        "tertiary-fixed": "#eaddff",
+                        "surface-container-low": "#131b2e",
+                        "on-secondary-fixed": "#001a42",
+                        "surface-bright": "#31394d",
+                        "outline": "#a08e7a",
+                        "surface-tint": "#ffb95f",
+                        "on-secondary-container": "#e6ecff",
+                        "surface-container-lowest": "#060e20",
+                        "on-primary": "#472a00",
+                        "secondary-container": "#0566d9",
+                        "on-tertiary-fixed-variant": "#5a00c6",
+                        "background": "#0b1326",
+                        "on-tertiary-container": "#5600be",
+                        "error-container": "#93000a",
+                        "primary-fixed": "#ffddb8",
+                        "on-primary-container": "#613b00",
+                        "inverse-on-surface": "#283044",
+                        "surface-container-high": "#222a3d",
+                        "surface-container": "#171f33",
+                        "on-surface-variant": "#d8c3ad",
+                        "surface-container-highest": "#2d3449",
+                        "tertiary": "#d8c3ff",
+                        "on-primary-fixed": "#2a1700",
+                        "on-tertiary": "#3f008e",
+                        "primary-fixed-dim": "#ffb95f",
+                        "on-secondary": "#002e6a",
+                        "inverse-primary": "#855300",
+                        "error": "#ffb4ab",
+                        "surface-dim": "#0b1326",
+                        "surface-variant": "#2d3449",
+                        "on-tertiary-fixed": "#25005a",
+                        "on-background": "#dae2fd",
+                        "outline-variant": "#534434",
+                        "on-error-container": "#ffdad6",
+                        "tertiary-fixed-dim": "#d2bbff",
+                        "on-secondary-fixed-variant": "#004395"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "base": "8px",
+                        "stack-sm": "12px",
+                        "gutter": "16px",
+                        "section-gap": "40px",
+                        "container-padding": "24px",
+                        "stack-md": "24px"
+                    },
+                    "fontFamily": {
+                        "headline-md": ["Plus Jakarta Sans"],
+                        "display": ["Plus Jakarta Sans"],
+                        "label-md": ["Plus Jakarta Sans"],
+                        "title-lg": ["Plus Jakarta Sans"],
+                        "headline-lg-mobile": ["Plus Jakarta Sans"],
+                        "headline-lg": ["Plus Jakarta Sans"],
+                        "body-md": ["Plus Jakarta Sans"],
+                        "body-lg": ["Plus Jakarta Sans"],
+                        "label-sm": ["Plus Jakarta Sans"]
+                    },
+                    "fontSize": {
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "display": ["48px", { "lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "800" }],
+                        "label-md": ["14px", { "lineHeight": "20px", "letterSpacing": "0.02em", "fontWeight": "600" }],
+                        "title-lg": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "headline-lg-mobile": ["24px", { "lineHeight": "32px", "fontWeight": "700" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "700" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+                        "label-sm": ["12px", { "lineHeight": "16px", "fontWeight": "500" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        
+        /* Custom scrollbar for previews */
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        /* Loading bar animation */
+        @keyframes loading-progress {
+            0% { width: 0%; }
+            100% { width: 100%; }
+        }
+        .animate-loading {
+            animation: loading-progress 2s ease-in-out forwards;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background font-body-md antialiased overflow-hidden selection:bg-primary selection:text-on-primary">
+<!-- Dimmed Background Context (Simulated Background) -->
+<div class="fixed inset-0 z-0 bg-surface-container-low flex flex-col pt-16 px-gutter opacity-40 blur-sm pointer-events-none">
+<div class="w-full h-32 bg-surface-container rounded-2xl mb-stack-md"></div>
+<div class="w-full h-64 bg-surface-container rounded-2xl"></div>
+</div>
+<!-- Modal Overlay -->
+<div class="fixed inset-0 z-50 bg-black/60 backdrop-blur-md transition-opacity duration-300 flex flex-col justify-end">
+<!-- Bottom Sheet Container -->
+<div class="w-full max-w-2xl mx-auto bg-surface-container-high rounded-t-[32px] border-t border-white/10 shadow-[0_-8px_32px_rgba(0,0,0,0.4)] flex flex-col max-h-[795px] transform transition-transform duration-300 ease-out translate-y-0">
+<!-- Drag Handle & Header -->
+<div class="px-container-padding pt-6 pb-4 sticky top-0 bg-surface-container-high/95 backdrop-blur z-10 rounded-t-[32px] border-b border-white/5">
+<div class="w-12 h-1.5 bg-outline-variant/40 rounded-full mx-auto mb-6"></div>
+<div class="flex items-center justify-between">
+<div>
+<p class="font-label-sm text-label-sm text-primary uppercase tracking-wider mb-1">Assignment</p>
+<h2 class="font-headline-md text-headline-md text-on-surface">Submit Homework</h2>
+<p class="font-body-md text-body-md text-on-surface-variant mt-1">Physics Lab Report: Kinematics</p>
+</div>
+<button class="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center text-on-surface-variant hover:text-on-surface hover:bg-surface-container-highest transition-colors">
+<span class="material-symbols-outlined">close</span>
+</button>
+</div>
+</div>
+<!-- Scrollable Content -->
+<div class="px-container-padding py-stack-md overflow-y-auto hide-scrollbar flex-1 space-y-stack-md">
+<!-- Rich Text Area -->
+<div class="space-y-2">
+<label class="font-label-md text-label-md text-on-surface-variant">Additional Notes (Optional)</label>
+<div class="w-full bg-surface-container-lowest border border-outline-variant/30 rounded-2xl overflow-hidden focus-within:border-primary/50 focus-within:ring-1 focus-within:ring-primary/50 transition-all">
+<!-- Toolbar simulation -->
+<div class="bg-surface-container px-4 py-2 flex items-center gap-3 border-b border-outline-variant/20">
+<button class="text-on-surface-variant hover:text-primary"><span class="material-symbols-outlined text-[18px]">format_bold</span></button>
+<button class="text-on-surface-variant hover:text-primary"><span class="material-symbols-outlined text-[18px]">format_italic</span></button>
+<button class="text-on-surface-variant hover:text-primary"><span class="material-symbols-outlined text-[18px]">format_list_bulleted</span></button>
+<button class="text-on-surface-variant hover:text-primary"><span class="material-symbols-outlined text-[18px]">link</span></button>
+</div>
+<textarea class="w-full bg-transparent border-none text-on-surface placeholder:text-on-surface-variant/50 p-4 min-h-[120px] resize-y focus:ring-0" placeholder="Type any comments for your teacher here..."></textarea>
+</div>
+</div>
+<!-- Attachments Section -->
+<div class="space-y-4">
+<div class="flex items-center justify-between">
+<label class="font-label-md text-label-md text-on-surface-variant">Attachments</label>
+<span class="font-label-sm text-label-sm text-outline-variant">2 files selected</span>
+</div>
+<!-- Horizontal Previews -->
+<div class="flex gap-4 overflow-x-auto hide-scrollbar pb-2">
+<!-- Preview 1 -->
+<div class="relative flex-none w-32 h-40 rounded-xl overflow-hidden group border border-outline-variant/20 shadow-lg">
+<img class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" data-alt="A top-down view of a handwritten physics lab report on grid paper, illuminated by a warm desk lamp in a dimly lit study space. The handwriting is neat, featuring complex equations and diagrams. The lighting emphasizes the texture of the paper and creates a moody, focused atmosphere, fitting a late-night study session aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBRh2Dbd_8P_gDfe8mtLDsb3iDO3b0dJAbN6jFwqBIe-vwjrpH0t4z0BMT5y_s2YQ769_eosHFVEK07O6l1NZIcLy55B1rSlIe6i3T280kbsTzgykTTjGSSP75Ra_fKs4yLQYv0Uqu2fiXmScEgGciZB7Cn4BeAz62hvwYmWYxNQ0HPpT6J_7GVKrjv5QeZPbrT3neq3UG_JQu5c63JZ1Z994axPRoWus08lysKc3ogxte4YYxXyslBakykLqyldz9xxRkEvqAix9s"/>
+<div class="absolute inset-0 bg-gradient-to-t from-surface-container-lowest/90 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-2">
+<p class="font-label-sm text-label-sm text-on-surface truncate">page_1.jpg</p>
+</div>
+<button class="absolute top-2 right-2 w-6 h-6 bg-surface-container-high/80 rounded-full flex items-center justify-center text-on-surface hover:bg-error hover:text-on-error backdrop-blur-sm transition-colors opacity-0 group-hover:opacity-100">
+<span class="material-symbols-outlined text-[14px]">close</span>
+</button>
+</div>
+<!-- Preview 2 -->
+<div class="relative flex-none w-32 h-40 rounded-xl overflow-hidden group border border-outline-variant/20 shadow-lg">
+<img class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" data-alt="Close-up of a graph drawn on graph paper within a physics lab notebook. The graph shows a curve with plotted data points. The lighting is soft and directional, casting slight shadows that give depth to the page. The surrounding area is dark, highlighting the academic nature of the document in a modern, focused context." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCFGoHFpJM36zsDPpYRxdWhU1WW1upD-6ppVhxkU6pmit5Oiy28hCcgAAwUdkdDLfDakBi5fOZaPEqDQRo7UVGBWwumL4VzwKQzhVYRXcIaFYcvtZ_9SwDA3iEjKpk6_sEEs7img3nyJe64i0K9vOxoiRovjexmQb6LrrAtNz6ykw-Ez-lnfYaEptaN84yxwikA_Qav68nmgWElqpVf4eeSH9z0a3bMt-V46IPJ8-7rDsQ8_4SG_f4qXVUHOOS3ugbLheQ23Sj6-nM"/>
+<div class="absolute inset-0 bg-gradient-to-t from-surface-container-lowest/90 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-2">
+<p class="font-label-sm text-label-sm text-on-surface truncate">graph_data.png</p>
+</div>
+<button class="absolute top-2 right-2 w-6 h-6 bg-surface-container-high/80 rounded-full flex items-center justify-center text-on-surface hover:bg-error hover:text-on-error backdrop-blur-sm transition-colors opacity-0 group-hover:opacity-100">
+<span class="material-symbols-outlined text-[14px]">close</span>
+</button>
+</div>
+</div>
+<!-- Dashed Dropzone -->
+<button class="w-full border-2 border-dashed border-outline-variant/40 rounded-2xl bg-surface-container-low hover:bg-surface-container transition-colors flex flex-col items-center justify-center py-10 gap-3 group relative overflow-hidden">
+<div class="w-12 h-12 rounded-full bg-surface-container-highest group-hover:bg-primary/20 flex items-center justify-center transition-colors">
+<span class="material-symbols-outlined text-on-surface-variant group-hover:text-primary transition-colors text-[28px]">add_a_photo</span>
+</div>
+<div class="text-center">
+<p class="font-title-lg text-title-lg text-on-surface">Attach Photos or Files</p>
+<p class="font-body-md text-body-md text-on-surface-variant mt-1">Tap to browse or take a photo</p>
+</div>
+</button>
+</div>
+</div>
+<!-- Footer Action Area -->
+<div class="p-container-padding border-t border-white/5 bg-surface-container-high">
+<!-- Submit Button with Loading Bar -->
+<button class="relative w-full h-14 bg-primary text-on-primary font-title-lg text-title-lg rounded-xl overflow-hidden shadow-[0_4px_20px_rgba(245,158,11,0.2)] hover:shadow-[0_4px_24px_rgba(245,158,11,0.3)] transition-shadow group">
+<!-- Loading Bar (Simulated progress) -->
+<div class="absolute top-0 left-0 h-full bg-primary-container opacity-50 animate-loading"></div>
+<!-- Button Content -->
+<div class="relative z-10 flex items-center justify-center gap-2 h-full w-full">
+<span class="material-symbols-outlined" data-weight="fill" style="font-variation-settings: 'FILL' 1;">cloud_upload</span>
+<span>SUBMIT TO TEACHER</span>
+</div>
+</button>
+</div>
+</div>
+</div>
+</body></html>

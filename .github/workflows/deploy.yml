@@ -1,0 +1,35 @@
+name: Deploy AcademyHub
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Execute remote SSH commands to deploy
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: 22
+          script: |
+            cd /var/www/academyhub
+            
+            # Fetch latest changes as www-data user to preserve folder ownership
+            sudo -u www-data git pull origin main
+            
+            # Install production Composer dependencies
+            composer install --no-dev --optimize-autoloader
+            
+            # Run database migrations
+            php artisan migrate --force
+            
+            # Clear and rebuild application caches
+            php artisan optimize
+            
+            # Restart supervisor queue worker to pick up code changes
+            supervisorctl restart academyhub-worker:*
