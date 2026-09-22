@@ -1322,12 +1322,25 @@ class WhatsAppController extends Controller
         $schoolName = config('academyhub.school_name', 'AcademyHub');
         $currency = config('academyhub.currency_symbol', '₦');
 
+        $processUrl = \Illuminate\Support\Facades\URL::temporarySignedRoute(
+            'whatsapp.pay.process',
+            now()->addHours(2),
+            [
+                'studentId' => $student->id,
+                'term'      => $term,
+                'session'   => $session,
+                'amount'    => $amount,
+                'key'       => $key,
+            ]
+        );
+
         return view('whatsapp.pay', [
             'student'     => $student,
             'term'        => $term,
             'session'     => $session,
             'amount'      => $amount,
             'key'         => $key,
+            'process_url' => $processUrl,
             'parent_name' => $parentName,
             'school_name' => $schoolName,
             'currency'    => $currency,
@@ -1336,10 +1349,10 @@ class WhatsAppController extends Controller
 
     public function processPayment(Request $request)
     {
-        $studentId = (int) $request->input('student_id');
-        $term = (int) $request->input('term', 1);
-        $session = (string) $request->input('session');
-        $amount = (float) $request->input('amount', 0.0);
+        $studentId = (int) ($request->input('student_id') ?: $request->query('studentId'));
+        $term = (int) ($request->input('term') ?: $request->query('term', 1));
+        $session = (string) ($request->input('session') ?: $request->query('session'));
+        $amount = (float) ($request->input('amount') ?: $request->query('amount', 0.0));
 
         $student = \App\Models\Student::findOrFail($studentId);
         

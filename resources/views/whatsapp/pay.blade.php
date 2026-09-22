@@ -589,7 +589,7 @@
             };
 
             // Post payment request
-            fetch('{{ route("whatsapp.pay.process") }}', {
+            fetch({!! json_encode($process_url ?? route('whatsapp.pay.process')) !!}, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

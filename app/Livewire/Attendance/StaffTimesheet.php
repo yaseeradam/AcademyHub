@@ -59,13 +59,17 @@ class StaffTimesheet extends Component
     #[Computed]
     public function workingDaysCount(): int
     {
-        $tenantId = auth()->user()?->tenant_id ?? 1;
+        $tenantId = auth()->user()?->tenant_id;
         $startOfMonth = Carbon::parse($this->selectedMonth . '-01')->startOfMonth();
         $endOfMonth = (clone $startOfMonth)->endOfMonth();
         $capDate = $endOfMonth->isFuture() ? Carbon::today() : $endOfMonth;
 
         // Count distinct attendance sheets recorded in this month
-        $recordedSheetsCount = TeacherAttendanceSheet::where('tenant_id', $tenantId)
+        $sheetQuery = TeacherAttendanceSheet::query();
+        if ($tenantId) {
+            $sheetQuery->where('tenant_id', $tenantId);
+        }
+        $recordedSheetsCount = $sheetQuery
             ->whereBetween('date', [$startOfMonth->toDateString(), $capDate->toDateString()])
             ->count();
 
@@ -88,13 +92,13 @@ class StaffTimesheet extends Component
     #[Computed]
     public function staffTimesheets(): array
     {
-        $tenantId = auth()->user()?->tenant_id ?? 1;
+        $tenantId = auth()->user()?->tenant_id;
         $startOfMonth = Carbon::parse($this->selectedMonth . '-01')->startOfMonth()->toDateString();
         $endOfMonth = Carbon::parse($this->selectedMonth . '-01')->endOfMonth()->toDateString();
         $totalWorkDays = $this->workingDaysCount;
 
         $staffQuery = User::withoutGlobalScopes()
-            ->where('tenant_id', $tenantId)
+            ->when($tenantId, fn($q) => $q->where('tenant_id', $tenantId))
             ->whereIn('role', ['teacher', 'admin', 'bursar'])
             ->where('is_active', true)
             ->orderBy('name');
@@ -106,7 +110,11 @@ class StaffTimesheet extends Component
         $staffMembers = $staffQuery->get();
 
         // Eager-load all marks for the month
-        $sheetIds = TeacherAttendanceSheet::where('tenant_id', $tenantId)
+        $sheetQuery = TeacherAttendanceSheet::query();
+        if ($tenantId) {
+            $sheetQuery->where('tenant_id', $tenantId);
+        }
+        $sheetIds = $sheetQuery
             ->whereBetween('date', [$startOfMonth, $endOfMonth])
             ->pluck('id');
 
@@ -241,16 +249,24 @@ class StaffTimesheet extends Component
             return [];
         }
 
-        $tenantId = auth()->user()?->tenant_id ?? 1;
+        $tenantId = auth()->user()?->tenant_id;
         $startOfMonth = Carbon::parse($this->selectedMonth . '-01')->startOfMonth()->toDateString();
         $endOfMonth = Carbon::parse($this->selectedMonth . '-01')->endOfMonth()->toDateString();
 
-        $teacher = User::withoutGlobalScopes()->where('tenant_id', $tenantId)->find($this->selectedTeacherId);
+        $teacherQuery = User::withoutGlobalScopes();
+        if ($tenantId) {
+            $teacherQuery->where('tenant_id', $tenantId);
+        }
+        $teacher = $teacherQuery->find($this->selectedTeacherId);
         if (!$teacher) {
             return [];
         }
 
-        $sheetIds = TeacherAttendanceSheet::where('tenant_id', $tenantId)
+        $sheetQuery = TeacherAttendanceSheet::query();
+        if ($tenantId) {
+            $sheetQuery->where('tenant_id', $tenantId);
+        }
+        $sheetIds = $sheetQuery
             ->whereBetween('date', [$startOfMonth, $endOfMonth])
             ->pluck('id', 'date');
 

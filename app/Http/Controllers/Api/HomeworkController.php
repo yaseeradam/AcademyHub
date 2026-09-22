@@ -17,17 +17,22 @@ class HomeworkController extends Controller
         $query = Homework::with(['subject:id,name', 'teacher:id,name'])
             ->orderByDesc('due_date');
 
-        if ($user->role === 'teacher') {
+        $isStudentModel = $user instanceof \App\Models\Student;
+        $role = $isStudentModel ? 'student' : ($user->role ?? null);
+
+        if ($role === 'teacher') {
             $query->where('teacher_id', $user->id);
             if ($request->class_id) $query->where('class_id', $request->class_id);
-        } elseif ($user->role === 'student') {
-            $student = \App\Models\Student::where('user_id', $user->id)->first();
+        } elseif ($role === 'student' || $isStudentModel) {
+            $student = $isStudentModel ? $user : \App\Models\Student::where('user_id', $user->id)->first();
             abort_unless($student, 403);
             $query->where('class_id', $student->class_id);
-        } elseif ($user->role === 'parent') {
+        } elseif ($role === 'parent') {
             $childIds   = $user->students()->pluck('students.id');
             $classIds   = \App\Models\Student::whereIn('id', $childIds)->pluck('class_id');
             $query->whereIn('class_id', $classIds);
+        } elseif ($role === 'admin' || $role === 'proprietor') {
+            if ($request->class_id) $query->where('class_id', $request->class_id);
         }
 
         // Term and session are stored on homework through associated class, filter by due_date range if provided
@@ -110,8 +115,11 @@ class HomeworkController extends Controller
     public function submit(Request $request, int $id)
     {
         $user    = $request->user();
-        $student = \App\Models\Student::where('user_id', $user->id)->first();
+        $student = ($user instanceof \App\Models\Student) ? $user : \App\Models\Student::where('user_id', $user->id)->first();
         abort_unless($student, 403);
+
+        $homework = Homework::findOrFail($id);
+        abort_unless((int) $homework->class_id === (int) $student->class_id, 403, 'Homework is not assigned to your class.');
 
         $data = $request->validate([
             'submission' => 'required|string',

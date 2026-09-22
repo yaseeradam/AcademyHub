@@ -24,28 +24,27 @@ class EnforceTenant
             return $next($request);
         }
 
-        $check = Auth::check();
+        $user = $request->user() ?: (Auth::check() ? Auth::user() : null);
         \Illuminate\Support\Facades\Log::debug('EnforceTenant: Checking authentication', [
             'host' => $host,
-            'auth_check' => $check,
+            'user_present' => ! is_null($user),
             'tenantId' => $tenantId,
             'session_id' => $request->hasSession() ? $request->session()->getId() : 'NO_SESSION',
         ]);
 
-        if (! $check) {
+        if (! $user) {
             return $next($request);
         }
 
-        $user = $request->user();
         \Illuminate\Support\Facades\Log::debug('EnforceTenant: Authenticated user details', [
             'user_id' => $user->id,
-            'email' => $user->email,
-            'user_tenant_id' => $user->tenant_id,
-            'is_super_admin' => $user->is_super_admin,
+            'email' => $user->email ?? null,
+            'user_tenant_id' => $user->tenant_id ?? null,
+            'is_super_admin' => $user->is_super_admin ?? false,
         ]);
 
         // Superadmins should operate from the main domain (no tenant context).
-        if ($user && $user->is_super_admin) {
+        if ($user && ! empty($user->is_super_admin)) {
             if ($tenantId && ! app()->environment('testing')) {
                 \Illuminate\Support\Facades\Log::warning('EnforceTenant: SuperAdmin on tenant domain — logging out', [
                     'user_id' => $user->id,

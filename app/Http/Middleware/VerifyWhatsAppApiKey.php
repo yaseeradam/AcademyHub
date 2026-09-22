@@ -19,12 +19,15 @@ class VerifyWhatsAppApiKey
         $expected = config('services.whatsapp.api_key');
 
         if (empty($expected)) {
-            return $next($request);
+            return response()->json([
+                'success' => false,
+                'message' => 'WhatsApp API service is currently not configured or disabled.',
+            ], 403);
         }
 
-        $provided = $request->header('X-WhatsApp-Api-Key') ?: $request->query('key');
+        $provided = $request->header('X-WhatsApp-Api-Key') ?: $request->query('key') ?: $request->input('key');
 
-        if (! $provided || ! hash_equals($expected, $provided)) {
+        if (! $provided || ! hash_equals((string) $expected, (string) $provided)) {
             return response()->json([
                 'success' => false,
                 'message' => 'Invalid or missing API key.',

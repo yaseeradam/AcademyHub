@@ -88,4 +88,83 @@ class ResultsPublicationTest extends TestCase
             ->call('save')
             ->assertHasErrors(['scores']);
     }
+
+    public function test_broadsheet_class_selection_and_publication_workflow(): void
+    {
+        $admin = User::factory()->create(['role' => 'admin', 'is_active' => true]);
+
+        $class = SchoolClass::query()->create(['name' => 'JSS 3 Broadsheet', 'level' => 3]);
+        $section = Section::query()->create(['class_id' => $class->id, 'name' => 'A']);
+
+        $student1 = Student::query()->create([
+            'admission_number' => 'ADM-BS-001',
+            'first_name' => 'Ali',
+            'last_name' => 'Bello',
+            'class_id' => $class->id,
+            'section_id' => $section->id,
+            'gender' => 'Male',
+            'status' => 'Active',
+        ]);
+
+        $student2 = Student::query()->create([
+            'admission_number' => 'ADM-BS-002',
+            'first_name' => 'Zainab',
+            'last_name' => 'Ahmed',
+            'class_id' => $class->id,
+            'section_id' => $section->id,
+            'gender' => 'Female',
+            'status' => 'Active',
+        ]);
+
+        $subject = Subject::query()->create(['name' => 'Mathematics', 'code' => 'MTH-BS']);
+        \App\Models\SubjectAllocation::create([
+            'teacher_id' => $admin->id,
+            'subject_id' => $subject->id,
+            'class_id' => $class->id,
+        ]);
+
+        \App\Models\Score::create([
+            'student_id' => $student1->id,
+            'class_id' => $class->id,
+            'subject_id' => $subject->id,
+            'term' => 1,
+            'session' => '2026/2027',
+            'ca1' => 15,
+            'ca2' => 15,
+            'exam' => 50,
+            'total' => 80,
+        ]);
+
+        \App\Models\Score::create([
+            'student_id' => $student2->id,
+            'class_id' => $class->id,
+            'subject_id' => $subject->id,
+            'term' => 1,
+            'session' => '2026/2027',
+            'ca1' => 18,
+            'ca2' => 18,
+            'exam' => 58,
+            'total' => 94,
+        ]);
+
+        Livewire::actingAs($admin)
+            ->test(\App\Livewire\Results\Broadsheet::class)
+            ->set('classId', $class->id)
+            ->set('term', 1)
+            ->set('session', '2026/2027')
+            ->assertSee('JSS 3 Broadsheet')
+            ->assertSee('Zainab Ahmed')
+            ->assertSee('Ali Bello')
+            ->assertSee('94')
+            ->assertSee('80')
+            ->call('publish')
+            ->assertDispatched('alert', message: 'Results published successfully.', type: 'success');
+
+        $this->assertDatabaseHas('result_publications', [
+            'class_id' => $class->id,
+            'term' => 1,
+            'session' => '2026/2027',
+        ]);
+    }
 }
+

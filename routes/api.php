@@ -55,7 +55,7 @@ Route::post('/student/login', [StudentAuthController::class, 'login'])->middlewa
 Route::get('/tenant/{slug}', [TenantDiscoveryController::class, 'show']);
 
 // Protected
-Route::middleware(['auth:sanctum', 'active', \App\Http\Middleware\PreventProprietorMutations::class])->group(function () {
+Route::middleware(['auth:sanctum', 'active', 'enforce.tenant', \App\Http\Middleware\PreventProprietorMutations::class])->group(function () {
 
     Route::get('/user',   [AuthController::class, 'me']);
     Route::post('/logout',[AuthController::class, 'logout']);
@@ -210,7 +210,7 @@ Route::prefix('whatsapp')
         Route::post('staff/homework',       [WhatsAppController::class, 'staffHomework']);
         Route::post('admin/broadcast',      [WhatsAppController::class, 'adminBroadcast']);
         Route::get('checkout',              [WhatsAppController::class, 'checkout'])->name('whatsapp.pay')->middleware('signed');
-        Route::post('checkout/process',     [WhatsAppController::class, 'processPayment'])->name('whatsapp.pay.process');
+        Route::post('checkout/process',     [WhatsAppController::class, 'processPayment'])->name('whatsapp.pay.process')->middleware('signed');
     });
 
 // Public ZKTeco K40 ADMS Push Endpoints (No Auth middleware so hardware can post directly)

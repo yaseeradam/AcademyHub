@@ -10,7 +10,8 @@ class BackupController extends Controller
 {
     public function download(Request $request)
     {
-        abort_unless(auth()->user()?->role === 'admin', 403);
+        $user = auth()->user();
+        abort_unless($user && $user->is_super_admin && is_null($user->tenant_id), 403, 'Full database backups are restricted to platform super administrators.');
 
         // Check mysqldump availability
         $mysqldump = shell_exec('which mysqldump');

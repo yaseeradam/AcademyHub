@@ -338,7 +338,14 @@ class Management extends Component
             return;
         }
 
-        $this->selectedParent->students()->sync($this->selectedChildren);
+        $tenantId = $this->selectedParent->tenant_id;
+        $validChildren = Student::query()
+            ->when($tenantId, fn($q) => $q->where('tenant_id', $tenantId))
+            ->whereIn('id', $this->selectedChildren)
+            ->pluck('id')
+            ->all();
+
+        $this->selectedParent->students()->sync($validChildren);
 
         Audit::log('parents.children_linked', $this->selectedParent, [
             'parent_name' => $this->selectedParent->name,

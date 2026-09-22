@@ -195,9 +195,9 @@ class TeacherController extends Controller
             'scores.*.class_id'   => 'required|integer',
             'scores.*.term'       => 'required|integer',
             'scores.*.session'    => 'required|string',
-            'scores.*.ca1'        => 'nullable|integer|min:0',
-            'scores.*.ca2'        => 'nullable|integer|min:0',
-            'scores.*.exam'       => 'nullable|integer|min:0',
+            'scores.*.ca1'        => 'nullable|integer|min:0|max:100',
+            'scores.*.ca2'        => 'nullable|integer|min:0|max:100',
+            'scores.*.exam'       => 'nullable|integer|min:0|max:100',
         ]);
 
         foreach ($request->scores as $s) {

@@ -549,6 +549,7 @@ class TenantController extends Controller
 
     public function payBill(Tenant $tenant, \App\Models\TenantPluginBill $bill)
     {
+        abort_unless((int) $bill->tenant_id === (int) $tenant->id, 404);
         $bill->update([
             'status'  => 'paid',
             'paid_at' => now(),
@@ -559,6 +560,7 @@ class TenantController extends Controller
     
     public function voidBill(Tenant $tenant, \App\Models\TenantPluginBill $bill)
     {
+        abort_unless((int) $bill->tenant_id === (int) $tenant->id, 404);
         $bill->update([
             'status' => 'void',
         ]);

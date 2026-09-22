@@ -366,6 +366,9 @@ class MobileFeatureParityController extends Controller
         ]);
 
         $homework = Homework::findOrFail($id);
+        if ((int) $homework->class_id !== (int) $student->class_id) {
+            return response()->json(['message' => 'This homework is not assigned to your class.'], 403);
+        }
 
         $filePath = null;
         if ($request->hasFile('file')) {
@@ -410,9 +413,9 @@ class MobileFeatureParityController extends Controller
             'scores.*.session'    => 'required|string',
             'scores.*.admission_number' => 'nullable|string',
             'scores.*.student_id' => 'nullable|integer',
-            'scores.*.ca1'        => 'nullable|integer|min:0',
-            'scores.*.ca2'        => 'nullable|integer|min:0',
-            'scores.*.exam'       => 'nullable|integer|min:0',
+            'scores.*.ca1'        => 'nullable|integer|min:0|max:100',
+            'scores.*.ca2'        => 'nullable|integer|min:0|max:100',
+            'scores.*.exam'       => 'nullable|integer|min:0|max:100',
         ]);
 
         $imported = 0;
@@ -633,7 +636,8 @@ class MobileFeatureParityController extends Controller
     // Backups Trigger & List
     public function listBackups(Request $request)
     {
-        $this->authorizeAdmin($request);
+        $user = $request->user();
+        abort_unless($user && $user->is_super_admin && is_null($user->tenant_id), 403, 'Full database backups are restricted to platform super administrators.');
         $backupDir = storage_path('app/backups');
         if (!is_dir($backupDir)) {
             return response()->json([]);
@@ -657,7 +661,8 @@ class MobileFeatureParityController extends Controller
 
     public function triggerBackup(Request $request)
     {
-        $this->authorizeAdmin($request);
+        $user = $request->user();
+        abort_unless($user && $user->is_super_admin && is_null($user->tenant_id), 403, 'Full database backups are restricted to platform super administrators.');
 
         // Check mysqldump availability
         $mysqldump = shell_exec('which mysqldump');
@@ -704,7 +709,8 @@ class MobileFeatureParityController extends Controller
 
     public function downloadBackup(Request $request, $filename)
     {
-        $this->authorizeAdmin($request);
+        $user = $request->user();
+        abort_unless($user && $user->is_super_admin && is_null($user->tenant_id), 403, 'Full database backups are restricted to platform super administrators.');
 
         // Prevent path traversal — only allow bare filenames
         $filename = basename($filename);

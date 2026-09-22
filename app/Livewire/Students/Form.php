@@ -150,11 +150,13 @@ class Form extends Component
     {
         $id = $this->student?->id;
 
+        $tenantId = auth()->user()?->tenant_id;
+
         $rules = [
             'first_name' => ['required', 'string', 'max:255'],
             'last_name' => ['required', 'string', 'max:255'],
-            'class_id' => ['required', 'integer', Rule::exists('classes', 'id')],
-            'section_id' => ['required', 'integer', Rule::exists('sections', 'id')],
+            'class_id' => ['required', 'integer', Rule::exists('classes', 'id')->when($tenantId, fn($q) => $q->where('tenant_id', $tenantId))],
+            'section_id' => ['required', 'integer', Rule::exists('sections', 'id')->when($tenantId, fn($q) => $q->where('tenant_id', $tenantId))],
             'gender' => ['required', Rule::in(['Male', 'Female'])],
             'dob' => ['nullable', 'date'],
             'blood_group' => ['nullable', 'string', 'max:10'],
@@ -163,7 +165,7 @@ class Form extends Component
             'guardian_address' => ['nullable', 'string', 'max:255'],
             'status' =>  ['required', Rule::in(['Active', 'Graduated', 'Expelled'])],
             'parent_ids' =>  ['array'],
-            'parent_ids.*' =>  ['exists:users,id'],
+            'parent_ids.*' =>  [Rule::exists('users', 'id')->where('role', 'parent')->when($tenantId, fn($q) => $q->where('tenant_id', $tenantId))],
             'create_parent_account' =>  ['boolean'],
         ];
 

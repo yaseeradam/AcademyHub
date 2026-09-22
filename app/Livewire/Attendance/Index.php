@@ -390,7 +390,14 @@ class Index extends Component
     private function validateSelection(): array
     {
         $this->validate([
-            'classId'   => ['required', 'integer', Rule::exists('classes', 'id')->where('tenant_id', auth()->user()?->tenant_id)],
+            'classId'   => [
+                'required',
+                'integer',
+                Rule::exists('classes', 'id')->when(
+                    auth()->user()?->tenant_id,
+                    fn ($query, $tenantId) => $query->where('tenant_id', $tenantId)
+                ),
+            ],
             'sectionId' => ['required', 'integer', Rule::exists('sections', 'id')],
             'date'      => ['required', 'date'],
             'term'      => ['required', 'integer', 'between:1,3'],

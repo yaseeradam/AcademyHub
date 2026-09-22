@@ -27,7 +27,7 @@ class PaystackCallbackController extends Controller
         // Verify the transaction with Paystack
         $secretKey = config('services.paystack.secret_key');
         $response = Http::withToken($secretKey)
-            ->withOptions(['verify' => false])
+            ->withOptions(['verify' => app()->environment('production')])
             ->timeout(15)
             ->get("https://api.paystack.co/transaction/verify/{$reference}");
 
@@ -297,7 +297,7 @@ class PaystackCallbackController extends Controller
                 return;
             }
 
-            Http::withOptions(['verify' => false])
+            Http::withOptions(['verify' => app()->environment('production')])
                 ->withHeaders([
                     'Authorization' => 'Bearer ' . $token,
                     'Content-Type'  => 'application/json',

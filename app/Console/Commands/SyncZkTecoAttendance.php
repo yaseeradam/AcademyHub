@@ -142,26 +142,32 @@ class SyncZkTecoAttendance extends Command
                     // Check-out / departure scan:
                     // If teacher was already Present, do NOT overwrite to Late!
                     $teacherStatus = ($existingMark->status === 'Present') ? 'Present' : $calculatedStatus;
-                    $firstTime = '';
-                    if (preg_match('/(?:In|scan at)\s+([0-9:APMapm\s]+)/', (string) $existingMark->note, $matches)) {
-                        $firstTime = trim($matches[1]);
+                    $inDisplay  = $existingMark->punch_in_time
+                        ? Carbon::parse($existingMark->punch_in_time)->format('g:i A')
+                        : '';
+                    if (!$inDisplay && preg_match('/(?:In|scan at)\s+([0-9:APMapm\s]+)/', (string) $existingMark->note, $matches)) {
+                        $inDisplay = trim($matches[1]);
                     }
-                    $note = $firstTime
-                        ? "In: {$firstTime} | Out: " . $punchTime->format('g:i A')
-                        : "Out: " . $punchTime->format('g:i A');
+                    $outDisplay = $punchTime->format('g:i A');
+                    $note = $inDisplay
+                        ? "In: {$inDisplay} | Out: {$outDisplay}"
+                        : "Out: {$outDisplay}";
 
                     $existingMark->update([
-                        'status' => $teacherStatus,
-                        'note'   => $note,
+                        'status'         => $teacherStatus,
+                        'punch_out_time' => $punchTime->format('H:i:s'),
+                        'note'           => $note,
                     ]);
                 } else {
                     $teacherStatus = $calculatedStatus;
                     TeacherAttendanceMark::create([
-                        'tenant_id'  => $teacher->tenant_id ?? 1,
-                        'sheet_id'   => $staffSheet->id,
-                        'teacher_id' => $teacher->id,
-                        'status'     => $teacherStatus,
-                        'note'       => 'In: ' . $punchTime->format('g:i A') . " ({$teacherStatus})",
+                        'tenant_id'      => $teacher->tenant_id ?? 1,
+                        'sheet_id'       => $staffSheet->id,
+                        'teacher_id'     => $teacher->id,
+                        'status'         => $teacherStatus,
+                        'punch_in_time'  => $punchTime->format('H:i:s'),
+                        'punch_out_time' => null,
+                        'note'           => 'In: ' . $punchTime->format('g:i A') . " ({$teacherStatus})",
                     ]);
                 }
 

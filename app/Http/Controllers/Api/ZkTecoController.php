@@ -197,7 +197,7 @@ class ZkTecoController extends Controller
 
                 $staffSheet = TeacherAttendanceSheet::firstOrCreate(
                     [
-                        'tenant_id'  => $teacher->tenant_id ?? 1,
+                        'tenant_id'  => $teacher->tenant_id,
                         'date'       => $dateStr,
                         'term'       => $termNumber,
                         'session'    => $sessionName,
@@ -228,15 +228,33 @@ class ZkTecoController extends Controller
                     ]);
                 } else {
                     // ── SIGN-IN (first punch of the day) ────────────────────
-                    TeacherAttendanceMark::create([
-                        'tenant_id'     => $teacher->tenant_id ?? 1,
-                        'sheet_id'      => $staffSheet->id,
-                        'teacher_id'    => $teacher->id,
-                        'status'        => $calculatedStatus,
-                        'punch_in_time' => $punchTime->format('H:i:s'),
-                        'punch_out_time'=> null,
-                        'note'          => 'In: ' . $punchTime->format('g:i A') . " ({$calculatedStatus})",
-                    ]);
+                    try {
+                        TeacherAttendanceMark::create([
+                            'tenant_id'     => $teacher->tenant_id,
+                            'sheet_id'      => $staffSheet->id,
+                            'teacher_id'    => $teacher->id,
+                            'status'        => $calculatedStatus,
+                            'punch_in_time' => $punchTime->format('H:i:s'),
+                            'punch_out_time'=> null,
+                            'note'          => 'In: ' . $punchTime->format('g:i A') . " ({$calculatedStatus})",
+                        ]);
+                    } catch (\Illuminate\Database\UniqueConstraintViolationException $e) {
+                        $existingMark = TeacherAttendanceMark::where('sheet_id', $staffSheet->id)
+                            ->where('teacher_id', $teacher->id)
+                            ->first();
+                        if ($existingMark) {
+                            $finalStatus = ($existingMark->status === 'Present') ? 'Present' : $calculatedStatus;
+                            $inDisplay  = $existingMark->punch_in_time
+                                ? Carbon::parse($existingMark->punch_in_time)->format('g:i A')
+                                : '–';
+                            $outDisplay = $punchTime->format('g:i A');
+                            $existingMark->update([
+                                'status'         => $finalStatus,
+                                'punch_out_time' => $punchTime->format('H:i:s'),
+                                'note'           => "In: {$inDisplay} | Out: {$outDisplay}",
+                            ]);
+                        }
+                    }
                 }
 
 
@@ -331,15 +349,36 @@ class ZkTecoController extends Controller
                 $status = $finalStatus; // keep status consistent for payload
             } else {
                 // ── ARRIVAL (first punch) ──────────────────────────────────
-                AttendanceMark::create([
-                    'tenant_id'  => $student->tenant_id,
-                    'sheet_id'   => $sheet->id,
-                    'student_id' => $student->id,
-                    'status'     => $status,
-                    'arrived_at' => $punchTime->format('H:i:s'),
-                    'departed_at'=> null,
-                    'note'       => 'Arrived: ' . $punchTime->format('g:i A') . " ({$status})",
-                ]);
+                try {
+                    AttendanceMark::create([
+                        'tenant_id'  => $student->tenant_id,
+                        'sheet_id'   => $sheet->id,
+                        'student_id' => $student->id,
+                        'status'     => $status,
+                        'arrived_at' => $punchTime->format('H:i:s'),
+                        'departed_at'=> null,
+                        'note'       => 'Arrived: ' . $punchTime->format('g:i A') . " ({$status})",
+                    ]);
+                } catch (\Illuminate\Database\UniqueConstraintViolationException $e) {
+                    $existingStudentMark = AttendanceMark::where([
+                        'tenant_id'  => $student->tenant_id,
+                        'sheet_id'   => $sheet->id,
+                        'student_id' => $student->id,
+                    ])->first();
+                    if ($existingStudentMark) {
+                        $finalStatus = ($existingStudentMark->status === 'Present') ? 'Present' : $status;
+                        $inDisplay  = $existingStudentMark->arrived_at
+                            ? Carbon::parse($existingStudentMark->arrived_at)->format('g:i A')
+                            : '–';
+                        $outDisplay = $punchTime->format('g:i A');
+                        $existingStudentMark->update([
+                            'status'      => $finalStatus,
+                            'departed_at' => $punchTime->format('H:i:s'),
+                            'note'        => "Arrived: {$inDisplay} | Departed: {$outDisplay}",
+                        ]);
+                        $status = $finalStatus;
+                    }
+                }
             }
 
             $processedCount++;
@@ -464,41 +503,41 @@ class ZkTecoController extends Controller
      */
     public function getDeviceUsers(Request $request)
     {
-        $tenantId = $request->query('tenant_id');
-        if ($tenantId) {
-            $tenant = Tenant::find($tenantId);
-            if ($tenant && !$tenant->activeMarketplaceComponents()->where('slug', 'k40-biometrics')->exists()) {
-                return response()->json([
-                    'status'  => 'error',
-                    'message' => 'The K40 Biometrics package is not enabled for this school.',
-                    'users'   => [],
-                ], 403);
-            }
+        $tenantId = $request->query('tenant_id') ?: TenantSettings::tenantId();
+        if (!$tenantId) {
+            return response()->json([
+                'status'  => 'error',
+                'message' => 'tenant_id parameter is required for device user export.',
+                'users'   => [],
+            ], 400);
+        }
+
+        $tenant = Tenant::find($tenantId);
+        if ($tenant && !$tenant->activeMarketplaceComponents()->where('slug', 'k40-biometrics')->exists()) {
+            return response()->json([
+                'status'  => 'error',
+                'message' => 'The K40 Biometrics package is not enabled for this school.',
+                'users'   => [],
+            ], 403);
         }
 
         // 1. Fetch Staff (Teachers, Admins, Bursars)
         $staffQuery = User::query()
             ->whereIn('role', ['teacher', 'admin', 'bursar'])
-            ->where('is_active', true);
-
-        if ($tenantId) {
-            $staffQuery->where('tenant_id', $tenantId);
-        }
+            ->where('is_active', true)
+            ->where('tenant_id', $tenantId);
 
         $staffUsers = $staffQuery->get();
 
         // 2. Fetch Students
         $studentQuery = Student::query()
+            ->where('tenant_id', $tenantId)
             ->where(function($q) {
                 $q->whereNull('status')
                   ->orWhere('status', 'Active')
                   ->orWhere('status', 'active');
             })
             ->with(['schoolClass', 'section']);
-
-        if ($tenantId) {
-            $studentQuery->where('tenant_id', $tenantId);
-        }
 
         $students = $studentQuery->get();
 
@@ -684,7 +723,7 @@ class ZkTecoController extends Controller
         }
 
         // Staff / Teacher Attendance Breakdown
-        $teachers = User::where('role', 'teacher')->get();
+        $teachers = User::where('role', 'teacher')->where('tenant_id', $tenantId)->get();
         $staffSheet = TeacherAttendanceSheet::where('tenant_id', $tenantId)->whereDate('date', $date)->first();
         $staffMarks = $staffSheet ? TeacherAttendanceMark::where('sheet_id', $staffSheet->id)->with('teacher')->get() : collect();
 
@@ -753,11 +792,14 @@ class ZkTecoController extends Controller
      */
     public function manualOverride(Request $request)
     {
+        $user = auth('sanctum')->user() ?: auth()->user();
+        abort_unless($user && in_array($user->role, ['admin', 'teacher', 'superadmin']), 403, 'Unauthorized. Desk override requires authenticated staff.');
+
         $studentId = $request->input('student_id');
         $action    = $request->input('action', 'checkin'); // 'checkin' or 'checkout'
         $reason    = $request->input('reason', 'Security Desk Manual Override');
         $sendWa    = $request->boolean('send_whatsapp', true);
-        $tenantId  = $request->input('tenant_id') ?? $request->query('tenant_id') ?? auth()->user()?->tenant_id ?? 1;
+        $tenantId  = $user->tenant_id ?: ($request->input('tenant_id') ?? 1);
 
         $student = Student::with(['schoolClass', 'section'])->find($studentId);
         if (!$student) {

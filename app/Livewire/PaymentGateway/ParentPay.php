@@ -138,7 +138,13 @@ class ParentPay extends Component
             return;
         }
 
-        $student  = Student::findOrFail($this->selectedStudentId);
+        $user = auth()->user();
+        $student = $user?->students()->where('students.id', $this->selectedStudentId)->first();
+        if (!$student) {
+            $this->errorMessage = 'Student not found or not assigned to your account.';
+            return;
+        }
+
         $tenantId = $student->tenant_id;
         $tenant   = $student->tenant;
 
@@ -298,9 +304,14 @@ class ParentPay extends Component
             return;
         }
 
-        $student  = Student::findOrFail($this->selectedStudentId);
+        $parent  = auth()->user();
+        $student = $parent?->students()->where('students.id', $this->selectedStudentId)->first();
+        if (!$student) {
+            $this->dispatch('alert', message: 'You are not authorized to make payments for this student.', type: 'error');
+            return;
+        }
+
         $tenantId = $student->tenant_id;
-        $parent   = auth()->user();
 
         $amountInKobo = (int) ($this->paymentAmount * 100);
         $reference = 'TUI_' . uniqid() . '_' . time();

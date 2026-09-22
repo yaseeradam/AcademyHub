@@ -580,7 +580,7 @@ class Index extends Component
                     Rule::requiredIf(fn() => $this->type === 'Income'),
                     'nullable',
                     'integer',
-                    Rule::exists('students', 'id'),
+                    Rule::exists('students', 'id')->when($user?->tenant_id, fn($q) => $q->where('tenant_id', $user->tenant_id)),
                 ],
                 'type' => ['required', Rule::in(['Income', 'Expense'])],
                 'category' => ['required', 'string', 'max:255'],
