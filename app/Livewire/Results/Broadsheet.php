@@ -52,7 +52,7 @@ class Broadsheet extends Component
     {
         $user = auth()->user();
 
-        if ($user?->role === 'admin') {
+        if ($user?->role === 'admin' || $user?->role === 'proprietor') {
             return SchoolClass::query()->orderBy('level')->get();
         }
 

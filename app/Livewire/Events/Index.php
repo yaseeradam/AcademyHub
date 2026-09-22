@@ -140,7 +140,7 @@ class Index extends Component
         $user = auth()->user();
         abort_unless($user, 403);
 
-        if (! in_array($user->role, ['admin', 'teacher', 'bursar'], true)) {
+        if (! in_array($user->role, ['admin', 'teacher', 'bursar', 'proprietor'], true)) {
             abort(403);
         }
 

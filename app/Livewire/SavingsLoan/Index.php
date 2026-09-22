@@ -13,7 +13,7 @@ class Index extends Component
     public function render()
     {
         $user = auth()->user();
-        abort_unless($user && in_array($user->role, ['admin', 'bursar'], true), 403);
+        abort_unless($user && in_array($user->role, ['admin', 'bursar', 'proprietor'], true), 403);
 
         return view('livewire.savings-loan.index');
     }

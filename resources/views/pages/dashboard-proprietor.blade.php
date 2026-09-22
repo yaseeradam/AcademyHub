@@ -41,12 +41,12 @@
         {{-- ══════════════════════════════════════
              KEY EXECUTIVE KPI METRICS (5 TILES)
         ══════════════════════════════════════ --}}
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
 
             {{-- 1. Student Enrollment --}}
             <div class="rounded-2xl bg-white p-5 border border-slate-100 shadow-sm hover:shadow-md transition-shadow">
                 <div class="flex items-center justify-between text-slate-500 mb-2">
-                    <span class="text-xs font-extrabold uppercase tracking-wider text-slate-400">Total Students</span>
+                    <span class="text-xs font-extrabold uppercase tracking-wider text-slate-500">Total Students</span>
                     <div class="h-8 w-8 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
                         <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                     </div>
@@ -61,23 +61,29 @@
             {{-- 2. Staff & Punctuality --}}
             <div class="rounded-2xl bg-white p-5 border border-slate-100 shadow-sm hover:shadow-md transition-shadow">
                 <div class="flex items-center justify-between text-slate-500 mb-2">
-                    <span class="text-xs font-extrabold uppercase tracking-wider text-slate-400">Teaching Staff</span>
+                    <span class="text-xs font-extrabold uppercase tracking-wider text-slate-500">Teaching Staff</span>
                     <div class="h-8 w-8 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center">
                         <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                     </div>
                 </div>
                 <div class="text-2xl font-black text-slate-900">{{ number_format($totalTeachers) }}</div>
                 <div class="mt-2 flex items-center gap-1.5 text-[11px] font-bold">
-                    <span class="px-2 py-0.5 rounded-md {{ $staffPunctualityRate >= 80 ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700' }}">
-                        {{ $staffPunctualityRate }}% On-Time Today
-                    </span>
+                    @if(($markedCount ?? 0) === 0)
+                        <span class="px-2 py-0.5 rounded-md bg-slate-100 text-slate-600">
+                            Awaiting Clock-ins
+                        </span>
+                    @else
+                        <span class="px-2 py-0.5 rounded-md {{ $staffPunctualityRate >= 80 ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700' }}">
+                            {{ $staffPunctualityRate }}% On-Time Today
+                        </span>
+                    @endif
                 </div>
             </div>
 
             {{-- 3. Total Fees Collected --}}
             <a href="{{ route('billing.index', ['tab' => 'debtors']) }}" class="group block rounded-2xl bg-white p-5 border border-slate-100 shadow-sm hover:shadow-md hover:border-emerald-200 transition-all">
                 <div class="flex items-center justify-between text-slate-500 mb-2">
-                    <span class="text-xs font-extrabold uppercase tracking-wider text-slate-400 group-hover:text-emerald-600 transition-colors">Fees Collected &rarr;</span>
+                    <span class="text-xs font-extrabold uppercase tracking-wider text-slate-500 group-hover:text-emerald-600 transition-colors">Fees Collected &rarr;</span>
                     <div class="h-8 w-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
                         <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
                     </div>
@@ -91,13 +97,13 @@
             {{-- 4. Outstanding Debt --}}
             <a href="{{ route('billing.index', ['tab' => 'debtors']) }}" class="group block rounded-2xl bg-white p-5 border border-slate-100 shadow-sm hover:shadow-md hover:border-rose-200 transition-all">
                 <div class="flex items-center justify-between text-slate-500 mb-2">
-                    <span class="text-xs font-extrabold uppercase tracking-wider text-slate-400 group-hover:text-rose-600 transition-colors">Uncollected Debt &rarr;</span>
+                    <span class="text-xs font-extrabold uppercase tracking-wider text-slate-500 group-hover:text-rose-600 transition-colors">Uncollected Debt &rarr;</span>
                     <div class="h-8 w-8 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center">
                         <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
                     </div>
                 </div>
                 <div class="text-2xl font-black text-rose-600">₦{{ number_format($outstandingDebt, 0) }}</div>
-                <div class="mt-2 text-[11px] font-semibold text-slate-400">
+                <div class="mt-2 text-[11px] font-semibold text-slate-500">
                     Tuition balance pending collection &bull; <span class="underline">View details</span>
                 </div>
             </a>
@@ -211,8 +217,9 @@
                             </div>
                         </div>
                     @empty
-                        <div class="py-8 text-center text-slate-400 text-xs font-medium">
-                            No student scores recorded on watchlist.
+                        <div class="py-8 text-center text-slate-500 text-xs font-semibold flex flex-col items-center justify-center gap-1">
+                            <span class="text-emerald-500 text-base">✓</span>
+                            <span>All students are in good academic standing (No failing averages)</span>
                         </div>
                     @endforelse
                 </div>
@@ -230,7 +237,7 @@
                 <div class="flex items-center justify-between mb-5">
                     <div>
                         <h3 class="text-base font-extrabold text-slate-900">Class Academic Rankings</h3>
-                        <p class="text-xs text-slate-400">Ranked by combined average student scores</p>
+                        <p class="text-xs text-slate-500">Ranked by combined average student scores</p>
                     </div>
                     <span class="text-xs font-bold text-slate-500 bg-slate-100 px-3 py-1 rounded-full">
                         {{ $classRankings->count() }} Classes
@@ -238,7 +245,7 @@
                 </div>
 
                 @if($classRankings->isNotEmpty())
-                    <div class="space-y-3.5">
+                    <div class="space-y-3.5 max-h-[440px] overflow-y-auto pr-1">
                         @foreach($classRankings as $rank => $cls)
                             <div class="flex items-center gap-4 p-3 rounded-2xl bg-slate-50/70 border border-slate-100 hover:border-slate-200 transition-colors">
                                 <span class="font-black text-xs text-slate-400 w-5 text-center">{{ $rank + 1 }}</span>
@@ -352,7 +359,7 @@
                 <div class="overflow-x-auto">
                     <table class="w-full text-xs text-left">
                         <thead>
-                            <tr class="border-b border-slate-100 text-[10px] font-black uppercase tracking-wider text-slate-400">
+                            <tr class="border-b border-slate-100 text-[10px] font-black uppercase tracking-wider text-slate-500">
                                 <th class="py-2.5 px-3">Teacher</th>
                                 <th class="py-2.5 px-3">Shift</th>
                                 <th class="py-2.5 px-3">Status</th>
@@ -362,6 +369,24 @@
                         </thead>
                         <tbody class="divide-y divide-slate-100 font-medium text-slate-700">
                             @foreach($recentMarks as $m)
+                                @php
+                                    $punchInDisplay = '—';
+                                    if (!empty($m->punch_in_time)) {
+                                        try {
+                                            $punchInDisplay = \Carbon\Carbon::parse($m->punch_in_time)->format('g:i A');
+                                        } catch (\Throwable $e) {
+                                            $punchInDisplay = (string) $m->punch_in_time;
+                                        }
+                                    }
+                                    $punchOutDisplay = '—';
+                                    if (!empty($m->punch_out_time)) {
+                                        try {
+                                            $punchOutDisplay = \Carbon\Carbon::parse($m->punch_out_time)->format('g:i A');
+                                        } catch (\Throwable $e) {
+                                            $punchOutDisplay = (string) $m->punch_out_time;
+                                        }
+                                    }
+                                @endphp
                                 <tr>
                                     <td class="py-2.5 px-3 font-bold text-slate-900">{{ $m->teacher?->name ?? 'Staff' }}</td>
                                     <td class="py-2.5 px-3 text-slate-500">{{ $m->teacher?->getShiftLabel() ?? 'Western' }}</td>
@@ -371,15 +396,19 @@
                                         </span>
                                     </td>
                                     <td class="py-2.5 px-3 text-center font-mono font-bold text-emerald-600">
-                                        {{ $m->punch_in_time ? \Carbon\Carbon::parse($m->punch_in_time)->format('g:i A') : '—' }}
+                                        {{ $punchInDisplay }}
                                     </td>
                                     <td class="py-2.5 px-3 text-center font-mono font-bold text-rose-500">
-                                        {{ $m->punch_out_time ? \Carbon\Carbon::parse($m->punch_out_time)->format('g:i A') : '—' }}
+                                        {{ $punchOutDisplay }}
                                     </td>
                                 </tr>
                             @endforeach
                         </tbody>
                     </table>
+                </div>
+            @else
+                <div class="py-8 text-center text-slate-500 text-xs font-medium">
+                    No staff attendance punches recorded yet today.
                 </div>
             @endif
 

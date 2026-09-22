@@ -47,7 +47,7 @@ class Index extends Component
         $user = auth()->user();
         abort_unless($user, 403);
 
-        if ($user->role === 'admin') {
+        if ($user->role === 'admin' || $user->role === 'proprietor') {
             return SchoolClass::query()->orderBy('level')->get();
         }
 

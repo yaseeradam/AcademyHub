@@ -285,7 +285,7 @@ Route::middleware(['auth', 'active'])->group(function () {
         Route::get('/biometrics', \App\Livewire\Biometrics\Index::class)->name('biometrics.index');
     });
 
-    Route::middleware('role:admin,teacher,proprietor')->group(function () {
+    Route::middleware('role:admin,teacher,bursar,proprietor')->group(function () {
         Route::view('/institute', 'pages.institute.index')->name('institute');
         Route::view('/teachers', 'pages.teachers.index')->name('teachers');
         Route::get('/teachers/{teacher}', [TeacherController::class, 'show'])->name('teachers.show');
@@ -334,7 +334,7 @@ Route::middleware(['auth', 'active'])->group(function () {
             ->name('analytics.export.attendance');
         
         Route::get('/analytics/export/financial', [\App\Http\Controllers\AnalyticsExportController::class, 'exportFinancialData'])
-            ->middleware('role:admin,bursar')
+            ->middleware('role:admin,bursar,proprietor')
             ->name('analytics.export.financial');
         
         Route::get('/analytics/export/cbt', [\App\Http\Controllers\AnalyticsExportController::class, 'exportCbtData'])

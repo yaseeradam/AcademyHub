@@ -99,8 +99,19 @@ class UtilityController extends Controller
             ->where('is_void', false)
             ->sum('amount_paid');
 
-        // Calculate Expected Fees from active fee structures & student counts
-        $feeStructures = FeeStructure::query()->get();
+        // Calculate Expected Fees from active fee structures for current session/term & student counts
+        $feeQuery = FeeStructure::query();
+        if ($sessionName) {
+            $feeQuery->where('session', $sessionName);
+        }
+        if ($termNumber) {
+            $feeQuery->where('term', $termNumber);
+        }
+        $feeStructures = $feeQuery->get();
+        if ($feeStructures->isEmpty()) {
+            $feeStructures = FeeStructure::query()->get();
+        }
+
         $totalExpected = 0.0;
         $studentsPerClass = Student::query()
             ->select('class_id', \Illuminate\Support\Facades\DB::raw('count(*) as count'))
@@ -120,8 +131,11 @@ class UtilityController extends Controller
         $outstandingDebt = max(0.0, $totalExpected - $totalCollected);
         $collectionRate  = $totalExpected > 0 ? min(100, round(($totalCollected / $totalExpected) * 100, 1)) : 0;
 
-        // Procurement & Expenses
-        $procurementExpenses = (float) ProcurementRecord::query()->sum('total_amount');
+        // Procurement & Expenses (strictly tenant-scoped)
+        $tenantId = \App\Support\TenantSettings::tenantId();
+        $procurementExpenses = (float) ProcurementRecord::query()
+            ->when($tenantId, fn($q) => $q->where('tenant_id', $tenantId))
+            ->sum('total_amount');
         $transactionExpenses = (float) Transaction::query()
             ->where('type', 'Expense')
             ->where('is_void', false)
@@ -139,16 +153,14 @@ class UtilityController extends Controller
         }
         $scores = $scoresQuery->get();
 
-        if ($scores->isEmpty()) {
-            // Fallback to any scores in database
-            $scores = Score::query()->with(['student', 'student.schoolClass', 'subject'])->get();
-        }
-
         $studentStats = collect();
         $classStats = collect();
         $subjectStats = collect();
 
         if ($scores->isNotEmpty()) {
+            // Preload classes into memory map to avoid N+1 queries
+            $allClasses = SchoolClass::all()->keyBy('id');
+
             // Group by Student
             $byStudent = $scores->groupBy('student_id');
             foreach ($byStudent as $studentId => $studentScores) {
@@ -173,7 +185,7 @@ class UtilityController extends Controller
             // Group by Class
             $byClass = $scores->groupBy('class_id');
             foreach ($byClass as $classId => $classScores) {
-                $cls = $classScores->first()->student?->schoolClass ?? SchoolClass::find($classId);
+                $cls = $classScores->first()->student?->schoolClass ?? $allClasses->get($classId);
                 if (!$cls) continue;
 
                 $classStats->push([
@@ -199,11 +211,24 @@ class UtilityController extends Controller
             }
         }
 
-        $starStudents       = $studentStats->sortByDesc('average')->values()->take(5);
-        $watchlistStudents  = $studentStats->sortBy('average')->values()->take(5);
-        $classRankings      = $classStats->sortByDesc('average')->values();
-        $bestSubjects       = $subjectStats->sortByDesc('average')->values()->take(3);
-        $strugglingSubjects = $subjectStats->sortBy('average')->values()->take(3);
+        $starStudents = $studentStats->sortByDesc('average')->values()->take(5);
+
+        // Academic Watchlist: Only students with failing averages (< 50) or failed subjects (>= 1)
+        $watchlistStudents = $studentStats
+            ->filter(fn($s) => $s['average'] < 50 || $s['failed_count'] > 0)
+            ->sortBy('average')
+            ->values()
+            ->take(5);
+
+        $classRankings = $classStats->sortByDesc('average')->values();
+        $bestSubjects  = $subjectStats->sortByDesc('average')->values()->take(3);
+
+        // Struggling Subjects: Subjects with average < 50 or pass rate < 60%
+        $strugglingSubjects = $subjectStats
+            ->filter(fn($sub) => $sub['average'] < 50 || $sub['pass_rate'] < 60)
+            ->sortBy('average')
+            ->values()
+            ->take(3);
 
         // 4. Staff Attendance (Today & Dual-Shift)
         $todayStr = now()->toDateString();
@@ -213,6 +238,7 @@ class UtilityController extends Controller
         $presentTeachers = $marks->where('status', 'Present')->count();
         $lateTeachers    = $marks->where('status', 'Late')->count();
         $absentTeachers  = $marks->where('status', 'Absent')->count();
+        $markedCount     = $marks->count();
 
         $staffPunctualityRate = $totalTeachers > 0
             ? round(($presentTeachers / max(1, $totalTeachers)) * 100)
@@ -252,6 +278,7 @@ class UtilityController extends Controller
             'presentTeachers'      => $presentTeachers,
             'lateTeachers'         => $lateTeachers,
             'absentTeachers'       => $absentTeachers,
+            'markedCount'          => $markedCount,
             'staffPunctualityRate' => $staffPunctualityRate,
             'westernStaffCount'    => $westernStaffCount,
             'islamicStaffCount'    => $islamicStaffCount,

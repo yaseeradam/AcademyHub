@@ -27,6 +27,8 @@ class PreventProprietorMutations
 
         // Allow authentication and personal profile updates
         if ($request->routeIs('logout') ||
+            $request->is('logout') ||
+            $request->is('api/logout') ||
             $request->routeIs('profile.*') ||
             $request->routeIs('csrf-token') ||
             $request->routeIs('attendance.latest-scan')) {
@@ -41,8 +43,8 @@ class PreventProprietorMutations
                     $calls = $component['calls'] ?? [];
                     foreach ($calls as $call) {
                         $method = strtolower((string) ($call['method'] ?? ''));
-                        // Check for mutation keywords
-                        if (preg_match('/^(save|delete|create|store|destroy|update|mark|void|apply|randomize|remove)/i', $method)) {
+                        // Check for mutation keywords across all CRUD and state-altering workflows
+                        if (preg_match('/^(save|delete|create|store|destroy|update|mark|void|apply|randomize|remove|bulk|issue|upload|start|import|add|record|reset|submit|grade|attach|detach|sync|publish|unpublish|disburse|repay|assign|allocate|process|toggle(?!show))/i', $method)) {
                             abort(403, 'Proprietor account has read-only executive access. Data modifications are disabled.');
                         }
                     }

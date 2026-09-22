@@ -147,7 +147,7 @@ class AnalyticsExportController extends Controller
     public function exportFinancialData(Request $request): StreamedResponse
     {
         $user = $request->user();
-        abort_unless($user && in_array($user->role, ['admin', 'bursar'], true), 403);
+        abort_unless($user && in_array($user->role, ['admin', 'bursar', 'proprietor'], true), 403);
 
         $startDate = $request->query('start_date', now()->startOfMonth()->format('Y-m-d'));
         $endDate = $request->query('end_date', now()->format('Y-m-d'));
@@ -165,15 +165,14 @@ class AnalyticsExportController extends Controller
                 'Type',
                 'Amount',
                 'Payment Method',
-                'Description',
+                'Category',
                 'Receipt Number',
                 'Date',
-                'Recorded By'
             ]);
 
-            // Query transactions
+            // Query transactions (tenant-scoped)
             $transactions = Transaction::query()
-                ->with(['student', 'recordedBy'])
+                ->with('student')
                 ->whereBetween('created_at', [$startDate . ' 00:00:00', $endDate . ' 23:59:59'])
                 ->orderBy('created_at')
                 ->cursor();
@@ -184,12 +183,11 @@ class AnalyticsExportController extends Controller
                     $transaction->student?->admission_number,
                     $transaction->student?->full_name,
                     $transaction->type,
-                    $transaction->amount,
+                    $transaction->amount_paid,
                     $transaction->payment_method ?: 'Cash',
-                    $transaction->description,
+                    $transaction->category,
                     $transaction->receipt_number,
                     $transaction->created_at?->format('Y-m-d H:i:s'),
-                    $transaction->recordedBy?->name,
                 ]);
             }
 

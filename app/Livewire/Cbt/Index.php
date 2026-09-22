@@ -33,7 +33,7 @@ class Index extends Component
     {
         $this->term = $this->term ?: \App\Models\AcademicTerm::activeTermNumber();
         $user = auth()->user();
-        abort_unless($user && in_array($user->role, ['admin', 'teacher'], true), 403);
+        abort_unless($user && in_array($user->role, ['admin', 'teacher', 'proprietor'], true), 403);
 
         if (trim($this->session) === '') {
             $this->session = AcademicSession::activeName() ?: $this->defaultSession();

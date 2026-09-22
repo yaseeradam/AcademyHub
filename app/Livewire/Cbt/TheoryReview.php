@@ -28,7 +28,7 @@ class TheoryReview extends Component
     public function mount(CbtExam $exam): void
     {
         $user = auth()->user();
-        abort_unless($user && in_array($user->role, ['admin', 'teacher'], true), 403);
+        abort_unless($user && in_array($user->role, ['admin', 'teacher', 'proprietor'], true), 403);
 
         if ($user->role === 'teacher') {
             $ok = (int) $exam->created_by === (int) $user->id

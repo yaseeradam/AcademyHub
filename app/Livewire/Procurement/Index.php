@@ -95,9 +95,9 @@ class Index extends Component
     public function mount(): void
     {
         abort_unless(
-            in_array(auth()->user()?->role, ['admin', 'bursar'], true),
+            in_array(auth()->user()?->role, ['admin', 'bursar', 'proprietor'], true),
             403,
-            'Only administrators and bursars may access procurement records.'
+            'Only administrators, bursars, and proprietors may access procurement records.'
         );
         $this->purchasedAt = Carbon::today()->format('Y-m-d');
         $this->purchaserId = auth()->id();

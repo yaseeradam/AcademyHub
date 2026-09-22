@@ -21,6 +21,7 @@
                     <option value="bursar">Bursar</option>
                     <option value="teacher">Teacher</option>
                     <option value="parent">Parent</option>
+                    <option value="proprietor">Proprietor (Owner)</option>
                 </select>
             </div>
 

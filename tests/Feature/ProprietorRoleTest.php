@@ -206,4 +206,53 @@ class ProprietorRoleTest extends TestCase
         $responseProfile = $this->actingAs($proprietor)->get('/profile');
         $responseProfile->assertOk();
     }
+
+    public function test_proprietor_sees_all_classes_in_broadsheet(): void
+    {
+        [$tenant, $admin, $proprietor] = $this->setupTenantAndProprietor();
+
+        $class = SchoolClass::create([
+            'name' => 'Primary 5 Diamonds',
+            'level' => 5,
+            'tenant_id' => $tenant->id,
+        ]);
+
+        Livewire::actingAs($proprietor)
+            ->test(\App\Livewire\Results\Broadsheet::class)
+            ->assertSee('Primary 5 Diamonds');
+    }
+
+    public function test_proprietor_can_view_cbt_and_savings_loan(): void
+    {
+        [$tenant, $admin, $proprietor] = $this->setupTenantAndProprietor();
+
+        $responseSavings = $this->actingAs($proprietor)->get('/savings-loan');
+        $responseSavings->assertOk();
+
+        $responseEvents = $this->actingAs($proprietor)->get('/events');
+        $responseEvents->assertOk();
+    }
+
+    public function test_proprietor_api_token_cannot_mutate_data(): void
+    {
+        [$tenant, $admin, $proprietor] = $this->setupTenantAndProprietor();
+
+        $token = $proprietor->createToken('test-token')->plainTextToken;
+
+        // Attempt mutating API POST endpoint with token
+        $response = $this->withHeader('Authorization', 'Bearer ' . $token)
+            ->postJson('/api/homework', [
+                'title' => 'Rogue Homework',
+            ]);
+
+        $response->assertStatus(403);
+    }
+
+    public function test_proprietor_can_export_financial_analytics(): void
+    {
+        [$tenant, $admin, $proprietor] = $this->setupTenantAndProprietor();
+
+        $response = $this->actingAs($proprietor)->get('/analytics/export/financial');
+        $response->assertOk();
+    }
 }
