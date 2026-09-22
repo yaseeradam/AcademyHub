@@ -509,6 +509,48 @@
                             </div>
                         </div>
                     @endif
+
+                    @php
+                        $activeDoc = $this->curriculumDocument;
+                        $classDocs = $this->classCurriculumDocuments;
+                    @endphp
+                    @if($activeDoc)
+                        <div class="mt-5 pt-4 border-t border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-indigo-50/50 p-4 rounded-2xl">
+                            <div class="flex items-center gap-3">
+                                <div class="h-10 w-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center shrink-0 shadow-sm">
+                                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h4 class="text-xs font-black text-slate-800">Official Syllabus Document: {{ $activeDoc->file_name }}</h4>
+                                    <p class="text-[11px] text-slate-500 font-semibold">{{ $activeDoc->formatted_file_size }} • Uploaded by {{ $activeDoc->uploader?->name ?? 'Subject Teacher' }}</p>
+                                </div>
+                            </div>
+                            <a href="{{ route('curriculum.document.download', $activeDoc) }}"
+                               class="inline-flex items-center gap-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 text-xs font-black shadow-xs transition active:scale-95 shrink-0">
+                                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                                </svg>
+                                Download Syllabus ({{ strtoupper($activeDoc->file_type) }})
+                            </a>
+                        </div>
+                    @elseif($classDocs->isNotEmpty() && is_null($selectedTopicSubjectId))
+                        <div class="mt-5 pt-4 border-t border-slate-100 space-y-2">
+                            <div class="text-[11px] font-black uppercase tracking-wider text-slate-400">Available Syllabus Documents:</div>
+                            <div class="flex flex-wrap gap-2">
+                                @foreach($classDocs as $cDoc)
+                                    <a href="{{ route('curriculum.document.download', $cDoc) }}"
+                                       class="inline-flex items-center gap-2 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-100 px-3 py-1.5 text-xs font-bold transition">
+                                        <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                        </svg>
+                                        <span>{{ $cDoc->subject?->name }}: {{ strtoupper($cDoc->file_type) }}</span>
+                                    </a>
+                                @endforeach
+                            </div>
+                        </div>
+                    @endif
                 </div>
 
                 {{-- Subject Filter Pill Navigation --}}

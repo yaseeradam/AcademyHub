@@ -367,6 +367,11 @@ Route::middleware(['auth', 'active'])->group(function () {
         Route::get('/timetable/pdf', [\App\Http\Controllers\TimetableController::class, 'downloadPdf'])->name('timetable.pdf');
     });
 
+    // Curriculum Document Download (Shared between Staff, Proprietor, and Parents)
+    Route::get('/curriculum/document/{document}/download', [\App\Http\Controllers\CurriculumDocumentController::class, 'download'])
+        ->middleware('role:admin,teacher,bursar,proprietor,parent')
+        ->name('curriculum.document.download');
+
     // Results (Shared between Admin, Teacher, and Parent)
     Route::get('/results/report-card/{student}', [ReportCardController::class, 'download'])
         ->middleware('role:admin,teacher,parent')

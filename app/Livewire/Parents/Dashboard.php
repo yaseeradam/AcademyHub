@@ -236,6 +236,32 @@ class Dashboard extends Component
     }
 
     #[Computed]
+    public function curriculumDocument(): ?\App\Models\CurriculumDocument
+    {
+        if (! $this->selectedChild || ! $this->selectedTopicSubjectId) return null;
+
+        return \App\Models\CurriculumDocument::forClassSubjectTerm(
+            $this->selectedChild->class_id,
+            $this->selectedTopicSubjectId,
+            $this->term,
+            $this->session
+        )->latest()->first();
+    }
+
+    #[Computed]
+    public function classCurriculumDocuments(): Collection
+    {
+        if (! $this->selectedChild) return collect();
+
+        return \App\Models\CurriculumDocument::query()
+            ->where('class_id', $this->selectedChild->class_id)
+            ->where('term', $this->term)
+            ->when(! empty($this->session), fn ($q) => $q->where('session', $this->session))
+            ->with('subject')
+            ->get();
+    }
+
+    #[Computed]
     public function announcements(): Collection
     {
         return \App\Models\Announcement::query()

@@ -19,7 +19,14 @@
             </div>
 
             @if(auth()->user()?->role !== 'proprietor')
-                <div class="shrink-0">
+                <div class="shrink-0 flex items-center gap-3">
+                    <button wire:click="openImportModal"
+                            class="inline-flex items-center gap-2 rounded-2xl bg-white/10 hover:bg-white/20 border border-white/20 px-4 py-3.5 text-sm font-bold text-white transition-all shadow-sm active:scale-95">
+                        <svg class="h-5 w-5 text-indigo-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
+                        </svg>
+                        Bulk Import CSV
+                    </button>
                     <button wire:click="openCreateModal" 
                             class="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-violet-600 to-indigo-600 px-5 py-3.5 text-sm font-bold text-white shadow-lg shadow-violet-500/30 transition-all hover:from-violet-700 hover:to-indigo-700 hover:shadow-xl active:scale-95">
                         <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
@@ -79,6 +86,101 @@
     </div>
 
     @if($this->classId && $this->subjectId)
+        {{-- Term Syllabus Document Card (Upload & Download Hub) --}}
+        @php
+            $doc = $this->curriculumDocument;
+        @endphp
+        <div class="rounded-3xl border border-indigo-100 bg-gradient-to-r from-indigo-50/50 via-white to-purple-50/30 p-6 shadow-sm">
+            <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-5">
+                <div class="flex items-start gap-4">
+                    <div class="shrink-0 flex h-12 w-12 items-center justify-center rounded-2xl bg-indigo-600 text-white shadow-md shadow-indigo-600/20">
+                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-2 mb-1">
+                            <span class="text-[10px] font-black uppercase tracking-wider text-indigo-700 bg-indigo-100 px-2 py-0.5 rounded-md">Official Syllabus Document</span>
+                            @if($doc)
+                                <span class="text-[10px] font-black uppercase tracking-wider text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-md">✓ Uploaded</span>
+                            @else
+                                <span class="text-[10px] font-black uppercase tracking-wider text-amber-700 bg-amber-100 px-2 py-0.5 rounded-md">Not Yet Uploaded</span>
+                            @endif
+                        </div>
+                        <h3 class="text-base font-black text-slate-800">
+                            {{ $this->selectedSubject?->name }} — Term {{ $term == 1 ? 'One' : ($term == 2 ? 'Two' : 'Three') }} Curriculum File
+                        </h3>
+                        <p class="text-xs text-slate-500 font-semibold mt-0.5">
+                            @if($doc)
+                                {{ $doc->file_name }} ({{ $doc->formatted_file_size }}) • Uploaded {{ $doc->created_at?->diffForHumans() }} by {{ $doc->uploader?->name ?? 'Staff' }}
+                            @else
+                                Upload the master syllabus PDF or Word document so parents and teachers can download the official scheme anytime.
+                            @endif
+                        </p>
+                    </div>
+                </div>
+
+                {{-- Action Controls --}}
+                <div class="flex flex-wrap items-center gap-3">
+                    @if($doc)
+                        <a href="{{ route('curriculum.document.download', $doc) }}"
+                           class="inline-flex items-center gap-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2.5 text-xs font-black shadow-sm transition active:scale-95">
+                            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                            </svg>
+                            Download Document ({{ strtoupper($doc->file_type) }})
+                        </a>
+                        @if(auth()->user()?->role !== 'proprietor')
+                            <button wire:click="deleteCurriculumDocument({{ $doc->id }})" wire:confirm="Are you sure you want to remove this syllabus document?"
+                                    class="inline-flex items-center gap-1.5 rounded-xl border border-rose-200 bg-rose-50 hover:bg-rose-100 text-rose-700 px-3.5 py-2.5 text-xs font-black transition active:scale-95">
+                                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                </svg>
+                                Delete
+                            </button>
+                        @endif
+                    @endif
+
+                    @if(auth()->user()?->role !== 'proprietor')
+                        <div x-data="{ uploading: false, progress: 0 }" 
+                             x-on:livewire-upload-start="uploading = true" 
+                             x-on:livewire-upload-finish="uploading = false" 
+                             x-on:livewire-upload-error="uploading = false" 
+                             x-on:livewire-upload-progress="progress = $event.detail.progress"
+                             class="flex items-center gap-2">
+                            <label class="cursor-pointer inline-flex items-center gap-2 rounded-xl {{ $doc ? 'bg-white hover:bg-slate-50 text-slate-700 border border-slate-200' : 'bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm' }} px-4 py-2.5 text-xs font-black transition active:scale-95">
+                                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
+                                </svg>
+                                <span>{{ $doc ? 'Replace Document' : 'Upload Syllabus (PDF/DOCX)' }}</span>
+                                <input type="file" wire:model="curriculumDocFile" class="hidden" accept=".pdf,.doc,.docx" />
+                            </label>
+
+                            <div x-show="uploading" class="flex items-center gap-2 text-xs font-bold text-indigo-600">
+                                <div class="h-4 w-4 animate-spin rounded-full border-2 border-indigo-600 border-t-transparent"></div>
+                                <span x-text="progress + '%'"></span>
+                            </div>
+
+                            @if($curriculumDocFile)
+                                <button type="button" wire:click="uploadCurriculumDocument" wire:loading.attr="disabled"
+                                        class="inline-flex items-center gap-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white px-3.5 py-2.5 text-xs font-black shadow-sm transition active:scale-95">
+                                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+                                    </svg>
+                                    Confirm Save
+                                </button>
+                            @endif
+                        </div>
+                    @endif
+                </div>
+            </div>
+            @error('curriculumDocFile')
+                <div class="mt-3 text-xs font-bold text-rose-600 bg-rose-50 px-3 py-1.5 rounded-lg border border-rose-200">
+                    {{ $message }}
+                </div>
+            @enderror
+        </div>
+
         @php
             $stats = $this->stats;
         @endphp
@@ -296,6 +398,72 @@
                         </button>
                     </div>
                 </form>
+            </div>
+        </div>
+    @endif
+
+    {{-- Bulk Import CSV / Text Modal --}}
+    @if($showImportModal)
+        <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-xs animate-fade-in" x-data>
+            <div class="w-full max-w-xl rounded-3xl bg-white p-6 shadow-2xl space-y-5 animate-scale-up" @click.outside="$wire.set('showImportModal', false)">
+                <div class="flex items-center justify-between border-b border-slate-100 pb-4">
+                    <div>
+                        <h3 class="text-lg font-black text-slate-800">Bulk Import Scheme Topics</h3>
+                        <p class="text-xs font-semibold text-slate-400 mt-0.5">{{ $this->selectedClass?->name }} • {{ $this->selectedSubject?->name }} (Term {{ $term }})</p>
+                    </div>
+                    <button type="button" wire:click="$set('showImportModal', false)" class="h-8 w-8 rounded-full bg-slate-100 text-slate-400 hover:text-slate-600 flex items-center justify-center">
+                        ✕
+                    </button>
+                </div>
+
+                <div class="space-y-4">
+                    {{-- Download sample template notice --}}
+                    <div class="rounded-2xl bg-indigo-50/60 border border-indigo-100 p-4 flex items-center justify-between gap-3">
+                        <div>
+                            <div class="text-xs font-black text-indigo-900">Download CSV Sample Template</div>
+                            <div class="text-[11px] text-indigo-700/80 font-medium mt-0.5">Use our pre-formatted spreadsheet to fill out your weekly topics.</div>
+                        </div>
+                        <button type="button" wire:click="downloadCsvTemplate"
+                                class="shrink-0 inline-flex items-center gap-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white px-3.5 py-2 text-xs font-black shadow-xs transition active:scale-95">
+                            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                            </svg>
+                            Sample CSV
+                        </button>
+                    </div>
+
+                    {{-- Option A: Upload CSV File --}}
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">Option 1: Upload CSV / Excel Spreadsheet</label>
+                        <input type="file" wire:model="csvFile" accept=".csv,.txt"
+                               class="w-full text-xs text-slate-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-black file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 cursor-pointer rounded-2xl border border-slate-200 p-2 bg-slate-50" />
+                        @error('csvFile') <span class="text-[11px] text-rose-500 font-bold block mt-1">{{ $message }}</span> @enderror
+                    </div>
+
+                    <div class="relative flex py-1 items-center">
+                        <div class="flex-grow border-t border-slate-200"></div>
+                        <span class="flex-shrink mx-4 text-[10px] font-black uppercase text-slate-400">OR</span>
+                        <div class="flex-grow border-t border-slate-200"></div>
+                    </div>
+
+                    {{-- Option B: Quick Paste Text --}}
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">Option 2: Quick Paste Topics List</label>
+                        <textarea wire:model="rawTextTopics" rows="5" placeholder="Paste your weekly outline here. Examples:&#10;Week 1: Whole Numbers - Place value and operations&#10;Week 2: Fractions - Proper, improper and mixed fractions&#10;Week 3: Decimals - Adding and subtracting decimals"
+                                  class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-xs font-medium text-slate-800 focus:border-indigo-500 focus:bg-white"></textarea>
+                        <p class="text-[10px] text-slate-400 mt-1 font-semibold">Formats accepted: <code class="bg-slate-100 px-1 py-0.5 rounded">Week 1: Topic - Objectives</code> or <code class="bg-slate-100 px-1 py-0.5 rounded">1. Topic Title</code></p>
+                    </div>
+
+                    <div class="flex items-center justify-end gap-3 pt-4 border-t border-slate-100">
+                        <button type="button" wire:click="$set('showImportModal', false)" class="rounded-xl px-4 py-2.5 text-xs font-bold text-slate-500 hover:bg-slate-100 transition">
+                            Cancel
+                        </button>
+                        <button type="button" wire:click="importCsvTopics" class="rounded-xl bg-indigo-600 hover:bg-indigo-700 px-5 py-2.5 text-xs font-bold text-white shadow-md shadow-indigo-600/20 transition active:scale-95"
+                                wire:loading.attr="disabled" wire:loading.class="opacity-50 cursor-wait">
+                            Import &amp; Generate Scheme
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
     @endif
