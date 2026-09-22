@@ -63,8 +63,9 @@ class TenantDiscovery
             $isLocalIp = filter_var($host, FILTER_VALIDATE_IP) && !filter_var($host, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE);
             $isWebhookRoute = str_contains($request->getPathInfo(), '/api/whatsapp/webhook');
             $isZkTecoRoute = str_contains($request->getPathInfo(), '/iclock/') || str_contains($request->getPathInfo(), '/api/zkteco/');
+            $isHealthRoute = str_contains($request->getPathInfo(), '/api/health') || str_contains($request->getPathInfo(), '/deploy-clear-cache');
             $isTunnelDomain = str_ends_with($host, '.trycloudflare.com') || str_ends_with($host, '.ngrok.io') || str_ends_with($host, '.ngrok-free.app');
-            if (!in_array($host, ['localhost', '127.0.0.1']) && !$isLocalIp && !$isWebhookRoute && !$isZkTecoRoute && !$isTunnelDomain) {
+            if (!in_array($host, ['localhost', '127.0.0.1']) && !$isLocalIp && !$isWebhookRoute && !$isZkTecoRoute && !$isHealthRoute && !$isTunnelDomain) {
                 abort(404, "School instance '{$host}' not found.");
             }
         } else {

@@ -10,7 +10,7 @@
                 <h2 class="text-3xl font-black text-white tracking-tight">School Timetable</h2>
                 <p class="mt-1 text-sm text-slate-400">Manage and view the academic timetable and slots</p>
             </div>
-            <a href="{{ route('more-features') }}"
+            <a href="{{ auth()->user()?->role === 'parent' ? route('parents.dashboard') : route('more-features') }}"
                class="inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-bold text-white transition bg-white/10 hover:bg-white/20">
                 <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
                 Back

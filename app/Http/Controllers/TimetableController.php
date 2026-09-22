@@ -17,6 +17,12 @@ class TimetableController extends Controller
         $classId = (int) $request->query('class_id');
         $sectionId = $request->query('section_id') ? (int) $request->query('section_id') : null;
 
+        $user = auth()->user();
+        if ($user?->role === 'parent') {
+            $allowedClassIds = $user->students()->pluck('class_id')->toArray();
+            abort_unless(in_array($classId, $allowedClassIds), 403, 'Unauthorized access to class timetable.');
+        }
+
         $class = SchoolClass::query()->findOrFail($classId);
         $section = $sectionId ? Section::query()->findOrFail($sectionId) : null;
 

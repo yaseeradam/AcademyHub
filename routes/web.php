@@ -355,11 +355,16 @@ Route::middleware(['auth', 'active'])->group(function () {
         Route::get('/results/broadsheet', ResultsBroadsheet::class)->middleware('permission:results.broadsheet')->name('results.broadsheet');
         Route::get('/results/submissions', ResultsSubmissions::class)->middleware('role:admin')->name('results.submissions');
 
+        Route::get('/curriculum/topics', \App\Livewire\Curriculum\TopicsManager::class)->name('curriculum.topics');
         Route::get('/events', EventsIndex::class)->name('events');
-        Route::get('/timetable', TimetableIndex::class)->name('timetable');
-        Route::get('/timetable/pdf', [\App\Http\Controllers\TimetableController::class, 'downloadPdf'])->name('timetable.pdf');
         Route::get('/certificates', CertificatesManager::class)->name('certificates');
         Route::get('/certificates/{certificate}/download', [CertificateController::class, 'download'])->name('certificates.download');
+    });
+
+    // Timetable (Shared between Staff, Proprietor, and Parents)
+    Route::middleware('role:admin,teacher,bursar,proprietor,parent')->group(function () {
+        Route::get('/timetable', TimetableIndex::class)->name('timetable');
+        Route::get('/timetable/pdf', [\App\Http\Controllers\TimetableController::class, 'downloadPdf'])->name('timetable.pdf');
     });
 
     // Results (Shared between Admin, Teacher, and Parent)

@@ -30,14 +30,27 @@ Route::get('/health', function () {
         $dbOk = false;
     }
 
-    $status = $dbOk ? 'healthy' : 'degraded';
-    $httpCode = $dbOk ? 200 : 503;
+    $redisOk = true;
+    $redisUsed = config('cache.default') === 'redis' || config('session.driver') === 'redis' || config('queue.default') === 'redis';
+    if ($redisUsed) {
+        try {
+            \Illuminate\Support\Facades\Redis::ping();
+            $redisOk = true;
+        } catch (\Throwable $e) {
+            $redisOk = false;
+        }
+    }
+
+    $allOk = $dbOk && (! $redisUsed || $redisOk);
+    $status = $allOk ? 'healthy' : 'degraded';
+    $httpCode = $allOk ? 200 : 503;
 
     return response()->json([
         'status'    => $status,
         'app'       => config('app.name', 'AcademyHub'),
         'version'   => app()->version(),
         'database'  => $dbOk ? 'connected' : 'unreachable',
+        'redis'     => $redisUsed ? ($redisOk ? 'connected' : 'unreachable') : 'not_configured',
         'timestamp' => now()->toISOString(),
     ], $httpCode);
 });

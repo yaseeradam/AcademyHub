@@ -22,4 +22,9 @@ class Subject extends Model
     {
         return $this->hasMany(Score::class);
     }
+
+    public function topics(): HasMany
+    {
+        return $this->hasMany(SubjectTopic::class);
+    }
 }

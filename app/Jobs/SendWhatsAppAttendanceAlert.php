@@ -115,7 +115,9 @@ class SendWhatsAppAttendanceAlert implements ShouldQueue
                 Log::info("WhatsApp alert sent to guardian of student {$this->student->id} ({$phone})");
             } else {
                 Log::warning("WhatsApp alert failed for student {$this->student->id}: {$response->status()} - {$response->body()}");
-                $this->release(30);
+                if (! $response->clientError() && $this->attempts() < $this->tries) {
+                    $this->release(30);
+                }
             }
         } catch (\Throwable $e) {
             Log::error("WhatsApp alert exception for student {$this->student->id}: {$e->getMessage()}");

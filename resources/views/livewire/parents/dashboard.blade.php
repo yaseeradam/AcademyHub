@@ -158,6 +158,7 @@
                 $tabs = [
                     'overview'  => ['name' => 'Overview & Bulletin', 'icon' => '<svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>'],
                     'results'   => ['name' => 'Academic Results', 'icon' => '<svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>'],
+                    'topics'    => ['name' => 'Curriculum Topics', 'icon' => '<svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/></svg>'],
                     'homework'  => ['name' => 'Homework Tracker', 'icon' => '<svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>'],
                     'timetable' => ['name' => 'Weekly Timetable', 'icon' => '<svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>'],
                 ];
@@ -454,6 +455,157 @@
             </div>
         @endif
 
+        @if($activeTab === 'topics')
+            {{-- Curriculum Topics & Scheme of Work Tab --}}
+            <div class="space-y-6">
+                {{-- Overview Header Card --}}
+                <div class="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+                    <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+                        <div>
+                            <div class="flex items-center gap-2 mb-1.5">
+                                <span class="h-2 w-2 rounded-full bg-indigo-500"></span>
+                                <span class="text-[10px] font-black uppercase tracking-widest text-indigo-600">Scheme of Work</span>
+                            </div>
+                            <h3 class="text-xl font-black text-slate-800 tracking-tight">Curriculum Syllabus & Topics</h3>
+                            <p class="text-xs text-slate-500 font-semibold mt-1">
+                                Tracking topics taught and planned for {{ $child->schoolClass?->name ?? 'Class' }} — Term {{ $term == 1 ? 'One' : ($term == 2 ? 'Two' : 'Three') }} ({{ $session }})
+                            </p>
+                        </div>
+
+                        {{-- Progress & Metrics Badges --}}
+                        <div class="flex flex-wrap items-center gap-3">
+                            <div class="bg-slate-50 border border-slate-100 rounded-2xl p-3 text-center min-w-[5.5rem]">
+                                <div class="text-[9px] font-black uppercase tracking-wider text-slate-400">Total</div>
+                                <div class="text-lg font-black text-slate-800 mt-0.5">{{ $this->topicStats['total'] }}</div>
+                            </div>
+                            <div class="bg-emerald-50 border border-emerald-100 rounded-2xl p-3 text-center min-w-[5.5rem]">
+                                <div class="text-[9px] font-black uppercase tracking-wider text-emerald-600">Covered</div>
+                                <div class="text-lg font-black text-emerald-700 mt-0.5">{{ $this->topicStats['completed'] }}</div>
+                            </div>
+                            <div class="bg-amber-50 border border-amber-100 rounded-2xl p-3 text-center min-w-[5.5rem]">
+                                <div class="text-[9px] font-black uppercase tracking-wider text-amber-600">In Progress</div>
+                                <div class="text-lg font-black text-amber-700 mt-0.5">{{ $this->topicStats['inProgress'] }}</div>
+                            </div>
+                            <div class="bg-slate-100 border border-slate-200 rounded-2xl p-3 text-center min-w-[5.5rem]">
+                                <div class="text-[9px] font-black uppercase tracking-wider text-slate-500">Upcoming</div>
+                                <div class="text-lg font-black text-slate-700 mt-0.5">{{ $this->topicStats['upcoming'] }}</div>
+                            </div>
+                            <div class="bg-indigo-50 border border-indigo-100 rounded-2xl p-3 text-center min-w-[6.5rem]">
+                                <div class="text-[9px] font-black uppercase tracking-wider text-indigo-600">Completed</div>
+                                <div class="text-lg font-black text-indigo-700 mt-0.5">{{ $this->topicStats['percent'] }}%</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- Linear Progress Bar --}}
+                    @if($this->topicStats['total'] > 0)
+                        <div class="mt-6 pt-5 border-t border-slate-100">
+                            <div class="flex items-center justify-between text-xs font-bold text-slate-500 mb-2">
+                                <span>Curriculum Progress: {{ $this->topicStats['completed'] }} of {{ $this->topicStats['total'] }} topics covered</span>
+                                <span class="font-black text-indigo-600">{{ $this->topicStats['percent'] }}%</span>
+                            </div>
+                            <div class="h-2.5 w-full rounded-full bg-slate-100 overflow-hidden">
+                                <div class="h-full rounded-full bg-gradient-to-r from-indigo-500 to-emerald-500 transition-all duration-500" style="width: {{ $this->topicStats['percent'] }}%"></div>
+                            </div>
+                        </div>
+                    @endif
+                </div>
+
+                {{-- Subject Filter Pill Navigation --}}
+                <div class="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-thin">
+                    <button type="button" wire:click="$set('selectedTopicSubjectId', null)"
+                            class="rounded-xl px-4 py-2 text-xs font-black transition-all whitespace-nowrap {{ is_null($selectedTopicSubjectId) ? 'bg-slate-900 text-white shadow-sm' : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200' }}">
+                        All Subjects ({{ $this->childSubjects->count() }})
+                    </button>
+                    @foreach($this->childSubjects as $cSub)
+                        <button type="button" wire:click="$set('selectedTopicSubjectId', {{ $cSub->id }})"
+                                class="rounded-xl px-4 py-2 text-xs font-black transition-all whitespace-nowrap {{ (int)$selectedTopicSubjectId === (int)$cSub->id ? 'bg-indigo-600 text-white shadow-sm' : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200' }}">
+                            {{ $cSub->name }}
+                        </button>
+                    @endforeach
+                </div>
+
+                {{-- Topic Cards List --}}
+                @if($this->subjectTopics->isEmpty())
+                    <div class="rounded-3xl border border-slate-200 bg-white p-12 text-center shadow-sm">
+                        <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-indigo-50 text-indigo-500 mb-4">
+                            <svg class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                            </svg>
+                        </div>
+                        <h4 class="text-base font-black text-slate-800">No Curriculum Topics Published Yet</h4>
+                        <p class="text-xs text-slate-500 font-semibold max-w-md mx-auto mt-1">
+                            @if($selectedTopicSubjectId)
+                                No topics have been recorded for the selected subject in Term {{ $term == 1 ? 'One' : ($term == 2 ? 'Two' : 'Three') }}.
+                            @else
+                                Teachers have not uploaded the scheme of work topics for this term yet. Once posted, weekly lesson outlines and progress will appear here.
+                            @endif
+                        </p>
+                        @if($selectedTopicSubjectId)
+                            <button type="button" wire:click="$set('selectedTopicSubjectId', null)" class="mt-4 inline-flex items-center gap-1.5 text-xs font-black text-indigo-600 bg-indigo-50 hover:bg-indigo-100 px-3.5 py-1.5 rounded-xl transition">
+                                Clear Subject Filter
+                            </button>
+                        @endif
+                    </div>
+                @else
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        @foreach($this->subjectTopics as $topic)
+                            <div class="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm hover:border-indigo-200 hover:shadow-md transition-all flex flex-col justify-between">
+                                <div>
+                                    <div class="flex items-start justify-between gap-3 mb-3">
+                                        <div class="flex flex-wrap items-center gap-2">
+                                            @if($topic->week_number)
+                                                <span class="rounded-lg bg-indigo-50 text-indigo-700 border border-indigo-100 px-2.5 py-1 text-[10px] font-black uppercase tracking-wider">
+                                                    Week {{ $topic->week_number }}
+                                                </span>
+                                            @else
+                                                <span class="rounded-lg bg-slate-100 text-slate-600 border border-slate-200 px-2.5 py-1 text-[10px] font-black uppercase tracking-wider">
+                                                    General
+                                                </span>
+                                            @endif
+                                            <span class="rounded-lg bg-slate-50 text-slate-700 border border-slate-200 px-2.5 py-1 text-[10px] font-bold">
+                                                {{ $topic->subject?->name ?? 'Subject' }}
+                                            </span>
+                                        </div>
+
+                                        {{-- Status Badge --}}
+                                        @if($topic->status === 'completed')
+                                            <span class="inline-flex items-center gap-1 rounded-full bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 text-[10px] font-black text-emerald-700">
+                                                <svg class="h-3 w-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                                                Covered
+                                            </span>
+                                        @elseif($topic->status === 'in_progress')
+                                            <span class="inline-flex items-center gap-1.5 rounded-full bg-amber-50 border border-amber-200 px-2.5 py-0.5 text-[10px] font-black text-amber-700">
+                                                <span class="h-1.5 w-1.5 rounded-full bg-amber-500 animate-pulse"></span>
+                                                In Progress
+                                            </span>
+                                        @else
+                                            <span class="inline-flex items-center gap-1 rounded-full bg-slate-100 border border-slate-200 px-2.5 py-0.5 text-[10px] font-black text-slate-600">
+                                                <svg class="h-3 w-3 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                                Upcoming
+                                            </span>
+                                        @endif
+                                    </div>
+
+                                    <h4 class="text-base font-black text-slate-800 leading-snug">{{ $topic->title }}</h4>
+
+                                    @if($topic->learning_objectives)
+                                        <div class="mt-3.5 rounded-2xl bg-slate-50/70 border border-slate-150 p-3.5">
+                                            <div class="text-[10px] font-black uppercase tracking-wider text-slate-400 mb-1.5 flex items-center gap-1">
+                                                <svg class="h-3 w-3 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                                Learning Objectives
+                                            </div>
+                                            <div class="text-xs text-slate-600 font-medium leading-relaxed whitespace-pre-wrap">{{ $topic->learning_objectives }}</div>
+                                        </div>
+                                    @endif
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                @endif
+            </div>
+        @endif
+
         @if($activeTab === 'homework')
             {{-- Homework Tracker Tab --}}
             <div class="rounded-3xl border border-slate-200 bg-white shadow-sm overflow-hidden flex flex-col">
@@ -487,7 +639,7 @@
                                     </div>
                                     <div class="shrink-0 flex items-center gap-3">
                                         <span class="text-[10px] font-black uppercase rounded-lg border px-2.5 py-1 {{ $badge }}">
-                                            {{ $done ? 'âœ“ Completed' : ($late ? '! Overdue' : '? Pending') }}
+                                            {{ $done ? '✓ Completed' : ($late ? '! Overdue' : '? Pending') }}
                                         </span>
                                         <svg class="h-4 w-4 text-slate-400 transform transition-transform" :class="expanded ? 'rotate-180' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
                                     </div>
@@ -552,8 +704,21 @@
         @if($activeTab === 'timetable')
             {{-- Timetable Tab --}}
             <div class="rounded-3xl border border-slate-200 bg-white shadow-sm overflow-hidden flex flex-col">
-                <div class="border-b border-slate-100 bg-slate-50/50 px-6 py-4">
-                    <h3 class="text-sm font-black text-slate-800 uppercase tracking-wide">Weekly Timetable Schedule</h3>
+                <div class="border-b border-slate-100 bg-slate-50/50 px-6 py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div>
+                        <h3 class="text-sm font-black text-slate-800 uppercase tracking-wide">Weekly Timetable Schedule</h3>
+                        <p class="text-xs text-slate-500 font-semibold mt-0.5">Periods and subject allocations for {{ $child->schoolClass?->name ?? 'Class' }}</p>
+                    </div>
+                    @if($child->class_id)
+                        <a href="{{ route('timetable.pdf', ['class_id' => $child->class_id, 'section_id' => $child->section_id]) }}"
+                           target="_blank"
+                           class="inline-flex items-center gap-2 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 px-4 py-2 text-xs font-black transition-colors shadow-xs">
+                            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                            </svg>
+                            Download PDF Timetable
+                        </a>
+                    @endif
                 </div>
                 
                 <div class="p-6 space-y-6">

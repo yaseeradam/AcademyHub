@@ -51,6 +51,11 @@ class SchoolClass extends Model
             ->orderBy('name');
     }
 
+    public function topics(): HasMany
+    {
+        return $this->hasMany(SubjectTopic::class, 'class_id');
+    }
+
     public static function allSubjectsForClass(int $classId): \Illuminate\Support\Collection
     {
         $class = self::find($classId);

@@ -51,6 +51,14 @@ class Index extends Component
             return SchoolClass::query()->orderBy('level')->get();
         }
 
+        if ($user->role === 'parent') {
+            $childClassIds = $user->students()->pluck('class_id')->unique()->filter();
+            return SchoolClass::query()
+                ->whereIn('id', $childClassIds)
+                ->orderBy('level')
+                ->get();
+        }
+
         $ids = SubjectAllocation::query()->where('teacher_id', $user->id)->pluck('class_id')->unique();
 
         return SchoolClass::query()
@@ -106,6 +114,15 @@ class Index extends Component
         }
         $this->activeDayTab = $day;
         $this->entryDay = $day;
+
+        if ($user->role === 'parent') {
+            $firstClass = $this->classes->first();
+            if ($firstClass) {
+                $this->classId = $firstClass->id;
+                $child = $user->students()->where('class_id', $firstClass->id)->first();
+                $this->sectionId = $child?->section_id;
+            }
+        }
     }
 
     public function updatedClassId(): void

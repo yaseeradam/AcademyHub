@@ -24,6 +24,7 @@ class Dashboard extends Component
     public int $term = 1;
     public string $session = '';
     public string $activeTab = 'overview';
+    public ?int $selectedTopicSubjectId = null;
 
     public function mount(): void
     {
@@ -187,7 +188,51 @@ class Dashboard extends Component
     public function selectChild(int $id): void
     {
         $this->selectedChildId = $id;
+        $this->selectedTopicSubjectId = null;
         $this->activeTab = 'overview';
+    }
+
+    #[Computed]
+    public function childSubjects(): Collection
+    {
+        if (! $this->selectedChild) return collect();
+        return SchoolClass::allSubjectsForClass($this->selectedChild->class_id);
+    }
+
+    #[Computed]
+    public function subjectTopics(): Collection
+    {
+        if (! $this->selectedChild) return collect();
+
+        $query = \App\Models\SubjectTopic::query()
+            ->where('class_id', $this->selectedChild->class_id)
+            ->where('term', $this->term);
+
+        if (! empty($this->session)) {
+            $query->where('session', $this->session);
+        }
+
+        if ($this->selectedTopicSubjectId) {
+            $query->where('subject_id', $this->selectedTopicSubjectId);
+        }
+
+        return $query->with('subject')
+            ->orderByRaw('week_number IS NULL, week_number ASC')
+            ->orderBy('id', 'asc')
+            ->get();
+    }
+
+    #[Computed]
+    public function topicStats(): array
+    {
+        $topics = $this->subjectTopics;
+        $total = $topics->count();
+        $completed = $topics->where('status', 'completed')->count();
+        $inProgress = $topics->where('status', 'in_progress')->count();
+        $upcoming = $topics->where('status', 'upcoming')->count();
+        $percent = $total > 0 ? (int) round(($completed / $total) * 100) : 0;
+
+        return compact('total', 'completed', 'inProgress', 'upcoming', 'percent');
     }
 
     #[Computed]
