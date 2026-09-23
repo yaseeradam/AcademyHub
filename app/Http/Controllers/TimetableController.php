@@ -14,30 +14,6 @@ class TimetableController extends Controller
 {
     public function downloadPdf(Request $request)
     {
-        $data = $this->buildTimetableData($request);
-
-        $pdf = Pdf::loadView('pdf.timetable', $data)->setPaper('a4', 'landscape');
-
-        $filename = 'Timetable_' . str_replace(' ', '_', $data['class']->name);
-        if ($data['section']) {
-            $filename .= '_' . str_replace(' ', '_', $data['section']->name);
-        }
-        $filename .= '.pdf';
-
-        return $pdf->download($filename)
-            ->header('Cache-Control', 'no-cache, no-store, must-revalidate')
-            ->header('Pragma', 'no-cache')
-            ->header('Expires', '0');
-    }
-
-    public function printView(Request $request)
-    {
-        $data = $this->buildTimetableData($request);
-        return view('timetable.print', $data);
-    }
-
-    private function buildTimetableData(Request $request): array
-    {
         $classId = (int) $request->query('class_id');
         $sectionId = $request->query('section_id') ? (int) $request->query('section_id') : null;
 
@@ -58,7 +34,7 @@ class TimetableController extends Controller
             ->orderBy('starts_at')
             ->get();
 
-        $hasSaturday = $entries->where('day_of_week', 6)->isNotEmpty();
+        // Build days
         $days = [
             1 => 'Monday',
             2 => 'Tuesday',
@@ -66,21 +42,15 @@ class TimetableController extends Controller
             4 => 'Thursday',
             5 => 'Friday',
         ];
-        if ($hasSaturday) {
-            $days[6] = 'Saturday';
-        }
 
-        // Build time-slot grid
+        // Build time-slot grid (same logic as the Livewire editor)
         $boundaries = [];
-        if ($entries->isEmpty()) {
-            for ($hour = 8; $hour <= 14; $hour++) {
-                $boundaries[] = sprintf('%02d:00', $hour);
-            }
-        } else {
-            foreach ($entries as $entry) {
-                $boundaries[] = substr((string) $entry->starts_at, 0, 5);
-                $boundaries[] = substr((string) $entry->ends_at, 0, 5);
-            }
+        for ($hour = 8; $hour <= 16; $hour++) {
+            $boundaries[] = sprintf('%02d:00', $hour);
+        }
+        foreach ($entries as $entry) {
+            $boundaries[] = substr((string) $entry->starts_at, 0, 5);
+            $boundaries[] = substr((string) $entry->ends_at, 0, 5);
         }
 
         $unique = [];
@@ -124,7 +94,6 @@ class TimetableController extends Controller
         $schoolAddress = config('academyhub.school_address', '');
         $schoolPhone = config('academyhub.school_phone', '');
         $schoolEmail = config('academyhub.school_email', '');
-        $schoolTagline = config('academyhub.tagline', '');
         $logoPath = config('academyhub.school_logo');
 
         $logoBase64 = null;
@@ -141,7 +110,7 @@ class TimetableController extends Controller
         $termLabel = $activeTerm?->name ?? 'Term';
         $sessionLabel = $activeTerm?->session?->name ?? AcademicSession::activeName() ?? now()->format('Y');
 
-        return [
+        $pdf = Pdf::loadView('pdf.timetable', [
             'class' => $class,
             'section' => $section,
             'days' => $days,
@@ -151,11 +120,21 @@ class TimetableController extends Controller
             'schoolAddress' => $schoolAddress,
             'schoolPhone' => $schoolPhone,
             'schoolEmail' => $schoolEmail,
-            'schoolTagline' => $schoolTagline,
             'logoBase64' => $logoBase64,
             'termLabel' => $termLabel,
             'sessionLabel' => $sessionLabel,
-        ];
+        ])->setPaper('a4', 'landscape');
+
+        $filename = 'Timetable_' . str_replace(' ', '_', $class->name);
+        if ($section) {
+            $filename .= '_' . str_replace(' ', '_', $section->name);
+        }
+        $filename .= '.pdf';
+
+        return $pdf->download($filename)
+            ->header('Cache-Control', 'no-cache, no-store, must-revalidate')
+            ->header('Pragma', 'no-cache')
+            ->header('Expires', '0');
     }
 
     private function timeToSeconds(string $time): int

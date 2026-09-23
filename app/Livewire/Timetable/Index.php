@@ -68,6 +68,16 @@ class Index extends Component
     }
 
     #[Computed]
+    public function selectedClass()
+    {
+        if (! $this->classId) {
+            return null;
+        }
+
+        return SchoolClass::query()->find($this->classId);
+    }
+
+    #[Computed]
     public function sections()
     {
         if (! $this->classId) {
@@ -417,7 +427,7 @@ class Index extends Component
         $user = auth()->user();
         abort_unless($user, 403);
 
-        if (! in_array($user->role, ['admin', 'teacher', 'bursar'], true)) {
+        if (! in_array($user->role, ['admin', 'teacher', 'bursar', 'proprietor', 'parent'], true)) {
             abort(403);
         }
 
@@ -434,7 +444,10 @@ class Index extends Component
             : collect();
 
         $hasSaturday = $entries->where('day_of_week', 6)->isNotEmpty();
-        $dayNumbers = $hasSaturday ? [1, 2, 3, 4, 5, 6] : [1, 2, 3, 4, 5];
+        $dayNumbers = [1, 2, 3, 4, 5];
+        if ($hasSaturday) {
+            $dayNumbers[] = 6;
+        }
 
         $days = collect($dayNumbers)->map(fn ($day) => [
             'day' => $day,
