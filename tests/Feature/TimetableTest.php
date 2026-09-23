@@ -115,4 +115,28 @@ class TimetableTest extends TestCase
             ]);
         }
     }
+
+    public function test_user_can_download_timetable_pdf()
+    {
+        $this->seed();
+        $admin = User::query()->where('email', 'admin@academyhub.local')->firstOrFail();
+        $class = SchoolClass::query()->firstOrFail();
+
+        $response = $this->actingAs($admin)->get(route('timetable.pdf', ['class_id' => $class->id]));
+        $response->assertStatus(200);
+        $response->assertHeader('content-type', 'application/pdf');
+    }
+
+    public function test_user_can_view_timetable_print_poster()
+    {
+        $this->seed();
+        $admin = User::query()->where('email', 'admin@academyhub.local')->firstOrFail();
+        $class = SchoolClass::query()->firstOrFail();
+
+        $response = $this->actingAs($admin)->get(route('timetable.print', ['class_id' => $class->id]));
+        $response->assertStatus(200);
+        $response->assertSee('TIMETABLE');
+        $response->assertSee($class->name);
+    }
 }
+
