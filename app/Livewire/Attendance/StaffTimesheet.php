@@ -125,8 +125,8 @@ class StaffTimesheet extends Component
 
         $results = [];
 
-        $westernLateThreshold = config('academyhub.western_late_threshold', '08:15:00');
-        $islamicLateThreshold = config('academyhub.islamic_late_threshold', '12:45:00');
+        $westernLateThreshold = \App\Support\AttendanceShiftConfig::getLateThreshold(\App\Support\AttendanceShiftConfig::SHIFT_WESTERN, $tenantId);
+        $islamicLateThreshold = \App\Support\AttendanceShiftConfig::getLateThreshold(\App\Support\AttendanceShiftConfig::SHIFT_ISLAMIC, $tenantId);
 
         foreach ($staffMembers as $staff) {
             $shift = $staff->getShift(); // 'Islamic' or 'Western'

@@ -228,4 +228,29 @@ class Student extends Model
             ->orderBy('due_date', 'desc')
             ->get();
     }
+
+    public function getShift(): string
+    {
+        if (!empty($this->custom_fields['shift'])) {
+            return \App\Support\AttendanceShiftConfig::normalizeShift($this->custom_fields['shift']);
+        }
+
+        if ($this->relationLoaded('section') && $this->section) {
+            return $this->section->getShift();
+        }
+
+        if ($this->section_id) {
+            $section = Section::find($this->section_id);
+            if ($section) {
+                return $section->getShift();
+            }
+        }
+
+        return \App\Support\AttendanceShiftConfig::SHIFT_WESTERN;
+    }
+
+    public function getShiftLabel(): string
+    {
+        return $this->getShift() . ' Section';
+    }
 }

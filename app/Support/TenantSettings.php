@@ -38,6 +38,11 @@ class TenantSettings
             : 'academyhub_settings_cache_global';
     }
 
+    public static function clearCache(?\App\Models\Tenant $tenant = null): void
+    {
+        \Illuminate\Support\Facades\Cache::forget(self::settingsCacheKey($tenant));
+    }
+
     public static function uploadsSubdir(string $baseDir): string
     {
         $tenantId = self::tenantId();
@@ -118,6 +123,15 @@ class TenantSettings
                 'rc_principal_name',
                 'rc_principal_title',
                 'subscription_due_date',
+                'attendance_start_time',
+                'attendance_end_time',
+                'late_threshold_time',
+                'western_start_time',
+                'western_late_threshold',
+                'western_end_time',
+                'islamic_start_time',
+                'islamic_late_threshold',
+                'islamic_end_time',
             ];
 
             return \Illuminate\Support\Arr::only($data, $allowed);
@@ -148,6 +162,33 @@ class TenantSettings
     public static function get(string $key, mixed $default = null): mixed
     {
         return config("academyhub.{$key}", config("myacademy.{$key}", $default));
+    }
+
+    public static function getForTenant(string $key, ?int $tenantId = null, mixed $default = null): mixed
+    {
+        $tenantId = $tenantId ?? self::tenantId();
+        if (! $tenantId) {
+            return self::get($key, $default);
+        }
+
+        $cacheKey = 'academyhub_settings_cache_tenant_' . $tenantId;
+        $settings = \Illuminate\Support\Facades\Cache::get($cacheKey);
+        if ($settings === null) {
+            $path = storage_path('app/academyhub/tenants/' . $tenantId . '/settings.json');
+            if (\Illuminate\Support\Facades\File::exists($path)) {
+                $data = json_decode(\Illuminate\Support\Facades\File::get($path), true);
+                if (is_array($data)) {
+                    $settings = $data;
+                    \Illuminate\Support\Facades\Cache::put($cacheKey, $settings, 3600);
+                }
+            }
+        }
+
+        if (is_array($settings) && array_key_exists($key, $settings) && $settings[$key] !== null && $settings[$key] !== '') {
+            return $settings[$key];
+        }
+
+        return self::get($key, $default);
     }
 }
 

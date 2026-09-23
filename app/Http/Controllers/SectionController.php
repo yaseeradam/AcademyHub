@@ -22,11 +22,13 @@ class SectionController extends Controller
                     ->where('class_id', $class->id)
                     ->where('tenant_id', TenantSettings::tenantId())),
             ],
+            'shift' => ['nullable', 'string', 'in:Western,Islamic'],
         ]);
 
         Section::query()->create([
             'class_id' => $class->id,
             'name' => strtoupper(trim($data['name'])),
+            'shift' => $data['shift'] ?? 'Western',
         ]);
 
         return back()->with('status', 'Section added.');
@@ -36,8 +38,12 @@ class SectionController extends Controller
     {
         abort_unless((int) $section->class_id === (int) $class->id, 404);
 
-        $data = $request->validate([
-            'name' => [
+        $rules = [
+            'shift' => ['nullable', 'string', 'in:Western,Islamic'],
+        ];
+
+        if ($request->has('name')) {
+            $rules['name'] = [
                 'required',
                 'string',
                 'max:50',
@@ -46,12 +52,22 @@ class SectionController extends Controller
                         ->where('class_id', $class->id)
                         ->where('tenant_id', TenantSettings::tenantId()))
                     ->ignore($section->id),
-            ],
-        ]);
+            ];
+        }
 
-        $section->update([
-            'name' => strtoupper(trim($data['name'])),
-        ]);
+        $data = $request->validate($rules);
+
+        $updateData = [];
+        if (isset($data['name'])) {
+            $updateData['name'] = strtoupper(trim($data['name']));
+        }
+        if (isset($data['shift'])) {
+            $updateData['shift'] = $data['shift'];
+        }
+
+        if (!empty($updateData)) {
+            $section->update($updateData);
+        }
 
         return back()->with('status', 'Section updated.');
     }

@@ -17,12 +17,24 @@ class Section extends Model
         'tenant_id',
         'class_id',
         'name',
+        'shift',
     ];
 
     protected $casts = [
         'tenant_id' => 'integer',
         'class_id' => 'integer',
+        'shift' => 'string',
     ];
+
+    public function getShift(): string
+    {
+        return \App\Support\AttendanceShiftConfig::normalizeShift($this->shift ?? 'Western');
+    }
+
+    public function getShiftLabel(): string
+    {
+        return $this->getShift() . ' Section';
+    }
 
     public function schoolClass(): BelongsTo
     {

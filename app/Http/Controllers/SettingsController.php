@@ -593,5 +593,65 @@ class SettingsController extends Controller
         abort(404);
     }
 
+    public function showAttendance()
+    {
+        $western = \App\Support\AttendanceShiftConfig::getShiftConfig(\App\Support\AttendanceShiftConfig::SHIFT_WESTERN);
+        $islamic = \App\Support\AttendanceShiftConfig::getShiftConfig(\App\Support\AttendanceShiftConfig::SHIFT_ISLAMIC);
+
+        $classes = SchoolClass::query()
+            ->with(['sections' => fn ($q) => $q->orderBy('name')])
+            ->orderBy('level')
+            ->orderBy('name')
+            ->get();
+
+        return view('pages.settings.attendance', compact('western', 'islamic', 'classes'));
+    }
+
+    public function updateAttendance(Request $request)
+    {
+        $data = $request->validate([
+            'western_start_time'     => ['required', 'string'],
+            'western_late_threshold' => ['required', 'string'],
+            'western_end_time'       => ['required', 'string'],
+            'islamic_start_time'     => ['required', 'string'],
+            'islamic_late_threshold' => ['required', 'string'],
+            'islamic_end_time'       => ['required', 'string'],
+            'section_shifts'         => ['nullable', 'array'],
+            'section_shifts.*'       => ['nullable', 'string', 'in:Western,Islamic'],
+        ]);
+
+        $settingsPath = $this->settingsPath();
+        $settings = $this->loadSettings($settingsPath);
+
+        $settings['western_start_time']     = \App\Support\AttendanceShiftConfig::standardizeTime($data['western_start_time'], '07:00:00');
+        $settings['western_late_threshold'] = \App\Support\AttendanceShiftConfig::standardizeTime($data['western_late_threshold'], '08:15:00');
+        $settings['western_end_time']       = \App\Support\AttendanceShiftConfig::standardizeTime($data['western_end_time'], '12:30:00');
+
+        $settings['islamic_start_time']     = \App\Support\AttendanceShiftConfig::standardizeTime($data['islamic_start_time'], '12:00:00');
+        $settings['islamic_late_threshold'] = \App\Support\AttendanceShiftConfig::standardizeTime($data['islamic_late_threshold'], '12:45:00');
+        $settings['islamic_end_time']       = \App\Support\AttendanceShiftConfig::standardizeTime($data['islamic_end_time'], '17:00:00');
+
+        // Also update general fallbacks
+        $settings['attendance_start_time'] = $settings['western_start_time'];
+        $settings['late_threshold_time']   = $settings['western_late_threshold'];
+        $settings['attendance_end_time']   = $settings['islamic_end_time'];
+
+        $this->persistSettings($settingsPath, $settings);
+        $this->refreshSettingsCache();
+
+        // Update section shifts if submitted
+        if (!empty($data['section_shifts'])) {
+            foreach ($data['section_shifts'] as $sectionId => $shift) {
+                if (in_array($shift, ['Western', 'Islamic'], true)) {
+                    \App\Models\Section::where('id', $sectionId)->update(['shift' => $shift]);
+                }
+            }
+        }
+
+        \Illuminate\Support\Facades\Artisan::call('config:clear');
+
+        return back()->with('status', 'Attendance shift parameters & section assignments saved successfully.');
+    }
+
     // License functionality removed - all features are free
 }

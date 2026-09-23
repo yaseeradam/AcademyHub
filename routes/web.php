@@ -239,6 +239,7 @@ Route::middleware(['auth', 'active'])->group(function () {
         Route::post('/settings/school', [SettingsController::class, 'updateSchool'])->name('settings.update-school');
         Route::post('/settings/results', [SettingsController::class, 'updateResults'])->name('settings.update-results');
         Route::post('/settings/certificates', [SettingsController::class, 'updateCertificates'])->name('settings.update-certificates');
+        Route::post('/settings/attendance', [SettingsController::class, 'updateAttendance'])->name('settings.update-attendance');
     });
 
     Route::get('/students', StudentsIndex::class)->name('students.index');
@@ -398,6 +399,7 @@ Route::middleware(['auth', 'active'])->group(function () {
         Route::view('/settings', 'pages.settings.index')->name('settings.index');
         Route::view('/settings/results', 'pages.settings.results')->name('settings.results');
         Route::view('/settings/certificates', 'pages.settings.certificates')->name('settings.certificates');
+        Route::get('/settings/attendance', [SettingsController::class, 'showAttendance'])->name('settings.attendance');
         Route::get('/settings/templates', [SettingsController::class, 'showTemplates'])->name('settings.templates');
         Route::post('/settings/templates', [SettingsController::class, 'updateTemplates'])->name('settings.update-templates');
         Route::get('/settings/templates/preview/{type}/{template}', [SettingsController::class, 'previewTemplate'])->name('settings.templates.preview');

@@ -35,6 +35,7 @@ class User extends Authenticatable
         'whatsapp_verified',
         'whatsapp_subscribed',
         'is_class_teacher',
+        'shift',
     ];
 
     /**
@@ -215,11 +216,8 @@ class User extends Authenticatable
      */
     public function getShift(): string
     {
-        $shift = $this->custom_fields['shift'] ?? null;
-        if ($shift && in_array(strtolower($shift), ['islamic', 'afternoon'], true)) {
-            return 'Islamic';
-        }
-        return 'Western';
+        $shift = $this->custom_fields['shift'] ?? $this->shift;
+        return \App\Support\AttendanceShiftConfig::normalizeShift($shift);
     }
 
     /**

@@ -184,18 +184,37 @@
                         </div>
 
                         {{-- Section tag bubbles --}}
-                        <div class="flex flex-wrap gap-2 mb-5">
+                        <div class="flex flex-wrap gap-2.5 mb-5">
                             @forelse ($class->sections as $section)
-                                <form method="POST" action="{{ route('sections.destroy', ['class' => $class, 'section' => $section]) }}" onsubmit="return confirm('Delete section {{ $section->name }}?')">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="group/section inline-flex items-center gap-2 rounded-xl bg-white border border-slate-200/80 px-3.5 py-2 text-xs font-bold text-slate-700 shadow-sm transition-all hover:bg-rose-50 hover:border-rose-200 hover:text-rose-600 active:scale-[0.97]">
-                                        <span>{{ $section->name }}</span>
-                                        <svg class="h-3.5 w-3.5 text-slate-400 group-hover/section:text-rose-500 transition-colors" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                                            <path d="M18 6L6 18M6 6l12 12"/>
-                                        </svg>
-                                    </button>
-                                </form>
+                                <div class="group/section inline-flex items-center gap-1.5 rounded-xl bg-white border border-slate-200/80 p-1 pl-3 text-xs font-bold text-slate-700 shadow-sm transition-all hover:border-slate-300">
+                                    <span>Section {{ $section->name }}</span>
+
+                                    {{-- Shift Toggle Button --}}
+                                    <form method="POST" action="{{ route('sections.update', ['class' => $class, 'section' => $section]) }}" class="inline">
+                                        @csrf
+                                        @method('PATCH')
+                                        <input type="hidden" name="shift" value="{{ $section->getShift() === 'Western' ? 'Islamic' : 'Western' }}">
+                                        <button type="submit" title="Click to toggle shift (Western ↔ Islamic)" class="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[10px] font-extrabold transition-all {{ $section->getShift() === 'Western' ? 'bg-sky-50 text-sky-700 hover:bg-sky-100 ring-1 ring-sky-200' : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100 ring-1 ring-emerald-200' }}">
+                                            @if($section->getShift() === 'Western')
+                                                <span>☀️ Western</span>
+                                            @else
+                                                <span>🌙 Islamic</span>
+                                            @endif
+                                            <svg class="h-2.5 w-2.5 opacity-60" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/></svg>
+                                        </button>
+                                    </form>
+
+                                    {{-- Delete Section Button --}}
+                                    <form method="POST" action="{{ route('sections.destroy', ['class' => $class, 'section' => $section]) }}" onsubmit="return confirm('Delete section {{ $section->name }}?')">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" title="Delete section" class="p-1 rounded-lg hover:bg-rose-50 hover:text-rose-600 text-slate-400 transition-colors">
+                                            <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                                <path d="M18 6L6 18M6 6l12 12"/>
+                                            </svg>
+                                        </button>
+                                    </form>
+                                </div>
                             @empty
                                 <div class="text-xs font-semibold text-slate-400 italic py-2">No sections registered yet for this class level.</div>
                             @endforelse
@@ -211,6 +230,15 @@
                                     placeholder="Section label (e.g., A, B, C, GOLD, BLUE)" 
                                     required 
                                 />
+                            </div>
+                            <div class="w-full sm:w-56">
+                                <select 
+                                    name="shift" 
+                                    class="w-full rounded-xl border-2 border-slate-200 bg-white px-3 py-3 text-sm font-bold text-gray-800 shadow-sm transition-all focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 hover:border-slate-300"
+                                    required>
+                                    <option value="Western">☀️ Western (Morning)</option>
+                                    <option value="Islamic">🌙 Islamic (Afternoon)</option>
+                                </select>
                             </div>
                             <button type="submit" class="inline-flex items-center justify-center gap-1.5 rounded-xl bg-gradient-to-r {{ $scheme['button'] }} px-5 py-3 text-sm font-bold text-white shadow-md transition-all active:scale-[0.98]">
                                 <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">

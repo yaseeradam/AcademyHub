@@ -113,14 +113,7 @@ class SyncZkTecoAttendance extends Command
 
             if ($teacher) {
                 $shift = method_exists($teacher, 'getShift') ? $teacher->getShift() : 'Western';
-                $westernLate = config('academyhub.western_late_threshold', '08:15:00');
-                $islamicLate = config('academyhub.islamic_late_threshold', '12:45:00');
-
-                if ($shift === 'Islamic') {
-                    $calculatedStatus = ($timeStr <= $islamicLate) ? 'Present' : 'Late';
-                } else {
-                    $calculatedStatus = ($timeStr <= $westernLate) ? 'Present' : 'Late';
-                }
+                $calculatedStatus = \App\Support\AttendanceShiftConfig::evaluateStatus($timeStr, $shift, $teacher->tenant_id);
 
                 $staffSheet = TeacherAttendanceSheet::firstOrCreate(
                     [
@@ -204,6 +197,9 @@ class SyncZkTecoAttendance extends Command
             );
 
             // 2. Record or update student's attendance mark
+            $studentShift = method_exists($student, 'getShift') ? $student->getShift() : 'Western';
+            $studentStatus = \App\Support\AttendanceShiftConfig::evaluateStatus($timeStr, $studentShift, $student->tenant_id);
+
             AttendanceMark::updateOrCreate(
                 [
                     'tenant_id'  => $student->tenant_id,
@@ -211,7 +207,7 @@ class SyncZkTecoAttendance extends Command
                     'student_id' => $student->id,
                 ],
                 [
-                    'status'     => $status,
+                    'status'     => $studentStatus,
                     'note'       => "Biometric scan on K40 at {$punchTime->format('g:i A')}",
                 ]
             );
@@ -223,7 +219,7 @@ class SyncZkTecoAttendance extends Command
                 $alertCacheKey = "zk_wa_alert_{$student->id}_{$dateStr}";
                 if (!Cache::has($alertCacheKey)) {
                     Cache::put($alertCacheKey, true, now()->endOfDay());
-                    $this->sendWhatsAppAttendanceAlert($student, $punchTime, $status);
+                    $this->sendWhatsAppAttendanceAlert($student, $punchTime, $studentStatus);
                 }
             }
         }

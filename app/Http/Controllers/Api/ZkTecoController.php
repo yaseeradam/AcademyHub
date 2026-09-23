@@ -182,18 +182,7 @@ class ZkTecoController extends Controller
                 }
 
                 $shift = $teacher->getShift(); // 'Islamic' or 'Western'
-                
-                // Shift-specific late threshold calculation:
-                // Western Section: 7:00 AM - 12:30 PM (Late after 8:15 AM)
-                // Islamic Section: 12:30 PM - 5:00 PM (Late after 12:45 PM)
-                $westernLate = config('academyhub.western_late_threshold', '08:15:00');
-                $islamicLate = config('academyhub.islamic_late_threshold', '12:45:00');
-
-                if ($shift === 'Islamic') {
-                    $calculatedStatus = ($timeStr <= $islamicLate) ? 'Present' : 'Late';
-                } else {
-                    $calculatedStatus = ($timeStr <= $westernLate) ? 'Present' : 'Late';
-                }
+                $calculatedStatus = \App\Support\AttendanceShiftConfig::evaluateStatus($timeStr, $shift, $teacher->tenant_id);
 
                 $staffSheet = TeacherAttendanceSheet::firstOrCreate(
                     [
@@ -308,6 +297,9 @@ class ZkTecoController extends Controller
                 continue;
             }
 
+            $studentShift = $student->getShift();
+            $studentStatus = \App\Support\AttendanceShiftConfig::evaluateStatus($timeStr, $studentShift, $student->tenant_id);
+
             // 1. Create or retrieve daily attendance sheet for student's class
             $sheet = AttendanceSheet::firstOrCreate(
                 [
@@ -333,7 +325,7 @@ class ZkTecoController extends Controller
             if ($existingStudentMark) {
                 // ── DEPARTURE (second punch) ───────────────────────────────
                 // Never downgrade Present → Late on departure scan.
-                $finalStatus = ($existingStudentMark->status === 'Present') ? 'Present' : $status;
+                $finalStatus = ($existingStudentMark->status === 'Present') ? 'Present' : $studentStatus;
 
                 $inDisplay  = $existingStudentMark->arrived_at
                     ? Carbon::parse($existingStudentMark->arrived_at)->format('g:i A')
@@ -354,10 +346,10 @@ class ZkTecoController extends Controller
                         'tenant_id'  => $student->tenant_id,
                         'sheet_id'   => $sheet->id,
                         'student_id' => $student->id,
-                        'status'     => $status,
+                        'status'     => $studentStatus,
                         'arrived_at' => $punchTime->format('H:i:s'),
                         'departed_at'=> null,
-                        'note'       => 'Arrived: ' . $punchTime->format('g:i A') . " ({$status})",
+                        'note'       => 'Arrived: ' . $punchTime->format('g:i A') . " ({$studentStatus})",
                     ]);
                 } catch (\Illuminate\Database\UniqueConstraintViolationException $e) {
                     $existingStudentMark = AttendanceMark::where([
@@ -366,7 +358,7 @@ class ZkTecoController extends Controller
                         'student_id' => $student->id,
                     ])->first();
                     if ($existingStudentMark) {
-                        $finalStatus = ($existingStudentMark->status === 'Present') ? 'Present' : $status;
+                        $finalStatus = ($existingStudentMark->status === 'Present') ? 'Present' : $studentStatus;
                         $inDisplay  = $existingStudentMark->arrived_at
                             ? Carbon::parse($existingStudentMark->arrived_at)->format('g:i A')
                             : '–';
@@ -379,6 +371,7 @@ class ZkTecoController extends Controller
                         $status = $finalStatus;
                     }
                 }
+                $status = $studentStatus;
             }
 
             $processedCount++;
@@ -834,9 +827,9 @@ class ZkTecoController extends Controller
             'tenant_id'  => $student->tenant_id ?? $tenantId,
         ]);
 
-        $lateThreshold = config('academyhub.late_threshold_time', '08:15:00');
-        $isLate = $now->format('H:i:s') > $lateThreshold;
-        $status = $isLate ? 'Late' : 'Present';
+        $studentShift = $student->getShift();
+        $status = \App\Support\AttendanceShiftConfig::evaluateStatus($now->format('H:i:s'), $studentShift, $student->tenant_id ?? $tenantId);
+        $isLate = ($status === 'Late');
 
         if ($action === 'checkout') {
             $prevIn = '07:45 AM';

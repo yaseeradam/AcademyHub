@@ -52,10 +52,11 @@
             ['route'=>'settings.results',      'label'=>'Scoring',       'sub'=>'Grade config',      'from'=>'from-blue-500',   'to'=>'to-indigo-600',  'icon'=>'<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>'],
             ['route'=>'settings.certificates', 'label'=>'Certificates',  'sub'=>'Award templates',   'from'=>'from-pink-500',   'to'=>'to-rose-600',    'icon'=>'<circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/>'],
             ['route'=>'settings.templates',    'label'=>'Templates',     'sub'=>'Report designs',    'from'=>'from-violet-500', 'to'=>'to-purple-600',  'icon'=>'<rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/>'],
+            ['route'=>'settings.attendance',   'label'=>'Shifts & Hours', 'sub'=>'Attendance rules',  'from'=>'from-emerald-500','to'=>'to-teal-600',    'icon'=>'<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>'],
             ['route'=>'settings.custom-fields','label'=>'Custom Fields', 'sub'=>'Extra data fields', 'from'=>'from-cyan-400',   'to'=>'to-teal-500',    'icon'=>'<line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>'],
         ];
     @endphp
-    <div class="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
+    <div class="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
         @foreach($navItems as $item)
             <a href="{{ route($item['route']) }}"
                class="group relative overflow-hidden rounded-2xl bg-gradient-to-br {{ $item['from'] }} {{ $item['to'] }} p-5 text-white shadow-lg transition duration-200 hover:shadow-xl hover:-translate-y-0.5">
