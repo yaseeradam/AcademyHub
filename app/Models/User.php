@@ -237,4 +237,63 @@ class User extends Authenticatable
     {
         return isset($this->custom_fields['k40_uid']) ? (int) $this->custom_fields['k40_uid'] : $this->id;
     }
+
+    /**
+     * Get clean international digits for WhatsApp (e.g. 2348012345678).
+     */
+    public function getCleanWhatsappPhoneAttribute(): ?string
+    {
+        $phone = $this->whatsapp_phone ?? ($this->custom_fields['phone'] ?? ($this->custom_fields['whatsapp'] ?? ($this->custom_fields['whatsapp_phone'] ?? null)));
+        if (! $phone) {
+            return null;
+        }
+
+        $digits = preg_replace('/[^0-9]/', '', (string) $phone);
+        if (empty($digits)) {
+            return null;
+        }
+
+        // Convert local Nigerian numbers starting with '0' (e.g. 08012345678) to international prefix 234
+        if (str_starts_with($digits, '0') && strlen($digits) === 11) {
+            $digits = '234' . substr($digits, 1);
+        }
+
+        return $digits;
+    }
+
+    /**
+     * Get human-friendly formatted WhatsApp phone display (e.g. +234 801 234 5678).
+     */
+    public function getFormattedWhatsappPhoneAttribute(): ?string
+    {
+        $clean = $this->clean_whatsapp_phone;
+        if (! $clean) {
+            return null;
+        }
+
+        if (str_starts_with($clean, '234') && strlen($clean) === 13) {
+            return '+234 ' . substr($clean, 3, 3) . ' ' . substr($clean, 6, 3) . ' ' . substr($clean, 9);
+        }
+
+        return '+' . $clean;
+    }
+
+    /**
+     * Generate direct WhatsApp click-to-chat URL with optional pre-filled greeting.
+     */
+    public function getWhatsappChatUrl(?string $message = null): ?string
+    {
+        $clean = $this->clean_whatsapp_phone;
+        if (! $clean) {
+            return null;
+        }
+
+        $url = "https://wa.me/{$clean}";
+        if ($message !== null && trim($message) !== '') {
+            $url .= '?text=' . rawurlencode(trim($message));
+        }
+
+        return $url;
+    }
 }
+

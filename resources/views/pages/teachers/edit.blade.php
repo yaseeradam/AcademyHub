@@ -69,6 +69,21 @@
                 </div>
 
                 <div>
+                    <label class="text-sm font-semibold text-slate-900">WhatsApp Phone Number</label>
+                    <div class="mt-2">
+                        <input
+                            name="whatsapp_phone"
+                            type="tel"
+                            class="input"
+                            value="{{ old('whatsapp_phone', $teacher->whatsapp_phone) }}"
+                            placeholder="e.g., 08012345678 or +2348012345678"
+                            autocomplete="tel"
+                        />
+                    </div>
+                    <div class="mt-1 text-xs text-slate-500">Used for 1-click WhatsApp messaging in the Parent Portal directory.</div>
+                </div>
+
+                <div>
                     <label class="text-sm font-semibold text-slate-900">New password</label>
                     <div class="mt-2">
                         <input

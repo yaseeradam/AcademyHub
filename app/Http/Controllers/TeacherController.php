@@ -29,12 +29,13 @@ class TeacherController extends Controller
         $customFields = CustomField::active()->ordered()->where('form_type', 'teacher')->get();
 
         $rules = [
-            'name'      => ['required', 'string', 'max:255'],
-            'email'     => ['required', 'string', 'email', 'max:255', Rule::unique('users', 'email')->where('tenant_id', TenantSettings::tenantId())],
-            'password'  => ['required', 'string', 'min:8', 'confirmed'],
-            'is_active' => ['nullable', 'boolean'],
+            'name'             => ['required', 'string', 'max:255'],
+            'email'            => ['required', 'string', 'email', 'max:255', Rule::unique('users', 'email')->where('tenant_id', TenantSettings::tenantId())],
+            'whatsapp_phone'   => ['nullable', 'string', 'max:25'],
+            'password'         => ['required', 'string', 'min:8', 'confirmed'],
+            'is_active'        => ['nullable', 'boolean'],
             'is_class_teacher' => ['nullable', 'boolean'],
-            'photo'     => ['nullable', 'image', 'max:5120'],
+            'photo'            => ['nullable', 'image', 'max:5120'],
         ];
 
         foreach ($customFields as $field) {
@@ -70,9 +71,12 @@ class TeacherController extends Controller
             $profilePhotoPath = str_replace('\\', '/', (string) $profilePhotoPath);
         }
 
+        $cleanPhone = !empty($data['whatsapp_phone']) ? preg_replace('/[^\+0-9]/', '', $data['whatsapp_phone']) : null;
+
         $teacher = User::query()->create([
             'name'             => $data['name'],
             'email'            => $data['email'],
+            'whatsapp_phone'   => $cleanPhone,
             'password'         => $data['password'],
             'role'             => 'teacher',
             'is_active'        => (bool) ($data['is_active'] ?? false),
@@ -122,6 +126,7 @@ class TeacherController extends Controller
         $rules = [
             'name'             => ['required', 'string', 'max:255'],
             'email'            => ['required', 'string', 'email', 'max:255', Rule::unique('users', 'email')->where('tenant_id', TenantSettings::tenantId())->ignore($teacher->id)],
+            'whatsapp_phone'   => ['nullable', 'string', 'max:25'],
             'password'         => ['nullable', 'string', 'min:8', 'confirmed'],
             'is_active'        => ['nullable', 'boolean'],
             'is_class_teacher' => ['nullable', 'boolean'],
@@ -157,6 +162,7 @@ class TeacherController extends Controller
 
         $teacher->name             = $data['name'];
         $teacher->email            = $data['email'];
+        $teacher->whatsapp_phone   = !empty($data['whatsapp_phone']) ? preg_replace('/[^\+0-9]/', '', $data['whatsapp_phone']) : null;
         $teacher->is_active        = (bool) ($data['is_active'] ?? false);
         $teacher->is_class_teacher = (bool) ($data['is_class_teacher'] ?? false);
         $teacher->custom_fields    = !empty($customFieldValues) ? $customFieldValues : null;

@@ -88,6 +88,13 @@
                 <div class="mt-1 text-xs text-gray-500">If blank, a strong password is generated.</div>
             </div>
 
+            <div class="lg:col-span-3">
+                <label class="text-xs font-semibold uppercase tracking-wider text-gray-500">WhatsApp Phone (optional)</label>
+                <input wire:model.live="whatsappPhone" type="tel" class="mt-2 input-compact"
+                    placeholder="e.g. 08012345678 or +2348012345678" />
+                <div class="mt-1 text-xs text-gray-500">Used for direct WhatsApp messaging in directories.</div>
+            </div>
+
             {{-- Role-Specific Custom Fields (Create) --}}
             @php $createFields = match($role) { 'parent' => $this->parentCustomFields, 'teacher' => $this->teacherCustomFields, default => collect() }; @endphp
             @if($createFields->count() > 0)
@@ -218,6 +225,15 @@
                                                 Password (optional)</label>
                                             <input wire:model.live="newPassword" type="text" class="mt-2 input-compact"
                                                 placeholder="Min 8 characters" />
+                                        </div>
+
+                                        <div class="lg:col-span-3">
+                                            <label class="text-xs font-semibold uppercase tracking-wider text-gray-500">WhatsApp Phone</label>
+                                            <input wire:model.live="editWhatsappPhone" type="tel" class="mt-2 input-compact"
+                                                placeholder="e.g. 08012345678 or +2348012345678" />
+                                            @error('editWhatsappPhone')
+                                                <div class="mt-1 text-xs font-semibold text-orange-700">{{ $message }}</div>
+                                            @enderror
                                         </div>
 
                                         {{-- Role-Specific Custom Fields (Edit) --}}

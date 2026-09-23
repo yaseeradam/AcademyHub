@@ -27,6 +27,7 @@ class Index extends Component
 
     public string $name = '';
     public string $email = '';
+    public string $whatsappPhone = '';
     public string $role = 'teacher';
     public string $isActive = '1';
     public string $password = '';
@@ -35,6 +36,7 @@ class Index extends Component
     public ?int $editingUserId = null;
     public string $editRole = 'teacher';
     public string $editIsActive = '1';
+    public string $editWhatsappPhone = '';
     public string $newPassword = '';
     public array $editPermissions = [];
     public array $editCustomFieldValues = [];
@@ -103,6 +105,7 @@ class Index extends Component
         $rules = [
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users', 'email')->where('tenant_id', TenantSettings::tenantId())],
+            'whatsappPhone' => ['nullable', 'string', 'max:25'],
             'role' => ['required', Rule::in(['admin', 'bursar', 'teacher', 'parent', 'proprietor'])],
             'isActive' => ['required', 'in:0,1'],
             'password' => ['nullable', 'string', 'min:8'],
@@ -134,6 +137,7 @@ class Index extends Component
         $created = User::query()->create([
             'name' => $data['name'],
             'email' => $data['email'],
+            'whatsapp_phone' => !empty($this->whatsappPhone) ? preg_replace('/[^\+0-9]/', '', $this->whatsappPhone) : null,
             'role' => $data['role'],
             'is_active' => (bool) $data['isActive'],
             'password' => $password,
@@ -145,7 +149,7 @@ class Index extends Component
             'is_active' => $created->is_active,
         ]);
 
-        $this->reset(['name', 'email', 'role', 'isActive', 'password', 'customFieldValues']);
+        $this->reset(['name', 'email', 'whatsappPhone', 'role', 'isActive', 'password', 'customFieldValues']);
         $this->role = 'teacher';
         $this->isActive = '1';
 
@@ -163,6 +167,7 @@ class Index extends Component
         $this->editingUserId = (int) $user->id;
         $this->editRole = (string) $user->role;
         $this->editIsActive = $user->is_active ? '1' : '0';
+        $this->editWhatsappPhone = (string) ($user->whatsapp_phone ?? '');
         $this->newPassword = '';
         $this->editCustomFieldValues = $user->custom_fields ?? [];
 
@@ -201,6 +206,7 @@ class Index extends Component
         abort_unless($authUser && $authUser->hasPermission('users.manage'), 403);
 
         $this->editingUserId = null;
+        $this->editWhatsappPhone = '';
         $this->newPassword = '';
         $this->editPermissions = [];
         $this->editCustomFieldValues = [];
@@ -220,6 +226,7 @@ class Index extends Component
         $rules = [
             'editRole' => ['required', Rule::in(['admin', 'bursar', 'teacher', 'parent', 'proprietor'])],
             'editIsActive' => ['required', 'in:0,1'],
+            'editWhatsappPhone' => ['nullable', 'string', 'max:25'],
             'newPassword' => ['nullable', 'string', 'min:8'],
         ];
 
@@ -250,6 +257,7 @@ class Index extends Component
 
         $user->role = $data['editRole'];
         $user->is_active = (bool) $data['editIsActive'];
+        $user->whatsapp_phone = !empty($this->editWhatsappPhone) ? preg_replace('/[^\+0-9]/', '', $this->editWhatsappPhone) : null;
         if ($data['newPassword']) {
             $user->password = $data['newPassword'];
         }
@@ -283,6 +291,7 @@ class Index extends Component
         ]);
 
         $this->editingUserId = null;
+        $this->editWhatsappPhone = '';
         $this->newPassword = '';
         $this->editPermissions = [];
         $this->editCustomFieldValues = [];

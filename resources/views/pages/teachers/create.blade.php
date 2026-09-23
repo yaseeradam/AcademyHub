@@ -82,6 +82,19 @@
                                 autocomplete="email"
                             />
                         </div>
+
+                        <div class="sm:col-span-2">
+                            <label class="block text-sm font-bold text-gray-900 mb-2">WhatsApp Phone Number</label>
+                            <input
+                                name="whatsapp_phone"
+                                type="tel"
+                                class="w-full rounded-lg border-2 border-gray-300 bg-white px-4 py-3 text-sm font-medium text-gray-900 shadow-sm transition-all focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/20 hover:border-gray-400"
+                                value="{{ old('whatsapp_phone') }}"
+                                placeholder="e.g. 08012345678 or +2348012345678"
+                                autocomplete="tel"
+                            />
+                            <p class="mt-1 text-xs text-gray-500 font-medium">Used for 1-click WhatsApp messaging in the Parent Portal directory.</p>
+                        </div>
                     </div>
                 </div>
 

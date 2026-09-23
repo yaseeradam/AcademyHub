@@ -144,5 +144,10 @@ class TenantSettings
             config(["academyhub.{$key}" => $value]);
         }
     }
+
+    public static function get(string $key, mixed $default = null): mixed
+    {
+        return config("academyhub.{$key}", config("myacademy.{$key}", $default));
+    }
 }
 
