@@ -13,8 +13,8 @@ $navLink = function(string $href, string $label, string $iconBg, string $iconCol
         : '';
         
     $aDirectives = $isMobile 
-        ? 'class="flex items-center gap-3 rounded-2xl px-3 py-2.5 transition-all duration-300 '.$pill.'"' 
-        : 'class="flex items-center gap-3 rounded-2xl py-2.5 transition-all duration-300 '.$pill.'" x-bind:class="sidebarCollapsed ? \'justify-center px-1\' : \'px-3\'"';
+        ? 'class="w-full flex items-center gap-3 rounded-2xl px-3 py-2.5 transition-all duration-300 '.$pill.'"' 
+        : 'class="w-full flex items-center rounded-2xl py-2.5 transition-all duration-300 '.$pill.'" x-bind:class="sidebarCollapsed ? \'justify-center px-0\' : \'gap-3 px-3\'"';
         
     $textDirectives = $isMobile ? '' : 'x-show="!sidebarCollapsed" x-transition:enter="transition-opacity ease-out duration-300 delay-100" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"';
     $arrowDirectives = $isMobile ? '' : 'x-show="!sidebarCollapsed" x-transition.opacity';
@@ -34,19 +34,19 @@ HTML;
 @endphp
 
 {{-- Branding --}}
-<div class="mx-3 mt-4 mb-2 rounded-2xl bg-white shadow-sm transition-all duration-300" x-bind:class="sidebarCollapsed && !{{ $isMobile ? 'true' : 'false' }} ? 'p-2 mx-2' : 'p-4'">
-    <div class="flex items-center" x-bind:class="sidebarCollapsed && !{{ $isMobile ? 'true' : 'false' }} ? 'justify-center' : 'gap-3'">
+<div class="mt-4 mb-2 rounded-2xl bg-white shadow-sm transition-all duration-300 flex items-center"
+     x-bind:class="sidebarCollapsed && !{{ $isMobile ? 'true' : 'false' }} ? 'p-1.5 mx-auto w-12 h-12 justify-center' : 'p-4 mx-3 gap-3'">
+    <div class="flex items-center" x-bind:class="sidebarCollapsed && !{{ $isMobile ? 'true' : 'false' }} ? 'justify-center w-full h-full' : 'gap-3'">
         <div class="flex flex-shrink-0 items-center justify-center overflow-hidden rounded-xl bg-violet-50 ring-2 ring-violet-100 transition-all duration-300"
-             style="width: 48px; height: 48px; min-width: 48px; min-height: 48px;"
-             x-bind:class="sidebarCollapsed && !{{ $isMobile ? 'true' : 'false' }} ? 'h-10 w-10' : 'h-12 w-12'"
-             x-bind:style="sidebarCollapsed && !{{ $isMobile ? 'true' : 'false' }} ? 'width: 40px; height: 40px; min-width: 40px; min-height: 40px;' : 'width: 48px; height: 48px; min-width: 48px; min-height: 48px;'">
+             x-bind:class="sidebarCollapsed && !{{ $isMobile ? 'true' : 'false' }} ? 'h-9 w-9' : 'h-12 w-12'"
+             x-bind:style="sidebarCollapsed && !{{ $isMobile ? 'true' : 'false' }} ? 'width: 36px; height: 36px; min-width: 36px; min-height: 36px;' : 'width: 48px; height: 48px; min-width: 48px; min-height: 48px;'">
             @if($schoolLogo)
-                <img src="{{ asset('uploads/'.str_replace('\\','/',$schoolLogo)) }}" alt="Logo" class="h-full w-full object-contain p-1" style="max-height: 100%; max-width: 100%; object-fit: contain;"/>
+                <img src="{{ asset('uploads/'.str_replace('\\','/',$schoolLogo)) }}" alt="Logo" class="h-full w-full object-contain p-0.5" style="max-height: 100%; max-width: 100%; object-fit: contain;"/>
             @else
                 <img src="{{ asset('full.png') }}" alt="Logo" class="h-full w-full object-contain p-0.5" style="max-height: 100%; max-width: 100%; object-fit: contain;"/>
             @endif
         </div>
-        <div class="min-w-0 text-left" x-show="!sidebarCollapsed || {{ $isMobile ? 'true' : 'false' }}" x-transition.opacity>
+        <div class="min-w-0 text-left overflow-hidden" x-show="!sidebarCollapsed || {{ $isMobile ? 'true' : 'false' }}" x-transition.opacity>
             <div class="truncate text-sm font-extrabold leading-tight text-slate-900">{{ $schoolName }}</div>
             <div class="mt-0.5 text-[11px] font-semibold text-violet-500">Student Portal</div>
         </div>
@@ -58,7 +58,8 @@ HTML;
 </div>
 
 {{-- Navigation Links --}}
-<nav class="flex-1 overflow-y-auto sidebar-scroll px-3 pb-3 space-y-0.5 min-h-0 mt-2">
+<nav class="flex-1 overflow-y-auto sidebar-scroll pb-3 space-y-0.5 min-h-0 mt-2 transition-all duration-300"
+     x-bind:class="sidebarCollapsed && !{{ $isMobile ? 'true' : 'false' }} ? 'px-2' : 'px-3'">
     {!! $navLink(route('student.dashboard'), 'Dashboard',
         'bg-indigo-100', 'text-indigo-500',
         '<path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>',

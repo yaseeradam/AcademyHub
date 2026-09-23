@@ -14,7 +14,9 @@ $navLink = function(string $href, string $label, string $iconBg, string $iconCol
         ? '<div class="ml-auto flex h-6 w-6 items-center justify-center rounded-full bg-white/20 flex-shrink-0"><svg class="h-3.5 w-3.5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg></div>'
         : ($badge ?: '');
         
-    $aDirectives = $isMobile ? 'class="flex items-center gap-3 rounded-2xl px-3 py-2.5 transition-all duration-300 '.$pill.'"' : 'class="flex items-center gap-3 rounded-2xl py-2.5 transition-all duration-300 '.$pill.'" x-bind:class="sidebarCollapsed ? \'justify-center px-1\' : \'px-3\'"';
+    $aDirectives = $isMobile 
+        ? 'class="w-full flex items-center gap-3 rounded-2xl px-3 py-2.5 transition-all duration-300 '.$pill.'"' 
+        : 'class="w-full flex items-center rounded-2xl py-2.5 transition-all duration-300 '.$pill.'" x-bind:class="sidebarCollapsed ? \'justify-center px-0\' : \'gap-3 px-3\'"';
     $textDirectives = $isMobile ? '' : 'x-show="!sidebarCollapsed" x-transition:enter="transition-opacity ease-out duration-200 delay-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="transition-opacity ease-in duration-75" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"';
     $arrowDirectives = $isMobile ? '' : 'x-show="!sidebarCollapsed" x-transition:enter="transition-opacity ease-out duration-200 delay-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="transition-opacity ease-in duration-75" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"';
 
@@ -107,17 +109,18 @@ HTML;
         <div x-data="{ open: {{ $isRegistryActive ? 'true' : 'false' }} }" class="mb-1">
             <button type="button" 
                 @click="sidebarCollapsed ? (sidebarCollapsed = false, open = true) : (open = !open)" 
-                class="w-full flex items-center justify-between rounded-2xl py-2.5 transition-all duration-300 text-slate-700 hover:bg-white hover:shadow-sm"
-                x-bind:class="sidebarCollapsed ? 'justify-center px-1' : 'px-3'">
-                <span class="flex items-center gap-3">
+                title="Registry &amp; Users"
+                class="w-full flex items-center rounded-2xl py-2.5 transition-all duration-300 {{ $isRegistryActive ? 'bg-violet-50/80 text-violet-700 font-bold ring-1 ring-violet-200/50' : 'text-slate-700 hover:bg-white hover:shadow-sm' }}"
+                x-bind:class="sidebarCollapsed ? 'justify-center px-0' : 'justify-between px-3'">
+                <div class="flex items-center" x-bind:class="sidebarCollapsed ? 'justify-center' : 'gap-3'">
                     <div class="nav-icon-box bg-blue-100 rounded-xl flex-shrink-0 flex items-center justify-center">
                         <svg class="h-5 w-5 text-blue-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a3 3 0 11-6 0 3 3 0 016 0z"/>
                         </svg>
                     </div>
-                    <span class="text-slate-700 font-bold text-sm leading-none" x-show="!sidebarCollapsed" x-transition:enter="transition-opacity ease-out duration-200 delay-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="transition-opacity ease-in duration-75" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0">Registry &amp; Users</span>
-                </span>
-                <svg x-show="!sidebarCollapsed" x-transition:enter="transition-opacity ease-out duration-200 delay-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="transition-opacity ease-in duration-75" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" :class="open ? 'rotate-180 text-slate-600' : 'text-slate-400'" class="h-4 w-4 transform transition-transform duration-200" viewBox="0 0 20 20" fill="currentColor">
+                    <span class="text-slate-700 font-bold text-sm leading-none whitespace-nowrap" x-show="!sidebarCollapsed" x-transition:enter="transition-opacity ease-out duration-200 delay-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="transition-opacity ease-in duration-75" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0">Registry &amp; Users</span>
+                </div>
+                <svg x-show="!sidebarCollapsed" x-transition:enter="transition-opacity ease-out duration-200 delay-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="transition-opacity ease-in duration-75" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" :class="open ? 'rotate-180 text-slate-600' : 'text-slate-400'" class="h-4 w-4 transform transition-transform duration-200 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
                     <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/>
                 </svg>
             </button>
@@ -159,17 +162,18 @@ HTML;
         <div x-data="{ open: {{ $isAcademicsActive ? 'true' : 'false' }} }" class="mb-1">
             <button type="button" 
                 @click="sidebarCollapsed ? (sidebarCollapsed = false, open = true) : (open = !open)" 
-                class="w-full flex items-center justify-between rounded-2xl py-2.5 transition-all duration-300 text-slate-700 hover:bg-white hover:shadow-sm"
-                x-bind:class="sidebarCollapsed ? 'justify-center px-1' : 'px-3'">
-                <span class="flex items-center gap-3">
+                title="Academics"
+                class="w-full flex items-center rounded-2xl py-2.5 transition-all duration-300 {{ $isAcademicsActive ? 'bg-violet-50/80 text-violet-700 font-bold ring-1 ring-violet-200/50' : 'text-slate-700 hover:bg-white hover:shadow-sm' }}"
+                x-bind:class="sidebarCollapsed ? 'justify-center px-0' : 'justify-between px-3'">
+                <div class="flex items-center" x-bind:class="sidebarCollapsed ? 'justify-center' : 'gap-3'">
                     <div class="nav-icon-box bg-slate-100 rounded-xl flex-shrink-0 flex items-center justify-center">
                         <svg class="h-5 w-5 text-slate-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
                         </svg>
                     </div>
-                    <span class="text-slate-700 font-bold text-sm leading-none" x-show="!sidebarCollapsed" x-transition:enter="transition-opacity ease-out duration-200 delay-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="transition-opacity ease-in duration-75" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0">Academics</span>
-                </span>
-                <svg x-show="!sidebarCollapsed" x-transition:enter="transition-opacity ease-out duration-200 delay-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="transition-opacity ease-in duration-75" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" :class="open ? 'rotate-180 text-slate-600' : 'text-slate-400'" class="h-4 w-4 transform transition-transform duration-200" viewBox="0 0 20 20" fill="currentColor">
+                    <span class="text-slate-700 font-bold text-sm leading-none whitespace-nowrap" x-show="!sidebarCollapsed" x-transition:enter="transition-opacity ease-out duration-200 delay-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="transition-opacity ease-in duration-75" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0">Academics</span>
+                </div>
+                <svg x-show="!sidebarCollapsed" x-transition:enter="transition-opacity ease-out duration-200 delay-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="transition-opacity ease-in duration-75" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" :class="open ? 'rotate-180 text-slate-600' : 'text-slate-400'" class="h-4 w-4 transform transition-transform duration-200 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
                     <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/>
                 </svg>
             </button>
@@ -257,17 +261,18 @@ HTML;
         <div x-data="{ open: {{ $isAddonsActive ? 'true' : 'false' }} }" class="mb-1">
             <button type="button" 
                 @click="sidebarCollapsed ? (sidebarCollapsed = false, open = true) : (open = !open)" 
-                class="w-full flex items-center justify-between rounded-2xl py-2.5 transition-all duration-300 text-slate-700 hover:bg-white hover:shadow-sm"
-                x-bind:class="sidebarCollapsed ? 'justify-center px-1' : 'px-3'">
-                <span class="flex items-center gap-3">
+                title="Plugins &amp; Apps"
+                class="w-full flex items-center rounded-2xl py-2.5 transition-all duration-300 {{ $isAddonsActive ? 'bg-violet-50/80 text-violet-700 font-bold ring-1 ring-violet-200/50' : 'text-slate-700 hover:bg-white hover:shadow-sm' }}"
+                x-bind:class="sidebarCollapsed ? 'justify-center px-0' : 'justify-between px-3'">
+                <div class="flex items-center" x-bind:class="sidebarCollapsed ? 'justify-center' : 'gap-3'">
                     <div class="nav-icon-box bg-purple-100 rounded-xl flex-shrink-0 flex items-center justify-center">
                         <svg class="h-5 w-5 text-purple-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
                         </svg>
                     </div>
-                    <span class="text-slate-700 font-bold text-sm leading-none" x-show="!sidebarCollapsed" x-transition:enter="transition-opacity ease-out duration-200 delay-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="transition-opacity ease-in duration-75" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0">Plugins &amp; Apps</span>
-                </span>
-                <svg x-show="!sidebarCollapsed" x-transition:enter="transition-opacity ease-out duration-200 delay-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="transition-opacity ease-in duration-75" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" :class="open ? 'rotate-180 text-slate-600' : 'text-slate-400'" class="h-4 w-4 transform transition-transform duration-200" viewBox="0 0 20 20" fill="currentColor">
+                    <span class="text-slate-700 font-bold text-sm leading-none whitespace-nowrap" x-show="!sidebarCollapsed" x-transition:enter="transition-opacity ease-out duration-200 delay-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="transition-opacity ease-in duration-75" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0">Plugins &amp; Apps</span>
+                </div>
+                <svg x-show="!sidebarCollapsed" x-transition:enter="transition-opacity ease-out duration-200 delay-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="transition-opacity ease-in duration-75" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" :class="open ? 'rotate-180 text-slate-600' : 'text-slate-400'" class="h-4 w-4 transform transition-transform duration-200 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
                     <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/>
                 </svg>
             </button>
@@ -332,18 +337,19 @@ HTML;
         <div x-data="{ open: {{ $isSystemActive ? 'true' : 'false' }} }" class="mb-1">
             <button type="button" 
                 @click="sidebarCollapsed ? (sidebarCollapsed = false, open = true) : (open = !open)" 
-                class="w-full flex items-center justify-between rounded-2xl py-2.5 transition-all duration-300 text-slate-700 hover:bg-white hover:shadow-sm"
-                x-bind:class="sidebarCollapsed ? 'justify-center px-1' : 'px-3'">
-                <span class="flex items-center gap-3">
+                title="Control Panel"
+                class="w-full flex items-center rounded-2xl py-2.5 transition-all duration-300 {{ $isSystemActive ? 'bg-violet-50/80 text-violet-700 font-bold ring-1 ring-violet-200/50' : 'text-slate-700 hover:bg-white hover:shadow-sm' }}"
+                x-bind:class="sidebarCollapsed ? 'justify-center px-0' : 'justify-between px-3'">
+                <div class="flex items-center" x-bind:class="sidebarCollapsed ? 'justify-center' : 'gap-3'">
                     <div class="nav-icon-box bg-gray-100 rounded-xl flex-shrink-0 flex items-center justify-center">
                         <svg class="h-5 w-5 text-gray-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <circle cx="12" cy="12" r="3"/>
                             <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
                         </svg>
                     </div>
-                    <span class="text-slate-700 font-bold text-sm leading-none" x-show="!sidebarCollapsed" x-transition:enter="transition-opacity ease-out duration-200 delay-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="transition-opacity ease-in duration-75" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0">Control Panel</span>
-                </span>
-                <svg x-show="!sidebarCollapsed" x-transition:enter="transition-opacity ease-out duration-200 delay-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="transition-opacity ease-in duration-75" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" :class="open ? 'rotate-180 text-slate-600' : 'text-slate-400'" class="h-4 w-4 transform transition-transform duration-200" viewBox="0 0 20 20" fill="currentColor">
+                    <span class="text-slate-700 font-bold text-sm leading-none whitespace-nowrap" x-show="!sidebarCollapsed" x-transition:enter="transition-opacity ease-out duration-200 delay-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="transition-opacity ease-in duration-75" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0">Control Panel</span>
+                </div>
+                <svg x-show="!sidebarCollapsed" x-transition:enter="transition-opacity ease-out duration-200 delay-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="transition-opacity ease-in duration-75" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" :class="open ? 'rotate-180 text-slate-600' : 'text-slate-400'" class="h-4 w-4 transform transition-transform duration-200 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
                     <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/>
                 </svg>
             </button>
