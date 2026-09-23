@@ -167,6 +167,7 @@
                                                                     'purple'  => 'border-l-purple-500 bg-purple-50/30',
                                                                     'pink'    => 'border-l-pink-500 bg-pink-50/30',
                                                                     'red'     => 'border-l-red-500 bg-red-50/30',
+                                                                    'rose'    => 'border-l-rose-500 bg-rose-50/30',
                                                                     'orange'  => 'border-l-orange-500 bg-orange-50/30',
                                                                     'amber'   => 'border-l-amber-500 bg-amber-50/30',
                                                                     'yellow'  => 'border-l-yellow-400 bg-yellow-50/30',
@@ -283,6 +284,7 @@
                                             'purple'  => 'border-l-purple-500 bg-purple-50/20',
                                             'pink'    => 'border-l-pink-500 bg-pink-50/20',
                                             'red'     => 'border-l-red-500 bg-red-50/20',
+                                            'rose'    => 'border-l-rose-500 bg-rose-50/20',
                                             'orange'  => 'border-l-orange-500 bg-orange-50/20',
                                             'amber'   => 'border-l-amber-500 bg-amber-50/20',
                                             'yellow'  => 'border-l-yellow-400 bg-yellow-50/20',
@@ -326,147 +328,165 @@
         @endif
     @endif
 
-    {{-- Admin Add/Edit Modal --}}
+    {{-- Admin Add/Edit Modal (Super Simple & Clean) --}}
     @if($isAdmin)
         <div x-data="{ open: false }" x-on:open-modal.window="if ($event.detail === 'timetable-form') open = true" x-on:close.window="open = false" x-show="open" x-cloak class="fixed inset-0 z-50 overflow-y-auto" style="display: none;" role="dialog" aria-modal="true">
-            <div class="flex min-h-screen items-center justify-center px-4 py-6">
-                <div x-on:click="open = false" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs transition-opacity"></div>
+            <div class="flex min-h-screen items-center justify-center p-4">
+                <div x-on:click="open = false" class="fixed inset-0 bg-slate-900/40 backdrop-blur-xs transition-opacity"></div>
                 
-                <div x-on:click.stop class="relative w-full max-w-lg rounded-2xl bg-white p-6 shadow-xl border border-slate-100">
-                    <div class="flex items-center justify-between pb-4 border-b border-slate-100">
-                        <h3 class="text-base font-bold text-slate-900">{{ $editingId ? 'Edit Schedule Entry' : 'Add Schedule Entry' }}</h3>
-                        <button type="button" x-on:click="open = false" class="text-slate-400 hover:text-slate-600">
+                <div x-on:click.stop class="relative w-full max-w-md rounded-2xl bg-white p-5 sm:p-6 shadow-xl border border-slate-200/80">
+                    {{-- Modal Header --}}
+                    <div class="flex items-center justify-between pb-3.5 border-b border-slate-100">
+                        <div>
+                            <h3 class="text-base font-bold text-slate-900">
+                                @if($editingId)
+                                    {{ $isBreak ? 'Edit Break' : 'Edit Period' }}
+                                @else
+                                    Add Timetable Entry
+                                @endif
+                            </h3>
+                            <p class="text-xs text-slate-500 mt-0.5">{{ $this->selectedClass?->name ?? 'Configure schedule' }}</p>
+                        </div>
+                        <button type="button" x-on:click="open = false" class="rounded-lg p-1 text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition">
                             <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
                         </button>
                     </div>
 
                     <div class="mt-4 space-y-4">
-                        <div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
-                            <div>
-                                <label class="text-xs font-semibold text-slate-700">Day</label>
-                                <select wire:model.live="entryDay" class="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-xs">
-                                    <option value="1">Monday</option>
-                                    <option value="2">Tuesday</option>
-                                    <option value="3">Wednesday</option>
-                                    <option value="4">Thursday</option>
-                                    <option value="5">Friday</option>
-                                    <option value="6">Saturday</option>
-                                </select>
-                                @error('entryDay') <div class="mt-1 text-xs text-red-600">{{ $message }}</div> @enderror
-                            </div>
-
-                            <div>
-                                <label class="text-xs font-semibold text-slate-700">Start Time</label>
-                                <input wire:model="startsAt" type="time" class="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-xs">
-                                @error('startsAt') <div class="mt-1 text-xs text-red-600">{{ $message }}</div> @enderror
-                            </div>
-
-                            <div>
-                                <label class="text-xs font-semibold text-slate-700">End Time</label>
-                                <input wire:model="endsAt" type="time" class="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-xs">
-                                @error('endsAt') <div class="mt-1 text-xs text-red-600">{{ $message }}</div> @enderror
-                            </div>
+                        {{-- Type Selector: Subject vs Break --}}
+                        <div class="grid grid-cols-2 p-1 bg-slate-100/80 rounded-xl text-xs font-semibold">
+                            <button type="button" wire:click="$set('isBreak', false)" class="py-2 rounded-lg transition-all {{ !$isBreak ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-500 hover:text-slate-800' }}">
+                                Class Subject
+                            </button>
+                            <button type="button" wire:click="$set('isBreak', true)" class="py-2 rounded-lg transition-all {{ $isBreak ? 'bg-white text-amber-900 shadow-xs' : 'text-slate-500 hover:text-slate-800' }}">
+                                Break / Recess
+                            </button>
                         </div>
 
-                        <div>
-                            <label class="flex items-center gap-2 cursor-pointer select-none">
-                                <input type="checkbox" wire:model.live="isBreak" class="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500/20">
-                                <span class="text-xs font-semibold text-slate-700">Is this a Break / Recess?</span>
-                            </label>
+                        {{-- Day & Time Inputs --}}
+                        <div class="grid grid-cols-3 gap-2.5">
+                            <div>
+                                <label class="text-[11px] font-semibold text-slate-600">Day</label>
+                                <select wire:model.live="entryDay" class="mt-1 w-full rounded-lg border border-slate-200 bg-slate-50/50 px-2.5 py-2 text-xs font-medium text-slate-800 focus:border-blue-500 focus:bg-white focus:ring-1 focus:ring-blue-500">
+                                    <option value="1">Mon</option>
+                                    <option value="2">Tue</option>
+                                    <option value="3">Wed</option>
+                                    <option value="4">Thu</option>
+                                    <option value="5">Fri</option>
+                                    <option value="6">Sat</option>
+                                </select>
+                                @error('entryDay') <div class="mt-1 text-[10px] text-red-600">{{ $message }}</div> @enderror
+                            </div>
+
+                            <div>
+                                <label class="text-[11px] font-semibold text-slate-600">Start Time</label>
+                                <input wire:model="startsAt" type="time" class="mt-1 w-full rounded-lg border border-slate-200 bg-slate-50/50 px-2 py-2 text-xs font-medium text-slate-800 focus:border-blue-500 focus:bg-white focus:ring-1 focus:ring-blue-500">
+                                @error('startsAt') <div class="mt-1 text-[10px] text-red-600">{{ $message }}</div> @enderror
+                            </div>
+
+                            <div>
+                                <label class="text-[11px] font-semibold text-slate-600">End Time</label>
+                                <input wire:model="endsAt" type="time" class="mt-1 w-full rounded-lg border border-slate-200 bg-slate-50/50 px-2 py-2 text-xs font-medium text-slate-800 focus:border-blue-500 focus:bg-white focus:ring-1 focus:ring-blue-500">
+                                @error('endsAt') <div class="mt-1 text-[10px] text-red-600">{{ $message }}</div> @enderror
+                            </div>
                         </div>
 
                         @if($isBreak)
+                            {{-- Break Inputs --}}
                             <div>
-                                <label class="text-xs font-semibold text-slate-700">Break Label</label>
-                                <input wire:model="breakText" type="text" class="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-xs" placeholder="e.g. BREAK, Recess, Lunch, Zuhr">
-                                @error('breakText') <div class="mt-1 text-xs text-red-600">{{ $message }}</div> @enderror
+                                <label class="text-[11px] font-semibold text-slate-600">Break Title</label>
+                                <input wire:model="breakText" type="text" class="mt-1 w-full rounded-lg border border-slate-200 bg-slate-50/50 px-3 py-2 text-xs font-medium text-slate-800 focus:border-blue-500 focus:bg-white focus:ring-1 focus:ring-blue-500" placeholder="e.g. BREAK, Short Break, Lunch, Zuhr">
+                                @error('breakText') <div class="mt-1 text-[10px] text-red-600">{{ $message }}</div> @enderror
+                                <div class="mt-1.5 flex flex-wrap gap-1.5">
+                                    @foreach(['BREAK', 'Short Break', 'Lunch', 'Zuhr Prayer'] as $preset)
+                                        <button type="button" wire:click="$set('breakText', '{{ $preset }}')" class="rounded-md bg-slate-100 px-2 py-0.5 text-[10px] font-medium text-slate-600 hover:bg-slate-200 transition">
+                                            + {{ $preset }}
+                                        </button>
+                                    @endforeach
+                                </div>
                             </div>
                         @else
-                            <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                                <div>
-                                    <label class="text-xs font-semibold text-slate-700">Subject</label>
-                                    <select wire:model.live="subjectId" class="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-xs">
-                                        <option value="">Select Subject</option>
-                                        @foreach($this->subjects as $s)
-                                            <option value="{{ $s->id }}">{{ $s->name }}</option>
-                                        @endforeach
-                                    </select>
-                                    @error('subjectId') <div class="mt-1 text-xs text-red-600">{{ $message }}</div> @enderror
-                                </div>
+                            {{-- Subject Input --}}
+                            <div>
+                                <label class="text-[11px] font-semibold text-slate-600">Subject <span class="text-red-500">*</span></label>
+                                <select wire:model.live="subjectId" class="mt-1 w-full rounded-lg border border-slate-200 bg-slate-50/50 px-3 py-2 text-xs font-medium text-slate-800 focus:border-blue-500 focus:bg-white focus:ring-1 focus:ring-blue-500">
+                                    <option value="">Choose a subject...</option>
+                                    @foreach($this->subjects as $s)
+                                        <option value="{{ $s->id }}">{{ $s->name }}</option>
+                                    @endforeach
+                                </select>
+                                @error('subjectId') <div class="mt-1 text-[10px] text-red-600">{{ $message }}</div> @enderror
+                            </div>
 
+                            {{-- Teacher & Room --}}
+                            <div class="grid grid-cols-2 gap-2.5">
                                 <div>
-                                    <label class="text-xs font-semibold text-slate-700">Teacher</label>
-                                    <select wire:model.live="teacherId" class="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-xs">
-                                        <option value="">Select Teacher (Optional)</option>
+                                    <label class="text-[11px] font-semibold text-slate-600">Teacher <span class="text-slate-400 font-normal">(Optional)</span></label>
+                                    <select wire:model.live="teacherId" class="mt-1 w-full rounded-lg border border-slate-200 bg-slate-50/50 px-2.5 py-2 text-xs font-medium text-slate-800 focus:border-blue-500 focus:bg-white focus:ring-1 focus:ring-blue-500">
+                                        <option value="">Any / None</option>
                                         @foreach($this->teachers as $t)
                                             <option value="{{ $t->id }}">{{ $t->name }}</option>
                                         @endforeach
                                     </select>
-                                    @error('teacherId') <div class="mt-1 text-xs text-red-600">{{ $message }}</div> @enderror
+                                    @error('teacherId') <div class="mt-1 text-[10px] text-red-600">{{ $message }}</div> @enderror
+                                </div>
+
+                                <div>
+                                    <label class="text-[11px] font-semibold text-slate-600">Room <span class="text-slate-400 font-normal">(Optional)</span></label>
+                                    <input wire:model="room" class="mt-1 w-full rounded-lg border border-slate-200 bg-slate-50/50 px-2.5 py-2 text-xs font-medium text-slate-800 focus:border-blue-500 focus:bg-white focus:ring-1 focus:ring-blue-500" placeholder="e.g. Lab 1">
+                                    @error('room') <div class="mt-1 text-[10px] text-red-600">{{ $message }}</div> @enderror
                                 </div>
                             </div>
 
+                            {{-- Color Accent --}}
                             <div>
-                                <label class="text-xs font-semibold text-slate-700">Room / Location (Optional)</label>
-                                <input wire:model="room" class="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-xs" placeholder="e.g. Room 3, Lab 1">
-                                @error('room') <div class="mt-1 text-xs text-red-600">{{ $message }}</div> @enderror
+                                <label class="text-[11px] font-semibold text-slate-600 block mb-1.5">Color Accent</label>
+                                <div class="flex items-center gap-2">
+                                    @php
+                                        $curatedColors = [
+                                            'blue'    => 'bg-blue-500',
+                                            'indigo'  => 'bg-indigo-500',
+                                            'emerald' => 'bg-emerald-500',
+                                            'amber'   => 'bg-amber-500',
+                                            'purple'  => 'bg-purple-500',
+                                            'rose'    => 'bg-rose-500',
+                                            'slate'   => 'bg-slate-500',
+                                        ];
+                                    @endphp
+                                    @foreach($curatedColors as $colorKey => $colorClass)
+                                        <button type="button" wire:click="$set('color', '{{ $colorKey }}')" 
+                                                class="h-6 w-6 rounded-full {{ $colorClass }} transition focus:outline-none {{ $color === $colorKey ? 'ring-2 ring-offset-2 ring-slate-800 scale-110' : 'opacity-70 hover:opacity-100' }}"
+                                                title="{{ ucfirst($colorKey) }}"></button>
+                                    @endforeach
+                                </div>
+                                @error('color') <div class="mt-1 text-[10px] text-red-600">{{ $message }}</div> @enderror
                             </div>
                         @endif
 
-                        <div>
-                            <label class="text-xs font-semibold text-slate-700 block mb-1.5">Color Tag</label>
-                            <div class="flex flex-wrap gap-2">
-                                @php
-                                    $colorsList = [
-                                        'slate'   => 'bg-slate-500',
-                                        'blue'    => 'bg-blue-500',
-                                        'indigo'  => 'bg-indigo-500',
-                                        'violet'  => 'bg-violet-500',
-                                        'purple'  => 'bg-purple-500',
-                                        'pink'    => 'bg-pink-500',
-                                        'red'     => 'bg-red-500',
-                                        'orange'  => 'bg-orange-500',
-                                        'amber'   => 'bg-amber-500',
-                                        'yellow'  => 'bg-yellow-400',
-                                        'green'   => 'bg-green-500',
-                                        'emerald' => 'bg-emerald-500',
-                                        'teal'    => 'bg-teal-500',
-                                        'cyan'    => 'bg-cyan-500',
-                                        'sky'     => 'bg-sky-500',
-                                    ];
-                                @endphp
-                                @foreach($colorsList as $colorKey => $colorClass)
-                                    <button type="button" wire:click="$set('color', '{{ $colorKey }}')" 
-                                            class="h-6 w-6 rounded-full {{ $colorClass }} transition focus:outline-none {{ $color === $colorKey ? 'ring-2 ring-offset-2 ring-slate-800 scale-110' : 'opacity-70 hover:opacity-100' }}"
-                                            title="{{ ucfirst($colorKey) }}"></button>
-                                @endforeach
-                            </div>
-                            @error('color') <div class="mt-1 text-xs text-red-600">{{ $message }}</div> @enderror
-                        </div>
-
                         @if(!$editingId)
-                            <div class="pt-1">
+                            <div class="pt-0.5">
                                 <label class="flex items-center gap-2 cursor-pointer select-none">
-                                    <input type="checkbox" wire:model="applyToAllDays" class="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500/20">
-                                    <span class="text-xs font-medium text-slate-600">Apply this slot to Monday through Friday</span>
+                                    <input type="checkbox" wire:model="applyToAllDays" class="h-3.5 w-3.5 rounded border-slate-300 text-blue-600 focus:ring-blue-500/20">
+                                    <span class="text-xs text-slate-600">Repeat this for all weekdays (Mon–Fri)</span>
                                 </label>
                             </div>
                         @endif
                     </div>
 
-                    <div class="mt-6 flex items-center justify-between border-t border-slate-100 pt-4">
+                    {{-- Modal Footer --}}
+                    <div class="mt-5 flex items-center justify-between border-t border-slate-100 pt-3.5">
                         <div>
                             @if($editingId)
-                                <button type="button" wire:click="delete({{ $editingId }})" x-on:click="open = false" onclick="return confirm('Delete this entry?')" class="rounded-lg bg-red-50 px-3.5 py-2 text-xs font-semibold text-red-600 hover:bg-red-100 transition">
+                                <button type="button" wire:click="delete({{ $editingId }})" x-on:click="open = false" onclick="return confirm('Delete this entry?')" class="rounded-lg px-2.5 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-50 transition">
                                     Delete
                                 </button>
                             @endif
                         </div>
                         <div class="flex items-center gap-2">
-                            <button type="button" x-on:click="open = false" class="rounded-lg border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50 transition">
+                            <button type="button" x-on:click="open = false" class="rounded-lg border border-slate-200 px-3.5 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50 transition">
                                 Cancel
                             </button>
-                            <button type="button" wire:click="save" x-on:click="open = false" class="rounded-lg bg-blue-600 px-4 py-2 text-xs font-semibold text-white hover:bg-blue-700 transition">
+                            <button type="button" wire:click="save" x-on:click="open = false" class="rounded-lg bg-blue-600 px-4 py-2 text-xs font-semibold text-white hover:bg-blue-700 transition shadow-xs">
                                 {{ $editingId ? 'Update' : 'Save' }}
                             </button>
                         </div>
