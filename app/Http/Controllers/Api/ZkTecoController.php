@@ -900,18 +900,11 @@ class ZkTecoController extends Controller
     {
         $gates = [
             [
-                'name'    => 'Gate 1 (K40-1)',
+                'name'    => 'Gate 1 (K40)',
                 'ip'      => '192.168.0.201',
                 'port'    => 4370,
                 'online'  => true,
                 'latency' => rand(18, 28) . 'ms',
-            ],
-            [
-                'name'    => 'Gate 2 (K40-2)',
-                'ip'      => '192.168.0.202',
-                'port'    => 4370,
-                'online'  => true,
-                'latency' => rand(22, 35) . 'ms',
             ],
         ];
 

@@ -16,15 +16,18 @@
 	        ['route' => 'promotions', 'title' => 'Bulk Promotion', 'desc' => 'Promote multiple students at once', 'icon' => 'M16 7h5v5h-2V9h-3V7zM3 12h10v2H3v-2zm0 5h10v2H3v-2zM3 7h10v2H3V7z', 'color' => 'indigo', 'roles' => ['admin']],
 	        ['route' => 'events', 'title' => 'Event Scheduling', 'desc' => 'Plan and manage school events', 'icon' => 'M7 2v2H5a2 2 0 0 0-2 2v2h18V6a2 2 0 0 0-2-2h-2V2h-2v2H9V2H7zm14 8H3v10a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V10z', 'color' => 'purple', 'roles' => ['admin']],
 	        ['route' => 'academic-sessions', 'title' => 'Academic Year Management', 'desc' => 'Sessions and active academic year', 'icon' => 'M4 19a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7H4v12zm16-14V3h-2v2H6V3H4v2a2 2 0 0 0-2 2v2h20V7a2 2 0 0 0-2-2z', 'color' => 'cyan', 'roles' => ['admin']],
-	        ['route' => 'timetable', 'title' => 'Timetable', 'desc' => 'Class scheduling and time slots', 'icon' => 'M7 11h5v5H7v-5zm7 0h5v5h-5v-5zM7 4v2H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-2V4h-2v2H9V4H7z', 'color' => 'blue', 'roles' => ['admin']],
+	        ['route' => 'timetable', 'title' => 'Timetable', 'desc' => 'Class scheduling and time slots', 'icon' => 'M7 11h5v5H7v-5zm7 0h5v5h-5v-5zM7 4v2H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-2V4h-2v2H9V4H7z', 'color' => 'blue', 'roles' => ['admin', 'teacher']],
 	        ['route' => 'certificates', 'title' => 'Certificates', 'desc' => 'Certificate generation and printing', 'icon' => 'M6 2h9l3 3v15a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2zm8 0v4h4', 'color' => 'orange', 'roles' => ['admin']],
+	        ['route' => 'admission-letters.index', 'title' => 'Admission Letters', 'desc' => 'Official A4 admission offer letters with seal, watermark & summary table', 'icon' => 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z', 'color' => 'blue', 'roles' => ['admin']],
+	        ['route' => 'id-cards.index', 'title' => 'Student & Pickup ID Cards', 'desc' => 'CR80 standard identity cards with offline QR code & gate scanner simulator', 'icon' => 'M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2', 'color' => 'emerald', 'roles' => ['admin']],
+	        ['route' => 'teacher-appointments.index', 'title' => 'Teacher Appointment Letters', 'desc' => 'Official provisional appointment letters with configurable salary, staff ID & dates', 'icon' => 'M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z', 'color' => 'indigo', 'roles' => ['admin']],
 	    ];
 
         // Fetch active marketplace components / plugins dynamically
         $tenantComponents = $user?->tenant?->activeMarketplaceComponents()->get() ?? collect();
         foreach ($tenantComponents as $component) {
             // Avoid double displaying if already statically listed or handled elsewhere
-            if (in_array($component->slug, ['homework', 'messages'], true)) {
+            if (in_array($component->slug, ['homework', 'messages', 'k40-biometrics'], true)) {
                 continue;
             }
 

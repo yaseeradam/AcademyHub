@@ -155,7 +155,7 @@ HTML;
 
     {{-- Dropdown 2: Academics Portal --}}
     @php
-        $isAcademicsActive = request()->routeIs('classes.*') || request()->routeIs('subjects.*') || request()->routeIs('curriculum.*') || request()->routeIs('timetable*') || request()->routeIs('results.entry') || request()->routeIs('results.broadsheet') || request()->routeIs('attendance') || request()->routeIs('attendance.teachers') || request()->routeIs('attendance.staff-timesheet');
+        $isAcademicsActive = request()->routeIs('classes.*') || request()->routeIs('subjects.*') || request()->routeIs('curriculum.*') || request()->routeIs('results.entry') || request()->routeIs('results.broadsheet') || request()->routeIs('attendance') || request()->routeIs('attendance.teachers') || request()->routeIs('attendance.staff-timesheet');
         $hasAcademicsAccess = in_array($user?->role, ['admin', 'teacher'], true);
     @endphp
     @if($hasAcademicsAccess)
@@ -200,11 +200,6 @@ HTML;
                     'bg-purple-100', 'text-purple-500',
                     '<path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>',
                     request()->routeIs('curriculum.*')) !!}
-
-                {!! $navLink(route('timetable'), 'Timetable',
-                    'bg-sky-100', 'text-sky-500',
-                    '<path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>',
-                    request()->routeIs('timetable*')) !!}
 
                 {!! $navLink(route('results.entry'), 'Score Entry',
                     'bg-green-100', 'text-green-500',
@@ -312,8 +307,6 @@ HTML;
                         $iconPath = '<path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-14L4 7m8 4v10M4 7v10l8 4"/>';
                         if ($component->slug === 'cbt') {
                             $iconPath = '<path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>';
-                        } elseif ($component->slug === 'k40-biometrics') {
-                            $iconPath = '<path stroke-linecap="round" stroke-linejoin="round" d="M12 11c0 3.517-1.009 6.799-2.753 9.571m-3.44-2.04l.054-.09A13.916 13.916 0 008 11a4 4 0 118 0c0 1.017-.07 2.019-.203 3m-2.118 6.844A21.88 21.88 0 0015.171 17m3.839 1.132c.645-2.266.99-4.659.99-7.132A8 8 0 004.07 9m4.93 11a13.935 13.935 0 004.93-2.868"/>';
                         } elseif ($component->slug === 'procurement-records') {
                             $iconPath = '<path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>';
                         }
@@ -330,7 +323,7 @@ HTML;
 
     {{-- Dropdown 4: System Administration & Finance --}}
     @php
-        $isSystemActive = request()->routeIs('settings.index') || request()->routeIs('settings.subscription') || request()->routeIs('more-features') || request()->routeIs('billing.*') || request()->routeIs('profile');
+        $isSystemActive = request()->routeIs('settings.index') || request()->routeIs('settings.subscription') || request()->routeIs('more-features') || request()->routeIs('timetable*') || request()->routeIs('billing.*') || request()->routeIs('profile');
         $hasSystemAccess = in_array($user?->role, ['admin', 'teacher', 'bursar'], true);
     @endphp
     @if($hasSystemAccess)

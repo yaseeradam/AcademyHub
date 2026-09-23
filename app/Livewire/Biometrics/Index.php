@@ -63,23 +63,23 @@ class Index extends Component
         $defaultTerminals = [
             [
                 'id'       => 1,
-                'name'     => 'K40 Terminal 1 (Main Entrance)',
+                'name'     => 'K40 Terminal (Main Gate)',
                 'ip'       => '192.168.0.201',
                 'port'     => 4370,
-                'location' => 'Main Gate (Gate 1)',
+                'location' => 'Main Gate',
                 'device'   => 'ZKTeco K40 Fingerprint & RFID',
-            ],
-            [
-                'id'       => 2,
-                'name'     => 'K40 Terminal 2 (Western Section / Gate 2)',
-                'ip'       => '192.168.0.202',
-                'port'     => 4370,
-                'location' => 'Mosque / Staff Gate (Gate 2)',
-                'device'   => 'ZKTeco K40 Standard',
             ],
         ];
 
-        $this->terminals = Cache::get("tenant_{$tenantId}_k40_terminals", $defaultTerminals);
+        $terminals = Cache::get("tenant_{$tenantId}_k40_terminals", $defaultTerminals);
+
+        // If the legacy 2-terminal default was stored in cache, keep only 1 terminal
+        if (is_array($terminals) && count($terminals) === 2 && isset($terminals[1]['name']) && (str_contains($terminals[1]['name'], 'K40 Terminal 2') || str_contains($terminals[1]['name'], 'Western Section'))) {
+            $terminals = array_slice($terminals, 0, 1);
+            Cache::put("tenant_{$tenantId}_k40_terminals", $terminals, now()->addDays(30));
+        }
+
+        $this->terminals = $terminals;
     }
 
     public function refreshGateStatus(): void

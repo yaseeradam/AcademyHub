@@ -55,6 +55,10 @@ use App\Livewire\Imports\Index as ImportsIndex;
 use App\Livewire\Imports\Students as ImportsStudents;
 use App\Livewire\Imports\Teachers as ImportsTeachers;
 use App\Livewire\Settings\CustomFields;
+use App\Livewire\AdmissionLetters\Index as AdmissionLettersIndex;
+use App\Livewire\IdCards\Index as IdCardsIndex;
+use App\Livewire\TeacherAppointments\Index as TeacherAppointmentsIndex;
+use App\Http\Controllers\PrintLetterController;
 
 /*
 |--------------------------------------------------------------------------
@@ -240,6 +244,12 @@ Route::middleware(['auth', 'active'])->group(function () {
         Route::post('/settings/results', [SettingsController::class, 'updateResults'])->name('settings.update-results');
         Route::post('/settings/certificates', [SettingsController::class, 'updateCertificates'])->name('settings.update-certificates');
         Route::post('/settings/attendance', [SettingsController::class, 'updateAttendance'])->name('settings.update-attendance');
+
+        // Official Letters & ID Badges
+        Route::get('/admission-letters', AdmissionLettersIndex::class)->name('admission-letters.index');
+        Route::get('/id-cards', IdCardsIndex::class)->name('id-cards.index');
+        Route::get('/teacher-appointments', TeacherAppointmentsIndex::class)->name('teacher-appointments.index');
+        Route::get('/print/admission-letters', [PrintLetterController::class, 'printAdmissionLetters'])->name('print.admission-letters');
     });
 
     Route::get('/students', StudentsIndex::class)->name('students.index');
