@@ -455,7 +455,10 @@ class ZkTecoController extends Controller
      */
     public function testPopup(Request $request)
     {
-        $tenantId = $request->input('tenant_id') ?? $request->query('tenant_id') ?? auth()->user()?->tenant_id ?? 1;
+        $user = auth('sanctum')->user() ?: auth()->user();
+        abort_unless($user && in_array($user->role, ['admin', 'teacher', 'superadmin', 'proprietor']), 403, 'Unauthorized.');
+
+        $tenantId = $request->input('tenant_id') ?? $request->query('tenant_id') ?? $user->tenant_id ?? 1;
         $tenant = Tenant::find($tenantId);
         if ($tenant && !$tenant->activeMarketplaceComponents()->where('slug', 'k40-biometrics')->exists()) {
             return response()->json([

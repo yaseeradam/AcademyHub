@@ -77,7 +77,7 @@ class User extends Authenticatable
     protected static function booted(): void
     {
         static::addGlobalScope('tenant', function (Builder $builder) {
-            if (request()->is('superadmin', 'superadmin/*')) {
+            if (app()->bound('request') && request()->is('superadmin', 'superadmin/*')) {
                 return;
             }
 

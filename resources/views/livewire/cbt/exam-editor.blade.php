@@ -817,9 +817,9 @@ ANS: C</pre>
                                 <div class="flex justify-end gap-2">
                                     @if ($attempt && ($attempt->submitted_at || $attempt->terminated_at))
                                         @if ($hasTheory)
-                                            <button wire:click="startReview({{ $attempt->id }})" class="rounded-lg bg-violet-100 px-3 py-1.5 text-xs font-bold text-violet-700 hover:bg-violet-200 transition">
+                                            <a href="{{ route('cbt.exams.theory', ['exam' => $exam->id, 'attempt' => $attempt->id]) }}" class="inline-flex items-center rounded-lg bg-violet-100 px-3 py-1.5 text-xs font-bold text-violet-700 hover:bg-violet-200 transition">
                                                 Review/Mark
-                                            </button>
+                                            </a>
                                         @endif
                                         @if ($me?->role === 'admin')
                                             <button wire:click="resetAttempt({{ $attempt->id }})" class="rounded-lg bg-rose-50 px-3 py-1.5 text-xs font-bold text-rose-700 hover:bg-rose-100 transition">

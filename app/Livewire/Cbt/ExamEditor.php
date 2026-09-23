@@ -540,6 +540,14 @@ class ExamEditor extends Component
         $this->dispatch('alert', message: 'Attempt reset. Student can retake.', type: 'success');
     }
 
+    public function startReview(int $attemptId)
+    {
+        return redirect()->route('cbt.exams.theory', [
+            'exam' => $this->examId,
+            'attempt' => $attemptId,
+        ]);
+    }
+
     #[Computed]
     public function roster()
     {
