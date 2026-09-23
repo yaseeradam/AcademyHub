@@ -626,8 +626,11 @@ class Index extends Component
             $this->dispatch('$refresh');
 
             $this->dispatch('alert', message: 'Transaction saved successfully!', type: 'success');
-        } catch (\Exception $e) {
-            $this->dispatch('alert', message: 'Failed to save transaction. Please try again.', type: 'error');
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            throw $e;
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('Billing saveTransaction error: ' . $e->getMessage());
+            $this->dispatch('alert', message: 'Failed to save transaction: ' . $e->getMessage(), type: 'error');
         }
     }
 

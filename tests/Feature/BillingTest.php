@@ -18,7 +18,7 @@ class BillingTest extends TestCase
 
     private function createTenant(array $overrides = []): Tenant
     {
-        return Tenant::query()->create(array_merge([
+        $tenant = Tenant::query()->create(array_merge([
             'name' => 'Custom Academy',
             'slug' => 'custom-academy',
             'plan' => 'pro',
@@ -26,6 +26,10 @@ class BillingTest extends TestCase
             'max_students' => 100,
             'max_teachers' => 10,
         ], $overrides));
+
+        app()->instance('currentTenant', $tenant);
+
+        return $tenant;
     }
 
     public function test_user_can_view_plugin_bills_tab(): void

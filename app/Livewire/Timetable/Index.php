@@ -376,13 +376,15 @@ class Index extends Component
     {
         $boundaries = [];
 
-        for ($hour = 8; $hour <= 16; $hour++) {
-            $boundaries[] = sprintf('%02d:00', $hour);
-        }
-
-        foreach ($entries as $entry) {
-            $boundaries[] = substr((string) $entry->starts_at, 0, 5);
-            $boundaries[] = substr((string) $entry->ends_at, 0, 5);
+        if ($entries->isEmpty()) {
+            for ($hour = 8; $hour <= 14; $hour++) {
+                $boundaries[] = sprintf('%02d:00', $hour);
+            }
+        } else {
+            foreach ($entries as $entry) {
+                $boundaries[] = substr((string) $entry->starts_at, 0, 5);
+                $boundaries[] = substr((string) $entry->ends_at, 0, 5);
+            }
         }
 
         $unique = [];
@@ -431,7 +433,10 @@ class Index extends Component
                 ->get()
             : collect();
 
-        $days = collect([1, 2, 3, 4, 5, 6])->map(fn ($day) => [
+        $hasSaturday = $entries->where('day_of_week', 6)->isNotEmpty();
+        $dayNumbers = $hasSaturday ? [1, 2, 3, 4, 5, 6] : [1, 2, 3, 4, 5];
+
+        $days = collect($dayNumbers)->map(fn ($day) => [
             'day' => $day,
             'label' => $this->dayLabel($day),
         ])->all();

@@ -67,7 +67,7 @@
 <div class="space-y-6">
 
     {{-- Hero Card --}}
-    <div class="relative overflow-hidden rounded-2xl shadow-xl" style="background-color: #1a2e4a;">
+    <div class="relative overflow-hidden rounded-3xl shadow-xl" style="background-color: #1a2e4a;">
         <div class="absolute inset-0" style="background: radial-gradient(ellipse at top left, #1e3a5f 0%, transparent 60%);"></div>
         <div class="absolute right-0 top-0 bottom-0 w-48 opacity-10">
             <svg viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full">
@@ -76,31 +76,31 @@
                 <circle cx="160" cy="100" r="50" stroke="white" stroke-width="0.5"/>
             </svg>
         </div>
-        <div class="relative px-8 py-8">
-            <div class="flex items-center gap-2 mb-3">
+        <div class="relative px-5 py-6 sm:px-8 sm:py-8">
+            <div class="flex items-center gap-2 mb-2 sm:mb-3">
                 <span class="h-2.5 w-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
-                <span class="text-sm font-semibold uppercase tracking-widest" style="color: #93c5fd;">Teacher Portal</span>
+                <span class="text-xs sm:text-sm font-semibold uppercase tracking-widest" style="color: #93c5fd;">Teacher Portal</span>
             </div>
-            <h2 class="text-4xl font-bold text-white tracking-tight">Welcome, {{ $user->name }}</h2>
-            <p class="mt-2 text-lg font-medium" style="color: #93c5fd;">Manage your classes, scores and attendance.</p>
-            <div class="mt-5 flex flex-wrap items-center justify-between gap-4">
+            <h2 class="text-2xl sm:text-3xl lg:text-4xl font-black text-white tracking-tight">Welcome, {{ $user->name }}</h2>
+            <p class="mt-1.5 text-xs sm:text-base font-medium" style="color: #93c5fd;">Manage your classes, scores and attendance.</p>
+            <div class="mt-4 sm:mt-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div class="flex flex-wrap gap-2">
-                    <span class="inline-flex items-center gap-2 rounded-lg px-4 py-1.5 text-sm font-semibold text-white" style="background:rgba(255,255,255,0.12);">
-                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                    <span class="inline-flex items-center gap-1.5 sm:gap-2 rounded-lg px-3 py-1 sm:px-4 sm:py-1.5 text-xs sm:text-sm font-semibold text-white" style="background:rgba(255,255,255,0.12);">
+                        <svg class="h-3.5 w-3.5 sm:h-4 sm:w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
                         {{ $currentTerm ? $currentTerm->name : 'No Active Term' }}
                     </span>
-                    <span class="inline-flex items-center gap-2 rounded-lg px-4 py-1.5 text-sm font-semibold text-white" style="background:rgba(255,255,255,0.12);">
-                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+                    <span class="inline-flex items-center gap-1.5 sm:gap-2 rounded-lg px-3 py-1 sm:px-4 sm:py-1.5 text-xs sm:text-sm font-semibold text-white" style="background:rgba(255,255,255,0.12);">
+                        <svg class="h-3.5 w-3.5 sm:h-4 sm:w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
                         {{ number_format($studentsCount) }} Students
                     </span>
-                    <span class="inline-flex items-center gap-2 rounded-lg px-4 py-1.5 text-sm font-semibold text-white" style="background:rgba(255,255,255,0.12);">
-                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                    <span class="inline-flex items-center gap-1.5 sm:gap-2 rounded-lg px-3 py-1 sm:px-4 sm:py-1.5 text-xs sm:text-sm font-semibold text-white" style="background:rgba(255,255,255,0.12);">
+                        <svg class="h-3.5 w-3.5 sm:h-4 sm:w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
                         {{ now()->format('l, F j') }}
                     </span>
                 </div>
 
                 <a href="{{ route('curriculum.topics') }}"
-                   class="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-violet-500 to-indigo-500 hover:from-violet-600 hover:to-indigo-600 text-white px-5 py-2.5 text-sm font-bold shadow-lg shadow-black/20 transition active:scale-95">
+                   class="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-violet-500 to-indigo-500 hover:from-violet-600 hover:to-indigo-600 text-white px-5 py-2.5 text-xs sm:text-sm font-bold shadow-lg shadow-black/20 transition active:scale-95">
                     <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
                     </svg>
@@ -110,60 +110,60 @@
         </div>
     </div>
 
-    {{-- Stat Cards --}}
-    <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
-        <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-blue-400 to-blue-600 p-6 text-white shadow-lg">
+    {{-- Stat Cards (2-Column Mobile Grid for Instant Scanning) --}}
+    <div class="grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-4">
+        <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-blue-400 to-blue-600 p-4 sm:p-6 text-white shadow-md">
             <div class="absolute -right-6 -top-6 h-28 w-28 rounded-full bg-white/10"></div>
             <div class="absolute right-4 bottom-4 h-16 w-16 rounded-full bg-white/10"></div>
             <div class="relative flex items-start justify-between">
                 <div>
-                    <div class="text-4xl font-black">{{ $classes->count() }}</div>
-                    <div class="mt-1 text-sm font-semibold text-white/80">Assigned Classes</div>
+                    <div class="text-2xl sm:text-4xl font-black">{{ $classes->count() }}</div>
+                    <div class="mt-1 text-xs sm:text-sm font-semibold text-white/80">Assigned Classes</div>
                 </div>
-                <div class="grid h-12 w-12 place-items-center rounded-xl bg-white/20">
-                    <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                <div class="grid h-9 w-9 sm:h-12 sm:w-12 place-items-center rounded-xl bg-white/20 shrink-0">
+                    <svg class="h-4.5 w-4.5 sm:h-6 sm:w-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
                 </div>
             </div>
         </div>
 
-        <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-emerald-400 to-teal-500 p-6 text-white shadow-lg">
+        <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-emerald-400 to-teal-500 p-4 sm:p-6 text-white shadow-md">
             <div class="absolute -right-6 -top-6 h-28 w-28 rounded-full bg-white/10"></div>
             <div class="absolute right-4 bottom-4 h-16 w-16 rounded-full bg-white/10"></div>
             <div class="relative flex items-start justify-between">
                 <div>
-                    <div class="text-4xl font-black">{{ number_format($studentsCount) }}</div>
-                    <div class="mt-1 text-sm font-semibold text-white/80">Active Students</div>
+                    <div class="text-2xl sm:text-4xl font-black">{{ number_format($studentsCount) }}</div>
+                    <div class="mt-1 text-xs sm:text-sm font-semibold text-white/80">Active Students</div>
                 </div>
-                <div class="grid h-12 w-12 place-items-center rounded-xl bg-white/20">
-                    <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+                <div class="grid h-9 w-9 sm:h-12 sm:w-12 place-items-center rounded-xl bg-white/20 shrink-0">
+                    <svg class="h-4.5 w-4.5 sm:h-6 sm:w-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
                 </div>
             </div>
         </div>
 
-        <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-violet-500 to-purple-600 p-6 text-white shadow-lg">
+        <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-violet-500 to-purple-600 p-4 sm:p-6 text-white shadow-md">
             <div class="absolute -right-6 -top-6 h-28 w-28 rounded-full bg-white/10"></div>
             <div class="absolute right-4 bottom-4 h-16 w-16 rounded-full bg-white/10"></div>
             <div class="relative flex items-start justify-between">
                 <div>
-                    <div class="text-4xl font-black">{{ $subjectsCount }}</div>
-                    <div class="mt-1 text-sm font-semibold text-white/80">Assigned Subjects</div>
+                    <div class="text-2xl sm:text-4xl font-black">{{ $subjectsCount }}</div>
+                    <div class="mt-1 text-xs sm:text-sm font-semibold text-white/80">Assigned Subjects</div>
                 </div>
-                <div class="grid h-12 w-12 place-items-center rounded-xl bg-white/20">
-                    <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+                <div class="grid h-9 w-9 sm:h-12 sm:w-12 place-items-center rounded-xl bg-white/20 shrink-0">
+                    <svg class="h-4.5 w-4.5 sm:h-6 sm:w-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
                 </div>
             </div>
         </div>
 
-        <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-amber-400 to-orange-500 p-6 text-white shadow-lg">
+        <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-amber-400 to-orange-500 p-4 sm:p-6 text-white shadow-md">
             <div class="absolute -right-6 -top-6 h-28 w-28 rounded-full bg-white/10"></div>
             <div class="absolute right-4 bottom-4 h-16 w-16 rounded-full bg-white/10"></div>
             <div class="relative flex items-start justify-between">
                 <div>
-                    <div class="text-4xl font-black">{{ $pendingSubmissions }}</div>
-                    <div class="mt-1 text-sm font-semibold text-white/80">Pending Submissions</div>
+                    <div class="text-2xl sm:text-4xl font-black">{{ $pendingSubmissions }}</div>
+                    <div class="mt-1 text-xs sm:text-sm font-semibold text-white/80">Pending Submissions</div>
                 </div>
-                <div class="grid h-12 w-12 place-items-center rounded-xl bg-white/20">
-                    <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                <div class="grid h-9 w-9 sm:h-12 sm:w-12 place-items-center rounded-xl bg-white/20 shrink-0">
+                    <svg class="h-4.5 w-4.5 sm:h-6 sm:w-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
                 </div>
             </div>
         </div>

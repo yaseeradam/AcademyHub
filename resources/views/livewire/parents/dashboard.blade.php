@@ -35,7 +35,7 @@
 <div class="space-y-6 pb-12">
     
     {{-- Global Dashboard Header --}}
-    <div class="relative overflow-hidden rounded-3xl bg-slate-900 p-8 shadow-lg">
+    <div class="relative overflow-hidden rounded-3xl bg-slate-900 p-5 sm:p-8 shadow-lg">
         <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMSIgY3k9IjEiIHI9IjEiIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4xIi8+PC9zdmc+')] opacity-5"></div>
         <div class="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-white/5 blur-3xl"></div>
         <div class="absolute -bottom-10 -left-10 h-40 w-40 rounded-full bg-black/20 blur-2xl"></div>
@@ -43,13 +43,13 @@
         <div class="relative z-10">
             <div class="inline-flex items-center gap-2 rounded-full bg-white/20 px-3 py-1 mb-3 backdrop-blur-sm shadow-sm">
                 <div class="h-2 w-2 rounded-full bg-indigo-400 shadow-[0_0_8px_rgba(129,140,248,0.8)]"></div>
-                <span class="text-xs font-bold text-white tracking-wide uppercase">Parent Portal Control Center</span>
+                <span class="text-[11px] sm:text-xs font-bold text-white tracking-wide uppercase">Parent Portal Control Center</span>
             </div>
-            <h1 class="text-3xl font-black text-white sm:text-4xl tracking-tight">Welcome back, {{ auth()->user()->name }}</h1>
+            <h1 class="text-2xl sm:text-3xl lg:text-4xl font-black text-white tracking-tight">Welcome back, {{ auth()->user()->name }}</h1>
             @if($hasPaymentGateway)
-                <p class="mt-2 text-sm text-indigo-150 font-semibold max-w-lg">Track your children's academic progress, attendance, homework, and fees seamlessly from one place.</p>
+                <p class="mt-2 text-xs sm:text-sm text-indigo-150 font-semibold max-w-lg">Track your children's academic progress, attendance, homework, and fees seamlessly from one place.</p>
             @else
-                <p class="mt-2 text-sm text-indigo-150 font-semibold max-w-lg">Track your children's academic progress, attendance, and homework seamlessly from one place.</p>
+                <p class="mt-2 text-xs sm:text-sm text-indigo-150 font-semibold max-w-lg">Track your children's academic progress, attendance, and homework seamlessly from one place.</p>
             @endif
         </div>
     </div>
@@ -65,10 +65,10 @@
                 <p class="mt-1 text-sm text-slate-500">Contact the school administrator to link your children.</p>
             </div>
         @else
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 p-1">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 p-1">
                 @foreach ($this->children as $c)
                     <button wire:click="selectChild({{ $c->id }})"
-                            class="group relative w-full text-left bg-white rounded-3xl border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] transition-all duration-300 hover:-translate-y-2 hover:shadow-[0_20px_40px_rgb(0,0,0,0.1)] overflow-hidden flex flex-col h-72">
+                            class="group relative w-full text-left bg-white rounded-3xl border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] transition-all duration-300 hover:-translate-y-2 hover:shadow-[0_20px_40px_rgb(0,0,0,0.1)] overflow-hidden flex flex-col min-h-[17rem] h-auto">
                         
                         {{-- Top Pattern/Color Strip --}}
                         <div class="h-28 w-full relative border-b border-slate-100 overflow-hidden bg-gradient-to-r from-slate-100 to-slate-50">
@@ -111,32 +111,32 @@
         {{-- STATE 2: Child Data Layout (Compact, Premium Tabbed Control) --}}
         
         {{-- Very Compact Colorful Header --}}
-        <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-5 bg-slate-800 rounded-3xl p-6 shadow-md border-0 relative overflow-hidden">
+        <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 sm:gap-5 bg-slate-800 rounded-3xl p-4 sm:p-6 shadow-md border-0 relative overflow-hidden">
             <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMSIgY3k9IjEiIHI9IjEiIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4xIi8+PC9zdmc+')] opacity-10"></div>
             
-            <div class="relative z-10 flex items-center gap-5 w-full lg:w-auto">
-                <button wire:click="$set('selectedChildId', null)" class="shrink-0 h-12 w-12 flex items-center justify-center rounded-2xl bg-white/10 text-white hover:bg-white hover:text-slate-800 backdrop-blur-md transition-all shadow-sm border border-white/5" wire:loading.attr="disabled" wire:loading.class="opacity-50 cursor-wait">
+            <div class="relative z-10 flex items-center gap-3 sm:gap-5 w-full lg:w-auto">
+                <button wire:click="$set('selectedChildId', null)" class="shrink-0 h-10 w-10 sm:h-12 sm:w-12 flex items-center justify-center rounded-xl sm:rounded-2xl bg-white/10 text-white hover:bg-white hover:text-slate-800 backdrop-blur-md transition-all shadow-sm border border-white/5" wire:loading.attr="disabled" wire:loading.class="opacity-50 cursor-wait">
                     <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
                 </button>
                 
                 @if ($child->passport_photo_url)
-                    <img src="{{ $child->passport_photo_url }}" class="shrink-0 h-16 w-16 rounded-2xl object-cover ring-2 ring-white/50 shadow-sm" />
+                    <img src="{{ $child->passport_photo_url }}" class="shrink-0 h-12 w-12 sm:h-16 sm:w-16 rounded-xl sm:rounded-2xl object-cover ring-2 ring-white/50 shadow-sm" />
                 @else
-                    <div class="shrink-0 flex h-16 w-16 items-center justify-center rounded-2xl bg-white/20 backdrop-blur-md text-2xl font-black text-white ring-2 ring-white/50 shadow-sm">
+                    <div class="shrink-0 flex h-12 w-12 sm:h-16 sm:w-16 items-center justify-center rounded-xl sm:rounded-2xl bg-white/20 backdrop-blur-md text-xl sm:text-2xl font-black text-white ring-2 ring-white/50 shadow-sm">
                         {{ mb_substr($child->first_name, 0, 1) }}
                     </div>
                 @endif
                 
                 <div class="flex-1 min-w-0">
-                    <h2 class="text-2xl font-black text-white leading-tight truncate">{{ $child->full_name }}</h2>
-                    <div class="flex flex-wrap items-center gap-2 mt-2">
-                        <span class="rounded-lg bg-white/20 px-2.5 py-1 text-[11px] font-black uppercase tracking-wider text-white backdrop-blur-md shadow-sm">{{ $child->schoolClass?->name ?? 'Unassigned' }}</span>
-                        <span class="rounded-lg bg-black/20 px-2.5 py-1 text-[11px] font-black uppercase tracking-wider text-white backdrop-blur-md shadow-sm">Admin: {{ $child->admission_number }}</span>
+                    <h2 class="text-xl sm:text-2xl font-black text-white leading-tight truncate">{{ $child->full_name }}</h2>
+                    <div class="flex flex-wrap items-center gap-1.5 sm:gap-2 mt-1.5 sm:mt-2">
+                        <span class="rounded-lg bg-white/20 px-2.5 py-0.5 sm:py-1 text-[10px] sm:text-[11px] font-black uppercase tracking-wider text-white backdrop-blur-md shadow-sm">{{ $child->schoolClass?->name ?? 'Unassigned' }}</span>
+                        <span class="rounded-lg bg-black/20 px-2.5 py-0.5 sm:py-1 text-[10px] sm:text-[11px] font-black uppercase tracking-wider text-white backdrop-blur-md shadow-sm">Admin: {{ $child->admission_number }}</span>
                     </div>
                 </div>
             </div>
 
-            <div class="relative z-10 flex gap-3 w-full lg:w-auto">
+            <div class="relative z-10 grid grid-cols-2 sm:flex gap-2.5 sm:gap-3 w-full lg:w-auto">
                 <div class="flex items-center gap-2 rounded-xl bg-slate-900/50 backdrop-blur-md px-3 py-2 border border-white/10 shadow-sm flex-1 lg:flex-none">
                     <span class="text-[10px] font-black uppercase tracking-widest text-white/50">Term</span>
                     <select wire:model.live="term" class="bg-transparent text-sm font-black text-white border-0 p-0 focus:ring-0 cursor-pointer w-full focus:bg-slate-800 transition-colors rounded">
@@ -153,7 +153,7 @@
         </div>
 
         {{-- Elegant Tabbed Navigation Bar --}}
-        <div class="flex items-center gap-2 overflow-x-auto pb-2 border-b border-slate-200 scrollbar-thin">
+        <div class="flex items-center gap-2 overflow-x-auto pb-2 border-b border-slate-200 no-scrollbar" style="-webkit-overflow-scrolling: touch; touch-action: pan-x;">
             @php
                 $tabs = [
                     'overview'  => ['name' => 'Overview & Bulletin', 'icon' => '<svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>'],
@@ -170,7 +170,7 @@
             @endphp
             @foreach($tabs as $tabKey => $tabVal)
                 <button type="button" wire:click="$set('activeTab', '{{ $tabKey }}')"
-                        class="flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-bold transition-all whitespace-nowrap {{ $activeTab === $tabKey ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/20' : 'text-slate-500 hover:text-slate-800 bg-slate-50 hover:bg-slate-100' }}" wire:loading.attr="disabled" wire:loading.class="opacity-50 cursor-wait">
+                        class="flex items-center gap-2 rounded-xl px-3.5 py-2.5 sm:px-4 text-xs font-bold transition-all whitespace-nowrap {{ $activeTab === $tabKey ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/20' : 'text-slate-500 hover:text-slate-800 bg-slate-50 hover:bg-slate-100' }}" wire:loading.attr="disabled" wire:loading.class="opacity-50 cursor-wait">
                     {!! $tabVal['icon'] !!}
                     {{ $tabVal['name'] }}
                 </button>
@@ -181,52 +181,52 @@
 
         @if($activeTab === 'overview')
             {{-- Stat Metrics Row --}}
-            <div class="grid grid-cols-2 lg:grid-cols-{{ $hasPaymentGateway ? 4 : 3 }} gap-4">
+            <div class="grid grid-cols-2 lg:grid-cols-{{ $hasPaymentGateway ? 4 : 3 }} gap-3 sm:gap-4">
                 {{-- Metric 1: Average --}}
-                <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm flex flex-col justify-between transition-transform hover:-translate-y-1 hover:shadow-md">
+                <div class="rounded-2xl border border-slate-200 bg-white p-4 sm:p-5 shadow-sm flex flex-col justify-between transition-transform hover:-translate-y-1 hover:shadow-md">
                     <div class="flex items-start justify-between">
-                        <div class="h-10 w-10 rounded-xl bg-indigo-50 text-indigo-500 flex items-center justify-center">
-                            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
+                        <div class="h-9 w-9 sm:h-10 sm:w-10 rounded-xl bg-indigo-50 text-indigo-500 flex items-center justify-center">
+                            <svg class="h-4.5 w-4.5 sm:h-5 sm:w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
                         </div>
-                        <p class="text-[10px] font-black uppercase tracking-wider text-slate-400 bg-slate-50 px-2 py-1 rounded-md">Average</p>
+                        <p class="text-[9px] sm:text-[10px] font-black uppercase tracking-wider text-slate-400 bg-slate-50 px-2 py-0.5 sm:py-1 rounded-md">Average</p>
                     </div>
-                    <div class="mt-4 text-3xl font-black text-slate-800 tracking-tight">{{ $stats['average'] }}<span class="text-sm font-bold text-slate-400 ml-1">%</span></div>
+                    <div class="mt-3 sm:mt-4 text-2xl sm:text-3xl font-black text-slate-800 tracking-tight">{{ $stats['average'] }}<span class="text-xs sm:text-sm font-bold text-slate-400 ml-1">%</span></div>
                 </div>
                 
                 {{-- Metric 2: Position --}}
-                <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm flex flex-col justify-between transition-transform hover:-translate-y-1 hover:shadow-md">
+                <div class="rounded-2xl border border-slate-200 bg-white p-4 sm:p-5 shadow-sm flex flex-col justify-between transition-transform hover:-translate-y-1 hover:shadow-md">
                     <div class="flex items-start justify-between">
-                        <div class="h-10 w-10 rounded-xl bg-emerald-50 text-emerald-500 flex items-center justify-center">
-                            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/></svg>
+                        <div class="h-9 w-9 sm:h-10 sm:w-10 rounded-xl bg-emerald-50 text-emerald-500 flex items-center justify-center">
+                            <svg class="h-4.5 w-4.5 sm:h-5 sm:w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/></svg>
                         </div>
-                        <p class="text-[10px] font-black uppercase tracking-wider text-slate-400 bg-slate-50 px-2 py-1 rounded-md">Position</p>
+                        <p class="text-[9px] sm:text-[10px] font-black uppercase tracking-wider text-slate-400 bg-slate-50 px-2 py-0.5 sm:py-1 rounded-md">Position</p>
                     </div>
-                    <div class="mt-4 text-3xl font-black text-slate-800 tracking-tight">
+                    <div class="mt-3 sm:mt-4 text-2xl sm:text-3xl font-black text-slate-800 tracking-tight">
                         {{ $published && $stats['position'] ? $ordinal($stats['position']) : '--' }}
                     </div>
                 </div>
 
                 {{-- Metric 3: Attendance --}}
-                <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm flex flex-col justify-between transition-transform hover:-translate-y-1 hover:shadow-md">
+                <div class="rounded-2xl border border-slate-200 bg-white p-4 sm:p-5 shadow-sm flex flex-col justify-between transition-transform hover:-translate-y-1 hover:shadow-md">
                     <div class="flex items-start justify-between">
-                        <div class="h-10 w-10 rounded-xl bg-sky-50 text-sky-500 flex items-center justify-center">
-                            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                        <div class="h-9 w-9 sm:h-10 sm:w-10 rounded-xl bg-sky-50 text-sky-500 flex items-center justify-center">
+                            <svg class="h-4.5 w-4.5 sm:h-5 sm:w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
                         </div>
-                        <p class="text-[10px] font-black uppercase tracking-wider text-slate-400 bg-slate-50 px-2 py-1 rounded-md">Attendance</p>
+                        <p class="text-[9px] sm:text-[10px] font-black uppercase tracking-wider text-slate-400 bg-slate-50 px-2 py-0.5 sm:py-1 rounded-md">Attendance</p>
                     </div>
-                    <div class="mt-4 text-3xl font-black text-slate-800 tracking-tight">{{ $att['rate'] }}<span class="text-sm font-bold text-slate-400 ml-1">%</span></div>
+                    <div class="mt-3 sm:mt-4 text-2xl sm:text-3xl font-black text-slate-800 tracking-tight">{{ $att['rate'] }}<span class="text-xs sm:text-sm font-bold text-slate-400 ml-1">%</span></div>
                 </div>
 
                 @if($hasPaymentGateway)
                     {{-- Metric 4: Fees --}}
-                    <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm flex flex-col justify-between transition-transform hover:-translate-y-1 hover:shadow-md">
+                    <div class="rounded-2xl border border-slate-200 bg-white p-4 sm:p-5 shadow-sm flex flex-col justify-between transition-transform hover:-translate-y-1 hover:shadow-md">
                         <div class="flex items-start justify-between">
-                            <div class="h-10 w-10 rounded-xl {{ $fees['outstanding'] > 0 ? 'bg-rose-50 text-rose-500' : 'bg-emerald-50 text-emerald-500' }} flex items-center justify-center">
-                                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path></svg>
+                            <div class="h-9 w-9 sm:h-10 sm:w-10 rounded-xl {{ $fees['outstanding'] > 0 ? 'bg-rose-50 text-rose-500' : 'bg-emerald-50 text-emerald-500' }} flex items-center justify-center">
+                                <svg class="h-4.5 w-4.5 sm:h-5 sm:w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path></svg>
                             </div>
-                            <p class="text-[10px] font-black uppercase tracking-wider text-slate-400 bg-slate-50 px-2 py-1 rounded-md">Outstanding</p>
+                            <p class="text-[9px] sm:text-[10px] font-black uppercase tracking-wider text-slate-400 bg-slate-50 px-2 py-0.5 sm:py-1 rounded-md">Outstanding</p>
                         </div>
-                        <div class="mt-4 text-2xl font-black {{ $fees['outstanding'] > 0 ? 'text-rose-600' : 'text-slate-800' }} tracking-tight truncate">â‚¦{{ number_format($fees['outstanding'], 2) }}</div>
+                        <div class="mt-3 sm:mt-4 text-xl sm:text-2xl font-black {{ $fees['outstanding'] > 0 ? 'text-rose-600' : 'text-slate-800' }} tracking-tight truncate">₦{{ number_format($fees['outstanding'], 2) }}</div>
                     </div>
                 @endif
             </div>
@@ -383,31 +383,61 @@
         @if($activeTab === 'results')
             {{-- Academic Results Tab --}}
             <div class="rounded-3xl border border-slate-200 bg-white shadow-sm overflow-hidden flex flex-col">
-                <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-slate-100 bg-slate-50/50 px-6 py-5">
+                <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-slate-100 bg-slate-50/50 px-4 sm:px-6 py-4 sm:py-5">
                     <div>
                         <h3 class="text-base font-black text-slate-800 uppercase tracking-wide">Academic Results</h3>
                         <p class="text-xs font-semibold text-slate-500 mt-1">Academic report scores for {{ $child->full_name }} (Term {{ $term }}, {{ $session }})</p>
                     </div>
                     @if ($published && $scores->isNotEmpty())
                         <a href="{{ route('results.report-card', ['student' => $child, 'term' => $term, 'session' => $session]) }}"
-                           target="_blank" class="btn-outline text-xs px-4 py-2.5 rounded-xl flex items-center justify-center gap-2 shadow-sm font-bold">
+                           target="_blank" class="w-full sm:w-auto btn-outline text-xs px-4 py-2.5 rounded-xl flex items-center justify-center gap-2 shadow-sm font-bold">
                             <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
                             Download Report Card PDF
                         </a>
                     @endif
                 </div>
 
-                <div class="overflow-x-auto">
-                    @if (! $published)
-                        <div class="py-16 text-center">
-                            <div class="mx-auto h-16 w-16 bg-slate-50 rounded-full flex items-center justify-center mb-4 ring-1 ring-slate-100">
-                                <svg class="h-8 w-8 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
-                            </div>
-                            <span class="rounded-full bg-slate-100 px-4 py-2 text-xs font-bold text-slate-500">Results are currently pending school compilation & release.</span>
+                @if (! $published)
+                    <div class="py-16 text-center px-4">
+                        <div class="mx-auto h-16 w-16 bg-slate-50 rounded-full flex items-center justify-center mb-4 ring-1 ring-slate-100">
+                            <svg class="h-8 w-8 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
                         </div>
-                    @elseif ($scores->isEmpty())
-                        <div class="py-16 text-center text-sm font-semibold text-slate-400">No subject scores recorded for this child.</div>
-                    @else
+                        <span class="rounded-full bg-slate-100 px-4 py-2 text-xs font-bold text-slate-500">Results are currently pending school compilation & release.</span>
+                    </div>
+                @elseif ($scores->isEmpty())
+                    <div class="py-16 text-center text-sm font-semibold text-slate-400 px-4">No subject scores recorded for this child.</div>
+                @else
+                    {{-- Mobile Card View (block md:hidden) --}}
+                    <div class="block md:hidden p-4 space-y-3">
+                        @foreach ($scores as $score)
+                            <div class="rounded-2xl border border-slate-150 bg-slate-50/40 p-4 space-y-3 shadow-2xs">
+                                <div class="flex items-start justify-between gap-2">
+                                    <div class="font-black text-slate-800 text-sm leading-snug">{{ $score->subject?->name }}</div>
+                                    <span class="shrink-0 rounded-lg px-2.5 py-1 text-xs uppercase font-black {{ $gradeColor($score->grade) }}">
+                                        {{ $score->grade ?? '-' }}
+                                    </span>
+                                </div>
+                                
+                                <div class="grid grid-cols-3 gap-2 text-center pt-1">
+                                    <div class="bg-white rounded-xl p-2.5 border border-slate-200/70 shadow-2xs">
+                                        <span class="block text-[9px] font-black uppercase tracking-wider text-slate-400">CA</span>
+                                        <span class="text-sm font-bold text-slate-700">{{ ($score->ca1 ?? 0) + ($score->ca2 ?? 0) }}</span>
+                                    </div>
+                                    <div class="bg-white rounded-xl p-2.5 border border-slate-200/70 shadow-2xs">
+                                        <span class="block text-[9px] font-black uppercase tracking-wider text-slate-400">Exam</span>
+                                        <span class="text-sm font-bold text-slate-700">{{ $score->exam ?? '-' }}</span>
+                                    </div>
+                                    <div class="bg-indigo-50/70 rounded-xl p-2.5 border border-indigo-100 shadow-2xs">
+                                        <span class="block text-[9px] font-black uppercase tracking-wider text-indigo-500">Total</span>
+                                        <span class="text-sm font-black text-indigo-700">{{ $score->total ?? '-' }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+
+                    {{-- Desktop Table View (hidden md:block) --}}
+                    <div class="hidden md:block overflow-x-auto">
                         <table class="w-full text-left text-sm border-collapse">
                             <thead class="bg-slate-50/50 border-b border-slate-100 text-[10px] font-black uppercase text-slate-400 tracking-wider">
                                 <tr>
@@ -438,8 +468,8 @@
                                 @endforeach
                             </tbody>
                         </table>
-                    @endif
-                </div>
+                    </div>
+                @endif
 
                 {{-- Grading Scheme Key --}}
                 @if ($published && $scores->isNotEmpty())
@@ -459,50 +489,50 @@
             {{-- Curriculum Topics & Scheme of Work Tab --}}
             <div class="space-y-6">
                 {{-- Overview Header Card --}}
-                <div class="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-                    <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+                <div class="rounded-3xl border border-slate-200 bg-white p-4 sm:p-6 shadow-sm">
+                    <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-5 sm:gap-6">
                         <div>
                             <div class="flex items-center gap-2 mb-1.5">
                                 <span class="h-2 w-2 rounded-full bg-indigo-500"></span>
                                 <span class="text-[10px] font-black uppercase tracking-widest text-indigo-600">Scheme of Work</span>
                             </div>
-                            <h3 class="text-xl font-black text-slate-800 tracking-tight">Curriculum Syllabus & Topics</h3>
+                            <h3 class="text-lg sm:text-xl font-black text-slate-800 tracking-tight">Curriculum Syllabus & Topics</h3>
                             <p class="text-xs text-slate-500 font-semibold mt-1">
                                 Tracking topics taught and planned for {{ $child->schoolClass?->name ?? 'Class' }} — Term {{ $term == 1 ? 'One' : ($term == 2 ? 'Two' : 'Three') }} ({{ $session }})
                             </p>
                         </div>
 
-                        {{-- Progress & Metrics Badges --}}
-                        <div class="flex flex-wrap items-center gap-3">
-                            <div class="bg-slate-50 border border-slate-100 rounded-2xl p-3 text-center min-w-[5.5rem]">
+                        {{-- Progress & Metrics Badges (Responsive Grid) --}}
+                        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-3 w-full lg:w-auto">
+                            <div class="bg-slate-50 border border-slate-100 rounded-2xl p-2.5 sm:p-3 text-center">
                                 <div class="text-[9px] font-black uppercase tracking-wider text-slate-400">Total</div>
-                                <div class="text-lg font-black text-slate-800 mt-0.5">{{ $this->topicStats['total'] }}</div>
+                                <div class="text-base sm:text-lg font-black text-slate-800 mt-0.5">{{ $this->topicStats['total'] }}</div>
                             </div>
-                            <div class="bg-emerald-50 border border-emerald-100 rounded-2xl p-3 text-center min-w-[5.5rem]">
+                            <div class="bg-emerald-50 border border-emerald-100 rounded-2xl p-2.5 sm:p-3 text-center">
                                 <div class="text-[9px] font-black uppercase tracking-wider text-emerald-600">Covered</div>
-                                <div class="text-lg font-black text-emerald-700 mt-0.5">{{ $this->topicStats['completed'] }}</div>
+                                <div class="text-base sm:text-lg font-black text-emerald-700 mt-0.5">{{ $this->topicStats['completed'] }}</div>
                             </div>
-                            <div class="bg-amber-50 border border-amber-100 rounded-2xl p-3 text-center min-w-[5.5rem]">
+                            <div class="bg-amber-50 border border-amber-100 rounded-2xl p-2.5 sm:p-3 text-center">
                                 <div class="text-[9px] font-black uppercase tracking-wider text-amber-600">In Progress</div>
-                                <div class="text-lg font-black text-amber-700 mt-0.5">{{ $this->topicStats['inProgress'] }}</div>
+                                <div class="text-base sm:text-lg font-black text-amber-700 mt-0.5">{{ $this->topicStats['inProgress'] }}</div>
                             </div>
-                            <div class="bg-slate-100 border border-slate-200 rounded-2xl p-3 text-center min-w-[5.5rem]">
+                            <div class="bg-slate-100 border border-slate-200 rounded-2xl p-2.5 sm:p-3 text-center">
                                 <div class="text-[9px] font-black uppercase tracking-wider text-slate-500">Upcoming</div>
-                                <div class="text-lg font-black text-slate-700 mt-0.5">{{ $this->topicStats['upcoming'] }}</div>
+                                <div class="text-base sm:text-lg font-black text-slate-700 mt-0.5">{{ $this->topicStats['upcoming'] }}</div>
                             </div>
-                            <div class="bg-indigo-50 border border-indigo-100 rounded-2xl p-3 text-center min-w-[6.5rem]">
+                            <div class="col-span-2 sm:col-span-1 bg-indigo-50 border border-indigo-100 rounded-2xl p-2.5 sm:p-3 text-center">
                                 <div class="text-[9px] font-black uppercase tracking-wider text-indigo-600">Completed</div>
-                                <div class="text-lg font-black text-indigo-700 mt-0.5">{{ $this->topicStats['percent'] }}%</div>
+                                <div class="text-base sm:text-lg font-black text-indigo-700 mt-0.5">{{ $this->topicStats['percent'] }}%</div>
                             </div>
                         </div>
                     </div>
 
                     {{-- Linear Progress Bar --}}
                     @if($this->topicStats['total'] > 0)
-                        <div class="mt-6 pt-5 border-t border-slate-100">
+                        <div class="mt-5 pt-4 sm:mt-6 sm:pt-5 border-t border-slate-100">
                             <div class="flex items-center justify-between text-xs font-bold text-slate-500 mb-2">
-                                <span>Curriculum Progress: {{ $this->topicStats['completed'] }} of {{ $this->topicStats['total'] }} topics covered</span>
-                                <span class="font-black text-indigo-600">{{ $this->topicStats['percent'] }}%</span>
+                                <span class="truncate mr-2">Progress: {{ $this->topicStats['completed'] }} of {{ $this->topicStats['total'] }} topics covered</span>
+                                <span class="font-black text-indigo-600 shrink-0">{{ $this->topicStats['percent'] }}%</span>
                             </div>
                             <div class="h-2.5 w-full rounded-full bg-slate-100 overflow-hidden">
                                 <div class="h-full rounded-full bg-gradient-to-r from-indigo-500 to-emerald-500 transition-all duration-500" style="width: {{ $this->topicStats['percent'] }}%"></div>
@@ -522,13 +552,13 @@
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                                     </svg>
                                 </div>
-                                <div>
-                                    <h4 class="text-xs font-black text-slate-800">Official Syllabus Document: {{ $activeDoc->file_name }}</h4>
-                                    <p class="text-[11px] text-slate-500 font-semibold">{{ $activeDoc->formatted_file_size }} • Uploaded by {{ $activeDoc->uploader?->name ?? 'Subject Teacher' }}</p>
+                                <div class="min-w-0">
+                                    <h4 class="text-xs font-black text-slate-800 truncate">Official Syllabus: {{ $activeDoc->file_name }}</h4>
+                                    <p class="text-[11px] text-slate-500 font-semibold truncate">{{ $activeDoc->formatted_file_size }} • By {{ $activeDoc->uploader?->name ?? 'Subject Teacher' }}</p>
                                 </div>
                             </div>
                             <a href="{{ route('curriculum.document.download', $activeDoc) }}"
-                               class="inline-flex items-center gap-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 text-xs font-black shadow-xs transition active:scale-95 shrink-0">
+                               class="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2.5 text-xs font-black shadow-xs transition active:scale-95 shrink-0">
                                 <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
                                 </svg>
@@ -554,7 +584,7 @@
                 </div>
 
                 {{-- Subject Filter Pill Navigation --}}
-                <div class="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-thin">
+                <div class="flex items-center gap-2 overflow-x-auto pb-2 no-scrollbar" style="-webkit-overflow-scrolling: touch; touch-action: pan-x;">
                     <button type="button" wire:click="$set('selectedTopicSubjectId', null)"
                             class="rounded-xl px-4 py-2 text-xs font-black transition-all whitespace-nowrap {{ is_null($selectedTopicSubjectId) ? 'bg-slate-900 text-white shadow-sm' : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200' }}">
                         All Subjects ({{ $this->childSubjects->count() }})
@@ -745,8 +775,9 @@
 
         @if($activeTab === 'timetable')
             {{-- Timetable Tab --}}
-            <div class="rounded-3xl border border-slate-200 bg-white shadow-sm overflow-hidden flex flex-col">
-                <div class="border-b border-slate-100 bg-slate-50/50 px-6 py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div class="rounded-3xl border border-slate-200 bg-white shadow-sm overflow-hidden flex flex-col"
+                 x-data="{ activeDay: (new Date().getDay() >= 1 && new Date().getDay() <= 5) ? new Date().getDay() : 1 }">
+                <div class="border-b border-slate-100 bg-slate-50/50 px-4 sm:px-6 py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                     <div>
                         <h3 class="text-sm font-black text-slate-800 uppercase tracking-wide">Weekly Timetable Schedule</h3>
                         <p class="text-xs text-slate-500 font-semibold mt-0.5">Periods and subject allocations for {{ $child->schoolClass?->name ?? 'Class' }}</p>
@@ -754,7 +785,7 @@
                     @if($child->class_id)
                         <a href="{{ route('timetable.pdf', ['class_id' => $child->class_id, 'section_id' => $child->section_id]) }}"
                            target="_blank"
-                           class="inline-flex items-center gap-2 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 px-4 py-2 text-xs font-black transition-colors shadow-xs">
+                           class="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 px-4 py-2 text-xs font-black transition-colors shadow-xs">
                             <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                             </svg>
@@ -763,7 +794,7 @@
                     @endif
                 </div>
                 
-                <div class="p-6 space-y-6">
+                <div class="p-4 sm:p-6 space-y-4 sm:space-y-6">
                     @php
                         $daysMap = [1 => 'Monday', 2 => 'Tuesday', 3 => 'Wednesday', 4 => 'Thursday', 5 => 'Friday'];
                         $timetable = $this->timetable;
@@ -773,12 +804,29 @@
                             No class timetable schedule recorded for this class.
                         </div>
                     @else
-                        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-4">
+                        {{-- Mobile Day Filter Pills (Phones only) --}}
+                        <div class="sm:hidden flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar" style="-webkit-overflow-scrolling: touch; touch-action: pan-x;">
+                            @foreach($daysMap as $dayNum => $dayName)
+                                <button type="button" @click="activeDay = {{ $dayNum }}"
+                                        :class="activeDay === {{ $dayNum }} ? 'bg-indigo-600 text-white shadow-xs' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'"
+                                        class="rounded-xl px-3.5 py-1.5 text-xs font-black transition whitespace-nowrap">
+                                    {{ substr($dayName, 0, 3) }}
+                                </button>
+                            @endforeach
+                            <button type="button" @click="activeDay = 'all'"
+                                    :class="activeDay === 'all' ? 'bg-indigo-600 text-white shadow-xs' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'"
+                                    class="rounded-xl px-3.5 py-1.5 text-xs font-black transition whitespace-nowrap">
+                                All Days
+                            </button>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-4">
                             @foreach($daysMap as $dayNum => $dayName)
                                 @php
                                     $dayEntries = $timetable->where('day_of_week', $dayNum)->sortBy('starts_at');
                                 @endphp
-                                <div class="rounded-2xl border border-slate-200 bg-slate-50/20 p-4 shadow-sm flex flex-col h-full">
+                                <div :class="{ 'hidden': activeDay !== 'all' && activeDay !== {{ $dayNum }} }"
+                                     class="sm:!flex rounded-2xl border border-slate-200 bg-slate-50/20 p-4 shadow-sm flex-col h-full">
                                     <div class="border-b border-slate-100 pb-2 mb-3">
                                         <h4 class="text-xs font-black text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
                                             <span class="h-2 w-2 rounded-full bg-indigo-500"></span>
@@ -793,7 +841,12 @@
                                                 </div>
                                                 <div class="text-xs font-black text-slate-800 truncate">{{ $entry->subject?->name }}</div>
                                                 @if($entry->teacher)
-                                                    <div class="text-[9px] text-slate-400 font-bold mt-1 truncate">ðŸ‘¨â€ðŸ« {{ $entry->teacher->name }}</div>
+                                                    <div class="text-[9px] text-slate-500 font-bold mt-1 truncate flex items-center gap-1">
+                                                        <svg class="h-3 w-3 text-slate-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                                        </svg>
+                                                        <span class="truncate">{{ $entry->teacher->name }}</span>
+                                                    </div>
                                                 @endif
                                             </div>
                                         @empty
@@ -813,18 +866,54 @@
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
                 {{-- Left: Transaction History Log --}}
                 <div class="lg:col-span-8 rounded-3xl border border-slate-200 bg-white shadow-sm overflow-hidden flex flex-col">
-                    <div class="border-b border-slate-100 bg-slate-50/50 px-6 py-5">
+                    <div class="border-b border-slate-100 bg-slate-50/50 px-4 sm:px-6 py-4 sm:py-5">
                         <h3 class="text-sm font-black text-slate-800 uppercase tracking-wide">Child Account Ledger</h3>
                         <p class="text-xs font-semibold text-slate-400 mt-1">Audit logs of all charges, invoice bills, and payments received</p>
                     </div>
                     
-                    <div class="overflow-x-auto">
-                        @php
-                            $txs = $this->transactions;
-                        @endphp
-                        @if ($txs->isEmpty())
-                            <div class="py-16 text-center text-sm font-semibold text-slate-400">No account ledger entries found.</div>
-                        @else
+                    @php
+                        $txs = $this->transactions;
+                    @endphp
+                    @if ($txs->isEmpty())
+                        <div class="py-16 text-center text-sm font-semibold text-slate-400 px-4">No account ledger entries found.</div>
+                    @else
+                        {{-- Mobile Transaction Cards (block md:hidden) --}}
+                        <div class="block md:hidden p-4 space-y-3">
+                            @foreach ($txs as $tx)
+                                <div class="rounded-2xl border border-slate-150 bg-slate-50/40 p-4 space-y-2.5 shadow-2xs">
+                                    <div class="flex items-start justify-between gap-2">
+                                        <div>
+                                            <span class="text-xs font-black text-slate-800 tracking-wide">{{ $tx->receipt_number ?? 'INVOICE' }}</span>
+                                            <span class="block text-[10px] font-semibold text-slate-400 mt-0.5">{{ $tx->date?->format('M d, Y') }}</span>
+                                        </div>
+                                        <span class="text-sm font-black {{ $tx->type === 'Payment' ? 'text-emerald-600' : 'text-rose-600' }}">
+                                            {{ $tx->type === 'Payment' ? '-' : '+' }}₦{{ number_format($tx->amount, 2) }}
+                                        </span>
+                                    </div>
+
+                                    <div class="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-100 text-xs">
+                                        <span class="font-bold text-slate-600 text-xs">{{ $tx->category }}</span>
+                                        <div class="flex items-center gap-1.5">
+                                            <span class="rounded-lg px-2 py-0.5 text-[9px] font-black uppercase tracking-wider {{ $tx->type === 'Payment' ? 'bg-emerald-50 text-emerald-700 border border-emerald-100' : 'bg-rose-50 text-rose-700 border border-rose-100' }}">
+                                                {{ $tx->type }}
+                                            </span>
+                                            @if($tx->installment_plan && $tx->installment_plan !== 'full')
+                                                <span class="text-[9px] font-bold bg-violet-50 text-violet-700 border border-violet-200 px-2 py-0.5 rounded-full">
+                                                    @if($tx->installment_plan === 'two_installments')
+                                                        2-Part #{{ $tx->installment_number }}
+                                                    @elseif($tx->installment_plan === 'monthly')
+                                                        Monthly #{{ $tx->installment_number }}
+                                                    @endif
+                                                </span>
+                                            @endif
+                                        </div>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+
+                        {{-- Desktop Table View (hidden md:block) --}}
+                        <div class="hidden md:block overflow-x-auto">
                             <table class="w-full text-left text-sm border-collapse">
                                 <thead class="bg-slate-50/50 border-b border-slate-100 text-[10px] font-black uppercase text-slate-400 tracking-wider">
                                     <tr>
@@ -861,14 +950,14 @@
                                                 @endif
                                             </td>
                                             <td class="px-6 py-4 text-right font-black text-sm {{ $tx->type === 'Payment' ? 'text-emerald-600' : 'text-rose-600' }}">
-                                                {{ $tx->type === 'Payment' ? '-' : '+' }}â‚¦{{ number_format($tx->amount, 2) }}
+                                                {{ $tx->type === 'Payment' ? '-' : '+' }}₦{{ number_format($tx->amount, 2) }}
                                             </td>
                                         </tr>
                                     @endforeach
                                 </tbody>
                             </table>
-                        @endif
-                    </div>
+                        </div>
+                    @endif
                 </div>
 
                 {{-- Right: Pay Now CTA + Bank fallback --}}
@@ -918,7 +1007,7 @@
         @if($activeTab === 'teachers')
             {{-- Class Teachers Directory Tab (Direct WhatsApp Connection) --}}
             <div class="rounded-3xl border border-slate-200 bg-white shadow-sm overflow-hidden flex flex-col">
-                <div class="border-b border-slate-100 bg-slate-50/70 px-6 py-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <div class="border-b border-slate-100 bg-slate-50/70 px-4 sm:px-6 py-4 sm:py-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                     <div>
                         <div class="flex items-center gap-2">
                             <span class="flex h-6 w-6 items-center justify-center rounded-lg bg-emerald-50 text-emerald-600">
@@ -939,7 +1028,7 @@
                     @endif
                 </div>
                 
-                <div class="p-6">
+                <div class="p-4 sm:p-6">
                     @if ($teachers->isEmpty())
                         <div class="py-16 text-center text-sm font-bold text-slate-400 bg-slate-50 rounded-3xl border border-dashed border-slate-200">
                             <svg class="mx-auto h-10 w-10 text-slate-300 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -948,7 +1037,7 @@
                             No teachers or subject allocations recorded for this child's class yet.
                         </div>
                     @else
-                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                             @foreach ($teachers as $teacher)
                                 @php
                                     $parentName = auth()->user()?->name ?? 'Parent';
@@ -961,9 +1050,9 @@
                                     $formattedPhone = $teacher->formatted_whatsapp_phone;
                                     $subjects = $teacher->assigned_subjects ?? [];
                                 @endphp
-                                <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:shadow-md flex flex-col justify-between">
+                                <div class="rounded-2xl border border-slate-200 bg-white p-4 sm:p-5 shadow-sm transition hover:shadow-md flex flex-col justify-between">
                                     <div>
-                                        <div class="flex items-start gap-3.5">
+                                        <div class="flex items-start gap-3 sm:gap-3.5">
                                             @if ($teacher->profile_photo)
                                                 <img src="{{ $teacher->profile_photo_url }}" class="h-12 w-12 rounded-2xl object-cover ring-2 ring-slate-100 shadow-sm shrink-0" alt="{{ $teacher->name }}" />
                                             @else
@@ -1012,14 +1101,14 @@
                                     <div class="mt-4">
                                         @if ($waUrl)
                                             <a href="{{ $waUrl }}" target="_blank" rel="noopener noreferrer"
-                                               class="w-full inline-flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] text-white text-xs font-black shadow-sm shadow-emerald-500/25 transition-all">
+                                               class="w-full min-h-[44px] inline-flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] text-white text-xs font-black shadow-sm shadow-emerald-500/25 transition-all">
                                                 <svg class="h-4 w-4 fill-current shrink-0" viewBox="0 0 24 24">
                                                     <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.771-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.299.045-.677.063-1.092-.069-.252-.08-.575-.187-.988-.365-1.739-.751-2.874-2.502-2.961-2.617-.087-.116-.708-.94-.708-1.793s.448-1.273.607-1.446c.159-.173.346-.217.462-.217l.332.006c.106.005.249-.04.39.298.144.347.491 1.2.534 1.287.043.087.072.188.014.304-.058.116-.087.188-.173.289l-.26.304c-.087.086-.177.18-.076.354.101.174.449.741.964 1.201.662.591 1.221.774 1.394.86.173.086.275.072.376-.043.101-.116.433-.506.549-.68.116-.173.231-.145.39-.086s1.011.477 1.184.564.289.13.332.203c.043.072.043.419-.101.824z"/>
                                                 </svg>
                                                 <span>Chat on WhatsApp</span>
                                             </a>
                                         @else
-                                            <div class="w-full text-center py-2 px-3 rounded-xl bg-slate-100 text-slate-400 text-xs font-bold border border-slate-200/60">
+                                            <div class="w-full text-center py-2 px-3 rounded-xl bg-slate-100 text-slate-400 text-xs font-bold border border-slate-200/60 min-h-[44px] flex items-center justify-center">
                                                 Contact via School Frontdesk
                                             </div>
                                         @endif

@@ -51,6 +51,8 @@
         .sidebar-scroll::-webkit-scrollbar-thumb { background:#cbd5e1; border-radius:99px; }
         .sidebar-scroll::-webkit-scrollbar-thumb:hover { background:#94a3b8; }
         .sidebar-scroll { scrollbar-width: thin; scrollbar-color: #cbd5e1 rgba(148, 163, 184, 0.1); }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
 </head>
 <body class="h-full bg-[#f5f6fa] text-slate-900">
@@ -564,7 +566,7 @@ $activeShadow = "shadow-{$accent}-200";
         @endif
 
         {{-- Page content --}}
-        <main class="flex-1 overflow-y-auto px-4 sm:px-6 py-6">
+        <main class="flex-1 overflow-y-auto px-3 sm:px-6 py-4 sm:py-6">
             @php
                 $resolvedTenant = app()->bound('currentTenant') ? app('currentTenant') : null;
             @endphp
