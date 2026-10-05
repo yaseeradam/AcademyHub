@@ -100,7 +100,7 @@ services:
 
   # ── WhatsApp Gateway (Evolution API - Free Multi-Device QR Pairing) ──────
   whatsapp:
-    image: evoapicloud/evolution-api:v2.1.2
+    image: evoapicloud/evolution-api:v2.3.7
     container_name: academyhub-whatsapp
     restart: unless-stopped
     ports:
