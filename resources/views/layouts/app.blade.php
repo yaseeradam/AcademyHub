@@ -3,8 +3,20 @@
 <script>document.documentElement.classList.remove('dark'); try { localStorage.removeItem('darkMode') } catch(e){}</script>
 <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
     <meta name="csrf-token" content="{{ csrf_token() }}" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="{{ config('academyhub.school_name', 'AcademyHub') }}" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="theme-color" content="#0f172a" />
+    <meta name="theme-color" content="#0f172a" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0f172a" media="(prefers-color-scheme: dark)" />
+    @if(config('academyhub.school_logo'))
+        <link rel="apple-touch-icon" href="{{ asset('uploads/'.str_replace('\\','/',config('academyhub.school_logo'))) }}">
+    @else
+        <link rel="apple-touch-icon" href="{{ asset('apple-touch-icon.png') }}">
+    @endif
     <script>
         window.onerror = function(message, source, line, col, error) {
             fetch('/log-error', {
@@ -39,7 +51,6 @@
     </script>
     <title>{{ config('academyhub.school_name', config('app.name', 'AcademyHub')) }}</title>
     <meta name="description" content="{{ config('academyhub.school_name', 'AcademyHub') }} — School Management System for Attendance, Results, CBT, Billing & More">
-    <meta name="theme-color" content="#0f172a">
     <link rel="manifest" href="/manifest.json">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @livewireStyles
@@ -57,6 +68,17 @@
     </style>
 </head>
 <body class="h-full bg-[#f5f6fa] text-slate-900">
+
+{{-- Native PWA Boot Splash Screen --}}
+<x-pwa-splash-screen />
+
+{{-- Native PWA Offline Indicator --}}
+<div wire:offline class="fixed top-3 left-1/2 -translate-x-1/2 z-[99999] pointer-events-none transition-all duration-300">
+    <div class="bg-amber-500/95 backdrop-blur-md text-slate-900 border border-amber-600/30 rounded-full px-4 py-1.5 shadow-xl flex items-center gap-2 text-xs font-bold animate-pulse">
+        <span class="h-2 w-2 rounded-full bg-amber-950"></span>
+        <span>Offline Mode — Browsing cached data</span>
+    </div>
+</div>
 
 @if(session()->has('original_superadmin_id'))
     <div class="fixed top-4 left-1/2 -translate-x-1/2 z-[9999] w-[90%] max-w-xl">
@@ -137,37 +159,47 @@ $activeShadow = "shadow-{$accent}-200";
            x-transition:leave="transition ease-in duration-200 transform"
            x-transition:leave-start="translate-x-0"
            x-transition:leave-end="-translate-x-full"
-           class="fixed inset-y-0 left-0 z-50 flex w-72 flex-col bg-[#f5f6fa] lg:hidden shadow-2xl">
+           class="fixed inset-y-0 left-0 z-50 flex w-80 max-w-[85vw] flex-col bg-[#f5f6fa] rounded-r-3xl lg:hidden shadow-2xl pt-safe pb-safe overscroll-contain select-none">
 
-        <div class="flex items-center justify-end px-4 pt-4">
+        {{-- Top Drag Handle & Close --}}
+        <div class="flex items-center justify-between px-4 pt-3 pb-1">
+            <div class="flex items-center gap-2">
+                <span class="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                <span class="text-[11px] font-black uppercase tracking-wider text-slate-400">Academy Hub</span>
+            </div>
             <button @click="mobileSidebarOpen = false"
-                    class="rounded-xl bg-white p-2 text-slate-400 shadow-sm hover:text-slate-600">
-                <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    aria-label="Close menu"
+                    class="rounded-xl bg-white p-2 text-slate-400 shadow-sm hover:text-slate-600 tap-bounce focus:outline-none">
+                <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
                 </svg>
             </button>
         </div>
 
-        {{-- Branding --}}
-        <div class="mx-3 mb-2 rounded-2xl bg-white p-4 shadow-sm">
+        {{-- Native User Profile Card --}}
+        <div class="mx-3 my-2 rounded-2xl bg-white p-3.5 shadow-sm border border-slate-200/60">
             <div class="flex items-center gap-3">
-                <div class="flex h-12 w-12 flex-shrink-0 items-center justify-center overflow-hidden rounded-xl bg-violet-50 ring-2 ring-violet-100"
-                     style="width: 48px; height: 48px; min-width: 48px; min-height: 48px;">
-                    @if($schoolLogo)
-                        <img src="{{ asset('uploads/'.str_replace('\\','/',$schoolLogo)) }}" alt="Logo" class="h-full w-full object-contain p-1" style="max-height: 100%; max-width: 100%; object-fit: contain;"/>
-                    @else
-                        <img src="{{ asset('full.png') }}" alt="AcademyHub" class="h-full w-full object-contain p-0.5" style="max-height: 100%; max-width: 100%; object-fit: contain;"/>
-                    @endif
-                </div>
-                <div class="min-w-0">
-                    <div class="truncate text-sm font-extrabold leading-tight text-slate-900">{{ $schoolName }}</div>
-                    <div class="mt-0.5 text-[11px] font-semibold text-violet-500">Smart Learning System</div>
+                @if($user?->profile_photo_url)
+                    <img src="{{ $user->profile_photo_url }}" alt="{{ $user->name }}" class="h-11 w-11 flex-shrink-0 rounded-2xl object-cover ring-2 ring-violet-100"/>
+                @else
+                    <div class="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-2xl bg-violet-600 text-white shadow-sm ring-2 ring-violet-100">
+                        <span class="text-base font-extrabold">{{ $userInitial }}</span>
+                    </div>
+                @endif
+                <div class="min-w-0 flex-1">
+                    <div class="truncate text-sm font-extrabold text-slate-900 leading-tight">{{ $user?->name ?? 'User' }}</div>
+                    <div class="flex items-center gap-1.5 mt-0.5">
+                        <span class="inline-flex items-center px-1.5 py-0.5 rounded-md text-[10px] font-bold bg-violet-50 text-violet-700 capitalize">
+                            {{ $user?->role ?? 'User' }}
+                        </span>
+                        <span class="text-[10px] text-slate-400 truncate">{{ $schoolName }}</span>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <div class="px-5 pb-1 pt-3">
-            <span class="text-[10px] font-black uppercase tracking-widest text-slate-400">Main Menu</span>
+        <div class="px-5 pb-1 pt-2">
+            <span class="text-[10px] font-black uppercase tracking-widest text-slate-400">All Modules &amp; Tools</span>
         </div>
 
         <nav class="flex-1 overflow-y-auto sidebar-scroll px-3 pb-3 space-y-0.5 min-h-0">
@@ -175,11 +207,11 @@ $activeShadow = "shadow-{$accent}-200";
         </nav>
 
         <div class="p-3 border-t border-slate-200/50 bg-white/50">
-            <button type="button" onclick="doLogout('logoutForm')" class="w-full flex items-center justify-center gap-2 rounded-xl bg-red-50 hover:bg-red-100 text-red-600 font-bold text-xs py-2.5 transition-colors">
+            <button type="button" onclick="doLogout('logoutForm')" class="w-full flex items-center justify-center gap-2 rounded-xl bg-red-50 hover:bg-red-100 text-red-600 font-bold text-xs py-2.5 transition-colors tap-bounce">
                 <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
                 </svg>
-                Logout
+                Sign Out
             </button>
         </div>
 
@@ -245,43 +277,57 @@ $activeShadow = "shadow-{$accent}-200";
     <div class="flex flex-1 min-w-0 flex-col">
 
         {{-- Header --}}
-        <header class="sticky top-0 z-30 flex h-[72px] items-center justify-between gap-4 border-b border-slate-200/60 bg-white px-4 sm:px-6 shadow-sm">
+        <header class="sticky top-0 z-30 flex h-14 sm:h-16 lg:h-[72px] items-center justify-between gap-2 sm:gap-4 border-b border-slate-200/60 bg-white/95 backdrop-blur-md px-3 sm:px-6 shadow-sm pt-safe select-none">
 
-            <div class="flex items-center gap-3 overflow-hidden">
-                <button @click="mobileSidebarOpen = true"
-                        class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl border border-slate-200 text-slate-500 hover:bg-slate-50 lg:hidden transition-colors">
-                    <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/>
-                    </svg>
-                </button>
+            <div class="flex items-center gap-2 sm:gap-3 overflow-hidden">
+                {{-- Mobile App Icon / Logo Trigger --}}
+                <div class="lg:hidden flex-shrink-0 flex items-center">
+                    <button type="button" @click="mobileSidebarOpen = true" aria-label="Open App Menu" class="tap-bounce flex items-center focus:outline-none">
+                        <div class="flex h-9 w-9 items-center justify-center overflow-hidden rounded-xl bg-violet-50 ring-1 ring-violet-200/80 shadow-sm">
+                            @if($schoolLogo)
+                                <img src="{{ asset('uploads/'.str_replace('\\','/',$schoolLogo)) }}" alt="Logo" class="h-full w-full object-contain p-0.5" />
+                            @else
+                                <img src="{{ asset('full.png') }}" alt="Logo" class="h-full w-full object-contain p-0.5" />
+                            @endif
+                        </div>
+                    </button>
+                </div>
+
+                {{-- Desktop collapse button --}}
                 <button @click="sidebarCollapsed = !sidebarCollapsed" title="Toggle Menu"
                         class="hidden h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl border border-slate-200 text-slate-500 hover:bg-slate-50 lg:flex transition-colors">
                     <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/>
                     </svg>
                 </button>
+
                 <div class="min-w-0 overflow-hidden">
-                    <h1 class="truncate text-sm sm:text-lg font-extrabold tracking-tight text-slate-900">{{ $schoolName }}</h1>
-                    <p class="hidden sm:block truncate text-[10px] font-medium text-slate-400 sm:text-xs">{{ now()->format('l, F j, Y') }}</p>
+                    <h1 class="truncate text-sm sm:text-lg font-extrabold tracking-tight text-slate-900 leading-tight">{{ $schoolName }}</h1>
+                    <div class="flex items-center gap-1.5">
+                        <span class="lg:hidden inline-flex items-center px-1.5 py-0.2 rounded-full text-[9px] font-bold bg-slate-100 text-slate-600 capitalize">
+                            {{ $user?->role ?? 'Portal' }}
+                        </span>
+                        <p class="hidden sm:block truncate text-[10px] font-medium text-slate-400 sm:text-xs">{{ now()->format('l, F j, Y') }}</p>
+                    </div>
                 </div>
             </div>
 
-            <div class="flex items-center gap-1.5 sm:gap-3">
+            <div class="flex items-center gap-2 sm:gap-3 flex-shrink-0">
 
                 {{-- Bell --}}
-                <div class="relative flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500 hover:bg-slate-50 transition-colors">
+                <div class="relative flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500 hover:bg-slate-50 transition-colors tap-bounce shadow-sm">
                     <livewire:notifications.bell />
                 </div>
 
                 {{-- User chip --}}
                 <a href="{{ route('profile') }}"
-                   class="flex items-center gap-1 sm:gap-2.5 rounded-full border border-slate-200 bg-white p-1 sm:py-1 sm:pl-1 sm:pr-4 shadow-sm hover:shadow-md transition-all">
+                   class="flex items-center gap-1.5 sm:gap-2.5 rounded-full border border-slate-200 bg-white p-0.5 sm:py-1 sm:pl-1 sm:pr-4 shadow-sm hover:shadow-md transition-all tap-bounce">
                     @if($user?->profile_photo_url)
                         <img src="{{ $user->profile_photo_url }}" alt="{{ $user->name }}"
                              class="h-8 w-8 flex-shrink-0 rounded-full object-cover"/>
                     @else
-                        <div class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-violet-500 text-white shadow-sm">
-                            <span class="text-sm font-extrabold leading-none">{{ $userInitial }}</span>
+                        <div class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-violet-600 text-white shadow-sm font-extrabold">
+                            <span class="text-xs sm:text-sm leading-none">{{ $userInitial }}</span>
                         </div>
                     @endif
                     <div class="hidden leading-tight sm:block text-left">
@@ -290,15 +336,13 @@ $activeShadow = "shadow-{$accent}-200";
                     </div>
                 </a>
 
-                {{-- Header Logout Button --}}
+                {{-- Header Logout Button (Desktop only) --}}
                 <button type="button" onclick="doLogout('logoutForm')" title="Logout"
                         class="hidden sm:flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500 hover:bg-red-50 hover:text-red-600 transition-colors shadow-sm flex-shrink-0">
                     <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
                     </svg>
                 </button>
-
-
 
             </div>
         </header>
@@ -568,7 +612,7 @@ $activeShadow = "shadow-{$accent}-200";
         @endif
 
         {{-- Page content --}}
-        <main class="flex-1 overflow-y-auto px-3 sm:px-6 py-4 sm:py-6">
+        <main class="flex-1 overflow-y-auto px-3 sm:px-6 py-4 sm:py-6 pb-24 lg:pb-6 overscroll-contain">
             @php
                 $resolvedTenant = app()->bound('currentTenant') ? app('currentTenant') : null;
             @endphp
@@ -586,6 +630,31 @@ $activeShadow = "shadow-{$accent}-200";
                     </div>
                 </div>
             @endif
+
+            @if(isset($hasActiveAcademicTerm) && !$hasActiveAcademicTerm && !request()->routeIs('academic-sessions'))
+                <div class="mb-6 rounded-2xl bg-gradient-to-r from-amber-500/15 via-orange-500/10 to-amber-500/15 border-2 border-amber-400/60 p-4 shadow-md backdrop-blur-md flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                    <div class="flex items-start gap-3.5">
+                        <div class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-amber-500 text-white shadow-md">
+                            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <span class="text-sm font-extrabold text-amber-950">Academic Calendar Setup Required</span>
+                                <span class="rounded-full bg-amber-200 px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-wider text-amber-900">Action Required</span>
+                            </div>
+                            <p class="text-xs font-medium text-amber-900/90 mt-0.5">Your school does not have an active Academic Session or Term. Please configure and activate your academic calendar.</p>
+                        </div>
+                    </div>
+                    @if(in_array(auth()->user()?->role, ['admin', 'proprietor'], true))
+                        <a href="{{ route('academic-sessions') }}" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs shadow-md transition-all whitespace-nowrap">
+                            Configure Calendar &rarr;
+                        </a>
+                    @endif
+                </div>
+            @endif
+
             @yield('content')
             {{ $slot ?? '' }}
 
@@ -602,6 +671,9 @@ $activeShadow = "shadow-{$accent}-200";
 
         <livewire:global-modal />
     </div>
+
+    {{-- Native Bottom Tab Bar for Mobile --}}
+    @include('layouts.partials.mobile-bottom-nav')
 
 </div>
 
@@ -919,9 +991,11 @@ $activeShadow = "shadow-{$accent}-200";
 
     {{-- Mobile sidebar JS is handled in app.js --}}
 
-    // Push notifications
-    if ('serviceWorker' in navigator && 'PushManager' in window) {
-        navigator.serviceWorker.register('/sw.js').catch(() => {});
+    // Service Worker & PWA registration
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('/sw.js?v=3').catch(() => {});
+        });
     }
     function sendBrowserNotification(title, body, url = '/') {
         if ('Notification' in window && Notification.permission === 'granted') {
@@ -989,6 +1063,8 @@ $activeShadow = "shadow-{$accent}-200";
         100% { transform: translateX(300%); }
     }
 </style>
+
+<x-pwa-install-prompt />
 
 </body>
 </html>

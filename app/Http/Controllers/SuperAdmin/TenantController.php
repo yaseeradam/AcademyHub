@@ -96,7 +96,7 @@ class TenantController extends Controller
             // Create the admin user and associate with the tenant
             if ($adminData) {
                 $adminData['tenant_id'] = $tenant->id;
-                User::create($adminData);
+                User::forceCreate($adminData);
             }
 
             // Ensure the new tenant has baseline data & a settings file so it can log in immediately.

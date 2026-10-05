@@ -18,6 +18,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
+use App\Support\TenantSettings;
 
 class ZkTecoController extends Controller
 {
@@ -322,14 +323,12 @@ class ZkTecoController extends Controller
                 'student_id' => $student->id,
             ])->first();
 
-            if ($existingStudentMark) {
+            if ($existingStudentMark && !empty($existingStudentMark->arrived_at)) {
                 // ── DEPARTURE (second punch) ───────────────────────────────
                 // Never downgrade Present → Late on departure scan.
                 $finalStatus = ($existingStudentMark->status === 'Present') ? 'Present' : $studentStatus;
 
-                $inDisplay  = $existingStudentMark->arrived_at
-                    ? Carbon::parse($existingStudentMark->arrived_at)->format('g:i A')
-                    : '–';
+                $inDisplay  = Carbon::parse($existingStudentMark->arrived_at)->format('g:i A');
                 $outDisplay = $punchTime->format('g:i A');
 
                 $existingStudentMark->update([
@@ -339,8 +338,17 @@ class ZkTecoController extends Controller
                 ]);
 
                 $status = $finalStatus; // keep status consistent for payload
+            } elseif ($existingStudentMark) {
+                // ── ARRIVAL (first biometric punch of the day on pre-existing mark) ──
+                $existingStudentMark->update([
+                    'status'      => $studentStatus,
+                    'arrived_at'  => $punchTime->format('H:i:s'),
+                    'departed_at' => null,
+                    'note'        => 'Arrived: ' . $punchTime->format('g:i A') . " ({$studentStatus})",
+                ]);
+                $status = $studentStatus;
             } else {
-                // ── ARRIVAL (first punch) ──────────────────────────────────
+                // ── ARRIVAL (first punch, new record) ──────────────────────
                 try {
                     AttendanceMark::create([
                         'tenant_id'  => $student->tenant_id,
@@ -358,17 +366,25 @@ class ZkTecoController extends Controller
                         'student_id' => $student->id,
                     ])->first();
                     if ($existingStudentMark) {
-                        $finalStatus = ($existingStudentMark->status === 'Present') ? 'Present' : $studentStatus;
-                        $inDisplay  = $existingStudentMark->arrived_at
-                            ? Carbon::parse($existingStudentMark->arrived_at)->format('g:i A')
-                            : '–';
-                        $outDisplay = $punchTime->format('g:i A');
-                        $existingStudentMark->update([
-                            'status'      => $finalStatus,
-                            'departed_at' => $punchTime->format('H:i:s'),
-                            'note'        => "Arrived: {$inDisplay} | Departed: {$outDisplay}",
-                        ]);
-                        $status = $finalStatus;
+                        if (!empty($existingStudentMark->arrived_at)) {
+                            $finalStatus = ($existingStudentMark->status === 'Present') ? 'Present' : $studentStatus;
+                            $inDisplay  = Carbon::parse($existingStudentMark->arrived_at)->format('g:i A');
+                            $outDisplay = $punchTime->format('g:i A');
+                            $existingStudentMark->update([
+                                'status'      => $finalStatus,
+                                'departed_at' => $punchTime->format('H:i:s'),
+                                'note'        => "Arrived: {$inDisplay} | Departed: {$outDisplay}",
+                            ]);
+                            $status = $finalStatus;
+                        } else {
+                            $existingStudentMark->update([
+                                'status'      => $studentStatus,
+                                'arrived_at'  => $punchTime->format('H:i:s'),
+                                'departed_at' => null,
+                                'note'        => 'Arrived: ' . $punchTime->format('g:i A') . " ({$studentStatus})",
+                            ]);
+                            $status = $studentStatus;
+                        }
                     }
                 }
                 $status = $studentStatus;

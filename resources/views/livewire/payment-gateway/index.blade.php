@@ -9,7 +9,7 @@
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
             
-            <!-- â”€â”€ Fee Scale + Installment Plans â”€â”€ -->
+            <!-- ── Fee Scale + Installment Plans ── -->
             <div class="space-y-6">
 
                 <!-- Class Tuition Settings -->
@@ -31,7 +31,7 @@
                         <div>
                             <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Tuition Amount</label>
                             <div class="relative">
-                                <span class="absolute left-4 top-1/2 -translate-y-1/2 font-bold text-slate-400 text-sm">â‚¦</span>
+                                <span class="absolute left-4 top-1/2 -translate-y-1/2 font-bold text-slate-400 text-sm">₦</span>
                                 <input type="number" step="0.01" wire:model="amount_due" class="w-full rounded-xl border border-slate-200 bg-slate-50 pl-8 pr-4 py-3 text-slate-900 focus:bg-white focus:border-violet-500 focus:ring-1 focus:ring-violet-500 outline-none transition duration-200" placeholder="0.00">
                             </div>
                             @error('amount_due') <span class="text-xs text-rose-500 mt-1 block">{{ $message }}</span> @enderror
@@ -52,7 +52,7 @@
                     <p class="text-xs text-slate-400 mb-5">Enable payment plans parents can choose for the selected class. Full payment is always available.</p>
 
                     <div class="space-y-3 mb-5">
-                        <!-- Full Payment â€” always on -->
+                        <!-- Full Payment — always on -->
                         <label class="flex items-start gap-3 p-3 rounded-xl border border-emerald-100 bg-emerald-50/50 cursor-not-allowed opacity-80">
                             <input type="checkbox" checked disabled class="mt-0.5 h-4 w-4 rounded accent-emerald-600">
                             <div>
@@ -67,7 +67,7 @@
                             <input type="checkbox" wire:model.live="plan_two_installments" class="mt-0.5 h-4 w-4 rounded accent-violet-600">
                             <div>
                                 <span class="text-sm font-bold text-slate-800">2 Installments per Term</span>
-                                <p class="text-xs text-slate-500 mt-0.5">Fee split into 2 equal halves â€” beginning and mid-term.</p>
+                                <p class="text-xs text-slate-500 mt-0.5">Fee split into 2 equal halves — beginning and mid-term.</p>
                             </div>
                         </label>
 
@@ -87,7 +87,7 @@
                 </div>
             </div>
 
-            <!-- â”€â”€ Payout Settlement Account â”€â”€ -->
+            <!-- ── Payout Settlement Account ── -->
             <div class="lg:col-span-2 bg-white rounded-2xl border border-slate-200/80 p-6 shadow-sm">
                 <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
                     <div>
@@ -166,7 +166,7 @@
                                 <select x-on:change="$event.target.value === '__other__' ? ($el.nextElementSibling.style.display='block') : ($el.nextElementSibling.style.display='none')"
                                         wire:model="bank_name"
                                         class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-900 focus:bg-white focus:border-violet-500 focus:ring-1 focus:ring-violet-500 outline-none transition duration-200 font-bold text-sm">
-                                    <option value="">â€” Select your bank â€”</option>
+                                    <option value="">— Select your bank —</option>
 
                                     <optgroup label="Tier 1 Commercial Banks">
                                         <option value="Access Bank">Access Bank</option>
@@ -221,7 +221,7 @@
                                     </optgroup>
 
                                     <optgroup label="Not listed above?">
-                                        <option value="__other__">Other â€” type my bank name below â†“</option>
+                                        <option value="__other__">Other — type my bank name below ↓</option>
                                     </optgroup>
                                 </select>
 
@@ -346,7 +346,7 @@
                                         </span>
                                     </td>
                                     <td class="px-4 py-4 font-extrabold text-slate-900">
-                                        â‚¦{{ number_format($item->amount_paid, 2) }}
+                                        ₦{{ number_format($item->amount_paid, 2) }}
                                     </td>
                                     <td class="px-4 py-4 text-center">
                                         @if($item->is_void)

@@ -13,6 +13,7 @@ RUN npm install --ignore-scripts
 
 COPY vite.config.js tailwind.config.js postcss.config.js ./
 COPY resources/ resources/
+COPY app/ app/
 
 RUN npm run build
 
@@ -100,11 +101,7 @@ COPY --chown=www-data:www-data . .
 # Copy built frontend assets from Stage 1
 COPY --from=assets --chown=www-data:www-data /build/public/build public/build
 
-# Install PHP dependencies (production only)
-RUN composer install --no-dev --optimize-autoloader --no-interaction --no-progress --ignore-platform-reqs \
-    && composer clear-cache
-
-# Create required directories and set permissions
+# Create required directories and set permissions before composer hooks
 RUN mkdir -p \
         storage/framework/cache/data \
         storage/framework/sessions \
@@ -117,7 +114,11 @@ RUN mkdir -p \
         public/certificates \
         public/report-cards-export \
     && chown -R www-data:www-data storage bootstrap/cache public/uploads public/avatars public/certificates public/report-cards-export \
-    && chmod -R 775 storage bootstrap/cache
+    && chmod -R 777 storage bootstrap/cache
+
+# Install PHP dependencies (production only)
+RUN composer install --no-dev --optimize-autoloader --no-interaction --no-progress --ignore-platform-reqs \
+    && composer clear-cache
 
 # Create storage symlink
 RUN php artisan storage:link 2>/dev/null || true

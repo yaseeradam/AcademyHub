@@ -190,56 +190,56 @@
 <div class="space-y-5 pb-12 font-sans">
 
     {{-- 1. HERO SECTION (Dark Blue header background explicitly applied via tailwind) --}}
-    <div class="relative overflow-hidden rounded-[1.5rem] bg-gradient-to-r from-[#17274E] to-[#1D3261] shadow-xl px-7 flex flex-col md:flex-row items-center justify-between min-h-[220px]">
+    <div class="relative overflow-hidden rounded-2xl sm:rounded-[1.5rem] bg-gradient-to-r from-[#17274E] to-[#1D3261] shadow-xl p-4 sm:p-7 flex flex-col md:flex-row items-center justify-between min-h-0 sm:min-h-[220px]">
         
         {{-- Subtle background stars/dots inline --}}
         <div class="absolute inset-0 pointer-events-none opacity-40 mix-blend-screen bg-[radial-gradient(circle,#ffffff_1.5px,transparent_1.5px)]" style="background-size: 32px 32px;"></div>
 
         {{-- Left Content --}}
-        <div class="relative z-10 py-7 w-full md:w-3/5">
-            <div class="flex items-center gap-2 mb-3">
+        <div class="relative z-10 py-2 sm:py-7 w-full md:w-3/5">
+            <div class="flex items-center gap-2 mb-2 sm:mb-3">
                 <span class="h-2 w-2 rounded-full bg-[#10b981] animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.8)]"></span>
                 <span class="text-[10px] font-black uppercase tracking-widest text-[#34d399]">Live System</span>
             </div>
-            <h2 class="text-3xl lg:text-4xl font-black text-white tracking-tight leading-[1.1] mb-1.5">
+            <h2 class="text-xl sm:text-3xl lg:text-4xl font-black text-white tracking-tight leading-tight mb-1 sm:mb-1.5">
                 {{ config('academyhub.school_name', config('app.name', 'FrontalMinds Islamic and Science Academy')) }}
             </h2>
-            <p class="text-sm font-medium text-blue-200 mb-5">School Management System</p>
+            <p class="text-xs sm:text-sm font-medium text-blue-200 mb-3 sm:mb-5">School Management System</p>
             
-            <div class="flex flex-wrap items-center gap-2.5">
-                <div class="inline-flex flex-shrink-0 items-center gap-1.5 rounded-lg border border-white/10 bg-white/10 backdrop-blur-sm px-3 py-2 text-[11px] font-bold text-white shadow-sm">
-                    <svg class="h-3.5 w-3.5 text-blue-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+            <div class="flex flex-wrap items-center gap-1.5 sm:gap-2.5">
+                <div class="inline-flex flex-shrink-0 items-center gap-1.5 rounded-lg border border-white/10 bg-white/10 backdrop-blur-sm px-2.5 py-1 sm:px-3 sm:py-2 text-[10px] sm:text-[11px] font-bold text-white shadow-sm">
+                    <svg class="h-3 w-3 sm:h-3.5 sm:w-3.5 text-blue-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
                     {{ $currentTerm ? $currentTerm->name : 'No Active Term' }}
                 </div>
-                <div class="inline-flex flex-shrink-0 items-center gap-1.5 rounded-lg border border-white/10 bg-white/10 backdrop-blur-sm px-3 py-2 text-[11px] font-bold text-white shadow-sm">
-                    <svg class="h-3.5 w-3.5 text-blue-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                <div class="inline-flex flex-shrink-0 items-center gap-1.5 rounded-lg border border-white/10 bg-white/10 backdrop-blur-sm px-2.5 py-1 sm:px-3 sm:py-2 text-[10px] sm:text-[11px] font-bold text-white shadow-sm">
+                    <svg class="h-3 w-3 sm:h-3.5 sm:w-3.5 text-blue-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
                     {{ number_format($studentsTotal) }} Students
                 </div>
-                <div class="inline-flex flex-shrink-0 items-center gap-1.5 rounded-lg border border-white/10 bg-white/10 backdrop-blur-sm px-3 py-2 text-[11px] font-bold text-white shadow-sm">
-                    <svg class="h-3.5 w-3.5 text-blue-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                <div class="inline-flex flex-shrink-0 items-center gap-1.5 rounded-lg border border-white/10 bg-white/10 backdrop-blur-sm px-2.5 py-1 sm:px-3 sm:py-2 text-[10px] sm:text-[11px] font-bold text-white shadow-sm">
+                    <svg class="h-3 w-3 sm:h-3.5 sm:w-3.5 text-blue-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
                     {{ now()->format('l, F j') }}
                 </div>
             </div>
         </div>
 
         {{-- Right Content: Mini "Today's Overview" Widget & 3D Avatar --}}
-        <div class="relative z-10 w-full md:w-2/5 flex items-center justify-end py-6 md:py-0 md:self-stretch">
+        <div class="relative z-10 w-full md:w-2/5 flex items-center justify-end py-2 sm:py-6 md:py-0 md:self-stretch">
             
             {{-- Avatar Placeholder 1 (Hero Admin) --}}
             <img src="{{ asset('avatars/Admin.png') }}" class="absolute bottom-0 -left-12 h-56 md:h-[220px] lg:h-[240px] xl:h-[250px] z-20 object-contain drop-shadow-2xl hidden md:block" alt="Admin Avatar">
 
-            <div class="bg-white/10 backdrop-blur-md rounded-2xl border border-white/10 p-4 shadow-xl w-full max-w-[280px] relative z-10 mt-6 md:mt-0">
-                <div class="flex items-center justify-between mb-3">
-                    <span class="text-xs font-bold text-white">Today's Overview</span>
-                    <svg class="h-4 w-4 text-indigo-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 3v18h18M9 15l3-3 4 4 5-5"/></svg>
+            <div class="bg-white/10 backdrop-blur-md rounded-xl sm:rounded-2xl border border-white/10 p-3 sm:p-4 shadow-xl w-full max-w-full sm:max-w-[280px] relative z-10 mt-2 sm:mt-6 md:mt-0">
+                <div class="flex items-center justify-between mb-2 sm:mb-3">
+                    <span class="text-[11px] sm:text-xs font-bold text-white">Today's Overview</span>
+                    <svg class="h-3.5 w-3.5 sm:h-4 sm:w-4 text-indigo-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 3v18h18M9 15l3-3 4 4 5-5"/></svg>
                 </div>
-                <div class="flex items-start gap-3">
-                    <div class="shrink-0 flex items-center justify-center h-10 w-10 rounded-xl bg-[#34d399] shadow-[0_0_12px_rgba(52,211,153,0.5)]">
-                        <svg class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                <div class="flex items-start gap-2.5 sm:gap-3">
+                    <div class="shrink-0 flex items-center justify-center h-8 w-8 sm:h-10 sm:w-10 rounded-lg sm:rounded-xl bg-[#34d399] shadow-[0_0_12px_rgba(52,211,153,0.5)]">
+                        <svg class="h-4 w-4 sm:h-5 sm:w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
                     </div>
                     <div>
-                        <h4 class="text-xs font-black text-white leading-tight">Everything looks good!</h4>
-                        <p class="text-[10px] font-semibold text-blue-200 mt-0.5 leading-relaxed">All systems are running smoothly. 😊</p>
+                        <h4 class="text-[11px] sm:text-xs font-black text-white leading-tight">Everything looks good!</h4>
+                        <p class="text-[9px] sm:text-[10px] font-semibold text-blue-200 mt-0.5 leading-relaxed">All systems are running smoothly. 😊</p>
                     </div>
                 </div>
             </div>
@@ -247,74 +247,74 @@
     </div>
 
 
-    {{-- 2. STAT CARDS ROW (-20% sized) --}}
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+    {{-- 2. STAT CARDS ROW (App-style 2-Column Mobile Grid) --}}
+    <div class="grid grid-cols-2 md:grid-cols-3 gap-3 sm:gap-5">
         
         {{-- Orange: Students --}}
-        <div class="rounded-3xl bg-gradient-to-br from-[#f97316] to-[#f43f5e] p-5 shadow-md relative overflow-hidden flex flex-col justify-between min-h-[140px] group">
+        <div class="rounded-2xl sm:rounded-3xl bg-gradient-to-br from-[#f97316] to-[#f43f5e] p-3.5 sm:p-5 shadow-sm sm:shadow-md relative overflow-hidden flex flex-col justify-between min-h-[115px] sm:min-h-[140px] group">
             <div class="absolute -right-8 -top-8 h-28 w-28 rounded-full bg-white/10 mix-blend-overlay"></div>
             <div class="absolute right-8 bottom-8 h-12 w-12 rounded-full bg-white/10 mix-blend-overlay"></div>
             
             <div class="relative z-10">
                 <div class="flex items-start justify-between">
                     <div>
-                        <h3 class="text-3xl font-black text-white drop-shadow-sm tracking-tight leading-none">{{ number_format($studentsTotal) }}</h3>
-                        <p class="text-white/90 font-bold text-sm mt-1 tracking-wide">Students</p>
+                        <h3 class="text-2xl sm:text-3xl font-black text-white drop-shadow-sm tracking-tight leading-none">{{ number_format($studentsTotal) }}</h3>
+                        <p class="text-white/90 font-bold text-xs sm:text-sm mt-1 tracking-wide">Students</p>
                     </div>
-                    <div class="bg-white/20 p-2 rounded-xl backdrop-blur-[2px]">
-                        <svg class="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 14l9-5-9-5-9 5 9 5z"></path><path stroke-linecap="round" stroke-linejoin="round" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"></path></svg>
+                    <div class="bg-white/20 p-1.5 sm:p-2 rounded-xl backdrop-blur-[2px]">
+                        <svg class="h-4 w-4 sm:h-5 sm:w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 14l9-5-9-5-9 5 9 5z"></path><path stroke-linecap="round" stroke-linejoin="round" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"></path></svg>
                     </div>
                 </div>
-                <div class="mt-4 flex flex-wrap items-center gap-1 text-[10px] font-bold text-emerald-200 bg-white/10 w-max px-2.5 py-1 rounded-full backdrop-blur-sm shadow-sm ring-1 ring-white/20">
-                    <span class="text-white">+{{ $admissionsThisMonth }}</span> this month <svg class="h-2.5 w-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18"/></svg>
+                <div class="mt-2.5 sm:mt-4 flex flex-wrap items-center gap-1 text-[9px] sm:text-[10px] font-bold text-emerald-200 bg-white/10 w-max px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full backdrop-blur-sm shadow-sm ring-1 ring-white/20">
+                    <span class="text-white">+{{ $admissionsThisMonth }}</span> this mo. <svg class="h-2 w-2 sm:h-2.5 sm:w-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18"/></svg>
                 </div>
             </div>
             {{-- Avatar Placeholder 2 (Boy Student) --}}
-            <img src="{{ asset('avatars/studentblue.png') }}" class="absolute bottom-0 -right-2 h-[120%] object-contain origin-bottom scale-90 translate-x-2 z-0" alt="Student">
+            <img src="{{ asset('avatars/studentblue.png') }}" class="absolute bottom-0 -right-2 h-[85%] sm:h-[120%] object-contain origin-bottom scale-90 translate-x-2 z-0 opacity-75 sm:opacity-100 pointer-events-none" alt="Student">
         </div>
 
         {{-- Purple: Teachers --}}
-        <div class="rounded-3xl bg-gradient-to-br from-[#a855f7] to-[#7e22ce] p-5 shadow-md relative overflow-hidden flex flex-col justify-between min-h-[140px] group">
+        <div class="rounded-2xl sm:rounded-3xl bg-gradient-to-br from-[#a855f7] to-[#7e22ce] p-3.5 sm:p-5 shadow-sm sm:shadow-md relative overflow-hidden flex flex-col justify-between min-h-[115px] sm:min-h-[140px] group">
             <div class="absolute -right-6 -top-6 h-28 w-28 rounded-full bg-white/10 mix-blend-overlay"></div>
             
             <div class="relative z-10">
                 <div class="flex items-start justify-between">
                     <div>
-                        <h3 class="text-3xl font-black text-white drop-shadow-sm tracking-tight leading-none">{{ number_format($teachersTotal) }}</h3>
-                        <p class="text-white/90 font-bold text-sm mt-1 tracking-wide">Teachers</p>
+                        <h3 class="text-2xl sm:text-3xl font-black text-white drop-shadow-sm tracking-tight leading-none">{{ number_format($teachersTotal) }}</h3>
+                        <p class="text-white/90 font-bold text-xs sm:text-sm mt-1 tracking-wide">Teachers</p>
                     </div>
-                    <div class="bg-white/20 p-2 rounded-xl backdrop-blur-[2px]">
-                        <svg class="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                    <div class="bg-white/20 p-1.5 sm:p-2 rounded-xl backdrop-blur-[2px]">
+                        <svg class="h-4 w-4 sm:h-5 sm:w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
                     </div>
                 </div>
-                <div class="mt-4 flex flex-wrap items-center gap-1 text-[10px] font-bold text-emerald-200 bg-white/10 w-max px-2.5 py-1 rounded-full backdrop-blur-sm shadow-sm ring-1 ring-white/20">
-                    <span class="text-white">Active</span> personnel <svg class="h-2.5 w-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18"/></svg>
+                <div class="mt-2.5 sm:mt-4 flex flex-wrap items-center gap-1 text-[9px] sm:text-[10px] font-bold text-emerald-200 bg-white/10 w-max px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full backdrop-blur-sm shadow-sm ring-1 ring-white/20">
+                    <span class="text-white">Active</span> staff <svg class="h-2 w-2 sm:h-2.5 sm:w-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18"/></svg>
                 </div>
             </div>
             {{-- Avatar Placeholder 3 (Teacher Female) --}}
-            <img src="{{ asset('avatars/girl student pink.png') }}" class="absolute bottom-0 right-2 h-[115%] object-contain scale-90 translate-x-2 z-0" alt="Teacher">
+            <img src="{{ asset('avatars/girl student pink.png') }}" class="absolute bottom-0 right-1 sm:right-2 h-[80%] sm:h-[115%] object-contain scale-90 translate-x-2 z-0 opacity-75 sm:opacity-100 pointer-events-none" alt="Teacher">
         </div>
 
         {{-- Teal: Classes --}}
-        <div class="rounded-3xl bg-gradient-to-br from-[#14b8a6] to-[#0f766e] p-5 shadow-md relative overflow-hidden flex flex-col justify-between min-h-[140px] group">
+        <div class="col-span-2 md:col-span-1 rounded-2xl sm:rounded-3xl bg-gradient-to-br from-[#14b8a6] to-[#0f766e] p-3.5 sm:p-5 shadow-sm sm:shadow-md relative overflow-hidden flex flex-col justify-between min-h-[100px] sm:min-h-[140px] group">
             <div class="absolute -right-6 -top-6 h-28 w-28 rounded-full bg-white/10 mix-blend-overlay"></div>
             
             <div class="relative z-10">
                 <div class="flex items-start justify-between">
                     <div>
-                        <h3 class="text-3xl font-black text-white drop-shadow-sm tracking-tight leading-none">{{ number_format($classesTotal) }}</h3>
-                        <p class="text-white/90 font-bold text-sm mt-1 tracking-wide">Classes</p>
+                        <h3 class="text-2xl sm:text-3xl font-black text-white drop-shadow-sm tracking-tight leading-none">{{ number_format($classesTotal) }}</h3>
+                        <p class="text-white/90 font-bold text-xs sm:text-sm mt-1 tracking-wide">Classes</p>
                     </div>
-                    <div class="bg-white/20 p-2 rounded-xl backdrop-blur-[2px]">
-                        <svg class="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+                    <div class="bg-white/20 p-1.5 sm:p-2 rounded-xl backdrop-blur-[2px]">
+                        <svg class="h-4 w-4 sm:h-5 sm:w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
                     </div>
                 </div>
-                <div class="mt-4 flex flex-wrap items-center gap-1 text-[11px] font-bold text-teal-100 px-1">
+                <div class="mt-2 sm:mt-4 flex flex-wrap items-center gap-1 text-[10px] sm:text-[11px] font-bold text-teal-100">
                     Active classes in session
                 </div>
             </div>
             {{-- Avatar Placeholder 4 (Boy Pointing) --}}
-            <img src="{{ asset('avatars/student yellow.png') }}" class="absolute bottom-0 -right-2 h-[120%] object-contain scale-90 translate-x-2 z-0" alt="Student">
+            <img src="{{ asset('avatars/student yellow.png') }}" class="absolute bottom-0 -right-2 h-[85%] sm:h-[120%] object-contain scale-90 translate-x-2 z-0 opacity-75 sm:opacity-100 pointer-events-none" alt="Student">
         </div>
 
     </div>
@@ -323,82 +323,86 @@
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
         
         {{-- Left: Attendance Today --}}
-        <div class="lg:col-span-7 bg-white rounded-3xl border border-slate-100 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07)] p-5 overflow-hidden">
-            <div class="flex items-center justify-between mb-8">
+        <div class="lg:col-span-7 bg-white rounded-2xl sm:rounded-3xl border border-slate-100 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07)] p-4 sm:p-5 overflow-hidden">
+            <div class="flex items-center justify-between mb-4 sm:mb-8">
                 <div class="flex items-center gap-2">
                     <svg class="h-5 w-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                    <h3 class="text-[15px] font-extrabold text-slate-800">Attendance Today</h3>
+                    <h3 class="text-sm sm:text-[15px] font-extrabold text-slate-800">Attendance Today</h3>
                 </div>
-                <div class="rounded-lg border border-slate-200 px-3 py-1.5 text-[11px] font-bold text-slate-600 bg-slate-50 flex items-center gap-1.5 shadow-sm">
+                <div class="rounded-lg border border-slate-200 px-2.5 py-1 sm:px-3 sm:py-1.5 text-[10px] sm:text-[11px] font-bold text-slate-600 bg-slate-50 flex items-center gap-1.5 shadow-sm">
                     Today <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
                 </div>
             </div>
 
-            <div class="flex flex-col md:flex-row items-center gap-7">
+            <div class="flex flex-col md:flex-row items-center gap-5 sm:gap-7">
                 
-                {{-- Pure CSS SVG Circular Donut Chart --}}
-                <div class="shrink-0 relative flex items-center justify-center">
-                    <svg class="h-28 w-28 transform -rotate-90">
-                        <circle cx="56" cy="56" r="48" stroke="#f1f5f9" stroke-width="12" fill="none"></circle>
-                        {{-- Stroke Dasharray logic for precise % match --}}
-                        @php $dashPresent = 301 * ($attendanceRate / 100); @endphp
-                        <circle cx="56" cy="56" r="48" stroke="#10b981" stroke-width="12" fill="none" stroke-linecap="round" stroke-dasharray="{{ $dashPresent }} 301"></circle>
-                    </svg>
-                    <div class="absolute flex flex-col items-center justify-center">
-                        <span class="text-xl font-black text-slate-800 tracking-tight">{{ $attendanceRate }}%</span>
-                        <span class="text-[9px] font-bold uppercase tracking-wider text-slate-500">Present</span>
+                {{-- Donut & Legend side-by-side on mobile --}}
+                <div class="flex flex-row items-center justify-around sm:justify-start gap-3 sm:gap-6 w-full md:w-auto">
+                    {{-- Pure CSS SVG Circular Donut Chart --}}
+                    <div class="shrink-0 relative flex items-center justify-center">
+                        <svg class="h-24 w-24 sm:h-28 sm:w-28 transform -rotate-90">
+                            <circle cx="48" cy="48" r="40" class="sm:hidden" stroke="#f1f5f9" stroke-width="10" fill="none"></circle>
+                            <circle cx="56" cy="56" r="48" class="hidden sm:block" stroke="#f1f5f9" stroke-width="12" fill="none"></circle>
+                            {{-- Stroke Dasharray logic for precise % match --}}
+                            @php 
+                                $dashPresentSm = 251 * ($attendanceRate / 100);
+                                $dashPresent = 301 * ($attendanceRate / 100); 
+                            @endphp
+                            <circle cx="48" cy="48" r="40" class="sm:hidden" stroke="#10b981" stroke-width="10" fill="none" stroke-linecap="round" stroke-dasharray="{{ $dashPresentSm }} 251"></circle>
+                            <circle cx="56" cy="56" r="48" class="hidden sm:block" stroke="#10b981" stroke-width="12" fill="none" stroke-linecap="round" stroke-dasharray="{{ $dashPresent }} 301"></circle>
+                        </svg>
+                        <div class="absolute flex flex-col items-center justify-center">
+                            <span class="text-lg sm:text-xl font-black text-slate-800 tracking-tight">{{ $attendanceRate }}%</span>
+                            <span class="text-[8px] sm:text-[9px] font-bold uppercase tracking-wider text-slate-500">Present</span>
+                        </div>
+                    </div>
+
+                    {{-- Legend / Breakdown --}}
+                    <div class="shrink-0 space-y-2.5 sm:space-y-3.5 pr-0 sm:pr-8 sm:border-r border-slate-100 min-w-[110px] sm:min-w-[120px]">
+                        <div class="flex items-center gap-2 sm:gap-4">
+                            <div class="flex items-center gap-1.5 sm:gap-2 w-14 sm:w-16">
+                                <span class="h-2 w-2 sm:h-2.5 sm:w-2.5 rounded-full bg-[#10b981]"></span>
+                                <span class="text-xs font-bold text-slate-600">Present</span>
+                            </div>
+                            <span class="text-xs font-black text-slate-800 w-5 sm:w-6">{{ $presentToday }}</span>
+                            <span class="text-[10px] font-bold text-slate-400">{{ $attendanceRate }}%</span>
+                        </div>
+                        <div class="flex items-center gap-2 sm:gap-4">
+                            <div class="flex items-center gap-1.5 sm:gap-2 w-14 sm:w-16">
+                                <span class="h-2 w-2 sm:h-2.5 sm:w-2.5 rounded-full bg-[#f43f5e]"></span>
+                                <span class="text-xs font-bold text-slate-600">Absent</span>
+                            </div>
+                            <span class="text-xs font-black text-slate-800 w-5 sm:w-6">{{ $absentToday }}</span>
+                            <span class="text-[10px] font-bold text-slate-400">{{ $absentRate }}%</span>
+                        </div>
+                        <div class="flex items-center gap-2 sm:gap-4">
+                            <div class="flex items-center gap-1.5 sm:gap-2 w-14 sm:w-16">
+                                <span class="h-2 w-2 sm:h-2.5 sm:w-2.5 rounded-full bg-[#fbbf24]"></span>
+                                <span class="text-xs font-bold text-slate-600">Late</span>
+                            </div>
+                            <span class="text-xs font-black text-slate-800 w-5 sm:w-6">{{ $lateToday }}</span>
+                            <span class="text-[10px] font-bold text-slate-400">{{ $lateRate }}%</span>
+                        </div>
                     </div>
                 </div>
 
-                {{-- Legend / Breakdown perfectly matched --}}
-                <div class="shrink-0 space-y-3.5 pr-8 lg:border-r border-slate-100 min-w-[120px]">
-                    <div class="flex items-center gap-4">
-                        <div class="flex items-center gap-2 w-16">
-                            <span class="h-2.5 w-2.5 rounded-full bg-[#10b981]"></span>
-                            <span class="text-xs font-bold text-slate-600">Present</span>
-                        </div>
-                        <span class="text-xs font-black text-slate-800 w-6">{{ $presentToday }}</span>
-                        <span class="text-[10px] font-bold text-slate-400">{{ $attendanceRate }}%</span>
-                    </div>
-                    <div class="flex items-center gap-4">
-                        <div class="flex items-center gap-2 w-16">
-                            <span class="h-2.5 w-2.5 rounded-full bg-[#f43f5e]"></span>
-                            <span class="text-xs font-bold text-slate-600">Absent</span>
-                        </div>
-                        <span class="text-xs font-black text-slate-800 w-6">{{ $absentToday }}</span>
-                        <span class="text-[10px] font-bold text-slate-400">{{ $absentRate }}%</span>
-                    </div>
-                    <div class="flex items-center gap-4">
-                        <div class="flex items-center gap-2 w-16">
-                            <span class="h-2.5 w-2.5 rounded-full bg-[#fbbf24]"></span>
-                            <span class="text-xs font-bold text-slate-600">Late</span>
-                        </div>
-                        <span class="text-xs font-black text-slate-800 w-6">{{ $lateToday }}</span>
-                        <span class="text-[10px] font-bold text-slate-400">{{ $lateRate }}%</span>
-                    </div>
-                </div>
-
-                {{-- FUNCTIONING Stacked Vertical Bar Chart (CSS driven by actual weekly data) --}}
-                <div class="flex-1 w-full pl-2">
-                    <div class="relative h-[110px] w-full flex items-end justify-between gap-2 px-2 text-[10px] font-bold text-slate-400">
+                {{-- Stacked Vertical Bar Chart --}}
+                <div class="flex-1 w-full pt-3 sm:pt-0 border-t sm:border-t-0 border-slate-100">
+                    <div class="relative h-[95px] sm:h-[110px] w-full flex items-end justify-between gap-1.5 sm:gap-2 px-1 sm:px-2 text-[10px] font-bold text-slate-400">
                         @foreach($weeklyBars as $bar)
                             <div class="flex flex-col items-center w-full h-full justify-end relative group">
-                                {{-- Tooltip --}}
                                 <div class="absolute -top-7 opacity-0 group-hover:opacity-100 transition whitespace-nowrap bg-slate-800 text-white text-[9px] px-2 py-0.5 rounded shadow pointer-events-none z-10 text-center">
                                     {{ $bar['present_h'] }}% Present
                                 </div>
                                 
-                                {{-- Stacked Bars --}}
                                 <div class="flex flex-col-reverse w-2.5 md:w-3 items-center justify-start h-[80%] rounded-full overflow-hidden bg-slate-50 relative {{ $bar['is_today'] ? 'ring-2 ring-slate-100' : '' }}">
                                     @if($bar['present_h'] > 0 || $bar['absent_h'] > 0 || $bar['late_h'] > 0)
                                         <div class="w-full bg-[#10b981] transition-all duration-500" style="height: {{ $bar['present_h'] }}%"></div>
                                         <div class="w-full bg-[#fbbf24] transition-all duration-500" style="height: {{ $bar['late_h'] }}%"></div>
                                         <div class="w-full bg-[#f43f5e] transition-all duration-500" style="height: {{ $bar['absent_h'] }}%"></div>
-                                    @else
-                                        {{-- Empty state for future days of the week --}}
                                     @endif
                                 </div>
-                                <span class="tracking-wider mt-2 {{ $bar['is_today'] ? 'text-slate-800 font-extrabold' : '' }}">{{ $bar['day'] }}</span>
+                                <span class="tracking-wider mt-1.5 text-[9px] sm:text-[10px] {{ $bar['is_today'] ? 'text-slate-800 font-extrabold' : '' }}">{{ $bar['day'] }}</span>
                             </div>
                         @endforeach
                     </div>
@@ -407,53 +411,57 @@
         </div>
 
         {{-- Right: Students Overview --}}
-        <div class="lg:col-span-5 bg-white rounded-3xl border border-slate-100 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07)] p-5 overflow-hidden flex flex-col">
-            <div class="flex items-center gap-2 mb-6">
+        <div class="lg:col-span-5 bg-white rounded-2xl sm:rounded-3xl border border-slate-100 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07)] p-4 sm:p-5 overflow-hidden flex flex-col">
+            <div class="flex items-center gap-2 mb-4 sm:mb-6">
                 <svg class="h-5 w-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
-                <h3 class="text-[15px] font-extrabold text-slate-800">Students Overview</h3>
+                <h3 class="text-sm sm:text-[15px] font-extrabold text-slate-800">Students Overview</h3>
             </div>
 
-            <div class="flex flex-row items-center gap-6 justify-between lg:justify-start flex-1">
-                {{-- Donut exactly as image --}}
-                <div class="shrink-0 relative flex items-center justify-center ml-2">
-                    <svg class="h-[100px] w-[100px] transform -rotate-90">
-                        <circle cx="50" cy="50" r="40" stroke="#f1f5f9" stroke-width="12" fill="none"></circle>
+            <div class="flex flex-row items-center gap-4 sm:gap-6 justify-between lg:justify-start flex-1">
+                {{-- Donut --}}
+                <div class="shrink-0 relative flex items-center justify-center">
+                    <svg class="h-20 w-20 sm:h-[100px] sm:w-[100px] transform -rotate-90">
+                        <circle cx="40" cy="40" r="32" class="sm:hidden" stroke="#f1f5f9" stroke-width="10" fill="none"></circle>
+                        <circle cx="50" cy="50" r="40" class="hidden sm:block" stroke="#f1f5f9" stroke-width="12" fill="none"></circle>
                         @php 
                             $boysPct = $studentsTotal > 0 ? ($studentsBoys / $studentsTotal) : 0;
+                            $dashBoysSm = 201 * $boysPct;
                             $dashBoys = 251 * $boysPct;
                         @endphp
-                        <circle cx="50" cy="50" r="40" stroke="#fb8c00" stroke-width="12" fill="none"></circle> 
-                        <circle cx="50" cy="50" r="40" stroke="#8b5cf6" stroke-width="12" fill="none" stroke-linecap="round" stroke-dasharray="{{ $dashBoys }} 251"></circle>
+                        <circle cx="40" cy="40" r="32" class="sm:hidden" stroke="#fb8c00" stroke-width="10" fill="none"></circle> 
+                        <circle cx="40" cy="40" r="32" class="sm:hidden" stroke="#8b5cf6" stroke-width="10" fill="none" stroke-linecap="round" stroke-dasharray="{{ $dashBoysSm }} 201"></circle>
+                        <circle cx="50" cy="50" r="40" class="hidden sm:block" stroke="#fb8c00" stroke-width="12" fill="none"></circle> 
+                        <circle cx="50" cy="50" r="40" class="hidden sm:block" stroke="#8b5cf6" stroke-width="12" fill="none" stroke-linecap="round" stroke-dasharray="{{ $dashBoys }} 251"></circle>
                     </svg>
                     <div class="absolute flex flex-col items-center justify-center">
-                        <span class="text-xl font-black text-slate-800 tracking-tight">{{ number_format($studentsTotal) }}</span>
-                        <span class="text-[9px] font-bold uppercase tracking-wider text-slate-500">Total</span>
+                        <span class="text-base sm:text-xl font-black text-slate-800 tracking-tight">{{ number_format($studentsTotal) }}</span>
+                        <span class="text-[8px] sm:text-[9px] font-bold uppercase tracking-wider text-slate-500">Total</span>
                     </div>
                 </div>
 
                 {{-- Legend & Admission Badge --}}
-                <div class="flex-1 space-y-3.5">
+                <div class="flex-1 space-y-2.5 sm:space-y-3.5">
                     <div class="flex items-center justify-between">
-                        <div class="flex items-center gap-2">
-                            <span class="h-2.5 w-2.5 rounded-full bg-[#8b5cf6]"></span>
+                        <div class="flex items-center gap-1.5 sm:gap-2">
+                            <span class="h-2 w-2 sm:h-2.5 sm:w-2.5 rounded-full bg-[#8b5cf6]"></span>
                             <span class="text-xs font-bold text-slate-600">Boys</span>
                         </div>
                         <span class="text-xs font-black text-slate-800">{{ $studentsBoys }}</span>
                         <span class="text-[10px] font-bold text-slate-400">{{ $studentsTotal > 0 ? round(($studentsBoys/$studentsTotal)*100) : 0 }}%</span>
                     </div>
                     <div class="flex items-center justify-between">
-                        <div class="flex items-center gap-2">
-                            <span class="h-2.5 w-2.5 rounded-full bg-[#fb8c00]"></span>
+                        <div class="flex items-center gap-1.5 sm:gap-2">
+                            <span class="h-2 w-2 sm:h-2.5 sm:w-2.5 rounded-full bg-[#fb8c00]"></span>
                             <span class="text-xs font-bold text-slate-600">Girls</span>
                         </div>
                         <span class="text-xs font-black text-slate-800">{{ $studentsGirls }}</span>
                         <span class="text-[10px] font-bold text-slate-400">{{ $studentsTotal > 0 ? round(($studentsGirls/$studentsTotal)*100) : 0 }}%</span>
                     </div>
                     
-                    <div class="pt-3">
-                        <div class="inline-flex items-center gap-1.5 rounded-lg bg-emerald-50/80 px-2.5 py-1.5 text-[10px] font-bold text-emerald-600 w-full border border-emerald-100 shadow-[0_1px_2px_rgba(16,185,129,0.05)] justify-center tracking-wide">
-                            <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path></svg>
-                            Admission this month: <span class="font-black">{{ $admissionsThisMonth }}</span>
+                    <div class="pt-2 sm:pt-3">
+                        <div class="inline-flex items-center gap-1.5 rounded-lg bg-emerald-50/80 px-2 py-1 sm:px-2.5 sm:py-1.5 text-[9px] sm:text-[10px] font-bold text-emerald-600 w-full border border-emerald-100 shadow-sm justify-center tracking-wide">
+                            <svg class="h-3 w-3 sm:h-3.5 sm:w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path></svg>
+                            Admissions this month: <span class="font-black">{{ $admissionsThisMonth }}</span>
                         </div>
                     </div>
                 </div>
@@ -461,64 +469,64 @@
         </div>
     </div>
 
-    {{-- 4. BOTTOM HORIZONTAL ROW --}}
-    <div class="bg-white rounded-3xl border border-slate-100 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07)] divide-y lg:divide-y-0 lg:divide-x divide-slate-100 overflow-hidden mb-8">
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+    {{-- 4. BOTTOM HORIZONTAL ROW (2-Column Mobile Grid for Instant App Scanning) --}}
+    <div class="bg-white rounded-2xl sm:rounded-3xl border border-slate-100 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07)] overflow-hidden mb-6 sm:mb-8">
+        <div class="grid grid-cols-2 lg:grid-cols-4 divide-y sm:divide-y-0 divide-slate-100 sm:divide-x">
             
             {{-- Block 1: Attendance Rate --}}
-            <div class="p-5 flex items-center gap-4 hover:bg-slate-50 transition-colors">
-                <div class="h-12 w-12 rounded-2xl bg-indigo-50 border border-indigo-100 flex shrink-0 items-center justify-center text-indigo-500 shadow-inner">
-                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+            <div class="p-3.5 sm:p-5 flex items-center gap-2.5 sm:gap-4 hover:bg-slate-50 transition-colors">
+                <div class="h-10 w-10 sm:h-12 sm:w-12 rounded-xl sm:rounded-2xl bg-indigo-50 border border-indigo-100 flex shrink-0 items-center justify-center text-indigo-500 shadow-inner">
+                    <svg class="h-4.5 w-4.5 sm:h-5 sm:w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
                 </div>
-                <div>
-                    <h4 class="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-0.5">Attendance Rate</h4>
-                    <p class="text-[9px] font-bold text-slate-400 mb-0.5">This month</p>
-                    <div class="flex items-center gap-1.5">
-                        <span class="text-xl font-black text-slate-800 leading-none">{{ collect([$monthlyAttendance, 100])->min() }}%</span>
+                <div class="min-w-0">
+                    <h4 class="text-[9px] sm:text-[10px] font-black uppercase tracking-wider text-slate-500 mb-0.5 truncate">Attendance Rate</h4>
+                    <p class="text-[8px] sm:text-[9px] font-bold text-slate-400 mb-0.5">This month</p>
+                    <div class="flex items-center gap-1">
+                        <span class="text-base sm:text-xl font-black text-slate-800 leading-none">{{ collect([$monthlyAttendance, 100])->min() }}%</span>
                         @php
                             $isPositive = !str_starts_with($attendanceChange, '-');
                             $colorClass = $isPositive ? 'bg-[#10b981]/10 text-[#10b981]' : 'bg-rose-500/10 text-rose-500';
                         @endphp
-                        <span class="inline-flex items-center rounded-md {{ $colorClass }} px-1 py-0.5 text-[9px] font-black leading-none">{{ $attendanceChange }}</span>
+                        <span class="inline-flex items-center rounded {{ $colorClass }} px-1 py-0.2 text-[8px] sm:text-[9px] font-black leading-none">{{ $attendanceChange }}</span>
                     </div>
                 </div>
             </div>
 
             {{-- Block 2: Best Class --}}
-            <div class="p-5 flex items-center gap-4 hover:bg-slate-50 transition-colors">
-                <div class="h-12 w-12 shrink-0 rounded-2xl bg-amber-50 border border-amber-100 flex items-center justify-center text-amber-500 shadow-inner">
-                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"></path></svg>
+            <div class="p-3.5 sm:p-5 flex items-center gap-2.5 sm:gap-4 hover:bg-slate-50 transition-colors">
+                <div class="h-10 w-10 sm:h-12 sm:w-12 shrink-0 rounded-xl sm:rounded-2xl bg-amber-50 border border-amber-100 flex items-center justify-center text-amber-500 shadow-inner">
+                    <svg class="h-5 w-5 sm:h-6 sm:w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"></path></svg>
                 </div>
-                <div>
-                    <h4 class="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-0.5">Best Class</h4>
-                    <span class="text-lg font-black text-[#10b981] block mb-0.5 leading-none">{{ $classStats['best_class_name'] }}</span>
-                    <p class="text-[9px] font-bold text-slate-400 uppercase tracking-wide">{{ $classStats['best_class_rate'] }}% Attendance</p>
+                <div class="min-w-0">
+                    <h4 class="text-[9px] sm:text-[10px] font-black uppercase tracking-wider text-slate-500 mb-0.5 truncate">Best Class</h4>
+                    <span class="text-sm sm:text-lg font-black text-[#10b981] block mb-0.5 leading-tight truncate">{{ $classStats['best_class_name'] }}</span>
+                    <p class="text-[8px] sm:text-[9px] font-bold text-slate-400 uppercase tracking-wide truncate">{{ $classStats['best_class_rate'] }}% Attend</p>
                 </div>
             </div>
 
             {{-- Block 3: Needs Attention --}}
-            <div class="p-5 flex items-center gap-4 hover:bg-slate-50 transition-colors">
-                <div class="h-12 w-12 shrink-0 rounded-2xl bg-rose-50 border border-rose-100 flex items-center justify-center text-rose-500 shadow-inner">
-                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+            <div class="p-3.5 sm:p-5 flex items-center gap-2.5 sm:gap-4 hover:bg-slate-50 transition-colors">
+                <div class="h-10 w-10 sm:h-12 sm:w-12 shrink-0 rounded-xl sm:rounded-2xl bg-rose-50 border border-rose-100 flex items-center justify-center text-rose-500 shadow-inner">
+                    <svg class="h-4.5 w-4.5 sm:h-5 sm:w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
                 </div>
-                <div>
-                    <h4 class="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-0.5">Needs Attention</h4>
-                    <span class="text-lg font-black text-rose-600 block mb-0.5 leading-none">{{ $classStats['worst_class_name'] }}</span>
-                    <p class="text-[9px] font-bold text-slate-400 uppercase tracking-wide">{{ $classStats['worst_class_rate'] }}% Attendance</p>
+                <div class="min-w-0">
+                    <h4 class="text-[9px] sm:text-[10px] font-black uppercase tracking-wider text-slate-500 mb-0.5 truncate">Needs Attention</h4>
+                    <span class="text-sm sm:text-lg font-black text-rose-600 block mb-0.5 leading-tight truncate">{{ $classStats['worst_class_name'] }}</span>
+                    <p class="text-[8px] sm:text-[9px] font-bold text-slate-400 uppercase tracking-wide truncate">{{ $classStats['worst_class_rate'] }}% Attend</p>
                 </div>
             </div>
 
             {{-- Block 4: Current Streak (Bonus Fire Widget) --}}
-            <div class="p-5 flex items-center gap-4 hover:bg-slate-50 transition-colors relative overflow-hidden group">
-                <div class="h-12 w-12 shrink-0 rounded-2xl bg-orange-50 border border-orange-100 flex items-center justify-center text-[#f97316] shadow-inner relative z-10">
-                    <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor"><path d="M17.5 12a10.05 10.05 0 00-6.5-6.5C11 8.5 11.5 10.5 13 13c-4.5-2.5-4-8.5-4-8.5C9 7.5 4.5 11 4.5 16.5 4.5 20.64 7.86 24 12 24s7.5-3.36 7.5-7.5c0-1.66-.63-3.26-2-4.5z"/></svg>
+            <div class="p-3.5 sm:p-5 flex items-center gap-2.5 sm:gap-4 hover:bg-slate-50 transition-colors relative overflow-hidden group">
+                <div class="h-10 w-10 sm:h-12 sm:w-12 shrink-0 rounded-xl sm:rounded-2xl bg-orange-50 border border-orange-100 flex items-center justify-center text-[#f97316] shadow-inner relative z-10">
+                    <svg class="h-4.5 w-4.5 sm:h-5 sm:w-5" viewBox="0 0 24 24" fill="currentColor"><path d="M17.5 12a10.05 10.05 0 00-6.5-6.5C11 8.5 11.5 10.5 13 13c-4.5-2.5-4-8.5-4-8.5C9 7.5 4.5 11 4.5 16.5 4.5 20.64 7.86 24 12 24s7.5-3.36 7.5-7.5c0-1.66-.63-3.26-2-4.5z"/></svg>
                 </div>
-                <div class="relative z-10">
-                    <h4 class="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-0.5">Current Streak</h4>
-                    <span class="text-lg font-black text-slate-800 block mb-0.5 leading-none">{{ $currentStreak }} {{ \Illuminate\Support\Str::plural('day', $currentStreak) }}</span>
-                    <p class="text-[9px] font-bold text-slate-400 flex items-center gap-1 uppercase tracking-wide">
+                <div class="relative z-10 min-w-0">
+                    <h4 class="text-[9px] sm:text-[10px] font-black uppercase tracking-wider text-slate-500 mb-0.5 truncate">Current Streak</h4>
+                    <span class="text-sm sm:text-lg font-black text-slate-800 block mb-0.5 leading-tight">{{ $currentStreak }} {{ \Illuminate\Support\Str::plural('day', $currentStreak) }}</span>
+                    <p class="text-[8px] sm:text-[9px] font-bold text-slate-400 flex items-center gap-1 uppercase tracking-wide truncate">
                         @if($currentStreak > 0)
-                            Keep it up! <span class="bg-[#ffedd5] text-[#ea580c] px-1 py-0.5 rounded leading-none">🔥</span>
+                            Keep it up! <span class="bg-[#ffedd5] text-[#ea580c] px-1 py-0.2 rounded leading-none">🔥</span>
                         @else
                             No data yet
                         @endif
@@ -527,8 +535,7 @@
                 
                 {{-- Fire avatar placeholder --}}
                 <div class="absolute right-[-2.5rem] bottom-[-2.5rem] opacity-20 group-hover:opacity-40 transition-opacity">
-                    <!-- <img src="FIRE_EMOJI_AVATAR.png" alt="Fire" class="h-24 w-24"> -->
-                    <div class="text-[8rem]">🔥</div>
+                    <div class="text-[6rem] sm:text-[8rem]">🔥</div>
                 </div>
             </div>
             

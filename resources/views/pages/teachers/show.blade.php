@@ -79,6 +79,7 @@
                         <thead class="bg-gray-50 text-xs font-semibold uppercase tracking-wider text-gray-500">
                             <tr>
                                 <th class="px-5 py-3">Class</th>
+                                <th class="px-5 py-3">Arm / Subclass</th>
                                 <th class="px-5 py-3">Subject</th>
                                 <th class="px-5 py-3 text-right">Action</th>
                             </tr>
@@ -88,6 +89,17 @@
                                 <tr class="bg-white hover:bg-gray-50">
                                     <td class="px-5 py-4 text-sm font-semibold text-slate-900">
                                         {{ $allocation->schoolClass?->name ?? '—' }}
+                                    </td>
+                                    <td class="px-5 py-4">
+                                        @if($allocation->section)
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-indigo-50 text-indigo-700 border border-indigo-100">
+                                                {{ $allocation->section->name }}
+                                            </span>
+                                        @else
+                                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-600">
+                                                All Arms
+                                            </span>
+                                        @endif
                                     </td>
                                     <td class="px-5 py-4">
                                         <div class="text-sm font-semibold text-slate-900">{{ $allocation->subject?->name ?? '—' }}</div>
@@ -113,7 +125,7 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="3" class="px-5 py-10 text-center text-sm text-slate-500">No allocations yet.</td>
+                                    <td colspan="4" class="px-5 py-10 text-center text-sm text-slate-500">No allocations yet.</td>
                                 </tr>
                             @endforelse
                         </tbody>
@@ -245,9 +257,43 @@
                 </div>
 
                 @if ($user?->role === 'admin')
-                    <div class="card-padded">
-                        <div class="text-sm font-semibold text-slate-900">Assign Class & Subject</div>
-                        <div class="mt-1 text-sm text-slate-600">Allocate subjects to teach per class.</div>
+                    <div class="card-padded" x-data="{
+                        classes: {{ Js::from($classes->map(fn($c) => [
+                            'id' => $c->id,
+                            'name' => $c->name,
+                            'sections' => $c->sections->map(fn($s) => ['id' => $s->id, 'name' => $s->name])->values()
+                        ])->values()) }},
+                        subjects: {{ Js::from($subjects->map(fn($s) => [
+                            'id' => (string) $s->id,
+                            'name' => $s->name,
+                            'code' => $s->code
+                        ])->values()) }},
+                        selectedClassId: '{{ old('class_id', $classes->first()?->id ?? '') }}',
+                        selectedSectionId: '{{ old('section_id', '') }}',
+                        selectedSubjects: {{ Js::from(array_map('strval', (array) old('subject_ids', old('subject_id') ? [old('subject_id')] : []))) }},
+                        search: '',
+                        
+                        get availableSections() {
+                            const c = this.classes.find(item => String(item.id) === String(this.selectedClassId));
+                            return c ? c.sections : [];
+                        },
+                        get filteredSubjects() {
+                            const q = this.search.toLowerCase().trim();
+                            if (!q) return this.subjects;
+                            return this.subjects.filter(s => s.name.toLowerCase().includes(q) || (s.code && s.code.toLowerCase().includes(q)));
+                        },
+                        toggleAll() {
+                            const visibleIds = this.filteredSubjects.map(s => String(s.id));
+                            const allVisibleSelected = visibleIds.length > 0 && visibleIds.every(id => this.selectedSubjects.includes(id));
+                            if (allVisibleSelected) {
+                                this.selectedSubjects = this.selectedSubjects.filter(id => !visibleIds.includes(id));
+                            } else {
+                                this.selectedSubjects = Array.from(new Set([...this.selectedSubjects, ...visibleIds]));
+                            }
+                        }
+                    }">
+                        <div class="text-sm font-semibold text-slate-900">Assign Class &amp; Subjects</div>
+                        <div class="mt-1 text-xs text-slate-500">Allocate subjects to teach per class or specific subclass/arm.</div>
 
                         @if ($classes->isEmpty() || $subjects->isEmpty())
                             <div class="mt-4 rounded-xl bg-slate-50 px-3 py-2 text-sm text-slate-600 ring-1 ring-inset ring-slate-200">
@@ -259,45 +305,76 @@
                             </div>
                         @else
                             <form method="POST" action="{{ route('teachers.allocations.store', $teacher) }}" class="mt-4 space-y-3">
-                            @csrf
+                                @csrf
 
-                            <div>
-                                @php
-                                    $selectedClassIds = collect(old('class_ids', old('class_id') ? [old('class_id')] : []))
-                                        ->map(fn ($id) => (string) $id)
-                                        ->all();
-                                @endphp
-                                <label class="text-xs font-semibold uppercase tracking-wider text-slate-500">Classes</label>
-                                <select name="class_ids[]" class="mt-2 select" multiple size="6" required>
-                                    @foreach ($classes as $class)
-                                        <option value="{{ $class->id }}" @selected(in_array((string) $class->id, $selectedClassIds, true))>
-                                            {{ $class->name }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                                <div class="mt-1 text-xs text-slate-500">Hold Ctrl (Windows) / Cmd (Mac) to pick multiple.</div>
-                            </div>
+                                {{-- Class Selector --}}
+                                <div>
+                                    <label class="text-xs font-semibold uppercase tracking-wider text-slate-500">Class</label>
+                                    <select name="class_id" x-model="selectedClassId" @change="selectedSectionId = ''" class="mt-1.5 select w-full" required>
+                                        <template x-for="c in classes" :key="c.id">
+                                            <option :value="c.id" x-text="c.name" :selected="String(c.id) === String(selectedClassId)"></option>
+                                        </template>
+                                    </select>
+                                </div>
 
-                            <div>
-                                <label class="text-xs font-semibold uppercase tracking-wider text-slate-500">Subject</label>
-                                <select name="subject_id" class="mt-2 select" required>
-                                    <option value="">Select subject</option>
-                                    @foreach ($subjects as $subject)
-                                        <option value="{{ $subject->id }}" @selected((string) old('subject_id') === (string) $subject->id)>
-                                            {{ $subject->code }} — {{ $subject->name }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                            </div>
+                                {{-- Subclass / Arm Selector --}}
+                                <div>
+                                    <div class="flex items-center justify-between">
+                                        <label class="text-xs font-semibold uppercase tracking-wider text-slate-500">Arm / Subclass</label>
+                                        <span class="text-[11px] text-slate-400" x-show="availableSections.length === 0">Class-wide</span>
+                                    </div>
+                                    <select name="section_id" x-model="selectedSectionId" class="mt-1.5 select w-full">
+                                        <option value="">All Arms (Entire Class)</option>
+                                        <template x-for="sec in availableSections" :key="sec.id">
+                                            <option :value="sec.id" x-text="sec.name" :selected="String(sec.id) === String(selectedSectionId)"></option>
+                                        </template>
+                                    </select>
+                                    <p class="mt-1 text-[11px] text-slate-500 leading-tight">
+                                        Selecting an arm (e.g. Gold) scopes the teacher so they only see and grade that arm's students.
+                                    </p>
+                                </div>
 
-                            <button type="submit" class="btn-primary w-full justify-center">
-                                Assign
-                            </button>
+                                {{-- Bulk Subjects Selector --}}
+                                <div>
+                                    <div class="flex items-center justify-between gap-2 mb-1.5">
+                                        <label class="text-xs font-semibold uppercase tracking-wider text-slate-500">
+                                            Subjects (<span x-text="selectedSubjects.length"></span> selected)
+                                        </label>
+                                        <button type="button" @click="toggleAll()" class="text-xs font-bold text-indigo-600 hover:text-indigo-700">
+                                            <span x-text="filteredSubjects.length > 0 && filteredSubjects.every(s => selectedSubjects.includes(String(s.id))) ? 'Deselect All' : 'Select All'"></span>
+                                        </button>
+                                    </div>
+
+                                    <!-- Search filter -->
+                                    <div class="relative mb-2">
+                                        <input type="text" x-model="search" placeholder="Search subjects..." class="w-full text-xs rounded-lg border-slate-300 pl-7 pr-3 py-1.5 focus:border-indigo-500 focus:ring-indigo-500" />
+                                        <svg class="w-3.5 h-3.5 text-slate-400 absolute left-2 top-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                                        </svg>
+                                    </div>
+
+                                    <!-- Scrollable checkbox list -->
+                                    <div class="max-h-56 overflow-y-auto divide-y divide-slate-100 border border-slate-200 rounded-xl bg-slate-50/50 p-2 space-y-0.5">
+                                        <template x-for="subj in filteredSubjects" :key="subj.id">
+                                            <label class="flex items-center gap-2.5 p-1.5 rounded-lg hover:bg-white cursor-pointer transition-colors text-xs select-none">
+                                                <input type="checkbox" name="subject_ids[]" :value="subj.id" x-model="selectedSubjects" class="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 h-4 w-4">
+                                                <span class="font-medium text-slate-800 flex-1" x-text="subj.name"></span>
+                                                <span class="text-[10px] font-mono text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded" x-text="subj.code"></span>
+                                            </label>
+                                        </template>
+                                        <div x-show="filteredSubjects.length === 0" class="py-4 text-center text-xs text-slate-400">
+                                            No subjects match your search.
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <button type="submit" 
+                                        class="btn-primary w-full justify-center mt-3" 
+                                        :disabled="selectedSubjects.length === 0"
+                                        :class="selectedSubjects.length === 0 ? 'opacity-50 cursor-not-allowed' : ''">
+                                    <span>Assign <span x-text="selectedSubjects.length || 0"></span> Subject(s)</span>
+                                </button>
                             </form>
-
-                            <div class="mt-4 text-xs text-slate-500">
-                                Assign the same subject across multiple classes in one go.
-                            </div>
                         @endif
                     </div>
                 @endif

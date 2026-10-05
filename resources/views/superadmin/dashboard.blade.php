@@ -109,6 +109,36 @@
             gap: 16px;
         }
     }
+    @media (max-width: 639px) {
+        .sa-premium-stats-grid {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+        .sa-premium-card {
+            padding: 12px;
+            gap: 10px;
+            border-radius: 14px;
+        }
+        .sa-premium-glass-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+        }
+        .sa-premium-glass-icon svg {
+            width: 18px;
+            height: 18px;
+        }
+        .sa-premium-value {
+            font-size: 15px;
+        }
+        .sa-premium-label {
+            font-size: 9px;
+        }
+        .sa-premium-desc {
+            display: none;
+        }
+    }
 </style>
 
 {{-- ── Executive Financial Overview (Stats Cards) ──────────────── --}}

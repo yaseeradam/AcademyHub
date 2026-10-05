@@ -4,8 +4,8 @@
     "description": "School Management System — Attendance, Results, CBT, Billing & More",
     "start_url": "/",
     "display": "standalone",
-    "background_color": "#0f172a",
-    "theme_color": "#f59e0b",
+    "background_color": "#f5f6fa",
+    "theme_color": "#4f46e5",
     "orientation": "any",
     "icons": [
         {

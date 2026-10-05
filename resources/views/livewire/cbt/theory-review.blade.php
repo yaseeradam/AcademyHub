@@ -36,7 +36,7 @@
         </div>
     </div>
 
-    {{-- â”€â”€ STUDENT LIST â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ --}}
+    {{-- ── STUDENT LIST ──────────────────────────────────────────────── --}}
     @if(!$reviewAttemptId)
         @php
             $total   = $this->attempts->count();
@@ -55,8 +55,8 @@
                      style="width: {{ $total > 0 ? round(($marked / $total) * 100) : 0 }}%"></div>
             </div>
             <div class="mt-3 flex gap-4 text-xs font-semibold">
-                <span class="text-emerald-600">âœ“ {{ $marked }} marked</span>
-                <span class="text-amber-600">â³ {{ $pending }} pending</span>
+                <span class="text-emerald-600">✓ {{ $marked }} marked</span>
+                <span class="text-amber-600">⏳ {{ $pending }} pending</span>
             </div>
         </div>
 
@@ -87,7 +87,7 @@
                     </div>
                     <div class="ml-3 flex flex-shrink-0 items-center gap-2">
                         @if($isMarked)
-                            <span class="rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-bold text-emerald-800">âœ“ Marked</span>
+                            <span class="rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-bold text-emerald-800">✓ Marked</span>
                         @elseif($status === 'forwarded')
                             <span class="rounded-full bg-amber-100 px-2.5 py-1 text-xs font-bold text-amber-800">Forwarded</span>
                         @else
@@ -101,14 +101,14 @@
                 </button>
             @empty
                 <div class="rounded-2xl bg-white p-10 text-center shadow-sm ring-1 ring-gray-200">
-                    <div class="text-4xl mb-3">ðŸ“­</div>
+                    <div class="text-4xl mb-3">📭</div>
                     <h3 class="text-lg font-bold text-gray-900">No submitted attempts</h3>
                     <p class="mt-1 text-sm text-gray-500">Students haven't submitted yet.</p>
                 </div>
             @endforelse
         </div>
 
-    {{-- â”€â”€ MARKING VIEW â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ --}}
+    {{-- ── MARKING VIEW ──────────────────────────────────────────────── --}}
     @else
         @php $attempt = $this->currentAttempt; @endphp
         @if($attempt)
@@ -127,7 +127,7 @@
                     <div class="flex flex-shrink-0 items-center gap-2">
                         <button wire:click="autoMarkAll" wire:loading.attr="disabled"
                             class="flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 px-3 py-2 text-xs font-bold text-white shadow-sm hover:from-amber-600 hover:to-orange-600 sm:px-5 sm:py-2.5 sm:text-sm disabled:opacity-50">
-                            <span wire:loading.remove wire:target="autoMarkAll">ðŸª„ Auto-Mark All (AI)</span>
+                            <span wire:loading.remove wire:target="autoMarkAll">🪄 Auto-Mark All (AI)</span>
                             <span wire:loading wire:target="autoMarkAll" class="flex items-center gap-1">
                                 <svg class="animate-spin h-3.5 w-3.5 text-white" viewBox="0 0 24 24" fill="none"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
                                 AI Marking...
@@ -139,7 +139,7 @@
                         </button>
                         <button wire:click="saveAndNext"
                             class="rounded-xl bg-gradient-to-r from-violet-600 to-purple-600 px-3 py-2 text-xs font-bold text-white shadow-sm hover:from-violet-700 hover:to-purple-700 sm:px-5 sm:py-2.5 sm:text-sm" wire:loading.attr="disabled" wire:loading.class="opacity-50 cursor-wait">
-                            Save &amp; Next â†’
+                            Save &amp; Next →
                         </button>
                     </div>
                 </div>
@@ -166,7 +166,7 @@
                         <div class="px-4 py-4 sm:px-6">
                             <div class="mb-1.5 text-xs font-bold uppercase tracking-wider text-gray-500">Student's Answer</div>
                             <div class="min-h-[60px] rounded-xl bg-gray-50 px-4 py-3 text-sm text-gray-800 ring-1 ring-gray-200">
-                                {{ $response !== '' ? $response : 'â€” No answer submitted â€”' }}
+                                {{ $response !== '' ? $response : '— No answer submitted —' }}
                             </div>
                         </div>
 
@@ -183,7 +183,7 @@
                                  
                                  <button type="button" wire:click="autoMarkQuestion({{ $question->id }})" wire:loading.attr="disabled"
                                      class="flex items-center gap-1 rounded-lg bg-amber-100 hover:bg-amber-200 px-2 py-1 text-xs font-bold text-amber-800 disabled:opacity-50 transition-colors">
-                                     <span wire:loading.remove wire:target="autoMarkQuestion({{ $question->id }})">ðŸª„ AI Suggest</span>
+                                     <span wire:loading.remove wire:target="autoMarkQuestion({{ $question->id }})">🪄 AI Suggest</span>
                                      <span wire:loading wire:target="autoMarkQuestion({{ $question->id }})" class="flex items-center gap-1">
                                          <svg class="animate-spin h-3 w-3 text-amber-800" viewBox="0 0 24 24" fill="none"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
                                          AI...
@@ -208,7 +208,7 @@
             {{-- Bottom Action Bar --}}
             <div class="flex flex-col gap-3 rounded-2xl bg-white px-4 py-4 shadow-sm ring-1 ring-gray-200 sm:flex-row sm:items-center sm:justify-between sm:px-6">
                 <button wire:click="back" class="text-sm font-bold text-gray-500 hover:text-gray-700" wire:loading.attr="disabled" wire:loading.class="opacity-50 cursor-wait">
-                    â† Back to list
+                    ← Back to list
                 </button>
                 <div class="flex gap-2">
                     <button wire:click="save"
@@ -217,7 +217,7 @@
                     </button>
                     <button wire:click="saveAndNext"
                         class="flex-1 rounded-xl bg-gradient-to-r from-violet-600 to-purple-600 px-4 py-2.5 text-sm font-bold text-white shadow-lg hover:from-violet-700 hover:to-purple-700 sm:flex-none sm:px-6" wire:loading.attr="disabled" wire:loading.class="opacity-50 cursor-wait">
-                        Save &amp; Next â†’
+                        Save &amp; Next →
                     </button>
                 </div>
             </div>

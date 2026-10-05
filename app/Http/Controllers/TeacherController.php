@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Support\Audit;
 use App\Models\SchoolClass;
+use App\Models\Section;
 use App\Models\Subject;
 use App\Models\SubjectAllocation;
 use App\Models\User;
@@ -95,13 +96,14 @@ class TeacherController extends Controller
         abort_unless($teacher->role === 'teacher', 404);
 
         $allocations = SubjectAllocation::query()
-            ->with(['subject', 'schoolClass'])
+            ->with(['subject', 'schoolClass', 'section'])
             ->where('teacher_id', $teacher->id)
             ->orderBy('class_id')
+            ->orderBy('section_id')
             ->orderBy('subject_id')
             ->get();
 
-        $classes = SchoolClass::query()->orderBy('level')->get();
+        $classes = SchoolClass::query()->with('sections')->orderBy('level')->get();
         $subjects = Subject::query()->orderBy('name')->get();
         $customFields = CustomField::active()->ordered()->where('form_type', 'teacher')->get();
 
@@ -212,10 +214,13 @@ class TeacherController extends Controller
         abort_unless($teacher->role === 'teacher', 404);
 
         $data = $request->validate([
-            'class_id' => ['nullable', 'required_without:class_ids', 'integer', 'exists:classes,id'],
-            'class_ids' => ['nullable', 'required_without:class_id', 'array', 'min:1'],
-            'class_ids.*' => ['integer', 'distinct', 'exists:classes,id'],
-            'subject_id' => ['required', 'integer', 'exists:subjects,id'],
+            'class_id'     => ['nullable', 'required_without:class_ids', 'integer', 'exists:classes,id'],
+            'class_ids'    => ['nullable', 'required_without:class_id', 'array', 'min:1'],
+            'class_ids.*'  => ['integer', 'distinct', 'exists:classes,id'],
+            'section_id'   => ['nullable', 'integer', 'exists:sections,id'],
+            'subject_id'   => ['nullable', 'required_without:subject_ids', 'integer', 'exists:subjects,id'],
+            'subject_ids'  => ['nullable', 'required_without:subject_id', 'array', 'min:1'],
+            'subject_ids.*'=> ['integer', 'distinct', 'exists:subjects,id'],
         ]);
 
         $classIds = collect($data['class_ids'] ?? (! empty($data['class_id']) ? [$data['class_id']] : []))
@@ -224,20 +229,43 @@ class TeacherController extends Controller
             ->unique()
             ->values();
 
+        $subjectIds = collect($data['subject_ids'] ?? (! empty($data['subject_id']) ? [$data['subject_id']] : []))
+            ->filter()
+            ->map(fn ($id) => (int) $id)
+            ->unique()
+            ->values();
+
+        $requestedSectionId = ! empty($data['section_id']) ? (int) $data['section_id'] : null;
+
         $created = 0;
         foreach ($classIds as $classId) {
-            try {
-                $allocation = SubjectAllocation::query()->firstOrCreate([
-                    'teacher_id' => (int) $teacher->id,
-                    'class_id' => $classId,
-                    'subject_id' => (int) $data['subject_id'],
-                ]);
-
-                if ($allocation->wasRecentlyCreated) {
-                    $created++;
+            // If section is provided, ensure it belongs to this classId
+            $validSectionId = null;
+            if ($requestedSectionId) {
+                $belongs = Section::query()
+                    ->where('id', $requestedSectionId)
+                    ->where('class_id', $classId)
+                    ->exists();
+                if ($belongs) {
+                    $validSectionId = $requestedSectionId;
                 }
-            } catch (QueryException $e) {
-                // Ignore duplicate allocation attempts (unique constraint).
+            }
+
+            foreach ($subjectIds as $subjectId) {
+                try {
+                    $allocation = SubjectAllocation::query()->firstOrCreate([
+                        'teacher_id' => (int) $teacher->id,
+                        'class_id'   => $classId,
+                        'section_id' => $validSectionId,
+                        'subject_id' => $subjectId,
+                    ]);
+
+                    if ($allocation->wasRecentlyCreated) {
+                        $created++;
+                    }
+                } catch (QueryException $e) {
+                    // Ignore duplicate allocation attempts (unique constraint).
+                }
             }
         }
 
@@ -245,7 +273,7 @@ class TeacherController extends Controller
             return back()->with('status', 'All selected allocations already exist.');
         }
 
-        $message = $created === 1 ? '1 allocation saved.' : "{$created} allocations saved.";
+        $message = $created === 1 ? '1 allocation saved.' : "{$created} allocations saved successfully.";
 
         return back()->with('status', $message);
     }

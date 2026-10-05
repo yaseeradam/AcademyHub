@@ -23,6 +23,11 @@ class CashFlow extends Component
     public ?string $session = null;
     public ?int $term = null;
 
+    // Interactive Ledger Filters
+    public string $ledgerTab = 'all'; // 'all', 'inflow', 'outflow'
+    public string $ledgerSearch = '';
+    public int $ledgerLimit = 20;
+
     public function boot(): void
     {
         abort_unless(
@@ -45,12 +50,41 @@ class CashFlow extends Component
             return $this->financialMetrics();
         }
 
+        if ($property === 'ledgerEntries') {
+            return $this->ledgerEntries();
+        }
+
         return parent::__get($property);
     }
 
     public function updatedTimeframe(): void
     {
         $this->applyTimeframeDates();
+    }
+
+    public function updatedStartDate(): void
+    {
+        $this->timeframe = 'custom';
+    }
+
+    public function updatedEndDate(): void
+    {
+        $this->timeframe = 'custom';
+    }
+
+    public function updatedLedgerSearch(): void
+    {
+        $this->ledgerLimit = 20;
+    }
+
+    public function updatedLedgerTab(): void
+    {
+        $this->ledgerLimit = 20;
+    }
+
+    public function loadMoreLedger(): void
+    {
+        $this->ledgerLimit += 25;
     }
 
     private function applyTimeframeDates(): void
@@ -132,10 +166,31 @@ class CashFlow extends Component
             ->pluck('total', 'category_name')
             ->toArray();
 
-        // Net Cash Flow
+        // Net Cash Flow calculations
         $netPosition = $totalInflow - $totalOutflow;
-        $operatingRatio = $totalInflow > 0 ? round(($totalOutflow / $totalInflow) * 100, 1) : 0;
-        $profitMargin = $totalInflow > 0 ? round(($netPosition / $totalInflow) * 100, 1) : 0;
+        $operatingRatio = $totalInflow > 0 ? round(($totalOutflow / $totalInflow) * 100, 1) : ($totalOutflow > 0 ? 100 : 0);
+        $profitMargin = $totalInflow > 0 ? round(($netPosition / $totalInflow) * 100, 1) : ($netPosition < 0 ? -100 : 0);
+
+        // Health Status Classification
+        if ($netPosition >= 0) {
+            if ($operatingRatio <= 45.0) {
+                $healthStatus = 'Liquidity Fortress';
+                $healthBadge = 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/30';
+                $healthDescription = "Excellent financial strength. Operational expenditures consume only {$operatingRatio}% of revenue, preserving capital for school investments.";
+            } elseif ($operatingRatio <= 75.0) {
+                $healthStatus = 'Strong Surplus';
+                $healthBadge = 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/30';
+                $healthDescription = "Healthy operations with {$profitMargin}% retained margin. Procurement costs are well-aligned with collected student fees.";
+            } else {
+                $healthStatus = 'Moderate Surplus';
+                $healthBadge = 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/30';
+                $healthDescription = "Operating near capacity ({$operatingRatio}% spend). Recommend periodic audit of recurring facility, fuel, and supplies costs.";
+            }
+        } else {
+            $healthStatus = 'Operating Deficit';
+            $healthBadge = 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/30';
+            $healthDescription = "Operating deficit of ₦" . number_format(abs($netPosition), 2) . ". Outflows currently exceed incoming fee collections in this period.";
+        }
 
         return [
             'totalInflow'        => $totalInflow,
@@ -147,7 +202,107 @@ class CashFlow extends Component
             'netPosition'        => $netPosition,
             'operatingRatio'     => $operatingRatio,
             'profitMargin'       => $profitMargin,
+            'healthStatus'       => $healthStatus,
+            'healthBadge'        => $healthBadge,
+            'healthDescription'  => $healthDescription,
         ];
+    }
+
+    #[Computed]
+    public function ledgerEntries(): array
+    {
+        $tenantId = auth()->user()?->tenant_id ?? 1;
+        $entries = collect();
+
+        // 1. Inflows
+        if ($this->ledgerTab === 'all' || $this->ledgerTab === 'inflow') {
+            $inflowQ = Transaction::withoutGlobalScopes()
+                ->with(['student'])
+                ->where('tenant_id', $tenantId)
+                ->where('type', 'Income')
+                ->where(function ($q) {
+                    $q->whereNull('is_void')->orWhere('is_void', false);
+                });
+
+            if ($this->startDate) {
+                $inflowQ->whereDate('date', '>=', $this->startDate);
+            }
+            if ($this->endDate) {
+                $inflowQ->whereDate('date', '<=', $this->endDate);
+            }
+            if (!empty($this->ledgerSearch)) {
+                $s = '%' . trim($this->ledgerSearch) . '%';
+                $inflowQ->where(function ($q) use ($s) {
+                    $q->where('category', 'like', $s)
+                        ->orWhere('receipt_number', 'like', $s)
+                        ->orWhere('payment_method', 'like', $s)
+                        ->orWhereHas('student', function ($sq) use ($s) {
+                            $sq->where('first_name', 'like', $s)
+                                ->orWhere('last_name', 'like', $s)
+                                ->orWhere('admission_number', 'like', $s);
+                        });
+                });
+            }
+
+            $inflows = $inflowQ->latest('date')->latest('id')->limit(80)->get();
+            foreach ($inflows as $in) {
+                $studentName = $in->student ? ($in->student->first_name . ' ' . $in->student->last_name) : null;
+                $entries->push([
+                    'id'             => 'inflow-' . $in->id,
+                    'type'           => 'inflow',
+                    'date'           => $in->date ?? $in->created_at,
+                    'title'          => $studentName ? ($studentName . ' • Fee Payment') : ($in->category ?? 'Income Inflow'),
+                    'subtitle'       => $in->receipt_number ? ('Receipt #' . $in->receipt_number) : 'Direct Fee Collection',
+                    'category'       => $in->category ?: 'Tuition & Fees',
+                    'amount'         => (float) $in->amount_paid,
+                    'payment_method' => $in->payment_method ?: 'Direct',
+                    'status'         => 'Reconciled',
+                ]);
+            }
+        }
+
+        // 2. Outflows
+        if ($this->ledgerTab === 'all' || $this->ledgerTab === 'outflow') {
+            $outflowQ = ProcurementRecord::withoutGlobalScopes()
+                ->where('tenant_id', $tenantId)
+                ->where('status', '!=', 'cancelled');
+
+            if ($this->startDate) {
+                $outflowQ->whereDate('purchased_at', '>=', $this->startDate);
+            }
+            if ($this->endDate) {
+                $outflowQ->whereDate('purchased_at', '<=', $this->endDate);
+            }
+            if (!empty($this->ledgerSearch)) {
+                $s = '%' . trim($this->ledgerSearch) . '%';
+                $outflowQ->where(function ($q) use ($s) {
+                    $q->where('item_name', 'like', $s)
+                        ->orWhere('vendor_name', 'like', $s)
+                        ->orWhere('category', 'like', $s)
+                        ->orWhere('receipt_number', 'like', $s);
+                });
+            }
+
+            $outflows = $outflowQ->latest('purchased_at')->latest('id')->limit(80)->get();
+            foreach ($outflows as $out) {
+                $entries->push([
+                    'id'             => 'outflow-' . $out->id,
+                    'type'           => 'outflow',
+                    'date'           => $out->purchased_at ?? $out->created_at,
+                    'title'          => $out->item_name,
+                    'subtitle'       => $out->vendor_name ? ('Vendor: ' . $out->vendor_name) : ($out->receipt_number ? 'Ref: ' . $out->receipt_number : 'Procurement Outlay'),
+                    'category'       => $out->category ?: 'General & Supplies',
+                    'amount'         => (float) $out->total_amount,
+                    'payment_method' => $out->payment_method ?: 'Bank Transfer',
+                    'status'         => ucfirst($out->status ?: 'approved'),
+                ]);
+            }
+        }
+
+        // Sort descending by date
+        return $entries->sortByDesc(function ($item) {
+            return $item['date'] ? Carbon::parse($item['date'])->timestamp : 0;
+        })->values()->take($this->ledgerLimit)->all();
     }
 
     public function exportFinancialStatement(): StreamedResponse
@@ -170,6 +325,7 @@ class CashFlow extends Component
             fputcsv($out, ['Net School Position (Surplus / Deficit)', number_format($metrics['netPosition'], 2, '.', '')]);
             fputcsv($out, ['Operating Expense Ratio', $metrics['operatingRatio'] . '%']);
             fputcsv($out, ['Net Margin', $metrics['profitMargin'] . '%']);
+            fputcsv($out, ['Financial Health Assessment', $metrics['healthStatus']]);
             fputcsv($out, []);
 
             fputcsv($out, ['=== REVENUE INFLOWS BY CATEGORY ===']);
@@ -188,14 +344,15 @@ class CashFlow extends Component
             fclose($out);
         }, $filename, [
             'Content-Type'        => 'text/csv; charset=UTF-8',
-            'Content-Disposition' => "attachment; filename=\"{$filename}\"",
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
         ]);
     }
 
     public function render()
     {
         return view('livewire.procurement.cash-flow', [
-            'metrics' => $this->financialMetrics,
+            'metrics'       => $this->financialMetrics,
+            'ledgerEntries' => $this->ledgerEntries,
         ]);
     }
 }

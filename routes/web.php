@@ -55,9 +55,8 @@ use App\Livewire\Imports\Index as ImportsIndex;
 use App\Livewire\Imports\Students as ImportsStudents;
 use App\Livewire\Imports\Teachers as ImportsTeachers;
 use App\Livewire\Settings\CustomFields;
+use App\Livewire\Settings\WhatsAppGateway;
 use App\Livewire\AdmissionLetters\Index as AdmissionLettersIndex;
-use App\Livewire\IdCards\Index as IdCardsIndex;
-use App\Livewire\TeacherAppointments\Index as TeacherAppointmentsIndex;
 use App\Http\Controllers\PrintLetterController;
 
 /*
@@ -90,6 +89,10 @@ Route::middleware(['student.session', 'plugin:cbt', 'throttle:cbt_attempt'])->gr
 // Fresh CSRF token endpoint — used by JS logout to prevent 419 Page Expired
 Route::get('/csrf-token', [UtilityController::class, 'csrfToken'])->middleware('throttle:10,1');
 Route::post('/log-error', [UtilityController::class, 'logClientError'])->middleware('throttle:5,1');
+
+// Progressive Web App (PWA) dynamic white-label manifest & offline fallback
+Route::get('/manifest.json', [\App\Http\Controllers\PwaController::class, 'manifest'])->name('pwa.manifest');
+Route::get('/offline', [\App\Http\Controllers\PwaController::class, 'offline'])->name('pwa.offline');
 
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthenticatedSessionController::class, 'create'])
@@ -163,6 +166,10 @@ Route::get('/student/notifications', \App\Livewire\Student\Notifications::class)
 Route::get('/student/profile', \App\Livewire\Student\Profile::class)
     ->middleware('student.session')
     ->name('student.profile');
+
+Route::get('/student/hall-of-fame', \App\Livewire\Academics\HallOfFame::class)
+    ->middleware('student.session')
+    ->name('student.hall-of-fame');
 
 Route::middleware(['auth', 'active'])->group(function () {
     Route::get('/paystack/callback', [PaystackCallbackController::class, 'handleCallback'])
@@ -245,10 +252,8 @@ Route::middleware(['auth', 'active'])->group(function () {
         Route::post('/settings/certificates', [SettingsController::class, 'updateCertificates'])->name('settings.update-certificates');
         Route::post('/settings/attendance', [SettingsController::class, 'updateAttendance'])->name('settings.update-attendance');
 
-        // Official Letters & ID Badges
+        // Official Letters
         Route::get('/admission-letters', AdmissionLettersIndex::class)->name('admission-letters.index');
-        Route::get('/id-cards', IdCardsIndex::class)->name('id-cards.index');
-        Route::get('/teacher-appointments', TeacherAppointmentsIndex::class)->name('teacher-appointments.index');
         Route::get('/print/admission-letters', [PrintLetterController::class, 'printAdmissionLetters'])->name('print.admission-letters');
     });
 
@@ -372,10 +377,11 @@ Route::middleware(['auth', 'active'])->group(function () {
         Route::get('/certificates/{certificate}/download', [CertificateController::class, 'download'])->name('certificates.download');
     });
 
-    // Timetable (Shared between Staff, Proprietor, and Parents)
+    // Timetable & Hall of Fame (Shared between Staff, Proprietor, and Parents)
     Route::middleware('role:admin,teacher,bursar,proprietor,parent')->group(function () {
         Route::get('/timetable', TimetableIndex::class)->name('timetable');
         Route::get('/timetable/pdf', [\App\Http\Controllers\TimetableController::class, 'downloadPdf'])->name('timetable.pdf');
+        Route::get('/academics/hall-of-fame', \App\Livewire\Academics\HallOfFame::class)->name('academics.hall-of-fame');
     });
 
     // Curriculum Document Download (Shared between Staff, Proprietor, and Parents)
@@ -393,7 +399,7 @@ Route::middleware(['auth', 'active'])->group(function () {
         Route::view('/accounts', 'pages.accounts.index')->middleware('permission:billing.transactions')->name('accounts');
     });
 
-    Route::middleware('role:admin,teacher,bursar')->group(function () {
+    Route::middleware('role:admin,teacher,bursar,proprietor')->group(function () {
         Route::get('/messages', MessagesIndex::class)->middleware('permission:messages.access')->name('messages');
         Route::get('/messages/attachments/{message}', [MessageAttachmentController::class, 'download'])->name('messages.attachments.download');
         Route::get('/announcements', AnnouncementsIndex::class)->name('announcements');
@@ -436,6 +442,11 @@ Route::middleware(['auth', 'active'])->group(function () {
         Route::get('/settings/health', [\App\Http\Controllers\Admin\HealthController::class, 'index'])->name('admin.health');
         Route::post('/settings/health/diagnose', [\App\Http\Controllers\Admin\HealthController::class, 'diagnose'])->name('admin.health.diagnose');
     });
+
+    // WhatsApp Gateway - accessible by admin and proprietor (component mount() does additional checks)
+    Route::get('/settings/whatsapp', WhatsAppGateway::class)
+        ->middleware('role:admin,proprietor')
+        ->name('settings.whatsapp');
 
     // Marketplace product detail alias (used by bursar upgrade link)
     Route::get('/marketplace/product/{product}', \App\Livewire\Marketplace\ProductDetail::class)

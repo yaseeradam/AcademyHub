@@ -41,94 +41,94 @@
 
     {{-- Financial Overview Cards --}}
     @if ($user?->role === 'admin' || $user?->role === 'bursar' || $user?->role === 'proprietor')
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-            <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 flex items-center justify-between">
-                <div>
-                    <p class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Total Income</p>
-                    <h3 class="text-2xl font-black text-emerald-600">
+        <div class="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 mb-4 sm:mb-6">
+            <div class="bg-white rounded-2xl p-3.5 sm:p-5 lg:p-6 shadow-sm border border-slate-100 flex items-center justify-between active:scale-[0.98] transition-transform">
+                <div class="min-w-0 flex-1 pr-2">
+                    <p class="text-[10px] sm:text-xs font-bold text-slate-500 uppercase tracking-wider mb-0.5 sm:mb-1 truncate">Total Income</p>
+                    <h3 class="text-lg sm:text-2xl font-black text-emerald-600 truncate">
                         {{ config('academyhub.currency_symbol', '₦') }}{{ number_format($this->totalIncome, 2) }}
                     </h3>
                 </div>
-                <div class="h-12 w-12 rounded-full bg-emerald-50 text-emerald-500 flex items-center justify-center">
-                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                <div class="h-9 w-9 sm:h-12 sm:w-12 rounded-xl sm:rounded-full bg-emerald-50 text-emerald-500 flex items-center justify-center shrink-0">
+                    <svg class="h-5 w-5 sm:h-6 sm:w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
                 </div>
             </div>
 
-            <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 flex items-center justify-between">
-                <div>
-                    <p class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Total Expenses</p>
-                    <h3 class="text-2xl font-black text-rose-500">
+            <div class="bg-white rounded-2xl p-3.5 sm:p-5 lg:p-6 shadow-sm border border-slate-100 flex items-center justify-between active:scale-[0.98] transition-transform">
+                <div class="min-w-0 flex-1 pr-2">
+                    <p class="text-[10px] sm:text-xs font-bold text-slate-500 uppercase tracking-wider mb-0.5 sm:mb-1 truncate">Total Expenses</p>
+                    <h3 class="text-lg sm:text-2xl font-black text-rose-500 truncate">
                         {{ config('academyhub.currency_symbol', '₦') }}{{ number_format($this->totalExpenses, 2) }}
                     </h3>
                 </div>
-                <div class="h-12 w-12 rounded-full bg-rose-50 text-rose-500 flex items-center justify-center">
-                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"></path></svg>
+                <div class="h-9 w-9 sm:h-12 sm:w-12 rounded-xl sm:rounded-full bg-rose-50 text-rose-500 flex items-center justify-center shrink-0">
+                    <svg class="h-5 w-5 sm:h-6 sm:w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"></path></svg>
                 </div>
             </div>
 
-            <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 flex items-center justify-between">
-                <div>
-                    <p class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Net Balance</p>
-                    <h3 class="text-2xl font-black {{ $this->netBalance >= 0 ? 'text-slate-900' : 'text-rose-600' }}">
+            <div class="col-span-2 sm:col-span-1 bg-white rounded-2xl p-3.5 sm:p-5 lg:p-6 shadow-sm border border-slate-100 flex items-center justify-between active:scale-[0.98] transition-transform">
+                <div class="min-w-0 flex-1 pr-2">
+                    <p class="text-[10px] sm:text-xs font-bold text-slate-500 uppercase tracking-wider mb-0.5 sm:mb-1 truncate">Net Balance</p>
+                    <h3 class="text-lg sm:text-2xl font-black truncate {{ $this->netBalance >= 0 ? 'text-slate-900' : 'text-rose-600' }}">
                         {{ config('academyhub.currency_symbol', '₦') }}{{ number_format($this->netBalance, 2) }}
                     </h3>
                 </div>
-                <div class="h-12 w-12 rounded-full bg-slate-50 text-slate-500 flex items-center justify-center">
-                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3"></path></svg>
+                <div class="h-9 w-9 sm:h-12 sm:w-12 rounded-xl sm:rounded-full bg-slate-50 text-slate-500 flex items-center justify-center shrink-0">
+                    <svg class="h-5 w-5 sm:h-6 sm:w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3"></path></svg>
                 </div>
             </div>
         </div>
     @endif
 
     @if ($canTransactions)
-        <div class="relative overflow-hidden rounded-3xl bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700 shadow-xl transition-all duration-300">
+        <div class="relative overflow-hidden rounded-2xl sm:rounded-3xl bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700 shadow-lg sm:shadow-xl transition-all duration-300">
             <!-- Header bar with subtle gradient background and mode toggle -->
-            <div class="px-6 py-5 bg-gradient-to-r from-slate-50 via-slate-50/50 to-white dark:from-slate-800/80 dark:to-slate-800 border-b border-slate-200/70 dark:border-slate-700 flex flex-wrap items-center justify-between gap-4">
+            <div class="px-4 sm:px-6 py-3.5 sm:py-5 bg-gradient-to-r from-slate-50 via-slate-50/50 to-white dark:from-slate-800/80 dark:to-slate-800 border-b border-slate-200/70 dark:border-slate-700 flex flex-wrap items-center justify-between gap-3 sm:gap-4">
                 <div class="flex items-center gap-3">
-                    <div class="w-11 h-11 rounded-2xl {{ $type === 'Income' ? 'bg-emerald-500/10 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400' : 'bg-rose-500/10 text-rose-600 dark:bg-rose-500/20 dark:text-rose-400' }} flex items-center justify-center shadow-inner">
+                    <div class="w-10 h-10 sm:w-11 sm:h-11 rounded-xl sm:rounded-2xl {{ $type === 'Income' ? 'bg-emerald-500/10 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400' : 'bg-rose-500/10 text-rose-600 dark:bg-rose-500/20 dark:text-rose-400' }} flex items-center justify-center shadow-inner shrink-0">
                         @if($type === 'Income')
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
                             </svg>
                         @else
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4" />
                             </svg>
                         @endif
                     </div>
                     <div>
-                        <div class="flex items-center gap-2">
-                            <h2 class="text-lg font-bold text-slate-900 dark:text-white">
+                        <div class="flex flex-wrap items-center gap-1.5 sm:gap-2">
+                            <h2 class="text-sm sm:text-lg font-bold text-slate-900 dark:text-white">
                                 {{ $type === 'Income' ? 'Cashier & Fee Payment Terminal' : 'Record School Expense' }}
                             </h2>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold {{ $type === 'Income' ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300 border border-emerald-200/50 dark:border-emerald-800/50' : 'bg-rose-50 text-rose-700 dark:bg-rose-950/50 dark:text-rose-300 border border-rose-200/50 dark:border-rose-800/50' }}">
+                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] sm:text-xs font-semibold {{ $type === 'Income' ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300 border border-emerald-200/50 dark:border-emerald-800/50' : 'bg-rose-50 text-rose-700 dark:bg-rose-950/50 dark:text-rose-300 border border-rose-200/50 dark:border-rose-800/50' }}">
                                 {{ $type === 'Income' ? 'Fee Inflow' : 'Operating Outflow' }}
                             </span>
                         </div>
-                        <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                        <p class="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 mt-0.5">
                             {{ $type === 'Income' ? 'Receive cash, bank transfers, or card payments with automatic ledger reconciliation' : 'Record school maintenance, supplies, or staff reimbursements' }}
                         </p>
                     </div>
                 </div>
 
                 <!-- Segmented Type Selector (Income / Expense) -->
-                <div class="inline-flex p-1 bg-slate-100 dark:bg-slate-900/60 rounded-xl border border-slate-200/80 dark:border-slate-700">
+                <div class="inline-flex p-1 bg-slate-100 dark:bg-slate-900/60 rounded-xl border border-slate-200/80 dark:border-slate-700 w-full sm:w-auto">
                     <button type="button" 
                             wire:click="$set('type', 'Income')" 
-                            class="flex items-center gap-2 px-3.5 py-1.5 text-xs font-bold rounded-lg transition-all {{ $type === 'Income' ? 'bg-white dark:bg-slate-800 text-emerald-600 dark:text-emerald-400 shadow-sm' : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-300' }}">
+                            class="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-3.5 py-1.5 text-xs font-bold rounded-lg transition-all active:scale-95 {{ $type === 'Income' ? 'bg-white dark:bg-slate-800 text-emerald-600 dark:text-emerald-400 shadow-sm' : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-300' }}">
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
                         Fee Inflow (Income)
                     </button>
                     <button type="button" 
                             wire:click="$set('type', 'Expense')" 
-                            class="flex items-center gap-2 px-3.5 py-1.5 text-xs font-bold rounded-lg transition-all {{ $type === 'Expense' ? 'bg-white dark:bg-slate-800 text-rose-600 dark:text-rose-400 shadow-sm' : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-300' }}">
+                            class="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-3.5 py-1.5 text-xs font-bold rounded-lg transition-all active:scale-95 {{ $type === 'Expense' ? 'bg-white dark:bg-slate-800 text-rose-600 dark:text-rose-400 shadow-sm' : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-300' }}">
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"></path></svg>
                         Expense (Payout)
                     </button>
                 </div>
             </div>
 
-            <form wire:submit="saveTransaction" class="p-6">
+            <form wire:submit="saveTransaction" class="p-4 sm:p-6">
                 <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
                     
                     {{-- Left Section: Student & Category Selection (7 Cols on desktop) --}}
@@ -430,62 +430,62 @@
 
     @if ($tab === 'transactions' && $canTransactions)
         <!-- Transaction Filters -->
-        <div class="rounded-xl bg-white p-5 shadow-sm ring-1 ring-gray-200">
-            <div class="mb-4 flex items-center gap-2">
-                <svg class="h-5 w-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div class="rounded-xl sm:rounded-2xl bg-white p-4 sm:p-5 shadow-sm ring-1 ring-gray-200">
+            <div class="mb-3 sm:mb-4 flex items-center gap-2">
+                <svg class="h-4 w-4 sm:h-5 sm:w-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/>
                 </svg>
-                <h4 class="font-medium text-gray-900">Filter Transactions</h4>
+                <h4 class="text-sm sm:text-base font-semibold text-gray-900">Filter Transactions</h4>
             </div>
-            <div class="grid gap-3 sm:grid-cols-6">
-                <select wire:model.live="filterType" class="select">
+            <div class="grid gap-2.5 sm:gap-3 grid-cols-2 sm:grid-cols-3 lg:grid-cols-6">
+                <select wire:model.live="filterType" class="select text-xs sm:text-sm">
                     <option value="">All Types</option>
                     <option value="Income">Income</option>
                     <option value="Expense">Expense</option>
                 </select>
-                <input wire:model.live.debounce.300ms="filterCategory" type="text" placeholder="Category" class="input-compact" />
-                <select wire:model.live="selectedClassId" class="select">
+                <input wire:model.live.debounce.300ms="filterCategory" type="text" placeholder="Category" class="input-compact text-xs sm:text-sm" />
+                <select wire:model.live="selectedClassId" class="select text-xs sm:text-sm">
                     <option value="">All Classes</option>
                     @foreach ($this->classes as $class)
                         <option value="{{ $class->id }}">{{ $class->name }}</option>
                     @endforeach
                 </select>
-                <select wire:model.live="filterStudentId" class="select">
+                <select wire:model.live="filterStudentId" class="select text-xs sm:text-sm">
                     <option value="">All Students</option>
                     @foreach ($this->students as $student)
                         <option value="{{ $student->id }}">{{ $student->full_name }}</option>
                     @endforeach
                 </select>
-                <input wire:model.live="filterFrom" type="date" class="input-compact" />
-                <input wire:model.live="filterTo" type="date" class="input-compact" />
+                <input wire:model.live="filterFrom" type="date" class="input-compact text-xs sm:text-sm" />
+                <input wire:model.live="filterTo" type="date" class="input-compact text-xs sm:text-sm" />
             </div>
         </div>
 
     @elseif ($tab === 'debtors')
-        <div class="relative overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200">
+        <div class="relative overflow-hidden rounded-xl sm:rounded-2xl bg-white shadow-sm ring-1 ring-gray-200">
             <div class="absolute inset-0 bg-gradient-to-br from-orange-500/5 to-orange-600/10"></div>
-            <div class="relative p-6">
-                <div class="mb-4 flex items-center gap-3">
-                    <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-orange-500 text-white">
-                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div class="relative p-4 sm:p-6">
+                <div class="mb-3 sm:mb-4 flex items-center gap-2.5 sm:gap-3">
+                    <div class="flex h-8 w-8 sm:h-10 sm:w-10 items-center justify-center rounded-xl bg-orange-500 text-white shrink-0">
+                        <svg class="h-4 w-4 sm:h-5 sm:w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
                         </svg>
                     </div>
                     <div>
-                        <h3 class="text-lg font-semibold text-gray-900">Outstanding Balances</h3>
-                        <p class="text-sm text-gray-600">Students with pending payments</p>
+                        <h3 class="text-base sm:text-lg font-bold text-gray-900">Outstanding Balances</h3>
+                        <p class="text-xs sm:text-sm text-gray-600">Students with pending payments</p>
                     </div>
                 </div>
-                <div class="grid gap-4 sm:grid-cols-3">
-                <input wire:model.live.debounce.300ms="debtorsCategory" type="text" placeholder="Category (e.g. Tuition)" class="input-compact" />
-                <input wire:model.live.debounce.300ms="debtorsSession" type="text" placeholder="Session (e.g. 2025/2026)" class="input-compact" />
-                <select wire:model.live="debtorsTerm" class="select">
-                    <option value="">All terms</option>
-                    <option value="1">Term 1</option>
-                    <option value="2">Term 2</option>
-                    <option value="3">Term 3</option>
-                </select>
-            </div>
+                <div class="grid gap-2.5 sm:gap-4 sm:grid-cols-3">
+                    <input wire:model.live.debounce.300ms="debtorsCategory" type="text" placeholder="Category (e.g. Tuition)" class="input-compact text-xs sm:text-sm" />
+                    <input wire:model.live.debounce.300ms="debtorsSession" type="text" placeholder="Session (e.g. 2025/2026)" class="input-compact text-xs sm:text-sm" />
+                    <select wire:model.live="debtorsTerm" class="select text-xs sm:text-sm">
+                        <option value="">All terms</option>
+                        <option value="1">Term 1</option>
+                        <option value="2">Term 2</option>
+                        <option value="3">Term 3</option>
+                    </select>
+                </div>
             </div>
         </div>
 
@@ -759,7 +759,7 @@
                                     @if(!empty($bill->marketplaceComponent->icon) && str_contains($bill->marketplaceComponent->icon, '<svg'))
                                         <div class="h-5 w-5 [&>svg]:w-5 [&>svg]:h-5 [&>svg]:stroke-current">{!! $bill->marketplaceComponent->icon !!}</div>
                                     @else
-                                        <span class="text-lg">ðŸ§©</span>
+                                        <span class="text-lg">🧩</span>
                                     @endif
                                 </div>
                                 <div>
@@ -780,25 +780,25 @@
                                 <div>{{ $bill->term_name }}</div>
                                 <div class="text-xs text-gray-500">{{ $bill->session_name }}</div>
                             @else
-                                <span class="text-gray-400">â€”</span>
+                                <span class="text-gray-400">—</span>
                             @endif
                         </td>
                         <td class="px-5 py-4 text-right text-sm text-gray-700">
                             @if ($bill->bill_type === 'usage')
                                 {{ number_format($bill->student_count) }}
                             @else
-                                <span class="text-gray-400">â€”</span>
+                                <span class="text-gray-400">—</span>
                             @endif
                         </td>
                         <td class="px-5 py-4 text-right text-sm text-gray-700">
                             @if ($bill->bill_type === 'setup')
-                                <div>Setup: {{ config('myacademy.currency_symbol', 'â‚¦') }}{{ number_format($bill->setup_fee, 2) }}</div>
+                                <div>Setup: {{ config('myacademy.currency_symbol', '₦') }}{{ number_format($bill->setup_fee, 2) }}</div>
                             @else
-                                <div>Rate: {{ config('myacademy.currency_symbol', 'â‚¦') }}{{ number_format($bill->usage_fee_per_student, 2) }}/std</div>
+                                <div>Rate: {{ config('myacademy.currency_symbol', '₦') }}{{ number_format($bill->usage_fee_per_student, 2) }}/std</div>
                             @endif
                         </td>
                         <td class="px-5 py-4 text-right text-sm font-semibold text-gray-900">
-                            {{ config('myacademy.currency_symbol', 'â‚¦') }}{{ number_format($bill->total_due, 2) }}
+                            {{ config('myacademy.currency_symbol', '₦') }}{{ number_format($bill->total_due, 2) }}
                         </td>
                         <td class="px-5 py-4">
                             @if ($bill->status === 'paid')
@@ -822,7 +822,7 @@
                                     <span wire:loading wire:target="payPluginBill({{ $bill->id }})">...</span>
                                 </button>
                             @else
-                                <span class="text-gray-400 text-xs font-medium">â€”</span>
+                                <span class="text-gray-400 text-xs font-medium">—</span>
                             @endif
                         </td>
                     </tr>

@@ -89,7 +89,7 @@
                                 </span>
                             @elseif ($isMarked)
                                 <span class="inline-flex items-center gap-1 rounded-full bg-emerald-500 px-2.5 py-0.5 text-[9px] font-black text-white shadow-sm border border-emerald-400/20">
-                                    âœ“ MARKED
+                                    ✓ MARKED
                                 </span>
                             @elseif ($exam['status'] === 'completed')
                                 <span class="inline-flex items-center gap-1 rounded-full bg-slate-200 px-2.5 py-0.5 text-[9px] font-black text-slate-700">
@@ -262,13 +262,13 @@
                                                 $optBadge = null;
                                                 if ($isRight) {
                                                     $optStyle = 'bg-emerald-50 border-emerald-300 font-extrabold text-emerald-800 ring-1 ring-emerald-500/10';
-                                                    $optBadge = 'âœ“ Correct Answer';
+                                                    $optBadge = '✓ Correct Answer';
                                                     if ($isSelected) {
-                                                        $optBadge = 'âœ“ Correct & Chosen';
+                                                        $optBadge = '✓ Correct & Chosen';
                                                     }
                                                 } elseif ($isSelected && !$isRight) {
                                                     $optStyle = 'bg-rose-50 border-rose-300 font-extrabold text-rose-800 ring-1 ring-rose-500/10';
-                                                    $optBadge = 'âœ— Your Choice (Incorrect)';
+                                                    $optBadge = '✗ Your Choice (Incorrect)';
                                                 }
                                             @endphp
                                             <div class="flex items-center justify-between rounded-xl border px-4 py-2.5 text-xs transition-all {{ $optStyle }}">
@@ -295,7 +295,7 @@
                                         </div>
                                         @if ($answer?->teacher_comment)
                                             <div class="flex items-start gap-2 rounded-xl bg-indigo-50/50 border border-indigo-100 p-3 mt-2">
-                                                <span class="text-xs">ðŸ’¬</span>
+                                                <span class="text-xs">💬</span>
                                                 <div class="text-xs text-indigo-900 leading-relaxed font-bold">
                                                     <span class="font-black text-indigo-950">Teacher's Comment:</span> {{ $answer->teacher_comment }}
                                                 </div>

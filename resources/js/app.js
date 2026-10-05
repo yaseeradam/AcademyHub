@@ -252,3 +252,49 @@ window.exportData = function(type, format = 'csv') {
     }, 1500);
 };
 
+// =========================================================================
+// PWA & Mobile App Experience Engine
+// =========================================================================
+function initPwa() {
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches ||
+                         window.navigator.standalone === true;
+
+    if (isStandalone) {
+        document.documentElement.classList.add('pwa-standalone');
+    }
+
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('/sw.js')
+                .then(reg => {
+                    reg.onupdatefound = () => {
+                        const installingWorker = reg.installing;
+                        if (installingWorker) {
+                            installingWorker.onstatechange = () => {
+                                if (installingWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                    console.log('App update available');
+                                }
+                            };
+                        }
+                    };
+                })
+                .catch(err => {
+                    console.debug('ServiceWorker registration skipped:', err.message);
+                });
+        });
+    }
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+        window.deferredPrompt = e;
+        window.dispatchEvent(new CustomEvent('pwa-installable'));
+    });
+}
+
+initPwa();
+document.addEventListener('livewire:navigated', () => {
+    if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true) {
+        document.documentElement.classList.add('pwa-standalone');
+    }
+});
+
+

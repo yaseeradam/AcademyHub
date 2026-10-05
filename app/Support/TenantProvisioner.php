@@ -18,9 +18,9 @@ class TenantProvisioner
     public function provision(Tenant $tenant): void
     {
         $this->ensureSettingsFile($tenant);
-        $this->ensureAcademicCalendar($tenant);
-        // Classes, sections, subjects and fee structures are NOT auto-created.
-        // Each school adds their own after onboarding.
+        // Academic sessions & terms, classes, sections, subjects and fee structures
+        // are NOT auto-created. Each school must explicitly configure their current
+        // academic calendar upon first login.
     }
 
     private function ensureSettingsFile(Tenant $tenant): void
@@ -47,64 +47,8 @@ class TenantProvisioner
         Cache::forget(TenantSettings::settingsCacheKey($tenant));
     }
 
-    private function ensureAcademicCalendar(Tenant $tenant): void
-    {
-        $session = AcademicSession::query()
-            ->where('tenant_id', $tenant->id)
-            ->where('is_active', true)
-            ->first();
-
-        if (! $session) {
-            $year = (int) now()->format('Y');
-            $next = $year + 1;
-            $defaultSession = "{$year}/{$next}";
-
-            $session = AcademicSession::query()->firstOrCreate(
-                ['tenant_id' => $tenant->id, 'name' => $defaultSession],
-                ['is_active' => true]
-            );
-        }
-
-        $hasActiveTerm = AcademicTerm::query()
-            ->where('tenant_id', $tenant->id)
-            ->where('is_active', true)
-            ->exists();
-
-        $termDefaults = [
-            1 => 'First Term',
-            2 => 'Second Term',
-            3 => 'Third Term',
-        ];
-
-        foreach ($termDefaults as $termNumber => $name) {
-            AcademicTerm::query()->firstOrCreate(
-                [
-                    'tenant_id' => $tenant->id,
-                    'academic_session_id' => $session->id,
-                    'term_number' => $termNumber,
-                ],
-                [
-                    'name' => $name,
-                    'is_active' => false,
-                ]
-            );
-        }
-
-        if (! $hasActiveTerm) {
-            AcademicTerm::query()
-                ->where('tenant_id', $tenant->id)
-                ->update(['is_active' => false]);
-
-            AcademicTerm::query()
-                ->where('tenant_id', $tenant->id)
-                ->where('academic_session_id', $session->id)
-                ->where('term_number', 1)
-                ->update(['is_active' => true]);
-        }
-    }
-
-    // ensureDefaultClassesAndSections(), ensureDefaultSubjects() and
-    // ensureDefaultFeeStructures() have been intentionally removed.
-    // Schools must create their own classes, sections, subjects and fee
-    // structures through the admin interface after onboarding.
+    // ensureAcademicCalendar(), ensureDefaultClassesAndSections(), ensureDefaultSubjects()
+    // and ensureDefaultFeeStructures() have been intentionally removed.
+    // Schools must set their own academic calendar, classes, sections, subjects
+    // and fee structures through the admin interface after onboarding.
 }

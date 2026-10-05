@@ -97,7 +97,7 @@
                                                         @foreach($parent->students as $student)
                                                             <div class="flex flex-col border-b border-gray-50 pb-1.5 last:border-0 last:pb-0">
                                                                 <span class="font-semibold text-xs text-gray-900">{{ $student->full_name }}</span>
-                                                                <span class="text-[10px] text-gray-500">{{ $student->schoolClass?->name ?? 'Unassigned' }} â€¢ {{ $student->admission_number }}</span>
+                                                                <span class="text-[10px] text-gray-500">{{ $student->schoolClass?->name ?? 'Unassigned' }} • {{ $student->admission_number }}</span>
                                                             </div>
                                                         @endforeach
                                                     </div>
@@ -268,7 +268,7 @@
                             @endif
                             <div class="flex-1">
                                 <div class="text-sm font-medium text-gray-900">{{ $student->full_name }}</div>
-                                <div class="text-xs text-gray-500">{{ $student->admission_number }} â€¢ {{ $student->schoolClass?->name ?? 'Unassigned' }}</div>
+                                <div class="text-xs text-gray-500">{{ $student->admission_number }} • {{ $student->schoolClass?->name ?? 'Unassigned' }}</div>
                             </div>
                         </label>
                     @endforeach

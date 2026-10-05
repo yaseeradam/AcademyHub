@@ -2,8 +2,59 @@
 
 namespace App\Support;
 
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\File;
+
 class TenantSettings
 {
+    /**
+     * Resiliently write settings to disk with atomic replace and permission fallback.
+     */
+    public static function persist(string $path, array $settings): void
+    {
+        $dir = dirname($path);
+        File::ensureDirectoryExists($dir);
+        if (function_exists('chmod')) {
+            @chmod($dir, 0775);
+        }
+
+        $json = json_encode($settings, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+
+        $tempPath = $dir . '/.settings_' . uniqid('', true) . '.tmp';
+        try {
+            File::put($tempPath, $json);
+            if (function_exists('chmod')) {
+                @chmod($tempPath, 0666);
+            }
+
+            // If an un-writable file already exists (e.g. created by root), remove it first
+            // since www-data has directory write permissions.
+            if (File::exists($path) && !is_writable($path)) {
+                @unlink($path);
+            }
+
+            if (!@rename($tempPath, $path)) {
+                File::put($path, $json);
+            }
+
+            if (function_exists('chmod')) {
+                @chmod($path, 0666);
+            }
+        } catch (\Throwable $e) {
+            if (File::exists($path) && !is_writable($path)) {
+                @unlink($path);
+            }
+            File::put($path, $json);
+            if (function_exists('chmod')) {
+                @chmod($path, 0666);
+            }
+        } finally {
+            if (File::exists($tempPath)) {
+                @unlink($tempPath);
+            }
+        }
+    }
+
     public static function tenantId(): ?int
     {
         if (! app()->bound('currentTenant')) {

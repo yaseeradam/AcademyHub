@@ -33,6 +33,112 @@ class WhatsAppService
             }
         }
 
+        $provider = config('services.whatsapp.provider', 'evolution');
+
+        if ($provider === 'evolution') {
+            return self::sendEvolutionMessage($phone, $message, $mediaUrl, $filename, $caption, $buttons);
+        }
+
+        return self::sendMetaMessage($phone, $message, $mediaUrl, $filename, $caption, $buttons);
+    }
+
+    /**
+     * Send via Free Multi-Device Gateway (Evolution API / Baileys).
+     */
+    public static function sendEvolutionMessage(string $phone, string $message, ?string $mediaUrl = null, ?string $filename = null, ?string $caption = null, ?array $buttons = null): bool
+    {
+        try {
+            $baseUrl  = rtrim(config('services.whatsapp.evolution_url', 'http://whatsapp:8080'), '/');
+            $apiKey   = config('services.whatsapp.evolution_api_key', 'academyhub-wa-secret-key');
+            $instance = config('services.whatsapp.evolution_instance', 'academyhub');
+
+            $toPhone = preg_replace('/\D/', '', $phone);
+
+            // Guard: reject empty phone numbers
+            if (empty($toPhone)) {
+                Log::warning('WhatsAppService (Evolution API): Empty phone number after sanitization', ['original' => $phone]);
+                return false;
+            }
+
+            // Format message with buttons as text bullets if provided
+            $textToSend = $message;
+            if ($buttons && is_array($buttons)) {
+                $buttonLines = [];
+                foreach ($buttons as $btn) {
+                    $title = $btn['title'] ?? $btn['id'] ?? '';
+                    if (!empty($title)) {
+                        $buttonLines[] = "• Reply *{$title}*";
+                    }
+                }
+                if (!empty($buttonLines)) {
+                    $textToSend .= "\n\n" . implode("\n", $buttonLines);
+                }
+            }
+
+            if (!empty($mediaUrl)) {
+                // Auto-detect media type from URL/filename extension
+                $ext = strtolower(pathinfo($mediaUrl, PATHINFO_EXTENSION));
+                if (empty($ext) && $filename) {
+                    $ext = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
+                }
+                $mediaType = match (true) {
+                    in_array($ext, ['jpg', 'jpeg', 'png', 'gif', 'webp']) => 'image',
+                    in_array($ext, ['mp4', 'avi', 'mov', 'mkv', '3gp'])  => 'video',
+                    in_array($ext, ['mp3', 'ogg', 'wav', 'aac', 'opus']) => 'audio',
+                    default => 'document',
+                };
+
+                $url = "{$baseUrl}/message/sendMedia/{$instance}";
+                $payload = [
+                    'number'    => $toPhone,
+                    'media'     => $mediaUrl,
+                    'mediatype' => $mediaType,
+                    'caption'   => $textToSend ?: ($caption ?: ''),
+                    'fileName'  => $filename ?: 'document.pdf',
+                ];
+            } else {
+                // Guard: reject empty text messages when no media
+                if (empty(trim($textToSend))) {
+                    Log::warning('WhatsAppService (Evolution API): Empty message text and no media', ['phone' => $toPhone]);
+                    return false;
+                }
+
+                $url = "{$baseUrl}/message/sendText/{$instance}";
+                $payload = [
+                    'number' => $toPhone,
+                    'text'   => $textToSend,
+                ];
+            }
+
+            $response = Http::withOptions(['verify' => false, 'timeout' => 15])
+                ->withHeaders([
+                    'apikey'       => $apiKey,
+                    'Content-Type' => 'application/json',
+                ])
+                ->post($url, $payload);
+
+            if ($response->failed()) {
+                Log::error('WhatsAppService (Evolution API): Failed to send message', [
+                    'status' => $response->status(),
+                    'body'   => $response->body(),
+                ]);
+                return false;
+            }
+
+            return true;
+        } catch (\Exception $e) {
+            Log::error('WhatsAppService (Evolution API): Exception during message send', [
+                'error' => $e->getMessage(),
+            ]);
+            return false;
+        }
+    }
+
+    /**
+     * Send via Official Meta Cloud API (legacy/paid).
+     */
+    public static function sendMetaMessage(string $phone, string $message, ?string $mediaUrl = null, ?string $filename = null, ?string $caption = null, ?array $buttons = null): bool
+    {
         try {
             $token = config('services.whatsapp.token');
             $phoneNumberId = config('services.whatsapp.phone_number_id');
@@ -104,6 +210,129 @@ class WhatsAppService
             Log::error('WhatsAppService (Meta Cloud API): Exception during message send', [
                 'error' => $e->getMessage()
             ]);
+            return false;
+        }
+    }
+
+    /**
+     * Check Evolution API connection state.
+     * Returns ['connected' => bool, 'state' => string, 'phone' => ?string]
+     */
+    public static function getEvolutionStatus(): array
+    {
+        try {
+            $baseUrl  = rtrim(config('services.whatsapp.evolution_url', 'http://whatsapp:8080'), '/');
+            $apiKey   = config('services.whatsapp.evolution_api_key', 'academyhub-wa-secret-key');
+            $instance = config('services.whatsapp.evolution_instance', 'academyhub');
+
+            $response = Http::withOptions(['verify' => false, 'timeout' => 5])
+                ->withHeaders(['apikey' => $apiKey])
+                ->get("{$baseUrl}/instance/connectionState/{$instance}");
+
+            if ($response->successful()) {
+                $data = $response->json();
+                $state = $data['instance']['state'] ?? 'close';
+                $isConnected = ($state === 'open');
+                $phone = null;
+
+                // connectionState in v2 does NOT return ownerJid.
+                // Fetch it from fetchInstances when connected.
+                if ($isConnected) {
+                    try {
+                        $infoRes = Http::withOptions(['verify' => false, 'timeout' => 5])
+                            ->withHeaders(['apikey' => $apiKey])
+                            ->get("{$baseUrl}/instance/fetchInstances", ['instanceName' => $instance]);
+
+                        if ($infoRes->successful()) {
+                            $instances = $infoRes->json();
+                            // Response is an array of instance objects
+                            $inst = is_array($instances) ? ($instances[0] ?? null) : null;
+                            $phone = $inst['instance']['owner'] ?? $inst['instance']['ownerJid'] ?? null;
+                        }
+                    } catch (\Exception $e) {
+                        // Non-critical: phone display will show 'Active Instance' fallback
+                    }
+                }
+
+                return [
+                    'connected' => $isConnected,
+                    'state'     => $state,
+                    'phone'     => $phone,
+                ];
+            }
+
+            return ['connected' => false, 'state' => 'unreachable', 'phone' => null];
+        } catch (\Exception $e) {
+            return ['connected' => false, 'state' => 'offline', 'phone' => null, 'error' => $e->getMessage()];
+        }
+    }
+
+    /**
+     * Get or create Evolution API QR Code for pairing.
+     */
+    public static function getEvolutionQr(): ?string
+    {
+        try {
+            $baseUrl  = rtrim(config('services.whatsapp.evolution_url', 'http://whatsapp:8080'), '/');
+            $apiKey   = config('services.whatsapp.evolution_api_key', 'academyhub-wa-secret-key');
+            $instance = config('services.whatsapp.evolution_instance', 'academyhub');
+
+            // 1. Try to connect to existing instance to fetch QR
+            $response = Http::withOptions(['verify' => false, 'timeout' => 8])
+                ->withHeaders(['apikey' => $apiKey])
+                ->get("{$baseUrl}/instance/connect/{$instance}");
+
+            if ($response->successful()) {
+                $data = $response->json();
+                return $data['base64'] ?? $data['qrcode']['base64'] ?? null;
+            }
+
+            // 2. If instance doesn't exist, create it first (with webhook config)
+            if ($response->status() === 404) {
+                $createRes = Http::withOptions(['verify' => false, 'timeout' => 8])
+                    ->withHeaders(['apikey' => $apiKey])
+                    ->post("{$baseUrl}/instance/create", [
+                        'instanceName' => $instance,
+                        'token'        => $apiKey,
+                        'qrcode'       => true,
+                        'integration'  => 'WHATSAPP-BAILEYS',
+                        'webhook' => [
+                            'url'      => rtrim(config('app.url', 'http://app'), '/') . '/api/whatsapp/webhook',
+                            'byEvents' => false,
+                            'enabled'  => true,
+                            'events'   => ['MESSAGES_UPSERT'],
+                        ],
+                    ]);
+
+                if ($createRes->successful()) {
+                    $createData = $createRes->json();
+                    return $createData['base64'] ?? $createData['qrcode']['base64'] ?? null;
+                }
+            }
+
+            return null;
+        } catch (\Exception $e) {
+            Log::error('WhatsAppService: Failed to get Evolution QR code', ['error' => $e->getMessage()]);
+            return null;
+        }
+    }
+
+    /**
+     * Disconnect/logout the Evolution API instance.
+     */
+    public static function logoutEvolution(): bool
+    {
+        try {
+            $baseUrl  = rtrim(config('services.whatsapp.evolution_url', 'http://whatsapp:8080'), '/');
+            $apiKey   = config('services.whatsapp.evolution_api_key', 'academyhub-wa-secret-key');
+            $instance = config('services.whatsapp.evolution_instance', 'academyhub');
+
+            $res = Http::withOptions(['verify' => false, 'timeout' => 8])
+                ->withHeaders(['apikey' => $apiKey])
+                ->delete("{$baseUrl}/instance/logout/{$instance}");
+
+            return $res->successful();
+        } catch (\Exception $e) {
             return false;
         }
     }

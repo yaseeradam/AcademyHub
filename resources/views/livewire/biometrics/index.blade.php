@@ -119,47 +119,103 @@
 
     {{-- Today's Real-time Punch Feeds & Shift Guide --}}
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {{-- Today's Live Student Punches --}}
-        <div class="lg:col-span-2 bg-white dark:bg-slate-800 rounded-2xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm">
-            <div class="flex items-center justify-between mb-4">
+        {{-- Today's Live Biometric Gate Scans --}}
+        <div class="lg:col-span-2 bg-white dark:bg-slate-800 rounded-2xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm" wire:poll.5s>
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-5 pb-4 border-b border-slate-100 dark:border-slate-700">
                 <div>
-                    <h3 class="text-base font-bold text-slate-900 dark:text-white">Today's Gate Punch Logs</h3>
-                    <p class="text-xs text-slate-500">Biometric arrivals and departures recorded today</p>
+                    <div class="flex items-center gap-2">
+                        <span class="h-2 w-2 rounded-full bg-emerald-500 animate-ping"></span>
+                        <h3 class="text-base font-bold text-slate-900 dark:text-white">Today's Gate Punch Logs</h3>
+                        <span class="px-2 py-0.5 rounded-full text-[11px] font-bold bg-indigo-50 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300">
+                            {{ $totalAllLogs }} recorded
+                        </span>
+                    </div>
+                    <p class="text-xs text-slate-500 mt-0.5">Live biometric arrivals and departures captured by K40 hardware</p>
                 </div>
-                <div class="flex items-center gap-2">
-                    <button wire:click="triggerTestPopup" type="button" class="px-2.5 py-1.5 text-xs font-semibold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 rounded-lg dark:bg-indigo-900/40 dark:text-indigo-300">
-                        ⚡ Sim Arrival
+                <div class="flex flex-wrap items-center gap-2">
+                    <button wire:click="triggerTestPopup" type="button" title="Simulate student gate check-in" class="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-semibold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 rounded-lg dark:bg-indigo-900/40 dark:text-indigo-300 transition-colors">
+                        <span>⚡</span> Sim Student In
                     </button>
-                    <button wire:click="triggerDepartureTest" type="button" class="px-2.5 py-1.5 text-xs font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 rounded-lg dark:bg-emerald-900/40 dark:text-emerald-300">
-                        👋 Sim Departure
+                    <button wire:click="triggerDepartureTest" type="button" title="Simulate student gate checkout" class="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-semibold text-purple-700 bg-purple-50 hover:bg-purple-100 rounded-lg dark:bg-purple-900/40 dark:text-purple-300 transition-colors">
+                        <span>👋</span> Sim Student Out
+                    </button>
+                    <button wire:click="triggerStaffScanTest" type="button" title="Simulate staff gate scan (toggles In/Out)" class="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 rounded-lg dark:bg-emerald-900/40 dark:text-emerald-300 transition-colors">
+                        <span>👔</span> Sim Staff Scan
                     </button>
                 </div>
             </div>
 
-            <div class="space-y-3 max-h-96 overflow-y-auto pr-1">
-                @forelse($studentMarks as $mark)
-                    <div class="flex items-center justify-between p-3 rounded-xl bg-slate-50 dark:bg-slate-700/40 border border-slate-100 dark:border-slate-700">
+            {{-- Filter Tabs --}}
+            <div class="flex items-center gap-2 mb-4">
+                <button wire:click="setPunchFilter('all')" type="button" class="px-3 py-1 text-xs font-semibold rounded-lg transition-colors {{ $punchTypeFilter === 'all' ? 'bg-indigo-600 text-white shadow-sm' : 'bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-700/60 dark:text-slate-300' }}">
+                    All Logs ({{ $totalAllLogs }})
+                </button>
+                <button wire:click="setPunchFilter('students')" type="button" class="px-3 py-1 text-xs font-semibold rounded-lg transition-colors {{ $punchTypeFilter === 'students' ? 'bg-indigo-600 text-white shadow-sm' : 'bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-700/60 dark:text-slate-300' }}">
+                    Students ({{ $totalStudentLogs }})
+                </button>
+                <button wire:click="setPunchFilter('staff')" type="button" class="px-3 py-1 text-xs font-semibold rounded-lg transition-colors {{ $punchTypeFilter === 'staff' ? 'bg-indigo-600 text-white shadow-sm' : 'bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-700/60 dark:text-slate-300' }}">
+                    Staff &amp; Teachers ({{ $totalStaffLogs }})
+                </button>
+            </div>
+
+            <div class="space-y-2.5 max-h-[420px] overflow-y-auto pr-1">
+                @forelse($punchLogs as $log)
+                    <div class="flex items-center justify-between p-3 rounded-xl bg-slate-50 dark:bg-slate-700/40 border border-slate-100 dark:border-slate-700 hover:border-indigo-200 dark:hover:border-slate-600 transition-colors">
                         <div class="flex items-center gap-3">
-                            <div class="w-9 h-9 rounded-full bg-indigo-100 dark:bg-indigo-900/60 flex items-center justify-center font-bold text-indigo-700 dark:text-indigo-300 text-xs">
-                                {{ substr($mark->student->full_name ?? 'S', 0, 1) }}
-                            </div>
+                            @if(!empty($log->photo_url))
+                                <img src="{{ $log->photo_url }}" alt="{{ $log->name }}" class="w-10 h-10 rounded-full object-cover border border-slate-200 dark:border-slate-600">
+                            @else
+                                <div class="w-10 h-10 rounded-full {{ $log->type === 'student' ? 'bg-indigo-100 dark:bg-indigo-900/60 text-indigo-700 dark:text-indigo-300' : 'bg-emerald-100 dark:bg-emerald-900/60 text-emerald-700 dark:text-emerald-300' }} flex items-center justify-center font-bold text-sm">
+                                    {{ $log->avatar_text }}
+                                </div>
+                            @endif
                             <div>
-                                <div class="text-sm font-bold text-slate-900 dark:text-white">{{ $mark->student->full_name ?? 'Unknown Student' }}</div>
-                                <div class="text-xs text-slate-400">
-                                    {{ $mark->student->schoolClass->name ?? 'Class' }} &bull; {{ $mark->student->admission_number ?? '' }}
+                                <div class="flex items-center gap-2">
+                                    <span class="text-sm font-bold text-slate-900 dark:text-white">{{ $log->name }}</span>
+                                    @if($log->type === 'student')
+                                        <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold bg-indigo-50 text-indigo-700 dark:bg-indigo-900/50 dark:text-indigo-300 border border-indigo-100 dark:border-indigo-800">
+                                            Student
+                                        </span>
+                                    @else
+                                        <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold bg-emerald-50 text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-300 border border-emerald-100 dark:border-emerald-800">
+                                            {{ $log->type_label }}
+                                        </span>
+                                    @endif
+                                </div>
+                                <div class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                                    {{ $log->subtext }}
                                 </div>
                             </div>
                         </div>
                         <div class="text-right">
-                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold {{ $mark->status === 'Present' ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300' : 'bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300' }}">
-                                {{ $mark->status }}
+                            @php
+                                $badgeClass = match($log->status) {
+                                    'Present'  => 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800',
+                                    'Late'     => 'bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300 border border-amber-200 dark:border-amber-800',
+                                    'Departed' => 'bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-600',
+                                    default    => 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/40 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800',
+                                };
+                            @endphp
+                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold {{ $badgeClass }}">
+                                {{ $log->status }}
                             </span>
-                            <div class="text-[11px] text-slate-400 font-mono mt-0.5">{{ $mark->note }}</div>
+                            <div class="text-xs font-semibold text-slate-700 dark:text-slate-300 font-mono mt-0.5">
+                                {{ $log->time }}
+                            </div>
+                            @if(!empty($log->note))
+                                <div class="text-[11px] text-slate-400 font-mono mt-0.5">{{ $log->note }}</div>
+                            @endif
                         </div>
                     </div>
                 @empty
-                    <div class="text-center py-10 text-slate-400 text-xs">
-                        No biometric student scans recorded yet today.
+                    <div class="text-center py-12 px-4 rounded-xl border-2 border-dashed border-slate-200 dark:border-slate-700/60 bg-slate-50/50 dark:bg-slate-800/30">
+                        <div class="w-12 h-12 mx-auto rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center text-slate-400 mb-3">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 11c0 3.517-1.009 6.799-2.753 9.571m-3.44-2.04l.054-.09A13.916 13.916 0 008 11a4 4 0 118 0c0 1.017-.07 2.019-.203 3m-2.118 6.844A21.88 21.88 0 0015.171 17m3.839 1.132c.645-2.266.99-4.659.99-7.132A8 8 0 008 4.07M3 15.364c.64-1.319 1-2.8 1-4.364 0-1.457.39-2.823 1.07-4"></path></svg>
+                        </div>
+                        <h4 class="text-sm font-bold text-slate-700 dark:text-slate-300">No Biometric Scans Recorded Today</h4>
+                        <p class="text-xs text-slate-500 max-w-sm mx-auto mt-1">
+                            Scans from your physical ZKTeco K40 gate terminals will automatically appear here. You can also click the simulation buttons above to test gate punch logging.
+                        </p>
                     </div>
                 @endforelse
             </div>

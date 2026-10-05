@@ -258,7 +258,7 @@
                             </h3>
                             <div class="w-48 border-t border-yellow-600 my-3 relative">
                                 <span
-                                    class="absolute -top-2 left-1/2 -translate-x-1/2 bg-yellow-50 px-2 text-yellow-600 text-[10px]">â—†</span>
+                                    class="absolute -top-2 left-1/2 -translate-x-1/2 bg-yellow-50 px-2 text-yellow-600 text-[10px]">◆</span>
                             </div>
                             <h1 class="text-3xl font-serif text-blue-900 mb-1">{{ $title ?: 'Certificate of Achievement' }}
                             </h1>
@@ -390,7 +390,7 @@
                                 <span class="text-xl font-serif font-bold italic text-slate-900 mt-2">Student Name</span>
                                 <div class="w-44 border-t-2 border-yellow-600 mt-1 relative">
                                     <span
-                                        class="absolute -top-1.5 left-1/2 -translate-x-1/2 bg-purple-50 px-1 text-yellow-600 text-[8px]">â—‡</span>
+                                        class="absolute -top-1.5 left-1/2 -translate-x-1/2 bg-purple-50 px-1 text-yellow-600 text-[8px]">◇</span>
                                 </div>
                                 <p class="text-xs text-slate-500 italic mt-2 max-w-[16rem]">
                                     {{ $description ?: 'Outstanding performance' }}
@@ -447,7 +447,7 @@
                                     Name</span>
                                 <div class="w-44 mx-auto mt-1 relative" style="border-top: 2px solid #c9a84c;">
                                     <span class="absolute -top-1.5 left-1/2 -translate-x-1/2 px-2 text-[8px]"
-                                        style="background: #0f2241; color: #c9a84c;">â˜…</span>
+                                        style="background: #0f2241; color: #c9a84c;">★</span>
                                 </div>
                                 <p class="text-xs italic mt-3 max-w-xs mx-auto" style="color: #8899aa;">
                                     {{ $description ?: 'Outstanding performance' }}
@@ -509,7 +509,7 @@
                                 </h3>
                                 <div class="w-36 mx-auto my-3 relative" style="border-top: 1px solid #4a7c59;">
                                     <span class="absolute -top-2 left-1/2 -translate-x-1/2 px-2 text-sm"
-                                        style="background: #f0f7ec; color: #4a7c59;">â§</span>
+                                        style="background: #f0f7ec; color: #4a7c59;">✥</span>
                                 </div>
                                 <h1 class="text-3xl font-serif" style="color: #2d3b2d;">
                                     {{ $title ?: 'Certificate of Achievement' }}
@@ -647,7 +647,7 @@
                                 </h3>
                                 <div class="w-40 mx-auto my-3 relative" style="border-top: 1px solid #8b1a1a;">
                                     <span class="absolute -top-2 left-1/2 -translate-x-1/2 px-2 text-[10px]"
-                                        style="background: #f5e8d0; color: #d4af37;">âœ¦</span>
+                                        style="background: #f5e8d0; color: #d4af37;">✦</span>
                                 </div>
                                 <h1 class="text-3xl font-serif" style="color: #8b1a1a;">
                                     {{ $title ?: 'Certificate of Achievement' }}
@@ -662,7 +662,7 @@
                                 <div class="w-44 mx-auto mt-1 relative"
                                     style="border-top: 2px solid transparent; background-image: linear-gradient(90deg, transparent, #8b1a1a, #d4af37, #8b1a1a, transparent); background-size: 100% 2px; background-repeat: no-repeat; background-position: top;">
                                     <span class="absolute -top-1.5 left-1/2 -translate-x-1/2 px-1 text-[8px]"
-                                        style="background: #f5e8d0; color: #d4af37;">â—†</span>
+                                        style="background: #f5e8d0; color: #d4af37;">◆</span>
                                 </div>
                                 <p class="text-xs italic mt-3 max-w-xs mx-auto" style="color: #8b6b4a;">
                                     {{ $description ?: 'Outstanding performance' }}
@@ -764,7 +764,7 @@
                                 </h3>
                                 <div class="w-40 mx-auto my-3 relative" style="border-top: 1px solid #b87333;">
                                     <span class="absolute -top-2 left-1/2 -translate-x-1/2 px-2 text-sm"
-                                        style="background: #f0e0c4; color: #c2703e;">â–</span>
+                                        style="background: #f0e0c4; color: #c2703e;">❖</span>
                                 </div>
                                 <h1 class="text-3xl font-serif" style="color: #5c3a1e;">
                                     {{ $title ?: 'Certificate of Achievement' }}
@@ -835,7 +835,7 @@
                                 </h3>
                                 <div class="w-36 mx-auto my-3 relative" style="border-top: 1px solid #0e6b8a;">
                                     <span class="absolute -top-2 left-1/2 -translate-x-1/2 px-2 text-xs"
-                                        style="background: #d4eef5; color: #0e6b8a;">â—ˆ</span>
+                                        style="background: #d4eef5; color: #0e6b8a;">◈</span>
                                 </div>
                                 <h1 class="text-3xl font-serif" style="color: #0a2540;">
                                     {{ $title ?: 'Certificate of Achievement' }}
@@ -962,7 +962,7 @@
                                 <div class="w-32 mx-auto my-3 relative"
                                     style="border-top: 1px solid rgba(183,110,121,0.5);">
                                     <span class="absolute -top-1.5 left-1/2 -translate-x-1/2 px-2 text-[9px]"
-                                        style="background: #fffef9; color: #b76e79;">â¬¥</span>
+                                        style="background: #fffef9; color: #b76e79;">➡</span>
                                 </div>
                                 <h1 class="text-3xl font-normal" style="color: #3a2f2f;">
                                     {{ $title ?: 'Certificate of Achievement' }}

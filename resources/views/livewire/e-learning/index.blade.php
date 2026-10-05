@@ -347,7 +347,7 @@
                          x-on:livewire-upload-finish="progress = 100"
                          x-on:livewire-upload-progress="progress = $event.detail.progress"
                          class="relative">
-                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">Attachment File <span class="text-red-500">*</span> <span class="text-[10px] text-slate-400 uppercase tracking-normal font-medium">(PDF, DOC, ZIP â€” Max 10MB)</span></label>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">Attachment File <span class="text-red-500">*</span> <span class="text-[10px] text-slate-400 uppercase tracking-normal font-medium">(PDF, DOC, ZIP — Max 10MB)</span></label>
                         
                         <div :class="isDragging ? 'border-indigo-500 bg-indigo-50/30' : 'border-slate-200 bg-slate-50/30 hover:bg-slate-50/80'"
                              class="flex flex-col items-center justify-center border-2 border-dashed rounded-3xl p-8 text-center transition-all relative overflow-hidden group cursor-pointer shadow-inner">

@@ -7,6 +7,7 @@ use App\Models\AcademicTerm;
 use App\Models\AttendanceMark;
 use App\Models\Homework;
 use App\Models\ResultPublication;
+use App\Models\SchoolClass;
 use App\Models\Score;
 use App\Models\Student;
 use App\Models\Transaction;

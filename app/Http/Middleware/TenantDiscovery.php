@@ -20,6 +20,11 @@ class TenantDiscovery
         $mainDomain = config('app.url'); // e.g., http://frontalminds.com.ng
         $mainDomainHost = parse_url($mainDomain, PHP_URL_HOST);
 
+        // Normalize www prefix to apex domain
+        if ($mainDomainHost && $host === 'www.' . $mainDomainHost) {
+            return redirect()->to(rtrim($mainDomain, '/') . $request->getRequestUri(), 301);
+        }
+
         $tenant = null;
 
         // Check for X-Tenant-Slug header (useful for mobile apps)

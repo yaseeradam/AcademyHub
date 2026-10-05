@@ -229,6 +229,46 @@ class User extends Authenticatable
     }
 
     /**
+     * Get mapping of [class_id => null|array of section_ids] for a teacher.
+     * null indicates the teacher teaches all arms/sections of that class.
+     * An array indicates the teacher is restricted to those specific arms/subclasses.
+     */
+    public function teacherClassSectionScope(): array
+    {
+        if ($this->role !== 'teacher') {
+            return [];
+        }
+
+        $allocations = SubjectAllocation::query()
+            ->where('teacher_id', $this->id)
+            ->select('class_id', 'section_id')
+            ->distinct()
+            ->get();
+
+        $scope = [];
+        foreach ($allocations as $alloc) {
+            $classId = (int) $alloc->class_id;
+            if (! array_key_exists($classId, $scope)) {
+                $scope[$classId] = [];
+            }
+
+            if (is_null($alloc->section_id)) {
+                $scope[$classId] = null; // Class-wide / all arms
+            } elseif (is_array($scope[$classId])) {
+                $scope[$classId][] = (int) $alloc->section_id;
+            }
+        }
+
+        foreach ($scope as $classId => $sectionIds) {
+            if (is_array($sectionIds)) {
+                $scope[$classId] = array_values(array_unique($sectionIds));
+            }
+        }
+
+        return $scope;
+    }
+
+    /**
      * Returns matching hardware biometric UID on K40 device.
      */
     public function getK40Uid(): ?int

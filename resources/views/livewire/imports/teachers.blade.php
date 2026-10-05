@@ -153,7 +153,7 @@
                         >
                             <span wire:loading wire:target="analyzeWithAI" class="h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
                             <span wire:loading.remove wire:target="analyzeWithAI">Analyze Layout with AI</span>
-                            <span wire:loading wire:target="analyzeWithAI">AI Analyzing Layoutâ€¦</span>
+                            <span wire:loading wire:target="analyzeWithAI">AI Analyzing Layout...</span>
                         </button>
                     </div>
                 </div>
@@ -165,7 +165,7 @@
                     <div class="absolute -right-10 -bottom-10 h-40 w-40 bg-white/5 rounded-full blur-2xl"></div>
                     <div class="relative space-y-4">
                         <div class="h-10 w-10 rounded-xl bg-white/10 flex items-center justify-center text-xl">
-                            ðŸ’¡
+                            💡
                         </div>
                         <h4 class="text-base font-bold">Why use AI Layout Analysis?</h4>
                         <p class="text-xs text-white/80 leading-relaxed">
@@ -173,11 +173,11 @@
                         </p>
                         <ul class="text-xs text-white/90 space-y-2">
                             <li class="flex items-start gap-2">
-                                <span class="text-emerald-300 font-bold">âœ“</span>
+                                <span class="text-emerald-300 font-bold">✓</span>
                                 <span><strong>Synonym Detection:</strong> AI detects that "Full Name", "teacher_name", or "Name" all map to the name field.</span>
                             </li>
                             <li class="flex items-start gap-2">
-                                <span class="text-emerald-300 font-bold">âœ“</span>
+                                <span class="text-emerald-300 font-bold">✓</span>
                                 <span><strong>Auto Credentials:</strong> Automatically generates strong default passwords if left empty in the sheet.</span>
                             </li>
                         </ul>
@@ -225,12 +225,12 @@
         @if ($errorsPreview !== [])
             <div class="bg-white/80 backdrop-blur-md border border-slate-100 rounded-3xl p-6 shadow-xl space-y-4">
                 <h4 class="text-sm font-bold text-rose-600 flex items-center gap-2">
-                    âš ï¸ Validation Errors Detected (Dry Run)
+                    ⚠️ Validation Errors Detected (Dry Run)
                 </h4>
                 <div class="divide-y divide-slate-100 text-xs font-semibold text-slate-650 max-h-60 overflow-y-auto">
                     @foreach ($errorsPreview as $error)
                         <div class="py-2.5 flex items-start gap-2.5">
-                            <span class="text-rose-500">â€¢</span>
+                            <span class="text-rose-500">•</span>
                             <span>{{ $error }}</span>
                         </div>
                     @endforeach
@@ -280,7 +280,7 @@
     @if ($step === 3)
         <div class="bg-white/80 backdrop-blur-md border border-slate-100 rounded-3xl p-6 shadow-xl space-y-6 max-w-2xl mx-auto text-center">
             <div class="h-16 w-16 bg-emerald-50 rounded-2xl flex items-center justify-center mx-auto text-emerald-500 text-3xl">
-                âœ“
+                ✓
             </div>
             
             <div>
@@ -309,7 +309,7 @@
                     <div class="text-xs font-semibold text-slate-650 max-h-40 overflow-y-auto space-y-1.5">
                         @foreach ($importReport['errors'] as $err)
                             <div class="flex items-start gap-2">
-                                <span class="text-rose-500">â€¢</span>
+                                <span class="text-rose-500">•</span>
                                 <span>{{ $err }}</span>
                             </div>
                         @endforeach

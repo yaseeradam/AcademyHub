@@ -726,27 +726,24 @@
         return {
             currentStep: 1,
             selectedPlan: 'basic',
-            schoolName: '{{ old('name', '') }}',
+            schoolName: @json(old('name', '')) || '',
             maxStudents: 50,
             maxTeachers: 5,
             expiresAt: '',
             
             get progressPercent() {
-                // Return progress indicator bar percent mapping
                 const steps = { 1: 10, 2: 40, 3: 70, 4: 100 };
                 return steps[this.currentStep] || 10;
             },
 
             init() {
-                // Initialize default plan if old plan input exists
-                const oldPlan = '{{ old('plan', 'basic') }}';
+                const oldPlan = @json(old('plan', 'basic')) || 'basic';
                 this.selectPlan(oldPlan);
             },
 
             selectPlan(plan) {
                 this.selectedPlan = plan;
                 
-                // Prefill limits according to dynamic standard options
                 if (plan === 'basic') {
                     this.maxStudents = 50;
                     this.maxTeachers = 5;
@@ -758,30 +755,41 @@
                     this.maxTeachers = 1000;
                 }
                 
-                // Expiry is blank by default for all plans (billing starts right away)
                 this.expiresAt = '';
             },
 
             nextStep() {
-                // Step 1 Validation: Check school Name is filled
                 if (this.currentStep === 1) {
-                    if (!this.schoolName.trim()) {
-                        alert('School Name is required.');
+                    const name = (this.schoolName || '').trim();
+                    if (!name) {
+                        alert('Please enter a School Name to continue.');
+                        const nameInput = document.querySelector('input[name="name"]');
+                        if (nameInput) nameInput.focus();
                         return;
                     }
                 }
                 
                 if (this.currentStep < 4) {
                     this.currentStep++;
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
                 }
             },
 
             prevStep() {
                 if (this.currentStep > 1) {
                     this.currentStep--;
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
                 }
             }
-        }
+        };
+    }
+
+    if (window.Alpine) {
+        Alpine.data('schoolWizard', schoolWizard);
+    } else {
+        document.addEventListener('alpine:init', function() {
+            Alpine.data('schoolWizard', schoolWizard);
+        });
     }
 </script>
 @endsection

@@ -1767,7 +1767,7 @@ class WhatsAppController extends Controller
 
     public function handleWebhook(Request $request)
     {
-        // 1. Verification Challenge (GET)
+        // 1. Verification Challenge (GET) - Meta Cloud API Handshake
         if ($request->isMethod('get')) {
             $mode = $request->query('hub_mode');
             $token = $request->query('hub_verify_token');
@@ -1786,7 +1786,57 @@ class WhatsAppController extends Controller
         if ($request->isMethod('post')) {
             $payload = $request->all();
 
-            // Extract incoming message details
+            // ── Case A: Evolution API Webhook (Free Multi-Device Gateway) ────
+            if (isset($payload['event']) && strcasecmp($payload['event'], 'messages.upsert') === 0) {
+                $data = $payload['data'] ?? [];
+                $key = $data['key'] ?? [];
+
+                // Skip outgoing messages sent by the bot itself
+                if (!empty($key['fromMe'])) {
+                    return response()->json(['status' => 'ignored_self']);
+                }
+
+                $remoteJid = $key['remoteJid'] ?? '';
+                // Ignore status updates or group messages
+                if (empty($remoteJid) || str_contains($remoteJid, '@broadcast') || str_contains($remoteJid, '@g.us')) {
+                    return response()->json(['status' => 'ignored_non_individual']);
+                }
+
+                $messageId = $key['id'] ?? null;
+                if ($messageId) {
+                    $cacheKey = "whatsapp_msg_{$messageId}";
+                    if (\Illuminate\Support\Facades\Cache::has($cacheKey)) {
+                        return response()->json(['status' => 'duplicate_skipped']);
+                    }
+                    \Illuminate\Support\Facades\Cache::put($cacheKey, true, now()->addMinutes(10));
+                }
+
+                $from = preg_replace('/\D/', '', explode('@', $remoteJid)[0]);
+
+                $msgObj = $data['message'] ?? [];
+                $text = '';
+                $buttonId = null;
+
+                if (!empty($msgObj['conversation'])) {
+                    $text = trim($msgObj['conversation']);
+                } elseif (!empty($msgObj['extendedTextMessage']['text'])) {
+                    $text = trim($msgObj['extendedTextMessage']['text']);
+                } elseif (!empty($msgObj['buttonsResponseMessage']['selectedDisplayText'])) {
+                    $text = trim($msgObj['buttonsResponseMessage']['selectedDisplayText']);
+                    $buttonId = trim($msgObj['buttonsResponseMessage']['selectedButtonId'] ?? '');
+                } elseif (!empty($msgObj['listResponseMessage']['title'])) {
+                    $text = trim($msgObj['listResponseMessage']['title']);
+                    $buttonId = trim($msgObj['listResponseMessage']['singleSelectReply']['selectedRowId'] ?? '');
+                }
+
+                if (!empty($text)) {
+                    $this->processIncomingWebhookMessage($from, $text, $buttonId);
+                }
+
+                return response()->json(['status' => 'success']);
+            }
+
+            // ── Case B: Meta Cloud API Webhook ──────────────────────────────
             if (isset($payload['entry'][0]['changes'][0]['value']['messages'][0])) {
                 $changeValue = $payload['entry'][0]['changes'][0]['value'];
                 $messageData = $changeValue['messages'][0];
@@ -2762,6 +2812,87 @@ class WhatsAppController extends Controller
     }
 
     private function sendMetaMessage(string $toPhone, string $messageText, ?string $mediaUrl = null, ?string $filename = null, ?array $buttons = null, ?array $listSections = null, ?string $listButtonText = 'Select Service 📱'): bool
+    {
+        $provider = config('services.whatsapp.provider', 'evolution');
+
+        if ($provider === 'evolution') {
+            return $this->sendEvolutionMessage($toPhone, $messageText, $mediaUrl, $filename, $buttons, $listSections);
+        }
+
+        return $this->sendMetaDirectMessage($toPhone, $messageText, $mediaUrl, $filename, $buttons, $listSections, $listButtonText);
+    }
+
+    private function sendEvolutionMessage(string $toPhone, string $messageText, ?string $mediaUrl = null, ?string $filename = null, ?array $buttons = null, ?array $listSections = null): bool
+    {
+        try {
+            $baseUrl  = rtrim(config('services.whatsapp.evolution_url', 'http://whatsapp:8080'), '/');
+            $apiKey   = config('services.whatsapp.evolution_api_key', 'academyhub-wa-secret-key');
+            $instance = config('services.whatsapp.evolution_instance', 'academyhub');
+
+            $cleanPhone = preg_replace('/\D/', '', $toPhone);
+            $textToSend = $messageText;
+
+            // If buttons or lists are provided, append readable bullet options
+            if ($buttons && is_array($buttons)) {
+                $lines = [];
+                foreach ($buttons as $btn) {
+                    $title = $btn['title'] ?? $btn['id'] ?? '';
+                    $lines[] = "• Reply *{$title}*";
+                }
+                if (!empty($lines)) {
+                    $textToSend .= "\n\n" . implode("\n", $lines);
+                }
+            } elseif ($listSections && is_array($listSections)) {
+                $lines = [];
+                foreach ($listSections as $sec) {
+                    if (!empty($sec['title'])) {
+                        $lines[] = "\n*" . strtoupper($sec['title']) . "*";
+                    }
+                    foreach ($sec['rows'] ?? [] as $row) {
+                        $rTitle = $row['title'] ?? '';
+                        $rDesc = $row['description'] ?? '';
+                        $lines[] = "• *{$rTitle}*" . ($rDesc ? " — {$rDesc}" : '');
+                    }
+                }
+                if (!empty($lines)) {
+                    $textToSend .= "\n" . implode("\n", $lines);
+                }
+            }
+
+            if ($mediaUrl) {
+                $url = "{$baseUrl}/message/sendMedia/{$instance}";
+                $payload = [
+                    'number'    => $cleanPhone,
+                    'media'     => $mediaUrl,
+                    'mediatype' => 'document',
+                    'caption'   => $textToSend,
+                    'fileName'  => $filename ?: 'document.pdf',
+                ];
+            } else {
+                $url = "{$baseUrl}/message/sendText/{$instance}";
+                $payload = [
+                    'number' => $cleanPhone,
+                    'text'   => $textToSend,
+                ];
+            }
+
+            $response = \Illuminate\Support\Facades\Http::withOptions(['verify' => false, 'timeout' => 15])
+                ->withHeaders([
+                    'apikey'       => $apiKey,
+                    'Content-Type' => 'application/json',
+                ])
+                ->post($url, $payload);
+
+            return $response->successful();
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('WhatsAppController (Evolution API): Exception during message send', [
+                'error' => $e->getMessage(),
+            ]);
+            return false;
+        }
+    }
+
+    private function sendMetaDirectMessage(string $toPhone, string $messageText, ?string $mediaUrl = null, ?string $filename = null, ?array $buttons = null, ?array $listSections = null, ?string $listButtonText = 'Select Service 📱'): bool
     {
         try {
             $token = config('services.whatsapp.token');

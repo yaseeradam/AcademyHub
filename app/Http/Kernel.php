@@ -43,6 +43,7 @@ class Kernel extends HttpKernel
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
             \App\Http\Middleware\CheckSubscriptionStatus::class,
             \App\Http\Middleware\PreventProprietorMutations::class,
+            \App\Http\Middleware\EnsureAcademicCalendarConfigured::class,
         ],
 
         'api' => [
@@ -76,6 +77,7 @@ class Kernel extends HttpKernel
         'superadmin'      => \App\Http\Middleware\SuperAdmin::class,
         'plugin'          => \App\Http\Middleware\RequiresPlugin::class,
         'enforce.tenant'  => \App\Http\Middleware\EnforceTenant::class,
+        'academic.calendar' => \App\Http\Middleware\EnsureAcademicCalendarConfigured::class,
         'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
     ];

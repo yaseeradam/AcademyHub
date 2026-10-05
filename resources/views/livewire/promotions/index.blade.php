@@ -126,7 +126,7 @@
                         {{ $p->student?->full_name ?? 'Student' }} ({{ $p->student?->admission_number }})
                     </div>
                     <div class="mt-1 text-xs text-gray-500">
-                        {{ $p->fromClass?->name }} â†’ {{ $p->toClass?->name }} â€¢ {{ $p->promoted_at?->diffForHumans() }}
+                        {{ $p->fromClass?->name }} → {{ $p->toClass?->name }} • {{ $p->promoted_at?->diffForHumans() }}
                     </div>
                 </div>
             @empty

@@ -1,19 +1,19 @@
 <div class="space-y-6">
 
     {{-- Stat Cards --}}
-    <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+    <div class="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
 
         {{-- Total Students --}}
-        <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-orange-400 to-amber-500 p-6 text-white shadow-lg">
+        <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-orange-400 to-amber-500 p-3.5 sm:p-5 lg:p-6 text-white shadow-md active:scale-[0.98] transition-transform">
             <div class="absolute -right-6 -top-6 h-28 w-28 rounded-full bg-white/10"></div>
             <div class="absolute right-4 bottom-4 h-16 w-16 rounded-full bg-white/10"></div>
-            <div class="relative flex items-start justify-between">
-                <div>
-                    <div class="text-4xl font-black">{{ $this->stats['total'] }}</div>
-                    <div class="mt-1 text-sm font-semibold text-white/80">Total Students</div>
+            <div class="relative flex items-start justify-between gap-2">
+                <div class="min-w-0 flex-1">
+                    <div class="text-xl sm:text-3xl lg:text-4xl font-black tracking-tight truncate">{{ $this->stats['total'] }}</div>
+                    <div class="mt-1 text-xs sm:text-sm font-semibold text-white/90 truncate">Total Students</div>
                 </div>
-                <div class="grid h-12 w-12 place-items-center rounded-xl bg-white/20">
-                    <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <div class="grid h-8 w-8 sm:h-11 sm:w-11 lg:h-12 lg:w-12 place-items-center rounded-lg sm:rounded-xl bg-white/20 shrink-0">
+                    <svg class="h-4 w-4 sm:h-5 sm:w-5 lg:h-6 lg:w-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                         <path d="M22 10 12 5 2 10l10 5 10-5z"/>
                         <path d="M6 12v5a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2v-5"/>
                     </svg>
@@ -22,16 +22,16 @@
         </div>
 
         {{-- Boys --}}
-        <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-violet-500 to-purple-600 p-6 text-white shadow-lg">
+        <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-violet-500 to-purple-600 p-3.5 sm:p-5 lg:p-6 text-white shadow-md active:scale-[0.98] transition-transform">
             <div class="absolute -right-6 -top-6 h-28 w-28 rounded-full bg-white/10"></div>
             <div class="absolute right-4 bottom-4 h-16 w-16 rounded-full bg-white/10"></div>
-            <div class="relative flex items-start justify-between">
-                <div>
-                    <div class="text-4xl font-black">{{ $this->stats['boys'] }}</div>
-                    <div class="mt-1 text-sm font-semibold text-white/80">Boys</div>
+            <div class="relative flex items-start justify-between gap-2">
+                <div class="min-w-0 flex-1">
+                    <div class="text-xl sm:text-3xl lg:text-4xl font-black tracking-tight truncate">{{ $this->stats['boys'] }}</div>
+                    <div class="mt-1 text-xs sm:text-sm font-semibold text-white/90 truncate">Boys</div>
                 </div>
-                <div class="grid h-12 w-12 place-items-center rounded-xl bg-white/20">
-                    <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <div class="grid h-8 w-8 sm:h-11 sm:w-11 lg:h-12 lg:w-12 place-items-center rounded-lg sm:rounded-xl bg-white/20 shrink-0">
+                    <svg class="h-4 w-4 sm:h-5 sm:w-5 lg:h-6 lg:w-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                         <circle cx="10" cy="14" r="5"/>
                         <path d="M13.5 10.5 21 3"/><path d="M16 3h5v5"/>
                     </svg>
@@ -40,16 +40,16 @@
         </div>
 
         {{-- Girls --}}
-        <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-cyan-400 to-teal-500 p-6 text-white shadow-lg">
+        <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-cyan-400 to-teal-500 p-3.5 sm:p-5 lg:p-6 text-white shadow-md active:scale-[0.98] transition-transform">
             <div class="absolute -right-6 -top-6 h-28 w-28 rounded-full bg-white/10"></div>
             <div class="absolute right-4 bottom-4 h-16 w-16 rounded-full bg-white/10"></div>
-            <div class="relative flex items-start justify-between">
-                <div>
-                    <div class="text-4xl font-black">{{ $this->stats['girls'] }}</div>
-                    <div class="mt-1 text-sm font-semibold text-white/80">Girls</div>
+            <div class="relative flex items-start justify-between gap-2">
+                <div class="min-w-0 flex-1">
+                    <div class="text-xl sm:text-3xl lg:text-4xl font-black tracking-tight truncate">{{ $this->stats['girls'] }}</div>
+                    <div class="mt-1 text-xs sm:text-sm font-semibold text-white/90 truncate">Girls</div>
                 </div>
-                <div class="grid h-12 w-12 place-items-center rounded-xl bg-white/20">
-                    <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <div class="grid h-8 w-8 sm:h-11 sm:w-11 lg:h-12 lg:w-12 place-items-center rounded-lg sm:rounded-xl bg-white/20 shrink-0">
+                    <svg class="h-4 w-4 sm:h-5 sm:w-5 lg:h-6 lg:w-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                         <circle cx="12" cy="9" r="5"/>
                         <path d="M12 14v7"/><path d="M9 18h6"/>
                     </svg>
@@ -58,16 +58,16 @@
         </div>
 
         {{-- Alumni --}}
-        <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-pink-400 to-rose-500 p-6 text-white shadow-lg">
+        <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-pink-400 to-rose-500 p-3.5 sm:p-5 lg:p-6 text-white shadow-md active:scale-[0.98] transition-transform">
             <div class="absolute -right-6 -top-6 h-28 w-28 rounded-full bg-white/10"></div>
             <div class="absolute right-4 bottom-4 h-16 w-16 rounded-full bg-white/10"></div>
-            <div class="relative flex items-start justify-between">
-                <div>
-                    <div class="text-4xl font-black">{{ $this->stats['alumni'] }}</div>
-                    <div class="mt-1 text-sm font-semibold text-white/80">Alumni</div>
+            <div class="relative flex items-start justify-between gap-2">
+                <div class="min-w-0 flex-1">
+                    <div class="text-xl sm:text-3xl lg:text-4xl font-black tracking-tight truncate">{{ $this->stats['alumni'] }}</div>
+                    <div class="mt-1 text-xs sm:text-sm font-semibold text-white/90 truncate">Alumni</div>
                 </div>
-                <div class="grid h-12 w-12 place-items-center rounded-xl bg-white/20">
-                    <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <div class="grid h-8 w-8 sm:h-11 sm:w-11 lg:h-12 lg:w-12 place-items-center rounded-lg sm:rounded-xl bg-white/20 shrink-0">
+                    <svg class="h-4 w-4 sm:h-5 sm:w-5 lg:h-6 lg:w-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                         <path d="M22 10 12 5 2 10l10 5 10-5z"/>
                         <path d="M6 12v5a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2v-5"/>
                         <path d="M2 10v6"/>
@@ -89,7 +89,7 @@
     <div class="rounded-2xl bg-white shadow-sm ring-1 ring-slate-100">
 
         {{-- Card Header --}}
-        <div class="flex flex-col gap-4 border-b border-slate-100 p-5 sm:flex-row sm:items-center sm:justify-between">
+        <div class="flex flex-col gap-3.5 border-b border-slate-100 p-3.5 sm:p-5 sm:flex-row sm:items-center sm:justify-between">
             <div>
                 <div class="text-base font-bold text-slate-800">All Students</div>
                 <div class="mt-0.5 text-xs text-slate-400">Manage, search and filter student records</div>
@@ -103,7 +103,7 @@
                 ]" />
                 @if (auth()->user()?->role === 'admin')
                     <a href="{{ route('students.create') }}"
-                        class="inline-flex items-center gap-2 rounded-xl bg-gradient-to-br from-orange-400 to-amber-500 px-4 py-2 text-sm font-bold text-white shadow-sm transition hover:from-orange-500 hover:to-amber-600">
+                        class="inline-flex items-center gap-1.5 sm:gap-2 rounded-xl bg-gradient-to-br from-orange-400 to-amber-500 px-3 sm:px-4 py-2 text-xs sm:text-sm font-bold text-white shadow-sm transition hover:from-orange-500 hover:to-amber-600 active:scale-95">
                         <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
                         </svg>
@@ -114,8 +114,8 @@
         </div>
 
         {{-- Filters --}}
-        <div class="border-b border-slate-100 bg-slate-50/50 px-5 py-4">
-            <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <div class="border-b border-slate-100 bg-slate-50/50 p-3.5 sm:p-5">
+            <div class="grid grid-cols-1 gap-2.5 sm:gap-3 sm:grid-cols-2 lg:grid-cols-4">
                 <select wire:model.live="classFilter" class="select rounded-xl border-slate-200 text-sm">
                     <option value="all">All Classes</option>
                     @foreach ($this->classes as $class)
@@ -153,9 +153,9 @@
         </div>
 
         {{-- Student Grid --}}
-        <div class="p-5">
+        <div class="p-3.5 sm:p-5">
             @if($this->students->count() > 0)
-                <div class="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+                <div class="grid grid-cols-2 gap-2.5 sm:gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
                     @foreach ($this->students as $student)
                         @php
                             $initials = collect(explode(' ', $student->full_name))
@@ -168,60 +168,60 @@
                                 default     => ['bar' => 'bg-amber-500',   'badge' => 'bg-amber-100 text-amber-700'],
                             };
                         @endphp
-                        <div class="group relative flex flex-col rounded-2xl bg-white border border-slate-100 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 overflow-hidden">
+                        <div class="group relative flex flex-col rounded-2xl bg-white border border-slate-100 shadow-sm active:scale-[0.985] sm:hover:shadow-md sm:hover:-translate-y-0.5 transition-all duration-200 overflow-hidden">
                             {{-- Status bar --}}
                             <div class="h-1 w-full {{ $statusStyle['bar'] }}"></div>
 
                             {{-- Photo --}}
-                            <div class="flex flex-col items-center px-4 pt-5 pb-4 gap-3">
+                            <div class="flex flex-col items-center px-2.5 sm:px-4 pt-3.5 sm:pt-5 pb-3 sm:pb-4 gap-2 sm:gap-3">
                                 @if($student->passport_photo_url)
                                     <img src="{{ $student->passport_photo_url }}" alt="{{ $student->full_name }}"
-                                        class="h-20 w-20 rounded-2xl object-cover ring-4 ring-slate-100 shadow-sm">
+                                        class="h-16 w-16 sm:h-20 sm:w-20 rounded-xl sm:rounded-2xl object-cover ring-2 sm:ring-4 ring-slate-100 shadow-sm">
                                 @else
-                                    <div class="grid h-20 w-20 place-items-center rounded-2xl bg-gradient-to-br {{ $colorClass }} text-xl font-black text-white ring-4 ring-slate-100 shadow-sm">
+                                    <div class="grid h-16 w-16 sm:h-20 sm:w-20 place-items-center rounded-xl sm:rounded-2xl bg-gradient-to-br {{ $colorClass }} text-lg sm:text-xl font-black text-white ring-2 sm:ring-4 ring-slate-100 shadow-sm">
                                         {{ $initials }}
                                     </div>
                                 @endif
 
                                 {{-- Name & ADM --}}
-                                <div class="text-center w-full">
-                                    <div class="text-sm font-extrabold text-slate-900 truncate leading-tight">{{ $student->full_name }}</div>
-                                    <div class="text-[11px] font-semibold text-slate-400 mt-0.5">{{ $student->schoolClass?->name }} &bull; {{ $student->section?->name }}</div>
+                                <div class="text-center w-full min-w-0">
+                                    <div class="text-xs sm:text-sm font-extrabold text-slate-900 truncate leading-tight">{{ $student->full_name }}</div>
+                                    <div class="text-[10px] sm:text-[11px] font-semibold text-slate-400 mt-0.5 truncate">{{ $student->schoolClass?->name }} &bull; {{ $student->section?->name }}</div>
                                 </div>
 
                                 {{-- Badges row --}}
-                                <div class="flex items-center justify-center gap-1.5 flex-wrap">
-                                    <span class="text-[9px] font-black px-2 py-0.5 rounded-full {{ $statusStyle['badge'] }} uppercase tracking-wide">
+                                <div class="flex items-center justify-center gap-1 sm:gap-1.5 flex-wrap">
+                                    <span class="text-[8px] sm:text-[9px] font-black px-1.5 sm:px-2 py-0.5 rounded-full {{ $statusStyle['badge'] }} uppercase tracking-wide">
                                         {{ $student->status }}
                                     </span>
                                     @if($student->gender === 'Male')
-                                        <span class="text-[9px] font-black px-2 py-0.5 rounded-full bg-violet-100 text-violet-700 uppercase tracking-wide">Male</span>
+                                        <span class="text-[8px] sm:text-[9px] font-black px-1.5 sm:px-2 py-0.5 rounded-full bg-violet-100 text-violet-700 uppercase tracking-wide">Male</span>
                                     @else
-                                        <span class="text-[9px] font-black px-2 py-0.5 rounded-full bg-pink-100 text-pink-700 uppercase tracking-wide">Female</span>
+                                        <span class="text-[8px] sm:text-[9px] font-black px-1.5 sm:px-2 py-0.5 rounded-full bg-pink-100 text-pink-700 uppercase tracking-wide">Female</span>
                                     @endif
                                 </div>
 
                                 {{-- ADM number --}}
-                                <span class="rounded-lg bg-slate-100 px-2.5 py-1 text-[10px] font-bold text-slate-500">
+                                <span class="rounded-lg bg-slate-100 px-2 sm:px-2.5 py-0.5 sm:py-1 text-[9px] sm:text-[10px] font-bold text-slate-500">
                                     {{ $student->admission_number }}
                                 </span>
                             </div>
 
                             {{-- Guardian --}}
                             @if($student->guardian_name)
-                                <div class="mx-4 mb-3 rounded-xl bg-slate-50 px-3 py-2 border border-slate-100">
-                                    <div class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Guardian</div>
-                                    <div class="text-xs font-semibold text-slate-700 truncate mt-0.5">{{ $student->guardian_name }}</div>
+                                <div class="mx-2.5 sm:mx-4 mb-2.5 sm:mb-3 rounded-xl bg-slate-50 px-2.5 sm:px-3 py-1.5 sm:py-2 border border-slate-100">
+                                    <div class="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-slate-400">Guardian</div>
+                                    <div class="text-[11px] sm:text-xs font-semibold text-slate-700 truncate mt-0.5">{{ $student->guardian_name }}</div>
                                     @if($student->guardian_phone)
-                                        <div class="text-[10px] text-slate-400">{{ $student->guardian_phone }}</div>
+                                        <div class="text-[9px] sm:text-[10px] text-slate-400 truncate">{{ $student->guardian_phone }}</div>
                                     @endif
                                 </div>
                             @endif
 
                             {{-- View Button --}}
-                            <div class="px-4 pb-4 mt-auto">
+                            <div class="px-2.5 sm:px-4 pb-2.5 sm:pb-4 mt-auto">
                                 <a href="{{ route('students.show', ['student' => $student]) }}"
-                                    class="flex w-full items-center justify-center gap-1.5 rounded-xl bg-gradient-to-br from-orange-400 to-amber-500 py-2.5 text-xs font-extrabold text-white shadow-sm hover:from-orange-500 hover:to-amber-600 transition-all">
+                                    class="flex w-full items-center justify-center gap-1.5 rounded-xl bg-gradient-to-br from-orange-400 to-amber-500 py-2 sm:py-2.5 text-[11px] sm:text-xs font-extrabold text-white shadow-sm hover:from-orange-500 hover:to-amber-600 active:scale-95 transition-all">
                                     View Profile
                                     <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>

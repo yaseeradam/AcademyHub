@@ -45,4 +45,9 @@ class Section extends Model
     {
         return $this->hasMany(Student::class);
     }
+
+    public function subjectAllocations(): HasMany
+    {
+        return $this->hasMany(SubjectAllocation::class, 'section_id');
+    }
 }

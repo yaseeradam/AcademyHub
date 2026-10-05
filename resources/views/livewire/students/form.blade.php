@@ -315,7 +315,7 @@
                             <option value="{{ $parent->id }}">{{ $parent->name }} ({{ $parent->email }})</option>
                         @endforeach
                     </select>
-                    <p class="mt-2 text-xs text-gray-500 font-semibold uppercase tracking-wider">ðŸ’¡ Tip: Hold Ctrl (Windows) or Cmd (Mac) to select multiple parents.</p>
+                    <p class="mt-2 text-xs text-gray-500 font-semibold uppercase tracking-wider">💡 Tip: Hold Ctrl (Windows) or Cmd (Mac) to select multiple parents.</p>
                     @error('parent_ids')
                         <p class="mt-2 text-sm text-red-600 font-semibold">{{ $message }}</p>
                     @enderror

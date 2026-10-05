@@ -108,9 +108,9 @@ class Teachers extends Component
 
         if ($this->onlyExceptions) {
             $teachers = $teachers->filter(function (User $teacher) {
-                $status = (string) ($this->marks[$teacher->id]['status'] ?? 'Present');
+                $status = (string) ($this->marks[$teacher->id]['status'] ?? 'Unmarked');
 
-                return $status !== 'Present';
+                return !in_array($status, ['Present', 'Unmarked'], true);
             });
         }
 
@@ -125,12 +125,13 @@ class Teachers extends Component
             'Absent' => 0,
             'Late' => 0,
             'Excused' => 0,
+            'Unmarked' => 0,
         ];
 
         foreach ($this->teachers as $teacher) {
-            $status = (string) ($this->marks[$teacher->id]['status'] ?? 'Present');
+            $status = (string) ($this->marks[$teacher->id]['status'] ?? 'Unmarked');
             if (!array_key_exists($status, $counts)) {
-                $status = 'Present';
+                $status = 'Unmarked';
             }
 
             $counts[$status]++;
@@ -230,11 +231,26 @@ class Teachers extends Component
 
     public function setMark(int $teacherId, string $status): void
     {
-        if (!in_array($status, ['Present', 'Absent', 'Late', 'Excused'], true)) {
+        if (!in_array($status, ['Present', 'Absent', 'Late', 'Excused', 'Unmarked'], true)) {
             return;
         }
 
+        $current = (string) ($this->marks[$teacherId]['status'] ?? 'Unmarked');
+        if ($current === $status) {
+            $status = 'Unmarked';
+        }
+
         $this->marks[$teacherId]['status'] = $status;
+
+        if ($status === 'Unmarked') {
+            if ($this->sheetId) {
+                TeacherAttendanceMark::query()
+                    ->where('sheet_id', $this->sheetId)
+                    ->where('teacher_id', $teacherId)
+                    ->delete();
+            }
+            $this->marks[$teacherId]['note'] = null;
+        }
     }
 
     public function applyTool(int $teacherId): void
@@ -244,14 +260,7 @@ class Teachers extends Component
             $tool = 'Absent';
         }
 
-        $current = (string) ($this->marks[$teacherId]['status'] ?? 'Present');
-
-        if ($tool === 'Present') {
-            $this->marks[$teacherId]['status'] = 'Present';
-            return;
-        }
-
-        $this->marks[$teacherId]['status'] = $current === $tool ? 'Present' : $tool;
+        $this->setMark($teacherId, $tool);
     }
 
     public function start(): void
@@ -293,8 +302,17 @@ class Teachers extends Component
         DB::transaction(function () use ($sheet) {
             foreach ($this->teachers as $teacher) {
                 $row = $this->marks[$teacher->id] ?? [];
-                $status = (string) ($row['status'] ?? 'Present');
+                $status = (string) ($row['status'] ?? 'Unmarked');
                 $note = $row['note'] ?? null;
+
+                // Skip Unmarked teachers — only save explicitly marked ones
+                if ($status === 'Unmarked') {
+                    TeacherAttendanceMark::query()
+                        ->where('sheet_id', $sheet->id)
+                        ->where('teacher_id', $teacher->id)
+                        ->delete();
+                    continue;
+                }
 
                 if (!in_array($status, ['Present', 'Absent', 'Late', 'Excused'], true)) {
                     throw ValidationException::withMessages([
@@ -332,12 +350,19 @@ class Teachers extends Component
 
     public function cycleStatus(int $teacherId): void
     {
-        $order = ['Present', 'Absent', 'Late', 'Excused'];
-        $current = (string) ($this->marks[$teacherId]['status'] ?? 'Present');
+        $order = ['Unmarked', 'Present', 'Absent', 'Late', 'Excused'];
+        $current = (string) ($this->marks[$teacherId]['status'] ?? 'Unmarked');
         $index = array_search($current, $order, true);
         $next = $order[$index === false ? 0 : ($index + 1) % count($order)];
 
         $this->marks[$teacherId]['status'] = $next;
+
+        if ($next === 'Unmarked' && $this->sheetId) {
+            TeacherAttendanceMark::query()
+                ->where('sheet_id', $this->sheetId)
+                ->where('teacher_id', $teacherId)
+                ->delete();
+        }
     }
 
     public function exportCsv(): StreamedResponse
@@ -377,7 +402,7 @@ class Teachers extends Component
                 $mark = $this->marks[$teacher->id] ?? [];
                 $dbMark = $existing[$teacher->id] ?? null;
 
-                $status = $mark['status'] ?? ($dbMark?->status ?? 'Present');
+                $status = $mark['status'] ?? ($dbMark?->status ?? 'Unmarked');
                 $note = $mark['note'] ?? ($dbMark?->note ?? '');
                 $timestamp = $dbMark?->updated_at ?? ($dbMark?->created_at ?? null);
                 $punchTime = $this->formatPunchTime($status, $note, $timestamp);
@@ -417,7 +442,7 @@ class Teachers extends Component
         foreach ($this->teachers as $teacher) {
             $mark = $existing->get($teacher->id);
             $this->marks[$teacher->id] = [
-                'status' => $mark?->status ?? 'Present',
+                'status' => $mark?->status ?? 'Unmarked',
                 'note' => $mark?->note,
             ];
         }
@@ -450,7 +475,7 @@ class Teachers extends Component
         if (!$sheet) {
             foreach ($this->teachers as $teacher) {
                 $this->marks[$teacher->id] = [
-                    'status' => 'Present',
+                    'status' => 'Unmarked',
                     'note' => null,
                 ];
             }

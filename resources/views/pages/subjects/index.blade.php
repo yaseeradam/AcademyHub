@@ -21,19 +21,19 @@
         </x-slot:actions>
     </x-page-header>
 
-    {{-- Stat Cards --}}
-    <div class="grid grid-cols-1 gap-6 sm:grid-cols-3">
+    {{-- Stat Cards (2-Column Mobile App Grid) --}}
+    <div class="grid grid-cols-2 gap-3 sm:gap-6 sm:grid-cols-3">
         {{-- Total Subjects --}}
-        <div class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-violet-500 to-purple-600 p-6 text-white shadow-md shadow-violet-100 transition-all hover:-translate-y-1 hover:shadow-xl duration-300">
+        <div class="col-span-2 sm:col-span-1 group relative overflow-hidden rounded-2xl sm:rounded-3xl bg-gradient-to-br from-violet-500 to-purple-600 p-3.5 sm:p-6 text-white shadow-md shadow-violet-100 transition-all active:scale-[0.98] sm:hover:-translate-y-1 sm:hover:shadow-xl duration-300">
             <div class="absolute -right-6 -top-6 h-28 w-28 rounded-full bg-white/10 transition-transform duration-500 group-hover:scale-110"></div>
             <div class="absolute right-4 bottom-4 h-16 w-16 rounded-full bg-white/10 transition-transform duration-500 group-hover:scale-110"></div>
             <div class="relative flex items-start justify-between">
                 <div>
-                    <div class="text-4xl font-black tracking-tight">{{ $total }}</div>
-                    <div class="mt-1.5 text-sm font-bold text-violet-100 uppercase tracking-wider">Total Subjects</div>
+                    <div class="text-2xl sm:text-4xl font-black tracking-tight">{{ $total }}</div>
+                    <div class="mt-1 text-xs sm:text-sm font-bold text-violet-100 uppercase tracking-wider">Total Subjects</div>
                 </div>
-                <div class="grid h-12 w-12 place-items-center rounded-2xl bg-white/20 shadow-inner">
-                    <svg class="h-6 w-6 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <div class="grid h-9 w-9 sm:h-12 sm:w-12 place-items-center rounded-xl sm:rounded-2xl bg-white/20 shadow-inner shrink-0">
+                    <svg class="h-4.5 w-4.5 sm:h-6 sm:w-6 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
                     </svg>
                 </div>
@@ -41,16 +41,16 @@
         </div>
 
         {{-- With Codes --}}
-        <div class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-400 to-indigo-500 p-6 text-white shadow-md shadow-blue-100 transition-all hover:-translate-y-1 hover:shadow-xl duration-300">
+        <div class="group relative overflow-hidden rounded-2xl sm:rounded-3xl bg-gradient-to-br from-blue-400 to-indigo-500 p-3.5 sm:p-6 text-white shadow-md shadow-blue-100 transition-all active:scale-[0.98] sm:hover:-translate-y-1 sm:hover:shadow-xl duration-300">
             <div class="absolute -right-6 -top-6 h-28 w-28 rounded-full bg-white/10 transition-transform duration-500 group-hover:scale-110"></div>
             <div class="absolute right-4 bottom-4 h-16 w-16 rounded-full bg-white/10 transition-transform duration-500 group-hover:scale-110"></div>
             <div class="relative flex items-start justify-between">
                 <div>
-                    <div class="text-4xl font-black tracking-tight">{{ $subjects->whereNotNull('code')->count() }}</div>
-                    <div class="mt-1.5 text-sm font-bold text-blue-100 uppercase tracking-wider">With Codes</div>
+                    <div class="text-2xl sm:text-4xl font-black tracking-tight">{{ $subjects->whereNotNull('code')->count() }}</div>
+                    <div class="mt-1 text-xs sm:text-sm font-bold text-blue-100 uppercase tracking-wider">With Codes</div>
                 </div>
-                <div class="grid h-12 w-12 place-items-center rounded-2xl bg-white/20 shadow-inner">
-                    <svg class="h-6 w-6 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <div class="grid h-9 w-9 sm:h-12 sm:w-12 place-items-center rounded-xl sm:rounded-2xl bg-white/20 shadow-inner shrink-0">
+                    <svg class="h-4.5 w-4.5 sm:h-6 sm:w-6 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/>
                     </svg>
                 </div>
@@ -58,16 +58,16 @@
         </div>
 
         {{-- Allocated --}}
-        <div class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-emerald-400 to-teal-500 p-6 text-white shadow-md shadow-emerald-100 transition-all hover:-translate-y-1 hover:shadow-xl duration-300">
+        <div class="group relative overflow-hidden rounded-2xl sm:rounded-3xl bg-gradient-to-br from-emerald-400 to-teal-500 p-3.5 sm:p-6 text-white shadow-md shadow-emerald-100 transition-all active:scale-[0.98] sm:hover:-translate-y-1 sm:hover:shadow-xl duration-300">
             <div class="absolute -right-6 -top-6 h-28 w-28 rounded-full bg-white/10 transition-transform duration-500 group-hover:scale-110"></div>
             <div class="absolute right-4 bottom-4 h-16 w-16 rounded-full bg-white/10 transition-transform duration-500 group-hover:scale-110"></div>
             <div class="relative flex items-start justify-between">
                 <div>
-                    <div class="text-4xl font-black tracking-tight">{{ \App\Models\SubjectAllocation::distinct('subject_id')->count('subject_id') }}</div>
-                    <div class="mt-1.5 text-sm font-bold text-emerald-100 uppercase tracking-wider">Allocated</div>
+                    <div class="text-2xl sm:text-4xl font-black tracking-tight">{{ \App\Models\SubjectAllocation::distinct('subject_id')->count('subject_id') }}</div>
+                    <div class="mt-1 text-xs sm:text-sm font-bold text-emerald-100 uppercase tracking-wider">Allocated</div>
                 </div>
-                <div class="grid h-12 w-12 place-items-center rounded-2xl bg-white/20 shadow-inner">
-                    <svg class="h-6 w-6 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <div class="grid h-9 w-9 sm:h-12 sm:w-12 place-items-center rounded-xl sm:rounded-2xl bg-white/20 shadow-inner shrink-0">
+                    <svg class="h-4.5 w-4.5 sm:h-6 sm:w-6 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
                     </svg>
                 </div>
@@ -110,10 +110,10 @@
 
     {{-- Add Form --}}
     @if ($user?->role === 'admin')
-        <div class="rounded-3xl bg-white p-6 shadow-sm border border-slate-100">
-            <div class="mb-6 flex items-center gap-3 border-b border-slate-100 pb-4">
-                <div class="grid h-10 w-10 place-items-center rounded-2xl bg-gradient-to-br from-violet-500 to-purple-600 text-white shadow-md shadow-violet-50">
-                    <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+        <div class="rounded-2xl sm:rounded-3xl bg-white p-4 sm:p-6 shadow-sm border border-slate-100">
+            <div class="mb-4 sm:mb-6 flex items-center gap-3 border-b border-slate-100 pb-3 sm:pb-4">
+                <div class="grid h-9 w-9 sm:h-10 sm:w-10 place-items-center rounded-xl sm:rounded-2xl bg-gradient-to-br from-violet-500 to-purple-600 text-white shadow-md shadow-violet-50 shrink-0">
+                    <svg class="h-4.5 w-4.5 sm:h-5 sm:w-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
                     </svg>
                 </div>
@@ -122,29 +122,29 @@
                     <p class="text-xs text-slate-400">Set up a new curriculum subject level and assign a shorthand code</p>
                 </div>
             </div>
-            <form method="POST" action="{{ route('subjects.store') }}" class="flex flex-col md:flex-row items-stretch md:items-end gap-5">
+            <form method="POST" action="{{ route('subjects.store') }}" class="flex flex-col md:flex-row items-stretch md:items-end gap-3 sm:gap-5">
                 @csrf
                 <div class="flex-1">
-                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">Subject Name *</label>
+                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5 sm:mb-2">Subject Name *</label>
                     <input 
                         name="name" 
-                        class="w-full rounded-xl border-2 border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-gray-900 shadow-sm transition-all focus:border-violet-500 focus:bg-white focus:ring-4 focus:ring-violet-500/10 hover:border-slate-300" 
+                        class="w-full rounded-xl border-2 border-slate-200 bg-slate-50 px-3.5 py-2.5 sm:px-4 sm:py-3 text-xs sm:text-sm font-semibold text-gray-900 shadow-sm transition-all focus:border-violet-500 focus:bg-white focus:ring-4 focus:ring-violet-500/10 hover:border-slate-300" 
                         value="{{ old('name') }}" 
                         placeholder="e.g., Mathematics" 
                         required 
                     />
                 </div>
                 <div class="w-full md:w-44">
-                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">Subject Code *</label>
+                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5 sm:mb-2">Subject Code *</label>
                     <input 
                         name="code" 
-                        class="w-full rounded-xl border-2 border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-gray-900 shadow-sm transition-all focus:border-violet-500 focus:bg-white focus:ring-4 focus:ring-violet-500/10 hover:border-slate-300 uppercase" 
+                        class="w-full rounded-xl border-2 border-slate-200 bg-slate-50 px-3.5 py-2.5 sm:px-4 sm:py-3 text-xs sm:text-sm font-semibold text-gray-900 shadow-sm transition-all focus:border-violet-500 focus:bg-white focus:ring-4 focus:ring-violet-500/10 hover:border-slate-300 uppercase" 
                         value="{{ old('code') }}" 
                         placeholder="e.g., MATH" 
                         required 
                     />
                 </div>
-                <button type="submit" class="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-violet-600 to-purple-600 px-6 py-3.5 text-sm font-bold text-white shadow-md shadow-violet-100 transition-all hover:from-violet-700 hover:to-purple-700 hover:shadow-lg active:scale-[0.98] w-full md:w-auto h-[48px] self-end">
+                <button type="submit" class="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-violet-600 to-purple-600 px-5 py-3 sm:px-6 sm:py-3.5 text-xs sm:text-sm font-bold text-white shadow-md shadow-violet-100 transition-all hover:from-violet-700 hover:to-purple-700 hover:shadow-lg active:scale-[0.98] w-full md:w-auto h-[44px] sm:h-[48px] self-end">
                     <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
                     </svg>
@@ -155,7 +155,7 @@
     @endif
 
     {{-- Table Card --}}
-    <div class="rounded-3xl bg-white shadow-sm border border-slate-100 overflow-hidden">
+    <div class="rounded-2xl sm:rounded-3xl bg-white shadow-sm border border-slate-100 overflow-hidden">
         <div class="flex items-center justify-between border-b border-slate-100 p-5 bg-white">
             <div>
                 <h3 class="text-base font-bold text-slate-800">All Curriculum Subjects</h3>

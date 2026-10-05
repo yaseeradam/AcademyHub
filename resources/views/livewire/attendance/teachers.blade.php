@@ -1,7 +1,7 @@
 <div
     class="space-y-6"
     x-data="{
-        // â”€â”€ Keyboard shortcuts â”€â”€
+        // ── Keyboard shortcuts ──
         onKeydown(e) {
             const isTyping = (el) => {
                 if (!el) return false;
@@ -129,7 +129,7 @@
     @php
         $totalTeachersCount = $this->teachers->count();
     @endphp
-    <div class="grid grid-cols-2 gap-2.5 sm:grid-cols-3 lg:grid-cols-5">
+    <div class="grid grid-cols-2 gap-2.5 sm:grid-cols-3 lg:grid-cols-6">
         {{-- Total Active Teachers --}}
         <div class="relative overflow-hidden rounded-xl bg-slate-900 p-3.5 shadow-sm border border-slate-800 text-white">
             <div class="flex items-center justify-between">
@@ -193,6 +193,20 @@
             <div class="text-[10px] font-semibold text-purple-500">
                 <span>{{ $totalTeachersCount > 0 ? round((($this->markCounts['Excused'] ?? 0) / $totalTeachersCount) * 100) : 0 }}%</span>
                 <span class="text-slate-400 font-medium">excused rate</span>
+            </div>
+        </div>
+
+        {{-- Unmarked Counter --}}
+        <div class="relative overflow-hidden rounded-xl bg-white p-3.5 shadow-sm border border-slate-100 transition-all hover:shadow-md">
+            <div class="absolute top-0 left-0 right-0 h-1 bg-slate-400"></div>
+            <div class="flex items-center justify-between">
+                <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Unmarked</span>
+                <span class="rounded-full bg-slate-100 px-2 py-0.5 text-[9px] font-bold text-slate-500">?</span>
+            </div>
+            <div class="mt-1.5 text-2xl font-extrabold text-slate-850">{{ $this->markCounts['Unmarked'] ?? 0 }}</div>
+            <div class="text-[10px] font-semibold text-slate-400">
+                <span>{{ $totalTeachersCount > 0 ? round((($this->markCounts['Unmarked'] ?? 0) / $totalTeachersCount) * 100) : 0 }}%</span>
+                <span class="text-slate-400 font-medium">pending</span>
             </div>
         </div>
     </div>
@@ -319,14 +333,15 @@
 
                 @forelse ($this->visibleTeachers as $teacher)
                     @php
-                        $status = $marks[$teacher->id]['status'] ?? 'Present';
+                        $status = $marks[$teacher->id]['status'] ?? 'Unmarked';
                         $note = $marks[$teacher->id]['note'] ?? null;
 
                         $rowBorder = [
-                            'Present' => 'border-slate-100 bg-white hover:border-slate-300',
-                            'Absent'  => 'border-red-200 bg-red-50/30 hover:border-red-300',
-                            'Late'    => 'border-amber-200 bg-amber-50/30 hover:border-amber-300',
-                            'Excused' => 'border-purple-200 bg-purple-50/30 hover:border-purple-300',
+                            'Present'  => 'border-emerald-200 bg-emerald-50/20 hover:border-emerald-300',
+                            'Absent'   => 'border-red-200 bg-red-50/30 hover:border-red-300',
+                            'Late'     => 'border-amber-200 bg-amber-50/30 hover:border-amber-300',
+                            'Excused'  => 'border-purple-200 bg-purple-50/30 hover:border-purple-300',
+                            'Unmarked' => 'border-slate-200 bg-white hover:border-slate-300',
                         ][$status] ?? 'border-slate-100 bg-white';
                     @endphp
 
@@ -385,11 +400,12 @@
 
                                 <button type="button" wire:click="cycleStatus({{ $teacher->id }})"
                                     class="rounded-xl px-3 py-1.5 text-xs font-bold border transition-all {{ [
-                                        'Present' => 'bg-emerald-50 text-emerald-700 border-emerald-200',
-                                        'Absent'  => 'bg-red-50 text-red-700 border-red-200',
-                                        'Late'    => 'bg-amber-50 text-amber-700 border-amber-200',
-                                        'Excused' => 'bg-purple-50 text-purple-700 border-purple-200',
-                                    ][$status] }}">
+                                        'Present'  => 'bg-emerald-50 text-emerald-700 border-emerald-200',
+                                        'Absent'   => 'bg-red-50 text-red-700 border-red-200',
+                                        'Late'     => 'bg-amber-50 text-amber-700 border-amber-200',
+                                        'Excused'  => 'bg-purple-50 text-purple-700 border-purple-200',
+                                        'Unmarked' => 'bg-slate-100 text-slate-600 border-slate-200',
+                                    ][$status] ?? 'bg-slate-100 text-slate-600 border-slate-200' }}">
                                     {{ $status }}
                                 </button>
                             </div>
@@ -420,7 +436,7 @@
             <div class="border-b border-slate-100 px-6 py-4 bg-slate-50/50 flex items-center justify-between">
                 <div>
                     <h3 class="text-sm font-extrabold text-slate-900">Term Attendance Audit Log</h3>
-                    <p class="text-xs text-slate-400">Staff attendance breakdown for {{ $session }} â€” Term {{ $term }}</p>
+                    <p class="text-xs text-slate-400">Staff attendance breakdown for {{ $session }} — Term {{ $term }}</p>
                 </div>
                 <button type="button" wire:click="exportCsv" class="btn-outline text-xs" wire:loading.attr="disabled" wire:loading.class="opacity-50 cursor-wait">
                     Export Audit CSV

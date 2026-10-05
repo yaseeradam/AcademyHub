@@ -288,4 +288,127 @@
         pointer-events: none;
         animation: ripple 0.6s ease-out;
     }
+
+    /* Safe Area Insets for iOS Notch & Android Gesture Bars */
+    .pt-safe {
+        padding-top: env(safe-area-inset-top, 0px);
+    }
+    .pb-safe {
+        padding-bottom: env(safe-area-inset-bottom, 0px);
+    }
+    .pl-safe {
+        padding-left: env(safe-area-inset-left, 0px);
+    }
+    .pr-safe {
+        padding-right: env(safe-area-inset-right, 0px);
+    }
+
+    /* Native App Micro-Interactions & Tap Physics */
+    .tap-bounce {
+        transition: transform 0.12s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .tap-bounce:active {
+        transform: scale(0.92);
+    }
+
+    .tap-bounce-sm {
+        transition: transform 0.1s ease;
+    }
+    .tap-bounce-sm:active {
+        transform: scale(0.96);
+    }
+
+    /* Frosted Glass Native App Chrome */
+    .app-glass-header {
+        background: rgba(255, 255, 255, 0.88);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+    }
+
+    .app-glass-nav {
+        background: rgba(255, 255, 255, 0.94);
+        backdrop-filter: blur(24px);
+        -webkit-backdrop-filter: blur(24px);
+    }
+
+    /* Native-like horizontal touch scroll */
+    .touch-scroll {
+        -webkit-overflow-scrolling: touch;
+        overscroll-behavior-x: contain;
+    }
+}
+
+/* ==========================================================================
+   MOBILE APP & PWA NATIVE ENHANCEMENTS
+   Ensures the platform looks and feels 100% like a native iOS/Android application
+   ========================================================================== */
+:root {
+    --sat: env(safe-area-inset-top, 0px);
+    --sab: env(safe-area-inset-bottom, 0px);
+    --sal: env(safe-area-inset-left, 0px);
+    --sar: env(safe-area-inset-right, 0px);
+}
+
+html, body {
+    -webkit-tap-highlight-color: transparent;
+    overscroll-behavior-y: contain;
+}
+
+/* Safe areas for mobile bottom navigation */
+.mobile-bottom-nav, #mobile-bottom-nav, .student-bottom-nav {
+    padding-bottom: max(10px, env(safe-area-inset-bottom, 10px)) !important;
+}
+
+/* Standalone Mode (Installed PWA App Experience) */
+html.pwa-standalone {
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+html.pwa-standalone header, 
+html.pwa-standalone .topbar-native,
+html.pwa-standalone #sa-topbar {
+    padding-top: max(14px, env(safe-area-inset-top, 14px)) !important;
+    height: auto !important;
+    min-height: 64px;
+}
+
+@media (max-width: 1023px) {
+    /* Prevent accidental auto-zoom on iOS Safari input focus (16px rule) */
+    input, select, textarea {
+        font-size: 16px !important;
+    }
+
+    /* Native app-like non-selectable chrome to prevent blue text drag selection */
+    button, a, .tab-bar-item, .nav-icon-box, nav, header, aside {
+        -webkit-user-select: none !important;
+        user-select: none !important;
+        -webkit-touch-callout: none !important;
+    }
+
+    /* Mobile Card Optimizations (iOS / Material 3 style) */
+    .rounded-3xl {
+        border-radius: 1.25rem !important; /* 20px on mobile instead of oversized 24-32px */
+    }
+
+    /* Crisp mobile cards with high-density app feel */
+    .card, .card-stat, [class*="rounded-2xl"], [class*="rounded-3xl"] {
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    /* Smooth touch responsiveness for interactive cards & buttons */
+    button.card, a.card, button[wire\:click].group, .card-interactive, .btn-touch {
+        touch-action: manipulation;
+        transition: transform 0.12s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.12s ease;
+    }
+
+    button.card:active, a.card:active, button[wire\:click].group:active, .btn-touch:active {
+        transform: scale(0.97) !important;
+    }
+
+    /* Prevent accidental card overflow on narrow 360px-390px screens */
+    .grid {
+        min-width: 0;
+        max-width: 100%;
+    }
 }

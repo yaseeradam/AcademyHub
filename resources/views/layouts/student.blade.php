@@ -2,8 +2,21 @@
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="h-full">
 <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
     <meta name="csrf-token" content="{{ csrf_token() }}" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="{{ config('academyhub.school_name', 'AcademyHub') }}" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="theme-color" content="#0f172a" />
+    <meta name="theme-color" content="#0f172a" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0f172a" media="(prefers-color-scheme: dark)" />
+    <link rel="manifest" href="/manifest.json">
+    @if(config('academyhub.school_logo'))
+        <link rel="apple-touch-icon" href="{{ asset('uploads/'.str_replace('\\','/',config('academyhub.school_logo'))) }}">
+    @else
+        <link rel="apple-touch-icon" href="{{ asset('apple-touch-icon.png') }}">
+    @endif
     <title>{{ config('academyhub.school_name', config('app.name', 'AcademyHub')) }} — Student Portal</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @livewireStyles
@@ -20,6 +33,17 @@
 </head>
 <body class="h-full bg-[#f5f6fa] text-slate-900">
 
+{{-- Native PWA Boot Splash Screen --}}
+<x-pwa-splash-screen />
+
+{{-- Native PWA Offline Indicator --}}
+<div wire:offline class="fixed top-3 left-1/2 -translate-x-1/2 z-[99999] pointer-events-none transition-all duration-300">
+    <div class="bg-amber-500/95 backdrop-blur-md text-slate-900 border border-amber-600/30 rounded-full px-4 py-1.5 shadow-xl flex items-center gap-2 text-xs font-bold animate-pulse">
+        <span class="h-2 w-2 rounded-full bg-amber-950"></span>
+        <span>Offline Mode — Browsing cached data</span>
+    </div>
+</div>
+
 @php
     $schoolLogo       = config('academyhub.school_logo');
     $schoolName       = config('academyhub.school_name', 'AcademyHub');
@@ -35,6 +59,7 @@
         ['route'=>'student.results',       'label'=>'Results',       'icon'=>'<path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>'],
         ['route'=>'student.attendance',    'label'=>'Attendance',    'icon'=>'<path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>'],
         ['route'=>'student.performance',   'label'=>'Performance',   'icon'=>'<path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/>'],
+        ['route'=>'student.hall-of-fame',  'label'=>'Hall of Fame',  'icon'=>'<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/>'],
         ['route'=>'student.notifications', 'label'=>'Notifications', 'icon'=>'<path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>'],
         ['route'=>'student.profile',       'label'=>'My Profile',    'icon'=>'<path stroke-linecap="round" stroke-linejoin="round" d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>'],
     ];
@@ -77,12 +102,17 @@
            x-transition:leave="transition ease-in duration-200 transform"
            x-transition:leave-start="translate-x-0"
            x-transition:leave-end="-translate-x-full"
-           class="fixed inset-y-0 left-0 z-50 flex w-72 flex-col bg-[#f5f6fa] lg:hidden shadow-2xl"
+           class="fixed inset-y-0 left-0 z-50 flex w-80 max-w-[85vw] flex-col bg-[#f5f6fa] rounded-r-3xl lg:hidden shadow-2xl pt-safe pb-safe overscroll-contain select-none"
            style="display:none;">
-        <div class="flex items-center justify-end px-4 pt-4">
+        <div class="flex items-center justify-between px-4 pt-3 pb-1">
+            <div class="flex items-center gap-2">
+                <span class="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                <span class="text-[11px] font-black uppercase tracking-wider text-slate-400">Student App</span>
+            </div>
             <button @click="mobileSidebarOpen = false"
-                    class="rounded-xl bg-white p-2 text-slate-400 shadow-sm hover:text-slate-600">
-                <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    aria-label="Close menu"
+                    class="rounded-xl bg-white p-2 text-slate-400 shadow-sm hover:text-slate-600 tap-bounce focus:outline-none">
+                <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
                 </svg>
             </button>
@@ -100,16 +130,21 @@
     <div class="flex flex-1 min-w-0 flex-col">
 
         {{-- Top Header --}}
-        <header class="sticky top-0 z-30 flex h-[72px] items-center justify-between gap-4 border-b border-slate-200/60 bg-white px-4 sm:px-6 shadow-sm">
+        <header class="sticky top-0 z-30 flex h-14 sm:h-16 lg:h-[72px] items-center justify-between gap-2 sm:gap-4 border-b border-slate-200/60 bg-white/95 backdrop-blur-md px-3 sm:px-6 shadow-sm pt-safe select-none">
 
-            {{-- Left: hamburger + page label --}}
-            <div class="flex items-center gap-3 overflow-hidden">
-                <button @click="mobileSidebarOpen = true"
-                        class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl border border-slate-200 text-slate-500 hover:bg-slate-50 lg:hidden transition-colors">
-                    <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/>
-                    </svg>
-                </button>
+            {{-- Left: Logo trigger + page label --}}
+            <div class="flex items-center gap-2 sm:gap-3 overflow-hidden">
+                <div class="lg:hidden flex-shrink-0 flex items-center">
+                    <button type="button" @click="mobileSidebarOpen = true" aria-label="Open App Menu" class="tap-bounce flex items-center focus:outline-none">
+                        <div class="flex h-9 w-9 items-center justify-center overflow-hidden rounded-xl bg-violet-50 ring-1 ring-violet-200/80 shadow-sm">
+                            @if($schoolLogo)
+                                <img src="{{ asset('uploads/'.str_replace('\\','/',$schoolLogo)) }}" alt="Logo" class="h-full w-full object-contain p-0.5" />
+                            @else
+                                <img src="{{ asset('full.png') }}" alt="Logo" class="h-full w-full object-contain p-0.5" />
+                            @endif
+                        </div>
+                    </button>
+                </div>
                 <button @click="sidebarCollapsed = !sidebarCollapsed" title="Toggle Menu"
                         class="hidden h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl border border-slate-200 text-slate-500 hover:bg-slate-50 lg:flex transition-colors">
                     <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
@@ -117,40 +152,45 @@
                     </svg>
                 </button>
                 <div class="min-w-0 overflow-hidden text-left">
-                    <h1 class="truncate text-base font-extrabold tracking-tight text-slate-900 sm:text-lg">{{ $schoolName }}</h1>
-                    <p class="truncate text-[10px] font-medium text-slate-400 sm:text-xs">{{ now()->format('l, F j, Y') }}</p>
+                    <h1 class="truncate text-sm sm:text-lg font-extrabold tracking-tight text-slate-900 leading-tight">{{ $schoolName }}</h1>
+                    <div class="flex items-center gap-1.5">
+                        <span class="lg:hidden inline-flex items-center px-1.5 py-0.2 rounded-full text-[9px] font-bold bg-green-50 text-green-700 capitalize">
+                            Student
+                        </span>
+                        <p class="hidden sm:block truncate text-[10px] font-medium text-slate-400 sm:text-xs">{{ now()->format('l, F j, Y') }}</p>
+                    </div>
                 </div>
             </div>
 
             {{-- Right: bell + student chip + logout --}}
-            <div class="flex items-center gap-3">
-                <div class="relative flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500 hover:bg-slate-50 transition-colors">
+            <div class="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+                <div class="relative flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500 hover:bg-slate-50 transition-colors tap-bounce shadow-sm">
                     <livewire:student.notification-bell />
                 </div>
-                <div class="flex items-center gap-1 sm:gap-2.5 rounded-full border border-slate-200 bg-white p-1 sm:py-1 sm:pl-1 sm:pr-4 shadow-sm hover:shadow-md transition-all">
+                <div class="flex items-center gap-1 sm:gap-2.5 rounded-full border border-slate-200 bg-white p-0.5 sm:py-1 sm:pl-1 sm:pr-4 shadow-sm hover:shadow-md transition-all tap-bounce">
                     <div class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-green-600 text-white shadow-sm font-extrabold">
-                        <span class="text-sm font-bold leading-none">{{ $studentInitial }}</span>
+                        <span class="text-xs sm:text-sm leading-none">{{ $studentInitial }}</span>
                     </div>
                     <div class="hidden leading-tight sm:block text-left">
                         <div class="text-xs font-bold text-slate-800">{{ $studentName }}</div>
                         <div class="text-[10px] font-semibold text-slate-400">{{ $studentAdmission }}</div>
                     </div>
                 </div>
-                <form method="POST" action="{{ route('student.logout') }}">
+                <form method="POST" action="{{ route('student.logout') }}" class="hidden sm:block">
                     @csrf
                     <button type="submit"
                             class="flex items-center gap-1.5 rounded-lg bg-slate-900 px-3.5 py-2 text-xs font-bold text-white hover:bg-slate-700 transition-all shadow-sm">
                         <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
                         </svg>
-                        <span class="hidden sm:inline">Logout</span>
+                        <span>Logout</span>
                     </button>
                 </form>
             </div>
         </header>
 
         {{-- Page content --}}
-        <main class="flex-1 overflow-y-auto px-4 py-4 sm:px-6 sm:py-5 min-h-0">
+        <main class="flex-1 overflow-y-auto px-4 py-4 sm:px-6 sm:py-5 pb-24 lg:pb-6 min-h-0 overscroll-contain">
             @if(session('success'))
                 <div class="mb-4 flex items-center gap-3 rounded-xl border border-green-200 bg-green-50 px-4 py-3">
                     <svg class="h-4 w-4 flex-shrink-0 text-green-500" fill="currentColor" viewBox="0 0 20 20">
@@ -178,6 +218,9 @@
             {{ $slot }}
         </main>
     </div>
+
+    {{-- Native Bottom Tab Bar for Student Mobile --}}
+    @include('layouts.partials.student-mobile-bottom-nav')
 
 </div>
 
@@ -220,6 +263,15 @@
         100% { transform: translateX(300%); }
     }
 </style>
+
+<script>
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function() {
+            navigator.serviceWorker.register('/sw.js?v=3').catch(function() {});
+        });
+    }
+</script>
+<x-pwa-install-prompt />
 
 </body>
 </html>

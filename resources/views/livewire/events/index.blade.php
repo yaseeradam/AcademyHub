@@ -63,8 +63,8 @@
                                 <div class="text-sm font-bold text-gray-900">{{ $e->title }}</div>
                                 <div class="mt-1 text-xs text-gray-500">
                                     {{ $e->starts_at?->format('M j, Y g:i A') }}
-                                    @if($e->ends_at) â†’ {{ $e->ends_at->format('g:i A') }} @endif
-                                    @if($e->location) â€¢ {{ $e->location }} @endif
+                                    @if($e->ends_at) → {{ $e->ends_at->format('g:i A') }} @endif
+                                    @if($e->location) • {{ $e->location }} @endif
                                 </div>
                             </div>
                             @if($isAdmin)
@@ -102,7 +102,7 @@
                         <div class="text-sm font-bold text-gray-900">{{ $e->title }}</div>
                         <div class="mt-1 text-xs text-gray-500">
                             {{ $e->starts_at?->format('M j, Y g:i A') }}
-                            @if($e->location) â€¢ {{ $e->location }} @endif
+                            @if($e->location) • {{ $e->location }} @endif
                         </div>
                         @if($e->description)
                             <div class="mt-3 whitespace-pre-wrap text-sm text-gray-700">{{ $e->description }}</div>

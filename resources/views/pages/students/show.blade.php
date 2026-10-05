@@ -153,36 +153,36 @@
     @endif
 
     {{-- Profile Header Card --}}
-    <div class="rounded-2xl bg-white shadow-sm ring-1 ring-slate-100 px-6 py-6 mb-2">
-        <div class="flex flex-col gap-6 md:flex-row md:items-center justify-between">
+    <div class="rounded-2xl bg-white shadow-sm ring-1 ring-slate-100 p-4 sm:p-6 mb-2">
+        <div class="flex flex-col gap-4 md:flex-row md:items-center justify-between">
             {{-- Left: Avatar & Info --}}
-            <div class="flex items-center gap-5">
+            <div class="flex items-center gap-3.5 sm:gap-5">
                 <div class="shrink-0 relative">
                     @if ($student->passport_photo_url)
-                        <img src="{{ $student->passport_photo_url }}" alt="{{ $student->full_name }}" class="h-20 w-20 rounded-2xl object-cover ring-4 ring-slate-50 shadow-sm" />
+                        <img src="{{ $student->passport_photo_url }}" alt="{{ $student->full_name }}" class="h-16 w-16 sm:h-20 sm:w-20 rounded-xl sm:rounded-2xl object-cover ring-2 sm:ring-4 ring-slate-50 shadow-sm" />
                     @else
-                        <div class="grid h-20 w-20 place-items-center rounded-2xl bg-gradient-to-br from-orange-400 to-amber-500 text-2xl font-bold text-white shadow-sm ring-4 ring-slate-50">
+                        <div class="grid h-16 w-16 sm:h-20 sm:w-20 place-items-center rounded-xl sm:rounded-2xl bg-gradient-to-br from-orange-400 to-amber-500 text-xl sm:text-2xl font-bold text-white shadow-sm ring-2 sm:ring-4 ring-slate-50">
                             {{ $initials }}
                         </div>
                     @endif
                 </div>
                 
-                <div>
-                    <div class="flex items-center gap-3">
-                        <h2 class="text-2xl font-bold text-slate-800 tracking-tight">{{ $student->full_name }}</h2>
+                <div class="min-w-0 flex-1">
+                    <div class="flex items-center gap-2 sm:gap-3 flex-wrap">
+                        <h2 class="text-lg sm:text-2xl font-bold text-slate-800 tracking-tight truncate">{{ $student->full_name }}</h2>
                         @php $statusColor = match($student->status) { 'Active' => 'bg-emerald-50 text-emerald-600 ring-emerald-200', 'Graduated' => 'bg-emerald-50 text-emerald-600 ring-emerald-200', default => 'bg-amber-50 text-amber-600 ring-amber-200' }; @endphp
-                        <span class="rounded-full px-2.5 py-0.5 text-xs font-semibold ring-1 {{ $statusColor }}">{{ $student->status }}</span>
+                        <span class="rounded-full px-2 sm:px-2.5 py-0.5 text-[10px] sm:text-xs font-semibold ring-1 {{ $statusColor }}">{{ $student->status }}</span>
                     </div>
-                    <p class="mt-1 text-sm font-medium text-slate-500">{{ $studentMeta }}</p>
+                    <p class="mt-1 text-xs sm:text-sm font-medium text-slate-500 truncate">{{ $studentMeta }}</p>
                     
-                    <div class="mt-4 flex flex-wrap gap-2">
-                        <a href="{{ route('students.admission-form', $student) }}" class="inline-flex items-center gap-1.5 rounded-lg bg-orange-50 px-3 py-1.5 text-xs font-bold text-orange-600 hover:bg-orange-100 transition">
-                            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+                    <div class="mt-2.5 sm:mt-4 flex flex-wrap gap-1.5 sm:gap-2">
+                        <a href="{{ route('students.admission-form', $student) }}" class="inline-flex items-center gap-1.5 rounded-lg bg-orange-50 px-2.5 sm:px-3 py-1 sm:py-1.5 text-xs font-bold text-orange-600 hover:bg-orange-100 active:scale-95 transition">
+                            <svg class="h-3.5 w-3.5 sm:h-4 sm:w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
                             Admission Form
                         </a>
                         @if (auth()->user()?->role === 'admin')
-                            <a href="{{ route('students.edit', $student) }}" class="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-bold text-slate-600 hover:bg-slate-50 transition shadow-sm">
-                                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                            <a href="{{ route('students.edit', $student) }}" class="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 sm:px-3 py-1 sm:py-1.5 text-xs font-bold text-slate-600 hover:bg-slate-50 active:scale-95 transition shadow-sm">
+                                <svg class="h-3.5 w-3.5 sm:h-4 sm:w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
                                 Edit Profile
                             </a>
                         @endif
@@ -191,9 +191,9 @@
             </div>
 
             {{-- Right: Actions & Status --}}
-            <div class="flex md:flex-col items-center md:items-end justify-between h-full gap-4">
-                <a href="{{ route('students.index') }}" class="inline-flex items-center gap-2 rounded-xl bg-slate-50 px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-100 transition ring-1 ring-slate-200 shadow-sm">
-                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+            <div class="flex flex-row md:flex-col items-center md:items-end justify-between w-full md:w-auto pt-3 md:pt-0 border-t border-slate-50 md:border-t-0 gap-3">
+                <a href="{{ route('students.index') }}" class="inline-flex items-center gap-1.5 sm:gap-2 rounded-xl bg-slate-50 px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-semibold text-slate-600 hover:bg-slate-100 active:scale-95 transition ring-1 ring-slate-200 shadow-sm">
+                    <svg class="h-3.5 w-3.5 sm:h-4 sm:w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
                     Back to List
                 </a>
                 
@@ -235,84 +235,84 @@
     @if ($tab === 'profile')
         <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
             {{-- Unified Details Card --}}
-            <div class="lg:col-span-2 rounded-2xl bg-white p-8 shadow-sm ring-1 ring-slate-100">
-                <div class="mb-6 flex items-center justify-between border-b border-slate-100 pb-4">
-                    <div class="text-lg font-bold text-slate-800">Student Particulars</div>
+            <div class="lg:col-span-2 rounded-2xl bg-white p-4 sm:p-6 lg:p-8 shadow-sm ring-1 ring-slate-100">
+                <div class="mb-4 sm:mb-6 flex items-center justify-between border-b border-slate-100 pb-3 sm:pb-4">
+                    <div class="text-base sm:text-lg font-bold text-slate-800">Student Particulars</div>
                 </div>
                 
-                <div class="space-y-10">
+                <div class="space-y-6 sm:space-y-8">
                     <div>
-                        <h4 class="text-sm font-bold uppercase tracking-wider text-slate-400 mb-4">Personal Information</h4>
-                        <div class="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-2">
-                            <div><div class="text-xs font-semibold text-slate-500">Admission No</div><div class="mt-1 text-sm font-bold text-slate-800">{{ $student->admission_number }}</div></div>
-                            <div><div class="text-xs font-semibold text-slate-500">Gender</div><div class="mt-1 text-sm font-bold text-slate-800">{{ $student->gender }}</div></div>
-                            <div><div class="text-xs font-semibold text-slate-500">Date of Birth</div><div class="mt-1 text-sm font-bold text-slate-800">{{ $student->dob?->format('F j, Y') ?: '—' }}</div></div>
-                            <div><div class="text-xs font-semibold text-slate-500">Blood Group</div><div class="mt-1 text-sm font-bold text-slate-800">{{ $student->blood_group ?: '—' }}</div></div>
+                        <h4 class="text-xs sm:text-sm font-bold uppercase tracking-wider text-slate-400 mb-3 sm:mb-4">Personal Information</h4>
+                        <div class="grid grid-cols-2 gap-y-4 gap-x-3 sm:grid-cols-2 sm:gap-y-6 sm:gap-x-4">
+                            <div><div class="text-[11px] sm:text-xs font-semibold text-slate-500">Admission No</div><div class="mt-0.5 sm:mt-1 text-xs sm:text-sm font-bold text-slate-800 break-words">{{ $student->admission_number }}</div></div>
+                            <div><div class="text-[11px] sm:text-xs font-semibold text-slate-500">Gender</div><div class="mt-0.5 sm:mt-1 text-xs sm:text-sm font-bold text-slate-800">{{ $student->gender }}</div></div>
+                            <div><div class="text-[11px] sm:text-xs font-semibold text-slate-500">Date of Birth</div><div class="mt-0.5 sm:mt-1 text-xs sm:text-sm font-bold text-slate-800">{{ $student->dob?->format('F j, Y') ?: '—' }}</div></div>
+                            <div><div class="text-[11px] sm:text-xs font-semibold text-slate-500">Blood Group</div><div class="mt-0.5 sm:mt-1 text-xs sm:text-sm font-bold text-slate-800">{{ $student->blood_group ?: '—' }}</div></div>
                         </div>
                     </div>
                     
                     <div>
-                        <h4 class="text-sm font-bold uppercase tracking-wider text-slate-400 mb-4">Academic Placement</h4>
-                        <div class="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-2">
-                            <div><div class="text-xs font-semibold text-slate-500">Class</div><div class="mt-1 text-sm font-bold text-slate-800">{{ $student->schoolClass?->name ?: '—' }}</div></div>
-                            <div><div class="text-xs font-semibold text-slate-500">Section</div><div class="mt-1 text-sm font-bold text-slate-800">{{ $student->section?->name ?: '—' }}</div></div>
-                            <div class="sm:col-span-2">
-                                <div class="text-xs font-semibold text-slate-500 mb-2">Enrolled Subjects</div>
+                        <h4 class="text-xs sm:text-sm font-bold uppercase tracking-wider text-slate-400 mb-3 sm:mb-4">Academic Placement</h4>
+                        <div class="grid grid-cols-2 gap-y-4 gap-x-3 sm:grid-cols-2 sm:gap-y-6 sm:gap-x-4">
+                            <div><div class="text-[11px] sm:text-xs font-semibold text-slate-500">Class</div><div class="mt-0.5 sm:mt-1 text-xs sm:text-sm font-bold text-slate-800">{{ $student->schoolClass?->name ?: '—' }}</div></div>
+                            <div><div class="text-[11px] sm:text-xs font-semibold text-slate-500">Section</div><div class="mt-0.5 sm:mt-1 text-xs sm:text-sm font-bold text-slate-800">{{ $student->section?->name ?: '—' }}</div></div>
+                            <div class="col-span-2">
+                                <div class="text-[11px] sm:text-xs font-semibold text-slate-500 mb-2">Enrolled Subjects</div>
                                 @if($student->schoolClass && $student->schoolClass->subjects->count() > 0)
-                                    <div class="flex flex-wrap gap-2">
+                                    <div class="flex flex-wrap gap-1.5 sm:gap-2">
                                         @foreach($student->schoolClass->subjects as $subject)
-                                            <span class="inline-flex items-center rounded-lg bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700">{{ $subject->name }}</span>
+                                            <span class="inline-flex items-center rounded-lg bg-slate-100 px-2.5 py-1 text-[11px] sm:text-xs font-semibold text-slate-700">{{ $subject->name }}</span>
                                         @endforeach
                                     </div>
                                 @else
-                                    <div class="text-sm text-slate-400">No subjects currently assigned.</div>
+                                    <div class="text-xs sm:text-sm text-slate-400">No subjects currently assigned.</div>
                                 @endif
                             </div>
                         </div>
                     </div>
 
                     <div>
-                        <h4 class="text-sm font-bold uppercase tracking-wider text-slate-400 mb-4">Guardian Contact</h4>
-                        <div class="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-2">
-                            <div><div class="text-xs font-semibold text-slate-500">Guardian Name</div><div class="mt-1 text-sm font-bold text-slate-800">{{ $student->guardian_name ?: '—' }}</div></div>
-                            <div><div class="text-xs font-semibold text-slate-500">Phone Number</div><div class="mt-1 text-sm font-bold text-slate-800">{{ $student->guardian_phone ?: '—' }}</div></div>
-                            <div class="sm:col-span-2"><div class="text-xs font-semibold text-slate-500">Residential Address</div><div class="mt-1 text-sm font-bold text-slate-800">{{ $student->guardian_address ?: '—' }}</div></div>
+                        <h4 class="text-xs sm:text-sm font-bold uppercase tracking-wider text-slate-400 mb-3 sm:mb-4">Guardian Contact</h4>
+                        <div class="grid grid-cols-2 gap-y-4 gap-x-3 sm:grid-cols-2 sm:gap-y-6 sm:gap-x-4">
+                            <div><div class="text-[11px] sm:text-xs font-semibold text-slate-500">Guardian Name</div><div class="mt-0.5 sm:mt-1 text-xs sm:text-sm font-bold text-slate-800">{{ $student->guardian_name ?: '—' }}</div></div>
+                            <div><div class="text-[11px] sm:text-xs font-semibold text-slate-500">Phone Number</div><div class="mt-0.5 sm:mt-1 text-xs sm:text-sm font-bold text-slate-800 break-words">{{ $student->guardian_phone ?: '—' }}</div></div>
+                            <div class="col-span-2"><div class="text-[11px] sm:text-xs font-semibold text-slate-500">Residential Address</div><div class="mt-0.5 sm:mt-1 text-xs sm:text-sm font-bold text-slate-800">{{ $student->guardian_address ?: '—' }}</div></div>
                         </div>
                     </div>
                 </div>
             </div>
 
             {{-- Sidebar --}}
-            <div class="space-y-6">
+            <div class="space-y-4 sm:space-y-6">
                 {{-- Quick Stats matching Dashboard --}}
-                <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-orange-400 to-amber-500 p-6 text-white shadow-lg">
+                <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-orange-400 to-amber-500 p-4 sm:p-6 text-white shadow-lg active:scale-[0.99] transition-transform">
                     <div class="absolute -right-6 -top-6 h-28 w-28 rounded-full bg-white/10"></div>
                     <div class="absolute right-4 bottom-4 h-16 w-16 rounded-full bg-white/10"></div>
-                    <div class="relative flex items-start justify-between">
+                    <div class="relative flex items-center justify-between sm:items-start">
                         <div>
-                            <div class="text-3xl font-black">{{ $student->schoolClass?->name ?: 'N/A' }}</div>
-                            <div class="mt-1 text-sm font-semibold text-white/80">Current Class</div>
+                            <div class="text-2xl sm:text-3xl font-black">{{ $student->schoolClass?->name ?: 'N/A' }}</div>
+                            <div class="mt-0.5 sm:mt-1 text-xs sm:text-sm font-semibold text-white/80">Current Class</div>
                         </div>
-                        <div class="grid h-12 w-12 place-items-center rounded-xl bg-white/20">
-                            <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 14l9-5-9-5-9 5 9 5z"/><path d="M12 14l6.16-3.422A12.083 12.083 0 0112 21.5a12.083 12.083 0 01-6.16-10.922L12 14z"/></svg>
+                        <div class="grid h-10 w-10 sm:h-12 sm:w-12 place-items-center rounded-xl bg-white/20 shrink-0">
+                            <svg class="h-5 w-5 sm:h-6 sm:w-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 14l9-5-9-5-9 5 9 5z"/><path d="M12 14l6.16-3.422A12.083 12.083 0 0112 21.5a12.083 12.083 0 01-6.16-10.922L12 14z"/></svg>
                         </div>
                     </div>
                 </div>
                 
                 {{-- Activity Feed --}}
-                <div class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-100">
-                    <div class="mb-4 flex items-center justify-between">
-                        <div class="text-base font-bold text-slate-800">Recent Activity</div>
+                <div class="rounded-2xl bg-white p-4 sm:p-6 shadow-sm ring-1 ring-slate-100">
+                    <div class="mb-3 sm:mb-4 flex items-center justify-between">
+                        <div class="text-sm sm:text-base font-bold text-slate-800">Recent Activity</div>
                     </div>
-                    <div class="space-y-4">
+                    <div class="space-y-3 sm:space-y-4">
                         @foreach ([
                             ['title' => 'Student record viewed', 'time' => now()->format('M j, Y g:i A'), 'color' => 'bg-emerald-400'],
                         ] as $item)
-                            <div class="flex items-start gap-3">
+                            <div class="flex items-start gap-2.5 sm:gap-3">
                                 <span class="mt-1.5 h-2 w-2 rounded-full {{ $item['color'] }} shrink-0"></span>
                                 <div class="min-w-0 flex-1">
-                                    <div class="text-sm font-semibold text-slate-800">{{ $item['title'] }}</div>
-                                    <div class="text-xs text-slate-400">{{ $item['time'] }}</div>
+                                    <div class="text-xs sm:text-sm font-semibold text-slate-800">{{ $item['title'] }}</div>
+                                    <div class="text-[10px] sm:text-xs text-slate-400">{{ $item['time'] }}</div>
                                 </div>
                             </div>
                         @endforeach
@@ -323,36 +323,36 @@
 
     @elseif ($tab === 'attendance')
         {{-- Attendance Stat Cards matching dashboard --}}
-        <div class="grid grid-cols-1 gap-5 sm:grid-cols-4">
-            <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-emerald-400 to-green-500 p-6 text-white shadow-lg">
-                <div class="absolute -right-6 -top-6 h-28 w-28 rounded-full bg-white/10"></div>
+        <div class="grid grid-cols-2 gap-3 sm:gap-4 sm:grid-cols-4">
+            <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-emerald-400 to-green-500 p-3.5 sm:p-5 lg:p-6 text-white shadow-lg active:scale-[0.98] transition-transform">
+                <div class="absolute -right-6 -top-6 h-20 w-20 sm:h-28 sm:w-28 rounded-full bg-white/10"></div>
                 <div class="relative">
-                    <div class="text-3xl font-black">{{ number_format((int) ($attendanceCounts['Present'] ?? 0)) }}</div>
-                    <div class="mt-1 text-sm font-semibold text-white/80">Total Present</div>
+                    <div class="text-xl sm:text-3xl font-black">{{ number_format((int) ($attendanceCounts['Present'] ?? 0)) }}</div>
+                    <div class="mt-0.5 sm:mt-1 text-[11px] sm:text-sm font-semibold text-white/80">Total Present</div>
                 </div>
             </div>
             
-            <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-red-400 to-rose-500 p-6 text-white shadow-lg">
-                <div class="absolute -right-6 -top-6 h-28 w-28 rounded-full bg-white/10"></div>
+            <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-red-400 to-rose-500 p-3.5 sm:p-5 lg:p-6 text-white shadow-lg active:scale-[0.98] transition-transform">
+                <div class="absolute -right-6 -top-6 h-20 w-20 sm:h-28 sm:w-28 rounded-full bg-white/10"></div>
                 <div class="relative">
-                    <div class="text-3xl font-black">{{ number_format((int) ($attendanceCounts['Absent'] ?? 0)) }}</div>
-                    <div class="mt-1 text-sm font-semibold text-white/80">Total Absent</div>
+                    <div class="text-xl sm:text-3xl font-black">{{ number_format((int) ($attendanceCounts['Absent'] ?? 0)) }}</div>
+                    <div class="mt-0.5 sm:mt-1 text-[11px] sm:text-sm font-semibold text-white/80">Total Absent</div>
                 </div>
             </div>
             
-            <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-amber-400 to-orange-500 p-6 text-white shadow-lg">
-                <div class="absolute -right-6 -top-6 h-28 w-28 rounded-full bg-white/10"></div>
+            <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-amber-400 to-orange-500 p-3.5 sm:p-5 lg:p-6 text-white shadow-lg active:scale-[0.98] transition-transform">
+                <div class="absolute -right-6 -top-6 h-20 w-20 sm:h-28 sm:w-28 rounded-full bg-white/10"></div>
                 <div class="relative">
-                    <div class="text-3xl font-black">{{ number_format((int) ($attendanceCounts['Late'] ?? 0)) }}</div>
-                    <div class="mt-1 text-sm font-semibold text-white/80">Total Late</div>
+                    <div class="text-xl sm:text-3xl font-black">{{ number_format((int) ($attendanceCounts['Late'] ?? 0)) }}</div>
+                    <div class="mt-0.5 sm:mt-1 text-[11px] sm:text-sm font-semibold text-white/80">Total Late</div>
                 </div>
             </div>
             
-            <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-slate-600 to-slate-800 p-6 text-white shadow-lg">
-                <div class="absolute -right-6 -top-6 h-28 w-28 rounded-full bg-white/10"></div>
+            <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-slate-600 to-slate-800 p-3.5 sm:p-5 lg:p-6 text-white shadow-lg active:scale-[0.98] transition-transform">
+                <div class="absolute -right-6 -top-6 h-20 w-20 sm:h-28 sm:w-28 rounded-full bg-white/10"></div>
                 <div class="relative">
-                    <div class="text-xl font-bold mt-2 truncate">{{ $lastAttendanceDate ? \Illuminate\Support\Carbon::parse($lastAttendanceDate)->format('M j, Y') : 'N/A' }}</div>
-                    <div class="mt-2 text-sm font-semibold text-white/80">Last Attendance</div>
+                    <div class="text-xs sm:text-xl font-bold mt-1 sm:mt-2 truncate">{{ $lastAttendanceDate ? \Illuminate\Support\Carbon::parse($lastAttendanceDate)->format('M j, Y') : 'N/A' }}</div>
+                    <div class="mt-1 sm:mt-2 text-[11px] sm:text-sm font-semibold text-white/80">Last Attendance</div>
                 </div>
             </div>
         </div>
@@ -464,21 +464,21 @@
         </div>
 
     @elseif ($tab === 'finance')
-        <div class="grid grid-cols-1 gap-5 sm:grid-cols-3">
-            <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-emerald-400 to-green-500 p-6 text-white shadow-lg">
-                <div class="absolute -right-6 -top-6 h-28 w-28 rounded-full bg-white/10"></div>
+        <div class="grid grid-cols-2 gap-3 sm:gap-4 sm:grid-cols-3">
+            <div class="col-span-2 sm:col-span-1 relative overflow-hidden rounded-2xl bg-gradient-to-br from-emerald-400 to-green-500 p-4 sm:p-6 text-white shadow-lg active:scale-[0.98] transition-transform">
+                <div class="absolute -right-6 -top-6 h-24 w-24 sm:h-28 sm:w-28 rounded-full bg-white/10"></div>
                 <div class="relative">
-                    <div class="text-3xl font-black">{{ config('academyhub.currency_symbol') }}{{ number_format($studentIncomeTotal, 2) }}</div>
-                    <div class="mt-1 text-sm font-semibold text-white/80">Total Processed Income</div>
+                    <div class="text-2xl sm:text-3xl font-black break-words">{{ config('academyhub.currency_symbol') }}{{ number_format($studentIncomeTotal, 2) }}</div>
+                    <div class="mt-0.5 sm:mt-1 text-xs sm:text-sm font-semibold text-white/80">Total Processed Income</div>
                 </div>
             </div>
-            <div class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-100 flex flex-col justify-center">
-                <div class="text-3xl font-black text-slate-800">{{ $studentTransactions->count() }}</div>
-                <div class="mt-1 text-sm font-bold text-slate-400 uppercase tracking-widest">Transactions</div>
+            <div class="rounded-2xl bg-white p-3.5 sm:p-6 shadow-sm ring-1 ring-slate-100 flex flex-col justify-center active:scale-[0.98] transition-transform">
+                <div class="text-xl sm:text-3xl font-black text-slate-800">{{ $studentTransactions->count() }}</div>
+                <div class="mt-0.5 sm:mt-1 text-[10px] sm:text-sm font-bold text-slate-400 uppercase tracking-wider sm:tracking-widest">Transactions</div>
             </div>
-            <div class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-100 flex flex-col justify-center">
-                <div class="text-3xl font-black text-slate-800">{{ $studentTransactions->whereNotNull('receipt_number')->count() }}</div>
-                <div class="mt-1 text-sm font-bold text-slate-400 uppercase tracking-widest">Issued Receipts</div>
+            <div class="rounded-2xl bg-white p-3.5 sm:p-6 shadow-sm ring-1 ring-slate-100 flex flex-col justify-center active:scale-[0.98] transition-transform">
+                <div class="text-xl sm:text-3xl font-black text-slate-800">{{ $studentTransactions->whereNotNull('receipt_number')->count() }}</div>
+                <div class="mt-0.5 sm:mt-1 text-[10px] sm:text-sm font-bold text-slate-400 uppercase tracking-wider sm:tracking-widest">Issued Receipts</div>
             </div>
         </div>
 
@@ -526,46 +526,46 @@
     @elseif ($tab === 'analytics')
         <div class="space-y-6">
             {{-- Performance Analytics Title --}}
-            <div class="rounded-2xl bg-white shadow-sm ring-1 ring-slate-100 p-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div class="rounded-2xl bg-white shadow-sm ring-1 ring-slate-100 p-4 sm:p-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                    <div class="text-lg font-bold text-slate-800">Performance Analytics</div>
-                    <div class="mt-0.5 text-sm text-slate-500">Comprehensive performance tracking and academic insights for the current active term.</div>
+                    <div class="text-base sm:text-lg font-bold text-slate-800">Performance Analytics</div>
+                    <div class="mt-0.5 text-xs sm:text-sm text-slate-500">Comprehensive performance tracking and academic insights for the current active term.</div>
                 </div>
             </div>
 
             @if(!empty($performanceData))
                 {{-- Academic Performance Card --}}
                 <div class="rounded-2xl bg-white shadow-sm ring-1 ring-slate-100 overflow-hidden">
-                    <div class="border-b border-slate-100 px-6 py-4 bg-gradient-to-r from-blue-50/50 to-indigo-50/30">
+                    <div class="border-b border-slate-100 px-4 sm:px-6 py-3.5 sm:py-4 bg-gradient-to-r from-blue-50/50 to-indigo-50/30">
                         <div class="flex items-center gap-2.5">
-                            <div class="h-8 w-8 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center">
-                                <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            <div class="h-7 w-7 sm:h-8 sm:w-8 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center shrink-0">
+                                <svg class="h-4 w-4 sm:h-5 sm:w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                             </div>
-                            <div class="text-base font-bold text-slate-800">Academic Performance</div>
+                            <div class="text-sm sm:text-base font-bold text-slate-800">Academic Performance</div>
                         </div>
                     </div>
-                    <div class="p-6">
+                    <div class="p-3.5 sm:p-6">
                         @if(isset($performanceData['overview']) && $performanceData['overview']['total_subjects'] > 0)
-                            <div class="grid grid-cols-2 gap-4 lg:grid-cols-4">
-                                <div class="rounded-xl border border-blue-100 bg-gradient-to-br from-blue-50 to-blue-100/30 p-5 hover:shadow-md transition">
-                                    <div class="text-xs font-bold uppercase tracking-wider text-blue-600">Average Score</div>
-                                    <div class="mt-2 text-2xl font-black text-slate-800">{{ $performanceData['overview']['average_score'] }}</div>
+                            <div class="grid grid-cols-2 gap-2.5 sm:gap-4 lg:grid-cols-4">
+                                <div class="rounded-xl border border-blue-100 bg-gradient-to-br from-blue-50 to-blue-100/30 p-3 sm:p-5 hover:shadow-md transition active:scale-[0.98]">
+                                    <div class="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-blue-600">Average Score</div>
+                                    <div class="mt-1 sm:mt-2 text-xl sm:text-2xl font-black text-slate-800">{{ $performanceData['overview']['average_score'] }}</div>
                                 </div>
-                                <div class="rounded-xl border border-purple-100 bg-gradient-to-br from-purple-50 to-purple-100/30 p-5 hover:shadow-md transition">
-                                    <div class="text-xs font-bold uppercase tracking-wider text-purple-600">Current Grade</div>
-                                    <div class="mt-2 text-2xl font-black text-slate-800">{{ $performanceData['overview']['grade'] }}</div>
+                                <div class="rounded-xl border border-purple-100 bg-gradient-to-br from-purple-50 to-purple-100/30 p-3 sm:p-5 hover:shadow-md transition active:scale-[0.98]">
+                                    <div class="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-purple-600">Current Grade</div>
+                                    <div class="mt-1 sm:mt-2 text-xl sm:text-2xl font-black text-slate-800">{{ $performanceData['overview']['grade'] }}</div>
                                 </div>
-                                <div class="rounded-xl border border-emerald-100 bg-gradient-to-br from-emerald-50 to-emerald-100/30 p-5 hover:shadow-md transition">
-                                    <div class="text-xs font-bold uppercase tracking-wider text-emerald-600">Subjects Passed</div>
-                                    <div class="mt-2 text-2xl font-black text-slate-800">{{ $performanceData['overview']['subjects_passed'] }} / {{ $performanceData['overview']['total_subjects'] }}</div>
+                                <div class="rounded-xl border border-emerald-100 bg-gradient-to-br from-emerald-50 to-emerald-100/30 p-3 sm:p-5 hover:shadow-md transition active:scale-[0.98]">
+                                    <div class="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-emerald-600">Subjects Passed</div>
+                                    <div class="mt-1 sm:mt-2 text-lg sm:text-2xl font-black text-slate-800">{{ $performanceData['overview']['subjects_passed'] }} / {{ $performanceData['overview']['total_subjects'] }}</div>
                                 </div>
-                                <div class="rounded-xl border border-indigo-100 bg-gradient-to-br from-indigo-50 to-indigo-100/30 p-5 hover:shadow-md transition">
-                                    <div class="text-xs font-bold uppercase tracking-wider text-indigo-600">Highest Score</div>
-                                    <div class="mt-2 text-2xl font-black text-slate-800">{{ $performanceData['overview']['highest_score'] }}</div>
+                                <div class="rounded-xl border border-indigo-100 bg-gradient-to-br from-indigo-50 to-indigo-100/30 p-3 sm:p-5 hover:shadow-md transition active:scale-[0.98]">
+                                    <div class="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-indigo-600">Highest Score</div>
+                                    <div class="mt-1 sm:mt-2 text-xl sm:text-2xl font-black text-slate-800">{{ $performanceData['overview']['highest_score'] }}</div>
                                 </div>
                             </div>
                         @else
-                            <div class="rounded-xl border border-dashed border-slate-200 bg-slate-50/50 p-8 text-center">
+                            <div class="rounded-xl border border-dashed border-slate-200 bg-slate-50/50 p-6 sm:p-8 text-center">
                                 <svg class="mx-auto h-12 w-12 text-slate-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
                                 <div class="mt-3 text-sm font-bold text-slate-700">No scores recorded yet</div>
                                 <div class="mt-1 text-xs text-slate-500">Academic performance scores will appear here once grades are entered for the active term.</div>

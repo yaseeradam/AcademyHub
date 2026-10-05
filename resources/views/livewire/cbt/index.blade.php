@@ -54,7 +54,7 @@
                         <input wire:model="title"
                                class="w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-xs font-extrabold text-slate-800 placeholder-slate-400 shadow-sm transition-all focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 focus:outline-none"
                                placeholder="e.g. Mathematics First Term Quiz" autofocus />
-                        @error('title') <div class="mt-1.5 text-xs font-bold text-rose-600 flex items-center gap-1">âš  {{ $message }}</div> @enderror
+                        @error('title') <div class="mt-1.5 text-xs font-bold text-rose-600 flex items-center gap-1">⚠️ {{ $message }}</div> @enderror
                     </div>
 
                     {{-- Exam Type --}}
@@ -88,7 +88,7 @@
                                 <option value="{{ $class->id }}">{{ $class->name }}</option>
                             @endforeach
                         </select>
-                        @error('classId') <div class="mt-1.5 text-xs font-bold text-rose-600 flex items-center gap-1">âš  {{ $message }}</div> @enderror
+                        @error('classId') <div class="mt-1.5 text-xs font-bold text-rose-600 flex items-center gap-1">⚠️ {{ $message }}</div> @enderror
                     </div>
                     <div>
                         <label class="mb-1.5 block text-xs font-black text-slate-700 uppercase tracking-wider">Subject <span class="text-red-500">*</span></label>
@@ -99,18 +99,18 @@
                                 <option value="{{ $subject->id }}">{{ $subject->name }}</option>
                             @endforeach
                         </select>
-                        @error('subjectId') <div class="mt-1.5 text-xs font-bold text-rose-600 flex items-center gap-1">âš  {{ $message }}</div> @enderror
+                        @error('subjectId') <div class="mt-1.5 text-xs font-bold text-rose-600 flex items-center gap-1">⚠️ {{ $message }}</div> @enderror
                     </div>
                     @else
                     <div class="lg:col-span-2 rounded-xl border border-violet-200 bg-violet-50/50 px-4 py-3 text-xs text-violet-700 font-medium">
-                        ðŸŽ¯ No class required â€” anyone with the access code can take this exam.
+                        🎯 No class required — anyone with the access code can take this exam.
                     </div>
                     @endif
                     <div>
                         <label class="mb-1.5 block text-xs font-black text-slate-700 uppercase tracking-wider">Duration (minutes)</label>
                         <input wire:model="durationMinutes" type="number" min="1"
                                class="w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-xs font-extrabold text-slate-800 shadow-sm transition-all focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 focus:outline-none" />
-                        @error('durationMinutes') <div class="mt-1.5 text-xs font-bold text-rose-600 flex items-center gap-1">âš  {{ $message }}</div> @enderror
+                        @error('durationMinutes') <div class="mt-1.5 text-xs font-bold text-rose-600 flex items-center gap-1">⚠️ {{ $message }}</div> @enderror
                     </div>
                     <div>
                         <label class="mb-1.5 block text-xs font-black text-slate-700 uppercase tracking-wider">Academic Term</label>
@@ -126,7 +126,7 @@
                         <input wire:model="session"
                                class="w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-xs font-extrabold text-slate-800 placeholder-slate-400 shadow-sm transition-all focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 focus:outline-none"
                                placeholder="e.g. 2025/2026" />
-                        @error('session') <div class="mt-1.5 text-xs font-bold text-rose-600 flex items-center gap-1">âš  {{ $message }}</div> @enderror
+                        @error('session') <div class="mt-1.5 text-xs font-bold text-rose-600 flex items-center gap-1">⚠️ {{ $message }}</div> @enderror
                     </div>
                 </div>
                 

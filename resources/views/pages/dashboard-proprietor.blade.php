@@ -41,33 +41,33 @@
         {{-- ══════════════════════════════════════
              KEY EXECUTIVE KPI METRICS (5 TILES)
         ══════════════════════════════════════ --}}
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
+        <div class="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3 sm:gap-4">
 
             {{-- 1. Student Enrollment --}}
-            <div class="rounded-2xl bg-white p-5 border border-slate-100 shadow-sm hover:shadow-md transition-shadow">
+            <div class="rounded-2xl bg-white p-3.5 sm:p-5 border border-slate-100 shadow-sm active:scale-[0.98] transition-all">
                 <div class="flex items-center justify-between text-slate-500 mb-2">
-                    <span class="text-xs font-extrabold uppercase tracking-wider text-slate-500">Total Students</span>
-                    <div class="h-8 w-8 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
-                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                    <span class="text-[10px] sm:text-xs font-extrabold uppercase tracking-wider text-slate-500 truncate">Total Students</span>
+                    <div class="h-7 w-7 sm:h-8 sm:w-8 rounded-lg sm:rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+                        <svg class="h-3.5 w-3.5 sm:h-4 sm:w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                     </div>
                 </div>
-                <div class="text-2xl font-black text-slate-900">{{ number_format($totalStudents) }}</div>
-                <div class="mt-2 flex items-center gap-2 text-[11px] font-semibold text-slate-500">
+                <div class="text-xl sm:text-2xl font-black text-slate-900 truncate">{{ number_format($totalStudents) }}</div>
+                <div class="mt-1.5 sm:mt-2 flex items-center gap-1.5 sm:gap-2 text-[10px] sm:text-[11px] font-semibold text-slate-500 truncate">
                     <span class="text-blue-600 font-bold">👦 {{ $maleStudents }} Boys</span> &bull;
                     <span class="text-pink-600 font-bold">👧 {{ $femaleStudents }} Girls</span>
                 </div>
             </div>
 
             {{-- 2. Staff & Punctuality --}}
-            <div class="rounded-2xl bg-white p-5 border border-slate-100 shadow-sm hover:shadow-md transition-shadow">
+            <div class="rounded-2xl bg-white p-3.5 sm:p-5 border border-slate-100 shadow-sm active:scale-[0.98] transition-all">
                 <div class="flex items-center justify-between text-slate-500 mb-2">
-                    <span class="text-xs font-extrabold uppercase tracking-wider text-slate-500">Teaching Staff</span>
-                    <div class="h-8 w-8 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center">
-                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    <span class="text-[10px] sm:text-xs font-extrabold uppercase tracking-wider text-slate-500 truncate">Teaching Staff</span>
+                    <div class="h-7 w-7 sm:h-8 sm:w-8 rounded-lg sm:rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
+                        <svg class="h-3.5 w-3.5 sm:h-4 sm:w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                     </div>
                 </div>
-                <div class="text-2xl font-black text-slate-900">{{ number_format($totalTeachers) }}</div>
-                <div class="mt-2 flex items-center gap-1.5 text-[11px] font-bold">
+                <div class="text-xl sm:text-2xl font-black text-slate-900 truncate">{{ number_format($totalTeachers) }}</div>
+                <div class="mt-1.5 sm:mt-2 flex items-center gap-1.5 text-[10px] sm:text-[11px] font-bold truncate">
                     @if(($markedCount ?? 0) === 0)
                         <span class="px-2 py-0.5 rounded-md bg-slate-100 text-slate-600">
                             Awaiting Clock-ins
@@ -81,45 +81,45 @@
             </div>
 
             {{-- 3. Total Fees Collected --}}
-            <a href="{{ route('billing.index', ['tab' => 'debtors']) }}" class="group block rounded-2xl bg-white p-5 border border-slate-100 shadow-sm hover:shadow-md hover:border-emerald-200 transition-all">
+            <a href="{{ route('billing.index', ['tab' => 'debtors']) }}" class="group block rounded-2xl bg-white p-3.5 sm:p-5 border border-slate-100 shadow-sm active:scale-[0.98] hover:border-emerald-200 transition-all">
                 <div class="flex items-center justify-between text-slate-500 mb-2">
-                    <span class="text-xs font-extrabold uppercase tracking-wider text-slate-500 group-hover:text-emerald-600 transition-colors">Fees Collected &rarr;</span>
-                    <div class="h-8 w-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
-                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+                    <span class="text-[10px] sm:text-xs font-extrabold uppercase tracking-wider text-slate-500 group-hover:text-emerald-600 transition-colors truncate">Fees Collected &rarr;</span>
+                    <div class="h-7 w-7 sm:h-8 sm:w-8 rounded-lg sm:rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
+                        <svg class="h-3.5 w-3.5 sm:h-4 sm:w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
                     </div>
                 </div>
-                <div class="text-2xl font-black text-emerald-600">₦{{ number_format($totalCollected, 0) }}</div>
-                <div class="mt-2 text-[11px] font-bold text-slate-500">
+                <div class="text-xl sm:text-2xl font-black text-emerald-600 truncate">₦{{ number_format($totalCollected, 0) }}</div>
+                <div class="mt-1.5 sm:mt-2 text-[10px] sm:text-[11px] font-bold text-slate-500 truncate">
                     <span class="text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded">{{ $collectionRate }}%</span> of ₦{{ number_format($totalExpected, 0) }}
                 </div>
             </a>
 
             {{-- 4. Outstanding Debt --}}
-            <a href="{{ route('billing.index', ['tab' => 'debtors']) }}" class="group block rounded-2xl bg-white p-5 border border-slate-100 shadow-sm hover:shadow-md hover:border-rose-200 transition-all">
+            <a href="{{ route('billing.index', ['tab' => 'debtors']) }}" class="group block rounded-2xl bg-white p-3.5 sm:p-5 border border-slate-100 shadow-sm active:scale-[0.98] hover:border-rose-200 transition-all">
                 <div class="flex items-center justify-between text-slate-500 mb-2">
-                    <span class="text-xs font-extrabold uppercase tracking-wider text-slate-500 group-hover:text-rose-600 transition-colors">Uncollected Debt &rarr;</span>
-                    <div class="h-8 w-8 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center">
-                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                    <span class="text-[10px] sm:text-xs font-extrabold uppercase tracking-wider text-slate-500 group-hover:text-rose-600 transition-colors truncate">Uncollected Debt &rarr;</span>
+                    <div class="h-7 w-7 sm:h-8 sm:w-8 rounded-lg sm:rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center shrink-0">
+                        <svg class="h-3.5 w-3.5 sm:h-4 sm:w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
                     </div>
                 </div>
-                <div class="text-2xl font-black text-rose-600">₦{{ number_format($outstandingDebt, 0) }}</div>
-                <div class="mt-2 text-[11px] font-semibold text-slate-500">
-                    Tuition balance pending collection &bull; <span class="underline">View details</span>
+                <div class="text-xl sm:text-2xl font-black text-rose-600 truncate">₦{{ number_format($outstandingDebt, 0) }}</div>
+                <div class="mt-1.5 sm:mt-2 text-[10px] sm:text-[11px] font-semibold text-slate-500 truncate">
+                    Tuition balance pending collection
                 </div>
             </a>
 
             {{-- 5. Net Operating Position --}}
-            <div class="rounded-2xl bg-white p-5 border border-slate-100 shadow-sm hover:shadow-md transition-shadow">
+            <div class="col-span-2 sm:col-span-1 rounded-2xl bg-white p-3.5 sm:p-5 border border-slate-100 shadow-sm hover:shadow-md transition-shadow">
                 <div class="flex items-center justify-between text-slate-500 mb-2">
-                    <span class="text-xs font-extrabold uppercase tracking-wider text-slate-400">Operating Net</span>
-                    <div class="h-8 w-8 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center">
-                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+                    <span class="text-[10px] sm:text-xs font-extrabold uppercase tracking-wider text-slate-400 truncate">Operating Net</span>
+                    <div class="h-7 w-7 sm:h-8 sm:w-8 rounded-lg sm:rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center shrink-0">
+                        <svg class="h-3.5 w-3.5 sm:h-4 sm:w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
                     </div>
                 </div>
-                <div class="text-2xl font-black {{ $netPosition >= 0 ? 'text-purple-700' : 'text-rose-600' }}">
+                <div class="text-xl sm:text-2xl font-black {{ $netPosition >= 0 ? 'text-purple-700' : 'text-rose-600' }} truncate">
                     ₦{{ number_format($netPosition, 0) }}
                 </div>
-                <div class="mt-2 text-[11px] font-medium text-slate-500">
+                <div class="mt-1.5 sm:mt-2 text-[10px] sm:text-[11px] font-medium text-slate-500 truncate">
                     Revenue minus ₦{{ number_format($totalExpenses, 0) }} costs
                 </div>
             </div>

@@ -37,10 +37,14 @@ return [
     ],
 
     'whatsapp' => [
-        'api_key'         => env('WHATSAPP_API_KEY'),
-        'token'           => env('WHATSAPP_TOKEN'),
-        'phone_number_id' => env('WHATSAPP_PHONE_NUMBER_ID'),
-        'verify_token'    => env('WHATSAPP_VERIFY_TOKEN'),
+        'provider'           => env('WHATSAPP_PROVIDER', 'evolution'), // 'evolution' (free QR gateway) or 'meta' (paid Cloud API)
+        'evolution_url'      => env('WHATSAPP_EVOLUTION_URL', 'http://whatsapp:8080'),
+        'evolution_api_key'  => env('WHATSAPP_EVOLUTION_KEY', 'academyhub-wa-secret-key'),
+        'evolution_instance' => env('WHATSAPP_EVOLUTION_INSTANCE', 'academyhub'),
+        'api_key'            => env('WHATSAPP_API_KEY'),
+        'token'              => env('WHATSAPP_TOKEN'),
+        'phone_number_id'    => env('WHATSAPP_PHONE_NUMBER_ID'),
+        'verify_token'       => env('WHATSAPP_VERIFY_TOKEN'),
     ],
 
     'paystack' => [

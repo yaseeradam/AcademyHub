@@ -40,7 +40,7 @@
                     <a href="{{ route('more-features') }}"
                        class="rounded-xl px-3 py-1.5 text-xs font-semibold text-white transition-all"
                        style="background:rgba(255,255,255,0.12);">
-                        â† Back
+                        ← Back
                     </a>
                 </div>
             </div>
@@ -138,7 +138,7 @@
         @else
             {{-- Chat header --}}
             <div class="flex items-center gap-3 border-b border-slate-100 bg-white px-4 py-3.5 shadow-sm flex-shrink-0">
-                {{-- Back button â€” mobile only --}}
+                {{-- Back button — mobile only --}}
                 <button wire:click="$set('conversationId', null)"
                         class="grid h-9 w-9 flex-shrink-0 place-items-center rounded-xl text-slate-500 hover:bg-slate-100 transition-colors lg:hidden" wire:loading.attr="disabled" wire:loading.class="opacity-50 cursor-wait">
                     <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
@@ -212,7 +212,7 @@
             <div class="border-t border-slate-100 bg-white px-4 py-3 flex-shrink-0">
                 @if($attachment)
                     <div class="mb-2 flex items-center justify-between gap-2 rounded-xl bg-amber-50 px-3 py-2 text-xs text-amber-800 ring-1 ring-amber-200">
-                        <div class="truncate font-semibold">ðŸ“Ž {{ $attachment->getClientOriginalName() }}</div>
+                        <div class="truncate font-semibold">📎 {{ $attachment->getClientOriginalName() }}</div>
                         <button type="button" wire:click="$set('attachment', null)" class="font-bold text-red-500 hover:text-red-600" wire:loading.attr="disabled" wire:loading.class="opacity-50 cursor-wait">Remove</button>
                     </div>
                 @endif
@@ -249,7 +249,7 @@
          wire:click.self="closeNewChat">
         {{-- Sheet on mobile, centered modal on sm+ --}}
         <div class="w-full sm:max-w-md rounded-t-2xl sm:rounded-2xl bg-white shadow-2xl overflow-hidden">
-            {{-- Handle bar â€” mobile only --}}
+            {{-- Handle bar — mobile only --}}
             <div class="flex justify-center pt-3 pb-1 sm:hidden">
                 <div class="h-1 w-10 rounded-full bg-slate-200"></div>
             </div>

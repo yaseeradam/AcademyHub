@@ -249,7 +249,7 @@
                                             <div class="absolute left-0 top-0 bottom-0 w-1 bg-emerald-500"></div>
                                             <div class="pl-1">
                                                 <p class="text-xs font-black text-slate-800">{{ $strength['subject'] }}</p>
-                                                <p class="text-[10px] font-bold text-slate-500 mt-0.5">Grade {{ $strength['grade'] }} â€¢ CA & Exam Avg</p>
+                                                <p class="text-[10px] font-bold text-slate-500 mt-0.5">Grade {{ $strength['grade'] }} • CA & Exam Avg</p>
                                             </div>
                                             <div class="text-right">
                                                 <span class="text-base font-black text-emerald-600">{{ $strength['score'] }}</span>
@@ -282,7 +282,7 @@
                                             <div class="absolute left-0 top-0 bottom-0 w-1 bg-rose-500"></div>
                                             <div class="pl-1">
                                                 <p class="text-xs font-black text-slate-800">{{ $weakness['subject'] }}</p>
-                                                <p class="text-[10px] font-bold text-slate-500 mt-0.5">Grade {{ $weakness['grade'] }} â€¢ CA & Exam Avg</p>
+                                                <p class="text-[10px] font-bold text-slate-500 mt-0.5">Grade {{ $weakness['grade'] }} • CA & Exam Avg</p>
                                             </div>
                                             <div class="text-right">
                                                 <span class="text-base font-black text-rose-600">{{ $weakness['score'] }}</span>

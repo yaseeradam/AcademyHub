@@ -26,18 +26,36 @@
             </div>
         </div>
     @else
-        <div class="rounded-2xl border border-amber-100 bg-amber-50 p-4">
-            <div class="flex items-center gap-3">
-                <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-500 text-white">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
-                        stroke="currentColor" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round"
-                            d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                </div>
-                <div>
-                    <div class="text-sm font-bold text-amber-900">No Active Term</div>
-                    <div class="text-xs text-amber-700">Create a session, add terms, and set one as active.</div>
+        <div class="rounded-2xl border-2 border-amber-300 bg-gradient-to-r from-amber-50 via-orange-50 to-amber-50 p-5 shadow-sm">
+            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div class="flex items-start gap-3.5">
+                    <div class="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-2xl bg-amber-500 text-white shadow-md">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <span class="text-sm font-extrabold text-amber-950">First-Time Setup Required: Academic Calendar</span>
+                            <span class="rounded-full bg-amber-200/80 px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-wider text-amber-900">Mandatory</span>
+                        </div>
+                        <div class="mt-1 text-xs text-amber-800 leading-relaxed max-w-2xl">
+                            A school must always configure its Academic Session and Term first. System operations (attendance, scores, report cards) require an active session and term. Follow the 2 steps below:
+                        </div>
+                        <div class="mt-2.5 flex flex-wrap items-center gap-3 text-xs font-semibold text-amber-900">
+                            <span class="inline-flex items-center gap-1.5 rounded-lg bg-white/80 px-2.5 py-1 border border-amber-200 shadow-2xs">
+                                <span class="flex h-4 w-4 items-center justify-center rounded-full bg-amber-500 text-[10px] font-bold text-white">1</span>
+                                Create Session below (check "Active")
+                            </span>
+                            <span class="text-amber-400">&rarr;</span>
+                            <span class="inline-flex items-center gap-1.5 rounded-lg bg-white/80 px-2.5 py-1 border border-amber-200 shadow-2xs">
+                                <span class="flex h-4 w-4 items-center justify-center rounded-full bg-amber-500 text-[10px] font-bold text-white">2</span>
+                                Add Terms (e.g. First Term) & Activate
+                            </span>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -106,9 +124,9 @@
                         <div>
                             <label class="text-xs font-semibold uppercase tracking-wider text-gray-500">Term Number</label>
                             <select wire:model="termNumber" class="mt-2 input w-full">
-                                <option value="1">1 â€” First Term</option>
-                                <option value="2">2 â€” Second Term</option>
-                                <option value="3">3 â€” Third Term</option>
+                                <option value="1">1 — First Term</option>
+                                <option value="2">2 — Second Term</option>
+                                <option value="3">3 — Third Term</option>
                             </select>
                             @error('termNumber') <div class="mt-1 text-xs text-orange-700">{{ $message }}</div> @enderror
                         </div>
@@ -166,7 +184,7 @@
                             </div>
                             <div class="mt-1 text-xs text-gray-500">
                                 @if($s->starts_on) {{ $s->starts_on->toDateString() }} @endif
-                                @if($s->starts_on && $s->ends_on) â†’ @endif
+                                @if($s->starts_on && $s->ends_on) → @endif
                                 @if($s->ends_on) {{ $s->ends_on->toDateString() }} @endif
                             </div>
                         </div>
@@ -208,7 +226,7 @@
                                             @if($term->starts_on || $term->ends_on)
                                                 <div class="text-[10px] text-gray-500">
                                                     @if($term->starts_on) {{ $term->starts_on->toDateString() }} @endif
-                                                    @if($term->starts_on && $term->ends_on) â†’ @endif
+                                                    @if($term->starts_on && $term->ends_on) → @endif
                                                     @if($term->ends_on) {{ $term->ends_on->toDateString() }} @endif
                                                 </div>
                                             @endif

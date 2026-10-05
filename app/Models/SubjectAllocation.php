@@ -18,6 +18,7 @@ class SubjectAllocation extends Model
         'teacher_id',
         'subject_id',
         'class_id',
+        'section_id',
     ];
 
     protected $casts = [
@@ -25,6 +26,7 @@ class SubjectAllocation extends Model
         'teacher_id' => 'integer',
         'subject_id' => 'integer',
         'class_id' => 'integer',
+        'section_id' => 'integer',
     ];
 
     public function teacher(): BelongsTo
@@ -40,5 +42,20 @@ class SubjectAllocation extends Model
     public function schoolClass(): BelongsTo
     {
         return $this->belongsTo(SchoolClass::class, 'class_id');
+    }
+
+    public function section(): BelongsTo
+    {
+        return $this->belongsTo(Section::class, 'section_id');
+    }
+
+    public function isClassWide(): bool
+    {
+        return is_null($this->section_id);
+    }
+
+    public function getSubclassLabelAttribute(): string
+    {
+        return $this->section ? $this->section->name : 'All Arms';
     }
 }

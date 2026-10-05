@@ -13,26 +13,26 @@
 
         <div class="relative flex items-end justify-between">
             {{-- Left: content --}}
-            <div class="flex-1 px-8 py-8">
-                <div class="flex items-center gap-2 mb-3">
+            <div class="flex-1 px-4 py-5 sm:px-8 sm:py-8">
+                <div class="flex items-center gap-2 mb-2 sm:mb-3">
                     <span class="h-2.5 w-2.5 rounded-full bg-emerald-300 animate-pulse"></span>
-                    <span class="text-sm font-semibold uppercase tracking-widest" style="color:#6ee7b7;">Student Portal</span>
+                    <span class="text-xs sm:text-sm font-semibold uppercase tracking-widest" style="color:#6ee7b7;">Student Portal</span>
                 </div>
-                <h2 class="text-4xl font-bold text-white tracking-tight">Welcome, {{ $student->first_name }}!</h2>
-                <p class="mt-2 text-lg font-medium" style="color:#6ee7b7;">
+                <h2 class="text-2xl sm:text-4xl font-bold text-white tracking-tight">Welcome, {{ $student->first_name }}!</h2>
+                <p class="mt-1 sm:mt-2 text-sm sm:text-lg font-medium" style="color:#6ee7b7;">
                     {{ $student->schoolClass?->name ?? 'N/A' }}{{ $student->section ? ' · ' . $student->section->name : '' }}
                 </p>
-                <div class="mt-4 flex flex-wrap gap-2">
-                    <span class="inline-flex items-center gap-2 rounded-lg px-4 py-1.5 text-sm font-semibold text-white" style="background:rgba(255,255,255,0.15);">
-                        <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                <div class="mt-3 sm:mt-4 flex flex-wrap gap-1.5 sm:gap-2">
+                    <span class="inline-flex items-center gap-1.5 sm:gap-2 rounded-lg px-2.5 py-1 sm:px-4 sm:py-1.5 text-xs sm:text-sm font-semibold text-white" style="background:rgba(255,255,255,0.15);">
+                        <svg class="h-3.5 w-3.5 sm:h-4 sm:w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
                         {{ $student->admission_number }}
                     </span>
-                    <span class="inline-flex items-center gap-2 rounded-lg px-4 py-1.5 text-sm font-semibold text-white" style="background:rgba(255,255,255,0.15);">
-                        <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                    <span class="inline-flex items-center gap-1.5 sm:gap-2 rounded-lg px-2.5 py-1 sm:px-4 sm:py-1.5 text-xs sm:text-sm font-semibold text-white" style="background:rgba(255,255,255,0.15);">
+                        <svg class="h-3.5 w-3.5 sm:h-4 sm:w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
                         {{ $stats['current_session'] ?? '' }} - Term {{ $stats['current_term'] ?? '' }}
                     </span>
-                    <span class="inline-flex items-center gap-2 rounded-lg px-4 py-1.5 text-sm font-semibold text-white" style="background:rgba(255,255,255,0.15);">
-                        <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                    <span class="inline-flex items-center gap-1.5 sm:gap-2 rounded-lg px-2.5 py-1 sm:px-4 sm:py-1.5 text-xs sm:text-sm font-semibold text-white" style="background:rgba(255,255,255,0.15);">
+                        <svg class="h-3.5 w-3.5 sm:h-4 sm:w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
                         {{ now()->format('l, F j') }}
                     </span>
                 </div>
@@ -62,78 +62,78 @@
     </div>
 
     {{-- Stat Cards --}}
-    <div class="grid grid-cols-2 gap-4 lg:grid-cols-4">
+    <div class="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
 
-        <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-emerald-400 to-green-500 p-6 text-white shadow-lg">
+        <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-emerald-400 to-green-500 p-3.5 sm:p-5 lg:p-6 text-white shadow-md active:scale-[0.98] transition-transform">
             <div class="absolute -right-6 -top-6 h-28 w-28 rounded-full bg-white/10"></div>
             <div class="absolute right-4 bottom-4 h-16 w-16 rounded-full bg-white/10"></div>
-            <div class="relative flex items-start justify-between">
-                <div>
-                    <div class="text-4xl font-black">{{ $stats['attendance_rate'] }}%</div>
-                    <div class="mt-1 text-sm font-semibold text-white/80">Attendance</div>
-                    <div class="mt-0.5 text-xs text-white/60">{{ $stats['present_days'] }}/{{ $stats['total_days'] }} days</div>
+            <div class="relative flex items-start justify-between gap-2">
+                <div class="min-w-0 flex-1">
+                    <div class="text-xl sm:text-3xl lg:text-4xl font-black tracking-tight truncate">{{ $stats['attendance_rate'] }}%</div>
+                    <div class="mt-1 text-xs sm:text-sm font-semibold text-white/90 truncate">Attendance</div>
+                    <div class="mt-0.5 text-[10px] sm:text-xs text-white/70 truncate">{{ $stats['present_days'] }}/{{ $stats['total_days'] }} days</div>
                 </div>
-                <div class="grid h-12 w-12 place-items-center rounded-xl bg-white/20">
-                    <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                <div class="grid h-8 w-8 sm:h-11 sm:w-11 lg:h-12 lg:w-12 place-items-center rounded-lg sm:rounded-xl bg-white/20 shrink-0">
+                    <svg class="h-4 w-4 sm:h-5 sm:w-5 lg:h-6 lg:w-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                 </div>
             </div>
         </div>
 
-        <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 p-6 text-white shadow-lg">
+        <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 p-3.5 sm:p-5 lg:p-6 text-white shadow-md active:scale-[0.98] transition-transform">
             <div class="absolute -right-6 -top-6 h-28 w-28 rounded-full bg-white/10"></div>
             <div class="absolute right-4 bottom-4 h-16 w-16 rounded-full bg-white/10"></div>
-            <div class="relative flex items-start justify-between">
-                <div>
-                    <div class="text-4xl font-black">{{ $stats['average_score'] }}%</div>
-                    <div class="mt-1 text-sm font-semibold text-white/80">Average Score</div>
-                    <div class="mt-0.5 text-xs text-white/60">{{ $stats['total_subjects'] }} subjects</div>
+            <div class="relative flex items-start justify-between gap-2">
+                <div class="min-w-0 flex-1">
+                    <div class="text-xl sm:text-3xl lg:text-4xl font-black tracking-tight truncate">{{ $stats['average_score'] }}%</div>
+                    <div class="mt-1 text-xs sm:text-sm font-semibold text-white/90 truncate">Average Score</div>
+                    <div class="mt-0.5 text-[10px] sm:text-xs text-white/70 truncate">{{ $stats['total_subjects'] }} subjects</div>
                 </div>
-                <div class="grid h-12 w-12 place-items-center rounded-xl bg-white/20">
-                    <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+                <div class="grid h-8 w-8 sm:h-11 sm:w-11 lg:h-12 lg:w-12 place-items-center rounded-lg sm:rounded-xl bg-white/20 shrink-0">
+                    <svg class="h-4 w-4 sm:h-5 sm:w-5 lg:h-6 lg:w-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
                 </div>
             </div>
         </div>
 
-        <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-amber-400 to-orange-500 p-6 text-white shadow-lg">
+        <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-amber-400 to-orange-500 p-3.5 sm:p-5 lg:p-6 text-white shadow-md active:scale-[0.98] transition-transform">
             <div class="absolute -right-6 -top-6 h-28 w-28 rounded-full bg-white/10"></div>
             <div class="absolute right-4 bottom-4 h-16 w-16 rounded-full bg-white/10"></div>
-            <div class="relative flex items-start justify-between">
-                <div>
-                    <div class="text-4xl font-black">{{ $stats['position'] ? '#'.$stats['position'] : 'N/A' }}</div>
-                    <div class="mt-1 text-sm font-semibold text-white/80">Class Position</div>
-                    <div class="mt-0.5 text-xs text-white/60">of {{ $stats['total_students'] }} students</div>
+            <div class="relative flex items-start justify-between gap-2">
+                <div class="min-w-0 flex-1">
+                    <div class="text-xl sm:text-3xl lg:text-4xl font-black tracking-tight truncate">{{ $stats['position'] ? '#'.$stats['position'] : 'N/A' }}</div>
+                    <div class="mt-1 text-xs sm:text-sm font-semibold text-white/90 truncate">Class Position</div>
+                    <div class="mt-0.5 text-[10px] sm:text-xs text-white/70 truncate">of {{ $stats['total_students'] }}</div>
                 </div>
-                <div class="grid h-12 w-12 place-items-center rounded-xl bg-white/20">
-                    <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/></svg>
+                <div class="grid h-8 w-8 sm:h-11 sm:w-11 lg:h-12 lg:w-12 place-items-center rounded-lg sm:rounded-xl bg-white/20 shrink-0">
+                    <svg class="h-4 w-4 sm:h-5 sm:w-5 lg:h-6 lg:w-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/></svg>
                 </div>
             </div>
         </div>
 
-        <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br {{ $stats['overdue_homework'] > 0 ? 'from-red-500 to-rose-600' : 'from-violet-500 to-purple-600' }} p-6 text-white shadow-lg">
+        <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br {{ $stats['overdue_homework'] > 0 ? 'from-red-500 to-rose-600' : 'from-violet-500 to-purple-600' }} p-3.5 sm:p-5 lg:p-6 text-white shadow-md active:scale-[0.98] transition-transform">
             <div class="absolute -right-6 -top-6 h-28 w-28 rounded-full bg-white/10"></div>
             <div class="absolute right-4 bottom-4 h-16 w-16 rounded-full bg-white/10"></div>
-            <div class="relative flex items-start justify-between">
-                <div>
-                    <div class="text-4xl font-black">{{ $stats['pending_homework'] }}</div>
-                    <div class="mt-1 text-sm font-semibold text-white/80">Pending HW</div>
-                    <div class="mt-0.5 text-xs text-white/60">
-                        {{ $stats['overdue_homework'] > 0 ? $stats['overdue_homework'].' overdue' : 'All up to date' }}
+            <div class="relative flex items-start justify-between gap-2">
+                <div class="min-w-0 flex-1">
+                    <div class="text-xl sm:text-3xl lg:text-4xl font-black tracking-tight truncate">{{ $stats['pending_homework'] }}</div>
+                    <div class="mt-1 text-xs sm:text-sm font-semibold text-white/90 truncate">Pending HW</div>
+                    <div class="mt-0.5 text-[10px] sm:text-xs text-white/70 truncate">
+                        {{ $stats['overdue_homework'] > 0 ? $stats['overdue_homework'].' overdue' : 'All clear' }}
                     </div>
                 </div>
-                <div class="grid h-12 w-12 place-items-center rounded-xl bg-white/20">
-                    <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                <div class="grid h-8 w-8 sm:h-11 sm:w-11 lg:h-12 lg:w-12 place-items-center rounded-lg sm:rounded-xl bg-white/20 shrink-0">
+                    <svg class="h-4 w-4 sm:h-5 sm:w-5 lg:h-6 lg:w-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
                 </div>
             </div>
         </div>
     </div>
 
     {{-- Bottom Row: Quick Actions (left) + Grade Distribution (right) --}}
-    <div class="grid grid-cols-1 gap-5 lg:grid-cols-3 items-start">
+    <div class="grid grid-cols-1 gap-4 sm:gap-5 lg:grid-cols-3 items-start">
 
         {{-- Quick Actions --}}
         <div class="rounded-2xl bg-white shadow-sm ring-1 ring-slate-100">
-            <div class="border-b border-slate-100 px-5 py-4">
-                <div class="text-base font-bold text-slate-800">Quick Actions</div>
+            <div class="border-b border-slate-100 px-4 sm:px-5 py-3.5 sm:py-4">
+                <div class="text-sm sm:text-base font-bold text-slate-800">Quick Actions</div>
                 <div class="mt-0.5 text-xs text-slate-400">Navigate to your portal sections</div>
             </div>
             <div class="divide-y divide-slate-50 p-2">
@@ -149,13 +149,13 @@
                 @endphp
                 @foreach($actions as $action)
                     <a href="{{ route($action['route']) }}"
-                       class="group flex items-center gap-3 rounded-xl px-3 py-3 transition hover:bg-slate-50">
-                        <div class="grid h-10 w-10 flex-shrink-0 place-items-center rounded-xl bg-gradient-to-br {{ $action['from'] }} {{ $action['to'] }} text-white shadow-sm transition group-hover:scale-105">
-                            <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">{!! $action['icon'] !!}</svg>
+                       class="group flex items-center gap-3 rounded-xl px-3 py-2.5 sm:py-3 transition hover:bg-slate-50 active:bg-slate-100">
+                        <div class="grid h-9 w-9 sm:h-10 sm:w-10 flex-shrink-0 place-items-center rounded-xl bg-gradient-to-br {{ $action['from'] }} {{ $action['to'] }} text-white shadow-sm transition group-hover:scale-105">
+                            <svg class="h-4.5 w-4.5 sm:h-5 sm:w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">{!! $action['icon'] !!}</svg>
                         </div>
                         <div class="min-w-0 flex-1">
-                            <div class="text-sm font-bold text-slate-800">{{ $action['label'] }}</div>
-                            <div class="text-xs text-slate-400">{{ $action['sub'] }}</div>
+                            <div class="text-xs sm:text-sm font-bold text-slate-800">{{ $action['label'] }}</div>
+                            <div class="text-[11px] sm:text-xs text-slate-400">{{ $action['sub'] }}</div>
                         </div>
                         <svg class="h-4 w-4 flex-shrink-0 text-slate-300 transition group-hover:text-slate-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
                     </a>
@@ -165,16 +165,16 @@
 
         {{-- Grade Distribution --}}
         <div class="lg:col-span-2 rounded-2xl bg-white shadow-sm ring-1 ring-slate-100">
-            <div class="flex items-center justify-between border-b border-slate-100 px-5 py-4">
+            <div class="flex items-center justify-between border-b border-slate-100 px-4 sm:px-5 py-3.5 sm:py-4">
                 <div>
-                    <div class="text-base font-bold text-slate-800">Grade Distribution</div>
+                    <div class="text-sm sm:text-base font-bold text-slate-800">Grade Distribution</div>
                     <div class="mt-0.5 text-xs text-slate-400">Current term performance by grade</div>
                 </div>
-                <span class="rounded-full bg-green-50 px-3 py-1 text-xs font-semibold text-green-600">This Term</span>
+                <span class="rounded-full bg-green-50 px-2.5 sm:px-3 py-0.5 sm:py-1 text-[11px] sm:text-xs font-semibold text-green-600">This Term</span>
             </div>
-            <div class="p-5">
+            <div class="p-3.5 sm:p-5">
                 @if(count($stats['grades']) > 0)
-                    <div class="grid grid-cols-6 gap-3">
+                    <div class="grid grid-cols-3 sm:grid-cols-6 gap-2 sm:gap-3">
                         @foreach(['A', 'B', 'C', 'D', 'E', 'F'] as $grade)
                             @php
                                 $count = $stats['grades'][$grade] ?? 0;
@@ -188,9 +188,9 @@
                                 ];
                                 $cls = $count > 0 ? ($active[$grade] ?? 'bg-slate-50 border-slate-200 text-slate-400') : 'bg-slate-50 border-slate-100 text-slate-300';
                             @endphp
-                            <div class="flex flex-col items-center justify-center rounded-xl border-2 py-5 {{ $cls }}">
-                                <div class="text-2xl font-black">{{ $grade }}</div>
-                                <div class="mt-1 text-xs font-semibold">{{ $count }} subj</div>
+                            <div class="flex flex-col items-center justify-center rounded-xl border-2 py-3 sm:py-5 {{ $cls }}">
+                                <div class="text-xl sm:text-2xl font-black">{{ $grade }}</div>
+                                <div class="mt-0.5 sm:mt-1 text-[11px] sm:text-xs font-semibold">{{ $count }} subj</div>
                             </div>
                         @endforeach
                     </div>

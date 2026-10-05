@@ -292,7 +292,7 @@
 
                                 @if($component->price > 0)
                                     <span class="px-2.5 py-0.5 rounded-md text-[9px] font-black uppercase tracking-wider bg-blue-50 text-blue-700 border border-blue-100">
-                                        {{ config('academyhub.currency_symbol', 'â‚¦') }}{{ number_format($component->price, 0) }}
+                                        {{ config('academyhub.currency_symbol', '₦') }}{{ number_format($component->price, 0) }}
                                     </span>
                                 @else
                                     <span class="px-2.5 py-0.5 rounded-md text-[9px] font-black uppercase tracking-wider {{ $badgeStyle }}">
@@ -416,7 +416,7 @@
                              :disabled="processing"
                              class="relative inline-flex items-center gap-2 px-6 py-2.5 rounded-xl text-xs font-black text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-60 transition-all focus:outline-none shadow-md shadow-blue-500/20 active:scale-95"
                          >
-                             <span x-text="processing ? 'Installingâ€¦' : 'Install Now'"></span>
+                             <span x-text="processing ? 'Installing...' : 'Install Now'"></span>
                          </button>
 
                          {{-- Paid payment button --}}
@@ -426,7 +426,7 @@
                              :disabled="processing"
                              class="relative inline-flex items-center gap-2 px-6 py-2.5 rounded-xl text-xs font-black text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-60 transition-all focus:outline-none shadow-md shadow-blue-500/20 active:scale-95"
                          >
-                             <span x-text="processing ? 'Connectingâ€¦' : 'Proceed to Checkout'"></span>
+                             <span x-text="processing ? 'Connecting...' : 'Proceed to Checkout'"></span>
                          </button>
                     </div>
                 </div>
@@ -436,7 +436,7 @@
 
     @push('scripts')
         <script>
-            // â”€â”€ Network toast helper â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+            // ── Network toast helper ──────────────────────────────────────────
             function showNetworkToast(msg, type = 'error') {
                 const container = document.getElementById('network-toast-container');
                 if (!container) return;
@@ -475,7 +475,7 @@
                 showNetworkToast(e.detail.msg, e.detail.type ?? 'error');
             });
 
-            // â”€â”€ Offline / back-online detection â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+            // ── Offline / back-online detection ──────────────────────────────
             window.addEventListener('offline', () => {
                 showNetworkToast('You are offline. Please check your internet connection.', 'error');
             });
@@ -484,11 +484,11 @@
                 showNetworkToast('Back online!', 'success');
             });
 
-            // â”€â”€ Slow connection detection (warn if request takes > 5s) â”€â”€â”€â”€â”€â”€â”€
+            // ── Slow connection detection (warn if request takes > 5s) ───────
             let slowTimer = null;
             document.addEventListener('livewire:request', () => {
                 slowTimer = setTimeout(() => {
-                    showNetworkToast('Slow connection detected. This may take a momentâ€¦', 'warning');
+                    showNetworkToast('Slow connection detected. This may take a moment...', 'warning');
                 }, 5000);
             });
             document.addEventListener('livewire:response', () => {

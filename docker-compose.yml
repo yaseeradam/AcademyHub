@@ -52,6 +52,10 @@ services:
       - REVERB_HOST=${REVERB_HOST:-localhost}
       - REVERB_PORT=${REVERB_PORT:-8080}
       - REVERB_SCHEME=${REVERB_SCHEME:-http}
+      - WHATSAPP_PROVIDER=${WHATSAPP_PROVIDER:-evolution}
+      - WHATSAPP_EVOLUTION_URL=${WHATSAPP_EVOLUTION_URL:-http://whatsapp:8080}
+      - WHATSAPP_EVOLUTION_KEY=${WHATSAPP_EVOLUTION_KEY:-academyhub-wa-secret-key}
+      - WHATSAPP_EVOLUTION_INSTANCE=${WHATSAPP_EVOLUTION_INSTANCE:-academyhub}
     depends_on:
       db:
         condition: service_healthy
@@ -94,6 +98,40 @@ services:
     networks:
       - academyhub
 
+  # ── WhatsApp Gateway (Evolution API - Free Multi-Device QR Pairing) ──────
+  whatsapp:
+    image: evoapicloud/evolution-api:v2.1.2
+    container_name: academyhub-whatsapp
+    restart: unless-stopped
+    ports:
+      - "${WHATSAPP_PORT:-8085}:8080"
+    environment:
+      - SERVER_URL=http://localhost:${WHATSAPP_PORT:-8085}
+      - AUTHENTICATION_API_KEY=${WHATSAPP_EVOLUTION_KEY:-academyhub-wa-secret-key}
+      - CACHE_REDIS_ENABLED=true
+      - CACHE_REDIS_URI=redis://redis:6379/3
+      - CACHE_REDIS_PREFIX_KEY=evolution
+      - DATABASE_ENABLED=true
+      - DATABASE_PROVIDER=mysql
+      - DATABASE_CONNECTION_URI=mysql://${DB_USERNAME:-academyhub}:${DB_PASSWORD:-secret}@db:3306/evolution
+      - DATABASE_SAVE_DATA_INSTANCE=true
+      - DATABASE_SAVE_DATA_NEW_MESSAGE=true
+      - DATABASE_SAVE_MESSAGE_UPDATE=true
+      - DATABASE_SAVE_DATA_CONTACTS=false
+      - DATABASE_SAVE_DATA_CHATS=false
+      - WEBHOOK_GLOBAL_URL=http://app/api/whatsapp/webhook
+      - WEBHOOK_GLOBAL_ENABLED=true
+      - WEBHOOK_EVENTS_MESSAGES_UPSERT=true
+      - CONFIG_SESSION_PHONE_CLIENT=AcademyHub
+      - QRCODE_LIMIT=30
+    volumes:
+      - whatsapp_instances:/evolution/instances
+    depends_on:
+      - redis
+      - db
+    networks:
+      - academyhub
+
 # ── Named Volumes ──────────────────────────────────────────────────────────
 volumes:
   dbdata:
@@ -107,6 +145,8 @@ volumes:
   certificates:
     driver: local
   report-cards:
+    driver: local
+  whatsapp_instances:
     driver: local
   storage:
     driver: local

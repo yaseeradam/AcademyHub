@@ -54,20 +54,20 @@
     <div class="relative overflow-hidden rounded-2xl shadow-lg" style="background: linear-gradient(135deg, #3730a3 0%, #4f46e5 50%, #6366f1 100%);">
         <div class="absolute inset-0 opacity-10" style="background-image: radial-gradient(circle at 20% 50%, white 1px, transparent 1px),radial-gradient(circle at 80% 20%, white 1px, transparent 1px); background-size: 40px 40px;"></div>
         <div class="absolute right-0 top-0 h-56 w-56 -translate-y-20 translate-x-20 rounded-full bg-white/10"></div>
-        <div class="relative px-8 py-7">
+        <div class="relative px-4 py-5 sm:px-8 sm:py-7">
             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div>
-                    <div class="flex items-center gap-2 mb-2">
+                    <div class="flex items-center gap-2 mb-1.5 sm:mb-2">
                         <span class="h-2 w-2 rounded-full bg-indigo-300 animate-pulse"></span>
-                        <span class="text-xs font-semibold uppercase tracking-widest text-indigo-200">Parent Portal</span>
+                        <span class="text-[10px] sm:text-xs font-semibold uppercase tracking-widest text-indigo-200">Parent Portal</span>
                     </div>
-                    <h1 class="text-3xl font-black text-white tracking-tight">Hello, {{ $user->name }}!</h1>
-                    <p class="mt-1 text-sm font-medium text-indigo-200">{{ $schoolName }} — {{ now()->format('l, F j, Y') }}</p>
+                    <h1 class="text-2xl sm:text-3xl font-black text-white tracking-tight">Hello, {{ $user->name }}!</h1>
+                    <p class="mt-1 text-xs sm:text-sm font-medium text-indigo-200">{{ $schoolName }} — {{ now()->format('l, F j, Y') }}</p>
                 </div>
                 <div class="flex items-center gap-2">
-                    <div class="flex flex-col items-center justify-center rounded-2xl bg-white/15 backdrop-blur px-5 py-3 border border-white/20">
-                        <div class="text-2xl font-black text-white">{{ $children->count() }}</div>
-                        <div class="text-xs font-semibold text-indigo-200">{{ Str::plural('Child', $children->count()) }}</div>
+                    <div class="flex flex-col items-center justify-center rounded-xl sm:rounded-2xl bg-white/15 backdrop-blur px-4 py-2 sm:px-5 sm:py-3 border border-white/20">
+                        <div class="text-xl sm:text-2xl font-black text-white">{{ $children->count() }}</div>
+                        <div class="text-[10px] sm:text-xs font-semibold text-indigo-200">{{ Str::plural('Child', $children->count()) }}</div>
                     </div>
                 </div>
             </div>
@@ -77,24 +77,24 @@
     {{-- Announcements Strip --}}
     @if($announcements->isNotEmpty())
     <div class="rounded-2xl bg-white shadow-sm ring-1 ring-slate-100 overflow-hidden">
-        <div class="flex items-center justify-between px-5 py-3.5 border-b border-slate-100">
+        <div class="flex items-center justify-between px-4 py-3 sm:px-5 sm:py-3.5 border-b border-slate-100">
             <div class="flex items-center gap-2">
                 <div class="h-5 w-5 rounded-md bg-amber-100 flex items-center justify-center">
                     <svg class="h-3 w-3 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
                 </div>
-                <span class="text-sm font-semibold text-slate-900">School Announcements</span>
+                <span class="text-xs sm:text-sm font-semibold text-slate-900">School Announcements</span>
             </div>
-            <span class="text-xs text-slate-400">Latest updates</span>
+            <span class="text-[11px] sm:text-xs text-slate-400">Latest updates</span>
         </div>
         <div class="divide-y divide-slate-50">
             @foreach($announcements as $ann)
-            <div class="flex items-start gap-3 px-5 py-3">
+            <div class="flex items-start gap-2.5 sm:gap-3 px-4 py-2.5 sm:px-5 sm:py-3">
                 <div class="h-1.5 w-1.5 rounded-full bg-indigo-400 mt-2 flex-shrink-0"></div>
                 <div class="flex-1 min-w-0">
-                    <div class="text-sm font-semibold text-slate-800 truncate">{{ $ann->title ?? $ann->subject ?? 'Announcement' }}</div>
-                    <div class="text-xs text-slate-500 mt-0.5 line-clamp-1">{{ Str::limit(strip_tags($ann->body ?? $ann->message ?? ''), 100) }}</div>
+                    <div class="text-xs sm:text-sm font-semibold text-slate-800 truncate">{{ $ann->title ?? $ann->subject ?? 'Announcement' }}</div>
+                    <div class="text-[11px] sm:text-xs text-slate-500 mt-0.5 line-clamp-1">{{ Str::limit(strip_tags($ann->body ?? $ann->message ?? ''), 100) }}</div>
                 </div>
-                <div class="text-xs text-slate-400 flex-shrink-0">{{ $ann->created_at->diffForHumans() }}</div>
+                <div class="text-[10px] sm:text-xs text-slate-400 flex-shrink-0">{{ $ann->created_at->diffForHumans() }}</div>
             </div>
             @endforeach
         </div>
@@ -103,44 +103,44 @@
 
     {{-- Children Cards --}}
     <div>
-        <div class="text-sm font-semibold text-slate-900 mb-3">My Children</div>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <div class="text-xs sm:text-sm font-semibold text-slate-900 mb-2.5 sm:mb-3">My Children</div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5 sm:gap-5">
             @forelse($children as $child)
             @php $cd = $childData[$child->id]; @endphp
-            <div class="rounded-2xl bg-white shadow-sm ring-1 ring-slate-100 overflow-hidden hover:shadow-md transition-shadow">
+            <div class="rounded-2xl bg-white shadow-sm ring-1 ring-slate-100 overflow-hidden hover:shadow-md transition-all active:scale-[0.99]">
                 {{-- Child Header --}}
-                <div class="flex items-center gap-4 p-5 border-b border-slate-50">
+                <div class="flex items-center gap-3 sm:gap-4 p-3.5 sm:p-5 border-b border-slate-50">
                     @if($child->passport_photo_url)
-                        <img src="{{ $child->passport_photo_url }}" class="h-14 w-14 rounded-xl object-cover shadow-sm" />
+                        <img src="{{ $child->passport_photo_url }}" class="h-12 w-12 sm:h-14 sm:w-14 rounded-xl object-cover shadow-sm shrink-0" />
                     @else
-                        <div class="h-14 w-14 rounded-xl bg-gradient-to-br from-indigo-400 to-violet-500 flex items-center justify-center text-white font-black text-xl shadow-sm">
+                        <div class="h-12 w-12 sm:h-14 sm:w-14 rounded-xl bg-gradient-to-br from-indigo-400 to-violet-500 flex items-center justify-center text-white font-black text-lg sm:text-xl shadow-sm shrink-0">
                             {{ substr($child->first_name, 0, 1) }}
                         </div>
                     @endif
                     <div class="flex-1 min-w-0">
-                        <div class="text-base font-bold text-slate-900 truncate">{{ $child->full_name }}</div>
-                        <div class="text-xs text-slate-500 mt-0.5">{{ $child->admission_number }}</div>
-                        <span class="inline-flex mt-1.5 items-center gap-1 rounded-full bg-indigo-50 px-2.5 py-0.5 text-xs font-semibold text-indigo-700">
+                        <div class="text-sm sm:text-base font-bold text-slate-900 truncate">{{ $child->full_name }}</div>
+                        <div class="text-[11px] sm:text-xs text-slate-500 mt-0.5 truncate">{{ $child->admission_number }}</div>
+                        <span class="inline-flex mt-1 sm:mt-1.5 items-center gap-1 rounded-full bg-indigo-50 px-2 sm:px-2.5 py-0.5 text-[10px] sm:text-xs font-semibold text-indigo-700">
                             {{ $child->schoolClass?->name ?? 'Unassigned' }} {{ $child->section?->name ?? '' }}
                         </span>
                     </div>
                     {{-- Fee badge --}}
                     @if($cd['feeStatus'] === 'paid')
-                        <span class="flex-shrink-0 inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-bold text-emerald-700">
+                        <span class="flex-shrink-0 inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2 sm:px-2.5 py-0.5 sm:py-1 text-[10px] sm:text-xs font-bold text-emerald-700">
                             <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>Fees Paid
                         </span>
                     @elseif($cd['feeStatus'] === 'partial')
-                        <span class="flex-shrink-0 inline-flex items-center gap-1 rounded-full bg-amber-100 px-2.5 py-1 text-xs font-bold text-amber-700">
+                        <span class="flex-shrink-0 inline-flex items-center gap-1 rounded-full bg-amber-100 px-2 sm:px-2.5 py-0.5 sm:py-1 text-[10px] sm:text-xs font-bold text-amber-700">
                             <span class="h-1.5 w-1.5 rounded-full bg-amber-500"></span>Partial
                         </span>
                     @elseif($cd['feeStatus'] === 'unpaid')
-                        <span class="flex-shrink-0 inline-flex items-center gap-1 rounded-full bg-red-100 px-2.5 py-1 text-xs font-bold text-red-700">
+                        <span class="flex-shrink-0 inline-flex items-center gap-1 rounded-full bg-red-100 px-2 sm:px-2.5 py-0.5 sm:py-1 text-[10px] sm:text-xs font-bold text-red-700">
                             <span class="h-1.5 w-1.5 rounded-full bg-red-500"></span>Unpaid
                         </span>
                     @endif
                 </div>
 
-                <div class="p-5 space-y-4">
+                <div class="p-3.5 sm:p-5 space-y-3 sm:space-y-4">
                     {{-- Attendance Bar --}}
                     @if($cd['attendanceDays'] > 0)
                     <div>

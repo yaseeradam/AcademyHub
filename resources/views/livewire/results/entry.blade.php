@@ -49,8 +49,8 @@
     </div>
 
     <div class="rounded-3xl bg-white p-5 sm:p-8 shadow-xl ring-1 ring-gray-200">
-        <div class="grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-6">
-            <div class="md:col-span-1 lg:col-span-2">
+        <div class="grid grid-cols-1 gap-4 sm:gap-6 sm:grid-cols-2 lg:grid-cols-5">
+            <div>
                 <label class="block text-sm font-black text-gray-900 mb-1.5 sm:mb-2">Class</label>
                 <select wire:key="class-select-dropdown" wire:model.live="classId"
                     class="w-full rounded-xl border-2 border-gray-300 bg-white px-3 py-2.5 sm:px-4 sm:py-3 text-sm font-medium text-gray-900 shadow-sm transition-all focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/20 hover:border-gray-400">
@@ -61,7 +61,19 @@
                 </select>
             </div>
 
-            <div class="md:col-span-1 lg:col-span-2">
+            <div>
+                <label class="block text-sm font-black text-gray-900 mb-1.5 sm:mb-2">Arm / Subclass</label>
+                <select wire:key="section-select-dropdown-{{ $classId }}" wire:model.live="sectionId"
+                    @disabled(!$classId)
+                    class="w-full rounded-xl border-2 border-gray-300 bg-white px-3 py-2.5 sm:px-4 sm:py-3 text-sm font-medium text-gray-900 shadow-sm transition-all focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/20 hover:border-gray-400 disabled:opacity-50 disabled:cursor-not-allowed">
+                    <option value="">All Arms (Entire Class)</option>
+                    @foreach ($this->sections as $sec)
+                        <option value="{{ $sec->id }}">{{ $sec->name }}</option>
+                    @endforeach
+                </select>
+            </div>
+
+            <div>
                 <label class="block text-sm font-black text-gray-900 mb-1.5 sm:mb-2">Subject</label>
                 <select wire:key="subject-select-dropdown" wire:model.live="subjectId"
                     @disabled(!$classId) 
@@ -73,22 +85,20 @@
                 </select>
             </div>
 
-            <div class="grid grid-cols-2 gap-4 md:col-span-2 lg:contents">
-                <div>
-                    <label class="block text-sm font-black text-gray-900 mb-1.5 sm:mb-2">Term</label>
-                    <select wire:model.live="term" 
-                        class="w-full rounded-xl border-2 border-gray-300 bg-white px-3 py-2.5 sm:px-4 sm:py-3 text-sm font-medium text-gray-900 shadow-sm transition-all focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/20 hover:border-gray-400">
-                        <option value="1">Term 1</option>
-                        <option value="2">Term 2</option>
-                        <option value="3">Term 3</option>
-                    </select>
-                </div>
+            <div>
+                <label class="block text-sm font-black text-gray-900 mb-1.5 sm:mb-2">Term</label>
+                <select wire:model.live="term" 
+                    class="w-full rounded-xl border-2 border-gray-300 bg-white px-3 py-2.5 sm:px-4 sm:py-3 text-sm font-medium text-gray-900 shadow-sm transition-all focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/20 hover:border-gray-400">
+                    <option value="1">Term 1</option>
+                    <option value="2">Term 2</option>
+                    <option value="3">Term 3</option>
+                </select>
+            </div>
 
-                <div>
-                    <label class="block text-sm font-black text-gray-900 mb-1.5 sm:mb-2">Session</label>
-                    <input wire:model.live.debounce.300ms="session" type="text" placeholder="2025/2026"
-                        class="w-full rounded-xl border-2 border-gray-300 bg-white px-3 py-2.5 sm:px-4 sm:py-3 text-sm font-medium text-gray-900 shadow-sm transition-all focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/20 hover:border-gray-400" />
-                </div>
+            <div>
+                <label class="block text-sm font-black text-gray-900 mb-1.5 sm:mb-2">Session</label>
+                <input wire:model.live.debounce.300ms="session" type="text" placeholder="2025/2026"
+                    class="w-full rounded-xl border-2 border-gray-300 bg-white px-3 py-2.5 sm:px-4 sm:py-3 text-sm font-medium text-gray-900 shadow-sm transition-all focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/20 hover:border-gray-400" />
             </div>
         </div>
 
@@ -251,7 +261,12 @@
                                                 </div>
                                                 <div class="min-w-0">
                                                     <div class="truncate font-bold text-gray-900">{{ $student->full_name }}</div>
-                                                    <div class="truncate text-xs text-gray-500">{{ $student->admission_number }}</div>
+                                                    <div class="flex items-center gap-1.5 truncate text-xs text-gray-500">
+                                                        <span>{{ $student->admission_number }}</span>
+                                                        @if($student->section)
+                                                            <span class="inline-flex items-center rounded-md bg-emerald-50 px-1.5 py-0.5 text-[10px] font-bold text-emerald-700 border border-emerald-200/60">{{ $student->section->name }}</span>
+                                                        @endif
+                                                    </div>
                                                 </div>
                                             </div>
                                         </td>
@@ -341,7 +356,12 @@
                                         </div>
                                         <div class="min-w-0">
                                             <div class="truncate text-sm font-bold text-gray-900">{{ $student->full_name }}</div>
-                                            <div class="text-[10px] text-gray-500">{{ $student->admission_number }}</div>
+                                            <div class="flex items-center gap-1.5 text-[10px] text-gray-500">
+                                                <span>{{ $student->admission_number }}</span>
+                                                @if($student->section)
+                                                    <span class="inline-flex items-center rounded-md bg-emerald-50 px-1.5 py-0.5 font-bold text-emerald-700 border border-emerald-200/60">{{ $student->section->name }}</span>
+                                                @endif
+                                            </div>
                                         </div>
                                     </div>
                                     <div class="flex items-center gap-2">
@@ -402,7 +422,7 @@
                         </svg>
                     </div>
                     <div>
-                        <h3 class="text-lg font-black text-blue-900">âŒ¨ï¸ Keyboard Shortcuts</h3>
+                        <h3 class="text-lg font-black text-blue-900">Keyboard Shortcuts</h3>
                         <p class="text-sm text-blue-700">Navigate quickly through the scoresheet</p>
                     </div>
                 </div>
@@ -416,7 +436,7 @@
                         <span class="text-sm font-medium text-blue-700">Move right</span>
                     </div>
                     <div class="flex items-center gap-2">
-                        <kbd class="inline-flex items-center rounded-lg bg-white px-3 py-2 text-xs font-bold text-gray-700 shadow-sm ring-1 ring-gray-300">â†‘â†“â†â†’</kbd>
+                        <kbd class="inline-flex items-center rounded-lg bg-white px-3 py-2 text-xs font-bold text-gray-700 shadow-sm ring-1 ring-gray-300">&uarr; &darr; &larr; &rarr;</kbd>
                         <span class="text-sm font-medium text-blue-700">Arrow keys</span>
                     </div>
                     <div class="flex items-center gap-2">
@@ -455,14 +475,14 @@
                     {{-- Class-wide Quick Presets --}}
                     <div class="border-b border-gray-100 bg-violet-50/50 p-6 flex flex-col lg:flex-row items-center justify-between gap-4 shadow-sm">
                         <div class="text-center lg:text-left">
-                            <h4 class="text-sm font-black text-violet-950">âš¡ Class-wide Quick Presets</h4>
+                            <h4 class="text-sm font-black text-violet-950">⚡ Class-wide Quick Presets</h4>
                             <p class="text-xs text-violet-700 font-bold mt-0.5">Set ALL traits for ALL students in this class in one single click:</p>
                         </div>
                         <div class="grid grid-cols-2 sm:flex items-center gap-2 w-full lg:w-auto">
-                            <button type="button" wire:click="setAllBulkTraits('Excellent')" class="rounded-xl bg-emerald-600 px-4 py-2.5 text-xs font-bold text-white shadow hover:bg-emerald-700 transition-all flex items-center justify-center gap-1.5" wire:loading.attr="disabled" wire:loading.class="opacity-50 cursor-wait">ðŸŒŸ Excellent</button>
-                            <button type="button" wire:click="setAllBulkTraits('Good')" class="rounded-xl bg-blue-600 px-4 py-2.5 text-xs font-bold text-white shadow hover:bg-blue-700 transition-all flex items-center justify-center gap-1.5" wire:loading.attr="disabled" wire:loading.class="opacity-50 cursor-wait">ðŸ‘ Good</button>
-                            <button type="button" wire:click="setAllBulkTraits('Average')" class="rounded-xl bg-amber-600 px-4 py-2.5 text-xs font-bold text-white shadow hover:bg-amber-700 transition-all flex items-center justify-center gap-1.5" wire:loading.attr="disabled" wire:loading.class="opacity-50 cursor-wait">ðŸ˜ Average</button>
-                            <button type="button" wire:click="setAllBulkTraits('Poor')" class="rounded-xl bg-red-600 px-4 py-2.5 text-xs font-bold text-white shadow hover:bg-red-700 transition-all flex items-center justify-center gap-1.5" wire:loading.attr="disabled" wire:loading.class="opacity-50 cursor-wait">âš ï¸ Poor</button>
+                            <button type="button" wire:click="setAllBulkTraits('Excellent')" class="rounded-xl bg-emerald-600 px-4 py-2.5 text-xs font-bold text-white shadow hover:bg-emerald-700 transition-all flex items-center justify-center gap-1.5" wire:loading.attr="disabled" wire:loading.class="opacity-50 cursor-wait">🌟 Excellent</button>
+                            <button type="button" wire:click="setAllBulkTraits('Good')" class="rounded-xl bg-blue-600 px-4 py-2.5 text-xs font-bold text-white shadow hover:bg-blue-700 transition-all flex items-center justify-center gap-1.5" wire:loading.attr="disabled" wire:loading.class="opacity-50 cursor-wait">👍 Good</button>
+                            <button type="button" wire:click="setAllBulkTraits('Average')" class="rounded-xl bg-amber-600 px-4 py-2.5 text-xs font-bold text-white shadow hover:bg-amber-700 transition-all flex items-center justify-center gap-1.5" wire:loading.attr="disabled" wire:loading.class="opacity-50 cursor-wait">😐 Average</button>
+                            <button type="button" wire:click="setAllBulkTraits('Poor')" class="rounded-xl bg-red-600 px-4 py-2.5 text-xs font-bold text-white shadow hover:bg-red-700 transition-all flex items-center justify-center gap-1.5" wire:loading.attr="disabled" wire:loading.class="opacity-50 cursor-wait">⚠️ Poor</button>
                         </div>
                     </div>
 
@@ -478,7 +498,7 @@
                                                 <span class="block text-[10px] font-black uppercase tracking-widest text-violet-900">{{ $trait }}</span>
                                                 <select wire:change="applyTraitToAll('{{ $slug }}', $event.target.value)" 
                                                     class="w-full rounded-xl border-2 border-violet-300 bg-white px-3 py-1.5 text-[10px] font-extrabold text-violet-800 focus:border-violet-600 focus:ring-2 focus:ring-violet-600/20 transition-all cursor-pointer">
-                                                    <option value="">Apply to allâ€¦</option>
+                                                    <option value="">Apply to all...</option>
                                                     <option value="Excellent">Excellent</option>
                                                     <option value="Good">Good</option>
                                                     <option value="Average">Average</option>
@@ -537,7 +557,7 @@
                                         <span class="block text-[10px] font-black uppercase tracking-wider text-violet-800 mb-1">{{ $trait }}</span>
                                         <select wire:change="applyTraitToAll('{{ $slug }}', $event.target.value)"
                                             class="w-full rounded-xl border border-violet-200 bg-white px-3 py-2 text-xs font-bold text-violet-700 focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20">
-                                            <option value="">Apply to allâ€¦</option>
+                                            <option value="">Apply to all...</option>
                                             <option value="Excellent">Excellent</option>
                                             <option value="Good">Good</option>
                                             <option value="Average">Average</option>
@@ -626,12 +646,12 @@
                 <div class="p-6 max-h-[60vh] overflow-y-auto">
                     {{-- Quick Presets Panel --}}
                     <div class="mb-6 rounded-2xl border-2 border-violet-200 bg-violet-50/50 p-4 shadow-sm">
-                        <span class="block text-xs font-black uppercase tracking-wider text-violet-950 mb-3 text-center">âš¡ Quick Presets (Set All Traits to)</span>
+                        <span class="block text-xs font-black uppercase tracking-wider text-violet-950 mb-3 text-center">⚡ Quick Presets (Set All Traits to)</span>
                         <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                            <button type="button" wire:click="setAllTraitsForSelected('Excellent')" class="rounded-xl bg-emerald-600 px-3 py-2.5 text-xs font-bold text-white shadow hover:bg-emerald-700 transition-all flex items-center justify-center gap-1" wire:loading.attr="disabled" wire:loading.class="opacity-50 cursor-wait">ðŸŒŸ Excellent</button>
-                            <button type="button" wire:click="setAllTraitsForSelected('Good')" class="rounded-xl bg-blue-600 px-3 py-2.5 text-xs font-bold text-white shadow hover:bg-blue-700 transition-all flex items-center justify-center gap-1" wire:loading.attr="disabled" wire:loading.class="opacity-50 cursor-wait">ðŸ‘ Good</button>
-                            <button type="button" wire:click="setAllTraitsForSelected('Average')" class="rounded-xl bg-amber-600 px-3 py-2.5 text-xs font-bold text-white shadow hover:bg-amber-700 transition-all flex items-center justify-center gap-1" wire:loading.attr="disabled" wire:loading.class="opacity-50 cursor-wait">ðŸ˜ Average</button>
-                            <button type="button" wire:click="setAllTraitsForSelected('Poor')" class="rounded-xl bg-red-600 px-3 py-2.5 text-xs font-bold text-white shadow hover:bg-red-700 transition-all flex items-center justify-center gap-1" wire:loading.attr="disabled" wire:loading.class="opacity-50 cursor-wait">âš ï¸ Poor</button>
+                            <button type="button" wire:click="setAllTraitsForSelected('Excellent')" class="rounded-xl bg-emerald-600 px-3 py-2.5 text-xs font-bold text-white shadow hover:bg-emerald-700 transition-all flex items-center justify-center gap-1" wire:loading.attr="disabled" wire:loading.class="opacity-50 cursor-wait">🌟 Excellent</button>
+                            <button type="button" wire:click="setAllTraitsForSelected('Good')" class="rounded-xl bg-blue-600 px-3 py-2.5 text-xs font-bold text-white shadow hover:bg-blue-700 transition-all flex items-center justify-center gap-1" wire:loading.attr="disabled" wire:loading.class="opacity-50 cursor-wait">👍 Good</button>
+                            <button type="button" wire:click="setAllTraitsForSelected('Average')" class="rounded-xl bg-amber-600 px-3 py-2.5 text-xs font-bold text-white shadow hover:bg-amber-700 transition-all flex items-center justify-center gap-1" wire:loading.attr="disabled" wire:loading.class="opacity-50 cursor-wait">😐 Average</button>
+                            <button type="button" wire:click="setAllTraitsForSelected('Poor')" class="rounded-xl bg-red-600 px-3 py-2.5 text-xs font-bold text-white shadow hover:bg-red-700 transition-all flex items-center justify-center gap-1" wire:loading.attr="disabled" wire:loading.class="opacity-50 cursor-wait">⚠️ Poor</button>
                         </div>
                     </div>
 
@@ -683,7 +703,7 @@
             document.head.appendChild(style);
         }
 
-        // shake-row event â€” $wire is available inside the script block
+        // shake-row event — $wire is available inside the script block
         $wire.on('shake-row', (event) => {
             const data = event[0] || event;
             const row   = document.querySelector(`tr[data-student-id="${data.studentId}"]`);
@@ -700,7 +720,7 @@
             }
         });
 
-        // Keyboard navigation â€” attach to the table body directly.
+        // Keyboard navigation — attach to the table body directly.
         // Using event delegation on document so it survives Livewire re-renders.
         function handleScoresheetKeydown(e) {
             const input = e.target;
@@ -762,7 +782,7 @@
             }
         }
 
-        // Attach once at document level â€” survives all Livewire re-renders
+        // Attach once at document level — survives all Livewire re-renders
         if (!document.__scoresheetKeydownAttached) {
             document.addEventListener('keydown',  handleScoresheetKeydown);
             document.addEventListener('focusin',  handleScoresheetFocusin);

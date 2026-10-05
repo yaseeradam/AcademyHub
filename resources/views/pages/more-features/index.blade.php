@@ -19,8 +19,6 @@
 	        ['route' => 'timetable', 'title' => 'Timetable', 'desc' => 'Class scheduling and time slots', 'icon' => 'M7 11h5v5H7v-5zm7 0h5v5h-5v-5zM7 4v2H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-2V4h-2v2H9V4H7z', 'color' => 'blue', 'roles' => ['admin', 'teacher']],
 	        ['route' => 'certificates', 'title' => 'Certificates', 'desc' => 'Certificate generation and printing', 'icon' => 'M6 2h9l3 3v15a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2zm8 0v4h4', 'color' => 'orange', 'roles' => ['admin']],
 	        ['route' => 'admission-letters.index', 'title' => 'Admission Letters', 'desc' => 'Official A4 admission offer letters with seal, watermark & summary table', 'icon' => 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z', 'color' => 'blue', 'roles' => ['admin']],
-	        ['route' => 'id-cards.index', 'title' => 'Student & Pickup ID Cards', 'desc' => 'CR80 standard identity cards with offline QR code & gate scanner simulator', 'icon' => 'M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2', 'color' => 'emerald', 'roles' => ['admin']],
-	        ['route' => 'teacher-appointments.index', 'title' => 'Teacher Appointment Letters', 'desc' => 'Official provisional appointment letters with configurable salary, staff ID & dates', 'icon' => 'M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z', 'color' => 'indigo', 'roles' => ['admin']],
 	    ];
 
         // Fetch active marketplace components / plugins dynamically
@@ -49,7 +47,7 @@
                 }
 
                 $features[] = [
-                    'route' => $component->slug . '.index',
+                    'route' => $component->slug === 'whatsapp-bot' ? 'settings.whatsapp' : $component->slug . '.index',
                     'title' => $component->name,
                     'desc' => $component->short_description ?: $component->description,
                     'icon' => $svgIcon,
@@ -84,7 +82,7 @@
                 </div>
             @endif
 
-	        <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+	        <div class="grid grid-cols-2 gap-3 sm:gap-5 sm:grid-cols-2 lg:grid-cols-3">
 	            @foreach($features as $feature)
 	                @if(in_array($user?->role, $feature['roles']))
 	                    @php $scheme = $colors[$feature['color']]; @endphp
@@ -92,40 +90,40 @@
 	                        $isAvailable = isset($feature['route']) && $feature['route'];
 	                        $isComingSoon = (bool) ($feature['coming_soon'] ?? false);
 	                        $cardClass = $isAvailable
-	                            ? 'group rounded-3xl border border-gray-100 bg-gradient-to-br '.$scheme['bg'].' p-6 shadow-lg transition-all hover:shadow-2xl hover:-translate-y-1'
-	                            : 'rounded-3xl border border-gray-100 bg-gradient-to-br '.$scheme['bg'].' p-6 shadow-lg opacity-70 cursor-not-allowed';
+	                            ? 'group rounded-2xl sm:rounded-3xl border border-gray-100 bg-gradient-to-br '.$scheme['bg'].' p-3.5 sm:p-6 shadow-sm sm:shadow-lg transition-all active:scale-[0.98] hover:shadow-xl hover:-translate-y-0.5'
+	                            : 'rounded-2xl sm:rounded-3xl border border-gray-100 bg-gradient-to-br '.$scheme['bg'].' p-3.5 sm:p-6 shadow-sm sm:shadow-lg opacity-70 cursor-not-allowed';
 	                    @endphp
 
 	                    @if($isAvailable)
 	                        <a href="{{ route($feature['route']) }}" class="{{ $cardClass }}">
-	                            <div class="flex items-start gap-4">
-	                                <div class="icon-3d grid h-14 w-14 place-items-center rounded-2xl bg-gradient-to-br {{ $scheme['icon'] }} text-white shadow-xl {{ $scheme['shadow'] }} transition-transform group-hover:scale-110 group-hover:rotate-6">
-	                                    <svg class="h-7 w-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+	                            <div class="flex flex-col sm:flex-row items-start gap-2.5 sm:gap-4">
+	                                <div class="icon-3d grid h-10 w-10 sm:h-14 sm:w-14 place-items-center rounded-xl sm:rounded-2xl bg-gradient-to-br {{ $scheme['icon'] }} text-white shadow-md sm:shadow-xl {{ $scheme['shadow'] }} transition-transform group-hover:scale-110 group-hover:rotate-6 shrink-0">
+	                                    <svg class="h-5 w-5 sm:h-7 sm:w-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
 	                                        <path d="{{ $feature['icon'] }}"/>
 	                                    </svg>
 	                                </div>
 	                                <div class="flex-1 min-w-0">
-	                                    <div class="text-lg font-black text-gray-900">{{ $feature['title'] }}</div>
-	                                    <div class="mt-1.5 text-sm font-semibold text-gray-600">{{ $feature['desc'] }}</div>
+	                                    <div class="text-xs sm:text-lg font-black text-gray-900 leading-snug">{{ $feature['title'] }}</div>
+	                                    <div class="mt-1 sm:mt-1.5 text-[11px] sm:text-sm font-semibold text-gray-600 line-clamp-2 sm:line-clamp-none">{{ $feature['desc'] }}</div>
 	                                </div>
 	                            </div>
 	                        </a>
 	                    @else
 	                        <div class="{{ $cardClass }}" aria-disabled="true">
-	                            <div class="flex items-start gap-4">
-	                                <div class="icon-3d grid h-14 w-14 place-items-center rounded-2xl bg-gradient-to-br {{ $scheme['icon'] }} text-white shadow-xl {{ $scheme['shadow'] }}">
-	                                    <svg class="h-7 w-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+	                            <div class="flex flex-col sm:flex-row items-start gap-2.5 sm:gap-4">
+	                                <div class="icon-3d grid h-10 w-10 sm:h-14 sm:w-14 place-items-center rounded-xl sm:rounded-2xl bg-gradient-to-br {{ $scheme['icon'] }} text-white shadow-md sm:shadow-xl {{ $scheme['shadow'] }} shrink-0">
+	                                    <svg class="h-5 w-5 sm:h-7 sm:w-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
 	                                        <path d="{{ $feature['icon'] }}"/>
 	                                    </svg>
 	                                </div>
 	                                <div class="flex-1 min-w-0">
-	                                    <div class="flex items-center gap-2">
-	                                        <div class="text-lg font-black text-gray-900">{{ $feature['title'] }}</div>
+	                                    <div class="flex flex-wrap items-center gap-1.5 sm:gap-2">
+	                                        <div class="text-xs sm:text-lg font-black text-gray-900 leading-snug">{{ $feature['title'] }}</div>
 	                                        @if($isComingSoon)
-	                                            <span class="rounded-full bg-white/70 px-2 py-0.5 text-[10px] font-black uppercase tracking-wider text-gray-700 ring-1 ring-white/60">Coming soon</span>
+	                                            <span class="rounded-full bg-white/70 px-1.5 sm:px-2 py-0.5 text-[9px] sm:text-[10px] font-black uppercase tracking-wider text-gray-700 ring-1 ring-white/60">Soon</span>
 	                                        @endif
 	                                    </div>
-	                                    <div class="mt-1.5 text-sm font-semibold text-gray-600">{{ $feature['desc'] }}</div>
+	                                    <div class="mt-1 sm:mt-1.5 text-[11px] sm:text-sm font-semibold text-gray-600 line-clamp-2 sm:line-clamp-none">{{ $feature['desc'] }}</div>
 	                                </div>
 	                            </div>
 	                        </div>

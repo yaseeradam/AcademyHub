@@ -390,12 +390,12 @@ class Index extends Component
     private function allowedRecipientRoles(User $user): array
     {
         return match ($user->role) {
-            'admin'   => ['admin', 'teacher', 'bursar', 'student', 'parent'],
-            'teacher' => ['admin', 'teacher', 'bursar', 'student', 'parent'],
-            'bursar'  => ['admin', 'teacher', 'bursar'],
-            'student' => ['admin', 'teacher'],
-            'parent'  => ['admin', 'teacher'],
-            default   => [],
+            'admin', 'proprietor' => ['admin', 'proprietor', 'teacher', 'bursar', 'student', 'parent'],
+            'teacher'             => ['admin', 'proprietor', 'teacher', 'bursar', 'student', 'parent'],
+            'bursar'              => ['admin', 'proprietor', 'teacher', 'bursar'],
+            'student'             => ['admin', 'proprietor', 'teacher'],
+            'parent'              => ['admin', 'proprietor', 'teacher'],
+            default               => [],
         };
     }
 

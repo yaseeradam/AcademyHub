@@ -72,7 +72,7 @@
                         @endphp
                         <tr class="text-sm">
                             <td class="px-3 py-3 whitespace-nowrap">
-                                <div class="font-bold text-slate-900">{{ $r->week_start?->format('M j') }}â€“{{ $r->week_end?->format('M j') }}</div>
+                                <div class="font-bold text-slate-900">{{ $r->week_start?->format('M j') }}–{{ $r->week_end?->format('M j') }}</div>
                                 <div class="mt-0.5 text-xs font-semibold text-slate-500">
                                     @if ($r->submitted_at)
                                         Submitted {{ $r->submitted_at->format('g:i A') }}
@@ -121,7 +121,7 @@
                                         <button type="button" class="btn-outline" wire:click="startReject({{ $r->id }})">Reject</button>
                                     </div>
                                 @else
-                                    <span class="text-xs font-semibold text-slate-500">â€”</span>
+                                    <span class="text-xs font-semibold text-slate-500">—</span>
                                 @endif
                             </td>
                         </tr>

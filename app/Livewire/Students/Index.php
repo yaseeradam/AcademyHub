@@ -52,29 +52,46 @@ class Index extends Component
     {
         $user = auth()->user();
 
-        if ($this->classFilter === 'all') {
-            $query = Section::query()
-                ->select('name')
-                ->distinct()
-                ->orderBy('name');
-
-            if ($user?->role === 'teacher') {
-                $classIds = $this->teacherClassIds();
-                if ($classIds->isEmpty()) {
-                    return collect();
-                }
-
-                $query->whereIn('class_id', $classIds);
-            }
-
-            return $query->pluck('name');
-        }
-
         if ($user?->role === 'teacher') {
-            $classIds = $this->teacherClassIds();
-            if (!$classIds->contains((int) $this->classFilter)) {
+            $scope = $user->teacherClassSectionScope();
+            if (empty($scope)) {
                 return collect();
             }
+
+            if ($this->classFilter === 'all') {
+                $query = Section::query();
+                $query->where(function ($q) use ($scope) {
+                    foreach ($scope as $classId => $sectionIds) {
+                        $q->orWhere(function ($sub) use ($classId, $sectionIds) {
+                            $sub->where('class_id', $classId);
+                            if (is_array($sectionIds)) {
+                                $sub->whereIn('id', $sectionIds);
+                            }
+                        });
+                    }
+                });
+                return $query->select('name')->distinct()->orderBy('name')->pluck('name');
+            }
+
+            $classId = (int) $this->classFilter;
+            if (! array_key_exists($classId, $scope)) {
+                return collect();
+            }
+
+            $query = Section::query()->where('class_id', $classId);
+            $sectionIds = $scope[$classId];
+            if (is_array($sectionIds)) {
+                $query->whereIn('id', $sectionIds);
+            }
+            return $query->orderBy('name')->get();
+        }
+
+        if ($this->classFilter === 'all') {
+            return Section::query()
+                ->select('name')
+                ->distinct()
+                ->orderBy('name')
+                ->pluck('name');
         }
 
         return Section::query()
@@ -91,12 +108,23 @@ class Index extends Component
         $teacherClassIds = null;
 
         if ($user?->role === 'teacher') {
-            $teacherClassIds = $this->teacherClassIds();
-            if ($teacherClassIds->isEmpty()) {
+            $scope = $user->teacherClassSectionScope();
+            if (empty($scope)) {
                 return Student::query()->whereRaw('1 = 0')->paginate(15);
             }
 
-            $query->whereIn('class_id', $teacherClassIds);
+            $teacherClassIds = collect(array_keys($scope));
+
+            $query->where(function ($q) use ($scope) {
+                foreach ($scope as $classId => $sectionIds) {
+                    $q->orWhere(function ($sub) use ($classId, $sectionIds) {
+                        $sub->where('class_id', $classId);
+                        if (is_array($sectionIds)) {
+                            $sub->whereIn('section_id', $sectionIds);
+                        }
+                    });
+                }
+            });
         }
 
         if ($user?->role === 'parent') {
@@ -146,11 +174,21 @@ class Index extends Component
         $user = auth()->user();
 
         if ($user?->role === 'teacher') {
-            $classIds = $this->teacherClassIds();
-            if ($classIds->isEmpty()) {
+            $scope = $user->teacherClassSectionScope();
+            if (empty($scope)) {
                 return ['total' => 0, 'boys' => 0, 'girls' => 0, 'alumni' => 0];
             }
-            $query->whereIn('class_id', $classIds);
+
+            $query->where(function ($q) use ($scope) {
+                foreach ($scope as $classId => $sectionIds) {
+                    $q->orWhere(function ($sub) use ($classId, $sectionIds) {
+                        $sub->where('class_id', $classId);
+                        if (is_array($sectionIds)) {
+                            $sub->whereIn('section_id', $sectionIds);
+                        }
+                    });
+                }
+            });
         }
 
         if ($user?->role === 'parent') {

@@ -18,7 +18,7 @@
         default    => 'Needs Work',
     };
 
-    // SVG ring (r=40, circâ‰ˆ251.3)
+    // SVG ring (r=40, circ≈251.3)
     $circ = 251.3;
     $dash = round($circ * $pct / 100, 1);
 @endphp
@@ -32,7 +32,7 @@
         </div>
     </div>
 
-    {{-- â”€â”€ Stat Cards â”€â”€ --}}
+    {{-- ── Stat Cards ── --}}
     @if($totalSubs > 0)
         <div class="grid grid-cols-2 gap-4 sm:grid-cols-4">
 
@@ -89,7 +89,7 @@
             </div>
         </div>
 
-        {{-- â”€â”€ Tabs Panel â”€â”€ --}}
+        {{-- ── Tabs Panel ── --}}
         <div class="rounded-2xl bg-white shadow-sm ring-1 ring-gray-100 overflow-hidden">
 
             {{-- Tab Nav --}}
@@ -114,7 +114,7 @@
 
             <div class="p-5 sm:p-6">
 
-                {{-- â”€â”€ Overview Tab â”€â”€ --}}
+                {{-- ── Overview Tab ── --}}
                 @if($activeTab === 'overview')
                     <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
 
@@ -200,7 +200,7 @@
                     </div>
                 @endif
 
-                {{-- â”€â”€ Subjects Tab â”€â”€ --}}
+                {{-- ── Subjects Tab ── --}}
                 @if($activeTab === 'subjects')
                     <div class="overflow-x-auto">
                         <table class="min-w-full">
@@ -243,7 +243,7 @@
                     </div>
                 @endif
 
-                {{-- â”€â”€ Trends Tab â”€â”€ --}}
+                {{-- ── Trends Tab ── --}}
                 @if($activeTab === 'trends')
                     <div class="space-y-6">
 
@@ -296,7 +296,7 @@
                     </div>
                 @endif
 
-                {{-- â”€â”€ Improvement Tab â”€â”€ --}}
+                {{-- ── Improvement Tab ── --}}
                 @if($activeTab === 'improvement')
                     <div class="space-y-3">
                         <h3 class="text-sm font-bold uppercase tracking-wider text-gray-500">Subject-wise Progress</h3>

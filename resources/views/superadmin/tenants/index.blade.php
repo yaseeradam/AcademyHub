@@ -196,6 +196,16 @@
                                     </a>
                                 @endif
 
+                                <form action="{{ route('superadmin.tenants.impersonate', $tenant) }}" method="POST" style="margin: 0; width: 100%;">
+                                    @csrf
+                                    <button type="submit" class="sa-dropdown-item" style="color: #7c3aed; font-weight: 700;">
+                                        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+                                        </svg>
+                                        Log In as Admin
+                                    </button>
+                                </form>
+
                                 <div style="border-top: 1px solid rgba(226, 232, 240, 0.6); margin: 4px 0;"></div>
 
                                 <form action="{{ route('superadmin.tenants.destroy', $tenant) }}" method="POST" 

@@ -56,7 +56,7 @@ return [
         ],
         'messages.access' => [
             'label' => 'Access messaging',
-            'roles' => ['admin', 'teacher', 'bursar'],
+            'roles' => ['admin', 'proprietor', 'teacher', 'bursar'],
         ],
         'data_collection.submit' => [
             'label' => 'Submit weekly data collection',

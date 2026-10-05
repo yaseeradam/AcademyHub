@@ -44,7 +44,7 @@
                     <a href="{{ route('cbt.index') }}" class="rounded-lg bg-white/20 px-4 py-2 text-sm font-semibold text-white backdrop-blur-sm hover:bg-white/30">Back</a>
                     @if ($hasTheory)
                         <a href="{{ route('cbt.exams.theory', $exam) }}" class="rounded-lg bg-gradient-to-r from-amber-500 to-orange-500 px-4 py-2 text-sm font-semibold text-white hover:from-amber-600 hover:to-orange-600 shadow-md">
-                            ðŸª„ Mark Theory
+                            🪄 Mark Theory
                         </a>
                     @endif
                     @if ($canEdit)
@@ -53,18 +53,18 @@
 
                     @if ($status === 'draft')
                         @if ($me?->role === 'admin')
-                            <button wire:click="goLive" class="rounded-lg bg-emerald-500 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-600" wire:loading.attr="disabled" wire:loading.class="opacity-50 cursor-wait">âœ“ Go Live</button>
+                            <button wire:click="goLive" class="rounded-lg bg-emerald-500 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-600" wire:loading.attr="disabled" wire:loading.class="opacity-50 cursor-wait">✓ Go Live</button>
                         @else
-                            <button wire:click="requestApproval" class="rounded-lg bg-violet-500 px-4 py-2 text-sm font-semibold text-white hover:bg-violet-600" wire:loading.attr="disabled" wire:loading.class="opacity-50 cursor-wait">âœ‰ Request Admin Approval</button>
+                            <button wire:click="requestApproval" class="rounded-lg bg-violet-500 px-4 py-2 text-sm font-semibold text-white hover:bg-violet-600" wire:loading.attr="disabled" wire:loading.class="opacity-50 cursor-wait">✉ Request Admin Approval</button>
                         @endif
                     @endif
 
                     @if ($status === 'pending_approval')
                         @if ($me?->role === 'admin')
-                            <button wire:click="goLive" class="rounded-lg bg-emerald-500 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-600" wire:loading.attr="disabled" wire:loading.class="opacity-50 cursor-wait">âœ“ Approve & Go Live</button>
+                            <button wire:click="goLive" class="rounded-lg bg-emerald-500 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-600" wire:loading.attr="disabled" wire:loading.class="opacity-50 cursor-wait">✓ Approve & Go Live</button>
                         @else
                             <span class="rounded-lg bg-white/20 px-4 py-2 text-sm font-semibold text-violet-200 backdrop-blur-sm">
-                                â³ Pending Admin Approval
+                                ⏳ Pending Admin Approval
                             </span>
                         @endif
                     @endif
@@ -73,7 +73,7 @@
                         <button wire:click="endAllExams"
                             wire:confirm="End exam and force-submit all active attempts?"
                             class="rounded-lg bg-red-500 px-4 py-2 text-sm font-semibold text-white hover:bg-red-600" wire:loading.attr="disabled" wire:loading.class="opacity-50 cursor-wait">
-                            â¹ End Exam
+                            ⏹ End Exam
                         </button>
                     @endif
 
@@ -82,11 +82,11 @@
                             <button wire:click="releaseResults"
                                 wire:confirm="Release results to students? They will be able to see their scores if 'Show Score' is enabled."
                                 class="rounded-lg bg-amber-500 px-4 py-2 text-sm font-semibold text-white hover:bg-amber-600" wire:loading.attr="disabled" wire:loading.class="opacity-50 cursor-wait">
-                                ðŸ“Š Release Results
+                                📊 Release Results
                             </button>
                         @elseif($exam->results_released_at)
                             <span class="rounded-lg bg-white/20 px-4 py-2 text-sm font-semibold text-emerald-300 backdrop-blur-sm">
-                                âœ“ Results Released
+                                ✓ Results Released
                             </span>
                         @endif
                     @endif
@@ -176,7 +176,7 @@
                 </div>
                 @else
                 <div class="lg:col-span-2 rounded-xl border border-violet-200 bg-violet-50 px-4 py-3 text-sm text-violet-700">
-                    ðŸŽ¯ Aptitude test â€” no class or subject required. Share the access code with candidates.
+                    🎯 Aptitude test — no class or subject required. Share the access code with candidates.
                 </div>
                 @endif
                 <div>
@@ -272,8 +272,8 @@
             @if ($showAiPanel)
                 <div class="mb-5 rounded-xl border-2 border-violet-200 bg-violet-50 p-5">
                     <div class="mb-3 flex items-center justify-between">
-                        <div class="font-bold text-violet-900">âœ¨ AI Question Generator</div>
-                        <button wire:click="closeAiPanel" class="text-xs text-gray-500 hover:text-gray-700" wire:loading.attr="disabled" wire:loading.class="opacity-50 cursor-wait" aria-label="Close">âœ• Close</button>
+                        <div class="font-bold text-violet-900">✨ AI Question Generator</div>
+                        <button wire:click="closeAiPanel" class="text-xs text-gray-500 hover:text-gray-700" wire:loading.attr="disabled" wire:loading.class="opacity-50 cursor-wait" aria-label="Close">✕ Close</button>
                     </div>
                     <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
                         <div class="sm:col-span-2">
@@ -301,13 +301,13 @@
                     <div class="mt-3">
                         <button wire:click="generateAiQuestions" wire:loading.attr="disabled" wire:target="generateAiQuestions" class="rounded-lg bg-violet-600 px-5 py-2 text-sm font-bold text-white hover:bg-violet-700 disabled:opacity-60">
                             <span wire:loading.remove wire:target="generateAiQuestions">Generate Questions</span>
-                            <span wire:loading wire:target="generateAiQuestions">Generatingâ€¦ please wait</span>
+                            <span wire:loading wire:target="generateAiQuestions">Generating... please wait</span>
                         </button>
                     </div>
 
                     @if (! empty($aiPreview))
                         <div class="mt-4 space-y-2">
-                            <div class="text-xs font-bold uppercase text-gray-600">Preview â€” {{ count($aiPreview) }} questions</div>
+                            <div class="text-xs font-bold uppercase text-gray-600">Preview — {{ count($aiPreview) }} questions</div>
                             @foreach ($aiPreview as $idx => $q)
                                 <div class="rounded-lg border border-violet-200 bg-white p-3 text-sm">
                                     <div class="flex items-start justify-between gap-2">
@@ -316,14 +316,14 @@
                                             <span class="font-medium text-gray-900">{{ $q['prompt'] }}</span>
                                             <span class="ml-2 text-xs text-gray-400">({{ $q['marks'] }} mark{{ $q['marks'] != 1 ? 's' : '' }})</span>
                                         </div>
-                                        <button wire:click="removeAiPreviewItem({{ $idx }})" class="text-xs text-red-500 hover:text-red-700" wire:loading.attr="disabled" wire:loading.class="opacity-50 cursor-wait" aria-label="Delete">âœ•</button>
+                                        <button wire:click="removeAiPreviewItem({{ $idx }})" class="text-xs text-red-500 hover:text-red-700" wire:loading.attr="disabled" wire:loading.class="opacity-50 cursor-wait" aria-label="Delete">✕</button>
                                     </div>
                                     @if (($q['type'] ?? '') === 'mcq' && ! empty($q['options']))
                                         <div class="mt-2 grid grid-cols-2 gap-1">
                                             @foreach ($q['options'] as $oi => $opt)
                                                 <div class="rounded px-2 py-1 text-xs {{ $oi === ($q['correct'] ?? 0) ? 'bg-green-100 font-bold text-green-800' : 'bg-gray-50 text-gray-700' }}">
                                                     {{ chr(65 + $oi) }}. {{ $opt }}
-                                                    @if ($oi === ($q['correct'] ?? 0)) <span class="ml-1">âœ“</span> @endif
+                                                    @if ($oi === ($q['correct'] ?? 0)) <span class="ml-1">✓</span> @endif
                                                 </div>
                                             @endforeach
                                         </div>
@@ -342,13 +342,13 @@
             @if ($showImportPanel)
                 <div class="mb-5 rounded-xl border-2 border-sky-200 bg-sky-50 p-5">
                     <div class="mb-3 flex items-center justify-between">
-                        <div class="font-bold text-sky-900">ðŸ“‚ Import Questions from File</div>
-                        <button wire:click="closeImportPanel" class="text-xs text-gray-500 hover:text-gray-700" wire:loading.attr="disabled" wire:loading.class="opacity-50 cursor-wait" aria-label="Close">âœ• Close</button>
+                        <div class="font-bold text-sky-900">📁 Import Questions from File</div>
+                        <button wire:click="closeImportPanel" class="text-xs text-gray-500 hover:text-gray-700" wire:loading.attr="disabled" wire:loading.class="opacity-50 cursor-wait" aria-label="Close">✕ Close</button>
                     </div>
                     <details class="mb-3 rounded-lg border border-sky-200 bg-white p-3 text-xs text-gray-600">
                         <summary class="cursor-pointer font-semibold text-sky-700">File Format Guide (click to expand)</summary>
                         <div class="mt-3 space-y-3">
-                            <p class="text-gray-700">Save as <strong>.txt</strong> from Notepad or Word (File â†’ Save As â†’ Plain Text). One blank line between questions.</p>
+                            <p class="text-gray-700">Save as <strong>.txt</strong> from Notepad or Word (File → Save As → Plain Text). One blank line between questions.</p>
                             <pre class="rounded bg-gray-50 p-3 font-mono text-xs leading-relaxed">1. What is the powerhouse of the cell?
 A. Nucleus
 B. Mitochondria
@@ -372,7 +372,7 @@ ANS: C</pre>
                                 <li>Options are <code class="rounded bg-gray-100 px-1">A.</code> <code class="rounded bg-gray-100 px-1">B.</code> <code class="rounded bg-gray-100 px-1">C.</code> <code class="rounded bg-gray-100 px-1">D.</code></li>
                                 <li>Correct answer: <code class="rounded bg-gray-100 px-1">ANS: B</code></li>
                                 <li>Theory question: add <code class="rounded bg-gray-100 px-1">TYPE: theory</code> (no options needed)</li>
-                                <li><code class="rounded bg-gray-100 px-1">MARKS: 2</code> is optional â€” defaults to 1</li>
+                                <li><code class="rounded bg-gray-100 px-1">MARKS: 2</code> is optional — defaults to 1</li>
                                 <li>Questions with no options are auto-treated as theory</li>
                             </ul>
                         </div>
@@ -381,15 +381,15 @@ ANS: C</pre>
                         <input type="file" wire:model="importFile" accept=".txt" class="text-sm text-gray-700" />
                         <button wire:click="parseImportFile" wire:loading.attr="disabled" wire:target="parseImportFile,importFile" class="rounded-lg bg-sky-600 px-4 py-2 text-sm font-bold text-white hover:bg-sky-700 disabled:opacity-60">
                             <span wire:loading.remove wire:target="parseImportFile,importFile">Parse File</span>
-                            <span wire:loading wire:target="parseImportFile,importFile">Parsingâ€¦</span>
+                            <span wire:loading wire:target="parseImportFile,importFile">Parsing...</span>
                         </button>
-                        <a href="{{ route('cbt.sample-download') }}" class="rounded-lg border border-sky-300 bg-white px-4 py-2 text-sm font-bold text-sky-700 hover:bg-sky-50">â¬‡ Sample File</a>
+                        <a href="{{ route('cbt.sample-download') }}" class="rounded-lg border border-sky-300 bg-white px-4 py-2 text-sm font-bold text-sky-700 hover:bg-sky-50">⬇ Sample File</a>
                     </div>
                     @error('importFile') <div class="mt-1 text-xs text-red-600">{{ $message }}</div> @enderror
 
                     @if (! empty($importPreview))
                         <div class="mt-4 space-y-2">
-                            <div class="text-xs font-bold uppercase text-gray-600">Preview â€” {{ count($importPreview) }} questions found</div>
+                            <div class="text-xs font-bold uppercase text-gray-600">Preview — {{ count($importPreview) }} questions found</div>
                             @foreach ($importPreview as $idx => $q)
                                 <div class="rounded-lg border border-sky-200 bg-white p-3 text-sm">
                                     <div class="flex items-start justify-between gap-2">
@@ -398,14 +398,14 @@ ANS: C</pre>
                                             <span class="font-medium text-gray-900">{{ $q['prompt'] }}</span>
                                             <span class="ml-2 text-xs text-gray-400">({{ $q['marks'] }} mark{{ $q['marks'] != 1 ? 's' : '' }})</span>
                                         </div>
-                                        <button wire:click="removeImportPreviewItem({{ $idx }})" class="text-xs text-red-500 hover:text-red-700" wire:loading.attr="disabled" wire:loading.class="opacity-50 cursor-wait" aria-label="Delete">âœ•</button>
+                                        <button wire:click="removeImportPreviewItem({{ $idx }})" class="text-xs text-red-500 hover:text-red-700" wire:loading.attr="disabled" wire:loading.class="opacity-50 cursor-wait" aria-label="Delete">✕</button>
                                     </div>
                                     @if (($q['type'] ?? '') === 'mcq' && ! empty($q['options']))
                                         <div class="mt-2 grid grid-cols-2 gap-1">
                                             @foreach ($q['options'] as $oi => $opt)
                                                 <div class="rounded px-2 py-1 text-xs {{ $oi === ($q['correct'] ?? 0) ? 'bg-green-100 font-bold text-green-800' : 'bg-gray-50 text-gray-700' }}">
                                                     {{ chr(65 + $oi) }}. {{ $opt }}
-                                                    @if ($oi === ($q['correct'] ?? 0)) <span class="ml-1">âœ“</span> @endif
+                                                    @if ($oi === ($q['correct'] ?? 0)) <span class="ml-1">✓</span> @endif
                                                 </div>
                                             @endforeach
                                         </div>
@@ -477,7 +477,7 @@ ANS: C</pre>
         @if (in_array($status, ['live', 'ended'], true))
             <div class="mb-5 flex items-center gap-3 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-800">
                 <svg class="h-5 w-5 shrink-0 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>
-                This exam is <strong class="mx-1">{{ ucfirst($status) }}</strong> â€” questions are locked and cannot be added or modified.
+                This exam is <strong class="mx-1">{{ ucfirst($status) }}</strong> — questions are locked and cannot be added or modified.
             </div>
         @endif
 
@@ -497,7 +497,7 @@ ANS: C</pre>
                                                 <span class="font-bold text-gray-800">{{ chr(65 + $loop->index) }}.</span> 
                                                 <span class="text-gray-900">{{ $opt->label }}</span>
                                                 @if ($opt->is_correct)
-                                                    <span class="ml-2 text-green-600 font-bold">âœ“ Correct</span>
+                                                    <span class="ml-2 text-green-600 font-bold">✓ Correct</span>
                                                 @endif
                                             </div>
                                         @endforeach
@@ -621,9 +621,9 @@ ANS: C</pre>
                                             $theoryStatus = $attempt->theory_status ?? 'pending';
                                         @endphp
                                         @if ($theoryStatus === 'marked')
-                                            <span class="rounded bg-green-100 px-2 py-1 text-xs font-semibold text-green-800">âœ“ Marked</span>
+                                            <span class="rounded bg-green-100 px-2 py-1 text-xs font-semibold text-green-800">✓ Marked</span>
                                         @elseif ($theoryStatus === 'forwarded')
-                                            <span class="rounded bg-amber-100 px-2 py-1 text-xs font-semibold text-amber-800">â†’ Forwarded</span>
+                                            <span class="rounded bg-amber-100 px-2 py-1 text-xs font-semibold text-amber-800">→ Forwarded</span>
                                         @else
                                             <span class="rounded bg-slate-100 px-2 py-1 text-xs font-semibold text-slate-800">Theory Pending</span>
                                         @endif
@@ -634,7 +634,7 @@ ANS: C</pre>
                                     
                                     @if ($attempt && $me?->role === 'admin')
                                         <div class="relative">
-                                            <button onclick="this.nextElementSibling.classList.toggle('hidden')" class="rounded bg-gray-200 px-3 py-1 text-xs font-semibold hover:bg-gray-300">â€¢â€¢â€¢</button>
+                                            <button onclick="this.nextElementSibling.classList.toggle('hidden')" class="rounded bg-gray-200 px-3 py-1 text-xs font-semibold hover:bg-gray-300">•••</button>
                                             <div class="absolute right-0 z-10 mt-1 hidden w-40 rounded-lg bg-white shadow-xl ring-1 ring-black/5">
                                                 @if ($hasTheory && ($attempt->submitted_at || $attempt->terminated_at) && ($attempt->theory_status ?? 'pending') !== 'marked')
                                                     <button wire:click="startForward({{ $attempt->id }})" class="block w-full px-3 py-2 text-left text-xs font-semibold text-violet-700 hover:bg-violet-50">Forward to Teacher</button>
@@ -685,9 +685,9 @@ ANS: C</pre>
                                             $theoryStatus = $a->theory_status ?? 'pending';
                                         @endphp
                                         @if ($theoryStatus === 'marked')
-                                            <span class="mt-1 inline-block rounded bg-green-100 px-2 py-0.5 text-xs font-semibold text-green-800">âœ“ Marked</span>
+                                            <span class="mt-1 inline-block rounded bg-green-100 px-2 py-0.5 text-xs font-semibold text-green-800">✓ Marked</span>
                                         @elseif ($theoryStatus === 'forwarded')
-                                            <span class="mt-1 inline-block rounded bg-amber-100 px-2 py-0.5 text-xs font-semibold text-amber-800">â†’ Forwarded</span>
+                                            <span class="mt-1 inline-block rounded bg-amber-100 px-2 py-0.5 text-xs font-semibold text-amber-800">→ Forwarded</span>
                                         @else
                                             <span class="mt-1 inline-block rounded bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-800">Pending</span>
                                         @endif
@@ -843,36 +843,36 @@ ANS: C</pre>
     <div x-show="tab === 'actions'" class="rounded-2xl bg-white p-6 shadow-lg">
         <div class="space-y-3">
             <a href="{{ route('cbt.exams.pdf', $exam) }}" target="_blank" class="flex items-center gap-3 rounded-lg border border-gray-200 bg-white p-4 text-sm font-semibold text-gray-700 transition hover:border-gray-300 hover:bg-gray-50">
-                <span class="text-xl">ðŸ“„</span>
+                <span class="text-xl">📄</span>
                 <span>Download PDF</span>
             </a>
             @if ($status === 'live' && $exam->access_code)
                 <a href="{{ route('cbt.student', ['code' => $exam->access_code]) }}" target="_blank" class="flex items-center gap-3 rounded-lg border border-blue-200 bg-blue-50 p-4 text-sm font-semibold text-blue-700 transition hover:border-blue-300 hover:bg-blue-100">
-                    <span class="text-xl">ðŸŽ“</span>
+                    <span class="text-xl">🎓</span>
                     <span>Student Portal</span>
                 </a>
             @endif
             @if ($me?->role === 'admin')
                 <a href="{{ route('cbt.exams.export', $exam) }}" class="flex items-center gap-3 rounded-lg border border-green-200 bg-green-50 p-4 text-sm font-semibold text-green-700 transition hover:border-green-300 hover:bg-green-100">
-                    <span class="text-xl">ðŸ“Š</span>
+                    <span class="text-xl">📊</span>
                     <span>Export CSV</span>
                 </a>
                 @if (in_array($status, ['live', 'ended'], true))
                     @if ($exam->exam_type !== 'aptitude')
                         <button wire:click="transferToResults" onclick="return confirm('Transfer CBT scores to academic results?')" class="flex w-full items-center gap-3 rounded-lg border border-emerald-200 bg-emerald-50 p-4 text-left text-sm font-semibold text-emerald-700 transition hover:border-emerald-300 hover:bg-emerald-100" wire:loading.attr="disabled" wire:loading.class="opacity-50 cursor-wait">
-                            <span class="text-xl">âœ…</span>
+                            <span class="text-xl">✅</span>
                             <span>Transfer to Results</span>
                         </button>
                     @endif
                     @if ($status === 'live')
                         <button wire:click="endAllExams" onclick="return confirm('End this exam?')" class="flex w-full items-center gap-3 rounded-lg border border-orange-200 bg-orange-50 p-4 text-left text-sm font-semibold text-orange-700 transition hover:border-orange-300 hover:bg-orange-100" wire:loading.attr="disabled" wire:loading.class="opacity-50 cursor-wait">
-                            <span class="text-xl">â¹ï¸</span>
+                            <span class="text-xl">⏹️</span>
                             <span>End This Exam</span>
                         </button>
                     @endif
                 @endif
                 <button wire:click="$set('showDeleteModal', true)" class="flex w-full items-center gap-3 rounded-lg border border-red-200 bg-red-50 p-4 text-left text-sm font-semibold text-red-700 transition hover:border-red-300 hover:bg-red-100" wire:loading.attr="disabled" wire:loading.class="opacity-50 cursor-wait">
-                    <span class="text-xl">ðŸ—‘ï¸</span>
+                    <span class="text-xl">🗑️</span>
                     <span>Delete Exam</span>
                 </button>
             @endif

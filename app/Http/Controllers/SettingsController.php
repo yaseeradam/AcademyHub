@@ -42,8 +42,7 @@ class SettingsController extends Controller
 
     private function persistSettings(string $settingsPath, array $settings): void
     {
-        File::ensureDirectoryExists(dirname($settingsPath));
-        File::put($settingsPath, json_encode($settings, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+        TenantSettings::persist($settingsPath, $settings);
     }
 
     private function refreshSettingsCache(): void
@@ -620,37 +619,49 @@ class SettingsController extends Controller
             'section_shifts.*'       => ['nullable', 'string', 'in:Western,Islamic'],
         ]);
 
-        $settingsPath = $this->settingsPath();
-        $settings = $this->loadSettings($settingsPath);
+        try {
+            $settingsPath = $this->settingsPath();
+            $settings = $this->loadSettings($settingsPath);
 
-        $settings['western_start_time']     = \App\Support\AttendanceShiftConfig::standardizeTime($data['western_start_time'], '07:00:00');
-        $settings['western_late_threshold'] = \App\Support\AttendanceShiftConfig::standardizeTime($data['western_late_threshold'], '08:15:00');
-        $settings['western_end_time']       = \App\Support\AttendanceShiftConfig::standardizeTime($data['western_end_time'], '12:30:00');
+            $settings['western_start_time']     = \App\Support\AttendanceShiftConfig::standardizeTime($data['western_start_time'], '07:00:00');
+            $settings['western_late_threshold'] = \App\Support\AttendanceShiftConfig::standardizeTime($data['western_late_threshold'], '08:15:00');
+            $settings['western_end_time']       = \App\Support\AttendanceShiftConfig::standardizeTime($data['western_end_time'], '12:30:00');
 
-        $settings['islamic_start_time']     = \App\Support\AttendanceShiftConfig::standardizeTime($data['islamic_start_time'], '12:00:00');
-        $settings['islamic_late_threshold'] = \App\Support\AttendanceShiftConfig::standardizeTime($data['islamic_late_threshold'], '12:45:00');
-        $settings['islamic_end_time']       = \App\Support\AttendanceShiftConfig::standardizeTime($data['islamic_end_time'], '17:00:00');
+            $settings['islamic_start_time']     = \App\Support\AttendanceShiftConfig::standardizeTime($data['islamic_start_time'], '12:00:00');
+            $settings['islamic_late_threshold'] = \App\Support\AttendanceShiftConfig::standardizeTime($data['islamic_late_threshold'], '12:45:00');
+            $settings['islamic_end_time']       = \App\Support\AttendanceShiftConfig::standardizeTime($data['islamic_end_time'], '17:00:00');
 
-        // Also update general fallbacks
-        $settings['attendance_start_time'] = $settings['western_start_time'];
-        $settings['late_threshold_time']   = $settings['western_late_threshold'];
-        $settings['attendance_end_time']   = $settings['islamic_end_time'];
+            // Also update general fallbacks
+            $settings['attendance_start_time'] = $settings['western_start_time'];
+            $settings['late_threshold_time']   = $settings['western_late_threshold'];
+            $settings['attendance_end_time']   = $settings['islamic_end_time'];
 
-        $this->persistSettings($settingsPath, $settings);
-        $this->refreshSettingsCache();
+            $this->persistSettings($settingsPath, $settings);
+            $this->refreshSettingsCache();
 
-        // Update section shifts if submitted
-        if (!empty($data['section_shifts'])) {
-            foreach ($data['section_shifts'] as $sectionId => $shift) {
-                if (in_array($shift, ['Western', 'Islamic'], true)) {
-                    \App\Models\Section::where('id', $sectionId)->update(['shift' => $shift]);
+            // Update section shifts if submitted
+            if (!empty($data['section_shifts'])) {
+                foreach ($data['section_shifts'] as $sectionId => $shift) {
+                    if (in_array($shift, ['Western', 'Islamic'], true)) {
+                        \App\Models\Section::where('id', $sectionId)->update(['shift' => $shift]);
+                    }
                 }
             }
+
+            try {
+                \Illuminate\Support\Facades\Artisan::call('config:clear');
+            } catch (\Throwable $e) {
+                // Cache clear warning suppressed
+            }
+
+            return back()->with('status', 'Attendance shift parameters & section assignments saved successfully.');
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('Failed to update attendance settings: ' . $e->getMessage(), [
+                'exception' => $e,
+            ]);
+
+            return back()->withErrors(['settings' => 'Failed to save attendance settings: ' . $e->getMessage()]);
         }
-
-        \Illuminate\Support\Facades\Artisan::call('config:clear');
-
-        return back()->with('status', 'Attendance shift parameters & section assignments saved successfully.');
     }
 
     // License functionality removed - all features are free

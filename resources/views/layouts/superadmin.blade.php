@@ -6,9 +6,19 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Super Admin Console — AcademyHub</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-    {{-- Local Alpine.js & Chart.js for 100% offline & local Docker capability --}}
-    <script defer src="{{ asset('vendor/alpine/alpine.min.js') }}"></script>
-    <script src="{{ asset('vendor/chartjs/chart.umd.min.js') }}"></script>
+    {{-- Local Alpine.js & Chart.js with CDN fallback --}}
+    <script defer src="{{ asset('vendor/alpine/alpine.min.js') }}?v=3.14"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            if (!window.Alpine) {
+                var s = document.createElement('script');
+                s.src = 'https://cdn.jsdelivr.net/npm/alpinejs@3.14.8/dist/cdn.min.js';
+                s.defer = true;
+                document.head.appendChild(s);
+            }
+        });
+    </script>
+    <script src="{{ asset('vendor/chartjs/chart.umd.min.js') }}?v=4.4"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
         * { box-sizing: border-box; }

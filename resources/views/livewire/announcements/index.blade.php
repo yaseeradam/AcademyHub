@@ -23,7 +23,7 @@
                         <div class="lg:col-span-2">
                             <label class="text-sm font-extrabold uppercase tracking-wide text-slate-900 block mb-1">Announcement Title</label>
                             <input wire:model="title" class="mt-1 w-full rounded-xl border-2 border-slate-400 bg-slate-50 px-4 py-3 text-sm text-slate-950 font-bold shadow-sm transition-all focus:bg-white focus:border-indigo-600 focus:ring-4 focus:ring-indigo-100 placeholder-slate-400" placeholder="e.g. End of Term Examination Notice" />
-                            @error('title') <div class="mt-1.5 text-xs font-bold text-rose-700 flex items-center gap-1">âš  {{ $message }}</div> @enderror
+                            @error('title') <div class="mt-1.5 text-xs font-bold text-rose-700 flex items-center gap-1">⚠️ {{ $message }}</div> @enderror
                         </div>
                         <div>
                             <label class="text-sm font-extrabold uppercase tracking-wide text-slate-900 block mb-1">Target Audience</label>
@@ -34,14 +34,14 @@
                                 <option value="teacher">Teachers Only</option>
                                 <option value="bursar">Bursars Only</option>
                             </select>
-                            @error('audience') <div class="mt-1.5 text-xs font-bold text-rose-700 flex items-center gap-1">âš  {{ $message }}</div> @enderror
+                            @error('audience') <div class="mt-1.5 text-xs font-bold text-rose-700 flex items-center gap-1">⚠️ {{ $message }}</div> @enderror
                         </div>
                     </div>
 
                     <div class="mt-5">
                         <label class="text-sm font-extrabold uppercase tracking-wide text-slate-900 block mb-1">Announcement Body / Content</label>
                         <textarea wire:model="body" rows="5" class="mt-1 w-full rounded-xl border-2 border-slate-400 bg-slate-50 px-4 py-3 text-sm text-slate-950 font-semibold shadow-sm transition-all focus:bg-white focus:border-indigo-600 focus:ring-4 focus:ring-indigo-100 placeholder-slate-400" placeholder="Write the announcement description and details here..."></textarea>
-                        @error('body') <div class="mt-1.5 text-xs font-bold text-rose-700 flex items-center gap-1">âš  {{ $message }}</div> @enderror
+                        @error('body') <div class="mt-1.5 text-xs font-bold text-rose-700 flex items-center gap-1">⚠️ {{ $message }}</div> @enderror
                     </div>
 
                     <div class="mt-6 flex flex-wrap items-center gap-3">
@@ -91,7 +91,7 @@
                                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full font-bold {{ $audienceColors[$a->audience] ?? 'bg-slate-100 text-slate-800 border border-slate-300' }}">
                                             {{ ucfirst($a->audience) }}
                                         </span>
-                                        <span class="text-slate-400">â€¢</span>
+                                        <span class="text-slate-400">•</span>
                                         <span class="text-slate-800 font-extrabold">
                                             @if($a->published_at)
                                                 {{ $a->published_at->diffForHumans() }}

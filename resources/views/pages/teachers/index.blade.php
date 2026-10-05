@@ -17,17 +17,17 @@
 @extends('layouts.app')
 
 @section('content')
-    <div class="space-y-8">
+    <div class="space-y-5 sm:space-y-8">
         {{-- Header Card --}}
-        <div class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-sky-500 via-blue-600 to-indigo-700 p-8 shadow-2xl">
+        <div class="relative overflow-hidden rounded-2xl sm:rounded-3xl bg-gradient-to-br from-sky-500 via-blue-600 to-indigo-700 p-4 sm:p-8 shadow-2xl">
             <div class="absolute -right-20 -top-20 h-40 w-40 rounded-full bg-white/10"></div>
             <div class="absolute -bottom-10 -left-10 h-32 w-32 rounded-full bg-white/5"></div>
             <div class="absolute right-6 bottom-6 h-16 w-16 rounded-full bg-white/10"></div>
             
-            <div class="relative flex items-center justify-between">
-                <div class="flex items-center gap-4">
-                    <div class="flex h-16 w-16 items-center justify-center rounded-2xl bg-white/20 backdrop-blur-sm">
-                        <svg class="h-8 w-8 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <div class="relative flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div class="flex items-center gap-3 sm:gap-4">
+                    <div class="flex h-12 w-12 sm:h-16 sm:w-16 items-center justify-center rounded-xl sm:rounded-2xl bg-white/20 backdrop-blur-sm shrink-0">
+                        <svg class="h-6 w-6 sm:h-8 sm:w-8 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                             <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
                             <circle cx="9" cy="7" r="4"/>
                             <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
@@ -35,13 +35,13 @@
                         </svg>
                     </div>
                     <div>
-                        <h1 class="text-3xl font-black text-white">Teaching Staff</h1>
-                        <p class="mt-1 text-sky-100">Manage teachers and their subject allocations</p>
+                        <h1 class="text-xl sm:text-3xl font-black text-white">Teaching Staff</h1>
+                        <p class="mt-0.5 text-xs sm:text-sm text-sky-100">Manage teachers and their subject allocations</p>
                     </div>
                 </div>
                 @if (auth()->user()?->role === 'admin')
                     <a href="{{ route('teachers.create') }}" 
-                       class="flex items-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-bold text-sky-600 shadow-lg transition-all hover:bg-sky-50 hover:shadow-xl">
+                       class="self-start sm:self-auto flex items-center gap-2 rounded-xl bg-white px-4 py-2 sm:px-5 sm:py-3 text-xs sm:text-sm font-bold text-sky-600 shadow-lg transition-all hover:bg-sky-50 hover:shadow-xl active:scale-95">
                         <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                             <path d="M12 4v16m8-8H4"/>
                         </svg>
@@ -51,44 +51,44 @@
             </div>
         </div>
 
-        {{-- Stats Cards --}}
-        <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-emerald-400 to-teal-500 p-6 text-white shadow-lg">
+        {{-- Stats Cards (2-Column Mobile App Grid) --}}
+        <div class="grid grid-cols-2 gap-3 sm:gap-6 lg:grid-cols-4">
+            <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-emerald-400 to-teal-500 p-3.5 sm:p-6 text-white shadow-md active:scale-[0.98] transition-transform">
                 <div class="absolute -right-6 -top-6 h-20 w-20 rounded-full bg-white/10"></div>
                 <div class="relative">
-                    <div class="text-3xl font-black">{{ $teachers->count() }}</div>
-                    <div class="mt-1 text-sm font-semibold text-emerald-100">Total Teachers</div>
+                    <div class="text-2xl sm:text-3xl font-black">{{ $teachers->count() }}</div>
+                    <div class="mt-1 text-xs sm:text-sm font-semibold text-emerald-100">Total Teachers</div>
                 </div>
             </div>
             
-            <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-blue-400 to-indigo-500 p-6 text-white shadow-lg">
+            <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-blue-400 to-indigo-500 p-3.5 sm:p-6 text-white shadow-md active:scale-[0.98] transition-transform">
                 <div class="absolute -right-6 -top-6 h-20 w-20 rounded-full bg-white/10"></div>
                 <div class="relative">
-                    <div class="text-3xl font-black">{{ $teachers->where('is_active', true)->count() }}</div>
-                    <div class="mt-1 text-sm font-semibold text-blue-100">Active</div>
+                    <div class="text-2xl sm:text-3xl font-black">{{ $teachers->where('is_active', true)->count() }}</div>
+                    <div class="mt-1 text-xs sm:text-sm font-semibold text-blue-100">Active</div>
                 </div>
             </div>
             
-            <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-purple-400 to-violet-500 p-6 text-white shadow-lg">
+            <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-purple-400 to-violet-500 p-3.5 sm:p-6 text-white shadow-md active:scale-[0.98] transition-transform">
                 <div class="absolute -right-6 -top-6 h-20 w-20 rounded-full bg-white/10"></div>
                 <div class="relative">
-                    <div class="text-3xl font-black">{{ $teachers->where('is_class_teacher', true)->count() }}</div>
-                    <div class="mt-1 text-sm font-semibold text-purple-100">Class Teachers</div>
+                    <div class="text-2xl sm:text-3xl font-black">{{ $teachers->where('is_class_teacher', true)->count() }}</div>
+                    <div class="mt-1 text-xs sm:text-sm font-semibold text-purple-100">Class Teachers</div>
                 </div>
             </div>
             
-            <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-amber-400 to-orange-500 p-6 text-white shadow-lg">
+            <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-amber-400 to-orange-500 p-3.5 sm:p-6 text-white shadow-md active:scale-[0.98] transition-transform">
                 <div class="absolute -right-6 -top-6 h-20 w-20 rounded-full bg-white/10"></div>
                 <div class="relative">
-                    <div class="text-3xl font-black">{{ $allocations->sum(fn($allocs) => $allocs->count()) }}</div>
-                    <div class="mt-1 text-sm font-semibold text-amber-100">Total Allocations</div>
+                    <div class="text-2xl sm:text-3xl font-black">{{ $allocations->sum(fn($allocs) => $allocs->count()) }}</div>
+                    <div class="mt-1 text-xs sm:text-sm font-semibold text-amber-100">Allocations</div>
                 </div>
             </div>
         </div>
 
         {{-- Search & Filter Card --}}
-        <div class="rounded-3xl bg-white p-6 shadow-xl ring-1 ring-gray-200">
-            <div class="grid grid-cols-1 gap-4 lg:grid-cols-3">
+        <div class="rounded-2xl sm:rounded-3xl bg-white p-3.5 sm:p-6 shadow-sm ring-1 ring-gray-200">
+            <div class="grid grid-cols-1 gap-3 sm:gap-4 lg:grid-cols-3">
                 <div class="relative lg:col-span-2">
                     <svg class="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <circle cx="11" cy="11" r="8"/>
@@ -97,10 +97,10 @@
                     <input type="text" 
                            id="teacherSearch" 
                            placeholder="Search by name or email..." 
-                           class="w-full rounded-xl border border-gray-200 bg-gray-50 py-3 pl-12 pr-4 text-sm font-medium transition-all focus:border-sky-500 focus:bg-white focus:ring-2 focus:ring-sky-500/20" />
+                           class="w-full rounded-xl border border-gray-200 bg-gray-50 py-2.5 sm:py-3 pl-12 pr-4 text-xs sm:text-sm font-medium transition-all focus:border-sky-500 focus:bg-white focus:ring-2 focus:ring-sky-500/20" />
                 </div>
                 <select id="statusFilter" 
-                        class="rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm font-medium transition-all focus:border-sky-500 focus:bg-white focus:ring-2 focus:ring-sky-500/20">
+                        class="rounded-xl border border-gray-200 bg-gray-50 px-4 py-2.5 sm:py-3 text-xs sm:text-sm font-medium transition-all focus:border-sky-500 focus:bg-white focus:ring-2 focus:ring-sky-500/20">
                     <option value="all">All Status</option>
                     <option value="active">Active</option>
                     <option value="inactive">Inactive</option>
@@ -110,20 +110,20 @@
 
         {{-- Status Message --}}
         @if (session('status'))
-            <div class="rounded-3xl border border-emerald-200 bg-emerald-50 p-6 shadow-lg">
-                <div class="flex items-center gap-4">
-                    <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-100">
+            <div class="rounded-2xl sm:rounded-3xl border border-emerald-200 bg-emerald-50 p-4 sm:p-6 shadow-sm">
+                <div class="flex items-center gap-3 sm:gap-4">
+                    <div class="flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-xl bg-emerald-100 shrink-0">
                         <svg class="h-5 w-5 text-emerald-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                         </svg>
                     </div>
-                    <p class="font-bold text-emerald-800">{{ session('status') }}</p>
+                    <p class="font-bold text-xs sm:text-sm text-emerald-800">{{ session('status') }}</p>
                 </div>
             </div>
         @endif
 
         {{-- Teachers Grid --}}
-        <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3">
+        <div class="grid grid-cols-1 gap-4 sm:gap-6 sm:grid-cols-2 xl:grid-cols-3">
             @forelse ($teachers as $teacher)
                 @php
                     $rows = $allocations->get($teacher->id, collect());
@@ -137,32 +137,32 @@
                     $color = $colors[$teacher->id % count($colors)];
                 @endphp
                 <a href="{{ route('teachers.show', $teacher) }}" 
-                   class="group relative overflow-hidden rounded-3xl bg-gradient-to-br {{ $color['bg'] }} shadow-xl ring-1 {{ $color['ring'] }} transition-all duration-300 hover:shadow-2xl hover:-translate-y-1 hover:scale-[1.02]">
+                   class="group relative overflow-hidden rounded-2xl sm:rounded-3xl bg-gradient-to-br {{ $color['bg'] }} shadow-md ring-1 {{ $color['ring'] }} transition-all duration-300 hover:shadow-xl active:scale-[0.98] sm:hover:-translate-y-1">
                     
                     {{-- Decorative Elements --}}
                     <div class="absolute -right-8 -top-8 h-24 w-24 rounded-full bg-white/10"></div>
                     <div class="absolute -bottom-6 -left-6 h-20 w-20 rounded-full {{ $color['accent'] }} opacity-10"></div>
                     
-                    <div class="p-6">
+                    <div class="p-4 sm:p-6">
                         {{-- Header Section --}}
-                        <div class="flex items-start gap-4">
+                        <div class="flex items-start gap-3 sm:gap-4">
                             @if ($teacher->profile_photo_url)
                                 <img src="{{ $teacher->profile_photo_url }}"
                                      alt="{{ $teacher->name }}"
-                                     class="h-16 w-16 rounded-2xl object-cover ring-4 ring-white shadow-lg transition-transform duration-300 group-hover:scale-110" />
+                                     class="h-12 w-12 sm:h-16 sm:w-16 rounded-xl sm:rounded-2xl object-cover ring-2 sm:ring-4 ring-white shadow-md transition-transform duration-300 group-hover:scale-105 shrink-0" />
                             @else
-                                <div class="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br {{ $color['icon'] }} text-white shadow-lg ring-4 ring-white transition-transform duration-300 group-hover:scale-110">
-                                    <span class="text-2xl font-black">{{ mb_substr($teacher->name, 0, 1) }}</span>
+                                <div class="flex h-12 w-12 sm:h-16 sm:w-16 items-center justify-center rounded-xl sm:rounded-2xl bg-gradient-to-br {{ $color['icon'] }} text-white shadow-md ring-2 sm:ring-4 ring-white transition-transform duration-300 group-hover:scale-105 shrink-0">
+                                    <span class="text-lg sm:text-2xl font-black">{{ mb_substr($teacher->name, 0, 1) }}</span>
                                 </div>
                             @endif
 
                             <div class="min-w-0 flex-1">
-                                <div class="flex items-start justify-between gap-2">
+                                <div class="flex items-start justify-between gap-1.5 sm:gap-2">
                                     <div class="min-w-0">
-                                        <h3 class="truncate text-lg font-black text-gray-900">{{ $teacher->name }}</h3>
-                                        <p class="truncate text-sm text-gray-600">{{ $teacher->email }}</p>
+                                        <h3 class="truncate text-base sm:text-lg font-black text-gray-900 leading-tight">{{ $teacher->name }}</h3>
+                                        <p class="truncate text-xs sm:text-sm text-gray-600 mt-0.5">{{ $teacher->email }}</p>
                                     </div>
-                                    <span class="status-badge inline-flex items-center rounded-full px-2.5 py-1 text-xs font-bold {{ $teacher->is_active ? 'bg-emerald-100 text-emerald-800' : 'bg-red-100 text-red-800' }}">
+                                    <span class="status-badge inline-flex items-center rounded-full px-2 py-0.5 sm:px-2.5 sm:py-1 text-[10px] sm:text-xs font-bold {{ $teacher->is_active ? 'bg-emerald-100 text-emerald-800' : 'bg-red-100 text-red-800' }} shrink-0">
                                         {{ $teacher->is_active ? 'Active' : 'Inactive' }}
                                     </span>
                                 </div>

@@ -24,9 +24,9 @@
     $colors = $gradients[$colorKey] ?? $gradients['blue'];
 @endphp
 
-<div class="relative overflow-hidden rounded-2xl bg-gradient-to-br {{ $colors['bg'] }} p-5 shadow-sm ring-1 {{ $colors['ring'] }} transition-all duration-300 hover:shadow-md hover:-translate-y-0.5">
+<div class="relative overflow-hidden rounded-2xl bg-gradient-to-br {{ $colors['bg'] }} p-3.5 sm:p-5 shadow-sm ring-1 {{ $colors['ring'] }} transition-all duration-300 active:scale-[0.98] sm:hover:shadow-md sm:hover:-translate-y-0.5">
     <div class="absolute -right-6 -top-6 h-20 w-20 rounded-full {{ $colors['accent'] }}"></div>
-    <div class="flex items-center gap-4">
+    <div class="flex items-center gap-2.5 sm:gap-4">
         @php
             $iconSlot = $icon ?? null;
             $iconContent = $iconSlot && ! $iconSlot->isEmpty() ? $iconSlot : $slot;
@@ -34,13 +34,13 @@
         @endphp
 
         @if ($hasIcon)
-            <div class="icon-3d grid h-14 w-14 place-items-center rounded-xl bg-gradient-to-br {{ $colors['icon'] }} text-white shadow-lg">
+            <div class="icon-3d grid h-9 w-9 sm:h-12 sm:w-12 lg:h-14 lg:w-14 place-items-center rounded-lg sm:rounded-xl bg-gradient-to-br {{ $colors['icon'] }} text-white shadow-md sm:shadow-lg shrink-0 [&>svg]:h-4.5 [&>svg]:w-4.5 sm:[&>svg]:h-6 sm:[&>svg]:w-6">
                 {{ $iconContent }}
             </div>
         @endif
-        <div class="min-w-0">
-            <div class="text-xs font-medium uppercase tracking-wide {{ $colors['text'] }}">{{ $label }}</div>
-            <div class="mt-1.5 text-2xl font-bold tracking-tight text-gray-900">{{ $value }}</div>
+        <div class="min-w-0 flex-1">
+            <div class="text-[10px] sm:text-xs font-semibold uppercase tracking-wider {{ $colors['text'] }} truncate">{{ $label }}</div>
+            <div class="mt-1 sm:mt-1.5 text-lg sm:text-2xl font-black tracking-tight text-gray-900 truncate">{{ $value }}</div>
         </div>
     </div>
 </div>

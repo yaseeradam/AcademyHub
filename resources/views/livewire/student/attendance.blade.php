@@ -29,7 +29,7 @@
         </div>
     </div>
 
-    {{-- â”€â”€ Term Stats â”€â”€ --}}
+    {{-- ── Term Stats ── --}}
     <div class="grid grid-cols-2 gap-2.5 sm:grid-cols-4">
 
         {{-- Attendance Rate Ring --}}
@@ -76,7 +76,7 @@
             <div class="flex items-center justify-between">
                 <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Late</span>
                 @if ($streak > 0)
-                    <span class="text-[9px] font-bold text-slate-600">ðŸ”¥ {{ $streak }}d</span>
+                    <span class="text-[9px] font-bold text-slate-600">🔥 {{ $streak }}d</span>
                 @endif
             </div>
             <div class="mt-0.5 flex items-baseline justify-between">
@@ -86,7 +86,7 @@
         </div>
     </div>
 
-    {{-- â”€â”€ Term Progress Bar â”€â”€ --}}
+    {{-- ── Term Progress Bar ── --}}
     <div class="rounded-xl bg-white p-4 shadow-sm ring-1 ring-slate-100">
         <div class="mb-2 flex items-center justify-between text-xs">
             <span class="font-bold text-slate-700">Term Attendance Overview</span>
@@ -106,7 +106,7 @@
         </div>
     </div>
 
-    {{-- â”€â”€ Calendar â”€â”€ --}}
+    {{-- ── Calendar ── --}}
     <div class="rounded-xl bg-white shadow-sm ring-1 ring-slate-100 overflow-hidden">
 
         {{-- Calendar header --}}
@@ -227,11 +227,11 @@
         </div>
     </div>
 
-    {{-- â”€â”€ Monthly Records List â”€â”€ --}}
+    {{-- ── Monthly Records List ── --}}
     @if ($monthMarks->isNotEmpty())
         <div class="rounded-2xl bg-white shadow-sm ring-1 ring-gray-100 overflow-hidden">
             <div class="border-b border-gray-100 px-6 py-4">
-                <h3 class="text-sm font-bold uppercase tracking-wider text-gray-500">{{ $monthName }} â€” Daily Records</h3>
+                <h3 class="text-sm font-bold uppercase tracking-wider text-gray-500">{{ $monthName }} — Daily Records</h3>
             </div>
             <div class="divide-y divide-gray-50">
                 @foreach ($monthMarks->sortByDesc(fn($m) => $m->sheet->date) as $mark)

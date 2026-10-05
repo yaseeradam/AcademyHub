@@ -253,7 +253,7 @@ class PaystackCallbackController extends Controller
         $settingsPath = TenantSettings::settingsPath();
         $existing = file_exists($settingsPath) ? (json_decode(file_get_contents($settingsPath), true) ?? []) : [];
         $existing['subscription_due_date'] = $newExpiry->toDateString();
-        file_put_contents($settingsPath, json_encode($existing, JSON_PRETTY_PRINT));
+        TenantSettings::persist($settingsPath, $existing);
 
         \Illuminate\Support\Facades\Cache::forget(TenantSettings::settingsCacheKey());
 

@@ -71,6 +71,11 @@ HTML;
         '<path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M3 14h18M10 3v18M14 3v18"/><rect x="3" y="3" width="18" height="18" rx="2" stroke-linecap="round" stroke-linejoin="round"/>',
         request()->routeIs('results.broadsheet')) !!}
 
+    {!! $navLink(route('academics.hall-of-fame'), 'Hall of Fame',
+        'bg-amber-100', 'text-amber-600',
+        '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16.5 18.75h-9m9 0a3 3 0 013 3h-15a3 3 0 013-3m9 0v-3.375c0-.621-.504-1.125-1.125-1.125h-.871M7.5 18.75v-3.375c0-.621.504-1.125 1.125-1.125h.872m5.004 0A6.75 6.75 0 0019.5 7.5c0-1.88-1.04-3.52-2.58-4.375M7.5 14.25a6.75 6.75 0 01-5.004-6.75C2.496 5.62 3.536 3.98 5.076 3.125M12 3a4.5 4.5 0 00-4.5 4.5c0 1.766 1.018 3.295 2.5 4.025v2.725h4v-2.725A4.502 4.502 0 0016.5 7.5 4.5 4.5 0 0012 3z"/>',
+        request()->routeIs('academics.hall-of-fame')) !!}
+
     {!! $navLink(route('billing.index', ['tab' => 'debtors']), 'Tuition & Debtors',
         'bg-emerald-100', 'text-emerald-500',
         '<path stroke-linecap="round" stroke-linejoin="round" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/>',
@@ -155,7 +160,7 @@ HTML;
 
     {{-- Dropdown 2: Academics Portal --}}
     @php
-        $isAcademicsActive = request()->routeIs('classes.*') || request()->routeIs('subjects.*') || request()->routeIs('curriculum.*') || request()->routeIs('results.entry') || request()->routeIs('results.broadsheet') || request()->routeIs('attendance') || request()->routeIs('attendance.teachers') || request()->routeIs('attendance.staff-timesheet');
+        $isAcademicsActive = request()->routeIs('classes.*') || request()->routeIs('subjects.*') || request()->routeIs('curriculum.*') || request()->routeIs('results.entry') || request()->routeIs('results.broadsheet') || request()->routeIs('attendance') || request()->routeIs('attendance.teachers') || request()->routeIs('attendance.staff-timesheet') || request()->routeIs('academics.hall-of-fame');
         $hasAcademicsAccess = in_array($user?->role, ['admin', 'teacher'], true);
     @endphp
     @if($hasAcademicsAccess)
@@ -212,6 +217,11 @@ HTML;
                         '<path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M3 14h18M10 3v18M14 3v18"/><rect x="3" y="3" width="18" height="18" rx="2" stroke-linecap="round" stroke-linejoin="round"/>',
                         request()->routeIs('results.broadsheet')) !!}
                 @endif
+
+                {!! $navLink(route('academics.hall-of-fame'), 'Hall of Fame',
+                    'bg-amber-100', 'text-amber-600',
+                    '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16.5 18.75h-9m9 0a3 3 0 013 3h-15a3 3 0 013-3m9 0v-3.375c0-.621-.504-1.125-1.125-1.125h-.871M7.5 18.75v-3.375c0-.621.504-1.125 1.125-1.125h.872m5.004 0A6.75 6.75 0 0019.5 7.5c0-1.88-1.04-3.52-2.58-4.375M7.5 14.25a6.75 6.75 0 01-5.004-6.75C2.496 5.62 3.536 3.98 5.076 3.125M12 3a4.5 4.5 0 00-4.5 4.5c0 1.766 1.018 3.295 2.5 4.025v2.725h4v-2.725A4.502 4.502 0 0016.5 7.5 4.5 4.5 0 0012 3z"/>',
+                    request()->routeIs('academics.hall-of-fame')) !!}
 
                 @if($user?->role === 'admin' || ($user?->role === 'teacher' && $user?->is_class_teacher))
                     {!! $navLink(route('attendance'), 'Attendance',

@@ -25,6 +25,7 @@ use Livewire\Component;
 class Entry extends Component
 {
     public $classId = null;
+    public $sectionId = null;
     public $subjectId = null;
     public $term = null;
     public string $session = '';
@@ -93,6 +94,7 @@ class Entry extends Component
 
         $user = auth()->user();
         $defaultClassId = (int) request('class', 0);
+        $defaultSectionId = (int) request('section', 0);
         $defaultSubjectId = (int) request('subject', 0);
         $defaultTerm = (int) request('term', 0);
         $defaultSession = trim((string) request('session', ''));
@@ -106,6 +108,7 @@ class Entry extends Component
             if (! $allowedClass) {
                 $defaultClassId = 0;
                 $defaultSubjectId = 0;
+                $defaultSectionId = 0;
             }
         }
 
@@ -123,6 +126,29 @@ class Entry extends Component
 
         if ($defaultClassId > 0) {
             $this->classId = $defaultClassId;
+        }
+
+        if ($defaultSectionId > 0) {
+            $this->sectionId = $defaultSectionId;
+        }
+
+        // For teachers with a single assigned arm in this class, auto-select that arm
+        if ($user?->role === 'teacher' && $this->classId) {
+            $allocations = SubjectAllocation::query()
+                ->where('teacher_id', $user->id)
+                ->where('class_id', $this->classId)
+                ->when($defaultSubjectId > 0, fn($q) => $q->where('subject_id', $defaultSubjectId))
+                ->get();
+
+            $hasEntireClass = $allocations->contains(fn($a) => is_null($a->section_id));
+            if (! $hasEntireClass && $allocations->isNotEmpty()) {
+                $allowedSectionIds = $allocations->pluck('section_id')->filter()->unique()->values();
+                if ($allowedSectionIds->count() === 1) {
+                    $this->sectionId = (int) $allowedSectionIds->first();
+                } elseif ($this->sectionId && ! $allowedSectionIds->contains($this->sectionId)) {
+                    $this->sectionId = (int) $allowedSectionIds->first();
+                }
+            }
         }
 
         if ($defaultSubjectId > 0) {
@@ -176,10 +202,47 @@ class Entry extends Component
         $ids = SubjectAllocation::query()
             ->where('class_id', $this->classId)
             ->where('teacher_id', $user->id)
+            ->when($this->sectionId, function ($q) {
+                $q->where(fn($sub) => $sub->where('section_id', $this->sectionId)->orWhereNull('section_id'));
+            })
             ->pluck('subject_id')
             ->unique();
 
         return Subject::query()->whereIn('id', $ids)->orderBy('name')->get();
+    }
+
+    #[Computed]
+    public function sections()
+    {
+        if (! $this->classId) {
+            return collect();
+        }
+
+        $query = \App\Models\Section::query()
+            ->where('class_id', $this->classId)
+            ->orderBy('name');
+
+        $user = auth()->user();
+        if ($user?->role === 'teacher') {
+            $allocQuery = SubjectAllocation::query()
+                ->where('teacher_id', $user->id)
+                ->where('class_id', $this->classId);
+
+            if ($this->subjectId) {
+                $allocQuery->where('subject_id', $this->subjectId);
+            }
+
+            $allocations = $allocQuery->get();
+            if ($allocations->isNotEmpty()) {
+                $hasEntireClass = $allocations->contains(fn($a) => is_null($a->section_id));
+                if (! $hasEntireClass) {
+                    $sectionIds = $allocations->pluck('section_id')->filter()->unique()->values()->all();
+                    $query->whereIn('id', $sectionIds);
+                }
+            }
+        }
+
+        return $query->get();
     }
 
     #[Computed]
@@ -190,23 +253,42 @@ class Entry extends Component
         }
 
         $user = auth()->user();
-        if ($user?->role === 'teacher') {
-            $allowed = SubjectAllocation::query()
-                ->where('teacher_id', $user->id)
-                ->where('class_id', $this->classId)
-                ->exists();
-
-            if (! $allowed) {
-                return collect();
-            }
-        }
-
-        return Student::query()
+        $query = Student::query()
             ->with(['schoolClass', 'section', 'user'])
             ->where('class_id', $this->classId)
-            ->where('status', 'Active')
-            ->orderBy('last_name')
-            ->get();
+            ->where('status', 'Active');
+
+        if ($user?->role === 'teacher') {
+            $allocQuery = SubjectAllocation::query()
+                ->where('teacher_id', $user->id)
+                ->where('class_id', $this->classId);
+
+            if ($this->subjectId) {
+                $allocQuery->where('subject_id', $this->subjectId);
+            }
+
+            $allocations = $allocQuery->get();
+
+            if ($allocations->isEmpty()) {
+                return collect();
+            }
+
+            $hasEntireClass = $allocations->contains(fn($a) => is_null($a->section_id));
+            if (! $hasEntireClass) {
+                $allowedSectionIds = $allocations->pluck('section_id')->filter()->unique()->values()->all();
+                if ($this->sectionId && in_array((int) $this->sectionId, $allowedSectionIds, true)) {
+                    $query->where('section_id', (int) $this->sectionId);
+                } else {
+                    $query->whereIn('section_id', $allowedSectionIds);
+                }
+            } elseif ($this->sectionId) {
+                $query->where('section_id', (int) $this->sectionId);
+            }
+        } elseif ($this->sectionId) {
+            $query->where('section_id', (int) $this->sectionId);
+        }
+
+        return $query->orderBy('last_name')->get();
     }
 
     #[Computed]
@@ -247,6 +329,20 @@ class Entry extends Component
 
     public function openPsychomotor(int $studentId, string $studentName): void
     {
+        $user = auth()->user();
+        if ($user?->role === 'teacher') {
+            $allocations = SubjectAllocation::query()
+                ->where('teacher_id', $user->id)
+                ->where('class_id', $this->classId)
+                ->get();
+            $hasEntireClass = $allocations->contains(fn($a) => is_null($a->section_id));
+            if (! $hasEntireClass && $allocations->isNotEmpty()) {
+                $allowedSectionIds = $allocations->pluck('section_id')->filter()->unique()->values()->all();
+                $studentSectionId = Student::whereKey($studentId)->value('section_id');
+                abort_unless(in_array($studentSectionId, $allowedSectionIds, true), 403);
+            }
+        }
+
         $this->selectedStudentId = $studentId;
         $this->selectedStudentName = $studentName;
         
@@ -269,6 +365,20 @@ class Entry extends Component
     public function savePsychomotor(): void
     {
         if (!$this->selectedStudentId) return;
+
+        $user = auth()->user();
+        if ($user?->role === 'teacher') {
+            $allocations = SubjectAllocation::query()
+                ->where('teacher_id', $user->id)
+                ->where('class_id', $this->classId)
+                ->get();
+            $hasEntireClass = $allocations->contains(fn($a) => is_null($a->section_id));
+            if (! $hasEntireClass && $allocations->isNotEmpty()) {
+                $allowedSectionIds = $allocations->pluck('section_id')->filter()->unique()->values()->all();
+                $studentSectionId = Student::whereKey($this->selectedStudentId)->value('section_id');
+                abort_unless(in_array($studentSectionId, $allowedSectionIds, true), 403);
+            }
+        }
 
         $dbTraits = [];
         foreach ($this->traitMap() as $slug => $label) {
@@ -347,10 +457,35 @@ class Entry extends Component
     {
         $this->classId = $value !== '' && $value !== null ? (int) $value : null;
         $this->subjectId = null;
+        $this->sectionId = null;
         $this->scores = [];
         $this->validationErrors = [];
+
+        $user = auth()->user();
+        if ($user?->role === 'teacher' && $this->classId) {
+            $allocations = SubjectAllocation::query()
+                ->where('teacher_id', $user->id)
+                ->where('class_id', $this->classId)
+                ->get();
+            $hasEntireClass = $allocations->contains(fn($a) => is_null($a->section_id));
+            if (! $hasEntireClass && $allocations->isNotEmpty()) {
+                $allowedSectionIds = $allocations->pluck('section_id')->filter()->unique()->values();
+                if ($allowedSectionIds->count() === 1) {
+                    $this->sectionId = (int) $allowedSectionIds->first();
+                }
+            }
+        }
+
         // Bust Livewire 3 computed property cache
-        unset($this->subjects, $this->students, $this->isPublished, $this->submission, $this->submissions);
+        unset($this->classes, $this->subjects, $this->sections, $this->students, $this->isPublished, $this->submission, $this->submissions);
+    }
+
+    public function updatedSectionId($value): void
+    {
+        $this->sectionId = $value !== '' && $value !== null ? (int) $value : null;
+        $this->validationErrors = [];
+        unset($this->subjects, $this->students);
+        $this->loadExistingScores();
     }
 
     public function updatedSubjectId($value): void
@@ -359,7 +494,7 @@ class Entry extends Component
         $this->validationErrors = [];
         $this->loadExistingScores();
         // Bust Livewire 3 computed property cache
-        unset($this->students, $this->isPublished, $this->submission, $this->submissions);
+        unset($this->sections, $this->students, $this->isPublished, $this->submission, $this->submissions);
     }
 
     public function updatedTerm($value): void
@@ -469,14 +604,23 @@ class Entry extends Component
         }
 
         if ($user->role !== 'admin') {
-            $allowed = SubjectAllocation::query()
+            $allocQuery = SubjectAllocation::query()
                 ->where('teacher_id', $user->id)
                 ->where('class_id', $this->classId)
-                ->where('subject_id', $this->subjectId)
-                ->exists();
+                ->where('subject_id', $this->subjectId);
 
-            if (! $allowed) {
+            $allocations = $allocQuery->get();
+            if ($allocations->isEmpty()) {
                 return;
+            }
+
+            $hasEntireClass = $allocations->contains(fn($a) => is_null($a->section_id));
+            if (! $hasEntireClass) {
+                $allowedSectionIds = $allocations->pluck('section_id')->filter()->unique()->values()->all();
+                $studentSectionId = Student::whereKey($studentId)->value('section_id');
+                if (! in_array($studentSectionId, $allowedSectionIds, true)) {
+                    return;
+                }
             }
         }
 
@@ -543,13 +687,16 @@ class Entry extends Component
         }
 
         if ($user?->role !== 'admin') {
-            $allowed = SubjectAllocation::query()
+            $allocQuery = SubjectAllocation::query()
                 ->where('teacher_id', $user->id)
                 ->where('class_id', $this->classId)
-                ->where('subject_id', $this->subjectId)
-                ->exists();
+                ->where('subject_id', $this->subjectId);
 
-            abort_unless($allowed, 403);
+            if ($this->sectionId) {
+                $allocQuery->where(fn($q) => $q->where('section_id', $this->sectionId)->orWhereNull('section_id'));
+            }
+
+            abort_unless($allocQuery->exists(), 403);
         }
 
         $this->validate([

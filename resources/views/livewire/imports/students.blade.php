@@ -161,7 +161,7 @@
                             <span wire:loading wire:target="analyzeWithAI" class="h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
                             <img wire:loading.remove wire:target="analyzeWithAI" src="{{ asset('ai.png') }}" class="h-4 w-4 object-contain brightness-0 invert" alt="AI" />
                             <span wire:loading.remove wire:target="analyzeWithAI">Analyze Layout with AI</span>
-                            <span wire:loading wire:target="analyzeWithAI">AI Analyzing Layoutâ€¦</span>
+                            <span wire:loading wire:target="analyzeWithAI">AI Analyzing Layout...</span>
                         </button>
                     </div>
                 </div>
@@ -181,15 +181,15 @@
                         </p>
                         <ul class="text-xs text-white/90 space-y-2">
                             <li class="flex items-start gap-2">
-                                <span class="text-emerald-300 font-bold">âœ“</span>
+                                <span class="text-emerald-300 font-bold">✓</span>
                                 <span><strong>Synonym Detection:</strong> AI detects that "Sex", "gender", or "student_gender" all map to the same field.</span>
                             </li>
                             <li class="flex items-start gap-2">
-                                <span class="text-emerald-300 font-bold">âœ“</span>
+                                <span class="text-emerald-300 font-bold">✓</span>
                                 <span><strong>Custom Fields:</strong> Auto-provisions custom fields like "Blood Pressure" or "Religion" to the database.</span>
                             </li>
                             <li class="flex items-start gap-2">
-                                <span class="text-emerald-300 font-bold">âœ“</span>
+                                <span class="text-emerald-300 font-bold">✓</span>
                                 <span><strong>Fast & Safe:</strong> Only reads 5 rows to detect mappings, avoiding token limits and keeping your import quick.</span>
                             </li>
                         </ul>
@@ -262,14 +262,14 @@
                         <p class="text-xs text-slate-500 mt-0.5">Review standard fields alignment and toggle auto-creation of custom fields.</p>
                     </div>
                 </div>
-                <button wire:click="resetWizard" class="btn-outline h-9 px-3 text-xs" wire:loading.attr="disabled" wire:loading.class="opacity-50 cursor-wait">âœ• Start Over</button>
+                <button wire:click="resetWizard" class="btn-outline h-9 px-3 text-xs" wire:loading.attr="disabled" wire:loading.class="opacity-50 cursor-wait">✕ Start Over</button>
             </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 
                 {{-- Column Mappings Selector --}}
                 <div class="lg:col-span-2 space-y-6">
-                    <h4 class="text-xs font-bold uppercase tracking-wider text-slate-500">Standard Student Fields â€” Map each file column</h4>
+                    <h4 class="text-xs font-bold uppercase tracking-wider text-slate-500">Standard Student Fields — Map each file column</h4>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         @foreach ($columnMapping as $fieldKey => $mappedHeader)
                             <div class="flex flex-col p-4 border border-slate-100 bg-slate-50/30 rounded-2xl">
@@ -296,7 +296,7 @@
                 {{-- Extra columns auto-saved as custom fields --}}
                 <div class="space-y-4">
                     <div>
-                        <h4 class="text-xs font-bold uppercase tracking-wider text-slate-500">Extra Columns â†’ Custom Fields</h4>
+                        <h4 class="text-xs font-bold uppercase tracking-wider text-slate-500">Extra Columns → Custom Fields</h4>
                         <p class="text-xs text-slate-400 mt-1">All columns not mapped to a standard field are automatically saved as student custom fields.</p>
                     </div>
 
@@ -345,7 +345,7 @@
 
             {{-- 5 Row Sample Mapped Data Preview Table --}}
             <div class="border-t border-slate-100 pt-6 space-y-3">
-                <h4 class="text-xs font-bold uppercase tracking-wider text-slate-500">First 5 Rows Preview â€” All {{ count($headers) }} Columns</h4>
+                <h4 class="text-xs font-bold uppercase tracking-wider text-slate-500">First 5 Rows Preview — All {{ count($headers) }} Columns</h4>
                 <div class="overflow-x-auto border border-slate-100 rounded-2xl bg-slate-50/10">
                     <table class="min-w-full text-xs">
                         <thead>
@@ -358,7 +358,7 @@
                                     <th class="px-4 py-3 text-left font-bold whitespace-nowrap {{ $isCustom ? 'text-indigo-600 bg-indigo-50/30' : 'text-slate-600' }}">
                                         {{ $header }}
                                         @if($mappedTo)
-                                            <div class="text-[9px] font-normal text-slate-400">â†’ {{ str_replace('_', ' ', $mappedTo) }}</div>
+                                            <div class="text-[9px] font-normal text-slate-400">→ {{ str_replace('_', ' ', $mappedTo) }}</div>
                                         @elseif($isCustom)
                                             <div class="text-[9px] font-normal text-indigo-400">custom field</div>
                                         @endif
@@ -457,7 +457,7 @@
                     </h4>
                     <div class="max-h-40 overflow-y-auto space-y-1">
                         @foreach ($importReport['errors'] as $err)
-                            <div class="text-xs text-rose-800 leading-relaxed">â€¢ {{ $err }}</div>
+                            <div class="text-xs text-rose-800 leading-relaxed">• {{ $err }}</div>
                         @endforeach
                     </div>
                 </div>

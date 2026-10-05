@@ -33,18 +33,18 @@
     </x-page-header>
 
     {{-- Stat Cards --}}
-    <div class="grid grid-cols-1 gap-6 sm:grid-cols-3">
+    <div class="grid grid-cols-2 gap-3 sm:gap-6 sm:grid-cols-3">
         {{-- Total Classes --}}
-        <div class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-indigo-500 to-violet-600 p-6 text-white shadow-md shadow-indigo-100 transition-all hover:-translate-y-1 hover:shadow-xl duration-300">
-            <div class="absolute -right-6 -top-6 h-28 w-28 rounded-full bg-white/10 transition-transform duration-500 group-hover:scale-110"></div>
-            <div class="absolute right-4 bottom-4 h-16 w-16 rounded-full bg-white/10 transition-transform duration-500 group-hover:scale-110"></div>
+        <div class="group relative overflow-hidden rounded-2xl sm:rounded-3xl bg-gradient-to-br from-indigo-500 to-violet-600 p-3.5 sm:p-6 text-white shadow-sm sm:shadow-md shadow-indigo-100 transition-all active:scale-[0.98] hover:-translate-y-1 hover:shadow-xl duration-300">
+            <div class="absolute -right-6 -top-6 h-20 w-20 sm:h-28 sm:w-28 rounded-full bg-white/10 transition-transform duration-500 group-hover:scale-110"></div>
+            <div class="absolute right-4 bottom-4 h-12 w-12 sm:h-16 sm:w-16 rounded-full bg-white/10 transition-transform duration-500 group-hover:scale-110"></div>
             <div class="relative flex items-start justify-between">
                 <div>
-                    <div class="text-4xl font-black tracking-tight">{{ $total }}</div>
-                    <div class="mt-1.5 text-sm font-bold text-indigo-100 uppercase tracking-wider">Total Classes</div>
+                    <div class="text-2xl sm:text-4xl font-black tracking-tight">{{ $total }}</div>
+                    <div class="mt-0.5 sm:mt-1.5 text-[10px] sm:text-sm font-bold text-indigo-100 uppercase tracking-wider">Total Classes</div>
                 </div>
-                <div class="grid h-12 w-12 place-items-center rounded-2xl bg-white/20 shadow-inner">
-                    <svg class="h-6 w-6 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <div class="grid h-8 w-8 sm:h-12 sm:w-12 place-items-center rounded-xl sm:rounded-2xl bg-white/20 shadow-inner shrink-0">
+                    <svg class="h-4 w-4 sm:h-6 sm:w-6 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
                     </svg>
                 </div>
@@ -52,16 +52,16 @@
         </div>
 
         {{-- Total Students --}}
-        <div class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-orange-400 to-amber-500 p-6 text-white shadow-md shadow-orange-100 transition-all hover:-translate-y-1 hover:shadow-xl duration-300">
-            <div class="absolute -right-6 -top-6 h-28 w-28 rounded-full bg-white/10 transition-transform duration-500 group-hover:scale-110"></div>
-            <div class="absolute right-4 bottom-4 h-16 w-16 rounded-full bg-white/10 transition-transform duration-500 group-hover:scale-110"></div>
+        <div class="group relative overflow-hidden rounded-2xl sm:rounded-3xl bg-gradient-to-br from-orange-400 to-amber-500 p-3.5 sm:p-6 text-white shadow-sm sm:shadow-md shadow-orange-100 transition-all active:scale-[0.98] hover:-translate-y-1 hover:shadow-xl duration-300">
+            <div class="absolute -right-6 -top-6 h-20 w-20 sm:h-28 sm:w-28 rounded-full bg-white/10 transition-transform duration-500 group-hover:scale-110"></div>
+            <div class="absolute right-4 bottom-4 h-12 w-12 sm:h-16 sm:w-16 rounded-full bg-white/10 transition-transform duration-500 group-hover:scale-110"></div>
             <div class="relative flex items-start justify-between">
                 <div>
-                    <div class="text-4xl font-black tracking-tight">{{ number_format($totalStudents) }}</div>
-                    <div class="mt-1.5 text-sm font-bold text-orange-100 uppercase tracking-wider">Total Students</div>
+                    <div class="text-2xl sm:text-4xl font-black tracking-tight">{{ number_format($totalStudents) }}</div>
+                    <div class="mt-0.5 sm:mt-1.5 text-[10px] sm:text-sm font-bold text-orange-100 uppercase tracking-wider">Total Students</div>
                 </div>
-                <div class="grid h-12 w-12 place-items-center rounded-2xl bg-white/20 shadow-inner">
-                    <svg class="h-6 w-6 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <div class="grid h-8 w-8 sm:h-12 sm:w-12 place-items-center rounded-xl sm:rounded-2xl bg-white/20 shadow-inner shrink-0">
+                    <svg class="h-4 w-4 sm:h-6 sm:w-6 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
                     </svg>
                 </div>
@@ -69,16 +69,16 @@
         </div>
 
         {{-- Subject Allocations --}}
-        <div class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-emerald-400 to-teal-500 p-6 text-white shadow-md shadow-emerald-100 transition-all hover:-translate-y-1 hover:shadow-xl duration-300">
-            <div class="absolute -right-6 -top-6 h-28 w-28 rounded-full bg-white/10 transition-transform duration-500 group-hover:scale-110"></div>
-            <div class="absolute right-4 bottom-4 h-16 w-16 rounded-full bg-white/10 transition-transform duration-500 group-hover:scale-110"></div>
+        <div class="col-span-2 sm:col-span-1 group relative overflow-hidden rounded-2xl sm:rounded-3xl bg-gradient-to-br from-emerald-400 to-teal-500 p-3.5 sm:p-6 text-white shadow-sm sm:shadow-md shadow-emerald-100 transition-all active:scale-[0.98] hover:-translate-y-1 hover:shadow-xl duration-300">
+            <div class="absolute -right-6 -top-6 h-20 w-20 sm:h-28 sm:w-28 rounded-full bg-white/10 transition-transform duration-500 group-hover:scale-110"></div>
+            <div class="absolute right-4 bottom-4 h-12 w-12 sm:h-16 sm:w-16 rounded-full bg-white/10 transition-transform duration-500 group-hover:scale-110"></div>
             <div class="relative flex items-start justify-between">
                 <div>
-                    <div class="text-4xl font-black tracking-tight">{{ $totalSubjects }}</div>
-                    <div class="mt-1.5 text-sm font-bold text-emerald-100 uppercase tracking-wider">Subject Allocations</div>
+                    <div class="text-2xl sm:text-4xl font-black tracking-tight">{{ $totalSubjects }}</div>
+                    <div class="mt-0.5 sm:mt-1.5 text-[10px] sm:text-sm font-bold text-emerald-100 uppercase tracking-wider">Subject Allocations</div>
                 </div>
-                <div class="grid h-12 w-12 place-items-center rounded-2xl bg-white/20 shadow-inner">
-                    <svg class="h-6 w-6 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <div class="grid h-8 w-8 sm:h-12 sm:w-12 place-items-center rounded-xl sm:rounded-2xl bg-white/20 shadow-inner shrink-0">
+                    <svg class="h-4 w-4 sm:h-6 sm:w-6 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
                     </svg>
                 </div>
@@ -121,10 +121,10 @@
 
     {{-- Add Form --}}
     @if ($user?->role === 'admin')
-        <div class="rounded-3xl bg-white p-6 shadow-sm border border-slate-100">
-            <div class="mb-6 flex items-center gap-3 border-b border-slate-100 pb-4">
-                <div class="grid h-10 w-10 place-items-center rounded-2xl bg-gradient-to-br from-indigo-500 to-violet-600 text-white shadow-md shadow-indigo-50">
-                    <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+        <div class="rounded-2xl sm:rounded-3xl bg-white p-4 sm:p-6 shadow-sm border border-slate-100">
+            <div class="mb-4 sm:mb-6 flex items-center gap-3 border-b border-slate-100 pb-3 sm:pb-4">
+                <div class="grid h-9 w-9 sm:h-10 sm:w-10 place-items-center rounded-xl sm:rounded-2xl bg-gradient-to-br from-indigo-500 to-violet-600 text-white shadow-md shadow-indigo-50 shrink-0">
+                    <svg class="h-4.5 w-4.5 sm:h-5 sm:w-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
                     </svg>
                 </div>
@@ -133,31 +133,31 @@
                     <p class="text-xs text-slate-400">Set up a new grade level and class structure</p>
                 </div>
             </div>
-            <form method="POST" action="{{ route('classes.store') }}" class="grid grid-cols-1 md:grid-cols-12 gap-5 items-end">
+            <form method="POST" action="{{ route('classes.store') }}" class="grid grid-cols-1 md:grid-cols-12 gap-4 sm:gap-5 items-end">
                 @csrf
                 <div class="col-span-1 md:col-span-7">
-                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">Class Name *</label>
+                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5 sm:mb-2">Class Name *</label>
                     <input 
                         name="name" 
-                        class="w-full rounded-xl border-2 border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-gray-900 shadow-sm transition-all focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-500/10 hover:border-slate-300" 
+                        class="w-full rounded-xl border-2 border-slate-200 bg-slate-50 px-4 py-2.5 sm:py-3 text-sm font-semibold text-gray-900 shadow-sm transition-all focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-500/10 hover:border-slate-300" 
                         value="{{ old('name') }}" 
                         placeholder="e.g., JSS 1A" 
                         required 
                     />
                 </div>
                 <div class="col-span-1 md:col-span-2">
-                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">Academic Level *</label>
+                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5 sm:mb-2">Academic Level *</label>
                     <input 
                         name="level" 
                         type="number" 
-                        class="w-full rounded-xl border-2 border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-gray-900 shadow-sm transition-all focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-500/10 hover:border-slate-300" 
+                        class="w-full rounded-xl border-2 border-slate-200 bg-slate-50 px-4 py-2.5 sm:py-3 text-sm font-semibold text-gray-900 shadow-sm transition-all focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-500/10 hover:border-slate-300" 
                         value="{{ old('level', 1) }}" 
                         min="1" 
                         max="30" 
                         required 
                     />
                 </div>
-                <button type="submit" class="col-span-1 md:col-span-3 inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 px-6 py-3.5 text-sm font-bold text-white shadow-md shadow-indigo-100 transition-all hover:from-indigo-700 hover:to-violet-700 hover:shadow-lg active:scale-[0.98] h-[48px] self-end">
+                <button type="submit" class="col-span-1 md:col-span-3 inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 px-5 sm:px-6 py-3 sm:py-3.5 text-sm font-bold text-white shadow-md shadow-indigo-100 transition-all hover:from-indigo-700 hover:to-violet-700 hover:shadow-lg active:scale-[0.98] h-[44px] sm:h-[48px] self-end">
                     <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
                     </svg>
@@ -168,8 +168,8 @@
     @endif
 
     {{-- Table Card --}}
-    <div class="rounded-3xl bg-white shadow-sm border border-slate-100 overflow-hidden">
-        <div class="flex items-center justify-between border-b border-slate-100 p-5 bg-white">
+    <div class="rounded-2xl sm:rounded-3xl bg-white shadow-sm border border-slate-100 overflow-hidden">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b border-slate-100 p-4 sm:p-5 bg-white">
             <div>
                 <h3 class="text-base font-bold text-slate-800">All Registered Classes</h3>
                 <p class="mt-0.5 text-xs text-slate-400 font-medium">Manage existing academic grade levels, student capacities, and subjects</p>

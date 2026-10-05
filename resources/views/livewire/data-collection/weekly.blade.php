@@ -54,7 +54,7 @@
                     <div>
                         <label class="text-xs font-semibold uppercase tracking-wider text-gray-500">School days opened (optional)</label>
                         <select wire:model.live="schoolDays" class="mt-2 select">
-                            <option value="">â€”</option>
+                            <option value="">—</option>
                             @for ($i = 1; $i <= 7; $i++)
                                 <option value="{{ $i }}">{{ $i }}</option>
                             @endfor
@@ -79,9 +79,9 @@
                             </div>
                         </div>
                         <div class="mt-1 text-xs font-semibold text-slate-600">
-                            Submitted by {{ $this->existing->teacher?->name ?? 'â€”' }}
+                            Submitted by {{ $this->existing->teacher?->name ?? '—' }}
                             @if ($this->existing->submitted_at)
-                                Â· {{ $this->existing->submitted_at->format('M j, g:i A') }}
+                                · {{ $this->existing->submitted_at->format('M j, g:i A') }}
                             @endif
                         </div>
                         @if ($this->existing->status === 'rejected' && $this->existing->rejection_note)
@@ -107,7 +107,7 @@
                                         {{ $r->schoolClass?->name ?? '-' }} {{ $r->section?->name ?? '' }}
                                     </div>
                                     <div class="mt-1 text-xs font-semibold text-slate-600">
-                                        {{ $r->session }} Â· T{{ $r->term }} Â· {{ $r->week_start?->format('M j') }}â€“{{ $r->week_end?->format('M j') }}
+                                        {{ $r->session }} · T{{ $r->term }} · {{ $r->week_start?->format('M j') }}–{{ $r->week_end?->format('M j') }}
                                     </div>
                                 </div>
                                 <div class="text-xs font-black uppercase tracking-wider {{ $r->status === 'approved' ? 'text-emerald-700' : ($r->status === 'rejected' ? 'text-rose-700' : 'text-amber-700') }}">
@@ -125,7 +125,7 @@
                 <div class="flex flex-wrap items-center justify-between gap-3">
                     <div>
                         <div class="text-sm font-black text-gray-900">Weekly summary</div>
-                        <div class="mt-1 text-xs font-semibold text-gray-500">Fast inputs (use + / âˆ’ or type numbers).</div>
+                        <div class="mt-1 text-xs font-semibold text-gray-500">Fast inputs (use + / − or type numbers).</div>
                     </div>
                     <div class="flex flex-wrap gap-2">
                         <button type="button" class="btn-primary" wire:click="submit" @disabled(! $classId || ! $sectionId) wire:loading.attr="disabled" wire:loading.class="opacity-50 cursor-wait">
@@ -144,7 +144,7 @@
                             <div>
                                 <div class="text-xs font-bold uppercase tracking-wider text-slate-600">Present</div>
                                 <div class="mt-2 flex items-center gap-2">
-                                    <button type="button" class="btn-outline px-3" wire:click="bump('boysPresent', -1)" wire:loading.attr="disabled" wire:loading.class="opacity-50 cursor-wait">âˆ’</button>
+                                    <button type="button" class="btn-outline px-3" wire:click="bump('boysPresent', -1)" wire:loading.attr="disabled" wire:loading.class="opacity-50 cursor-wait">−</button>
                                     <input wire:model.live="boysPresent" type="number" min="0" class="input-compact text-center" />
                                     <button type="button" class="btn-outline px-3" wire:click="bump('boysPresent', 1)" wire:loading.attr="disabled" wire:loading.class="opacity-50 cursor-wait">+</button>
                                 </div>
@@ -152,7 +152,7 @@
                             <div>
                                 <div class="text-xs font-bold uppercase tracking-wider text-slate-600">Absent</div>
                                 <div class="mt-2 flex items-center gap-2">
-                                    <button type="button" class="btn-outline px-3" wire:click="bump('boysAbsent', -1)" wire:loading.attr="disabled" wire:loading.class="opacity-50 cursor-wait">âˆ’</button>
+                                    <button type="button" class="btn-outline px-3" wire:click="bump('boysAbsent', -1)" wire:loading.attr="disabled" wire:loading.class="opacity-50 cursor-wait">−</button>
                                     <input wire:model.live="boysAbsent" type="number" min="0" class="input-compact text-center" />
                                     <button type="button" class="btn-outline px-3" wire:click="bump('boysAbsent', 1)" wire:loading.attr="disabled" wire:loading.class="opacity-50 cursor-wait">+</button>
                                 </div>
@@ -172,7 +172,7 @@
                             <div>
                                 <div class="text-xs font-bold uppercase tracking-wider text-slate-600">Present</div>
                                 <div class="mt-2 flex items-center gap-2">
-                                    <button type="button" class="btn-outline px-3" wire:click="bump('girlsPresent', -1)" wire:loading.attr="disabled" wire:loading.class="opacity-50 cursor-wait">âˆ’</button>
+                                    <button type="button" class="btn-outline px-3" wire:click="bump('girlsPresent', -1)" wire:loading.attr="disabled" wire:loading.class="opacity-50 cursor-wait">−</button>
                                     <input wire:model.live="girlsPresent" type="number" min="0" class="input-compact text-center" />
                                     <button type="button" class="btn-outline px-3" wire:click="bump('girlsPresent', 1)" wire:loading.attr="disabled" wire:loading.class="opacity-50 cursor-wait">+</button>
                                 </div>
@@ -180,7 +180,7 @@
                             <div>
                                 <div class="text-xs font-bold uppercase tracking-wider text-slate-600">Absent</div>
                                 <div class="mt-2 flex items-center gap-2">
-                                    <button type="button" class="btn-outline px-3" wire:click="bump('girlsAbsent', -1)" wire:loading.attr="disabled" wire:loading.class="opacity-50 cursor-wait">âˆ’</button>
+                                    <button type="button" class="btn-outline px-3" wire:click="bump('girlsAbsent', -1)" wire:loading.attr="disabled" wire:loading.class="opacity-50 cursor-wait">−</button>
                                     <input wire:model.live="girlsAbsent" type="number" min="0" class="input-compact text-center" />
                                     <button type="button" class="btn-outline px-3" wire:click="bump('girlsAbsent', 1)" wire:loading.attr="disabled" wire:loading.class="opacity-50 cursor-wait">+</button>
                                 </div>

@@ -172,12 +172,8 @@ class SubscriptionBilling extends Component
     private function writeSettings(array $data): void
     {
         $path = $this->settingsPath();
-        if (!is_dir(dirname($path))) {
-            mkdir(dirname($path), 0755, true);
-        }
-        // Merge with existing settings so we don't overwrite other keys
         $existing = $this->readSettings();
-        file_put_contents($path, json_encode(array_merge($existing, $data), JSON_PRETTY_PRINT));
+        TenantSettings::persist($path, array_merge($existing, $data));
     }
 
     public function verifyPayment($reference)

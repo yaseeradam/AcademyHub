@@ -50,31 +50,31 @@
                     <!-- Actions Dropdown -->
                     <div class="relative" x-data="{ open: false }">
                         <button @click="open = !open" type="button" class="rounded-xl bg-white/20 px-5 py-2.5 text-sm font-semibold text-white shadow-lg backdrop-blur-sm transition-all hover:bg-white/30 hover:shadow-xl">
-                            Actions â–¼
+                            Actions ▼
                         </button>
                         <div x-show="open" @click.away="open = false" x-cloak class="absolute right-0 z-50 mt-2 w-56 rounded-xl bg-white shadow-xl ring-1 ring-black ring-opacity-5" role="dialog" aria-modal="true">
                             <a href="{{ route('cbt.exams.pdf', $exam) }}" target="_blank" @click="open = false" class="block px-4 py-3 text-sm font-semibold text-gray-700 hover:bg-gray-50 first:rounded-t-xl">
-                                ðŸ“„ Download PDF
+                                📄 Download PDF
                             </a>
                             @if ($status === 'approved' && $exam->access_code)
                                 <a href="{{ route('cbt.student', ['code' => $exam->access_code]) }}" target="_blank" @click="open = false" class="block px-4 py-3 text-sm font-semibold text-gray-700 hover:bg-gray-50">
-                                    ðŸŽ“ Student Portal
+                                    🎓 Student Portal
                                 </a>
                             @endif
                             @if ($me?->role === 'admin')
                                 <a href="{{ route('cbt.exams.export', $exam) }}" @click="open = false" class="block px-4 py-3 text-sm font-semibold text-gray-700 hover:bg-gray-50">
-                                    ðŸ“Š Export CSV
+                                    📊 Export CSV
                                 </a>
                                 @if ($status === 'approved')
                                     <button type="button" wire:click="transferToResults" @click="open = false" class="block w-full px-4 py-3 text-left text-sm font-semibold text-emerald-700 hover:bg-emerald-50" onclick="if (!confirm('Transfer CBT scores to academic results? This will update the results table for {{ $exam->session }} Term {{ $exam->term }}.')) { event.stopImmediatePropagation(); }">
-                                        âœ… Transfer to Results
+                                        ✅ Transfer to Results
                                     </button>
                                     <button type="button" wire:click="endAllExams" @click="open = false" class="block w-full px-4 py-3 text-left text-sm font-semibold text-orange-700 hover:bg-orange-50" onclick="if (!confirm('End this exam? This will submit all active attempts for {{ $exam->title }} and calculate final scores.')) { event.stopImmediatePropagation(); }">
-                                        â¹ï¸ End This Exam
+                                        ⏹️ End This Exam
                                     </button>
                                 @endif
                                 <button type="button" wire:click="deleteExam" @click="open = false" class="block w-full px-4 py-3 text-left text-sm font-semibold text-red-700 hover:bg-red-50 last:rounded-b-xl" onclick="if (!confirm('Delete this exam? This action cannot be undone.')) { event.stopImmediatePropagation(); }" wire:loading.attr="disabled" wire:loading.class="opacity-50 cursor-wait" aria-label="Close">
-                                    ðŸ—‘ï¸ Delete Exam
+                                    🗑️ Delete Exam
                                 </button>
                             @endif
                         </div>
@@ -474,7 +474,7 @@
                                         @if ($attempt)
                                             <div class="relative" x-data="{ open: false }">
                                                 <button @click="open = !open" type="button" class="rounded-lg bg-gray-100 px-4 py-2 text-xs font-semibold text-gray-700 hover:bg-gray-200">
-                                                    Actions â–¼
+                                                    Actions ▼
                                                 </button>
                                                 <div x-show="open" @click.away="open = false" x-cloak class="absolute right-0 z-10 mt-1 w-44 rounded-lg bg-white shadow-xl ring-1 ring-black ring-opacity-5" role="dialog" aria-modal="true">
                                                     <button type="button" wire:click="startIpOverride({{ $attempt->id }})" @click="open = false" class="block w-full px-4 py-2.5 text-left text-xs font-semibold text-gray-700 hover:bg-gray-50">
@@ -512,7 +512,7 @@
                     @if ($editingAttemptIpId)
                         <div class="mt-4 rounded-2xl border border-pink-200 bg-gradient-to-br from-pink-50 to-fuchsia-50 p-6 shadow-lg">
                             <div class="text-sm font-semibold text-gray-900">Allow IP override</div>
-                            <div class="mt-1 text-sm text-gray-600">Enter the studentâ€™s current IP to allow access from that device. Leave blank to remove override.</div>
+                            <div class="mt-1 text-sm text-gray-600">Enter the student's current IP to allow access from that device. Leave blank to remove override.</div>
 
                             <div class="mt-3 flex flex-col gap-2 sm:flex-row sm:items-center">
                                 <input wire:model="allowedIp" class="input w-full font-mono" placeholder="e.g. 192.168.1.50" />

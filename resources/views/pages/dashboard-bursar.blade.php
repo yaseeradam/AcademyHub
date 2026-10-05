@@ -205,17 +205,17 @@
                 <div class="text-xs text-slate-500">Signed in as {{ $user?->name ?? 'Bursar' }}</div>
             </div>
 
-            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-emerald-50 to-emerald-100/50 p-6 shadow-sm ring-1 ring-emerald-200/50 transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
+            <div class="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
+                <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-emerald-50 to-emerald-100/50 p-3.5 sm:p-5 lg:p-6 shadow-sm ring-1 ring-emerald-200/50 transition-all duration-300 hover:shadow-lg active:scale-[0.98] sm:hover:-translate-y-1">
                     <div class="absolute -right-8 -top-8 h-24 w-24 rounded-full bg-emerald-500/5"></div>
-                    <div class="flex items-start justify-between gap-4">
-                        <div>
-                            <div class="text-xs font-medium uppercase tracking-wide text-emerald-600">Today's Collection</div>
-                            <div class="mt-2.5 text-3xl font-bold tracking-tight text-slate-900">{{ config('academyhub.currency_symbol') }}{{ number_format($feesCollectedToday, 2) }}</div>
-                            <div class="mt-1.5 text-xs text-slate-600">{{ $totalTransactionsToday }} transactions</div>
+                    <div class="flex items-start justify-between gap-2 sm:gap-4">
+                        <div class="min-w-0 flex-1">
+                            <div class="text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-emerald-600 truncate">Today's Collection</div>
+                            <div class="mt-1.5 sm:mt-2.5 text-lg sm:text-2xl lg:text-3xl font-bold tracking-tight text-slate-900 truncate">{{ config('academyhub.currency_symbol') }}{{ number_format($feesCollectedToday, 2) }}</div>
+                            <div class="mt-1 text-[10px] sm:text-xs text-slate-600 truncate">{{ $totalTransactionsToday }} transactions</div>
                         </div>
-                        <div class="icon-3d grid h-14 w-14 place-items-center rounded-xl bg-gradient-to-br from-emerald-400 to-emerald-600 text-white shadow-lg shadow-emerald-500/30">
-                            <svg class="h-7 w-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <div class="icon-3d grid h-9 w-9 sm:h-12 sm:w-12 lg:h-14 lg:w-14 place-items-center rounded-xl bg-gradient-to-br from-emerald-400 to-emerald-600 text-white shadow-md sm:shadow-lg shadow-emerald-500/30 shrink-0">
+                            <svg class="h-4.5 w-4.5 sm:h-6 sm:w-6 lg:h-7 lg:w-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <line x1="12" y1="1" x2="12" y2="23"/>
                                 <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
                             </svg>
@@ -223,16 +223,16 @@
                     </div>
                 </div>
 
-                <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-blue-50 to-blue-100/50 p-6 shadow-sm ring-1 ring-blue-200/50 transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
+                <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-blue-50 to-blue-100/50 p-3.5 sm:p-5 lg:p-6 shadow-sm ring-1 ring-blue-200/50 transition-all duration-300 hover:shadow-lg active:scale-[0.98] sm:hover:-translate-y-1">
                     <div class="absolute -right-8 -top-8 h-24 w-24 rounded-full bg-blue-500/5"></div>
-                    <div class="flex items-start justify-between gap-4">
-                        <div>
-                            <div class="text-xs font-medium uppercase tracking-wide text-blue-600">This Week</div>
-                            <div class="mt-2.5 text-3xl font-bold tracking-tight text-slate-900">{{ config('academyhub.currency_symbol') }}{{ number_format($feesCollectedThisWeek, 2) }}</div>
-                            <div class="mt-1.5 text-xs text-slate-600">weekly collection</div>
+                    <div class="flex items-start justify-between gap-2 sm:gap-4">
+                        <div class="min-w-0 flex-1">
+                            <div class="text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-blue-600 truncate">This Week</div>
+                            <div class="mt-1.5 sm:mt-2.5 text-lg sm:text-2xl lg:text-3xl font-bold tracking-tight text-slate-900 truncate">{{ config('academyhub.currency_symbol') }}{{ number_format($feesCollectedThisWeek, 2) }}</div>
+                            <div class="mt-1 text-[10px] sm:text-xs text-slate-600 truncate">weekly collection</div>
                         </div>
-                        <div class="icon-3d grid h-14 w-14 place-items-center rounded-xl bg-gradient-to-br from-blue-400 to-blue-600 text-white shadow-lg shadow-blue-500/30">
-                            <svg class="h-7 w-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <div class="icon-3d grid h-9 w-9 sm:h-12 sm:w-12 lg:h-14 lg:w-14 place-items-center rounded-xl bg-gradient-to-br from-blue-400 to-blue-600 text-white shadow-md sm:shadow-lg shadow-blue-500/30 shrink-0">
+                            <svg class="h-4.5 w-4.5 sm:h-6 sm:w-6 lg:h-7 lg:w-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
                                 <line x1="16" y1="2" x2="16" y2="6"/>
                                 <line x1="8" y1="2" x2="8" y2="6"/>
@@ -242,16 +242,16 @@
                     </div>
                 </div>
 
-                <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-purple-50 to-purple-100/50 p-6 shadow-sm ring-1 ring-purple-200/50 transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
+                <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-purple-50 to-purple-100/50 p-3.5 sm:p-5 lg:p-6 shadow-sm ring-1 ring-purple-200/50 transition-all duration-300 hover:shadow-lg active:scale-[0.98] sm:hover:-translate-y-1">
                     <div class="absolute -right-8 -top-8 h-24 w-24 rounded-full bg-purple-500/5"></div>
-                    <div class="flex items-start justify-between gap-4">
-                        <div>
-                            <div class="text-xs font-medium uppercase tracking-wide text-purple-600">This Month</div>
-                            <div class="mt-2.5 text-3xl font-bold tracking-tight text-slate-900">{{ config('academyhub.currency_symbol') }}{{ number_format($feesCollectedThisMonth, 2) }}</div>
-                            <div class="mt-1.5 text-xs text-slate-600">monthly total</div>
+                    <div class="flex items-start justify-between gap-2 sm:gap-4">
+                        <div class="min-w-0 flex-1">
+                            <div class="text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-purple-600 truncate">This Month</div>
+                            <div class="mt-1.5 sm:mt-2.5 text-lg sm:text-2xl lg:text-3xl font-bold tracking-tight text-slate-900 truncate">{{ config('academyhub.currency_symbol') }}{{ number_format($feesCollectedThisMonth, 2) }}</div>
+                            <div class="mt-1 text-[10px] sm:text-xs text-slate-600 truncate">monthly total</div>
                         </div>
-                        <div class="icon-3d grid h-14 w-14 place-items-center rounded-xl bg-gradient-to-br from-purple-400 to-purple-600 text-white shadow-lg shadow-purple-500/30">
-                            <svg class="h-7 w-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <div class="icon-3d grid h-9 w-9 sm:h-12 sm:w-12 lg:h-14 lg:w-14 place-items-center rounded-xl bg-gradient-to-br from-purple-400 to-purple-600 text-white shadow-md sm:shadow-lg shadow-purple-500/30 shrink-0">
+                            <svg class="h-4.5 w-4.5 sm:h-6 sm:w-6 lg:h-7 lg:w-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/>
                                 <line x1="1" y1="10" x2="23" y2="10"/>
                             </svg>
@@ -259,16 +259,16 @@
                     </div>
                 </div>
 
-                <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-red-50 to-red-100/50 p-6 shadow-sm ring-1 ring-red-200/50 transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
+                <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-red-50 to-red-100/50 p-3.5 sm:p-5 lg:p-6 shadow-sm ring-1 ring-red-200/50 transition-all duration-300 hover:shadow-lg active:scale-[0.98] sm:hover:-translate-y-1">
                     <div class="absolute -right-8 -top-8 h-24 w-24 rounded-full bg-red-500/5"></div>
-                    <div class="flex items-start justify-between gap-4">
-                        <div>
-                            <div class="text-xs font-medium uppercase tracking-wide text-red-600">Outstanding</div>
-                            <div class="mt-2.5 text-3xl font-bold tracking-tight text-slate-900">{{ config('academyhub.currency_symbol') }}{{ number_format($outstandingPaymentsEstimate, 2) }}</div>
-                            <div class="mt-1.5 text-xs text-slate-600">{{ $overdueInvoices }} overdue</div>
+                    <div class="flex items-start justify-between gap-2 sm:gap-4">
+                        <div class="min-w-0 flex-1">
+                            <div class="text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-red-600 truncate">Outstanding</div>
+                            <div class="mt-1.5 sm:mt-2.5 text-lg sm:text-2xl lg:text-3xl font-bold tracking-tight text-slate-900 truncate">{{ config('academyhub.currency_symbol') }}{{ number_format($outstandingPaymentsEstimate, 2) }}</div>
+                            <div class="mt-1 text-[10px] sm:text-xs text-slate-600 truncate">{{ $overdueInvoices }} overdue</div>
                         </div>
-                        <div class="icon-3d grid h-14 w-14 place-items-center rounded-xl bg-gradient-to-br from-red-400 to-red-600 text-white shadow-lg shadow-red-500/30">
-                            <svg class="h-7 w-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <div class="icon-3d grid h-9 w-9 sm:h-12 sm:w-12 lg:h-14 lg:w-14 place-items-center rounded-xl bg-gradient-to-br from-red-400 to-red-600 text-white shadow-md sm:shadow-lg shadow-red-500/30 shrink-0">
+                            <svg class="h-4.5 w-4.5 sm:h-6 sm:w-6 lg:h-7 lg:w-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
                                 <line x1="12" y1="9" x2="12" y2="13"/>
                                 <line x1="12" y1="17" x2="12.01" y2="17"/>
@@ -283,12 +283,12 @@
             <div class="text-sm font-semibold text-slate-900">Financial Analytics</div>
 
             <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
-                <div class="relative overflow-hidden rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-100 transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
+                <div class="relative overflow-hidden rounded-2xl bg-white p-4 sm:p-6 shadow-sm ring-1 ring-gray-100 transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
                     <div class="absolute -right-12 -top-12 h-32 w-32 rounded-full bg-emerald-500/5"></div>
                     <div class="flex items-center justify-between gap-3">
                         <div>
                             <div class="text-sm font-semibold text-slate-900">Revenue Trend</div>
-                            <div class="mt-1 text-sm text-slate-600">6-month collection overview</div>
+                            <div class="mt-1 text-xs sm:text-sm text-slate-600">6-month collection overview</div>
                         </div>
                         <x-status-badge variant="success">Active</x-status-badge>
                     </div>
@@ -297,12 +297,12 @@
                     </div>
                 </div>
 
-                <div class="relative overflow-hidden rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-100 transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
+                <div class="relative overflow-hidden rounded-2xl bg-white p-4 sm:p-6 shadow-sm ring-1 ring-gray-100 transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
                     <div class="absolute -right-8 -top-8 h-24 w-24 rounded-full bg-blue-500/5"></div>
                     <div class="flex items-center justify-between gap-3">
                         <div>
                             <div class="text-sm font-semibold text-slate-900">Payment Methods</div>
-                            <div class="mt-1 text-sm text-slate-600">This month's breakdown</div>
+                            <div class="mt-1 text-xs sm:text-sm text-slate-600">This month's breakdown</div>
                         </div>
                         <x-status-badge variant="info">Current</x-status-badge>
                     </div>
@@ -316,7 +316,7 @@
         <section class="space-y-3">
             <div class="text-sm font-semibold text-slate-900">Recent Transactions</div>
 
-            <div class="relative overflow-hidden rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-100">
+            <div class="relative overflow-hidden rounded-2xl bg-white p-4 sm:p-6 shadow-sm ring-1 ring-gray-100">
                 <div class="absolute -right-16 top-0 h-40 w-40 rounded-full bg-emerald-500/5"></div>
                 <div class="flex items-center justify-between gap-3">
                     <div>

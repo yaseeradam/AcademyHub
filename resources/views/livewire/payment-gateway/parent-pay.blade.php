@@ -50,7 +50,7 @@
                     @endif
                     <div class="flex justify-between items-center text-sm">
                         <span class="text-slate-400 font-semibold">Amount Paid</span>
-                        <span class="font-black text-emerald-600 text-lg">â‚¦{{ number_format($paymentAmount, 2) }}</span>
+                        <span class="font-black text-emerald-600 text-lg">₦{{ number_format($paymentAmount, 2) }}</span>
                     </div>
                 </div>
 
@@ -108,16 +108,16 @@
                                 </div>
                                 <div class="flex justify-between items-center text-sm font-semibold">
                                     <span class="text-slate-400">Total Allocated Fees</span>
-                                    <span class="text-slate-800 font-bold">â‚¦{{ number_format($amount_due, 2) }}</span>
+                                    <span class="text-slate-800 font-bold">₦{{ number_format($amount_due, 2) }}</span>
                                 </div>
                                 <div class="flex justify-between items-center text-sm font-semibold text-emerald-600 bg-emerald-50 px-3 py-1.5 rounded-lg border border-emerald-100">
                                     <span>Paid Tuition to Date</span>
-                                    <span class="font-extrabold">â‚¦{{ number_format($amount_paid, 2) }}</span>
+                                    <span class="font-extrabold">₦{{ number_format($amount_paid, 2) }}</span>
                                 </div>
                                 <div class="flex justify-between items-center text-base pt-2 border-t border-slate-200 border-dashed font-bold">
                                     <span class="text-slate-900">Outstanding Balance</span>
                                     <span class="text-xl font-black bg-gradient-to-r from-violet-600 to-pink-500 bg-clip-text text-transparent">
-                                        â‚¦{{ number_format($outstanding_balance, 2) }}
+                                        ₦{{ number_format($outstanding_balance, 2) }}
                                     </span>
                                 </div>
                             </div>
@@ -133,7 +133,7 @@
                             </div>
 
                             <div class="space-y-2">
-                                <!-- Full Payment â€” always available -->
+                                <!-- Full Payment — always available -->
                                 <label class="flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition duration-150
                                     {{ $selectedPlan === 'full' ? 'border-violet-400 bg-violet-50/60 shadow-sm' : 'border-slate-200 hover:border-violet-300 hover:bg-violet-50/30' }}">
                                     <input type="radio" wire:model.live="selectedPlan" value="full" class="h-4 w-4 accent-violet-600">
@@ -142,7 +142,7 @@
                                         <p class="text-xs text-slate-500 mt-0.5">Pay the entire outstanding balance in one go.</p>
                                     </div>
                                     <span class="text-sm font-extrabold text-violet-700 whitespace-nowrap">
-                                        â‚¦{{ number_format($outstanding_balance, 2) }}
+                                        ₦{{ number_format($outstanding_balance, 2) }}
                                     </span>
                                 </label>
 
@@ -155,10 +155,10 @@
                                         <input type="radio" wire:model.live="selectedPlan" value="two_installments" class="h-4 w-4 accent-violet-600">
                                         <div class="flex-1">
                                             <span class="text-sm font-bold text-slate-900">2 Installments</span>
-                                            <p class="text-xs text-slate-500 mt-0.5">Pay in 2 equal halves â€” beginning &amp; mid-term.</p>
+                                            <p class="text-xs text-slate-500 mt-0.5">Pay in 2 equal halves — beginning &amp; mid-term.</p>
                                         </div>
                                         <span class="text-sm font-extrabold text-violet-700 whitespace-nowrap">
-                                            â‚¦{{ $halfAmt }}/half
+                                            ₦{{ $halfAmt }}/half
                                         </span>
                                     </label>
                                 @endif
@@ -175,7 +175,7 @@
                                             <p class="text-xs text-slate-500 mt-0.5">Spread across 3 months of the term at a fixed rate.</p>
                                         </div>
                                         <span class="text-sm font-extrabold text-violet-700 whitespace-nowrap">
-                                            â‚¦{{ $monthlyAmt }}/month
+                                            ₦{{ $monthlyAmt }}/month
                                         </span>
                                     </label>
                                 @endif
@@ -186,7 +186,7 @@
                                     <svg class="h-4 w-4 text-violet-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                     </svg>
-                                    {{ $installmentLabel }} â€” you will pay â‚¦{{ number_format($paymentAmount, 2) }} now.
+                                    {{ $installmentLabel }} — you will pay ₦{{ number_format($paymentAmount, 2) }} now.
                                 </div>
                             @endif
                         </div>
@@ -271,7 +271,7 @@
                                 <div class="flex justify-between items-center text-base pt-3 border-t border-slate-200 border-dashed font-bold">
                                     <span class="text-slate-900">Total Amount Due Now</span>
                                     <span class="text-xl font-black text-emerald-600">
-                                        â‚¦{{ number_format($paymentAmount, 2) }}
+                                        ₦{{ number_format($paymentAmount, 2) }}
                                     </span>
                                 </div>
                             </div>
