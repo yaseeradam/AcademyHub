@@ -371,22 +371,17 @@ class WhatsAppController extends Controller
                     't'         => time()
                 ]);
 
-                // Calculate Tuition billing balances dynamically
-                $feeStructure = \App\Models\FeeStructure::where('class_id', $student->class_id)
-                    ->where('term', $activeTermNumber)
-                    ->where('session', $activeSessionName)
-                    ->first();
+                // Calculate Tuition billing balances dynamically including multi-term arrears
+                $ledger = \App\Support\BillingService::getStudentTermLedger(
+                    $student,
+                    $activeSessionName,
+                    $activeTermNumber,
+                    'Tuition'
+                );
 
-                $amountDue = $feeStructure ? (float) $feeStructure->amount_due : 0.0;
-
-                $amountPaid = (float) \App\Models\Transaction::where('student_id', $student->id)
-                    ->where('type', 'Income')
-                    ->where('term', $activeTermNumber)
-                    ->where('session', $activeSessionName)
-                    ->where('is_void', false)
-                    ->sum('amount_paid');
-
-                $outstandingBalance = max(0.0, $amountDue - $amountPaid);
+                $amountDue = (float) $ledger['total_due'];
+                $amountPaid = (float) $ledger['total_paid'];
+                $outstandingBalance = (float) $ledger['total_balance'];
 
                 $paymentUrl = \Illuminate\Support\Facades\URL::temporarySignedRoute(
                     'whatsapp.pay',
@@ -444,9 +439,12 @@ class WhatsAppController extends Controller
                     'recent_attendance_history' => $attendanceHistory,
                     'report_card_url' => $reportCardUrl,
                     'tuition_fees' => [
+                        'current_term_due'    => (float) $ledger['current_term_due'],
+                        'past_arrears'        => (float) $ledger['past_arrears'],
                         'amount_due'          => $amountDue,
                         'amount_paid'         => $amountPaid,
                         'outstanding_balance' => $outstandingBalance,
+                        'has_arrears'         => (bool) $ledger['has_arrears'],
                         'payment_checkout_url'=> ($outstandingBalance > 0 && $onlinePaymentActive) ? $paymentUrl : ($onlinePaymentActive ? 'PAID' : 'DISABLED'),
                         'online_payment_enabled' => $onlinePaymentActive,
                     ],
@@ -1374,27 +1372,20 @@ class WhatsAppController extends Controller
             ], 403);
         }
 
-        // Verify that the amount matches the student's actual outstanding balance
-        $feeStructure = \App\Models\FeeStructure::where('class_id', $student->class_id)
-            ->where('term', $term)
-            ->where('session', $session)
-            ->first();
+        // Verify that the amount matches the student's actual outstanding balance (including multi-term arrears)
+        $ledger = \App\Support\BillingService::getStudentTermLedger(
+            $student,
+            $session,
+            $term,
+            'Tuition'
+        );
 
-        $amountDue = $feeStructure ? (float) $feeStructure->amount_due : 0.0;
+        $outstandingBalance = (float) $ledger['total_balance'];
 
-        $amountPaid = (float) \App\Models\Transaction::where('student_id', $student->id)
-            ->where('type', 'Income')
-            ->where('term', $term)
-            ->where('session', $session)
-            ->where('is_void', false)
-            ->sum('amount_paid');
-
-        $outstandingBalance = max(0.0, $amountDue - $amountPaid);
-
-        if ($amount <= 0.0 || abs($amount - $outstandingBalance) > 0.01) {
+        if ($amount <= 0.0 || $amount > ($outstandingBalance + 0.01)) {
             return response()->json([
                 'success' => false,
-                'message' => 'Payment validation failed: The payment amount does not match the current outstanding balance.'
+                'message' => 'Payment validation failed: The payment amount exceeds the current outstanding balance.'
             ], 400);
         }
 

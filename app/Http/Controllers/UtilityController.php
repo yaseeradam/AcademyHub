@@ -99,33 +99,27 @@ class UtilityController extends Controller
             ->where('is_void', false)
             ->sum('amount_paid');
 
-        // Calculate Expected Fees from active fee structures for current session/term & student counts
-        $feeQuery = FeeStructure::query();
-        if ($sessionName) {
-            $feeQuery->where('session', $sessionName);
-        }
-        if ($termNumber) {
-            $feeQuery->where('term', $termNumber);
-        }
-        $feeStructures = $feeQuery->get();
-        if ($feeStructures->isEmpty()) {
-            $feeStructures = FeeStructure::query()->get();
-        }
-
-        $totalExpected = 0.0;
+        // Calculate Expected Fees across elapsed terms in the session using BillingService
         $studentsPerClass = Student::query()
+            ->where('status', 'Active')
             ->select('class_id', \Illuminate\Support\Facades\DB::raw('count(*) as count'))
             ->groupBy('class_id')
             ->pluck('count', 'class_id');
 
-        foreach ($feeStructures as $fee) {
-            $classCount = $studentsPerClass->get($fee->class_id, 0);
-            $totalExpected += ((float) $fee->amount_due * $classCount);
+        $totalExpected = 0.0;
+        $maxTerm = max(1, min(3, (int) $termNumber));
+
+        foreach ($studentsPerClass as $classId => $classCount) {
+            if ($classCount <= 0 || !$classId) continue;
+            for ($t = 1; $t <= $maxTerm; $t++) {
+                $termFee = \App\Support\BillingService::resolveFeeAmount((int) $classId, 'Tuition', $t, $sessionName);
+                $totalExpected += ($termFee * $classCount);
+            }
         }
 
         // Fallback default estimation if fee structures are not set
         if ($totalExpected <= 0 && $totalStudents > 0) {
-            $totalExpected = $totalStudents * 50000.0;
+            $totalExpected = $totalStudents * 50000.0 * $maxTerm;
         }
 
         $outstandingDebt = max(0.0, $totalExpected - $totalCollected);

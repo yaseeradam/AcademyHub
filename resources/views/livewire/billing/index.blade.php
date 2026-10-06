@@ -195,17 +195,23 @@
                                         </div>
 
                                         @if ($balanceInfo)
-                                            <div class="flex items-center gap-4 text-xs">
+                                            <div class="flex items-center gap-3 sm:gap-4 text-xs">
                                                 <div class="text-right">
-                                                    <div class="text-slate-400 text-[11px] uppercase tracking-wider font-semibold">Total Fee Due</div>
-                                                    <div class="font-bold text-slate-800 dark:text-slate-200 font-mono">₦{{ number_format($balanceInfo['due'], 2) }}</div>
+                                                    <div class="text-slate-400 text-[11px] uppercase tracking-wider font-semibold">Current Term Due</div>
+                                                    <div class="font-bold text-slate-800 dark:text-slate-200 font-mono">₦{{ number_format($balanceInfo['current_due'] ?? $balanceInfo['due'], 2) }}</div>
                                                 </div>
+                                                @if (!empty($balanceInfo['has_arrears']))
+                                                    <div class="text-right">
+                                                        <div class="text-amber-600 dark:text-amber-400 text-[11px] uppercase tracking-wider font-bold">Past Arrears</div>
+                                                        <div class="font-bold text-amber-600 dark:text-amber-400 font-mono">₦{{ number_format($balanceInfo['past_arrears'], 2) }}</div>
+                                                    </div>
+                                                @endif
                                                 <div class="text-right">
                                                     <div class="text-slate-400 text-[11px] uppercase tracking-wider font-semibold">Total Paid</div>
                                                     <div class="font-bold text-emerald-600 dark:text-emerald-400 font-mono">₦{{ number_format($balanceInfo['paid'], 2) }}</div>
                                                 </div>
                                                 <div class="text-right pl-3 border-l border-slate-200 dark:border-slate-700">
-                                                    <div class="text-rose-500 text-[11px] uppercase tracking-wider font-bold">Outstanding</div>
+                                                    <div class="text-rose-500 text-[11px] uppercase tracking-wider font-bold">Total Balance</div>
                                                     <div class="text-sm font-extrabold text-rose-600 dark:text-rose-400 font-mono">₦{{ number_format($balanceInfo['balance'], 2) }}</div>
                                                 </div>
                                             </div>
@@ -213,10 +219,14 @@
                                     </div>
 
                                     @if ($balanceInfo && $balanceInfo['balance'] > 0)
-                                        <div class="mt-3 pt-2.5 border-t border-emerald-100 dark:border-emerald-800/40 flex items-center justify-between">
+                                        <div class="mt-3 pt-2.5 border-t border-emerald-100 dark:border-emerald-800/40 flex flex-wrap items-center justify-between gap-2">
                                             <span class="text-xs text-slate-600 dark:text-slate-400 flex items-center gap-1.5">
                                                 <svg class="w-4 h-4 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                                                Unpaid balance available for auto-fill
+                                                @if (!empty($balanceInfo['has_arrears']))
+                                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-amber-50 text-amber-700 ring-1 ring-inset ring-amber-600/20">Includes ₦{{ number_format($balanceInfo['past_arrears'], 2) }} prior arrears</span>
+                                                @else
+                                                    Unpaid balance available for auto-fill
+                                                @endif
                                             </span>
                                             <button type="button" 
                                                     wire:click="applyStudentBalance" 
@@ -537,9 +547,10 @@
                 <tr>
                     <th class="px-5 py-3">Student</th>
                     <th class="px-5 py-3">Class</th>
-                    <th class="px-5 py-3 text-right">Due</th>
-                    <th class="px-5 py-3 text-right">Paid</th>
-                    <th class="px-5 py-3 text-right">Balance</th>
+                    <th class="px-5 py-3 text-right">Current Term Due</th>
+                    <th class="px-5 py-3 text-right">Previous Arrears</th>
+                    <th class="px-5 py-3 text-right">Total Paid</th>
+                    <th class="px-5 py-3 text-right">Total Outstanding</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-gray-100">
@@ -547,20 +558,35 @@
                     <tr class="bg-white hover:bg-gray-50">
                         <td class="px-5 py-4">
                             <div class="text-sm font-semibold text-gray-900">{{ $row['student']->full_name }}</div>
-                            <div class="mt-1 text-xs text-gray-500">{{ $row['student']->admission_number }}</div>
+                            <div class="mt-1 text-xs text-gray-500 font-mono">{{ $row['student']->admission_number }}</div>
                         </td>
                         <td class="px-5 py-4 text-sm text-gray-700">
-                            {{ $row['student']->schoolClass?->name }} / {{ $row['student']->section?->name }}
+                            {{ $row['student']->schoolClass?->name ?? '-' }}@if($row['student']->section) / {{ $row['student']->section->name }}@endif
                         </td>
-                        <td class="px-5 py-4 text-right text-sm font-semibold text-gray-900">{{ config('academyhub.currency_symbol') }}{{ number_format($row['due'], 2) }}</td>
-                        <td class="px-5 py-4 text-right text-sm font-semibold text-gray-900">{{ config('academyhub.currency_symbol') }}{{ number_format($row['paid'], 2) }}</td>
+                        <td class="px-5 py-4 text-right text-sm font-semibold text-gray-900 font-mono">
+                            {{ config('academyhub.currency_symbol') }}{{ number_format($row['current_due'] ?? $row['due'], 2) }}
+                        </td>
+                        <td class="px-5 py-4 text-right text-sm">
+                            @if (($row['past_arrears'] ?? 0) > 0)
+                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-amber-50 text-amber-700 ring-1 ring-inset ring-amber-600/20 font-mono">
+                                    {{ config('academyhub.currency_symbol') }}{{ number_format($row['past_arrears'], 2) }}
+                                </span>
+                            @else
+                                <span class="text-xs text-slate-400 font-mono">{{ config('academyhub.currency_symbol') }}0.00</span>
+                            @endif
+                        </td>
+                        <td class="px-5 py-4 text-right text-sm font-semibold text-emerald-600 font-mono">
+                            {{ config('academyhub.currency_symbol') }}{{ number_format($row['paid'], 2) }}
+                        </td>
                         <td class="px-5 py-4 text-right">
-                            <x-status-badge variant="warning">{{ config('academyhub.currency_symbol') }}{{ number_format($row['balance'], 2) }}</x-status-badge>
+                            <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-black bg-rose-50 text-rose-700 dark:bg-rose-900/30 dark:text-rose-300 ring-1 ring-inset ring-rose-600/20 font-mono">
+                                {{ config('academyhub.currency_symbol') }}{{ number_format($row['balance'], 2) }}
+                            </span>
                         </td>
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="5" class="px-5 py-10 text-center text-sm text-gray-500">No debtors found.</td>
+                        <td colspan="6" class="px-5 py-10 text-center text-sm text-gray-500">No debtors found.</td>
                     </tr>
                 @endforelse
             </tbody>

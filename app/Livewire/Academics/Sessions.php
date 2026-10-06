@@ -238,21 +238,23 @@ class Sessions extends Component
         $user = auth()->user();
         abort_unless($user?->role === 'admin', 403);
 
-        DB::transaction(function () use ($termId) {
+        $term = null;
+        DB::transaction(function () use ($termId, &$term) {
             // Deactivate ALL terms across ALL sessions
             AcademicTerm::query()->where('is_active', true)->update(['is_active' => false]);
             // Activate this one
             AcademicTerm::query()->whereKey($termId)->update(['is_active' => true]);
 
             // Also ensure the parent session is set as active
-            $term = AcademicTerm::query()->find($termId);
+            $term = AcademicTerm::query()->with('academicSession')->find($termId);
             if ($term) {
                 AcademicSession::query()->where('is_active', true)->update(['is_active' => false]);
                 AcademicSession::query()->whereKey($term->academic_session_id)->update(['is_active' => true]);
             }
         });
 
-        $this->dispatch('alert', message: 'Active term updated.', type: 'success');
+        $termLabel = $term ? "{$term->name} ({$term->academicSession?->name})" : "Term {$termId}";
+        $this->dispatch('alert', message: "Active term set to {$termLabel}. New term fee billing is active and prior unpaid balances carry over as arrears.", type: 'success');
     }
 
     public function deleteTerm(int $termId): void

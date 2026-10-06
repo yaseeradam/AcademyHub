@@ -21,6 +21,7 @@ class ParentPay extends Component
     public ?int $selectedStudentId = null;
     public float $amount_due = 0.0;
     public float $amount_paid = 0.0;
+    public float $past_arrears = 0.0;
     public float $outstanding_balance = 0.0;
     public bool $isGatewayApproved = false;
     public string $errorMessage = '';
@@ -154,14 +155,30 @@ class ParentPay extends Component
 
         $this->isGatewayApproved = $gatewayActive && ($subaccountStatus === 'approved');
 
-        // Fetch Fee Structure for this student's class
+        $ledger = \App\Support\BillingService::getStudentTermLedger(
+            $student,
+            $this->selectedSession,
+            $this->selectedTerm,
+            'Tuition'
+        );
+
+        $this->amount_due = (float) $ledger['current_term_due'];
+        $this->amount_paid = (float) $ledger['current_term_paid'];
+        $this->past_arrears = (float) $ledger['past_arrears'];
+        $this->outstanding_balance = (float) $ledger['total_balance'];
+
+        // Fetch Fee Structure for this student's class (for installment plan config)
         $fee = FeeStructure::where('tenant_id', $tenantId)
             ->where('class_id', $student->class_id)
-            ->where('term', $this->selectedTerm)
-            ->where('session', $this->selectedSession)
+            ->where('category', 'Tuition')
+            ->where(function ($q) {
+                $q->whereNull('session')->orWhere('session', $this->selectedSession);
+            })
+            ->where(function ($q) {
+                $q->whereNull('term')->orWhere('term', $this->selectedTerm);
+            })
+            ->orderByDesc('term')
             ->first();
-
-        $this->amount_due = $fee ? (float) $fee->amount_due : 0.0;
 
         // Load enabled plans from the fee structure
         $this->enabledPlans = $fee ? $fee->enabledPlans() : ['full' => true];
@@ -170,17 +187,6 @@ class ParentPay extends Component
         if (!isset($this->enabledPlans[$this->selectedPlan])) {
             $this->selectedPlan = 'full';
         }
-
-        // Fetch total paid tuition for this term/session
-        $this->amount_paid = (float) Transaction::where('tenant_id', $tenantId)
-            ->where('student_id', $student->id)
-            ->where('category', 'Tuition')
-            ->where('term', $this->selectedTerm)
-            ->where('session', $this->selectedSession)
-            ->where('is_void', false)
-            ->sum('amount_paid');
-
-        $this->outstanding_balance = max(0.0, $this->amount_due - $this->amount_paid);
 
         $this->recalculatePaymentAmount();
     }

@@ -3,6 +3,7 @@
 namespace App\Livewire\Billing;
 
 use App\Support\Audit;
+use App\Support\BillingService;
 use App\Models\AcademicSession;
 use App\Models\FeeStructure;
 use App\Models\Student;
@@ -229,42 +230,22 @@ class Index extends Component
         }
 
         $category = trim($this->category) !== '' ? trim($this->category) : 'Tuition';
-        $fee = FeeStructure::query()
-            ->where('class_id', $student->class_id)
-            ->where('category', $category)
-            ->where(function ($q) {
-                if ($this->term === null) {
-                    $q->whereNull('term');
-                } else {
-                    $q->whereNull('term')->orWhere('term', $this->term);
-                }
-            })
-            ->where(function ($q) {
-                if (!$this->session) {
-                    $q->whereNull('session');
-                } else {
-                    $q->whereNull('session')->orWhere('session', $this->session);
-                }
-            })
-            ->orderByDesc('term')
-            ->first();
+        $session = $this->session ?: $this->defaultSession();
+        $term = $this->term ? (int) $this->term : null;
 
-        $due = (float) ($fee?->amount_due ?? 0);
-
-        $paid = (float) Transaction::query()
-            ->where('type', 'Income')
-            ->where('student_id', $student->id)
-            ->where('category', $category)
-            ->where('is_void', false)
-            ->when($this->term, fn($q) => $q->where('term', $this->term))
-            ->when($this->session, fn($q) => $q->where('session', $this->session))
-            ->sum('amount_paid');
+        $ledger = BillingService::getStudentTermLedger($student, $session, $term, $category);
 
         return [
-            'due' => $due,
-            'paid' => $paid,
-            'balance' => max(0.0, $due - $paid),
-            'has_fee_structure' => $fee !== null,
+            'due'               => $ledger['total_due'],
+            'current_due'       => $ledger['current_term_due'],
+            'current_paid'      => $ledger['current_term_paid'],
+            'current_balance'   => $ledger['current_term_balance'],
+            'past_arrears'      => $ledger['past_arrears'],
+            'paid'              => $ledger['total_paid'],
+            'balance'           => $ledger['total_balance'],
+            'has_arrears'       => $ledger['has_arrears'],
+            'has_fee_structure' => $ledger['total_due'] > 0,
+            'terms_breakdown'   => $ledger['terms_breakdown'],
         ];
     }
 
@@ -321,96 +302,18 @@ class Index extends Component
     public function debtors()
     {
         $category = trim($this->debtorsCategory) !== '' ? trim($this->debtorsCategory) : 'Tuition';
-        $term = $this->debtorsTerm;
-        $session = $this->debtorsSession;
+        $term = $this->debtorsTerm !== null && $this->debtorsTerm !== '' ? (int) $this->debtorsTerm : null;
+        $session = $this->debtorsSession ?: null;
+        $classId = $this->debtorsClassId ? (int) $this->debtorsClassId : null;
+        $search = $this->debtorsSearch ?: null;
 
-        $feeRows = FeeStructure::query()
-            ->where('category', $category)
-            ->where(function ($q) use ($term) {
-                if ($term === null) {
-                    $q->whereNull('term');
-                } else {
-                    $q->whereNull('term')->orWhere('term', $term);
-                }
-            })
-            ->where(function ($q) use ($session) {
-                if (!$session) {
-                    $q->whereNull('session');
-                } else {
-                    $q->whereNull('session')->orWhere('session', $session);
-                }
-            })
-            ->get(['class_id', 'term', 'session', 'amount_due']);
-
-        $feesByClass = $feeRows
-            ->groupBy('class_id')
-            ->map(function ($rows) use ($term, $session) {
-                $best = null;
-                $bestScore = -1;
-
-                foreach ($rows as $row) {
-                    $score = 0;
-                    if ($row->term !== null) {
-                        $score += 2;
-                    }
-                    if ($row->session !== null) {
-                        $score += 1;
-                    }
-
-                    if ($score > $bestScore) {
-                        $best = $row;
-                        $bestScore = $score;
-                    }
-                }
-
-                return $best?->amount_due ?? 0;
-            });
-
-        // Pre-aggregate paid amounts in a single query keyed by student_id.
-        // This ensures only 2 DB queries total regardless of student count.
-        $paidByStudent = Transaction::query()
-            ->selectRaw('student_id, COALESCE(SUM(amount_paid), 0) as paid')
-            ->where('type', 'Income')
-            ->where('category', $category)
-            ->where('is_void', false)
-            ->when($term !== null, fn ($q) => $q->where('term', $term))
-            ->when($session, fn ($q) => $q->where('session', $session))
-            ->groupBy('student_id')
-            ->pluck('paid', 'student_id');
-
-        $studentQuery = Student::query()
-            ->with(['schoolClass', 'section', 'user'])
-            ->where('status', 'Active');
-
-        if ($this->debtorsClassId) {
-            $studentQuery->where('class_id', $this->debtorsClassId);
-        }
-
-        if (trim($this->debtorsSearch) !== '') {
-            $search = trim($this->debtorsSearch);
-            $studentQuery->where(function ($q) use ($search) {
-                $q->where('full_name', 'like', "%{$search}%")
-                    ->orWhere('admission_number', 'like', "%{$search}%");
-            });
-        }
-
-        return $studentQuery
-            ->get()
-            ->map(function (Student $student) use ($feesByClass, $paidByStudent) {
-                $due     = (float) ($feesByClass->get($student->class_id, 0) ?? 0);
-                $paid    = (float) ($paidByStudent[$student->id] ?? 0);
-                $balance = max(0, $due - $paid);
-
-                return [
-                    'student' => $student,
-                    'due'     => $due,
-                    'paid'    => $paid,
-                    'balance' => $balance,
-                ];
-            })
-            ->filter(fn (array $row) => $row['balance'] > 0)
-            ->sortByDesc('balance')
-            ->values();
+        return BillingService::getDebtors(
+            category: $category,
+            term: $term,
+            session: $session,
+            classId: $classId,
+            search: $search
+        );
     }
 
     #[Computed]

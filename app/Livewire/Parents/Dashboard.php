@@ -151,13 +151,20 @@ class Dashboard extends Component
     {
         if (! $this->selectedChild) return ['paid' => 0, 'outstanding' => 0, 'total' => 0];
 
-        $txns       = Transaction::where('student_id', $this->selectedChild->id)
-            ->where('session', $this->session)->where('is_void', false)->get();
-        $paid       = $txns->where('type', 'Payment')->sum('amount');
-        $charges    = $txns->where('type', 'Charge')->sum('amount');
-        $outstanding = max(0, $charges - $paid);
+        $ledger = \App\Support\BillingService::getStudentTermLedger(
+            $this->selectedChild,
+            $this->session,
+            $this->term,
+            'Tuition'
+        );
 
-        return compact('paid', 'outstanding') + ['total' => $charges];
+        return [
+            'paid'         => $ledger['total_paid'],
+            'outstanding'  => $ledger['total_balance'],
+            'total'        => $ledger['total_due'],
+            'current_term' => $ledger['current_term_due'],
+            'arrears'      => $ledger['past_arrears'],
+        ];
     }
 
     #[Computed]

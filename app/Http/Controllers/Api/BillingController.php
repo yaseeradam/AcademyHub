@@ -51,21 +51,14 @@ class BillingController extends Controller
         $activeTermNumber = \App\Models\AcademicTerm::activeTermNumber();
         $activeSessionName = \App\Models\AcademicTerm::activeSessionName() ?: date('Y') . '/' . (date('Y') + 1);
 
-        $feeStructure = \App\Models\FeeStructure::where('class_id', $student->class_id)
-            ->where('term', $activeTermNumber)
-            ->where('session', $activeSessionName)
-            ->first();
+        $ledger = \App\Support\BillingService::getStudentTermLedger(
+            $student,
+            $activeSessionName,
+            $activeTermNumber,
+            'Tuition'
+        );
 
-        $amountDue = $feeStructure ? (float) $feeStructure->amount_due : 45000.0;
-
-        $amountPaid = (float) Transaction::where('student_id', $student->id)
-            ->where('type', 'Income')
-            ->where('term', $activeTermNumber)
-            ->where('session', $activeSessionName)
-            ->where('is_void', false)
-            ->sum('amount_paid');
-
-        $outstandingBalance = max(0.0, $amountDue - $amountPaid);
+        $outstandingBalance = (float) $ledger['total_balance'];
         $apiKey = config('services.whatsapp.api_key');
 
         $paymentUrl = \Illuminate\Support\Facades\URL::temporarySignedRoute(

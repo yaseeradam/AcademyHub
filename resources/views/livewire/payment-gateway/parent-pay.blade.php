@@ -107,16 +107,22 @@
                                     Term {{ $selectedTerm }} ({{ $selectedSession }}) Statement
                                 </div>
                                 <div class="flex justify-between items-center text-sm font-semibold">
-                                    <span class="text-slate-400">Total Allocated Fees</span>
-                                    <span class="text-slate-800 font-bold">₦{{ number_format($amount_due, 2) }}</span>
+                                    <span class="text-slate-400">Current Term Fees</span>
+                                    <span class="text-slate-800 font-bold font-mono">₦{{ number_format($amount_due, 2) }}</span>
                                 </div>
+                                @if($past_arrears > 0)
+                                    <div class="flex justify-between items-center text-sm font-semibold text-amber-700 bg-amber-50 px-3 py-1.5 rounded-lg border border-amber-200">
+                                        <span>Previous Arrears</span>
+                                        <span class="font-extrabold font-mono">₦{{ number_format($past_arrears, 2) }}</span>
+                                    </div>
+                                @endif
                                 <div class="flex justify-between items-center text-sm font-semibold text-emerald-600 bg-emerald-50 px-3 py-1.5 rounded-lg border border-emerald-100">
                                     <span>Paid Tuition to Date</span>
-                                    <span class="font-extrabold">₦{{ number_format($amount_paid, 2) }}</span>
+                                    <span class="font-extrabold font-mono">₦{{ number_format($amount_paid, 2) }}</span>
                                 </div>
                                 <div class="flex justify-between items-center text-base pt-2 border-t border-slate-200 border-dashed font-bold">
-                                    <span class="text-slate-900">Outstanding Balance</span>
-                                    <span class="text-xl font-black bg-gradient-to-r from-violet-600 to-pink-500 bg-clip-text text-transparent">
+                                    <span class="text-slate-900">Total Outstanding Balance</span>
+                                    <span class="text-xl font-black bg-gradient-to-r from-violet-600 to-pink-500 bg-clip-text text-transparent font-mono">
                                         ₦{{ number_format($outstanding_balance, 2) }}
                                     </span>
                                 </div>
