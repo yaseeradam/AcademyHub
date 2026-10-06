@@ -169,6 +169,7 @@ class Index extends Component
             'motto' => config('academyhub.school_motto', 'LEARNING TODAY LEADING TOMORROW'),
             'term' => $activeTerm?->name ?? 'First Term',
             'session' => $activeTerm?->session?->name ?? \App\Models\AcademicSession::activeName() ?? now()->format('Y') . '/' . (now()->year + 1),
+            'logo' => config('academyhub.school_logo'),
         ];
     }
 

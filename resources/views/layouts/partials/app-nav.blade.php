@@ -16,7 +16,7 @@ $navLink = function(string $href, string $label, string $iconBg, string $iconCol
         
     $aDirectives = $isMobile 
         ? 'class="w-full flex items-center gap-3 rounded-2xl px-3 py-2.5 transition-all duration-300 '.$pill.'"' 
-        : 'class="w-full flex items-center rounded-2xl py-2.5 transition-all duration-300 '.$pill.'" x-bind:class="sidebarCollapsed ? \'justify-center px-0\' : \'gap-3 px-3\'"';
+        : 'class="flex items-center transition-all duration-300 '.$pill.'" x-bind:class="sidebarCollapsed ? \'w-11 h-11 mx-auto justify-center rounded-xl p-0\' : \'w-full gap-3 px-3 py-2.5 rounded-2xl\'"';
     $textDirectives = $isMobile ? '' : 'x-show="!sidebarCollapsed" x-transition:enter="transition-opacity ease-out duration-200 delay-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="transition-opacity ease-in duration-75" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"';
     $arrowDirectives = $isMobile ? '' : 'x-show="!sidebarCollapsed" x-transition:enter="transition-opacity ease-out duration-200 delay-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="transition-opacity ease-in duration-75" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"';
 
@@ -125,8 +125,8 @@ HTML;
             <button type="button" 
                 @click="sidebarCollapsed ? (sidebarCollapsed = false, open = true) : (open = !open)" 
                 title="Registry &amp; Users"
-                class="w-full flex items-center rounded-2xl py-2.5 transition-all duration-300 {{ $isRegistryActive ? 'bg-violet-50/80 text-violet-700 font-bold ring-1 ring-violet-200/50' : 'text-slate-700 hover:bg-white hover:shadow-sm' }}"
-                x-bind:class="sidebarCollapsed ? 'justify-center px-0' : 'justify-between px-3'">
+                class="flex items-center transition-all duration-300 {{ $isRegistryActive ? 'bg-violet-50/80 text-violet-700 font-bold ring-1 ring-violet-200/50' : 'text-slate-700 hover:bg-white hover:shadow-sm' }}"
+                x-bind:class="sidebarCollapsed ? 'w-11 h-11 mx-auto justify-center rounded-xl p-0' : 'w-full justify-between px-3 py-2.5 rounded-2xl'">
                 <div class="flex items-center" x-bind:class="sidebarCollapsed ? 'justify-center' : 'gap-3'">
                     <div class="nav-icon-box bg-blue-100 rounded-xl flex-shrink-0 flex items-center justify-center">
                         <svg class="h-5 w-5 text-blue-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -178,8 +178,8 @@ HTML;
             <button type="button" 
                 @click="sidebarCollapsed ? (sidebarCollapsed = false, open = true) : (open = !open)" 
                 title="Academics"
-                class="w-full flex items-center rounded-2xl py-2.5 transition-all duration-300 {{ $isAcademicsActive ? 'bg-violet-50/80 text-violet-700 font-bold ring-1 ring-violet-200/50' : 'text-slate-700 hover:bg-white hover:shadow-sm' }}"
-                x-bind:class="sidebarCollapsed ? 'justify-center px-0' : 'justify-between px-3'">
+                class="flex items-center transition-all duration-300 {{ $isAcademicsActive ? 'bg-violet-50/80 text-violet-700 font-bold ring-1 ring-violet-200/50' : 'text-slate-700 hover:bg-white hover:shadow-sm' }}"
+                x-bind:class="sidebarCollapsed ? 'w-11 h-11 mx-auto justify-center rounded-xl p-0' : 'w-full justify-between px-3 py-2.5 rounded-2xl'">
                 <div class="flex items-center" x-bind:class="sidebarCollapsed ? 'justify-center' : 'gap-3'">
                     <div class="nav-icon-box bg-slate-100 rounded-xl flex-shrink-0 flex items-center justify-center">
                         <svg class="h-5 w-5 text-slate-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -277,8 +277,8 @@ HTML;
             <button type="button" 
                 @click="sidebarCollapsed ? (sidebarCollapsed = false, open = true) : (open = !open)" 
                 title="Plugins &amp; Apps"
-                class="w-full flex items-center rounded-2xl py-2.5 transition-all duration-300 {{ $isAddonsActive ? 'bg-violet-50/80 text-violet-700 font-bold ring-1 ring-violet-200/50' : 'text-slate-700 hover:bg-white hover:shadow-sm' }}"
-                x-bind:class="sidebarCollapsed ? 'justify-center px-0' : 'justify-between px-3'">
+                class="flex items-center transition-all duration-300 {{ $isAddonsActive ? 'bg-violet-50/80 text-violet-700 font-bold ring-1 ring-violet-200/50' : 'text-slate-700 hover:bg-white hover:shadow-sm' }}"
+                x-bind:class="sidebarCollapsed ? 'w-11 h-11 mx-auto justify-center rounded-xl p-0' : 'w-full justify-between px-3 py-2.5 rounded-2xl'">
                 <div class="flex items-center" x-bind:class="sidebarCollapsed ? 'justify-center' : 'gap-3'">
                     <div class="nav-icon-box bg-purple-100 rounded-xl flex-shrink-0 flex items-center justify-center">
                         <svg class="h-5 w-5 text-purple-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -351,8 +351,8 @@ HTML;
             <button type="button" 
                 @click="sidebarCollapsed ? (sidebarCollapsed = false, open = true) : (open = !open)" 
                 title="Control Panel"
-                class="w-full flex items-center rounded-2xl py-2.5 transition-all duration-300 {{ $isSystemActive ? 'bg-violet-50/80 text-violet-700 font-bold ring-1 ring-violet-200/50' : 'text-slate-700 hover:bg-white hover:shadow-sm' }}"
-                x-bind:class="sidebarCollapsed ? 'justify-center px-0' : 'justify-between px-3'">
+                class="flex items-center transition-all duration-300 {{ $isSystemActive ? 'bg-violet-50/80 text-violet-700 font-bold ring-1 ring-violet-200/50' : 'text-slate-700 hover:bg-white hover:shadow-sm' }}"
+                x-bind:class="sidebarCollapsed ? 'w-11 h-11 mx-auto justify-center rounded-xl p-0' : 'w-full justify-between px-3 py-2.5 rounded-2xl'">
                 <div class="flex items-center" x-bind:class="sidebarCollapsed ? 'justify-center' : 'gap-3'">
                     <div class="nav-icon-box bg-gray-100 rounded-xl flex-shrink-0 flex items-center justify-center">
                         <svg class="h-5 w-5 text-gray-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">

@@ -56,6 +56,8 @@
     @livewireStyles
     <style>
         body { font-family: 'Inter', 'Space Grotesk', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif; }
+        aside.w-20 { width: 5rem !important; }
+        aside.w-72 { width: 18rem !important; }
         .nav-icon-box { width:36px; height:36px; border-radius:10px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
         aside.w-20 .nav-icon-box { margin-left: auto; margin-right: auto; }
         .sidebar-scroll::-webkit-scrollbar { width:6px; }
@@ -220,7 +222,7 @@ $activeShadow = "shadow-{$accent}-200";
     {{-- ══════════════════════════════════════
          DESKTOP SIDEBAR
     ══════════════════════════════════════ --}}
-    <aside x-bind:class="sidebarCollapsed ? 'w-20' : 'w-72'" class="w-72 hidden flex-shrink-0 flex-col bg-[#f5f6fa] lg:flex transition-[width] duration-300 ease-in-out border-r border-slate-200/50 overflow-hidden">
+    <aside :class="sidebarCollapsed ? 'w-20' : 'w-72'" class="hidden flex-shrink-0 flex-col bg-[#f5f6fa] lg:flex transition-[width] duration-300 ease-in-out border-r border-slate-200/50 overflow-hidden">
 
         {{-- Branding --}}
         <div class="mt-4 mb-2 rounded-2xl bg-white shadow-sm transition-all duration-300 flex items-center"
@@ -251,8 +253,8 @@ $activeShadow = "shadow-{$accent}-200";
         <div class="border-t border-slate-200/50 bg-[#f5f6fa] transition-all duration-300"
              x-bind:class="sidebarCollapsed ? 'p-2' : 'p-3'">
             <button type="button" onclick="doLogout('logoutForm')" title="Sign Out"
-                    class="w-full flex items-center rounded-2xl py-2.5 transition-all duration-300 text-red-500 hover:bg-red-50"
-                    x-bind:class="sidebarCollapsed ? 'justify-center px-0' : 'gap-3 px-3'">
+                    class="flex items-center transition-all duration-300 text-red-500 hover:bg-red-50"
+                    x-bind:class="sidebarCollapsed ? 'w-11 h-11 mx-auto justify-center rounded-xl p-0' : 'w-full gap-3 px-3 py-2.5 rounded-2xl'">
                 <div class="nav-icon-box bg-red-100 rounded-xl flex-shrink-0 flex items-center justify-center">
                     <svg class="h-5 w-5 text-red-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
