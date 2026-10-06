@@ -27,7 +27,7 @@ class Index extends Component
     public string $scheduleScope = 'class'; // 'class' or 'staff'
     public $teacherFilterId = null;
     
-    public string $viewMode = 'conventional'; // 'conventional', 'grid', or 'daily'
+    public string $viewMode = 'grid'; // 'grid', 'daily', or 'conventional'
     public int $activeDayTab = 1;
 
     public ?int $editingId = null;
@@ -369,6 +369,7 @@ class Index extends Component
         }
 
         $this->dispatch('alert', message: 'Timetable entry saved.', type: 'success');
+        $this->dispatch('close-modal', 'timetable-form');
         $this->clearForm();
     }
 
@@ -384,6 +385,21 @@ class Index extends Component
         }
 
         $this->dispatch('alert', message: 'Entry deleted.', type: 'success');
+        $this->dispatch('close-modal', 'timetable-form');
+    }
+
+    public function setPeriodPreset(string $preset): void
+    {
+        match ($preset) {
+            '1' => [$this->startsAt = '08:00', $this->endsAt = '08:30', $this->isBreak = false],
+            '2' => [$this->startsAt = '08:30', $this->endsAt = '09:00', $this->isBreak = false],
+            '3' => [$this->startsAt = '09:00', $this->endsAt = '09:30', $this->isBreak = false],
+            'break' => [$this->startsAt = '09:30', $this->endsAt = '09:40', $this->isBreak = true, $this->breakText = 'BREAK'],
+            '4' => [$this->startsAt = '09:40', $this->endsAt = '10:10', $this->isBreak = false],
+            '5' => [$this->startsAt = '10:10', $this->endsAt = '10:40', $this->isBreak = false],
+            '6' => [$this->startsAt = '10:40', $this->endsAt = '13:10', $this->isBreak = false],
+            default => null,
+        };
     }
 
     public function loadConventionalTemplate(): void

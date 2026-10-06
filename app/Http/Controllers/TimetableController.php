@@ -6,7 +6,9 @@ use App\Models\AcademicSession;
 use App\Models\AcademicTerm;
 use App\Models\SchoolClass;
 use App\Models\Section;
+use App\Models\SubjectAllocation;
 use App\Models\TimetableEntry;
+use App\Models\User;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 
@@ -116,9 +118,22 @@ class TimetableController extends Controller
         }
 
         // Class teacher lookup
-        $classTeacherName = $class->teachers()->first()?->name
-            ?? $class->teacher?->name
-            ?? $entries->firstWhere('teacher_id', '!=', null)?->teacher?->name;
+        $classTeacherName = SubjectAllocation::query()
+            ->where('class_id', $classId)
+            ->whereHas('teacher', fn($q) => $q->where('is_class_teacher', true))
+            ->with('teacher:id,name')
+            ->first()?->teacher?->name
+            ?? SubjectAllocation::query()
+                ->where('class_id', $classId)
+                ->whereNotNull('teacher_id')
+                ->with('teacher:id,name')
+                ->first()?->teacher?->name
+            ?? $entries->firstWhere('teacher_id', '!=', null)?->teacher?->name
+            ?? User::query()
+                ->where('role', 'teacher')
+                ->where('is_class_teacher', true)
+                ->where('is_active', true)
+                ->first()?->name;
 
         // School info
         $schoolName = config('academyhub.school_name', config('app.name', 'AI INTEGRATED ACADEMY ARGUNGU'));
@@ -130,10 +145,17 @@ class TimetableController extends Controller
 
         $logoBase64 = null;
         if ($logoPath) {
-            $fullPath = storage_path('app/public/' . $logoPath);
-            if (file_exists($fullPath)) {
-                $mime = mime_content_type($fullPath) ?: 'image/png';
-                $logoBase64 = 'data:' . $mime . ';base64,' . base64_encode(file_get_contents($fullPath));
+            $candidates = [
+                storage_path('app/public/' . $logoPath),
+                public_path('uploads/' . $logoPath),
+                public_path($logoPath),
+            ];
+            foreach ($candidates as $fullPath) {
+                if (file_exists($fullPath) && !is_dir($fullPath)) {
+                    $mime = mime_content_type($fullPath) ?: 'image/png';
+                    $logoBase64 = 'data:' . $mime . ';base64,' . base64_encode(file_get_contents($fullPath));
+                    break;
+                }
             }
         }
 

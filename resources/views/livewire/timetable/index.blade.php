@@ -36,19 +36,31 @@
                     </div>
                 @endif
 
-                @if($hasTarget)
-                    <button type="button" onclick="window.print()" class="inline-flex items-center gap-2 px-3.5 py-2 text-xs font-bold rounded-xl text-amber-900 bg-amber-50 hover:bg-amber-100 border border-amber-300/80 transition-all shadow-xs print:hidden cursor-pointer" title="Print Landscape Timetable Poster">
-                        <svg class="h-3.5 w-3.5 text-amber-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
-                        <span>Print Poster</span>
+                {{-- Add Period Button --}}
+                @if($isAdmin && !$isStaffScope && $hasTarget)
+                    <button type="button" 
+                            wire:click="clearForm" 
+                            x-data 
+                            x-on:click="$dispatch('open-modal', 'timetable-form')" 
+                            class="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold rounded-xl text-white bg-sky-600 hover:bg-sky-700 shadow-sm transition-all cursor-pointer">
+                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+                        <span>Add Period</span>
                     </button>
                 @endif
 
                 @if($classId && !$isStaffScope && auth()->user()?->role !== 'parent')
                     <a href="{{ route('timetable.pdf', ['class_id' => $classId]) }}" target="_blank" 
-                       class="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold rounded-xl text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 transition-all shadow-xs">
-                        <svg class="h-3.5 w-3.5 text-sky-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                        <span>PDF</span>
+                       class="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold rounded-xl text-amber-900 bg-amber-50 hover:bg-amber-100 border border-amber-300 transition-all shadow-xs" title="Download Official Certificate Poster PDF">
+                        <svg class="h-3.5 w-3.5 text-amber-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                        <span>Download PDF</span>
                     </a>
+                @endif
+
+                @if($hasTarget)
+                    <button type="button" onclick="window.print()" class="inline-flex items-center gap-2 px-3.5 py-2 text-xs font-bold rounded-xl text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 transition-all shadow-xs print:hidden cursor-pointer" title="Print Landscape Timetable Poster">
+                        <svg class="h-3.5 w-3.5 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+                        <span>Print</span>
+                    </button>
                 @endif
             </div>
         </x-slot>
@@ -82,12 +94,8 @@
             @endif
 
             @if($hasTarget)
-                {{-- View Toggle [Conventional Poster | Weekly Grid | Daily Agenda] --}}
+                {{-- View Toggle [Modern Grid (Default) | Daily Agenda | Conventional Poster Preview] --}}
                 <div class="inline-flex p-1 bg-slate-100 rounded-xl border border-slate-200">
-                    <button type="button" wire:click="$set('viewMode', 'conventional')" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-lg transition-all {{ $viewMode === 'conventional' ? 'bg-amber-500 text-white shadow-xs' : 'text-slate-600 hover:text-slate-900' }}">
-                        <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                        <span>Poster View</span>
-                    </button>
                     <button type="button" wire:click="$set('viewMode', 'grid')" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-lg transition-all {{ $viewMode === 'grid' ? 'bg-sky-600 text-white shadow-xs' : 'text-slate-600 hover:text-slate-900' }}">
                         <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
                         <span>Modern Grid</span>
@@ -95,6 +103,10 @@
                     <button type="button" wire:click="$set('viewMode', 'daily')" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-lg transition-all {{ $viewMode === 'daily' ? 'bg-sky-600 text-white shadow-xs' : 'text-slate-600 hover:text-slate-900' }}">
                         <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
                         <span>Agenda</span>
+                    </button>
+                    <button type="button" wire:click="$set('viewMode', 'conventional')" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-lg transition-all {{ $viewMode === 'conventional' ? 'bg-amber-600 text-white shadow-xs' : 'text-slate-600 hover:text-slate-900' }}">
+                        <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                        <span>Poster Preview</span>
                     </button>
                 </div>
 
@@ -772,46 +784,64 @@
                                                             @endphp
 
                                                             @if($isAdmin && !$isStaffScope)
-                                                                <button type="button" wire:click="edit({{ $entry->id }})" x-data x-on:click="$dispatch('open-modal', 'timetable-form')" class="w-full text-left rounded-lg border border-slate-200 border-l-4 {{ $cardBorder }} p-2.5 transition hover:shadow-xs hover:border-slate-300">
-                                                                    <div class="text-xs font-bold text-slate-800 truncate">{{ $entry->subject?->name ?? 'Untitled' }}</div>
+                                                                <button type="button" wire:click="edit({{ $entry->id }})" x-data x-on:click="$dispatch('open-modal', 'timetable-form')" class="group relative w-full text-left rounded-xl border border-slate-200/90 border-l-[4px] {{ $cardBorder }} p-2.5 transition hover:shadow-xs hover:border-slate-300 cursor-pointer">
+                                                                    <div class="flex items-start justify-between gap-1">
+                                                                        <div class="text-xs font-bold text-slate-800 truncate leading-snug">{{ $entry->subject?->name ?? 'Untitled' }}</div>
+                                                                        <span class="opacity-0 group-hover:opacity-100 transition-opacity text-slate-400 group-hover:text-sky-600 shrink-0">
+                                                                            <svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
+                                                                        </span>
+                                                                    </div>
                                                                     @if($isStaffScope)
-                                                                        <div class="text-[11px] font-semibold text-blue-700 truncate mt-0.5">
+                                                                        <div class="text-[11px] font-semibold text-sky-700 truncate mt-1">
                                                                             {{ $entry->schoolClass?->name ?? 'Class' }}{{ $entry->section ? ' · ' . $entry->section->name : '' }}
                                                                         </div>
                                                                     @else
                                                                         @if($entry->teacher?->name)
-                                                                            <div class="text-[11px] text-slate-500 truncate mt-0.5">{{ $entry->teacher->name }}</div>
+                                                                            <div class="text-[11px] text-slate-600 truncate mt-1 flex items-center gap-1">
+                                                                                <svg class="h-3 w-3 text-slate-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                                                                                <span>{{ $entry->teacher->name }}</span>
+                                                                            </div>
                                                                         @endif
                                                                     @endif
                                                                     @if($entry->room)
-                                                                        <div class="text-[10px] text-slate-400 truncate mt-0.5">Room {{ $entry->room }}</div>
+                                                                        <div class="text-[10px] text-slate-500 font-medium truncate mt-1 inline-flex items-center gap-1 bg-white/70 px-1.5 py-0.5 rounded border border-slate-200/60">
+                                                                            <svg class="h-2.5 w-2.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                                                                            <span>Room {{ $entry->room }}</span>
+                                                                        </div>
                                                                     @endif
                                                                 </button>
                                                             @else
-                                                                <div class="w-full text-left rounded-lg border border-slate-200 border-l-4 {{ $cardBorder }} p-2.5">
-                                                                    <div class="text-xs font-bold text-slate-800 truncate">{{ $entry->subject?->name ?? 'Untitled' }}</div>
+                                                                <div class="w-full text-left rounded-xl border border-slate-200/90 border-l-[4px] {{ $cardBorder }} p-2.5">
+                                                                    <div class="text-xs font-bold text-slate-800 truncate leading-snug">{{ $entry->subject?->name ?? 'Untitled' }}</div>
                                                                     @if($isStaffScope)
-                                                                        <div class="text-[11px] font-semibold text-blue-700 truncate mt-0.5">
+                                                                        <div class="text-[11px] font-semibold text-sky-700 truncate mt-1">
                                                                             {{ $entry->schoolClass?->name ?? 'Class' }}{{ $entry->section ? ' · ' . $entry->section->name : '' }}
                                                                         </div>
                                                                     @else
                                                                         @if($entry->teacher?->name)
-                                                                            <div class="text-[11px] text-slate-500 truncate mt-0.5">{{ $entry->teacher->name }}</div>
+                                                                            <div class="text-[11px] text-slate-600 truncate mt-1 flex items-center gap-1">
+                                                                                <svg class="h-3 w-3 text-slate-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                                                                                <span>{{ $entry->teacher->name }}</span>
+                                                                            </div>
                                                                         @endif
                                                                     @endif
                                                                     @if($entry->room)
-                                                                        <div class="text-[10px] text-slate-400 truncate mt-0.5">Room {{ $entry->room }}</div>
+                                                                        <div class="text-[10px] text-slate-500 font-medium truncate mt-1 inline-flex items-center gap-1 bg-white/70 px-1.5 py-0.5 rounded border border-slate-200/60">
+                                                                            <svg class="h-2.5 w-2.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                                                                            <span>Room {{ $entry->room }}</span>
+                                                                        </div>
                                                                     @endif
                                                                 </div>
                                                             @endif
                                                         @endif
                                                     @else
                                                         @if($isAdmin && !$isStaffScope)
-                                                            <button type="button" wire:click="selectSlot({{ $d['day'] }}, @js($slot['start']), @js($slot['end']))" x-data x-on:click="$dispatch('open-modal', 'timetable-form')" class="w-full h-full min-h-[52px] rounded-lg border border-dashed border-slate-200 hover:border-blue-400 hover:bg-blue-50/30 text-[11px] font-medium text-slate-300 hover:text-blue-600 transition flex items-center justify-center">
-                                                                +
+                                                            <button type="button" wire:click="selectSlot({{ $d['day'] }}, @js($slot['start']), @js($slot['end']))" x-data x-on:click="$dispatch('open-modal', 'timetable-form')" class="group w-full h-full min-h-[58px] rounded-xl border-2 border-dashed border-slate-200 hover:border-sky-400 hover:bg-sky-50/40 p-2 text-slate-300 hover:text-sky-600 transition-all flex flex-col items-center justify-center gap-1 cursor-pointer" title="Click to add period">
+                                                                <svg class="h-4 w-4 transition-transform group-hover:scale-110" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+                                                                <span class="text-[9.5px] font-bold tracking-tight opacity-0 group-hover:opacity-100 transition-opacity">Add</span>
                                                             </button>
                                                         @else
-                                                            <div class="w-full h-full min-h-[52px] flex items-center justify-center text-xs text-slate-200 font-light">
+                                                            <div class="w-full h-full min-h-[58px] flex items-center justify-center text-xs text-slate-200 font-light">
                                                                 —
                                                             </div>
                                                         @endif
@@ -939,7 +969,16 @@
 
     {{-- Admin Add/Edit Modal (Super Simple & Clean) --}}
     @if($isAdmin)
-        <div x-data="{ open: false }" x-on:open-modal.window="if ($event.detail === 'timetable-form') open = true" x-on:close.window="open = false" x-show="open" x-cloak class="fixed inset-0 z-50 overflow-y-auto" style="display: none;" role="dialog" aria-modal="true">
+        <div x-data="{ open: false }" 
+             x-on:open-modal.window="if ($event.detail === 'timetable-form') open = true" 
+             x-on:close-modal.window="if ($event.detail === 'timetable-form' || !$event.detail) open = false" 
+             x-on:close.window="open = false" 
+             x-show="open" 
+             x-cloak 
+             class="fixed inset-0 z-50 overflow-y-auto" 
+             style="display: none;" 
+             role="dialog" 
+             aria-modal="true">
             <div class="flex min-h-screen items-center justify-center p-4">
                 <div x-on:click="open = false" class="fixed inset-0 bg-slate-900/40 backdrop-blur-xs transition-opacity"></div>
                 
@@ -970,6 +1009,23 @@
                             <button type="button" wire:click="$set('isBreak', true)" class="py-2 rounded-lg transition-all {{ $isBreak ? 'bg-white text-amber-900 shadow-xs' : 'text-slate-500 hover:text-slate-800' }}">
                                 Break / Recess
                             </button>
+                        </div>
+
+                        {{-- Quick Period Presets --}}
+                        <div>
+                            <div class="flex items-center justify-between mb-1">
+                                <label class="text-[11px] font-bold text-slate-700">Quick Period Presets</label>
+                                <span class="text-[10px] text-slate-400">Auto-fill timetable times</span>
+                            </div>
+                            <div class="grid grid-cols-7 gap-1">
+                                <button type="button" wire:click="setPeriodPreset('1')" class="py-1 px-1 text-center rounded-lg border border-slate-200 hover:border-sky-500 hover:bg-sky-50 text-[10px] font-bold text-slate-700 transition" title="Period 1: 8:00 – 8:30">P1</button>
+                                <button type="button" wire:click="setPeriodPreset('2')" class="py-1 px-1 text-center rounded-lg border border-slate-200 hover:border-sky-500 hover:bg-sky-50 text-[10px] font-bold text-slate-700 transition" title="Period 2: 8:30 – 9:00">P2</button>
+                                <button type="button" wire:click="setPeriodPreset('3')" class="py-1 px-1 text-center rounded-lg border border-slate-200 hover:border-sky-500 hover:bg-sky-50 text-[10px] font-bold text-slate-700 transition" title="Period 3: 9:00 – 9:30">P3</button>
+                                <button type="button" wire:click="setPeriodPreset('break')" class="py-1 px-1 text-center rounded-lg border border-amber-300 hover:border-amber-500 bg-amber-50/70 hover:bg-amber-100 text-[10px] font-bold text-amber-900 transition" title="Break: 9:30 – 9:40">Break</button>
+                                <button type="button" wire:click="setPeriodPreset('4')" class="py-1 px-1 text-center rounded-lg border border-slate-200 hover:border-sky-500 hover:bg-sky-50 text-[10px] font-bold text-slate-700 transition" title="Period 4: 9:40 – 10:10">P4</button>
+                                <button type="button" wire:click="setPeriodPreset('5')" class="py-1 px-1 text-center rounded-lg border border-slate-200 hover:border-sky-500 hover:bg-sky-50 text-[10px] font-bold text-slate-700 transition" title="Period 5: 10:10 – 10:40">P5</button>
+                                <button type="button" wire:click="setPeriodPreset('6')" class="py-1 px-1 text-center rounded-lg border border-slate-200 hover:border-sky-500 hover:bg-sky-50 text-[10px] font-bold text-slate-700 transition" title="Period 6: 10:40 – 13:10">P6</button>
+                            </div>
                         </div>
 
                         {{-- Day & Time Inputs --}}
@@ -1086,17 +1142,21 @@
                     <div class="mt-5 flex items-center justify-between border-t border-slate-100 pt-3.5">
                         <div>
                             @if($editingId)
-                                <button type="button" wire:click="delete({{ $editingId }})" x-on:click="open = false" onclick="return confirm('Delete this entry?')" class="rounded-lg px-2.5 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-50 transition">
+                                <button type="button" wire:click="delete({{ $editingId }})" wire:loading.attr="disabled" onclick="return confirm('Delete this timetable entry?')" class="rounded-xl px-3 py-2 text-xs font-bold text-red-600 hover:bg-red-50 transition cursor-pointer">
                                     Delete
                                 </button>
                             @endif
                         </div>
                         <div class="flex items-center gap-2">
-                            <button type="button" x-on:click="open = false" class="rounded-lg border border-slate-200 px-3.5 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50 transition">
+                            <button type="button" x-on:click="open = false" class="rounded-xl border border-slate-200 px-3.5 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50 transition cursor-pointer">
                                 Cancel
                             </button>
-                            <button type="button" wire:click="save" x-on:click="open = false" class="rounded-lg bg-blue-600 px-4 py-2 text-xs font-semibold text-white hover:bg-blue-700 transition shadow-xs">
-                                {{ $editingId ? 'Update' : 'Save' }}
+                            <button type="button" wire:click="save" wire:loading.attr="disabled" class="inline-flex items-center gap-1.5 rounded-xl bg-sky-600 hover:bg-sky-700 px-4 py-2 text-xs font-bold text-white transition shadow-xs disabled:opacity-50 cursor-pointer">
+                                <span wire:loading.remove wire:target="save">{{ $editingId ? 'Update Entry' : 'Save Entry' }}</span>
+                                <span wire:loading wire:target="save" class="inline-flex items-center gap-1">
+                                    <svg class="animate-spin h-3.5 w-3.5 text-white" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                                    <span>Saving...</span>
+                                </span>
                             </button>
                         </div>
                     </div>
