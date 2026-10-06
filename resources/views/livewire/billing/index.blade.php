@@ -476,15 +476,58 @@
                         <p class="text-xs sm:text-sm text-gray-600">Students with pending payments</p>
                     </div>
                 </div>
-                <div class="grid gap-2.5 sm:gap-4 sm:grid-cols-3">
-                    <input wire:model.live.debounce.300ms="debtorsCategory" type="text" placeholder="Category (e.g. Tuition)" class="input-compact text-xs sm:text-sm" />
-                    <input wire:model.live.debounce.300ms="debtorsSession" type="text" placeholder="Session (e.g. 2025/2026)" class="input-compact text-xs sm:text-sm" />
-                    <select wire:model.live="debtorsTerm" class="select text-xs sm:text-sm">
-                        <option value="">All terms</option>
-                        <option value="1">Term 1</option>
-                        <option value="2">Term 2</option>
-                        <option value="3">Term 3</option>
-                    </select>
+                <div class="grid gap-2 sm:gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-5">
+                    {{-- Category Select --}}
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">Fee Category</label>
+                        <select wire:model.live="debtorsCategory" class="select text-xs sm:text-sm w-full font-medium">
+                            @foreach($this->availableFeeCategories as $cat)
+                                <option value="{{ $cat }}">{{ $cat }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    {{-- Session Select --}}
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">Session</label>
+                        <select wire:model.live="debtorsSession" class="select text-xs sm:text-sm w-full font-medium">
+                            <option value="">All Sessions</option>
+                            @foreach($this->availableSessions as $sess)
+                                <option value="{{ $sess }}">{{ $sess }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    {{-- Term Select --}}
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">Term</label>
+                        <select wire:model.live="debtorsTerm" class="select text-xs sm:text-sm w-full font-medium">
+                            <option value="">All Terms</option>
+                            <option value="1">Term 1</option>
+                            <option value="2">Term 2</option>
+                            <option value="3">Term 3</option>
+                        </select>
+                    </div>
+
+                    {{-- Class Select --}}
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">Class</label>
+                        <select wire:model.live="debtorsClassId" class="select text-xs sm:text-sm w-full font-medium">
+                            <option value="">All Classes</option>
+                            @foreach($this->classes as $c)
+                                <option value="{{ $c->id }}">{{ $c->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    {{-- Student Search --}}
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">Search Student</label>
+                        <div class="relative">
+                            <input wire:model.live.debounce.300ms="debtorsSearch" type="text" placeholder="Name or Adm No..." class="input-compact text-xs sm:text-sm w-full pl-8" />
+                            <svg class="h-3.5 w-3.5 text-slate-400 absolute left-2.5 top-2.5 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

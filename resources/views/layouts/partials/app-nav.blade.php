@@ -76,6 +76,11 @@ HTML;
         '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16.5 18.75h-9m9 0a3 3 0 013 3h-15a3 3 0 013-3m9 0v-3.375c0-.621-.504-1.125-1.125-1.125h-.871M7.5 18.75v-3.375c0-.621.504-1.125 1.125-1.125h.872m5.004 0A6.75 6.75 0 0019.5 7.5c0-1.88-1.04-3.52-2.58-4.375M7.5 14.25a6.75 6.75 0 01-5.004-6.75C2.496 5.62 3.536 3.98 5.076 3.125M12 3a4.5 4.5 0 00-4.5 4.5c0 1.766 1.018 3.295 2.5 4.025v2.725h4v-2.725A4.502 4.502 0 0016.5 7.5 4.5 4.5 0 0012 3z"/>',
         request()->routeIs('academics.hall-of-fame')) !!}
 
+    {!! $navLink(route('timetable'), 'Institutional Timetable',
+        'bg-teal-100', 'text-teal-600',
+        '<path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>',
+        request()->routeIs('timetable*')) !!}
+
     {!! $navLink(route('billing.index', ['tab' => 'debtors']), 'Tuition & Debtors',
         'bg-emerald-100', 'text-emerald-500',
         '<path stroke-linecap="round" stroke-linejoin="round" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/>',
@@ -89,7 +94,7 @@ HTML;
     @if($user?->tenant?->activeMarketplaceComponents()->where('slug', 'procurement-records')->exists())
         {!! $navLink(route('procurement.cash-flow'), 'Cash Flow Intelligence',
             'bg-indigo-100', 'text-indigo-500',
-            '<path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>',
+            '<path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>',
             request()->routeIs('procurement.cash-flow')) !!}
     @endif
 
@@ -97,6 +102,11 @@ HTML;
         'bg-amber-100', 'text-amber-600',
         '<path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/>',
         request()->routeIs('attendance.staff-timesheet')) !!}
+
+    {!! $navLink(route('messages'), 'Messages',
+        'bg-sky-100', 'text-sky-500',
+        '<path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>',
+        request()->routeIs('messages*')) !!}
 
     {!! $navLink(route('profile'), 'My Profile',
         'bg-violet-100', 'text-violet-500',

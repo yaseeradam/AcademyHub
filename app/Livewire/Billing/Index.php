@@ -45,6 +45,8 @@ class Index extends Component
     public string $debtorsCategory = 'Tuition';
     public ?string $debtorsSession = null;
     public ?int $debtorsTerm = null;
+    public ?int $debtorsClassId = null;
+    public string $debtorsSearch = '';
 
     public ?int $feeClassId = null;
     public string $feeCategory = 'Tuition';
@@ -376,9 +378,23 @@ class Index extends Component
             ->groupBy('student_id')
             ->pluck('paid', 'student_id');
 
-        return Student::query()
+        $studentQuery = Student::query()
             ->with(['schoolClass', 'section', 'user'])
-            ->where('status', 'Active')
+            ->where('status', 'Active');
+
+        if ($this->debtorsClassId) {
+            $studentQuery->where('class_id', $this->debtorsClassId);
+        }
+
+        if (trim($this->debtorsSearch) !== '') {
+            $search = trim($this->debtorsSearch);
+            $studentQuery->where(function ($q) use ($search) {
+                $q->where('full_name', 'like', "%{$search}%")
+                    ->orWhere('admission_number', 'like', "%{$search}%");
+            });
+        }
+
+        return $studentQuery
             ->get()
             ->map(function (Student $student) use ($feesByClass, $paidByStudent) {
                 $due     = (float) ($feesByClass->get($student->class_id, 0) ?? 0);
@@ -395,6 +411,42 @@ class Index extends Component
             ->filter(fn (array $row) => $row['balance'] > 0)
             ->sortByDesc('balance')
             ->values();
+    }
+
+    #[Computed]
+    public function availableFeeCategories(): array
+    {
+        $dbCats = FeeStructure::query()
+            ->whereNotNull('category')
+            ->distinct()
+            ->pluck('category')
+            ->filter()
+            ->values()
+            ->toArray();
+
+        $defaults = ['Tuition', 'Development Levy', 'Uniform', 'Books', 'Transportation', 'Examination', 'Registration'];
+
+        return array_values(array_unique(array_merge($defaults, $dbCats)));
+    }
+
+    #[Computed]
+    public function availableSessions(): array
+    {
+        $sessions = \App\Models\AcademicSession::query()
+            ->orderByDesc('name')
+            ->pluck('name')
+            ->filter()
+            ->values()
+            ->toArray();
+
+        if (empty($sessions)) {
+            $sessions = [
+                date('Y') . '/' . (date('Y') + 1),
+                (date('Y') - 1) . '/' . date('Y'),
+            ];
+        }
+
+        return $sessions;
     }
 
     #[Computed]

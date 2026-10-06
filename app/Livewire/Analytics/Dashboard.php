@@ -29,7 +29,7 @@ class Dashboard extends Component
     public function mount()
     {
         $user = auth()->user();
-        abort_unless($user && in_array($user->role, ['admin', 'teacher'], true), 403);
+        abort_unless($user && ($user->hasPermission('analytics.view') || in_array($user->role, ['admin', 'teacher', 'proprietor'], true)), 403);
     }
 
     #[Computed]

@@ -1,77 +1,141 @@
-<div class="space-y-6">
-    {{-- Header & Control Bar --}}
-    <div class="rounded-2xl border border-slate-200/80 bg-white p-4 sm:p-5 shadow-sm">
-        <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-            <div>
-                <h2 class="text-xl sm:text-2xl font-bold tracking-tight text-slate-900">Timetable</h2>
-                <p class="text-xs sm:text-sm text-slate-500 mt-0.5">
-                    @if($classId && $this->selectedClass)
-                        Weekly schedule for <span class="font-medium text-slate-700">{{ $this->selectedClass->name }}</span>
+<div class="space-y-6 font-sans">
+    @php
+        $isStaffScope = $scheduleScope === 'staff';
+        $targetTitle = $isStaffScope ? ($this->selectedTeacher?->name ?? 'Select Staff Member') : ($this->selectedClass?->name ?? 'Select Class');
+        $hasTarget = $isStaffScope ? (bool) $this->teacherFilterId : (bool) $this->classId;
+        $totalPeriods = $entries->where('is_break', false)->count();
+    @endphp
+
+    {{-- ══════════════════════════════════════════════════════════════
+         1. EXECUTIVE HEADER & CONTROLS
+    ══════════════════════════════════════════════════════════════ --}}
+    <div class="relative overflow-hidden rounded-2xl sm:rounded-3xl bg-gradient-to-r from-[#17274E] to-[#1D3261] shadow-xl p-5 sm:p-7 text-white">
+        {{-- Subtle radial dot grid --}}
+        <div class="absolute inset-0 pointer-events-none opacity-30 mix-blend-screen bg-[radial-gradient(circle,#ffffff_1.5px,transparent_1.5px)]" style="background-size: 32px 32px;"></div>
+
+        <div class="relative z-10 flex flex-col md:flex-row md:items-center md:justify-between gap-5">
+            <div class="space-y-1.5">
+                <div class="flex items-center gap-2">
+                    <span class="h-2 w-2 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_8px_rgba(52,211,153,0.8)]"></span>
+                    <span class="text-[10px] font-black uppercase tracking-widest text-emerald-300">Master Schedule System</span>
+                    <span class="text-xs text-blue-200">&bull;</span>
+                    <span class="text-xs font-semibold text-blue-200">{{ $isStaffScope ? 'Staff & Faculty Schedule' : 'Class Schedule' }}</span>
+                </div>
+                <h1 class="text-2xl sm:text-3xl font-black text-white tracking-tight">
+                    {{ $hasTarget ? $targetTitle : 'Institutional Timetable' }}
+                </h1>
+                <p class="text-xs sm:text-sm text-blue-100 max-w-xl">
+                    @if($hasTarget)
+                        Managing weekly teaching periods, room allocations, and scheduled recess periods.
                     @else
-                        Select a class to view or manage its schedule
+                        Choose between class-wide or individual staff timetable scopes below.
                     @endif
                 </p>
             </div>
 
             <div class="flex flex-wrap items-center gap-2.5">
-                {{-- Class Selector --}}
-                <select wire:model.live="classId" class="rounded-lg border border-slate-200 bg-slate-50/50 px-3.5 py-2 text-xs sm:text-sm font-semibold text-slate-800 shadow-sm focus:border-blue-500 focus:bg-white focus:ring-1 focus:ring-blue-500 min-h-[38px]">
-                    <option value="">Select Class ({{ collect($this->classes)->count() }})</option>
-                    @foreach($this->classes as $c)
-                        <option value="{{ $c->id }}">{{ $c->name }}</option>
-                    @endforeach
-                </select>
-
-                @if($classId)
-                    {{-- View Toggle [Grid | Daily] --}}
-                    <div class="flex items-center rounded-lg border border-slate-200 bg-slate-100/80 p-0.5">
-                        <button type="button" wire:click="$set('viewMode', 'grid')" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-md transition-all {{ $viewMode === 'grid' ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-600 hover:text-slate-900' }}">
-                            <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
-                            Grid
+                {{-- Scope Switcher: Class vs Staff --}}
+                @if(auth()->user()?->role !== 'parent')
+                    <div class="inline-flex p-1 bg-white/10 rounded-xl border border-white/15 backdrop-blur-sm">
+                        <button type="button" 
+                                wire:click="$set('scheduleScope', 'class')" 
+                                class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-lg transition-all {{ !$isStaffScope ? 'bg-white text-[#17274E] shadow-sm' : 'text-blue-100 hover:text-white' }}">
+                            <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+                            Class Schedule
                         </button>
-                        <button type="button" wire:click="$set('viewMode', 'daily')" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-md transition-all {{ $viewMode === 'daily' ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-600 hover:text-slate-900' }}">
-                            <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
-                            Daily
+                        <button type="button" 
+                                wire:click="$set('scheduleScope', 'staff')" 
+                                class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-lg transition-all {{ $isStaffScope ? 'bg-white text-[#17274E] shadow-sm' : 'text-blue-100 hover:text-white' }}">
+                            <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                            Staff Timetable
                         </button>
                     </div>
-
-                    @if(auth()->user()?->role !== 'parent')
-                        {{-- Download PDF Button --}}
-                        <a href="{{ route('timetable.pdf', ['class_id' => $classId]) }}" target="_blank" class="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs sm:text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50 transition min-h-[38px]">
-                            <svg class="h-4 w-4 text-slate-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                            PDF
-                        </a>
-                    @endif
                 @endif
 
-                {{-- Back Navigation --}}
-                <a href="{{ auth()->user()?->role === 'parent' ? route('parents.dashboard') : route('more-features') }}" class="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs sm:text-sm font-semibold text-slate-600 shadow-sm hover:bg-slate-50 transition min-h-[38px]">
-                    <svg class="h-4 w-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
-                    Back
-                </a>
+                @if($classId && !$isStaffScope && auth()->user()?->role !== 'parent')
+                    <a href="{{ route('timetable.pdf', ['class_id' => $classId]) }}" target="_blank" 
+                       class="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold rounded-xl text-white bg-white/10 hover:bg-white/20 border border-white/15 backdrop-blur-sm transition-all shadow-sm">
+                        <svg class="h-3.5 w-3.5 text-blue-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                        PDF Export
+                    </a>
+                @endif
             </div>
         </div>
     </div>
 
-    @if(!$classId)
-        {{-- Empty State: No Class Selected --}}
+    {{-- ══════════════════════════════════════════════════════════════
+         2. CONTROLS TOOLBAR & METRICS BAR
+    ══════════════════════════════════════════════════════════════ --}}
+    <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200/80 dark:border-slate-700 shadow-sm flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div class="flex flex-wrap items-center gap-3">
+            @if(!$isStaffScope)
+                {{-- Class Selector --}}
+                <div class="min-w-[200px]">
+                    <select wire:model.live="classId" class="select text-xs sm:text-sm font-semibold w-full">
+                        <option value="">Select Class ({{ collect($this->classes)->count() }})</option>
+                        @foreach($this->classes as $c)
+                            <option value="{{ $c->id }}">{{ $c->name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+            @else
+                {{-- Teacher Selector --}}
+                <div class="min-w-[220px]">
+                    <select wire:model.live="teacherFilterId" class="select text-xs sm:text-sm font-semibold w-full">
+                        <option value="">Select Teaching Staff ({{ collect($this->teachers)->count() }})</option>
+                        @foreach($this->teachers as $t)
+                            <option value="{{ $t->id }}">{{ $t->name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+            @endif
+
+            @if($hasTarget)
+                {{-- View Toggle [Grid | Daily] --}}
+                <div class="inline-flex p-1 bg-slate-100 dark:bg-slate-700 rounded-xl border border-slate-200 dark:border-slate-600">
+                    <button type="button" wire:click="$set('viewMode', 'grid')" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-lg transition-all {{ $viewMode === 'grid' ? 'bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-sm' : 'text-slate-600 dark:text-slate-300 hover:text-slate-900' }}">
+                        <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
+                        Weekly Grid
+                    </button>
+                    <button type="button" wire:click="$set('viewMode', 'daily')" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-lg transition-all {{ $viewMode === 'daily' ? 'bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-sm' : 'text-slate-600 dark:text-slate-300 hover:text-slate-900' }}">
+                        <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
+                        Daily Agenda
+                    </button>
+                </div>
+            @endif
+        </div>
+
+        @if($hasTarget)
+            <div class="flex items-center gap-3 text-xs">
+                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 font-bold border border-emerald-200 dark:border-emerald-800">
+                    <span class="h-2 w-2 rounded-full bg-emerald-500"></span>
+                    {{ $totalPeriods }} Scheduled Periods
+                </span>
+                <span class="text-slate-400">&bull;</span>
+                <span class="text-slate-500 dark:text-slate-400 font-medium">Monday &ndash; {{ count($days) === 6 ? 'Saturday' : 'Friday' }}</span>
+            </div>
+        @endif
+    </div>
+
+    @if(!$hasTarget)
+        {{-- Empty State: No Target Selected --}}
         <div class="rounded-2xl border border-slate-200/80 bg-white p-12 text-center shadow-sm">
             <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-slate-100 text-slate-400 mb-3">
                 <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
             </div>
-            <h3 class="text-sm font-bold text-slate-800">No Class Selected</h3>
-            <p class="text-xs text-slate-500 mt-1 max-w-sm mx-auto">Please select a class from the dropdown above to view its timetable.</p>
+            <h3 class="text-sm font-bold text-slate-800">No {{ $isStaffScope ? 'Staff Member' : 'Class' }} Selected</h3>
+            <p class="text-xs text-slate-500 mt-1 max-w-sm mx-auto">Please select a {{ $isStaffScope ? 'teaching staff member' : 'class' }} from the selector above to display their timetable schedule.</p>
         </div>
     @else
         @if($entries->isEmpty())
-            {{-- Empty State: Class has no entries --}}
+            {{-- Empty State: Target has no entries --}}
             <div class="rounded-2xl border border-slate-200/80 bg-white p-12 text-center shadow-sm">
                 <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-slate-100 text-slate-400 mb-3">
                     <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
                 </div>
                 <h3 class="text-sm font-bold text-slate-800">No Schedule Entries</h3>
-                <p class="text-xs text-slate-500 mt-1 max-w-sm mx-auto">This class does not have any scheduled periods or breaks yet.</p>
-                @if($isAdmin)
+                <p class="text-xs text-slate-500 mt-1 max-w-sm mx-auto">This {{ $isStaffScope ? 'staff member' : 'class' }} does not have any scheduled periods or breaks yet.</p>
+                @if($isAdmin && !$isStaffScope)
                     <div class="mt-4">
                         <button type="button" wire:click="selectSlot(1, '08:00', '09:00')" x-data x-on:click="$dispatch('open-modal', 'timetable-form')" class="inline-flex items-center gap-1.5 rounded-lg bg-blue-600 px-4 py-2 text-xs font-semibold text-white shadow-sm hover:bg-blue-700 transition">
                             + Add First Period
@@ -124,10 +188,11 @@
                                             </td>
                                             <td colspan="{{ count($days) }}" class="px-4 py-2.5 text-center bg-amber-50/50">
                                                 <div class="flex items-center justify-center gap-2">
-                                                    <span class="text-amber-800 font-bold text-xs uppercase tracking-wider">
-                                                        ☕ {{ $breakText }}
+                                                    <span class="inline-flex items-center gap-1.5 text-amber-800 font-bold text-xs uppercase tracking-wider">
+                                                        <svg class="w-3.5 h-3.5 text-amber-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                                        {{ $breakText }}
                                                     </span>
-                                                    @if($isAdmin)
+                                                    @if($isAdmin && !$isStaffScope)
                                                         <button type="button" wire:click="edit({{ $breakEntry->id }})" x-data x-on:click="$dispatch('open-modal', 'timetable-form')" class="text-[11px] font-medium text-amber-700 hover:text-amber-900 underline ml-2">
                                                             Edit
                                                         </button>
@@ -150,10 +215,11 @@
                                                     @if($entry)
                                                         @if($entry->is_break)
                                                             <div class="rounded-lg border border-amber-200 bg-amber-50/60 p-2 text-center">
-                                                                <span class="text-[11px] font-bold text-amber-800 uppercase tracking-wide">
+                                                                <span class="inline-flex items-center justify-center gap-1 text-[11px] font-bold text-amber-800 uppercase tracking-wide">
+                                                                    <svg class="w-3 h-3 text-amber-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                                                                     {{ trim($entry->break_text ?? 'BREAK') }}
                                                                 </span>
-                                                                @if($isAdmin)
+                                                                @if($isAdmin && !$isStaffScope)
                                                                     <button type="button" wire:click="edit({{ $entry->id }})" x-data x-on:click="$dispatch('open-modal', 'timetable-form')" class="block mx-auto mt-0.5 text-[10px] text-amber-700 hover:underline">
                                                                         Edit
                                                                     </button>
@@ -182,11 +248,17 @@
                                                                 };
                                                             @endphp
 
-                                                            @if($isAdmin)
+                                                            @if($isAdmin && !$isStaffScope)
                                                                 <button type="button" wire:click="edit({{ $entry->id }})" x-data x-on:click="$dispatch('open-modal', 'timetable-form')" class="w-full text-left rounded-lg border border-slate-200 border-l-4 {{ $cardBorder }} p-2.5 transition hover:shadow-xs hover:border-slate-300">
-                                                                    <div class="text-xs font-bold text-slate-800 truncate">{{ $entry->subject?->name }}</div>
-                                                                    @if($entry->teacher?->name)
-                                                                        <div class="text-[11px] text-slate-500 truncate mt-0.5">{{ $entry->teacher->name }}</div>
+                                                                    <div class="text-xs font-bold text-slate-800 truncate">{{ $entry->subject?->name ?? 'Untitled' }}</div>
+                                                                    @if($isStaffScope)
+                                                                        <div class="text-[11px] font-semibold text-blue-700 truncate mt-0.5">
+                                                                            {{ $entry->schoolClass?->name ?? 'Class' }}{{ $entry->section ? ' · ' . $entry->section->name : '' }}
+                                                                        </div>
+                                                                    @else
+                                                                        @if($entry->teacher?->name)
+                                                                            <div class="text-[11px] text-slate-500 truncate mt-0.5">{{ $entry->teacher->name }}</div>
+                                                                        @endif
                                                                     @endif
                                                                     @if($entry->room)
                                                                         <div class="text-[10px] text-slate-400 truncate mt-0.5">Room {{ $entry->room }}</div>
@@ -194,9 +266,15 @@
                                                                 </button>
                                                             @else
                                                                 <div class="w-full text-left rounded-lg border border-slate-200 border-l-4 {{ $cardBorder }} p-2.5">
-                                                                    <div class="text-xs font-bold text-slate-800 truncate">{{ $entry->subject?->name }}</div>
-                                                                    @if($entry->teacher?->name)
-                                                                        <div class="text-[11px] text-slate-500 truncate mt-0.5">{{ $entry->teacher->name }}</div>
+                                                                    <div class="text-xs font-bold text-slate-800 truncate">{{ $entry->subject?->name ?? 'Untitled' }}</div>
+                                                                    @if($isStaffScope)
+                                                                        <div class="text-[11px] font-semibold text-blue-700 truncate mt-0.5">
+                                                                            {{ $entry->schoolClass?->name ?? 'Class' }}{{ $entry->section ? ' · ' . $entry->section->name : '' }}
+                                                                        </div>
+                                                                    @else
+                                                                        @if($entry->teacher?->name)
+                                                                            <div class="text-[11px] text-slate-500 truncate mt-0.5">{{ $entry->teacher->name }}</div>
+                                                                        @endif
                                                                     @endif
                                                                     @if($entry->room)
                                                                         <div class="text-[10px] text-slate-400 truncate mt-0.5">Room {{ $entry->room }}</div>
@@ -205,7 +283,7 @@
                                                             @endif
                                                         @endif
                                                     @else
-                                                        @if($isAdmin)
+                                                        @if($isAdmin && !$isStaffScope)
                                                             <button type="button" wire:click="selectSlot({{ $d['day'] }}, @js($slot['start']), @js($slot['end']))" x-data x-on:click="$dispatch('open-modal', 'timetable-form')" class="w-full h-full min-h-[52px] rounded-lg border border-dashed border-slate-200 hover:border-blue-400 hover:bg-blue-50/30 text-[11px] font-medium text-slate-300 hover:text-blue-600 transition flex items-center justify-center">
                                                                 +
                                                             </button>
@@ -244,7 +322,7 @@
                     @if($dayEntries->isEmpty())
                         <div class="text-center py-10 text-slate-400">
                             <p class="text-xs sm:text-sm font-medium">No periods scheduled for {{ $this->dayLabel($activeDayTab) }}.</p>
-                            @if($isAdmin)
+                            @if($isAdmin && !$isStaffScope)
                                 <button type="button" wire:click="selectSlot({{ $activeDayTab }}, '08:00', '09:00')" x-data x-on:click="$dispatch('open-modal', 'timetable-form')" class="mt-3 inline-flex items-center gap-1.5 rounded-lg bg-blue-600 px-3.5 py-2 text-xs font-semibold text-white hover:bg-blue-700 transition">
                                     + Add Period
                                 </button>
@@ -252,7 +330,7 @@
                         </div>
                     @else
                         <div class="space-y-2.5">
-                            @if($isAdmin)
+                            @if($isAdmin && !$isStaffScope)
                                 <div class="flex justify-end mb-2">
                                     <button type="button" wire:click="selectSlot({{ $activeDayTab }}, '08:00', '09:00')" x-data x-on:click="$dispatch('open-modal', 'timetable-form')" class="inline-flex items-center gap-1.5 rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-blue-700 transition">
                                         + Add Period
@@ -264,13 +342,15 @@
                                 @if($entry->is_break)
                                     <div class="flex items-center justify-between rounded-xl border border-amber-200 bg-amber-50/60 px-4 py-3">
                                         <div class="flex items-center gap-3">
-                                            <span class="text-base">☕</span>
+                                            <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-100 text-amber-700">
+                                                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                            </div>
                                             <div>
                                                 <div class="text-xs font-bold text-amber-900 uppercase tracking-wide">{{ $entry->break_text ?? 'BREAK' }}</div>
                                                 <div class="text-[11px] text-amber-700">{{ substr($entry->starts_at, 0, 5) }} – {{ substr($entry->ends_at, 0, 5) }}</div>
                                             </div>
                                         </div>
-                                        @if($isAdmin)
+                                        @if($isAdmin && !$isStaffScope)
                                             <button type="button" wire:click="edit({{ $entry->id }})" x-data x-on:click="$dispatch('open-modal', 'timetable-form')" class="text-xs font-semibold text-amber-800 hover:underline">
                                                 Edit
                                             </button>
@@ -304,10 +384,14 @@
                                                 {{ substr($entry->starts_at, 0, 5) }} – {{ substr($entry->ends_at, 0, 5) }}
                                             </div>
                                             <div>
-                                                <div class="text-sm font-bold text-slate-900">{{ $entry->subject?->name }}</div>
+                                                <div class="text-sm font-bold text-slate-900">{{ $entry->subject?->name ?? 'Untitled' }}</div>
                                                 <div class="flex items-center gap-3 text-xs text-slate-500 mt-0.5">
-                                                    @if($entry->teacher?->name)
-                                                        <span>{{ $entry->teacher->name }}</span>
+                                                    @if($isStaffScope)
+                                                        <span class="font-semibold text-blue-700">{{ $entry->schoolClass?->name ?? 'Class' }}{{ $entry->section ? ' (' . $entry->section->name . ')' : '' }}</span>
+                                                    @else
+                                                        @if($entry->teacher?->name)
+                                                            <span>{{ $entry->teacher->name }}</span>
+                                                        @endif
                                                     @endif
                                                     @if($entry->room)
                                                         <span class="text-slate-400">Room {{ $entry->room }}</span>
@@ -315,7 +399,7 @@
                                                 </div>
                                             </div>
                                         </div>
-                                        @if($isAdmin)
+                                        @if($isAdmin && !$isStaffScope)
                                             <button type="button" wire:click="edit({{ $entry->id }})" x-data x-on:click="$dispatch('open-modal', 'timetable-form')" class="text-xs font-semibold text-blue-600 hover:underline">
                                                 Edit
                                             </button>

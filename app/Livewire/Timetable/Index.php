@@ -24,6 +24,9 @@ class Index extends Component
     public ?int $day = null;
     public $debugPing = null;
     
+    public string $scheduleScope = 'class'; // 'class' or 'staff'
+    public $teacherFilterId = null;
+    
     public string $viewMode = 'grid'; // 'grid' or 'daily'
     public int $activeDayTab = 1;
 
@@ -113,6 +116,16 @@ class Index extends Component
             ->get(['id', 'name']);
     }
 
+    #[Computed]
+    public function selectedTeacher()
+    {
+        if (! $this->teacherFilterId) {
+            return null;
+        }
+
+        return User::query()->find($this->teacherFilterId);
+    }
+
     public function mount(): void
     {
         $user = auth()->user();
@@ -125,12 +138,37 @@ class Index extends Component
         $this->activeDayTab = $day;
         $this->entryDay = $day;
 
-        if ($user->role === 'parent') {
+        if ($user->role === 'teacher') {
+            $this->scheduleScope = 'staff';
+            $this->teacherFilterId = $user->id;
+        } elseif ($user->role === 'parent') {
+            $this->scheduleScope = 'class';
             $firstClass = $this->classes->first();
             if ($firstClass) {
                 $this->classId = $firstClass->id;
                 $child = $user->students()->where('class_id', $firstClass->id)->first();
                 $this->sectionId = $child?->section_id;
+            }
+        } else {
+            $firstClass = $this->classes->first();
+            if ($firstClass && ! $this->classId) {
+                $this->classId = $firstClass->id;
+            }
+        }
+    }
+
+    public function updatedScheduleScope(): void
+    {
+        $this->editingId = null;
+        if ($this->scheduleScope === 'staff' && ! $this->teacherFilterId) {
+            $firstTeacher = $this->teachers->first();
+            if ($firstTeacher) {
+                $this->teacherFilterId = $firstTeacher->id;
+            }
+        } elseif ($this->scheduleScope === 'class' && ! $this->classId) {
+            $firstClass = $this->classes->first();
+            if ($firstClass) {
+                $this->classId = $firstClass->id;
             }
         }
     }
@@ -141,6 +179,11 @@ class Index extends Component
         $this->sectionId = null;
         $this->editingId = null;
         unset($this->sections);
+    }
+
+    public function updatedTeacherFilterId(): void
+    {
+        $this->editingId = null;
     }
 
     public function updatedEntryClassId(): void
@@ -431,17 +474,29 @@ class Index extends Component
             abort(403);
         }
 
-        // Ensure classId is properly cast
-        $classId = $this->classId ? (int) $this->classId : null;
+        $entries = collect();
 
-        $entries = $classId
-            ? TimetableEntry::query()
-                ->with(['subject:id,name', 'teacher:id,name'])
-                ->where('class_id', $classId)
-                ->orderBy('day_of_week')
-                ->orderBy('starts_at')
-                ->get()
-            : collect();
+        if ($this->scheduleScope === 'staff') {
+            $teacherId = $this->teacherFilterId ? (int) $this->teacherFilterId : null;
+            if ($teacherId) {
+                $entries = TimetableEntry::query()
+                    ->with(['subject:id,name', 'teacher:id,name', 'schoolClass:id,name', 'section:id,name'])
+                    ->where('teacher_id', $teacherId)
+                    ->orderBy('day_of_week')
+                    ->orderBy('starts_at')
+                    ->get();
+            }
+        } else {
+            $classId = $this->classId ? (int) $this->classId : null;
+            if ($classId) {
+                $entries = TimetableEntry::query()
+                    ->with(['subject:id,name', 'teacher:id,name', 'schoolClass:id,name', 'section:id,name'])
+                    ->where('class_id', $classId)
+                    ->orderBy('day_of_week')
+                    ->orderBy('starts_at')
+                    ->get();
+            }
+        }
 
         $hasSaturday = $entries->where('day_of_week', 6)->isNotEmpty();
         $dayNumbers = [1, 2, 3, 4, 5];

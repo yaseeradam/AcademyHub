@@ -204,7 +204,7 @@ class Index extends Component
             });
         }
 
-        return $query->limit(20)->get(['id', 'name', 'role', 'profile_photo']);
+        return $query->limit(50)->get(['id', 'name', 'role', 'profile_photo']);
     }
 
     #[Computed]
