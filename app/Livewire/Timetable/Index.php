@@ -27,7 +27,7 @@ class Index extends Component
     public string $scheduleScope = 'class'; // 'class' or 'staff'
     public $teacherFilterId = null;
     
-    public string $viewMode = 'grid'; // 'grid' or 'daily'
+    public string $viewMode = 'conventional'; // 'conventional', 'grid', or 'daily'
     public int $activeDayTab = 1;
 
     public ?int $editingId = null;
@@ -124,6 +124,52 @@ class Index extends Component
         }
 
         return User::query()->find($this->teacherFilterId);
+    }
+
+    #[Computed]
+    public function selectedClassTeacher()
+    {
+        if (! $this->classId) {
+            return null;
+        }
+
+        $teacherId = SubjectAllocation::query()
+            ->where('class_id', $this->classId)
+            ->whereHas('teacher', fn($q) => $q->where('is_class_teacher', true))
+            ->value('teacher_id');
+
+        if ($teacherId) {
+            return User::find($teacherId)?->name;
+        }
+
+        $firstTeacherId = SubjectAllocation::query()
+            ->where('class_id', $this->classId)
+            ->whereNotNull('teacher_id')
+            ->value('teacher_id');
+
+        if ($firstTeacherId) {
+            return User::find($firstTeacherId)?->name;
+        }
+
+        $designatedTeacher = User::query()
+            ->where('role', 'teacher')
+            ->where('is_class_teacher', true)
+            ->where('is_active', true)
+            ->first();
+
+        return $designatedTeacher?->name;
+    }
+
+    #[Computed]
+    public function schoolInfo()
+    {
+        $activeTerm = \App\Models\AcademicTerm::active();
+        return [
+            'name' => config('academyhub.school_name', config('app.name', 'AI INTEGRATED ACADEMY ARGUNGU')),
+            'motto' => config('academyhub.school_motto', 'LEARNING TODAY LEADING TOMORROW'),
+            'term' => $activeTerm?->name ?? 'First Term',
+            'session' => $activeTerm?->session?->name ?? \App\Models\AcademicSession::activeName() ?? now()->format('Y') . '/' . (now()->year + 1),
+        ];
     }
 
     public function mount(): void
@@ -339,6 +385,39 @@ class Index extends Component
         $this->dispatch('alert', message: 'Entry deleted.', type: 'success');
     }
 
+    public function loadConventionalTemplate(): void
+    {
+        $user = auth()->user();
+        abort_unless($user?->role === 'admin', 403);
+        abort_unless($this->classId, 400);
+
+        for ($day = 1; $day <= 5; $day++) {
+            TimetableEntry::query()->updateOrCreate(
+                [
+                    'class_id' => (int) $this->classId,
+                    'day_of_week' => $day,
+                    'starts_at' => '09:30',
+                    'ends_at' => '09:40',
+                ],
+                [
+                    'class_id' => (int) $this->classId,
+                    'section_id' => null,
+                    'day_of_week' => $day,
+                    'starts_at' => '09:30',
+                    'ends_at' => '09:40',
+                    'subject_id' => null,
+                    'teacher_id' => null,
+                    'room' => null,
+                    'is_break' => true,
+                    'break_text' => 'BREAK',
+                    'color' => 'slate',
+                ]
+            );
+        }
+
+        $this->dispatch('alert', message: 'Conventional timetable structure initialized.', type: 'success');
+    }
+
     private function ensureNoConflicts(
         ?int $editingId,
         int $classId,
@@ -523,11 +602,87 @@ class Index extends Component
             }
         }
 
+        $conventionalSlots = [
+            [
+                'period' => 1,
+                'label' => '1',
+                'time' => '8:00am – 8:30am',
+                'start' => '08:00',
+                'end' => '08:30',
+                'is_break' => false,
+            ],
+            [
+                'period' => 2,
+                'label' => '2',
+                'time' => '8:30am – 9:00am',
+                'start' => '08:30',
+                'end' => '09:00',
+                'is_break' => false,
+            ],
+            [
+                'period' => 3,
+                'label' => '3',
+                'time' => '9:00am – 9:30am',
+                'start' => '09:00',
+                'end' => '09:30',
+                'is_break' => false,
+            ],
+            [
+                'period' => 'break',
+                'label' => 'BREAK',
+                'time' => '9:30am – 9:40am',
+                'start' => '09:30',
+                'end' => '09:40',
+                'is_break' => true,
+            ],
+            [
+                'period' => 4,
+                'label' => '4',
+                'time' => '9:40am – 10:10am',
+                'start' => '09:40',
+                'end' => '10:10',
+                'is_break' => false,
+            ],
+            [
+                'period' => 5,
+                'label' => '5',
+                'time' => '10:10am – 10:40am',
+                'start' => '10:10',
+                'end' => '10:40',
+                'is_break' => false,
+            ],
+            [
+                'period' => 6,
+                'label' => '6',
+                'time' => '10:40am – 1:10pm',
+                'start' => '10:40',
+                'end' => '13:10',
+                'is_break' => false,
+            ],
+        ];
+
+        $conventionalMap = [];
+        foreach ($entries as $entry) {
+            $eStart = $this->timeToSeconds(substr((string) $entry->starts_at, 0, 5));
+            $eEnd = $this->timeToSeconds(substr((string) $entry->ends_at, 0, 5));
+
+            foreach ($conventionalSlots as $idx => $cSlot) {
+                $cStart = $this->timeToSeconds($cSlot['start']);
+                $cEnd = $this->timeToSeconds($cSlot['end']);
+
+                if ($this->overlaps($eStart, $eEnd, $cStart, $cEnd)) {
+                    $conventionalMap[$entry->day_of_week][$idx] = $entry;
+                }
+            }
+        }
+
         return view('livewire.timetable.index', [
             'isAdmin' => $user->role === 'admin',
             'days' => $days,
             'timeSlots' => $timeSlots,
             'slotMap' => $slotMap,
+            'conventionalSlots' => $conventionalSlots,
+            'conventionalMap' => $conventionalMap,
             'entries' => $entries,
         ]);
     }

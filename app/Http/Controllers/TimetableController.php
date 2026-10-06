@@ -89,8 +89,40 @@ class TimetableController extends Controller
             }
         }
 
+        // Conventional slots & mapping matching the poster
+        $conventionalSlots = [
+            ['period' => 1, 'label' => '1', 'time' => '8:00am – 8:30am', 'start' => '08:00', 'end' => '08:30'],
+            ['period' => 2, 'label' => '2', 'time' => '8:30am – 9:00am', 'start' => '08:30', 'end' => '09:00'],
+            ['period' => 3, 'label' => '3', 'time' => '9:00am – 9:30am', 'start' => '09:00', 'end' => '09:30'],
+            ['period' => 'break', 'label' => 'BREAK', 'time' => '9:30am – 9:40am', 'start' => '09:30', 'end' => '09:40'],
+            ['period' => 4, 'label' => '4', 'time' => '9:40am – 10:10am', 'start' => '09:40', 'end' => '10:10'],
+            ['period' => 5, 'label' => '5', 'time' => '10:10am – 10:40am', 'start' => '10:10', 'end' => '10:40'],
+            ['period' => 6, 'label' => '6', 'time' => '10:40am – 1:10pm', 'start' => '10:40', 'end' => '13:10'],
+        ];
+
+        $conventionalMap = [];
+        foreach ($entries as $entry) {
+            $eStart = $this->timeToSeconds(substr((string) $entry->starts_at, 0, 5));
+            $eEnd = $this->timeToSeconds(substr((string) $entry->ends_at, 0, 5));
+
+            foreach ($conventionalSlots as $idx => $cSlot) {
+                $cStart = $this->timeToSeconds($cSlot['start']);
+                $cEnd = $this->timeToSeconds($cSlot['end']);
+
+                if (max($eStart, $cStart) < min($eEnd, $cEnd)) {
+                    $conventionalMap[$entry->day_of_week][$idx] = $entry;
+                }
+            }
+        }
+
+        // Class teacher lookup
+        $classTeacherName = $class->teachers()->first()?->name
+            ?? $class->teacher?->name
+            ?? $entries->firstWhere('teacher_id', '!=', null)?->teacher?->name;
+
         // School info
-        $schoolName = config('academyhub.school_name', config('app.name', 'School'));
+        $schoolName = config('academyhub.school_name', config('app.name', 'AI INTEGRATED ACADEMY ARGUNGU'));
+        $schoolMotto = config('academyhub.school_motto', 'LEARNING TODAY LEADING TOMORROW');
         $schoolAddress = config('academyhub.school_address', '');
         $schoolPhone = config('academyhub.school_phone', '');
         $schoolEmail = config('academyhub.school_email', '');
@@ -107,8 +139,8 @@ class TimetableController extends Controller
 
         // Term + session
         $activeTerm = AcademicTerm::active();
-        $termLabel = $activeTerm?->name ?? 'Term';
-        $sessionLabel = $activeTerm?->session?->name ?? AcademicSession::activeName() ?? now()->format('Y');
+        $termLabel = $activeTerm?->name ?? 'First Term';
+        $sessionLabel = $activeTerm?->session?->name ?? AcademicSession::activeName() ?? now()->format('Y') . '/' . (now()->year + 1);
 
         $pdf = Pdf::loadView('pdf.timetable', [
             'class' => $class,
@@ -116,7 +148,11 @@ class TimetableController extends Controller
             'days' => $days,
             'timeSlots' => $timeSlots,
             'slotMap' => $slotMap,
+            'conventionalSlots' => $conventionalSlots,
+            'conventionalMap' => $conventionalMap,
+            'classTeacherName' => $classTeacherName,
             'schoolName' => $schoolName,
+            'schoolMotto' => $schoolMotto,
             'schoolAddress' => $schoolAddress,
             'schoolPhone' => $schoolPhone,
             'schoolEmail' => $schoolEmail,

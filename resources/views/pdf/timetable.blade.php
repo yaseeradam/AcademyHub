@@ -3,11 +3,11 @@
 
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-    <title>Timetable – {{ $class->name }}</title>
+    <title>Conventional Timetable – {{ $class->name }}</title>
     <style>
         @page {
             size: A4 landscape;
-            margin: 12mm 10mm;
+            margin: 8mm 10mm;
         }
 
         * {
@@ -18,227 +18,256 @@
 
         body {
             font-family: 'DejaVu Sans', sans-serif;
-            font-size: 9px;
-            color: #1e293b;
+            font-size: 8.5px;
+            color: #0C1E40;
             background: #ffffff;
         }
 
-        /* ── Header layout ── */
+        /* ── Outer Gold & Inner Navy Frame ── */
+        .poster-outer {
+            border: 3.5px solid #C59B27;
+            padding: 6px;
+            background: #ffffff;
+        }
+
+        .poster-inner {
+            border: 2px solid #0C1E40;
+            padding: 10px 14px 8px 14px;
+            background: #ffffff;
+        }
+
+        /* ── Header ── */
         .header-table {
             width: 100%;
-            border: none;
             border-collapse: collapse;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
         }
 
         .header-table td {
-            border: none;
             vertical-align: middle;
-            padding: 0;
+            border: none;
         }
 
-        .logo-cell {
-            width: 60px;
-            padding-right: 12px;
+        .logo-box {
+            width: 70px;
+            height: 70px;
+            border: 2px solid #C59B27;
+            border-radius: 50%;
+            text-align: center;
+            background: #0C1E40;
+            color: #ffffff;
+            padding-top: 10px;
+            box-sizing: border-box;
         }
 
-        .logo-cell img {
-            width: 55px;
-            height: 55px;
-            border-radius: 6px;
-        }
-
-        .school-name {
-            font-size: 20px;
-            font-weight: bold;
-            color: #0c4a6e;
+        .school-title {
+            font-size: 16px;
+            font-weight: 900;
+            color: #0C1E40;
+            text-align: center;
             text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 2px;
+            letter-spacing: 0.5px;
+            margin-bottom: 3px;
         }
 
-        .school-details {
-            font-size: 8px;
-            color: #64748b;
-        }
-
-        /* ── Title bar ── */
-        .title-bar {
-            width: 100%;
-            border: none;
-            border-collapse: collapse;
-            border-radius: 6px;
-            margin-bottom: 12px;
-        }
-
-        .title-bar td {
-            background: #0ea5e9;
-            color: white;
-            padding: 8px 16px;
-            border: none;
-            vertical-align: middle;
-        }
-
-        .title-bar td:first-child {
-            border-radius: 6px 0 0 6px;
-        }
-
-        .title-bar td:last-child {
-            border-radius: 0 6px 6px 0;
-            text-align: right;
+        .motto-line {
+            text-align: center;
+            font-size: 8.5px;
+            color: #8C6D15;
+            font-weight: bold;
+            margin-bottom: 3px;
         }
 
         .doc-title {
-            font-size: 14px;
+            text-align: center;
+            font-size: 12px;
+            font-weight: 900;
+            color: #0C1E40;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            text-decoration: underline;
+        }
+
+        /* ── Metadata Box ── */
+        .meta-card {
+            border: 1.5px solid #0C1E40;
+            border-radius: 6px;
+            padding: 4px 6px;
+            background: #fdfbf7;
+            width: 170px;
+            font-size: 8px;
+        }
+
+        .meta-row {
+            border-bottom: 0.5px solid #e2d9c2;
+            padding: 2px 0;
+        }
+
+        .meta-label {
             font-weight: bold;
-            letter-spacing: 0.5px;
-        }
-
-        .doc-subtitle {
-            font-size: 9px;
-            opacity: 0.9;
-            margin-top: 2px;
-        }
-
-        .badge {
+            color: #0C1E40;
             display: inline-block;
-            background: rgba(255, 255, 255, 0.25);
-            padding: 3px 10px;
-            border-radius: 10px;
-            font-size: 9px;
-            font-weight: bold;
+            width: 75px;
         }
 
-        /* ── Timetable grid ── */
+        .meta-value {
+            font-weight: 800;
+            color: #1e293b;
+        }
+
+        /* ── Main Timetable Table ── */
         .timetable {
             width: 100%;
             border-collapse: collapse;
-            border: 2px solid #cbd5e1;
+            border: 2px solid #0C1E40;
+            margin-top: 4px;
         }
 
-        .timetable thead tr {
-            background: #1e40af;
-        }
-
-        .timetable th {
-            color: #ffffff;
-            padding: 8px 4px;
+        .timetable th, .timetable td {
+            border: 1.5px solid #0C1E40;
             text-align: center;
-            font-size: 9px;
-            font-weight: bold;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            border: 1px solid #3b82f6;
-        }
-
-        .timetable th.time-col {
-            width: 11%;
-            background: #1e3a8a;
-        }
-
-        .timetable tbody tr:nth-child(even) {
-            background: #f8fafc;
-        }
-
-        .timetable tbody tr:nth-child(odd) {
-            background: #ffffff;
-        }
-
-        .timetable td {
-            padding: 4px;
-            border: 1px solid #e2e8f0;
-            vertical-align: top;
-        }
-
-        .timetable td.time-cell {
-            background: #f1f5f9;
-            font-weight: bold;
-            text-align: center;
-            color: #334155;
-            font-size: 8px;
             vertical-align: middle;
-            border-right: 2px solid #cbd5e1;
         }
 
-        /* ── Entry card colors ── */
-        .entry-card {
-            border-radius: 4px;
-            padding: 4px 5px;
-            border: 1px solid #cbd5e1;
-            border-left: 3px solid #64748b;
-            background: #f1f5f9;
+        .th-days {
+            background: #0C1E40;
+            color: #F6C445;
+            font-size: 9.5px;
+            font-weight: 900;
+            width: 12%;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            padding: 4px;
         }
 
-        .entry-card.color-slate { background: #f1f5f9; border-color: #cbd5e1; border-left-color: #64748b; }
-        .entry-card.color-blue { background: #eff6ff; border-color: #bfdbfe; border-left-color: #3b82f6; }
-        .entry-card.color-indigo { background: #eef2ff; border-color: #c7d2fe; border-left-color: #4f46e5; }
-        .entry-card.color-violet { background: #f5f3ff; border-color: #ddd6fe; border-left-color: #7c3aed; }
-        .entry-card.color-purple { background: #faf5ff; border-color: #e9d5ff; border-left-color: #a855f7; }
-        .entry-card.color-pink { background: #fdf2f8; border-color: #fbcfe8; border-left-color: #ec4899; }
-        .entry-card.color-red { background: #fef2f2; border-color: #fca5a5; border-left-color: #ef4444; }
-        .entry-card.color-orange { background: #fff7ed; border-color: #ffedd5; border-left-color: #f97316; }
-        .entry-card.color-amber { background: #fffbeb; border-color: #fde68a; border-left-color: #f59e0b; }
-        .entry-card.color-yellow { background: #fefce8; border-color: #fef08a; border-left-color: #eab308; }
-        .entry-card.color-green { background: #f0fdf4; border-color: #bbf7d0; border-left-color: #22c55e; }
-        .entry-card.color-emerald { background: #ecfdf5; border-color: #a7f3d0; border-left-color: #10b981; }
-        .entry-card.color-teal { background: #f0fdfa; border-color: #99f6e4; border-left-color: #14b8a6; }
-        .entry-card.color-cyan { background: #ecfeff; border-color: #a5f3fc; border-left-color: #06b6d4; }
-        .entry-card.color-sky { background: #f0f9ff; border-color: #bae6fd; border-left-color: #0ea5e9; }
+        .th-periods-bar {
+            background: #0C1E40;
+            color: #ffffff;
+            font-size: 10px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            padding: 4px;
+        }
 
-        .entry-card.is-break {
-            padding: 8px 4px;
+        .th-slot {
+            background: #17274E;
+            color: #ffffff;
+            padding: 3px 2px;
+            font-size: 8px;
+        }
+
+        .th-slot-num {
+            font-size: 9.5px;
+            font-weight: 900;
+            color: #F6C445;
+        }
+
+        .th-slot-time {
+            font-size: 7px;
+            color: #dbeafe;
+            white-space: nowrap;
+        }
+
+        .th-break {
+            background: #DCE7F5;
+            color: #0C1E40;
+            font-size: 7.5px;
+            font-weight: 900;
+            width: 8%;
+            padding: 2px;
+        }
+
+        .day-cell {
+            background: #F4F7FC;
+            font-weight: 900;
+            color: #0C1E40;
+            font-size: 8.5px;
+            text-transform: uppercase;
+            padding: 6px 3px;
+        }
+
+        .entry-cell {
+            padding: 4px 2px;
+            height: 38px;
+        }
+
+        .subject-name {
+            font-size: 8.5px;
+            font-weight: 900;
+            color: #0C1E40;
+            text-transform: uppercase;
+            line-height: 1.1;
+        }
+
+        .teacher-name {
+            font-size: 7px;
+            color: #475569;
+            margin-top: 1px;
+        }
+
+        .break-vertical {
+            background: #DCE7F5;
+            color: #0C1E40;
+            font-weight: 900;
+            text-align: center;
+            vertical-align: middle;
+            font-size: 7.5px;
+            padding: 6px 2px;
+        }
+
+        /* ── Notes ── */
+        .notes-table {
+            width: 100%;
+            margin-top: 6px;
+            border-top: 1px solid #cbd5e1;
+            padding-top: 4px;
+            font-size: 7.5px;
+            color: #334155;
+        }
+
+        /* ── Signatures ── */
+        .signatures-table {
+            width: 100%;
+            margin-top: 16px;
             text-align: center;
         }
 
-        .break-title {
+        .sig-line {
+            border-bottom: 1.5px solid #0C1E40;
+            width: 75%;
+            margin: 0 auto 4px auto;
+            height: 12px;
+        }
+
+        .sig-title {
             font-size: 8px;
-            font-weight: bold;
-            color: #334155;
+            font-weight: 900;
+            color: #0C1E40;
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
 
-        .entry-subject {
-            font-size: 8.5px;
-            font-weight: bold;
-            color: #1e293b;
-            margin-bottom: 2px;
-        }
-
-        .entry-teacher {
-            font-size: 7.5px;
-            color: #475569;
-            margin-bottom: 1px;
-        }
-
-        .entry-room {
-            font-size: 7px;
-            color: #64748b;
-            font-weight: 600;
-        }
-
-        .empty-cell {
-            text-align: center;
-            color: #cbd5e1;
-            font-size: 11px;
-            padding: 8px 0;
-        }
-
-        /* ── Footer ── */
-        .footer-table {
+        /* ── Bottom Motto & Flourish ── */
+        .bottom-motto-table {
             width: 100%;
-            border: none;
-            border-collapse: collapse;
-            margin-top: 10px;
-            border-top: 1px solid #e2e8f0;
-            padding-top: 6px;
+            margin-top: 14px;
+            text-align: center;
         }
 
-        .footer-table td {
-            border: none;
-            font-size: 7px;
-            color: #94a3b8;
-            padding: 4px 0 0 0;
+        .bottom-motto-text {
+            font-size: 9px;
+            font-weight: 900;
+            color: #0C1E40;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .flourish-line {
+            border-top: 2px solid #C59B27;
+            height: 2px;
+            display: inline-block;
+            width: 90px;
             vertical-align: middle;
         }
     </style>
@@ -246,184 +275,248 @@
 
 <body>
 
-    {{-- ═══════ HEADER ═══════ --}}
-    <table class="header-table" style="width: 100%; border-bottom: 2px solid #0c4a6e; padding-bottom: 8px; margin-bottom: 15px;">
-        <tr>
-            @if($logoBase64)
-                <td class="logo-cell" style="width: 65px; vertical-align: middle;">
-                    <img src="{{ $logoBase64 }}" alt="Logo" style="width: 60px; height: 60px; border-radius: 8px;">
-                </td>
-            @endif
-            <td style="vertical-align: middle; text-align: left;">
-                <div class="school-name" style="font-size: 18px; font-weight: 900; color: #0c4a6e; letter-spacing: 0.5px; text-transform: uppercase;">{{ $schoolName }}</div>
-                @if($schoolAddress || $schoolPhone || $schoolEmail)
-                    <div class="school-details" style="font-size: 8px; color: #475569; margin-top: 3px; font-weight: 500;">
-                        {{ implode('  •  ', array_filter([$schoolAddress, $schoolPhone, $schoolEmail])) }}
-                    </div>
-                @endif
-            </td>
-            <td style="vertical-align: middle; text-align: right;">
-                <div style="font-size: 14px; font-weight: 900; color: #0c4a6e; text-transform: uppercase; letter-spacing: 1px;">Weekly Timetable</div>
-                <div style="font-size: 11px; font-weight: 800; color: #0ea5e9; margin-top: 2px;">
-                    Class: {{ $class->name }}@if($section) — {{ $section->name }}@endif
-                </div>
-                <div style="font-size: 9px; font-weight: bold; color: #64748b; margin-top: 2px;">
-                    {{ $termLabel }} &bull; {{ $sessionLabel }} Session
-                </div>
-            </td>
-        </tr>
-    </table>
+    <div class="poster-outer">
+        <div class="poster-inner">
 
-    {{-- ═══════ TIMETABLE GRID ═══════ --}}
-    <table class="timetable">
-        <thead>
-            <tr>
-                <th class="time-col" style="background: #1e3a8a; width: 10%;">Time / Date</th>
-                @foreach($timeSlots as $slot)
-                    <th style="font-size: 8px;">{{ $slot['label'] }}</th>
-                @endforeach
-            </tr>
-        </thead>
-        <tbody>
-            @php
-                $rendered = [];
-            @endphp
-            @foreach($days as $dayNum => $dayName)
-            <tr>
-                <td class="time-cell" style="font-weight: bold; background: #f8fafc; border-right: 2px solid #cbd5e1; text-align: center; vertical-align: middle;">
-                    {{ substr($dayName, 0, 3) }}
-                </td>
-                @foreach($timeSlots as $slot)
+            {{-- 1. POSTER HEADER --}}
+            <table class="header-table">
+                <tr>
+                    {{-- Left Emblem --}}
+                    <td style="width: 80px;">
+                        @if($logoBase64)
+                            <img src="{{ $logoBase64 }}" style="width: 65px; height: 65px; border-radius: 50%; border: 2px solid #C59B27;">
+                        @else
+                            <div class="logo-box">
+                                <div style="font-size: 14px; font-weight: bold; color: #F6C445;">★</div>
+                                <div style="font-size: 6.5px; font-weight: 900; letter-spacing: 0.5px;">ACADEMY</div>
+                            </div>
+                        @endif
+                    </td>
+
+                    {{-- Center Titles --}}
+                    <td>
+                        <div class="school-title">{{ $schoolName }}</div>
+                        <div class="motto-line">
+                            &mdash; MOTTO: <em>{{ $schoolMotto }}</em> &mdash;
+                        </div>
+                        <div class="doc-title">CONVENTIONAL TIMETABLE</div>
+                    </td>
+
+                    {{-- Right Meta Card --}}
+                    <td style="width: 180px; text-align: right;">
+                        <table class="meta-card">
+                            <tr class="meta-row">
+                                <td class="meta-label">CLASS:</td>
+                                <td class="meta-value" style="font-size: 9px; color: #0C1E40;">{{ $class->name }}@if($section) ({{ $section->name }})@endif</td>
+                            </tr>
+                            <tr class="meta-row">
+                                <td class="meta-label">TERM:</td>
+                                <td class="meta-value">{{ $termLabel }}</td>
+                            </tr>
+                            <tr class="meta-row">
+                                <td class="meta-label">SESSION:</td>
+                                <td class="meta-value">{{ $sessionLabel }}</td>
+                            </tr>
+                            <tr>
+                                <td class="meta-label" style="font-size: 7px;">CLASS TEACHER:</td>
+                                <td class="meta-value" style="font-size: 7.5px; color: #8C6D15;">{{ $classTeacherName ?? 'NOT ASSIGNED' }}</td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+            </table>
+
+            {{-- 2. TIMETABLE GRID TABLE --}}
+            <table class="timetable">
+                <thead>
+                    <tr>
+                        <th rowspan="2" class="th-days">DAYS</th>
+                        <th colspan="7" class="th-periods-bar">PERIODS &amp; TIME</th>
+                    </tr>
+                    <tr>
+                        <th class="th-slot" style="width: 13%;">
+                            <div class="th-slot-num">1</div>
+                            <div class="th-slot-time">8:00am &ndash; 8:30am</div>
+                        </th>
+                        <th class="th-slot" style="width: 13%;">
+                            <div class="th-slot-num">2</div>
+                            <div class="th-slot-time">8:30am &ndash; 9:00am</div>
+                        </th>
+                        <th class="th-slot" style="width: 13%;">
+                            <div class="th-slot-num">3</div>
+                            <div class="th-slot-time">9:00am &ndash; 9:30am</div>
+                        </th>
+                        <th class="th-break">
+                            <div style="font-weight: 900; font-size: 8px;">BREAK</div>
+                            <div style="font-size: 6.5px; font-weight: bold;">9:30&ndash;9:40</div>
+                        </th>
+                        <th class="th-slot" style="width: 13%;">
+                            <div class="th-slot-num">4</div>
+                            <div class="th-slot-time">9:40am &ndash; 10:10am</div>
+                        </th>
+                        <th class="th-slot" style="width: 13%;">
+                            <div class="th-slot-num">5</div>
+                            <div class="th-slot-time">10:10am &ndash; 10:40am</div>
+                        </th>
+                        <th class="th-slot" style="width: 15%;">
+                            <div class="th-slot-num">6</div>
+                            <div class="th-slot-time">10:40am &ndash; 1:10pm</div>
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
                     @php
-                        // Check if already rendered as part of a rowspan
-                        if (isset($rendered[$dayNum][$slot['key']])) {
-                            continue;
-                        }
-
-                        $entry = $slotMap[$dayNum][$slot['key']] ?? null;
+                        $weekdays = [
+                            1 => 'MONDAY',
+                            2 => 'TUESDAY',
+                            3 => 'WEDNESDAY',
+                            4 => 'THURSDAY',
+                            5 => 'FRIDAY',
+                        ];
                     @endphp
 
-                    @if($entry && $entry->is_break)
-                        @php
-                            $targetText = trim($entry->break_text ?? 'BREAK');
-                            $rowspan = 1;
-                            
-                            for ($d = $dayNum + 1; $d <= 5; $d++) {
-                                $nextEntry = $slotMap[$d][$slot['key']] ?? null;
-                                if ($nextEntry && $nextEntry->is_break && strcasecmp(trim($nextEntry->break_text ?? 'BREAK'), $targetText) === 0) {
-                                    $rowspan++;
-                                } else {
-                                    break;
-                                }
-                            }
+                    @foreach($weekdays as $dayNumber => $dayName)
+                        <tr>
+                            {{-- Day Cell --}}
+                            <td class="day-cell">{{ $dayName }}</td>
 
-                            // Mark subsequent days as rendered
-                            for ($offset = 1; $offset < $rowspan; $offset++) {
-                                $rendered[$dayNum + $offset][$slot['key']] = true;
-                            }
-
-                            $c = $entry->color ?? 'slate';
-                            $bgColor = match($c) {
-                                'blue'     => '#eff6ff',
-                                'indigo'   => '#eef2ff',
-                                'violet'   => '#f5f3ff',
-                                'purple'   => '#faf5ff',
-                                'pink'     => '#fdf2f8',
-                                'red'      => '#fef2f2',
-                                'orange'   => '#fff7ed',
-                                'amber'    => '#fffbeb',
-                                'yellow'   => '#fefce8',
-                                'green'    => '#f0fdf4',
-                                'emerald'  => '#ecfdf5',
-                                'teal'     => '#f0fdfa',
-                                'cyan'     => '#ecfeff',
-                                'sky'      => '#f0f9ff',
-                                default    => '#f1f5f9',
-                            };
-                            $textColor = match($c) {
-                                'blue'     => '#1e3a8a',
-                                'indigo'   => '#312e81',
-                                'violet'   => '#4c1d95',
-                                'purple'   => '#581c87',
-                                'pink'     => '#9d174d',
-                                'red'      => '#991b1b',
-                                'orange'   => '#9a3412',
-                                'amber'    => '#92400e',
-                                'yellow'   => '#854d0e',
-                                'green'    => '#166534',
-                                'emerald'  => '#065f46',
-                                'teal'     => '#115e59',
-                                'cyan'     => '#155e75',
-                                'sky'      => '#075985',
-                                default    => '#334155',
-                            };
-                            $borderColor = match($c) {
-                                'blue'     => '#bfdbfe',
-                                'indigo'   => '#c7d2fe',
-                                'violet'   => '#ddd6fe',
-                                'purple'   => '#e9d5ff',
-                                'pink'     => '#fbcfe8',
-                                'red'      => '#fca5a5',
-                                'orange'   => '#ffedd5',
-                                'amber'    => '#fde68a',
-                                'yellow'   => '#fef08a',
-                                'green'    => '#bbf7d0',
-                                'emerald'  => '#a7f3d0',
-                                'teal'     => '#99f6e4',
-                                'cyan'     => '#a5f3fc',
-                                'sky'      => '#bae6fd',
-                                default    => '#cbd5e1',
-                            };
-                        @endphp
-                        <td rowspan="{{ $rowspan }}" class="is-break" style="vertical-align: middle; text-align: center; background-color: {{ $bgColor }}; color: {{ $textColor }}; border: 1px solid {{ $borderColor }}; padding: 6px 4px;">
-                            @if($rowspan > 1)
-                                <div style="display: inline-block; font-size: 8px; font-weight: 950; color: {{ $textColor }}; text-transform: uppercase; letter-spacing: 1px;">
-                                    @php
-                                        $chars = mb_str_split($targetText);
-                                        foreach ($chars as $char) {
-                                            if ($char === ' ') {
-                                                echo '<span style="margin: 3px 0; display: block;"></span>';
-                                            } else {
-                                                echo '<span style="display: block; line-height: 1.1;">' . e($char) . '</span>';
-                                            }
-                                        }
-                                    @endphp
-                                </div>
-                            @else
-                                <div style="font-size: 8px; font-weight: 950; color: {{ $textColor }}; text-transform: uppercase; letter-spacing: 0.5px;">
-                                    {{ $targetText }}
-                                </div>
-                            @endif
-                        </td>
-                    @else
-                        <td>
-                            @if($entry)
-                                <div class="entry-card color-{{ $entry->color ?? 'slate' }}">
-                                    <div class="entry-subject">{{ $entry->subject?->name ?? 'N/A' }}</div>
-                                    <div class="entry-teacher">{{ $entry->teacher?->name ?? 'No Teacher' }}</div>
-                                    @if($entry->room)
-                                        <div class="entry-room">Room: {{ $entry->room }}</div>
+                            {{-- Period 1 --}}
+                            @php $slot0 = $conventionalMap[$dayNumber][0] ?? null; @endphp
+                            <td class="entry-cell">
+                                @if($slot0 && !$slot0->is_break)
+                                    <div class="subject-name">{{ $slot0->subject?->name ?? 'Untitled' }}</div>
+                                    @if($slot0->teacher?->name)
+                                        <div class="teacher-name">{{ $slot0->teacher->name }}</div>
                                     @endif
-                                </div>
-                            @else
-                                <div class="empty-cell">—</div>
-                            @endif
-                        </td>
-                    @endif
-                @endforeach
-            </tr>
-            @endforeach
-        </tbody>
-    </table>
+                                @else
+                                    <span style="color: #cbd5e1;">&mdash;</span>
+                                @endif
+                            </td>
 
-    {{-- ═══════ FOOTER ═══════ --}}
-    <table class="footer-table">
-        <tr>
-            <td>{{ $schoolName }} &bull; {{ $termLabel }} &bull; {{ $sessionLabel }} Session</td>
-            <td style="text-align: right;">Generated on {{ now()->format('F j, Y \a\t g:i A') }}</td>
-        </tr>
-    </table>
+                            {{-- Period 2 --}}
+                            @php $slot1 = $conventionalMap[$dayNumber][1] ?? null; @endphp
+                            <td class="entry-cell">
+                                @if($slot1 && !$slot1->is_break)
+                                    <div class="subject-name">{{ $slot1->subject?->name ?? 'Untitled' }}</div>
+                                    @if($slot1->teacher?->name)
+                                        <div class="teacher-name">{{ $slot1->teacher->name }}</div>
+                                    @endif
+                                @else
+                                    <span style="color: #cbd5e1;">&mdash;</span>
+                                @endif
+                            </td>
+
+                            {{-- Period 3 --}}
+                            @php $slot2 = $conventionalMap[$dayNumber][2] ?? null; @endphp
+                            <td class="entry-cell">
+                                @if($slot2 && !$slot2->is_break)
+                                    <div class="subject-name">{{ $slot2->subject?->name ?? 'Untitled' }}</div>
+                                    @if($slot2->teacher?->name)
+                                        <div class="teacher-name">{{ $slot2->teacher->name }}</div>
+                                    @endif
+                                @else
+                                    <span style="color: #cbd5e1;">&mdash;</span>
+                                @endif
+                            </td>
+
+                            {{-- Break Column (rowspan=5 on Monday) --}}
+                            @if($dayNumber === 1)
+                                <td rowspan="5" class="break-vertical">
+                                    <div style="font-weight: 900; font-size: 8px; text-transform: uppercase; letter-spacing: 1px;">
+                                        B<br>R<br>E<br>A<br>K
+                                    </div>
+                                    <div style="font-size: 6.5px; font-weight: bold; margin-top: 8px;">
+                                        9:30am<br>&ndash;<br>9:40am
+                                    </div>
+                                </td>
+                            @endif
+
+                            {{-- Period 4 --}}
+                            @php $slot4 = $conventionalMap[$dayNumber][4] ?? null; @endphp
+                            <td class="entry-cell">
+                                @if($slot4 && !$slot4->is_break)
+                                    <div class="subject-name">{{ $slot4->subject?->name ?? 'Untitled' }}</div>
+                                    @if($slot4->teacher?->name)
+                                        <div class="teacher-name">{{ $slot4->teacher->name }}</div>
+                                    @endif
+                                @else
+                                    <span style="color: #cbd5e1;">&mdash;</span>
+                                @endif
+                            </td>
+
+                            {{-- Period 5 --}}
+                            @php $slot5 = $conventionalMap[$dayNumber][5] ?? null; @endphp
+                            <td class="entry-cell">
+                                @if($slot5 && !$slot5->is_break)
+                                    <div class="subject-name">{{ $slot5->subject?->name ?? 'Untitled' }}</div>
+                                    @if($slot5->teacher?->name)
+                                        <div class="teacher-name">{{ $slot5->teacher->name }}</div>
+                                    @endif
+                                @else
+                                    <span style="color: #cbd5e1;">&mdash;</span>
+                                @endif
+                            </td>
+
+                            {{-- Period 6 --}}
+                            @php $slot6 = $conventionalMap[$dayNumber][6] ?? null; @endphp
+                            <td class="entry-cell">
+                                @if($slot6 && !$slot6->is_break)
+                                    <div class="subject-name">{{ $slot6->subject?->name ?? 'Untitled' }}</div>
+                                    @if($slot6->teacher?->name)
+                                        <div class="teacher-name">{{ $slot6->teacher->name }}</div>
+                                    @endif
+                                @else
+                                    <span style="color: #cbd5e1;">&mdash;</span>
+                                @endif
+                            </td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+
+            {{-- 3. NOTES ROW --}}
+            <table class="notes-table">
+                <tr>
+                    <td style="text-align: left;">
+                        <strong>NOTE:</strong> Periods 1 to 5: 30 minutes each &bull; Period 6: 2 hours 30 minutes
+                    </td>
+                    <td style="text-align: right;">
+                        Closing Time: <strong>1:10 PM</strong> &bull; Recess: <strong>9:30 AM &ndash; 9:40 AM</strong>
+                    </td>
+                </tr>
+            </table>
+
+            {{-- 4. SIGNATURE LINES --}}
+            <table class="signatures-table">
+                <tr>
+                    <td style="width: 50%;">
+                        <div class="sig-line"></div>
+                        <div class="sig-title">CLASS TEACHER'S SIGNATURE</div>
+                    </td>
+                    <td style="width: 50%;">
+                        <div class="sig-line"></div>
+                        <div class="sig-title">PRINCIPAL'S SIGNATURE</div>
+                    </td>
+                </tr>
+            </table>
+
+            {{-- 5. BOTTOM MOTTO & FLOURISHES --}}
+            <table class="bottom-motto-table">
+                <tr>
+                    <td style="width: 30%; text-align: right;">
+                        <span class="flourish-line"></span>
+                    </td>
+                    <td style="width: 40%; text-align: center;">
+                        <span class="bottom-motto-text">{{ $schoolMotto }}</span>
+                    </td>
+                    <td style="width: 30%; text-align: left;">
+                        <span class="flourish-line"></span>
+                    </td>
+                </tr>
+            </table>
+
+        </div>
+    </div>
 
 </body>
-
 </html>
