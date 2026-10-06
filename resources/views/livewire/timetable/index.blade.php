@@ -140,145 +140,151 @@
         @else
             @if($viewMode === 'conventional')
                 {{-- ══════════════════════════════════════════════════════════════
-                     CONVENTIONAL TIMETABLE POSTER (100% REPLICATION OF USER DESIGN)
+                     CONVENTIONAL TIMETABLE POSTER (100% EXACT POSTER REPLICATION)
                 ══════════════════════════════════════════════════════════════ --}}
-                <div class="bg-white rounded-3xl shadow-xl overflow-hidden print:m-0 print:p-0 print:shadow-none print:border-none" id="conventional-timetable-print-area">
-                    {{-- Quick Action Bar for printing / instructions --}}
-                    <div class="flex items-center justify-between px-6 py-3 bg-slate-50 border-b border-slate-200 print:hidden text-xs text-slate-600">
-                        <div class="flex items-center gap-2">
-                            <span class="inline-flex h-2 w-2 rounded-full bg-amber-500"></span>
-                            <span class="font-medium">Conventional Official Timetable Display</span>
-                            @if($isAdmin && !$isStaffScope)
-                                <span class="text-slate-400">&bull;</span>
-                                <span class="text-blue-700 font-semibold">Tip: Click on any period box to edit its subject, teacher, or time</span>
-                            @endif
+                <div class="space-y-4">
+                    {{-- Control Bar (Hidden when Printing) --}}
+                    <div class="flex flex-wrap items-center justify-between gap-3 px-5 py-3.5 bg-white rounded-2xl border border-slate-200/90 shadow-sm print:hidden">
+                        <div class="flex items-center gap-2.5">
+                            <span class="inline-flex h-2.5 w-2.5 rounded-full bg-amber-500 animate-pulse"></span>
+                            <div>
+                                <span class="text-xs font-black uppercase tracking-wider text-slate-800">Official Conventional Timetable</span>
+                                @if($isAdmin && !$isStaffScope)
+                                    <span class="text-slate-400 mx-1.5">&bull;</span>
+                                    <span class="text-xs text-blue-600 font-semibold">Click any subject or empty slot (&mdash;) to edit/assign</span>
+                                @endif
+                            </div>
                         </div>
                         <div class="flex items-center gap-2">
-                            <button type="button" onclick="window.print()" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-900 text-white font-semibold transition shadow-xs">
-                                <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
-                                Print Poster
+                            <button type="button" onclick="window.print()" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#0C1E40] hover:bg-[#17274E] text-amber-300 hover:text-amber-200 font-bold text-xs shadow-md transition-all cursor-pointer">
+                                <svg class="h-4 w-4 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+                                <span>Print Poster (Landscape)</span>
                             </button>
                         </div>
                     </div>
 
-                    {{-- Outer Golden Poster Frame --}}
-                    <div class="p-4 sm:p-7 bg-[#FCFAF5] print:p-2">
-                        <div class="relative bg-white rounded-xl sm:rounded-2xl border-[3.5px] border-[#C59B27] p-3 sm:p-5 shadow-sm">
-                            {{-- Inner Navy Border Frame --}}
-                            <div class="border-[2px] border-[#0C1E40] rounded-lg sm:rounded-xl p-4 sm:p-6 bg-white relative">
-                                
-                                {{-- 1. POSTER HEADER --}}
-                                <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 items-center pb-4 mb-4 border-b border-slate-200">
-                                    {{-- Left: School Emblem Badge --}}
-                                    <div class="lg:col-span-3 flex items-center gap-3">
-                                        <div class="h-16 w-16 sm:h-20 sm:w-20 rounded-full border-2 border-[#C59B27] p-1 bg-white shadow-sm flex items-center justify-center shrink-0">
-                                            <div class="h-full w-full rounded-full bg-gradient-to-br from-[#0C1E40] to-[#17274E] flex flex-col items-center justify-center text-center p-1 text-white border border-[#C59B27]/60">
-                                                <svg class="h-5 w-5 sm:h-6 sm:w-6 text-amber-300 mb-0.5" fill="currentColor" viewBox="0 0 24 24">
-                                                    <path d="M12 2L1 7l11 5 9-4.09V17h2V7L12 2zM3.45 10.55L12 14.44l8.55-3.89V16.5c0 3.03-4.5 5.5-8.55 5.5s-8.55-2.47-8.55-5.5v-5.95z"/>
+                    {{-- POSTER CONTAINER (Target for print) --}}
+                    <div id="conventional-poster-canvas" class="bg-white rounded-3xl p-3 sm:p-6 shadow-xl border border-slate-200/80 overflow-x-auto">
+                        {{-- Outer Gold Border (matches poster) --}}
+                        <div class="poster-outer-frame border-[3.5px] border-[#C59B27] bg-white p-2.5 sm:p-4 rounded-2xl sm:rounded-3xl shadow-xs" style="min-width: 1020px;">
+                            {{-- Inner Navy Border (matches poster) --}}
+                            <div class="poster-inner-frame border-[2px] border-[#0C1E40] bg-white p-4 sm:p-6 rounded-xl sm:rounded-2xl">
+
+                                {{-- ══════ HEADER ROW (Exact 3-column replica) ══════ --}}
+                                <div class="flex items-center justify-between gap-4 pb-3 mb-3">
+                                    {{-- Left: Official Circular Emblem Badge --}}
+                                    <div class="w-48 flex items-center justify-start shrink-0">
+                                        <div class="h-24 w-24 rounded-full border-[2.5px] border-[#C59B27] p-1 bg-white shadow-sm flex items-center justify-center">
+                                            <div class="h-full w-full rounded-full bg-[#0C1E40] border border-[#C59B27]/70 flex flex-col items-center justify-center p-1.5 text-center text-white relative overflow-hidden">
+                                                {{-- Circular emblem design matching AI INTEGRATED ACADEMY ARGUNGU --}}
+                                                <div class="text-[6.5px] font-black uppercase tracking-wider text-amber-200/90 leading-tight">AI INTEGRATED</div>
+                                                <svg class="h-7 w-7 text-amber-400 my-0.5" viewBox="0 0 24 24" fill="currentColor">
+                                                    <path d="M12 3L1 9l11 6 9-4.91V17h2V9L12 3zM3.45 11.55L12 16.22l8.55-4.67V17c0 3.31-4.7 6-8.55 6S3.45 20.31 3.45 17v-5.45z"/>
                                                 </svg>
-                                                <span class="text-[6.5px] font-black uppercase tracking-wider text-amber-200 leading-tight">ACADEMY</span>
+                                                <div class="text-[6px] font-black uppercase tracking-wider text-amber-200/90 leading-tight">ARGUNGU</div>
                                             </div>
-                                        </div>
-                                        <div class="hidden sm:block">
-                                            <div class="text-[10px] font-black tracking-widest text-[#0C1E40] uppercase">ACADEMIC EXCELLENCE</div>
-                                            <div class="text-[9px] text-[#C59B27] font-semibold">Official Academic Schedule</div>
                                         </div>
                                     </div>
 
-                                    {{-- Center: School Name, Motto Lines, and Big Title --}}
-                                    <div class="lg:col-span-6 text-center">
-                                        <h2 class="text-xl sm:text-2xl lg:text-3xl font-black text-[#0C1E40] tracking-tight uppercase font-serif">
+                                    {{-- Center: School Name + Motto + Big Bold Title --}}
+                                    <div class="flex-1 text-center px-2">
+                                        <h1 class="text-2xl sm:text-3xl font-black text-[#0C1E40] tracking-tight uppercase font-serif leading-tight">
                                             {{ $this->schoolInfo['name'] }}
-                                        </h2>
+                                        </h1>
 
-                                        {{-- Horizontal Rules Flanking Mottos & Gold Diamond --}}
+                                        {{-- Motto with horizontal rules & gold diamond --}}
                                         <div class="flex items-center justify-center gap-3 my-1.5">
-                                            <div class="h-[1.5px] w-12 sm:w-20 bg-gradient-to-r from-transparent to-[#C59B27]"></div>
-                                            <div class="flex items-center gap-1.5 text-[9px] sm:text-[10.5px] font-black uppercase tracking-widest text-[#8C6D15]">
-                                                <span>MOTTO:</span>
-                                                <span class="italic text-[#0C1E40] font-serif">{{ $this->schoolInfo['motto'] }}</span>
+                                            <div class="h-[1.5px] w-16 sm:w-28 bg-[#C59B27]"></div>
+                                            <div class="text-[10px] sm:text-[11px] font-black uppercase tracking-[0.2em] text-[#0C1E40]">
+                                                {{ $this->schoolInfo['motto'] }}
                                             </div>
-                                            <div class="h-2 w-2 rotate-45 bg-[#C59B27]"></div>
-                                            <div class="h-[1.5px] w-12 sm:w-20 bg-gradient-to-l from-transparent to-[#C59B27]"></div>
+                                            <div class="h-[1.5px] w-16 sm:w-28 bg-[#C59B27]"></div>
                                         </div>
 
-                                        <div class="mt-1">
-                                            <span class="inline-block text-sm sm:text-base lg:text-lg font-black tracking-[0.2em] text-[#0C1E40] uppercase border-b-2 border-[#0C1E40] pb-0.5">
+                                        {{-- Big Title: CONVENTIONAL TIMETABLE with Gold Diamond Separator --}}
+                                        <div class="flex items-center justify-center gap-3 mt-2">
+                                            <div class="h-2 w-2 rotate-45 bg-[#C59B27]"></div>
+                                            <h2 class="text-lg sm:text-xl font-black tracking-[0.25em] text-[#0C1E40] uppercase">
                                                 CONVENTIONAL TIMETABLE
-                                            </span>
+                                            </h2>
+                                            <div class="h-2 w-2 rotate-45 bg-[#C59B27]"></div>
                                         </div>
                                     </div>
 
-                                    {{-- Right: Meta Box (Class, Term, Session, Class Teacher) --}}
-                                    <div class="lg:col-span-3">
-                                        <div class="border-[1.5px] border-[#0C1E40] rounded-xl p-2.5 sm:p-3 bg-gradient-to-br from-[#FDFBF7] to-[#F5EEDC]/40 text-xs shadow-xs space-y-1.5">
-                                            <div class="flex items-baseline justify-between border-b border-amber-200/70 pb-1">
-                                                <span class="font-bold text-[#0C1E40] text-[11px] tracking-wide">CLASS:</span>
-                                                <span class="font-black text-[#0C1E40] text-sm">{{ $this->selectedClass?->name ?? 'ALL CLASSES' }}</span>
+                                    {{-- Right: Meta Card (CLASS, TERM, SESSION, CLASS TEACHER with underline fills) --}}
+                                    <div class="w-56 shrink-0">
+                                        <div class="border-[1.5px] border-[#0C1E40] rounded-xl p-2.5 sm:p-3 bg-white text-xs space-y-1.5 shadow-2xs">
+                                            <div class="flex items-baseline justify-between border-b border-[#0C1E40]/30 pb-0.5">
+                                                <span class="font-black text-[#0C1E40] text-[10px] tracking-wider uppercase">CLASS:</span>
+                                                <span class="font-extrabold text-[#0C1E40] text-xs uppercase">{{ $this->selectedClass?->name ?? '________' }}</span>
                                             </div>
-                                            <div class="flex items-baseline justify-between border-b border-amber-200/70 pb-1">
-                                                <span class="font-bold text-[#0C1E40] text-[11px] tracking-wide">TERM:</span>
-                                                <span class="font-extrabold text-slate-800 text-xs uppercase">{{ $this->schoolInfo['term'] }}</span>
+                                            <div class="flex items-baseline justify-between border-b border-[#0C1E40]/30 pb-0.5">
+                                                <span class="font-black text-[#0C1E40] text-[10px] tracking-wider uppercase">TERM:</span>
+                                                <span class="font-extrabold text-slate-800 text-[11px] uppercase">{{ $this->schoolInfo['term'] }}</span>
                                             </div>
-                                            <div class="flex items-baseline justify-between border-b border-amber-200/70 pb-1">
-                                                <span class="font-bold text-[#0C1E40] text-[11px] tracking-wide">SESSION:</span>
-                                                <span class="font-extrabold text-slate-800 text-xs">{{ $this->schoolInfo['session'] }}</span>
+                                            <div class="flex items-baseline justify-between border-b border-[#0C1E40]/30 pb-0.5">
+                                                <span class="font-black text-[#0C1E40] text-[10px] tracking-wider uppercase">SESSION:</span>
+                                                <span class="font-extrabold text-slate-800 text-[11px]">{{ $this->schoolInfo['session'] }}</span>
                                             </div>
                                             <div class="flex items-baseline justify-between pt-0.5">
-                                                <span class="font-bold text-[#0C1E40] text-[10px] tracking-wide shrink-0">CLASS TEACHER:</span>
-                                                <span class="font-bold text-[#8C6D15] text-[11px] truncate text-right pl-1">{{ $this->selectedClassTeacher ?? 'NOT ASSIGNED' }}</span>
+                                                <span class="font-black text-[#0C1E40] text-[9.5px] tracking-wider uppercase shrink-0">CLASS TEACHER:</span>
+                                                <span class="font-bold text-[#8C6D15] text-[10.5px] truncate text-right pl-1.5">{{ $this->selectedClassTeacher ?? '_______________' }}</span>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
 
-                                {{-- 2. POSTER TIMETABLE GRID TABLE --}}
-                                <div class="overflow-x-auto pb-2">
-                                    <table class="w-full border-collapse border-2 border-[#0C1E40] text-center" style="min-width: 900px;">
+                                {{-- ══════ TIMETABLE GRID TABLE (Exact Layout & Proportions) ══════ --}}
+                                <div class="mt-2">
+                                    <table class="w-full border-collapse border-[2px] border-[#0C1E40] text-center table-fixed">
                                         <thead>
                                             {{-- Top Navy Bar --}}
                                             <tr class="bg-[#0C1E40] text-white">
-                                                <th rowspan="2" class="border-2 border-[#0C1E40] px-3 py-2 text-xs font-black uppercase tracking-wider text-amber-300 w-28 bg-[#0C1E40]">
+                                                <th rowspan="2" class="border-[2px] border-[#0C1E40] w-[11%] px-2 py-2 text-xs font-black uppercase tracking-wider text-amber-300 bg-[#0C1E40]">
                                                     DAYS
                                                 </th>
-                                                <th colspan="7" class="border-2 border-[#0C1E40] py-2 text-xs font-black uppercase tracking-[0.25em] text-white bg-[#0C1E40]">
+                                                <th colspan="7" class="border-[2px] border-[#0C1E40] py-2 text-xs font-black uppercase tracking-[0.25em] text-white bg-[#0C1E40]">
                                                     PERIODS &amp; TIME
                                                 </th>
                                             </tr>
                                             {{-- Periods & Time Row --}}
-                                            <tr class="bg-[#17274E] text-white text-[11px]">
-                                                {{-- Periods 1 - 3 --}}
-                                                <th class="border-2 border-[#0C1E40] px-2 py-2 font-bold w-[13%]">
-                                                    <div class="font-black text-amber-300 text-xs">1</div>
-                                                    <div class="text-[10px] text-blue-100 font-medium whitespace-nowrap mt-0.5">8:00am &ndash; 8:30am</div>
+                                            <tr class="bg-[#0C1E40] text-white text-[11px]">
+                                                {{-- Period 1 --}}
+                                                <th class="border-[2px] border-[#0C1E40] bg-white text-[#0C1E40] px-1.5 py-1.5 font-bold w-[12.7%]">
+                                                    <div class="font-black text-sm text-[#0C1E40]">1</div>
+                                                    <div class="text-[10px] text-slate-600 font-bold whitespace-nowrap mt-0.5">8:00am &ndash; 8:30am</div>
                                                 </th>
-                                                <th class="border-2 border-[#0C1E40] px-2 py-2 font-bold w-[13%]">
-                                                    <div class="font-black text-amber-300 text-xs">2</div>
-                                                    <div class="text-[10px] text-blue-100 font-medium whitespace-nowrap mt-0.5">8:30am &ndash; 9:00am</div>
+                                                {{-- Period 2 --}}
+                                                <th class="border-[2px] border-[#0C1E40] bg-white text-[#0C1E40] px-1.5 py-1.5 font-bold w-[12.7%]">
+                                                    <div class="font-black text-sm text-[#0C1E40]">2</div>
+                                                    <div class="text-[10px] text-slate-600 font-bold whitespace-nowrap mt-0.5">8:30am &ndash; 9:00am</div>
                                                 </th>
-                                                <th class="border-2 border-[#0C1E40] px-2 py-2 font-bold w-[13%]">
-                                                    <div class="font-black text-amber-300 text-xs">3</div>
-                                                    <div class="text-[10px] text-blue-100 font-medium whitespace-nowrap mt-0.5">9:00am &ndash; 9:30am</div>
-                                                </th>
-
-                                                {{-- Break Column Header --}}
-                                                <th class="border-2 border-[#0C1E40] px-1 py-1 font-bold w-[8%] bg-[#DCE7F5] text-[#0C1E40]">
-                                                    <div class="font-black text-[11px] text-[#0C1E40] tracking-wider uppercase">BREAK</div>
-                                                    <div class="text-[9px] text-[#17274E] font-bold mt-0.5 whitespace-nowrap">9:30&ndash;9:40</div>
+                                                {{-- Period 3 --}}
+                                                <th class="border-[2px] border-[#0C1E40] bg-white text-[#0C1E40] px-1.5 py-1.5 font-bold w-[12.7%]">
+                                                    <div class="font-black text-sm text-[#0C1E40]">3</div>
+                                                    <div class="text-[10px] text-slate-600 font-bold whitespace-nowrap mt-0.5">9:00am &ndash; 9:30am</div>
                                                 </th>
 
-                                                {{-- Periods 4 - 6 --}}
-                                                <th class="border-2 border-[#0C1E40] px-2 py-2 font-bold w-[13%]">
-                                                    <div class="font-black text-amber-300 text-xs">4</div>
-                                                    <div class="text-[10px] text-blue-100 font-medium whitespace-nowrap mt-0.5">9:40am &ndash; 10:10am</div>
+                                                {{-- Recess Break Column Header --}}
+                                                <th class="border-[2px] border-[#0C1E40] px-1 py-1 font-bold w-[6.5%] bg-white text-[#0C1E40]">
+                                                    <div class="font-black text-[10px] text-[#0C1E40] tracking-wider uppercase">BREAK</div>
+                                                    <div class="text-[8px] text-slate-600 font-bold mt-0.5 whitespace-nowrap">9:30&ndash;9:40</div>
                                                 </th>
-                                                <th class="border-2 border-[#0C1E40] px-2 py-2 font-bold w-[13%]">
-                                                    <div class="font-black text-amber-300 text-xs">5</div>
-                                                    <div class="text-[10px] text-blue-100 font-medium whitespace-nowrap mt-0.5">10:10am &ndash; 10:40am</div>
+
+                                                {{-- Period 4 --}}
+                                                <th class="border-[2px] border-[#0C1E40] bg-white text-[#0C1E40] px-1.5 py-1.5 font-bold w-[14.8%]">
+                                                    <div class="font-black text-sm text-[#0C1E40]">4</div>
+                                                    <div class="text-[10px] text-slate-600 font-bold whitespace-nowrap mt-0.5">9:40am &ndash; 10:10am</div>
                                                 </th>
-                                                <th class="border-2 border-[#0C1E40] px-2 py-2 font-bold w-[14%]">
-                                                    <div class="font-black text-amber-300 text-xs">6</div>
-                                                    <div class="text-[10px] text-blue-100 font-medium whitespace-nowrap mt-0.5">10:40am &ndash; 1:10pm</div>
+                                                {{-- Period 5 --}}
+                                                <th class="border-[2px] border-[#0C1E40] bg-white text-[#0C1E40] px-1.5 py-1.5 font-bold w-[14.8%]">
+                                                    <div class="font-black text-sm text-[#0C1E40]">5</div>
+                                                    <div class="text-[10px] text-slate-600 font-bold whitespace-nowrap mt-0.5">10:10am &ndash; 10:40am</div>
+                                                </th>
+                                                {{-- Period 6 --}}
+                                                <th class="border-[2px] border-[#0C1E40] bg-white text-[#0C1E40] px-1.5 py-1.5 font-bold w-[14.8%]">
+                                                    <div class="font-black text-sm text-[#0C1E40]">6</div>
+                                                    <div class="text-[10px] text-slate-600 font-bold whitespace-nowrap mt-0.5">10:40am &ndash; 1:10pm</div>
                                                 </th>
                                             </tr>
                                         </thead>
@@ -294,15 +300,15 @@
                                             @endphp
 
                                             @foreach($weekdays as $dayNumber => $dayName)
-                                                <tr class="hover:bg-amber-50/20 transition-colors h-14">
-                                                    {{-- Day Column Header --}}
-                                                    <td class="border-2 border-[#0C1E40] px-3 py-2 font-black text-[#0C1E40] bg-[#F4F7FC] text-center tracking-wider text-[11px] whitespace-nowrap">
+                                                <tr class="h-16">
+                                                    {{-- Day Column --}}
+                                                    <td class="border-[2px] border-[#0C1E40] px-2 py-2 font-black text-[#0C1E40] bg-white text-center tracking-wider text-[11px] uppercase">
                                                         {{ $dayName }}
                                                     </td>
 
                                                     {{-- Period 1 (idx 0) --}}
                                                     @php $slot0 = $conventionalMap[$dayNumber][0] ?? null; @endphp
-                                                    <td class="border-2 border-[#0C1E40] p-1.5 align-middle relative group {{ $isAdmin && !$isStaffScope ? 'cursor-pointer hover:bg-blue-50/60' : '' }}"
+                                                    <td class="border-[2px] border-[#0C1E40] p-1.5 align-middle relative group bg-white {{ $isAdmin && !$isStaffScope ? 'cursor-pointer hover:bg-amber-50/50' : '' }}"
                                                         @if($isAdmin && !$isStaffScope)
                                                             @if($slot0)
                                                                 wire:click="edit({{ $slot0->id }})" x-data x-on:click="$dispatch('open-modal', 'timetable-form')"
@@ -311,14 +317,11 @@
                                                             @endif
                                                         @endif>
                                                         @if($slot0 && !$slot0->is_break)
-                                                            <div class="font-black text-slate-900 text-xs leading-snug uppercase tracking-tight">
+                                                            <div class="font-extrabold text-[#0C1E40] text-[11.5px] leading-snug">
                                                                 {{ $slot0->subject?->name ?? 'Untitled' }}
                                                             </div>
                                                             @if($slot0->teacher?->name)
-                                                                <div class="text-[10px] text-slate-500 font-medium truncate mt-0.5">{{ $slot0->teacher->name }}</div>
-                                                            @endif
-                                                            @if($slot0->room)
-                                                                <div class="text-[9px] text-[#8C6D15] font-bold">{{ $slot0->room }}</div>
+                                                                <div class="text-[9.5px] text-slate-500 font-medium truncate mt-0.5">{{ $slot0->teacher->name }}</div>
                                                             @endif
                                                         @else
                                                             <span class="text-slate-300 font-serif italic text-sm group-hover:text-blue-500 select-none">&mdash;</span>
@@ -327,7 +330,7 @@
 
                                                     {{-- Period 2 (idx 1) --}}
                                                     @php $slot1 = $conventionalMap[$dayNumber][1] ?? null; @endphp
-                                                    <td class="border-2 border-[#0C1E40] p-1.5 align-middle relative group {{ $isAdmin && !$isStaffScope ? 'cursor-pointer hover:bg-blue-50/60' : '' }}"
+                                                    <td class="border-[2px] border-[#0C1E40] p-1.5 align-middle relative group bg-white {{ $isAdmin && !$isStaffScope ? 'cursor-pointer hover:bg-amber-50/50' : '' }}"
                                                         @if($isAdmin && !$isStaffScope)
                                                             @if($slot1)
                                                                 wire:click="edit({{ $slot1->id }})" x-data x-on:click="$dispatch('open-modal', 'timetable-form')"
@@ -336,14 +339,11 @@
                                                             @endif
                                                         @endif>
                                                         @if($slot1 && !$slot1->is_break)
-                                                            <div class="font-black text-slate-900 text-xs leading-snug uppercase tracking-tight">
+                                                            <div class="font-extrabold text-[#0C1E40] text-[11.5px] leading-snug">
                                                                 {{ $slot1->subject?->name ?? 'Untitled' }}
                                                             </div>
                                                             @if($slot1->teacher?->name)
-                                                                <div class="text-[10px] text-slate-500 font-medium truncate mt-0.5">{{ $slot1->teacher->name }}</div>
-                                                            @endif
-                                                            @if($slot1->room)
-                                                                <div class="text-[9px] text-[#8C6D15] font-bold">{{ $slot1->room }}</div>
+                                                                <div class="text-[9.5px] text-slate-500 font-medium truncate mt-0.5">{{ $slot1->teacher->name }}</div>
                                                             @endif
                                                         @else
                                                             <span class="text-slate-300 font-serif italic text-sm group-hover:text-blue-500 select-none">&mdash;</span>
@@ -352,7 +352,7 @@
 
                                                     {{-- Period 3 (idx 2) --}}
                                                     @php $slot2 = $conventionalMap[$dayNumber][2] ?? null; @endphp
-                                                    <td class="border-2 border-[#0C1E40] p-1.5 align-middle relative group {{ $isAdmin && !$isStaffScope ? 'cursor-pointer hover:bg-blue-50/60' : '' }}"
+                                                    <td class="border-[2px] border-[#0C1E40] p-1.5 align-middle relative group bg-white {{ $isAdmin && !$isStaffScope ? 'cursor-pointer hover:bg-amber-50/50' : '' }}"
                                                         @if($isAdmin && !$isStaffScope)
                                                             @if($slot2)
                                                                 wire:click="edit({{ $slot2->id }})" x-data x-on:click="$dispatch('open-modal', 'timetable-form')"
@@ -361,14 +361,11 @@
                                                             @endif
                                                         @endif>
                                                         @if($slot2 && !$slot2->is_break)
-                                                            <div class="font-black text-slate-900 text-xs leading-snug uppercase tracking-tight">
+                                                            <div class="font-extrabold text-[#0C1E40] text-[11.5px] leading-snug">
                                                                 {{ $slot2->subject?->name ?? 'Untitled' }}
                                                             </div>
                                                             @if($slot2->teacher?->name)
-                                                                <div class="text-[10px] text-slate-500 font-medium truncate mt-0.5">{{ $slot2->teacher->name }}</div>
-                                                            @endif
-                                                            @if($slot2->room)
-                                                                <div class="text-[9px] text-[#8C6D15] font-bold">{{ $slot2->room }}</div>
+                                                                <div class="text-[9.5px] text-slate-500 font-medium truncate mt-0.5">{{ $slot2->teacher->name }}</div>
                                                             @endif
                                                         @else
                                                             <span class="text-slate-300 font-serif italic text-sm group-hover:text-blue-500 select-none">&mdash;</span>
@@ -378,17 +375,17 @@
                                                     {{-- Break Column with Rowspan=5 (Only output in Monday row) --}}
                                                     @if($dayNumber === 1)
                                                         @php $breakEntry = $conventionalMap[1][3] ?? null; @endphp
-                                                        <td rowspan="5" class="border-2 border-[#0C1E40] bg-[#DCE7F5]/70 p-2 text-center align-middle relative group select-none {{ $isAdmin && !$isStaffScope ? 'cursor-pointer hover:bg-amber-100/60' : '' }}"
+                                                        <td rowspan="5" class="border-[2px] border-[#0C1E40] bg-white p-1 text-center align-middle relative group select-none {{ $isAdmin && !$isStaffScope ? 'cursor-pointer hover:bg-amber-100/50' : '' }}"
                                                             @if($isAdmin && !$isStaffScope && $breakEntry)
                                                                 wire:click="edit({{ $breakEntry->id }})" x-data x-on:click="$dispatch('open-modal', 'timetable-form')"
                                                             @elseif($isAdmin && !$isStaffScope)
                                                                 wire:click="selectSlot(1, '09:30', '09:40')" x-data x-on:click="$dispatch('open-modal', 'timetable-form')"
                                                             @endif>
-                                                            <div class="flex flex-col items-center justify-center h-full py-4 space-y-1">
+                                                            <div class="flex flex-col items-center justify-center h-full py-4 space-y-2">
                                                                 <span class="text-xs font-black tracking-[0.25em] text-[#0C1E40] uppercase [writing-mode:vertical-rl] rotate-180 transform">
                                                                     BREAK
                                                                 </span>
-                                                                <span class="text-[10px] font-bold text-[#17274E] tracking-wider [writing-mode:vertical-rl] rotate-180 transform mt-2">
+                                                                <span class="text-[10px] font-black text-[#0C1E40] tracking-wider [writing-mode:vertical-rl] rotate-180 transform mt-3 whitespace-nowrap">
                                                                     9:30am &ndash; 9:40am
                                                                 </span>
                                                             </div>
@@ -397,7 +394,7 @@
 
                                                     {{-- Period 4 (idx 4) --}}
                                                     @php $slot4 = $conventionalMap[$dayNumber][4] ?? null; @endphp
-                                                    <td class="border-2 border-[#0C1E40] p-1.5 align-middle relative group {{ $isAdmin && !$isStaffScope ? 'cursor-pointer hover:bg-blue-50/60' : '' }}"
+                                                    <td class="border-[2px] border-[#0C1E40] p-1.5 align-middle relative group bg-white {{ $isAdmin && !$isStaffScope ? 'cursor-pointer hover:bg-amber-50/50' : '' }}"
                                                         @if($isAdmin && !$isStaffScope)
                                                             @if($slot4)
                                                                 wire:click="edit({{ $slot4->id }})" x-data x-on:click="$dispatch('open-modal', 'timetable-form')"
@@ -406,14 +403,11 @@
                                                             @endif
                                                         @endif>
                                                         @if($slot4 && !$slot4->is_break)
-                                                            <div class="font-black text-slate-900 text-xs leading-snug uppercase tracking-tight">
+                                                            <div class="font-extrabold text-[#0C1E40] text-[11.5px] leading-snug">
                                                                 {{ $slot4->subject?->name ?? 'Untitled' }}
                                                             </div>
                                                             @if($slot4->teacher?->name)
-                                                                <div class="text-[10px] text-slate-500 font-medium truncate mt-0.5">{{ $slot4->teacher->name }}</div>
-                                                            @endif
-                                                            @if($slot4->room)
-                                                                <div class="text-[9px] text-[#8C6D15] font-bold">{{ $slot4->room }}</div>
+                                                                <div class="text-[9.5px] text-slate-500 font-medium truncate mt-0.5">{{ $slot4->teacher->name }}</div>
                                                             @endif
                                                         @else
                                                             <span class="text-slate-300 font-serif italic text-sm group-hover:text-blue-500 select-none">&mdash;</span>
@@ -422,7 +416,7 @@
 
                                                     {{-- Period 5 (idx 5) --}}
                                                     @php $slot5 = $conventionalMap[$dayNumber][5] ?? null; @endphp
-                                                    <td class="border-2 border-[#0C1E40] p-1.5 align-middle relative group {{ $isAdmin && !$isStaffScope ? 'cursor-pointer hover:bg-blue-50/60' : '' }}"
+                                                    <td class="border-[2px] border-[#0C1E40] p-1.5 align-middle relative group bg-white {{ $isAdmin && !$isStaffScope ? 'cursor-pointer hover:bg-amber-50/50' : '' }}"
                                                         @if($isAdmin && !$isStaffScope)
                                                             @if($slot5)
                                                                 wire:click="edit({{ $slot5->id }})" x-data x-on:click="$dispatch('open-modal', 'timetable-form')"
@@ -431,14 +425,11 @@
                                                             @endif
                                                         @endif>
                                                         @if($slot5 && !$slot5->is_break)
-                                                            <div class="font-black text-slate-900 text-xs leading-snug uppercase tracking-tight">
+                                                            <div class="font-extrabold text-[#0C1E40] text-[11.5px] leading-snug">
                                                                 {{ $slot5->subject?->name ?? 'Untitled' }}
                                                             </div>
                                                             @if($slot5->teacher?->name)
-                                                                <div class="text-[10px] text-slate-500 font-medium truncate mt-0.5">{{ $slot5->teacher->name }}</div>
-                                                            @endif
-                                                            @if($slot5->room)
-                                                                <div class="text-[9px] text-[#8C6D15] font-bold">{{ $slot5->room }}</div>
+                                                                <div class="text-[9.5px] text-slate-500 font-medium truncate mt-0.5">{{ $slot5->teacher->name }}</div>
                                                             @endif
                                                         @else
                                                             <span class="text-slate-300 font-serif italic text-sm group-hover:text-blue-500 select-none">&mdash;</span>
@@ -447,7 +438,7 @@
 
                                                     {{-- Period 6 (idx 6) --}}
                                                     @php $slot6 = $conventionalMap[$dayNumber][6] ?? null; @endphp
-                                                    <td class="border-2 border-[#0C1E40] p-1.5 align-middle relative group {{ $isAdmin && !$isStaffScope ? 'cursor-pointer hover:bg-blue-50/60' : '' }}"
+                                                    <td class="border-[2px] border-[#0C1E40] p-1.5 align-middle relative group bg-white {{ $isAdmin && !$isStaffScope ? 'cursor-pointer hover:bg-amber-50/50' : '' }}"
                                                         @if($isAdmin && !$isStaffScope)
                                                             @if($slot6)
                                                                 wire:click="edit({{ $slot6->id }})" x-data x-on:click="$dispatch('open-modal', 'timetable-form')"
@@ -456,14 +447,11 @@
                                                             @endif
                                                         @endif>
                                                         @if($slot6 && !$slot6->is_break)
-                                                            <div class="font-black text-slate-900 text-xs leading-snug uppercase tracking-tight">
+                                                            <div class="font-extrabold text-[#0C1E40] text-[11.5px] leading-snug">
                                                                 {{ $slot6->subject?->name ?? 'Untitled' }}
                                                             </div>
                                                             @if($slot6->teacher?->name)
-                                                                <div class="text-[10px] text-slate-500 font-medium truncate mt-0.5">{{ $slot6->teacher->name }}</div>
-                                                            @endif
-                                                            @if($slot6->room)
-                                                                <div class="text-[9px] text-[#8C6D15] font-bold">{{ $slot6->room }}</div>
+                                                                <div class="text-[9.5px] text-slate-500 font-medium truncate mt-0.5">{{ $slot6->teacher->name }}</div>
                                                             @endif
                                                         @else
                                                             <span class="text-slate-300 font-serif italic text-sm group-hover:text-blue-500 select-none">&mdash;</span>
@@ -475,63 +463,59 @@
                                     </table>
                                 </div>
 
-                                {{-- 3. NOTES / PERIOD DURATION ROW --}}
-                                <div class="mt-4 pt-3 border-t border-slate-200 flex flex-wrap items-center justify-between gap-3 text-xs text-slate-700">
+                                {{-- ══════ NOTES ROW (Exact icons & text match) ══════ --}}
+                                <div class="mt-4 pt-2.5 border-t border-slate-200 flex flex-wrap items-center justify-between gap-4 text-xs text-[#0C1E40]">
                                     <div class="flex items-center gap-2">
-                                        <span class="inline-flex items-center justify-center h-5 w-5 rounded-full bg-[#0C1E40] text-amber-300 text-[10px] font-black">i</span>
-                                        <span class="font-bold text-[#0C1E40]">NOTE:</span>
-                                        <span>Periods 1 to 5: <strong>30 minutes</strong> each</span>
-                                        <span class="text-slate-300">&bull;</span>
-                                        <span>Period 6: <strong>2 hours 30 minutes</strong> (Extended Practicum / Study)</span>
+                                        <svg class="h-4 w-4 text-[#0C1E40] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                                        <span class="font-black">NOTE: Period 1 &ndash; 5 are 30 minutes each</span>
                                     </div>
-                                    <div class="flex items-center gap-2 font-semibold text-slate-600">
-                                        <span>Closing Time: <strong>1:10 PM</strong></span>
-                                        <span class="text-slate-300">&bull;</span>
-                                        <span>Recess Break: <strong>9:30 AM &ndash; 9:40 AM</strong></span>
+                                    <div class="flex items-center gap-2">
+                                        <svg class="h-4 w-4 text-[#0C1E40] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                        <span class="font-black">Period 6 is 2 hours 30 minutes (10:40am &ndash; 1:10pm)</span>
                                     </div>
-                                </div>
-
-                                {{-- 4. SIGNATURE LINES --}}
-                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-8 mt-10 pt-4 px-4 sm:px-12">
-                                    <div class="text-center">
-                                        <div class="border-b-[1.5px] border-[#0C1E40] pb-1 h-8"></div>
-                                        <div class="text-xs font-black uppercase text-[#0C1E40] tracking-wider mt-1.5">
-                                            CLASS TEACHER'S SIGNATURE
-                                        </div>
-                                    </div>
-                                    <div class="text-center">
-                                        <div class="border-b-[1.5px] border-[#0C1E40] pb-1 h-8"></div>
-                                        <div class="text-xs font-black uppercase text-[#0C1E40] tracking-wider mt-1.5">
-                                            PRINCIPAL'S SIGNATURE
-                                        </div>
+                                    <div class="flex items-center gap-2">
+                                        <svg class="h-4 w-4 text-[#0C1E40] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+                                        <span class="font-black">School closes by 1:10pm</span>
                                     </div>
                                 </div>
 
-                                {{-- 5. BOTTOM ORNATE VECTOR CURVES & MOTTO BANNER (100% REPLICATING POSTER CURVE) --}}
-                                <div class="mt-10 pt-4 flex items-center justify-center">
-                                    <div class="flex items-center justify-center gap-3 w-full max-w-2xl px-4">
-                                        {{-- Left Golden Curve Flourish SVG --}}
+                                {{-- ══════ SIGNATURE LINES (Exact underline match) ══════ --}}
+                                <div class="grid grid-cols-2 gap-12 mt-8 pt-4 px-6 sm:px-16">
+                                    <div class="flex items-baseline gap-2">
+                                        <span class="text-xs font-black uppercase text-[#0C1E40] tracking-wider whitespace-nowrap">CLASS TEACHER'S SIGNATURE:</span>
+                                        <div class="border-b-[1.5px] border-[#0C1E40] flex-1"></div>
+                                    </div>
+                                    <div class="flex items-baseline gap-2">
+                                        <span class="text-xs font-black uppercase text-[#0C1E40] tracking-wider whitespace-nowrap">PRINCIPAL'S SIGNATURE:</span>
+                                        <div class="border-b-[1.5px] border-[#0C1E40] flex-1"></div>
+                                    </div>
+                                </div>
+
+                                {{-- ══════ BOTTOM CURVE FLOURISHES & MOTTO BANNER (100% Poster Replica) ══════ --}}
+                                <div class="mt-8 pt-2 flex items-center justify-center">
+                                    <div class="flex items-center justify-center gap-4 w-full max-w-2xl px-4">
+                                        {{-- Left Golden Curve Flourish SVG (Exact match to poster) --}}
                                         <div class="flex-1 flex items-center justify-end">
-                                            <svg class="w-full max-w-[180px] h-6 text-[#C59B27]" viewBox="0 0 160 24" fill="none" preserveAspectRatio="none">
-                                                <path d="M0 12 C40 12, 70 2, 110 2 C135 2, 150 12, 160 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                                                <path d="M40 18 C70 18, 100 8, 130 8 C145 8, 155 14, 160 14" stroke="currentColor" stroke-width="1" stroke-linecap="round" opacity="0.6"/>
-                                                <circle cx="158" cy="12" r="2.5" fill="currentColor"/>
+                                            <svg class="w-full max-w-[140px] h-5 text-[#C59B27]" viewBox="0 0 140 20" fill="none">
+                                                <path d="M0 10 C30 10, 50 3, 90 3 C115 3, 130 12, 140 10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                                                <path d="M35 15 C65 15, 85 8, 120 8 C132 8, 138 12, 140 12" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" opacity="0.7"/>
+                                                <circle cx="138" cy="10" r="2.5" fill="currentColor"/>
                                             </svg>
                                         </div>
 
                                         {{-- Centered Motto Ribbon / Text --}}
-                                        <div class="px-3 sm:px-5 py-1 text-center whitespace-nowrap">
+                                        <div class="px-3 py-0.5 text-center whitespace-nowrap">
                                             <span class="text-xs sm:text-sm font-black tracking-[0.25em] text-[#0C1E40] uppercase font-serif">
                                                 {{ $this->schoolInfo['motto'] }}
                                             </span>
                                         </div>
 
-                                        {{-- Right Golden Curve Flourish SVG --}}
+                                        {{-- Right Golden Curve Flourish SVG (Mirrored) --}}
                                         <div class="flex-1 flex items-center justify-start">
-                                            <svg class="w-full max-w-[180px] h-6 text-[#C59B27] scale-x-[-1]" viewBox="0 0 160 24" fill="none" preserveAspectRatio="none">
-                                                <path d="M0 12 C40 12, 70 2, 110 2 C135 2, 150 12, 160 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                                                <path d="M40 18 C70 18, 100 8, 130 8 C145 8, 155 14, 160 14" stroke="currentColor" stroke-width="1" stroke-linecap="round" opacity="0.6"/>
-                                                <circle cx="158" cy="12" r="2.5" fill="currentColor"/>
+                                            <svg class="w-full max-w-[140px] h-5 text-[#C59B27] scale-x-[-1]" viewBox="0 0 140 20" fill="none">
+                                                <path d="M0 10 C30 10, 50 3, 90 3 C115 3, 130 12, 140 10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                                                <path d="M35 15 C65 15, 85 8, 120 8 C132 8, 138 12, 140 12" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" opacity="0.7"/>
+                                                <circle cx="138" cy="10" r="2.5" fill="currentColor"/>
                                             </svg>
                                         </div>
                                     </div>
@@ -541,6 +525,108 @@
                         </div>
                     </div>
                 </div>
+
+                {{-- Dedicated Print Style Sheet: Isolate the poster and force landscape page format --}}
+                <style>
+                    @media print {
+                        @page {
+                            size: A4 landscape;
+                            margin: 4mm 6mm;
+                        }
+                        html, body {
+                            background: #ffffff !important;
+                            color: #000000 !important;
+                            margin: 0 !important;
+                            padding: 0 !important;
+                            width: 100% !important;
+                            height: auto !important;
+                            min-height: 0 !important;
+                            overflow: visible !important;
+                        }
+                        /* Explicitly kill all top navigation, sidebars, modals, floating buttons, offline/broadcast bars */
+                        header, 
+                        aside, 
+                        #mobileSidebar, 
+                        nav, 
+                        .bottom-nav, 
+                        footer, 
+                        #biometric-popup-root,
+                        .x-page-header, 
+                        .print\:hidden,
+                        [wire\:offline],
+                        #subscription-expired-modal {
+                            display: none !important;
+                            visibility: hidden !important;
+                            height: 0 !important;
+                            width: 0 !important;
+                            overflow: hidden !important;
+                        }
+                        /* Reset App Shell Flex/Overflow */
+                        #app {
+                            display: block !important;
+                            position: static !important;
+                            height: auto !important;
+                            min-height: auto !important;
+                            overflow: visible !important;
+                            padding: 0 !important;
+                            margin: 0 !important;
+                        }
+                        #app > div.flex.flex-1 {
+                            display: block !important;
+                            height: auto !important;
+                            overflow: visible !important;
+                            padding: 0 !important;
+                            margin: 0 !important;
+                        }
+                        main {
+                            display: block !important;
+                            position: static !important;
+                            height: auto !important;
+                            overflow: visible !important;
+                            padding: 0 !important;
+                            margin: 0 !important;
+                        }
+                        /* Poster container fills landscape page cleanly */
+                        #conventional-poster-canvas {
+                            display: block !important;
+                            position: relative !important;
+                            width: 100% !important;
+                            max-width: 100% !important;
+                            margin: 0 auto !important;
+                            padding: 0 !important;
+                            box-shadow: none !important;
+                            border: none !important;
+                            background: #ffffff !important;
+                            overflow: visible !important;
+                            page-break-inside: avoid !important;
+                            break-inside: avoid !important;
+                        }
+                        .poster-outer-frame {
+                            min-width: 0 !important;
+                            width: 100% !important;
+                            box-shadow: none !important;
+                            padding: 2.5mm !important;
+                            border-width: 3.5px !important;
+                            border-color: #C59B27 !important;
+                            border-style: solid !important;
+                            page-break-inside: avoid !important;
+                            break-inside: avoid !important;
+                        }
+                        .poster-inner-frame {
+                            padding: 3mm 4mm !important;
+                            border-width: 2px !important;
+                            border-color: #0C1E40 !important;
+                            border-style: solid !important;
+                            page-break-inside: avoid !important;
+                            break-inside: avoid !important;
+                        }
+                        /* Ensure table borders and background colors print accurately */
+                        * {
+                            -webkit-print-color-adjust: exact !important;
+                            print-color-adjust: exact !important;
+                        }
+                    }
+                </style>
             @elseif($viewMode === 'grid')
                 {{-- Clean & Modern Grid View --}}
                 <div class="rounded-2xl border border-slate-200/80 bg-white shadow-sm overflow-hidden">
