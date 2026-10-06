@@ -18,25 +18,53 @@ class WhatsAppService
      * @param array|null $buttons
      * @return bool
      */
-    public static function sendMessage(string $phone, string $message, ?string $mediaUrl = null, ?string $filename = null, ?string $caption = null, ?array $buttons = null): bool
+    /**
+     * Resolve the Evolution API instance name for a specific tenant.
+     * Tenant 1 uses 'academyhub' to preserve existing connected sessions.
+     * Other tenants use 'school_{id}' or a custom name configured in tenant settings.
+     */
+    public static function getInstanceName(?\App\Models\Tenant $tenant = null): string
     {
-        if (app()->bound('currentTenant')) {
-            $tenant = app('currentTenant');
-            if ($tenant) {
-                $tenantActive = ($tenant->status === 'active') && (!$tenant->expires_at || !$tenant->expires_at->isPast());
-                $botActive = $tenant->activeMarketplaceComponents()->where('slug', 'whatsapp-bot')->exists();
+        $tenant = $tenant ?? (app()->bound('currentTenant') ? app('currentTenant') : null);
 
-                if (!$tenantActive || !$botActive) {
-                    Log::warning("WhatsAppService: Blocked sending message to {$phone} because tenant '{$tenant->name}' (ID: {$tenant->id}) has active status = " . ($tenantActive ? 'yes' : 'no') . " and bot active = " . ($botActive ? 'yes' : 'no'));
-                    return false;
-                }
+        if (!$tenant && auth()->check() && auth()->user()->tenant_id) {
+            $tenant = auth()->user()->tenant;
+        }
+
+        if ($tenant) {
+            $custom = config('academyhub.whatsapp_instance');
+            if (!empty($custom)) {
+                return preg_replace('/[^a-zA-Z0-9_-]/', '', $custom);
+            }
+
+            // Tenant 1 preserves 'academyhub' to keep existing active connections
+            if ((int) $tenant->id === 1) {
+                return config('services.whatsapp.evolution_instance', 'academyhub');
+            }
+
+            return 'school_' . $tenant->id;
+        }
+
+        return config('services.whatsapp.evolution_instance', 'academyhub');
+    }
+
+    public static function sendMessage(string $phone, string $message, ?string $mediaUrl = null, ?string $filename = null, ?string $caption = null, ?array $buttons = null, ?\App\Models\Tenant $tenant = null): bool
+    {
+        $tenant = $tenant ?? (app()->bound('currentTenant') ? app('currentTenant') : null);
+        if ($tenant) {
+            $tenantActive = ($tenant->status === 'active') && (!$tenant->expires_at || !$tenant->expires_at->isPast());
+            $botActive = $tenant->activeMarketplaceComponents()->where('slug', 'whatsapp-bot')->exists();
+
+            if (!$tenantActive || !$botActive) {
+                Log::warning("WhatsAppService: Blocked sending message to {$phone} because tenant '{$tenant->name}' (ID: {$tenant->id}) has active status = " . ($tenantActive ? 'yes' : 'no') . " and bot active = " . ($botActive ? 'yes' : 'no'));
+                return false;
             }
         }
 
         $provider = config('services.whatsapp.provider', 'evolution');
 
         if ($provider === 'evolution') {
-            return self::sendEvolutionMessage($phone, $message, $mediaUrl, $filename, $caption, $buttons);
+            return self::sendEvolutionMessage($phone, $message, $mediaUrl, $filename, $caption, $buttons, $tenant);
         }
 
         return self::sendMetaMessage($phone, $message, $mediaUrl, $filename, $caption, $buttons);
@@ -45,12 +73,12 @@ class WhatsAppService
     /**
      * Send via Free Multi-Device Gateway (Evolution API / Baileys).
      */
-    public static function sendEvolutionMessage(string $phone, string $message, ?string $mediaUrl = null, ?string $filename = null, ?string $caption = null, ?array $buttons = null): bool
+    public static function sendEvolutionMessage(string $phone, string $message, ?string $mediaUrl = null, ?string $filename = null, ?string $caption = null, ?array $buttons = null, ?\App\Models\Tenant $tenant = null): bool
     {
         try {
             $baseUrl  = rtrim(config('services.whatsapp.evolution_url', 'http://whatsapp:8080'), '/');
             $apiKey   = config('services.whatsapp.evolution_api_key', 'academyhub-wa-secret-key');
-            $instance = config('services.whatsapp.evolution_instance', 'academyhub');
+            $instance = self::getInstanceName($tenant);
 
             $toPhone = preg_replace('/\D/', '', $phone);
 
@@ -218,12 +246,12 @@ class WhatsAppService
      * Check Evolution API connection state.
      * Returns ['connected' => bool, 'state' => string, 'phone' => ?string]
      */
-    public static function getEvolutionStatus(): array
+    public static function getEvolutionStatus(?\App\Models\Tenant $tenant = null): array
     {
         try {
             $baseUrl  = rtrim(config('services.whatsapp.evolution_url', 'http://whatsapp:8080'), '/');
             $apiKey   = config('services.whatsapp.evolution_api_key', 'academyhub-wa-secret-key');
-            $instance = config('services.whatsapp.evolution_instance', 'academyhub');
+            $instance = self::getInstanceName($tenant);
 
             $response = Http::withOptions(['verify' => false, 'timeout' => 5])
                 ->withHeaders(['apikey' => $apiKey])
@@ -270,12 +298,12 @@ class WhatsAppService
     /**
      * Get or create Evolution API QR Code for pairing.
      */
-    public static function getEvolutionQr(): ?string
+    public static function getEvolutionQr(?\App\Models\Tenant $tenant = null): ?string
     {
         try {
             $baseUrl  = rtrim(config('services.whatsapp.evolution_url', 'http://whatsapp:8080'), '/');
             $apiKey   = config('services.whatsapp.evolution_api_key', 'academyhub-wa-secret-key');
-            $instance = config('services.whatsapp.evolution_instance', 'academyhub');
+            $instance = self::getInstanceName($tenant);
 
             // 1. Try to connect to existing instance to fetch QR
             $response = Http::withOptions(['verify' => false, 'timeout' => 8])
@@ -320,12 +348,12 @@ class WhatsAppService
     /**
      * Disconnect/logout the Evolution API instance.
      */
-    public static function logoutEvolution(): bool
+    public static function logoutEvolution(?\App\Models\Tenant $tenant = null): bool
     {
         try {
             $baseUrl  = rtrim(config('services.whatsapp.evolution_url', 'http://whatsapp:8080'), '/');
             $apiKey   = config('services.whatsapp.evolution_api_key', 'academyhub-wa-secret-key');
-            $instance = config('services.whatsapp.evolution_instance', 'academyhub');
+            $instance = self::getInstanceName($tenant);
 
             $res = Http::withOptions(['verify' => false, 'timeout' => 8])
                 ->withHeaders(['apikey' => $apiKey])

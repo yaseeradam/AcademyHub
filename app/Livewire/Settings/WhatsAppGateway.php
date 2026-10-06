@@ -30,6 +30,12 @@ class WhatsAppGateway extends Component
     #[Locked]
     public ?string $statusMessage = null;
 
+    #[Locked]
+    public string $instanceName = '';
+
+    #[Locked]
+    public string $schoolName = '';
+
     // Test message properties (user-editable)
     public string $testPhone = '';
     public string $testMessage = 'Hello from AcademyHub! Your WhatsApp gateway is active and working properly.';
@@ -51,6 +57,10 @@ class WhatsAppGateway extends Component
         );
 
         $this->provider = config('services.whatsapp.provider', 'evolution');
+        $this->instanceName = WhatsAppService::getInstanceName();
+        $this->schoolName = app()->bound('currentTenant') && app('currentTenant')
+            ? app('currentTenant')->name
+            : (auth()->user()?->tenant?->name ?? 'AcademyHub');
         $this->checkStatus();
     }
 

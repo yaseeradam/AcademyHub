@@ -109,19 +109,27 @@
                     </div>
 
                     <div class="p-6 space-y-6">
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                             <div class="p-4 rounded-xl bg-slate-50 border border-slate-100">
                                 <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-1">Connected Number</span>
                                 <div class="text-base font-bold text-slate-800 flex items-center gap-2">
-                                    <svg class="h-4 w-4 text-emerald-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 01-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z"/></svg>
+                                    <svg class="h-4 w-4 text-emerald-500 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 01-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z"/></svg>
                                     <span>{{ $connectedPhone ? preg_replace('/[:@].*$/', '', $connectedPhone) : 'Active Instance' }}</span>
+                                </div>
+                            </div>
+                            <div class="p-4 rounded-xl bg-slate-50 border border-slate-100">
+                                <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-1">Dedicated School Instance</span>
+                                <div class="text-base font-bold text-slate-800 flex items-center gap-2 truncate">
+                                    <svg class="h-4 w-4 text-purple-500 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"/></svg>
+                                    <span class="font-mono text-xs bg-purple-50 text-purple-700 px-2 py-0.5 rounded ring-1 ring-purple-200">{{ $instanceName }}</span>
+                                    <span class="text-xs text-slate-500 truncate">({{ $schoolName }})</span>
                                 </div>
                             </div>
                             <div class="p-4 rounded-xl bg-slate-50 border border-slate-100">
                                 <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-1">Architecture Rail</span>
                                 <div class="text-base font-bold text-slate-800 flex items-center gap-2">
-                                    <svg class="h-4 w-4 text-blue-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5.25 14.25h13.5m-13.5 0a3 3 0 01-3-3m3 3a3 3 0 100 6h13.5a3 3 0 100-6m-16.5-3a3 3 0 013-3h13.5a3 3 0 013 3m-19.5 0a4.5 4.5 0 01.9-2.7L5.75 5.1a2.25 2.25 0 011.8-1.1h8.9a2.25 2.25 0 011.8 1.1l2.6 3.45a4.5 4.5 0 01.9 2.7"/></svg>
-                                    <span>Multi-Device (Baileys / Evolution)</span>
+                                    <svg class="h-4 w-4 text-blue-500 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5.25 14.25h13.5m-13.5 0a3 3 0 01-3-3m3 3a3 3 0 100 6h13.5a3 3 0 100-6m-16.5-3a3 3 0 013-3h13.5a3 3 0 013 3m-19.5 0a4.5 4.5 0 01.9-2.7L5.75 5.1a2.25 2.25 0 011.8-1.1h8.9a2.25 2.25 0 011.8 1.1l2.6 3.45a4.5 4.5 0 01.9 2.7"/></svg>
+                                    <span>Multi-Device (Baileys)</span>
                                 </div>
                             </div>
                         </div>
@@ -160,7 +168,7 @@
                             </div>
                             <div>
                                 <h3 class="text-base font-bold text-slate-800">Scan QR Code to Link WhatsApp</h3>
-                                <p class="text-xs text-slate-500">Pair your official school phone with the system</p>
+                                <p class="text-xs text-slate-500">Pair official WhatsApp phone for <strong>{{ $schoolName }}</strong> (Instance: <code class="font-mono text-blue-600 bg-blue-50 px-1 py-0.5 rounded">{{ $instanceName }}</code>)</p>
                             </div>
                         </div>
                         <span class="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-semibold text-slate-600">

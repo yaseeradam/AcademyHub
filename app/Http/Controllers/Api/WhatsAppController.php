@@ -1829,6 +1829,23 @@ class WhatsAppController extends Controller
                     $buttonId = trim($msgObj['listResponseMessage']['singleSelectReply']['selectedRowId'] ?? '');
                 }
 
+                $instanceName = $payload['instance'] ?? null;
+                $tenant = null;
+                if ($instanceName) {
+                    if (preg_match('/^school_(\d+)$/', $instanceName, $matches)) {
+                        $tenant = \App\Models\Tenant::find((int) $matches[1]);
+                    } elseif ($instanceName === 'academyhub' || $instanceName === config('services.whatsapp.evolution_instance', 'academyhub')) {
+                        $tenant = \App\Models\Tenant::find(1);
+                    } else {
+                        $tenant = \App\Models\Tenant::where('slug', $instanceName)->first();
+                    }
+                }
+
+                if ($tenant) {
+                    app()->instance('currentTenant', $tenant);
+                    $this->loadTenantSettings($tenant);
+                }
+
                 if (!empty($text)) {
                     $this->processIncomingWebhookMessage($from, $text, $buttonId);
                 }
@@ -2827,7 +2844,7 @@ class WhatsAppController extends Controller
         try {
             $baseUrl  = rtrim(config('services.whatsapp.evolution_url', 'http://whatsapp:8080'), '/');
             $apiKey   = config('services.whatsapp.evolution_api_key', 'academyhub-wa-secret-key');
-            $instance = config('services.whatsapp.evolution_instance', 'academyhub');
+            $instance = \App\Support\WhatsAppService::getInstanceName();
 
             $cleanPhone = preg_replace('/\D/', '', $toPhone);
             $textToSend = $messageText;
