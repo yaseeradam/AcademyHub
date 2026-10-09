@@ -8,7 +8,7 @@
     $pwaColor = config('academyhub.accent_color', '#7c3aed');
 @endphp
 
-<div id="pwa-install-banner" class="fixed bottom-4 left-4 right-4 md:left-auto md:right-6 md:bottom-6 z-50 transition-all duration-500 transform translate-y-32 opacity-0 pointer-events-none max-w-md">
+<div id="pwa-install-banner" class="hidden md:hidden fixed bottom-4 left-4 right-4 z-50 transition-all duration-500 transform translate-y-32 opacity-0 pointer-events-none max-w-md">
     <div class="bg-white/95 backdrop-blur-md rounded-2xl shadow-2xl border border-slate-200/80 p-4 sm:p-5 flex flex-col gap-3 relative overflow-hidden"
          style="box-shadow: 0 12px 36px -6px rgba(15, 23, 42, 0.18);">
         
@@ -34,7 +34,7 @@
             </div>
         </div>
 
-        <!-- Action Section: Android / Desktop Button -->
+        <!-- Action Section: Android Button -->
         <div id="pwa-android-actions" class="flex items-center gap-2 pt-1">
             <button type="button" id="pwa-install-btn" 
                     class="flex-1 py-2.5 px-4 rounded-xl text-white font-bold text-xs shadow-md transition-all active:scale-[0.97] flex items-center justify-center gap-2"
@@ -63,6 +63,11 @@
 
 <script>
 (function() {
+    // Only target mobile/tablet devices; completely exit on desktop devices
+    const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+        || (navigator.maxTouchPoints && navigator.maxTouchPoints > 1 && window.innerWidth <= 1024);
+    if (!isMobileDevice) return;
+
     // If already in standalone mode, never display prompt
     const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
     if (isStandalone) return;
@@ -84,7 +89,7 @@
 
     function showBanner() {
         if (!banner) return;
-        banner.classList.remove('pointer-events-none', 'translate-y-32', 'opacity-0');
+        banner.classList.remove('hidden', 'pointer-events-none', 'translate-y-32', 'opacity-0');
         banner.classList.add('translate-y-0', 'opacity-100');
     }
 
