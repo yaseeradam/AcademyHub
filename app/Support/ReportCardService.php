@@ -292,6 +292,17 @@ class ReportCardService
         $principalName = $rawSettings['rc_principal_name'] ?? config('academyhub.rc_principal_name');
         $principalTitle = $rawSettings['rc_principal_title'] ?? config('academyhub.rc_principal_title', 'Principal');
 
+        $nextTermDate = $rawSettings['rc_next_term_date'] ?? null;
+        if (! $nextTermDate) {
+            $nextTerm = \App\Models\AcademicTerm::query()
+                ->where('term_number', $term < 3 ? $term + 1 : 1)
+                ->where('is_active', false)
+                ->where('starts_on', '>', now()->toDateString())
+                ->orderBy('starts_on')
+                ->first();
+            $nextTermDate = $nextTerm?->starts_on?->format('d/m/Y');
+        }
+
         $verifyUrl = url('/results/verify/' . urlencode($student->admission_number ?? 'ADM001'));
         $qrCodeUri = $this->generateQrCodeDataUri($verifyUrl);
 
@@ -313,7 +324,7 @@ class ReportCardService
             'lowestAverage' => $lowestAverage,
             'principalRemarks' => $principalRemarks,
             'teacherRemarks' => $teacherRemarks,
-            'nextTermDate' => null,
+            'nextTermDate' => $nextTermDate,
             'rcOptions' => $rcOptions,
             'schoolFees' => $schoolFees,
             'signatureImages' => $signatureImages,
@@ -331,25 +342,24 @@ class ReportCardService
     private function attendanceSummary(Student $student, int $term, string $session): array
     {
         $sectionId = (int) ($student->section_id ?? 0);
-        if ($sectionId <= 0) {
-            return [null, null, null];
-        }
 
         $sheetsQuery = AttendanceSheet::query()
             ->where('class_id', $student->class_id)
-            ->where('section_id', $sectionId)
+            ->when($sectionId > 0, fn($q) => $q->where('section_id', $sectionId), fn($q) => $q->whereNull('section_id'))
             ->where('term', $term)
             ->where('session', $session);
 
         $timesOpened = (int) $sheetsQuery->count();
 
-        $counts = AttendanceMark::query()
+        $countsQuery = AttendanceMark::query()
             ->join('attendance_sheets', 'attendance_sheets.id', '=', 'attendance_marks.sheet_id')
             ->where('attendance_marks.student_id', $student->id)
             ->where('attendance_sheets.class_id', $student->class_id)
-            ->where('attendance_sheets.section_id', $sectionId)
+            ->when($sectionId > 0, fn($q) => $q->where('attendance_sheets.section_id', $sectionId), fn($q) => $q->whereNull('attendance_sheets.section_id'))
             ->where('attendance_sheets.term', $term)
-            ->where('attendance_sheets.session', $session)
+            ->where('attendance_sheets.session', $session);
+
+        $counts = $countsQuery
             ->selectRaw("SUM(CASE WHEN attendance_marks.status = 'Absent' THEN 1 ELSE 0 END) AS absent_count")
             ->selectRaw("SUM(CASE WHEN attendance_marks.status IN ('Present','Late','Excused') THEN 1 ELSE 0 END) AS present_count")
             ->first();
@@ -400,8 +410,14 @@ class ReportCardService
             ->groupBy('student_id')
             ->map(fn ($rows) => (int) $rows->sum('total'));
 
-        $subjectCount = max(1, (int) $subjectIds->count());
-        $classAverage = round($totalsByStudent->avg() / $subjectCount, 2);
+        $studentAverages = $scores
+            ->groupBy('student_id')
+            ->map(function ($rows) {
+                $count = max(1, $rows->count());
+                return $rows->sum('total') / $count;
+            });
+
+        $classAverage = round((float) $studentAverages->avg(), 2);
 
         $sorted = $totalsByStudent->sortDesc();
         $position = 1;

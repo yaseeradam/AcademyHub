@@ -111,13 +111,15 @@ class Tenant extends Model
 
     public function isSubscriptionExpired(): bool
     {
+        if ($this->expires_at) {
+            return $this->expires_at->isPast();
+        }
+
         $dueDateRaw = config('academyhub.subscription_due_date');
         if (!empty($dueDateRaw)) {
             return \Carbon\Carbon::parse($dueDateRaw)->isPast();
         }
-        if ($this->expires_at) {
-            return $this->expires_at->isPast();
-        }
+
         return false;
     }
 }

@@ -79,12 +79,13 @@ class SchoolClass extends Model
             ->whereIn('id', $scoreSubjectIds)
             ->get();
 
-        // Combine all and make unique by subject name
+        // Combine all and make unique by id and normalized subject name
         return collect()
             ->concat($defaultSubjects)
             ->concat($allocatedSubjects)
             ->concat($scoreSubjects)
-            ->unique(fn ($s) => trim(strtolower($s->name)))
+            ->unique('id')
+            ->unique(fn ($s) => trim(strtolower((string) $s->name)))
             ->sortBy('name')
             ->values();
     }

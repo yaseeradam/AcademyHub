@@ -88,6 +88,17 @@ class Entry extends Component
         ];
     }
 
+    public function traitDefault(string $label): string
+    {
+        if (in_array($label, ['Games / Sports', 'Musical Skills'], true)) {
+            return 'Average';
+        }
+        if (in_array($label, ['Punctuality', 'Politeness / Courtesy', 'Honesty', 'Relationship with Others'], true)) {
+            return 'Excellent';
+        }
+        return 'Good';
+    }
+
     public function mount(): void
     {
         $this->session = $this->session ?: $this->defaultSession();
@@ -175,7 +186,7 @@ class Entry extends Component
     {
         $user = auth()->user();
 
-        if ($user?->role === 'admin') {
+        if ($user?->role !== 'teacher') {
             return SchoolClass::query()->orderBy('level')->get();
         }
 
@@ -194,8 +205,8 @@ class Entry extends Component
 
         $user = auth()->user();
 
-        if ($user?->role === 'admin' || $user?->is_super_admin) {
-            // Admins see ALL subjects — not limited by class defaults
+        if ($user?->role !== 'teacher') {
+            // Non-teachers see ALL subjects
             return Subject::query()->orderBy('name')->get();
         }
 
@@ -356,7 +367,7 @@ class Entry extends Component
         $this->psychomotorScores = [];
 
         foreach ($this->traitMap() as $slug => $label) {
-            $this->psychomotorScores[$slug] = $traits[$label] ?? $traits[$slug] ?? ($label === 'Games / Sports' || $label === 'Musical Skills' ? 'Average' : ($label === 'Punctuality' || $label === 'Politeness / Courtesy' || $label === 'Honesty' || $label === 'Relationship with Others' ? 'Excellent' : 'Good'));
+            $this->psychomotorScores[$slug] = $traits[$label] ?? $traits[$slug] ?? $this->traitDefault($label);
         }
 
         $this->showPsychomotorModal = true;
@@ -974,7 +985,7 @@ class Entry extends Component
 
                     $mapped = [];
                     foreach ($this->traitMap() as $slug => $label) {
-                        $mapped[$slug] = $traits[$label] ?? $traits[$slug] ?? ($label === 'Games / Sports' || $label === 'Musical Skills' ? 'Average' : ($label === 'Punctuality' || $label === 'Politeness / Courtesy' || $label === 'Honesty' || $label === 'Relationship with Others' ? 'Excellent' : 'Good'));
+                        $mapped[$slug] = $traits[$label] ?? $traits[$slug] ?? $this->traitDefault($label);
                     }
                     $this->bulkPsychomotorScores[$student->id] = $mapped;
                 }
@@ -995,8 +1006,27 @@ class Entry extends Component
             return;
         }
 
-        DB::transaction(function () {
+        $allowedStudentIds = null;
+        if ($user->role === 'teacher') {
+            $allocations = SubjectAllocation::query()
+                ->where('teacher_id', $user->id)
+                ->where('class_id', $this->classId)
+                ->get();
+            $hasEntireClass = $allocations->contains(fn($a) => is_null($a->section_id));
+            if (! $hasEntireClass && $allocations->isNotEmpty()) {
+                $allowedSectionIds = $allocations->pluck('section_id')->filter()->unique()->values()->all();
+                $allowedStudentIds = Student::where('class_id', $this->classId)
+                    ->whereIn('section_id', $allowedSectionIds)
+                    ->pluck('id')
+                    ->all();
+            }
+        }
+
+        DB::transaction(function () use ($allowedStudentIds) {
             foreach ($this->bulkPsychomotorScores as $studentId => $mappedTraits) {
+                if ($allowedStudentIds !== null && ! in_array((int) $studentId, $allowedStudentIds, true)) {
+                    continue;
+                }
                 $dbTraits = [];
                 foreach ($this->traitMap() as $slug => $label) {
                     $dbTraits[$label] = $mappedTraits[$slug] ?? 'Good';

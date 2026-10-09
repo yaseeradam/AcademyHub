@@ -447,11 +447,6 @@ Route::middleware(['auth', 'active'])->group(function () {
     Route::get('/settings/whatsapp', WhatsAppGateway::class)
         ->middleware('role:admin,proprietor')
         ->name('settings.whatsapp');
-
-    // Marketplace product detail alias (used by bursar upgrade link)
-    Route::get('/marketplace/product/{product}', \App\Livewire\Marketplace\ProductDetail::class)
-        ->name('marketplace.show')
-        ->middleware('role:admin');
 });
 
 // ══════════════════════════════════════════════════════════════════════

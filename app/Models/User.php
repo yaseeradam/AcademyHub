@@ -162,6 +162,9 @@ class User extends Authenticatable
             if ($this->role === 'admin' || $this->role === 'proprietor' || $this->is_super_admin) {
                 return asset('avatars/Admin.png');
             }
+            if ($this->role === 'parent') {
+                return asset('avatars/student_blue.png');
+            }
             return asset('avatars/teachers.png');
         }
 

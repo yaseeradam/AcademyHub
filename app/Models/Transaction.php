@@ -58,26 +58,29 @@ class Transaction extends Model
 
     public static function nextReceiptNumber(): string
     {
-        // Use database-level locking to prevent duplicate receipt numbers
-        // under concurrent requests.
+        // Use database-level locking and highest numeric suffix to prevent duplicate receipt numbers
         return \Illuminate\Support\Facades\DB::transaction(function () {
-            $latest = self::query()
+            $receipts = self::query()
                 ->whereNotNull('receipt_number')
+                ->where('receipt_number', 'like', 'REC-%')
                 ->orderByDesc('id')
+                ->limit(50)
                 ->lockForUpdate()
-                ->value('receipt_number');
+                ->pluck('receipt_number');
 
-            if (! $latest) {
-                return 'REC-001';
+            $maxNumber = 0;
+            foreach ($receipts as $num) {
+                if (preg_match('/REC-(\d+)/', (string) $num, $m)) {
+                    $val = (int) $m[1];
+                    if ($val > $maxNumber) {
+                        $maxNumber = $val;
+                    }
+                }
             }
 
-            if (preg_match('/REC-(\d+)/', $latest, $m) !== 1) {
-                return 'REC-001';
-            }
+            $next = $maxNumber + 1;
 
-            $next = (int) $m[1] + 1;
-
-            return 'REC-'.str_pad((string) $next, 3, '0', STR_PAD_LEFT);
+            return 'REC-' . str_pad((string) $next, 3, '0', STR_PAD_LEFT);
         });
     }
 

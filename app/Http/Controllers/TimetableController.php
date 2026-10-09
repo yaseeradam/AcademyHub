@@ -23,6 +23,12 @@ class TimetableController extends Controller
         if ($user?->role === 'parent') {
             $allowedClassIds = $user->students()->pluck('class_id')->toArray();
             abort_unless(in_array($classId, $allowedClassIds), 403, 'Unauthorized access to class timetable.');
+        } elseif ($user?->role === 'teacher') {
+            $hasAllocation = SubjectAllocation::query()
+                ->where('teacher_id', $user->id)
+                ->where('class_id', $classId)
+                ->exists();
+            abort_unless($hasAllocation, 403, 'Unauthorized access to class timetable.');
         }
 
         $class = SchoolClass::query()->findOrFail($classId);
@@ -44,6 +50,10 @@ class TimetableController extends Controller
             4 => 'Thursday',
             5 => 'Friday',
         ];
+
+        if ($entries->contains(fn($e) => (int) $e->day_of_week === 6)) {
+            $days[6] = 'Saturday';
+        }
 
         // Build time-slot grid (same logic as the Livewire editor)
         $boundaries = [];
@@ -128,12 +138,7 @@ class TimetableController extends Controller
                 ->whereNotNull('teacher_id')
                 ->with('teacher:id,name')
                 ->first()?->teacher?->name
-            ?? $entries->firstWhere('teacher_id', '!=', null)?->teacher?->name
-            ?? User::query()
-                ->where('role', 'teacher')
-                ->where('is_class_teacher', true)
-                ->where('is_active', true)
-                ->first()?->name;
+            ?? $entries->firstWhere('teacher_id', '!=', null)?->teacher?->name;
 
         // School info
         $schoolName = config('academyhub.school_name', config('app.name', 'AI INTEGRATED ACADEMY ARGUNGU'));

@@ -72,8 +72,12 @@ class Index extends Component
 
         $canTransactions = (bool) ($user?->hasPermission('billing.transactions') ?? false);
         $canFees = (bool) ($user?->hasPermission('fees.manage') ?? false);
+        $canView = (bool) ($user?->hasPermission('billing.view') ?? false);
 
-        $allowedTabs = ['debtors', 'plugin-bills'];
+        $allowedTabs = ['plugin-bills'];
+        if ($canTransactions || $canView) {
+            $allowedTabs[] = 'debtors';
+        }
         if ($canTransactions) {
             $allowedTabs[] = 'transactions';
         }
@@ -81,7 +85,7 @@ class Index extends Component
             $allowedTabs[] = 'fees';
         }
 
-        $defaultTab = $canTransactions ? 'transactions' : ($canFees ? 'fees' : 'debtors');
+        $defaultTab = $canTransactions ? 'transactions' : ($canFees ? 'fees' : ($canView ? 'debtors' : 'plugin-bills'));
         $this->tab = ($requestedTab && in_array($requestedTab, $allowedTabs, true)) ? $requestedTab : $defaultTab;
         $this->date = now()->toDateString();
         $this->session = $this->session ?? $this->defaultSession();
@@ -542,7 +546,7 @@ class Index extends Component
                 'term' => ['nullable', 'integer', 'between:1,3'],
                 'session' => ['nullable', 'string', 'max:9'],
                 'paymentMethod' => ['nullable', Rule::in(['Cash', 'Transfer', 'POS'])],
-                'amountPaid' => ['required', 'numeric', 'min:0'],
+                'amountPaid' => ['required', 'numeric', 'min:0.01'],
                 'date' => ['required', 'date'],
             ], [
                 'studentId.required' => 'Please select a student for income transactions.',
@@ -575,7 +579,6 @@ class Index extends Component
             ]);
 
             $this->reset(['studentId', 'amountPaid']);
-            $this->amountPaid = '';
 
             // Force refresh of computed properties
             $this->dispatch('$refresh');
@@ -642,6 +645,7 @@ class Index extends Component
     {
         $user = auth()->user();
         abort_unless($user && $user->hasPermission('billing.void'), 403);
+        abort_unless((int) $this->voidingTransactionId === (int) $transactionId, 422);
 
         $data = $this->validate([
             'voidReason' => ['nullable', 'string', 'max:255'],
@@ -714,7 +718,7 @@ class Index extends Component
         }
 
         $amountInKobo = (int) ($bill->total_due * 100);
-        $email = str_replace('.local', '.com', $user->email ?? 'admin@school.com');
+        $email = $user->email ?: ($tenant->contact_email ?: 'admin@school.com');
         $reference = 'BILL_' . $bill->id . '_' . uniqid() . '_' . time();
 
         $secretKey = config('services.paystack.secret_key');

@@ -34,7 +34,7 @@ class Student extends Model
         'passport_photo',
         'status',
         'custom_fields',
-        'password',
+        // 'password' — intentionally excluded from mass assignment.
     ];
 
     protected $hidden = [
@@ -187,20 +187,33 @@ class Student extends Model
             ->withTimestamps();
     }
 
+    public static array $classSubjectsCache = [];
+
     public function getAssignedSubjectsAttribute()
     {
-        if (!$this->schoolClass) {
+        if (! $this->class_id) {
             return collect();
         }
 
-        $classSubjects = SchoolClass::allSubjectsForClass($this->class_id)->pluck('id');
-        $overrides = $this->subjectOverrides;
-        
-        $removed = $overrides->where('pivot.action', 'remove')->pluck('id');
-        $added = $overrides->where('pivot.action', 'add')->pluck('id');
-        
+        if (! isset(static::$classSubjectsCache[$this->class_id])) {
+            static::$classSubjectsCache[$this->class_id] = SchoolClass::allSubjectsForClass($this->class_id);
+        }
+
+        $allClassSubjects = static::$classSubjectsCache[$this->class_id];
+        $classSubjectIds = $allClassSubjects->pluck('id');
+
+        $overrides = $this->relationLoaded('subjectOverrides') ? $this->subjectOverrides : $this->subjectOverrides()->get();
+        if ($overrides->isEmpty()) {
+            return $allClassSubjects;
+        }
+
+        $removed = $overrides->where('pivot.action', 'remove')->pluck('id')->all();
+        $added = $overrides->where('pivot.action', 'add')->pluck('id')->all();
+
+        $finalIds = $classSubjectIds->diff($removed)->merge($added)->unique();
+
         return Subject::query()
-            ->whereIn('id', $classSubjects->diff($removed)->merge($added))
+            ->whereIn('id', $finalIds)
             ->orderBy('name')
             ->get();
     }

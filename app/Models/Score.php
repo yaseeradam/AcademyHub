@@ -33,6 +33,7 @@ class Score extends Model
         'subject_id' => 'integer',
         'class_id' => 'integer',
         'term' => 'integer',
+        'session' => 'string',
         'ca1' => 'integer',
         'ca2' => 'integer',
         'exam' => 'integer',
@@ -44,6 +45,10 @@ class Score extends Model
     {
         static::saving(function (self $score) {
             $score->total = (int) $score->ca1 + (int) $score->ca2 + (int) $score->exam;
+
+            if ($score->session) {
+                $score->session = trim((string) $score->session);
+            }
 
             $maxTotal =
                 max(0, (int) config('academyhub.results_ca1_max', 20))

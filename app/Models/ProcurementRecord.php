@@ -44,6 +44,15 @@ class ProcurementRecord extends Model
         'is_inventory_item' => 'boolean',
     ];
 
+    protected static function booted(): void
+    {
+        static::saving(function (self $record) {
+            if ($record->quantity !== null && $record->unit_price !== null && (float) $record->quantity > 0 && (float) $record->unit_price > 0) {
+                $record->total_amount = round((float) $record->quantity * (float) $record->unit_price, 2);
+            }
+        });
+    }
+
     public static function categories(): array
     {
         return [

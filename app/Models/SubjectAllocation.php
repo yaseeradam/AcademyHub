@@ -29,6 +29,22 @@ class SubjectAllocation extends Model
         'section_id' => 'integer',
     ];
 
+    protected static function booted(): void
+    {
+        static::creating(function (self $alloc) {
+            $exists = static::query()
+                ->where('teacher_id', $alloc->teacher_id)
+                ->where('subject_id', $alloc->subject_id)
+                ->where('class_id', $alloc->class_id)
+                ->where('section_id', $alloc->section_id)
+                ->exists();
+
+            if ($exists) {
+                return false;
+            }
+        });
+    }
+
     public function teacher(): BelongsTo
     {
         return $this->belongsTo(User::class, 'teacher_id');

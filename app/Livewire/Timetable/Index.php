@@ -22,7 +22,6 @@ class Index extends Component
     public $classId = null;
     public $sectionId = null;
     public ?int $day = null;
-    public $debugPing = null;
     
     public string $scheduleScope = 'class'; // 'class' or 'staff'
     public $teacherFilterId = null;
@@ -151,13 +150,7 @@ class Index extends Component
             return User::find($firstTeacherId)?->name;
         }
 
-        $designatedTeacher = User::query()
-            ->where('role', 'teacher')
-            ->where('is_class_teacher', true)
-            ->where('is_active', true)
-            ->first();
-
-        return $designatedTeacher?->name;
+        return null;
     }
 
     #[Computed]
@@ -222,7 +215,6 @@ class Index extends Component
 
     public function updatedClassId(): void
     {
-        \Log::info('Timetable: updatedClassId fired', ['classId' => $this->classId, 'type' => gettype($this->classId)]);
         $this->sectionId = null;
         $this->editingId = null;
         unset($this->sections);
@@ -330,12 +322,14 @@ class Index extends Component
             $daysToSave = [1, 2, 3, 4, 5, 6];
         }
 
+        $targetSectionId = $this->entrySectionId ?: ($this->sectionId ?: null);
+
         // 1. Conflict Check
         foreach ($daysToSave as $day) {
             $this->ensureNoConflicts(
                 editingId: $this->editingId,
                 classId: (int) $this->classId,
-                sectionId: null,
+                sectionId: $targetSectionId,
                 day: $day,
                 startSec: $startSec,
                 endSec: $endSec,
@@ -354,7 +348,7 @@ class Index extends Component
                 ],
                 [
                     'class_id' => (int) $this->classId,
-                    'section_id' => null,
+                    'section_id' => $targetSectionId,
                     'day_of_week' => $day,
                     'starts_at' => $data['startsAt'],
                     'ends_at' => $data['endsAt'],
@@ -390,16 +384,44 @@ class Index extends Component
 
     public function setPeriodPreset(string $preset): void
     {
-        match ($preset) {
-            '1' => [$this->startsAt = '08:00', $this->endsAt = '08:30', $this->isBreak = false],
-            '2' => [$this->startsAt = '08:30', $this->endsAt = '09:00', $this->isBreak = false],
-            '3' => [$this->startsAt = '09:00', $this->endsAt = '09:30', $this->isBreak = false],
-            'break' => [$this->startsAt = '09:30', $this->endsAt = '09:40', $this->isBreak = true, $this->breakText = 'BREAK'],
-            '4' => [$this->startsAt = '09:40', $this->endsAt = '10:10', $this->isBreak = false],
-            '5' => [$this->startsAt = '10:10', $this->endsAt = '10:40', $this->isBreak = false],
-            '6' => [$this->startsAt = '10:40', $this->endsAt = '13:10', $this->isBreak = false],
-            default => null,
-        };
+        switch ($preset) {
+            case '1':
+                $this->startsAt = '08:00';
+                $this->endsAt = '08:30';
+                $this->isBreak = false;
+                break;
+            case '2':
+                $this->startsAt = '08:30';
+                $this->endsAt = '09:00';
+                $this->isBreak = false;
+                break;
+            case '3':
+                $this->startsAt = '09:00';
+                $this->endsAt = '09:30';
+                $this->isBreak = false;
+                break;
+            case 'break':
+                $this->startsAt = '09:30';
+                $this->endsAt = '09:40';
+                $this->isBreak = true;
+                $this->breakText = 'BREAK';
+                break;
+            case '4':
+                $this->startsAt = '09:40';
+                $this->endsAt = '10:10';
+                $this->isBreak = false;
+                break;
+            case '5':
+                $this->startsAt = '10:10';
+                $this->endsAt = '10:40';
+                $this->isBreak = false;
+                break;
+            case '6':
+                $this->startsAt = '10:40';
+                $this->endsAt = '13:10';
+                $this->isBreak = false;
+                break;
+        }
     }
 
     public function loadConventionalTemplate(): void
