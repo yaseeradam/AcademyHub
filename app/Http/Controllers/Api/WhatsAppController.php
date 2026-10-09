@@ -1814,18 +1814,14 @@ class WhatsAppController extends Controller
                     \Illuminate\Support\Facades\Cache::put($cacheKey, true, now()->addMinutes(10));
                 }
 
-                // Resolve real sender phone number (handles @lid, @s.whatsapp.net, participant)
-                $senderJid = '';
-                if (!empty($payload['sender']) && str_contains($payload['sender'], '@s.whatsapp.net')) {
-                    $senderJid = $payload['sender'];
-                } elseif (str_contains($remoteJid, '@s.whatsapp.net')) {
-                    $senderJid = $remoteJid;
-                } elseif (!empty($key['participant']) && str_contains($key['participant'], '@s.whatsapp.net')) {
-                    $senderJid = $key['participant'];
-                } elseif (!empty($data['participant']) && str_contains($data['participant'], '@s.whatsapp.net')) {
-                    $senderJid = $data['participant'];
-                } else {
-                    $senderJid = !empty($payload['sender']) ? $payload['sender'] : $remoteJid;
+                // Resolve real sender phone number (from contact remoteJid, not bot instance sender)
+                $senderJid = $remoteJid;
+                if (str_contains($remoteJid, '@lid')) {
+                    if (!empty($key['participant']) && str_contains($key['participant'], '@s.whatsapp.net')) {
+                        $senderJid = $key['participant'];
+                    } elseif (!empty($data['participant']) && str_contains($data['participant'], '@s.whatsapp.net')) {
+                        $senderJid = $data['participant'];
+                    }
                 }
 
                 $from = preg_replace('/\D/', '', explode('@', $senderJid)[0]);
@@ -2098,7 +2094,11 @@ class WhatsAppController extends Controller
             // Step A: Enter School Code
             if ($stateObj['step'] === 'LOGIN_SCHOOL') {
                 $schoolSlug = trim($textLower);
-                $tenant = \App\Models\Tenant::where('slug', $schoolSlug)->first();
+                $cleanSlug = str_replace([' ', '-', '_'], '', $schoolSlug);
+                $tenant = \App\Models\Tenant::where('slug', $schoolSlug)
+                    ->orWhere('slug', $cleanSlug)
+                    ->orWhereRaw("LOWER(REPLACE(name, ' ', '')) = ?", [$cleanSlug])
+                    ->first();
 
                 if (!$tenant) {
                     $this->sendMetaMessage($phone, "❌ School Code *{$schoolSlug}* not found. Please check the spelling and try again:\n\n_(Type *cancel* to stop)_");
@@ -2339,8 +2339,25 @@ class WhatsAppController extends Controller
 
         // 2. Entry Commands for Unregistered users
         if ($textLower === 'login') {
+            $currentTenant = app()->bound('currentTenant') ? app('currentTenant') : null;
+            if (!$currentTenant && \App\Models\Tenant::count() === 1) {
+                $currentTenant = \App\Models\Tenant::first();
+            }
+
+            if ($currentTenant) {
+                \Illuminate\Support\Facades\Cache::put($cacheKey, [
+                    'step'     => 'LOGIN_IDENTIFIER',
+                    'data'     => ['school' => $currentTenant->slug],
+                    'attempts' => 0,
+                ], now()->addMinutes(20));
+
+                $schoolName = config('academyhub.school_name') ?: $currentTenant->name;
+                $this->sendMetaMessage($phone, "👋 *Welcome to {$schoolName}!*\n\n👤 Please enter your *login identifier*:\n\n• *Students:* Admission Number (e.g. STU20240001)\n• *Staff/Parents:* Email Address\n\n_(Type *cancel* anytime to stop)_");
+                return;
+            }
+
             \Illuminate\Support\Facades\Cache::put($cacheKey, ['step' => 'LOGIN_SCHOOL', 'data' => [], 'attempts' => 0], now()->addMinutes(20));
-            $this->sendMetaMessage($phone, "👋 *Welcome to HubGenie!*\n\nPlease enter your *School Code* first (e.g. `demo`, `yis`):\n\n_(Type *cancel* anytime to stop)_");
+            $this->sendMetaMessage($phone, "👋 *Welcome to HubGenie!*\n\nPlease enter your *School Code* first (e.g. `aiacademy`, `demo`):\n\n_(Type *cancel* anytime to stop)_");
             return;
         }
 
