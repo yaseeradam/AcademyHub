@@ -9,32 +9,91 @@
 
     $user = auth()->user();
 
-    $classIds = SubjectAllocation::where('teacher_id', $user->id)->pluck('class_id')->unique()->values();
-    $subjectIds = SubjectAllocation::where('teacher_id', $user->id)->pluck('subject_id')->unique()->values();
+    // Retrieve all subject allocations for this teacher with class and section relations
+    $allocations = SubjectAllocation::with(['schoolClass', 'section'])
+        ->where('teacher_id', $user->id)
+        ->get();
 
-    $classes = $classIds->isEmpty()
-        ? collect()
-        : SchoolClass::whereIn('id', $classIds)->withCount('students')->orderBy('level')->orderBy('name')->get();
+    $classIds = $allocations->pluck('class_id')->filter()->unique()->values();
+    $subjectIds = $allocations->pluck('subject_id')->filter()->unique()->values();
 
-    $studentsCount = $classIds->isEmpty()
-        ? 0
-        : Student::whereIn('class_id', $classIds)->where('status', 'Active')->count();
+    // Map teacher's scope: [class_id => null (all arms) | array of section_ids]
+    $teacherScope = $user->teacherClassSectionScope();
+
+    // Build base query for students assigned to this teacher
+    $studentsQuery = Student::where('status', 'Active');
+    if (empty($teacherScope)) {
+        $studentsQuery->whereRaw('1 = 0');
+    } else {
+        $studentsQuery->where(function ($q) use ($teacherScope) {
+            foreach ($teacherScope as $classId => $sectionIds) {
+                $q->orWhere(function ($sub) use ($classId, $sectionIds) {
+                    $sub->where('class_id', $classId);
+                    if (is_array($sectionIds)) {
+                        $sub->whereIn('section_id', $sectionIds);
+                    }
+                });
+            }
+        });
+    }
+
+    $studentsCount = (clone $studentsQuery)->count();
+    $studentIds = (clone $studentsQuery)->pluck('id');
+
+    // Build allocated classes / subclasses (arms) breakdown
+    $myClassesList = collect();
+    $groupedAllocations = $allocations->groupBy('class_id');
+    foreach ($groupedAllocations as $cId => $allocGroup) {
+        $first = $allocGroup->first();
+        $schoolClass = $first->schoolClass;
+        if (! $schoolClass) continue;
+
+        $sectionIds = $allocGroup->pluck('section_id')->unique()->values();
+        // If there's an allocation with null section_id, the teacher teaches all arms
+        if ($sectionIds->contains(null)) {
+            $count = Student::where('class_id', $cId)->where('status', 'Active')->count();
+            $myClassesList->push([
+                'name' => $schoolClass->name,
+                'subtitle' => 'All Arms • Level ' . $schoolClass->level,
+                'count' => $count,
+                'level' => $schoolClass->level,
+            ]);
+        } else {
+            // Teacher is assigned to specific arm(s)
+            $sections = \App\Models\Section::whereIn('id', $sectionIds)->get();
+            foreach ($sections as $sec) {
+                $count = Student::where('class_id', $cId)->where('section_id', $sec->id)->where('status', 'Active')->count();
+                $myClassesList->push([
+                    'name' => $schoolClass->name . ' (' . $sec->name . ')',
+                    'subtitle' => 'Arm ' . $sec->name . ' • Level ' . $schoolClass->level,
+                    'count' => $count,
+                    'level' => $schoolClass->level,
+                ]);
+            }
+        }
+    }
+    $myClassesList = $myClassesList->sortBy('level')->values();
 
     $subjectsCount = (int) $subjectIds->count();
-
     $pendingSubmissions = 0;
 
-    // Attendance trend (last 7 days) for teacher's classes
+    // Attendance trend (last 7 days) for teacher's students/subclasses
     $attendanceData = [];
     for ($i = 6; $i >= 0; $i--) {
         $date = now()->subDays($i);
-        $present = AttendanceMark::whereHas('sheet', fn($q) => $q->whereDate('date', $date)->whereIn('class_id', $classIds))->where('status', 'Present')->count();
-        $absent  = AttendanceMark::whereHas('sheet', fn($q) => $q->whereDate('date', $date)->whereIn('class_id', $classIds))->where('status', 'Absent')->count();
+        $present = AttendanceMark::whereDate('created_at', $date)
+            ->whereIn('student_id', $studentIds)
+            ->where('status', 'Present')
+            ->count();
+        $absent = AttendanceMark::whereDate('created_at', $date)
+            ->whereIn('student_id', $studentIds)
+            ->where('status', 'Absent')
+            ->count();
         $attendanceData[] = ['label' => $date->format('D'), 'present' => $present, 'absent' => $absent];
     }
 
-    // Top students from teacher's classes
-    $topStudents = Score::whereIn('class_id', $classIds)
+    // Top students from teacher's assigned subclass/students
+    $topStudents = Score::whereIn('student_id', $studentIds)
         ->selectRaw('student_id, AVG(total) as avg_score')
         ->with('student')
         ->groupBy('student_id')
@@ -42,9 +101,9 @@
         ->limit(5)
         ->get();
 
-    // Subject averages for teacher's subjects
+    // Subject averages for teacher's subjects and students
     $subjectStats = Score::whereIn('subject_id', $subjectIds)
-        ->whereIn('class_id', $classIds)
+        ->whereIn('student_id', $studentIds)
         ->selectRaw('subject_id, AVG(total) as avg_score')
         ->with('subject')
         ->groupBy('subject_id')
@@ -192,14 +251,9 @@
                     @php($student = $row->student)
                     <div class="flex items-center gap-3">
                         <div class="relative flex-shrink-0">
-                            @if($student?->passport_photo)
-                                <img src="{{ asset('uploads/passports/' . $student->passport_photo) }}"
-                                     class="h-10 w-10 rounded-full object-cover ring-2 ring-blue-100" alt="">
-                            @else
-                                <div class="grid h-10 w-10 place-items-center rounded-full bg-gradient-to-br from-blue-400 to-violet-500 text-sm font-bold text-white ring-2 ring-blue-100">
-                                    {{ mb_substr($student?->first_name ?? 'S', 0, 1) }}
-                                </div>
-                            @endif
+                            <img src="{{ $student?->passport_photo_url }}"
+                                 class="h-10 w-10 rounded-full object-cover ring-2 ring-blue-100"
+                                 onerror="this.src='/avatars/student_blue.png'" alt="">
                             <span class="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-white bg-green-400"></span>
                         </div>
                         <div class="min-w-0 flex-1">
@@ -224,18 +278,18 @@
 
         <div class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-100">
             <div class="mb-4 flex items-center justify-between">
-                <div class="text-base font-bold text-slate-800">My Classes</div>
+                <div class="text-base font-bold text-slate-800">My Classes &amp; Arms</div>
                 <a href="{{ route('classes.index') }}" class="text-xs font-semibold text-blue-500 hover:underline">View All</a>
             </div>
             <div class="space-y-3">
-                @forelse($classes as $class)
+                @forelse($myClassesList as $classItem)
                     <div class="flex items-center justify-between rounded-xl border border-slate-100 bg-slate-50 px-4 py-3">
                         <div>
-                            <div class="text-sm font-semibold text-slate-800">{{ $class->name }}</div>
-                            <div class="text-xs text-slate-400">Level {{ $class->level }}</div>
+                            <div class="text-sm font-semibold text-slate-800">{{ $classItem['name'] }}</div>
+                            <div class="text-xs text-slate-400">{{ $classItem['subtitle'] }}</div>
                         </div>
                         <span class="rounded-full bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-700">
-                            {{ $class->students_count }} students
+                            {{ number_format($classItem['count']) }} students
                         </span>
                     </div>
                 @empty
