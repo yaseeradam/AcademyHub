@@ -81,6 +81,9 @@ class WhatsAppService
             $instance = self::getInstanceName($tenant);
 
             $toPhone = preg_replace('/\D/', '', $phone);
+            if (str_starts_with($toPhone, '0') && strlen($toPhone) === 11) {
+                $toPhone = '234' . substr($toPhone, 1);
+            }
 
             // Guard: reject empty phone numbers
             if (empty($toPhone)) {

@@ -1776,10 +1776,22 @@ class WhatsAppController extends Controller
         // 2. Event Delivery / Message Handling (POST)
         if ($request->isMethod('post')) {
             $payload = $request->all();
+            $rawEvent = $payload['event'] ?? '';
+            $event = strtolower(str_replace('_', '.', (string) $rawEvent));
+
+            \Illuminate\Support\Facades\Log::info('WhatsApp Webhook POST received', [
+                'event'    => $rawEvent,
+                'instance' => $payload['instance'] ?? null,
+                'sender'   => $payload['sender'] ?? null,
+            ]);
 
             // ── Case A: Evolution API Webhook (Free Multi-Device Gateway) ────
-            if (isset($payload['event']) && strcasecmp($payload['event'], 'messages.upsert') === 0) {
+            if ($event === 'messages.upsert') {
                 $data = $payload['data'] ?? [];
+                if (isset($data[0]) && is_array($data[0])) {
+                    $data = $data[0];
+                }
+
                 $key = $data['key'] ?? [];
 
                 // Skip outgoing messages sent by the bot itself
@@ -1802,9 +1814,40 @@ class WhatsAppController extends Controller
                     \Illuminate\Support\Facades\Cache::put($cacheKey, true, now()->addMinutes(10));
                 }
 
-                $from = preg_replace('/\D/', '', explode('@', $remoteJid)[0]);
+                // Resolve real sender phone number (handles @lid, @s.whatsapp.net, participant)
+                $senderJid = '';
+                if (!empty($payload['sender']) && str_contains($payload['sender'], '@s.whatsapp.net')) {
+                    $senderJid = $payload['sender'];
+                } elseif (str_contains($remoteJid, '@s.whatsapp.net')) {
+                    $senderJid = $remoteJid;
+                } elseif (!empty($key['participant']) && str_contains($key['participant'], '@s.whatsapp.net')) {
+                    $senderJid = $key['participant'];
+                } elseif (!empty($data['participant']) && str_contains($data['participant'], '@s.whatsapp.net')) {
+                    $senderJid = $data['participant'];
+                } else {
+                    $senderJid = !empty($payload['sender']) ? $payload['sender'] : $remoteJid;
+                }
+
+                $from = preg_replace('/\D/', '', explode('@', $senderJid)[0]);
+                if (str_starts_with($from, '0') && strlen($from) === 11) {
+                    $from = '234' . substr($from, 1);
+                }
 
                 $msgObj = $data['message'] ?? [];
+                // Unwrap potential wrapped messages (ephemeral, view-once, document, etc.)
+                if (isset($msgObj['ephemeralMessage']['message'])) {
+                    $msgObj = $msgObj['ephemeralMessage']['message'];
+                }
+                if (isset($msgObj['viewOnceMessage']['message'])) {
+                    $msgObj = $msgObj['viewOnceMessage']['message'];
+                }
+                if (isset($msgObj['viewOnceMessageV2']['message'])) {
+                    $msgObj = $msgObj['viewOnceMessageV2']['message'];
+                }
+                if (isset($msgObj['documentWithCaptionMessage']['message'])) {
+                    $msgObj = $msgObj['documentWithCaptionMessage']['message'];
+                }
+
                 $text = '';
                 $buttonId = null;
 
@@ -1815,10 +1858,21 @@ class WhatsAppController extends Controller
                 } elseif (!empty($msgObj['buttonsResponseMessage']['selectedDisplayText'])) {
                     $text = trim($msgObj['buttonsResponseMessage']['selectedDisplayText']);
                     $buttonId = trim($msgObj['buttonsResponseMessage']['selectedButtonId'] ?? '');
+                } elseif (!empty($msgObj['templateButtonReplyMessage']['selectedDisplayText'])) {
+                    $text = trim($msgObj['templateButtonReplyMessage']['selectedDisplayText']);
+                    $buttonId = trim($msgObj['templateButtonReplyMessage']['selectedId'] ?? '');
                 } elseif (!empty($msgObj['listResponseMessage']['title'])) {
                     $text = trim($msgObj['listResponseMessage']['title']);
                     $buttonId = trim($msgObj['listResponseMessage']['singleSelectReply']['selectedRowId'] ?? '');
                 }
+
+                \Illuminate\Support\Facades\Log::info('WhatsApp Webhook parsed message', [
+                    'from'      => $from,
+                    'text'      => $text,
+                    'buttonId'  => $buttonId,
+                    'senderJid' => $senderJid,
+                    'remoteJid' => $remoteJid,
+                ]);
 
                 $instanceName = $payload['instance'] ?? null;
                 $tenant = null;
@@ -2290,10 +2344,26 @@ class WhatsAppController extends Controller
             return;
         }
 
-        // 3. Find Logged In User
-        $user = \App\Models\User::where('whatsapp_phone', $phone)
-            ->where('whatsapp_verified', true)
-            ->first();
+        // 3. Find Logged In User (support 234..., 0..., +234..., and trailing 10 digits)
+        $phoneDigits = preg_replace('/\D/', '', $phone);
+        $phoneVariants = array_unique(array_filter([
+            $phone,
+            $phoneDigits,
+            '+' . $phoneDigits,
+            str_starts_with($phoneDigits, '234') && strlen($phoneDigits) === 13 ? '0' . substr($phoneDigits, 3) : null,
+            str_starts_with($phoneDigits, '0') && strlen($phoneDigits) === 11 ? '234' . substr($phoneDigits, 1) : null,
+            str_starts_with($phoneDigits, '0') && strlen($phoneDigits) === 11 ? '+234' . substr($phoneDigits, 1) : null,
+        ]));
+        $last10 = strlen($phoneDigits) >= 10 ? substr($phoneDigits, -10) : $phoneDigits;
+
+        $user = \App\Models\User::where(function ($q) use ($phoneVariants, $last10) {
+            $q->whereIn('whatsapp_phone', $phoneVariants);
+            if (strlen($last10) >= 10) {
+                $q->orWhere('whatsapp_phone', 'LIKE', "%{$last10}");
+            }
+        })
+        ->where('whatsapp_verified', true)
+        ->first();
 
         if ($user) {
             // Resolve Dynamic Tenant Config & Check Active Status / Plugin Activation first!
@@ -2838,6 +2908,15 @@ class WhatsAppController extends Controller
             $instance = \App\Support\WhatsAppService::getInstanceName();
 
             $cleanPhone = preg_replace('/\D/', '', $toPhone);
+            if (str_starts_with($cleanPhone, '0') && strlen($cleanPhone) === 11) {
+                $cleanPhone = '234' . substr($cleanPhone, 1);
+            }
+
+            if (empty($cleanPhone)) {
+                \Illuminate\Support\Facades\Log::warning('WhatsAppController (Evolution API): Empty phone number after sanitization', ['original' => $toPhone]);
+                return false;
+            }
+
             $textToSend = $messageText;
 
             // If buttons or lists are provided, append readable bullet options
@@ -2845,7 +2924,9 @@ class WhatsAppController extends Controller
                 $lines = [];
                 foreach ($buttons as $btn) {
                     $title = $btn['title'] ?? $btn['id'] ?? '';
-                    $lines[] = "• Reply *{$title}*";
+                    if (!empty($title)) {
+                        $lines[] = "• Reply *{$title}*";
+                    }
                 }
                 if (!empty($lines)) {
                     $textToSend .= "\n\n" . implode("\n", $lines);
@@ -2890,6 +2971,18 @@ class WhatsAppController extends Controller
                     'Content-Type' => 'application/json',
                 ])
                 ->post($url, $payload);
+
+            if ($response->failed()) {
+                \Illuminate\Support\Facades\Log::error('WhatsAppController (Evolution API): Failed to send message', [
+                    'phone'    => $cleanPhone,
+                    'status'   => $response->status(),
+                    'response' => $response->body(),
+                ]);
+            } else {
+                \Illuminate\Support\Facades\Log::info('WhatsAppController (Evolution API): Message sent successfully', [
+                    'phone' => $cleanPhone,
+                ]);
+            }
 
             return $response->successful();
         } catch (\Exception $e) {
