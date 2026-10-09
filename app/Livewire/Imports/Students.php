@@ -121,7 +121,8 @@ class Students extends Component
         $standardFields = [
             'admission_number', 'first_name', 'last_name', 'full_name', 'gender',
             'class_name', 'section_name', 'dob', 'blood_group',
-            'guardian_name', 'guardian_phone', 'guardian_address', 'status'
+            'guardian_name', 'guardian_phone', 'guardian_address', 'status',
+            'passport_photo',
         ];
         foreach ($standardFields as $field) {
             if (!isset($aiMapping[$field])) {
@@ -363,6 +364,12 @@ class Students extends Component
                     'custom_fields'    => $customFieldsPayload,
                 ];
 
+                $rawPhoto = $get('passport_photo') ?: ($get('photo') ?: null);
+                $savedPhoto = $this->processStudentPhoto($rawPhoto, $admNo);
+                if ($savedPhoto) {
+                    $payload['passport_photo'] = $savedPhoto;
+                }
+
                 $existingStudent = Student::query()->where('admission_number', $admNo)->first();
                 if ($existingStudent) {
                     if ($this->updateExisting) {
@@ -417,6 +424,7 @@ class Students extends Component
             'guardian_phone'   => ['phone', 'mobile', 'tel'],
             'guardian_address' => ['address', 'residence'],
             'status'           => ['status', 'active'],
+            'passport_photo'   => ['photo', 'passport', 'picture', 'image', 'avatar', 'img', 'pic'],
         ];
 
         foreach ($rules as $field => $keywords) {
@@ -439,6 +447,64 @@ class Students extends Component
             }
         }
         return $mapping;
+    }
+
+    private function processStudentPhoto(?string $rawPhoto, string $admNo): ?string
+    {
+        if (! $rawPhoto) {
+            return null;
+        }
+
+        $rawPhoto = trim($rawPhoto);
+        if ($rawPhoto === '') {
+            return null;
+        }
+
+        // 1. If it's a valid remote URL, attempt to download and store locally in uploads/Students/
+        if (filter_var($rawPhoto, FILTER_VALIDATE_URL)) {
+            try {
+                $response = Http::timeout(10)->withoutVerifying()->get($rawPhoto);
+                if ($response->successful()) {
+                    $ext = 'jpg';
+                    $contentType = (string) $response->header('Content-Type');
+                    if (str_contains($contentType, 'png')) {
+                        $ext = 'png';
+                    } elseif (str_contains($contentType, 'webp')) {
+                        $ext = 'webp';
+                    }
+
+                    $cleanAdm = preg_replace('/[^A-Za-z0-9_-]/', '_', $admNo);
+                    $filename = 'Students/' . $cleanAdm . '_' . time() . '.' . $ext;
+
+                    \Illuminate\Support\Facades\Storage::disk('uploads')->put($filename, $response->body());
+                    return $filename;
+                }
+            } catch (\Throwable) {
+                // If download fails, fallback to storing the URL directly
+            }
+            return $rawPhoto;
+        }
+
+        // 2. If it's a Base64 data URI
+        if (str_starts_with($rawPhoto, 'data:image')) {
+            try {
+                if (preg_match('/^data:image\/(\w+);base64,/', $rawPhoto, $type)) {
+                    $data = substr($rawPhoto, strpos($rawPhoto, ',') + 1);
+                    $ext = strtolower($type[1]);
+                    $data = base64_decode($data);
+                    if ($data !== false) {
+                        $cleanAdm = preg_replace('/[^A-Za-z0-9_-]/', '_', $admNo);
+                        $filename = 'Students/' . $cleanAdm . '_' . time() . '.' . $ext;
+                        \Illuminate\Support\Facades\Storage::disk('uploads')->put($filename, $data);
+                        return $filename;
+                    }
+                }
+            } catch (\Throwable) {}
+            return null;
+        }
+
+        // 3. If it's a relative path or filename (e.g. "Students/AD01.jpg" or "AD01.jpg")
+        return str_starts_with($rawPhoto, 'Students/') ? $rawPhoto : 'Students/' . ltrim($rawPhoto, '/');
     }
 
     private function incrementAdmissionNumber(string $number): string
@@ -484,6 +550,12 @@ class Students extends Component
                         'status'           => $row['status'] ?: 'Active',
                         'custom_fields'    => $row['custom_fields'] ?? [],
                     ];
+
+                    $rawPhoto = $row['passport_photo'] ?? ($row['photo'] ?? null);
+                    $savedPhoto = $this->processStudentPhoto($rawPhoto, $row['admission_number']);
+                    if ($savedPhoto) {
+                        $payload['passport_photo'] = $savedPhoto;
+                    }
 
                     $existing = Student::query()->where('admission_number', $row['admission_number'])->first();
                     if ($existing) {
@@ -533,7 +605,7 @@ class Students extends Component
             }
         }
 
-        $optional = ['dob', 'blood_group', 'guardian_name', 'guardian_phone', 'guardian_address', 'status'];
+        $optional = ['dob', 'blood_group', 'guardian_name', 'guardian_phone', 'guardian_address', 'status', 'passport_photo', 'photo'];
         $allKnownColumns = array_merge($required, $optional);
         $customColumns = array_diff($headers, $allKnownColumns);
 
@@ -559,6 +631,10 @@ class Students extends Component
 
             foreach ($optional as $col) {
                 $row[$col] = $get($col);
+            }
+
+            if (!empty($row['photo']) && empty($row['passport_photo'])) {
+                $row['passport_photo'] = $row['photo'];
             }
 
             $customFields = [];
@@ -705,6 +781,7 @@ We need to map these columns to our system's standard student fields:
 10. `guardian_phone` (parent/guardian phone/mobile)
 11. `guardian_address` (address/residence)
 12. `status` (status/active state)
+13. `passport_photo` (student passport photo, picture, image URL, or image filename)
 
 INSTRUCTIONS:
 1. Map each standard field to exactly ONE header from the file. If no column fits a field, map it to empty string "".
@@ -729,7 +806,8 @@ Respond ONLY with a valid JSON object in this format. Do not wrap it in markdown
     "guardian_name": "CSV_HEADER_OR_EMPTY",
     "guardian_phone": "CSV_HEADER_OR_EMPTY",
     "guardian_address": "CSV_HEADER_OR_EMPTY",
-    "status": "CSV_HEADER_OR_EMPTY"
+    "status": "CSV_HEADER_OR_EMPTY",
+    "passport_photo": "CSV_HEADER_OR_EMPTY"
   },
   "custom_fields": [
     {
