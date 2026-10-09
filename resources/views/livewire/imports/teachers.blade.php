@@ -91,7 +91,7 @@
                                     </svg>
                                 </div>
                                 <div class="text-sm font-bold text-slate-600">Drag & drop your file here, or <span class="text-indigo-600 hover:text-indigo-700 underline">browse</span></div>
-                                <div class="text-xs text-slate-400">Supports Excel (.xlsx, .xls, .ods) and CSV up to 10MB</div>
+                                <div class="text-xs text-slate-400">Supports Excel (.xlsx, .xls, .ods) and CSV up to 20MB</div>
                             </div>
                         @endif
 

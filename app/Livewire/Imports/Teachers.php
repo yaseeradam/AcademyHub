@@ -50,7 +50,7 @@ class Teachers extends Component
     public function analyze(): void
     {
         $this->validate([
-            'file' => ['required', 'file', 'mimes:csv,txt,xlsx,xls,ods', 'max:10240'],
+            'file' => ['required', 'file', 'mimes:csv,txt,xlsx,xls,ods', 'max:20480'],
         ]);
 
         try {
@@ -136,7 +136,7 @@ class Teachers extends Component
 
     public function analyzeWithAI(): void
     {
-        $this->validate(['file' => ['required', 'file', 'mimes:csv,txt,xlsx,xls,ods', 'max:10240']]);
+        $this->validate(['file' => ['required', 'file', 'mimes:csv,txt,xlsx,xls,ods', 'max:20480']]);
 
         $this->aiAnalyzing = true;
         $this->reset(['summary', 'errorsPreview', 'columnMapping', 'importReport']);
