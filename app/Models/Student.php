@@ -149,9 +149,16 @@ class Student extends Model
 
     public function getPassportPhotoUrlAttribute(): ?string
     {
+        $avatarFallback = in_array(strtolower($this->gender ?? ''), ['female', 'f', 'girl'])
+            ? '/avatars/girl_student_pink.png'
+            : '/avatars/student_blue.png';
+
         if (! $this->passport_photo) {
-            $isFemale = in_array(strtolower($this->gender ?? ''), ['female', 'f', 'girl']);
-            return $isFemale ? '/avatars/girl_student_pink.png' : '/avatars/student_blue.png';
+            $customPhotoUrl = $this->custom_fields['photo_url'] ?? null;
+            if ($customPhotoUrl && filter_var($customPhotoUrl, FILTER_VALIDATE_URL)) {
+                return $customPhotoUrl;
+            }
+            return $avatarFallback;
         }
 
         if (filter_var($this->passport_photo, FILTER_VALIDATE_URL)) {
@@ -165,6 +172,15 @@ class Student extends Model
         $path = ltrim($path, '/');
         if (str_starts_with($path, 'uploads/')) {
             $path = substr($path, 8);
+        }
+
+        // Check if file actually exists on uploads disk or public path
+        if (! file_exists(public_path('uploads/' . $path))) {
+            $customPhotoUrl = $this->custom_fields['photo_url'] ?? null;
+            if ($customPhotoUrl && filter_var($customPhotoUrl, FILTER_VALIDATE_URL)) {
+                return $customPhotoUrl;
+            }
+            return $avatarFallback;
         }
 
         return '/uploads/'.$path;

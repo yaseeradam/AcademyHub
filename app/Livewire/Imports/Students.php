@@ -463,7 +463,11 @@ class Students extends Component
         // 1. If it's a valid remote URL, attempt to download and store locally in uploads/Students/
         if (filter_var($rawPhoto, FILTER_VALIDATE_URL)) {
             try {
-                $response = Http::timeout(10)->withoutVerifying()->get($rawPhoto);
+                $response = Http::timeout(15)
+                    ->withoutVerifying()
+                    ->withHeaders(['User-Agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'])
+                    ->get($rawPhoto);
+
                 if ($response->successful()) {
                     $ext = 'jpg';
                     $contentType = (string) $response->header('Content-Type');
@@ -476,8 +480,9 @@ class Students extends Component
                     $cleanAdm = preg_replace('/[^A-Za-z0-9_-]/', '_', $admNo);
                     $filename = 'Students/' . $cleanAdm . '_' . time() . '.' . $ext;
 
-                    \Illuminate\Support\Facades\Storage::disk('uploads')->put($filename, $response->body());
-                    return $filename;
+                    if (\Illuminate\Support\Facades\Storage::disk('uploads')->put($filename, $response->body())) {
+                        return $filename;
+                    }
                 }
             } catch (\Throwable) {
                 // If download fails, fallback to storing the URL directly
@@ -495,8 +500,9 @@ class Students extends Component
                     if ($data !== false) {
                         $cleanAdm = preg_replace('/[^A-Za-z0-9_-]/', '_', $admNo);
                         $filename = 'Students/' . $cleanAdm . '_' . time() . '.' . $ext;
-                        \Illuminate\Support\Facades\Storage::disk('uploads')->put($filename, $data);
-                        return $filename;
+                        if (\Illuminate\Support\Facades\Storage::disk('uploads')->put($filename, $data)) {
+                            return $filename;
+                        }
                     }
                 }
             } catch (\Throwable) {}
