@@ -314,14 +314,7 @@ $activeShadow = "shadow-{$accent}-200";
                 </div>
             </div>
 
-                {{-- Install App Header Button --}}
-                <button type="button" onclick="if(window.triggerPwaInstall){window.triggerPwaInstall()}else{alert('To install AcademyHub: Use the 3 dots menu in your browser and click Install App.')}"
-                        title="Install App on Device"
-                        class="pwa-install-trigger flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-full border border-violet-200 bg-violet-50 text-violet-700 hover:bg-violet-100 hover:border-violet-300 transition-all text-xs font-bold shadow-xs tap-bounce">
-                    <svg class="w-3.5 h-3.5 text-violet-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
-                    <span class="hidden sm:inline">Install App</span>
-                    <span class="text-[9px] font-extrabold uppercase px-1 py-0.2 rounded bg-violet-200 text-violet-800">App</span>
-                </button>
+            <div class="flex items-center gap-2 sm:gap-3 flex-shrink-0">
 
                 {{-- Bell --}}
                 <div class="relative flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500 hover:bg-slate-50 transition-colors tap-bounce shadow-sm">
