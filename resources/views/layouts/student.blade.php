@@ -12,11 +12,23 @@
     <meta name="theme-color" content="#0f172a" media="(prefers-color-scheme: light)" />
     <meta name="theme-color" content="#0f172a" media="(prefers-color-scheme: dark)" />
     <link rel="manifest" href="/manifest.json">
-    @if(config('academyhub.school_logo'))
-        <link rel="apple-touch-icon" href="{{ asset('uploads/'.str_replace('\\','/',config('academyhub.school_logo'))) }}">
-    @else
-        <link rel="apple-touch-icon" href="{{ asset('apple-touch-icon.png') }}">
-    @endif
+    @php
+        $activeFavicon = null;
+        if (config('academyhub.school_logo')) {
+            $activeFavicon = asset('uploads/' . str_replace('\\', '/', config('academyhub.school_logo')));
+        } elseif (app()->bound('currentTenant') && app('currentTenant') && !empty(app('currentTenant')->logo)) {
+            $activeFavicon = asset('uploads/' . str_replace('\\', '/', app('currentTenant')->logo));
+        } elseif (auth()->check() && auth()->user()->tenant && !empty(auth()->user()->tenant->logo)) {
+            $activeFavicon = asset('uploads/' . str_replace('\\', '/', auth()->user()->tenant->logo));
+        } else {
+            $activeFavicon = asset('icon.png');
+        }
+    @endphp
+    <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
+    <link rel="shortcut icon" href="{{ $activeFavicon }}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ $activeFavicon }}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{{ $activeFavicon }}">
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ $activeFavicon }}">
     <title>{{ config('academyhub.school_name', config('app.name', 'AcademyHub')) }} — Student Portal</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @livewireStyles
