@@ -33,6 +33,7 @@
 
         @livewireScripts
         @stack('scripts')
+        <x-pwa-install-prompt />
     </body>
 </html>
 
