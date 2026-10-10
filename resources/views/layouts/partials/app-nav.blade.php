@@ -422,6 +422,25 @@ HTML;
                     'bg-violet-100', 'text-violet-500',
                     '<path stroke-linecap="round" stroke-linejoin="round" d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>',
                     request()->routeIs('profile')) !!}
+
+                {{-- PWA Install Button (always available for easy 1-click install) --}}
+                <a href="javascript:void(0)" onclick="if(window.triggerPwaInstall){window.triggerPwaInstall()}else{alert('To install AcademyHub: Use the 3 dots menu in your browser and click Install App.')}" 
+                   title="Install App"
+                   class="pwa-install-trigger flex items-center transition-all duration-300 hover:bg-white hover:shadow-sm {{ $isMobile ? 'w-full gap-3 px-3 py-2.5 rounded-2xl' : '' }}"
+                   {!! !$isMobile ? 'x-bind:class="sidebarCollapsed ? \'w-11 h-11 mx-auto justify-center rounded-xl p-0\' : \'w-full gap-3 px-3 py-2.5 rounded-2xl\'"' : '' !!}>
+                    <div class="nav-icon-box bg-emerald-100 rounded-xl transition-all duration-300 flex-shrink-0">
+                        <svg class="h-5 w-5 text-emerald-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                        </svg>
+                    </div>
+                    <span class="text-slate-700 font-bold flex-1 text-sm leading-none whitespace-nowrap overflow-hidden"
+                          {!! !$isMobile ? 'x-show="!sidebarCollapsed" x-transition:enter="transition-opacity ease-out duration-200 delay-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="transition-opacity ease-in duration-75" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"' : '' !!}>
+                        Install App
+                    </span>
+                    <div {!! !$isMobile ? 'x-show="!sidebarCollapsed" x-transition:enter="transition-opacity ease-out duration-200 delay-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="transition-opacity ease-in duration-75" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"' : '' !!}>
+                        <span class="text-[9px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wider bg-emerald-50 text-emerald-700">PWA</span>
+                    </div>
+                </a>
             </div>
         </div>
     @endif
