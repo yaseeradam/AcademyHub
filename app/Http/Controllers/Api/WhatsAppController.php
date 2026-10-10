@@ -1462,12 +1462,12 @@ class WhatsAppController extends Controller
 
                 $messages[] = ['role' => 'user', 'content' => $prompt];
 
-                $configured = config('services.groq.model', 'openai/gpt-oss-20b');
-                $models = array_values(array_unique([$configured, 'openai/gpt-oss-20b', 'llama-3.3-70b-versatile', 'llama-3.1-70b-versatile']));
+                $configured = config('services.groq.model', 'qwen/qwen3.8-27b');
+                $models = array_values(array_filter(array_unique([$configured, 'qwen/qwen3.8-27b', 'openai/gpt-oss-20b', 'openai/gpt-oss-120b'])));
                 $chosenModel = $models[$i % count($models)];
 
                 $response = \Illuminate\Support\Facades\Http::withOptions(['verify' => false])
-                    ->timeout(15)
+                    ->timeout(20)
                     ->withHeaders([
                         'Authorization' => 'Bearer ' . $apiKey,
                         'Content-Type'  => 'application/json',
@@ -1479,9 +1479,14 @@ class WhatsAppController extends Controller
                     ]);
 
                 if ($response->successful()) {
-                    $content = $response->json()['choices'][0]['message']['content'] ?? null;
-                    if ($content) {
-                        return $content;
+                    $json = $response->json();
+                    $choice = $json['choices'][0]['message'] ?? [];
+                    $content = $choice['content'] ?? null;
+                    if (!empty($content)) {
+                        return trim($content);
+                    }
+                    if (!empty($choice['reasoning'])) {
+                        return trim($choice['reasoning']);
                     }
                 }
 

@@ -216,7 +216,7 @@ class TheoryReview extends Component
                     'Content-Type'  => 'application/json',
                 ])
                 ->post('https://api.groq.com/openai/v1/chat/completions', [
-                    'model'    => config('services.groq.model', 'openai/gpt-oss-20b'),
+                    'model'    => config('services.groq.model', 'qwen/qwen3.8-27b'),
                     'messages' => [
                         ['role' => 'user', 'content' => $prompt]
                     ],

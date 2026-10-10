@@ -281,7 +281,7 @@ class Index extends Component
                     'Authorization' => 'Bearer ' . $apiKey,
                     'Content-Type'  => 'application/json',
                 ])->post('https://api.groq.com/openai/v1/chat/completions', [
-                    'model'       => config('services.groq.model', 'openai/gpt-oss-20b'),
+                    'model'       => config('services.groq.model', 'qwen/qwen3.8-27b'),
                     'messages'    => [
                         ['role' => 'system', 'content' => 'You are an experienced teacher creating homework assignments. Generate complete, well-structured assignments with clear objectives, instructions, tasks, and submission guidelines. Use plain text without markdown symbols.'],
                         ['role' => 'user',   'content' => $prompt],

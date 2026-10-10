@@ -587,7 +587,7 @@ class ReportCardService
                     'Authorization' => 'Bearer ' . $apiKey,
                     'Content-Type'  => 'application/json',
                 ])->post('https://api.groq.com/openai/v1/chat/completions', [
-                    'model'       => config('services.groq.model', 'openai/gpt-oss-20b'),
+                    'model'       => config('services.groq.model', 'qwen/qwen3.8-27b'),
                     'messages'    => [
                         ['role' => 'system', 'content' => $systemInstruction],
                         ['role' => 'user', 'content' => $prompt]

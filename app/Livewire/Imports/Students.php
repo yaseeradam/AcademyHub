@@ -943,8 +943,8 @@ PROMPT;
         $keys = array_filter(array_map('trim', explode(',', $rawKeys)));
         shuffle($keys);
 
-        $configuredModel = config('services.groq.model', 'openai/gpt-oss-20b');
-        $modelsToTry = array_values(array_unique([$configuredModel, 'openai/gpt-oss-20b', 'llama-3.3-70b-versatile']));
+        $configuredModel = config('services.groq.model', 'qwen/qwen3.8-27b');
+        $modelsToTry = array_values(array_unique([$configuredModel, 'qwen/qwen3.8-27b', 'openai/gpt-oss-20b']));
 
         foreach ($keys as $key) {
             foreach ($modelsToTry as $currentModel) {
