@@ -80,7 +80,7 @@ class Teachers extends Component
             ->whereIn('role', ['teacher', 'admin', 'bursar'])
             ->where('is_active', true)
             ->orderBy('name')
-            ->get(['id', 'name', 'email', 'role', 'custom_fields']);
+            ->get(['id', 'name', 'email', 'role', 'profile_photo', 'shift', 'custom_fields']);
     }
 
     #[Computed]
