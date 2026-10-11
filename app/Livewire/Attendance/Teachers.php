@@ -611,6 +611,11 @@ class Teachers extends Component
     {
         abort_unless(auth()->user()?->role === 'admin', 403);
 
-        return view('livewire.attendance.teachers');
+        return view('livewire.attendance.teachers', [
+            'teachers' => $this->teachers,
+            'visibleTeachers' => $this->visibleTeachers,
+            'markCounts' => $this->markCounts,
+            'teacherSummaries' => $this->teacherSummaries,
+        ]);
     }
 }

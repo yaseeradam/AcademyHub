@@ -145,12 +145,12 @@
 
     {{-- Modern KPI Stat Cards --}}
     @php
-        $totalTeachersCount = $this->teachers->count();
-        $presentCount = $this->markCounts['Present'] ?? 0;
-        $absentCount = $this->markCounts['Absent'] ?? 0;
-        $lateCount = $this->markCounts['Late'] ?? 0;
-        $excusedCount = $this->markCounts['Excused'] ?? 0;
-        $unmarkedCount = $this->markCounts['Unmarked'] ?? 0;
+        $totalTeachersCount = $teachers->count();
+        $presentCount = $markCounts['Present'] ?? 0;
+        $absentCount = $markCounts['Absent'] ?? 0;
+        $lateCount = $markCounts['Late'] ?? 0;
+        $excusedCount = $markCounts['Excused'] ?? 0;
+        $unmarkedCount = $markCounts['Unmarked'] ?? 0;
 
         $presentRate = $totalTeachersCount > 0 ? round(($presentCount / $totalTeachersCount) * 100) : 0;
         $absentRate = $totalTeachersCount > 0 ? round(($absentCount / $totalTeachersCount) * 100) : 0;
@@ -386,7 +386,7 @@
                     <div class="text-xs font-extrabold text-slate-900 flex items-center gap-2">
                         <span>Staff Members</span>
                         <span class="px-2 py-0.5 rounded-full bg-slate-100 text-[11px] font-bold text-slate-600">
-                            {{ $this->visibleTeachers->count() }} of {{ $totalTeachersCount }}
+                            {{ $visibleTeachers->count() }} of {{ $totalTeachersCount }}
                         </span>
                     </div>
 
@@ -415,7 +415,7 @@
 
                 {{-- Teacher Cards Stream --}}
                 <div class="space-y-3">
-                    @forelse ($this->visibleTeachers as $teacher)
+                    @forelse ($visibleTeachers as $teacher)
                         @php
                             $status = $marks[$teacher->id]['status'] ?? 'Unmarked';
                             $note = $marks[$teacher->id]['note'] ?? null;
@@ -581,7 +581,7 @@
                 </button>
             </div>
 
-            @if(count($this->teacherSummaries) > 0)
+            @if(count($teacherSummaries) > 0)
                 <div class="overflow-x-auto">
                     <table class="w-full border-collapse text-left">
                         <thead>
@@ -596,7 +596,7 @@
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-slate-100 text-xs font-semibold">
-                            @foreach($this->teacherSummaries as $row)
+                            @foreach($teacherSummaries as $row)
                                 <tr class="hover:bg-slate-50/50 transition-colors">
                                     <td class="px-6 py-4">
                                         <div class="flex items-center gap-3">
