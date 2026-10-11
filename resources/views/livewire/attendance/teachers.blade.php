@@ -454,8 +454,7 @@
                         @endphp
 
                         <div wire:key="teacher-row-{{ $teacher->id }}"
-                            wire:click="applyTool({{ $teacher->id }})"
-                            class="group relative rounded-2xl border p-4 shadow-2xs transition-all duration-150 cursor-pointer {{ $statusConfig['card'] }}">
+                            class="group relative rounded-2xl border p-4.5 shadow-2xs transition-all duration-150 {{ $statusConfig['card'] }}">
                             
                             {{-- Top Row: Avatar + Info + Segmented Buttons --}}
                             <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -504,39 +503,52 @@
                                     </div>
                                 </div>
 
-                                {{-- Segmented Controls & Status Cycle Button --}}
-                                <div class="flex items-center gap-2 flex-shrink-0" @click.stop>
-                                    {{-- Segmented 1-Click P / A / L / E --}}
-                                    <div class="inline-flex rounded-xl bg-slate-100/90 p-1 border border-slate-200 shadow-inner">
+                                {{-- Large Touch-Friendly Status Mark Buttons --}}
+                                <div class="flex flex-wrap items-center gap-2 flex-shrink-0" @click.stop>
+                                    <div class="inline-flex items-center gap-1.5 p-1 rounded-2xl bg-slate-100/90 border border-slate-200/80 shadow-2xs">
+                                        {{-- Present Button --}}
                                         <button type="button" wire:click="setMark({{ $teacher->id }}, 'Present')"
-                                            class="inline-flex items-center justify-center rounded-lg h-7 w-7 text-xs font-black transition-all {{ $status === 'Present' ? 'bg-emerald-600 text-white shadow-sm scale-105' : 'text-slate-500 hover:text-slate-900 hover:bg-slate-200/60' }}"
+                                            class="inline-flex items-center gap-1.5 rounded-xl px-3.5 py-2 text-xs font-black transition-all active:scale-95 {{ $status === 'Present' ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/30 ring-2 ring-emerald-400' : 'bg-white text-slate-700 hover:bg-emerald-50 hover:text-emerald-700 border border-slate-200/80 hover:border-emerald-200' }}"
                                             title="Mark Present">
-                                            P
+                                            <span class="h-2 w-2 rounded-full {{ $status === 'Present' ? 'bg-white ring-2 ring-emerald-300' : 'bg-emerald-500' }}"></span>
+                                            <span>Present</span>
                                         </button>
+
+                                        {{-- Absent Button --}}
                                         <button type="button" wire:click="setMark({{ $teacher->id }}, 'Absent')"
-                                            class="inline-flex items-center justify-center rounded-lg h-7 w-7 text-xs font-black transition-all {{ $status === 'Absent' ? 'bg-rose-600 text-white shadow-sm scale-105' : 'text-slate-500 hover:text-slate-900 hover:bg-slate-200/60' }}"
+                                            class="inline-flex items-center gap-1.5 rounded-xl px-3.5 py-2 text-xs font-black transition-all active:scale-95 {{ $status === 'Absent' ? 'bg-rose-600 text-white shadow-md shadow-rose-600/30 ring-2 ring-rose-400' : 'bg-white text-slate-700 hover:bg-rose-50 hover:text-rose-700 border border-slate-200/80 hover:border-rose-200' }}"
                                             title="Mark Absent">
-                                            A
+                                            <span class="h-2 w-2 rounded-full {{ $status === 'Absent' ? 'bg-white ring-2 ring-rose-300' : 'bg-rose-500' }}"></span>
+                                            <span>Absent</span>
                                         </button>
+
+                                        {{-- Late Button --}}
                                         <button type="button" wire:click="setMark({{ $teacher->id }}, 'Late')"
-                                            class="inline-flex items-center justify-center rounded-lg h-7 w-7 text-xs font-black transition-all {{ $status === 'Late' ? 'bg-amber-600 text-white shadow-sm scale-105' : 'text-slate-500 hover:text-slate-900 hover:bg-slate-200/60' }}"
+                                            class="inline-flex items-center gap-1.5 rounded-xl px-3.5 py-2 text-xs font-black transition-all active:scale-95 {{ $status === 'Late' ? 'bg-amber-600 text-white shadow-md shadow-amber-600/30 ring-2 ring-amber-400' : 'bg-white text-slate-700 hover:bg-amber-50 hover:text-amber-700 border border-slate-200/80 hover:border-amber-200' }}"
                                             title="Mark Late">
-                                            L
+                                            <span class="h-2 w-2 rounded-full {{ $status === 'Late' ? 'bg-white ring-2 ring-amber-300' : 'bg-amber-500' }}"></span>
+                                            <span>Late</span>
                                         </button>
+
+                                        {{-- Excused Button --}}
                                         <button type="button" wire:click="setMark({{ $teacher->id }}, 'Excused')"
-                                            class="inline-flex items-center justify-center rounded-lg h-7 w-7 text-xs font-black transition-all {{ $status === 'Excused' ? 'bg-purple-600 text-white shadow-sm scale-105' : 'text-slate-500 hover:text-slate-900 hover:bg-slate-200/60' }}"
+                                            class="inline-flex items-center gap-1.5 rounded-xl px-3.5 py-2 text-xs font-black transition-all active:scale-95 {{ $status === 'Excused' ? 'bg-purple-600 text-white shadow-md shadow-purple-600/30 ring-2 ring-purple-400' : 'bg-white text-slate-700 hover:bg-purple-50 hover:text-purple-700 border border-slate-200/80 hover:border-purple-200' }}"
                                             title="Mark Excused">
-                                            E
+                                            <span class="h-2 w-2 rounded-full {{ $status === 'Excused' ? 'bg-white ring-2 ring-purple-300' : 'bg-purple-500' }}"></span>
+                                            <span>Excused</span>
                                         </button>
                                     </div>
 
-                                    {{-- Status Capsule Button --}}
-                                    <button type="button" wire:click="cycleStatus({{ $teacher->id }})"
-                                        class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-extrabold border transition-all hover:scale-102 active:scale-95 shadow-2xs {{ $statusConfig['badge'] }}"
-                                        title="Click to cycle status">
-                                        <span class="h-1.5 w-1.5 rounded-full {{ $statusConfig['indicator'] }}"></span>
-                                        <span>{{ $status }}</span>
-                                    </button>
+                                    {{-- Status Indicator Badge / Quick Clear Button --}}
+                                    @if($status !== 'Unmarked')
+                                        <button type="button" wire:click="setMark({{ $teacher->id }}, 'Unmarked')"
+                                            class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-extrabold border transition-all hover:bg-slate-200/60 active:scale-95 shadow-2xs {{ $statusConfig['badge'] }}"
+                                            title="Click to reset to Unmarked">
+                                            <span class="h-2 w-2 rounded-full {{ $statusConfig['indicator'] }}"></span>
+                                            <span>{{ $status }}</span>
+                                            <svg class="h-3.5 w-3.5 opacity-60 hover:opacity-100 ml-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg>
+                                        </button>
+                                    @endif
                                 </div>
                             </div>
 
