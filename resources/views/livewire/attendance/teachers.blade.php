@@ -53,7 +53,7 @@
                 </span>
                 <span class="text-xs text-slate-400">&bull;</span>
                 <span class="text-xs font-semibold text-slate-500">
-                    {{ \Carbon\Carbon::parse($date)->format('l, F j, Y') }}
+                    {{ \Carbon\Carbon::parse($this->date ?: now())->format('l, F j, Y') }}
                 </span>
             </div>
             <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight mt-1">
