@@ -195,8 +195,6 @@ Route::middleware(['auth', 'active'])->group(function () {
         Route::get('/marketplace', MarketplaceIndex::class)->name('marketplace');
         Route::get('/marketplace/product/{product}', \App\Livewire\Marketplace\ProductDetail::class)->name('marketplace.product');
 
-        Route::get('/parents', \App\Livewire\Parents\Management::class)->name('parents.index');
-
         // Parent Portal manage plugin route
         Route::middleware('plugin:parent-portal')->group(function () {
             Route::get('/parent-portal', \App\Livewire\Parents\Management::class)->name('parent-portal.index');
@@ -305,6 +303,7 @@ Route::middleware(['auth', 'active'])->group(function () {
         Route::view('/institute', 'pages.institute.index')->name('institute');
         Route::view('/teachers', 'pages.teachers.index')->name('teachers');
         Route::get('/teachers/{teacher}', [TeacherController::class, 'show'])->name('teachers.show');
+        Route::get('/parents', \App\Livewire\Parents\Management::class)->name('parents.index');
         Route::get('/classes', [SchoolClassController::class, 'index'])->name('classes.index');
         Route::get('/classes/{class}/subjects', ManageSubjects::class)->middleware('role:admin')->name('classes.subjects');
         Route::get('/subjects', [SubjectController::class, 'index'])->name('subjects.index');

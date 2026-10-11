@@ -448,4 +448,117 @@ class ParentManagementTest extends TestCase
         $tenant->refresh();
         $this->assertEquals('not_submitted', $tenant->settings['payment_gateway']['subaccount_status']);
     }
+
+    public function test_teacher_can_access_parent_management_and_send_in_app_message(): void
+    {
+        $tenant = Tenant::query()->create([
+            'slug' => 'test-school-teacher',
+            'name' => 'Teacher School',
+            'plan' => 'pro',
+            'status' => 'active',
+            'max_students' => 500,
+            'max_teachers' => 50,
+        ]);
+
+        app()->instance('currentTenant', $tenant);
+
+        $teacher = User::query()->create([
+            'tenant_id' => $tenant->id,
+            'name' => 'Teacher Mark',
+            'email' => 'teacher.mark@test.local',
+            'password' => Hash::make('password'),
+            'role' => 'teacher',
+            'is_active' => true,
+        ]);
+
+        $parent = User::query()->create([
+            'tenant_id' => $tenant->id,
+            'name' => 'Sarah Connor',
+            'email' => 'sarah.connor@test.local',
+            'password' => Hash::make('password123'),
+            'role' => 'parent',
+            'is_active' => true,
+            'whatsapp_phone' => '2348012345678',
+        ]);
+
+        // Teacher accesses /parents route
+        $this->actingAs($teacher)
+            ->get('/parents')
+            ->assertStatus(200)
+            ->assertSee('Parent Management')
+            ->assertSee('Sarah Connor');
+
+        // Teacher sends in-app message
+        Livewire::actingAs($teacher)
+            ->test(ParentsManagement::class)
+            ->call('openInAppMessageModal', $parent->id)
+            ->assertSet('showInAppMessageModal', true)
+            ->assertSet('messageParentId', $parent->id)
+            ->set('inAppMessageBody', 'Hello Mrs Connor, John had a great presentation today in class!')
+            ->call('sendInAppMessage')
+            ->assertHasNoErrors()
+            ->assertSet('showInAppMessageModal', false);
+
+        // Verify message was created in DB
+        $this->assertDatabaseHas('messages', [
+            'sender_id' => $teacher->id,
+            'body' => 'Hello Mrs Connor, John had a great presentation today in class!',
+        ]);
+
+        // Verify in-app notification was created for parent
+        $this->assertDatabaseHas('in_app_notifications', [
+            'user_id' => $parent->id,
+            'title' => 'New message from ' . $teacher->name,
+        ]);
+    }
+
+    public function test_teacher_cannot_delete_parent(): void
+    {
+        $tenant = Tenant::query()->create([
+            'slug' => 'test-school-auth',
+            'name' => 'Auth School',
+            'plan' => 'pro',
+            'status' => 'active',
+            'max_students' => 500,
+            'max_teachers' => 50,
+        ]);
+
+        app()->instance('currentTenant', $tenant);
+
+        $teacher = User::query()->create([
+            'tenant_id' => $tenant->id,
+            'name' => 'Teacher Dave',
+            'email' => 'teacher.dave@test.local',
+            'password' => Hash::make('password'),
+            'role' => 'teacher',
+            'is_active' => true,
+        ]);
+
+        $parent = User::query()->create([
+            'tenant_id' => $tenant->id,
+            'name' => 'Protected Parent',
+            'email' => 'protected@test.local',
+            'password' => Hash::make('password123'),
+            'role' => 'parent',
+            'is_active' => true,
+        ]);
+
+        $this->expectException(\Symfony\Component\HttpKernel\Exception\HttpException::class);
+
+        Livewire::actingAs($teacher)
+            ->test(ParentsManagement::class)
+            ->call('deleteParent', $parent->id);
+    }
+
+    public function test_parent_whatsapp_chat_url_and_formatting(): void
+    {
+        $parent = new User([
+            'name' => 'Alice Parent',
+            'whatsapp_phone' => '08098765432',
+        ]);
+
+        $this->assertEquals('2348098765432', $parent->clean_whatsapp_phone);
+        $this->assertEquals('+234 809 876 5432', $parent->formatted_whatsapp_phone);
+        $this->assertEquals('https://wa.me/2348098765432?text=Hello%20Alice', $parent->getWhatsappChatUrl('Hello Alice'));
+    }
 }

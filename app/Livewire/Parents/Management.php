@@ -4,7 +4,12 @@ namespace App\Livewire\Parents;
 
 use App\Models\User;
 use App\Models\Student;
+use App\Models\Conversation;
+use App\Models\Message;
+use App\Models\InAppNotification;
 use App\Support\Audit;
+use App\Support\WhatsAppService;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Collection;
 use Livewire\Attributes\Computed;
@@ -44,6 +49,18 @@ class Management extends Component
 
     // Link children form
     public array $selectedChildren = [];
+
+    // In-App Message form
+    public bool $showInAppMessageModal = false;
+    public ?int $messageParentId = null;
+    public string $inAppMessageBody = '';
+    public ?User $messageParent = null;
+
+    // WhatsApp Message form
+    public bool $showWhatsappModal = false;
+    public ?int $whatsappParentId = null;
+    public string $whatsappMessageText = '';
+    public ?User $whatsappTargetParent = null;
 
     public function updatedSearch(): void
     {
@@ -300,6 +317,9 @@ class Management extends Component
 
     public function createParent(): void
     {
+        $user = auth()->user();
+        abort_unless($user && in_array($user->role, ['admin', 'proprietor'], true), 403);
+
         $this->validate([
             'name' => 'required|string|max:255',
             'email' => ['required', 'email', Rule::unique('users', 'email')->where('tenant_id', TenantSettings::tenantId())],
@@ -334,6 +354,9 @@ class Management extends Component
 
     public function linkChildren(): void
     {
+        $user = auth()->user();
+        abort_unless($user && in_array($user->role, ['admin', 'proprietor'], true), 403);
+
         if (!$this->selectedParent) {
             return;
         }
@@ -360,6 +383,9 @@ class Management extends Component
 
     public function deleteParent(int $parentId): void
     {
+        $user = auth()->user();
+        abort_unless($user && in_array($user->role, ['admin', 'proprietor'], true), 403);
+
         $parent = User::find($parentId);
         if (!$parent || $parent->role !== 'parent') {
             return;
@@ -471,10 +497,137 @@ class Management extends Component
         $this->whatsappPhone = '';
     }
 
+    public function openInAppMessageModal(int $parentId): void
+    {
+        $parent = User::query()->where('role', 'parent')->with('students.schoolClass')->find($parentId);
+        if (!$parent) {
+            return;
+        }
+
+        $this->messageParentId = $parent->id;
+        $this->messageParent = $parent;
+        $this->inAppMessageBody = '';
+        $this->showInAppMessageModal = true;
+    }
+
+    public function closeInAppMessageModal(): void
+    {
+        $this->showInAppMessageModal = false;
+        $this->messageParentId = null;
+        $this->messageParent = null;
+        $this->inAppMessageBody = '';
+    }
+
+    public function sendInAppMessage(): void
+    {
+        $user = auth()->user();
+        abort_unless($user, 403);
+
+        $this->validate([
+            'inAppMessageBody' => 'required|string|min:1|max:5000',
+        ]);
+
+        if (!$this->messageParentId) {
+            return;
+        }
+
+        $recipient = User::query()->where('role', 'parent')->find($this->messageParentId);
+        if (!$recipient) {
+            return;
+        }
+
+        // Find or create 1-on-1 conversation
+        $existing = Conversation::query()
+            ->whereHas('participants', fn ($q) => $q->where('users.id', $user->id))
+            ->whereHas('participants', fn ($q) => $q->where('users.id', $recipient->id))
+            ->whereDoesntHave('participants', fn ($q) => $q->whereNotIn('users.id', [$user->id, $recipient->id]))
+            ->first();
+
+        $conversation = $existing ?: DB::transaction(function () use ($user, $recipient) {
+            $c = Conversation::query()->create(['created_by' => $user->id]);
+            $c->participants()->attach([$user->id, $recipient->id]);
+            return $c;
+        });
+
+        $message = Message::create([
+            'conversation_id' => $conversation->id,
+            'sender_id'       => $user->id,
+            'body'            => trim($this->inAppMessageBody),
+        ]);
+
+        DB::table('conversation_user')
+            ->where('conversation_id', $conversation->id)
+            ->where('user_id', $user->id)
+            ->update(['last_read_at' => now()]);
+
+        InAppNotification::create([
+            'user_id' => $recipient->id,
+            'title'   => 'New message from ' . $user->name,
+            'body'    => mb_strimwidth($message->body, 0, 120, '...'),
+            'link'    => '/messages?c=' . $conversation->id,
+        ]);
+
+        $this->dispatch('alert', message: 'Message sent successfully to ' . $recipient->name . '!', type: 'success');
+        $this->closeInAppMessageModal();
+    }
+
+    public function openWhatsappModal(int $parentId): void
+    {
+        $parent = User::query()->where('role', 'parent')->with('students')->find($parentId);
+        if (!$parent) {
+            return;
+        }
+
+        $this->whatsappParentId = $parent->id;
+        $this->whatsappTargetParent = $parent;
+        $sender = auth()->user();
+        $senderName = $sender?->name ?? 'School Staff';
+        $schoolName = TenantSettings::get('school_name') ?? config('app.name', 'AcademyHub');
+
+        $children = $parent->students->pluck('full_name')->filter()->values();
+        $childContext = $children->isNotEmpty() ? " regarding {$children->join(', ')}" : "";
+
+        $this->whatsappMessageText = "Hello {$parent->name}, this is {$senderName} from {$schoolName}{$childContext}. ";
+        $this->showWhatsappModal = true;
+    }
+
+    public function closeWhatsappModal(): void
+    {
+        $this->showWhatsappModal = false;
+        $this->whatsappParentId = null;
+        $this->whatsappTargetParent = null;
+        $this->whatsappMessageText = '';
+    }
+
+    public function sendGatewayWhatsapp(): void
+    {
+        if (!$this->whatsappParentId || !$this->whatsappTargetParent) {
+            return;
+        }
+
+        $phone = $this->whatsappTargetParent->clean_whatsapp_phone;
+        if (!$phone) {
+            $this->dispatch('alert', message: 'This parent does not have a valid WhatsApp phone number.', type: 'error');
+            return;
+        }
+
+        $this->validate([
+            'whatsappMessageText' => 'required|string|min:2',
+        ]);
+
+        $sent = WhatsAppService::sendMessage($phone, trim($this->whatsappMessageText));
+        if ($sent) {
+            $this->dispatch('alert', message: 'WhatsApp message sent successfully via school gateway!', type: 'success');
+            $this->closeWhatsappModal();
+        } else {
+            $this->dispatch('alert', message: 'School WhatsApp gateway not active. Click "Open WhatsApp Web/App" to chat directly.', type: 'warning');
+        }
+    }
+
     public function render()
     {
         $user = auth()->user();
-        abort_unless($user && $user->role === 'admin', 403);
+        abort_unless($user && in_array($user->role, ['admin', 'teacher', 'proprietor', 'bursar'], true), 403);
 
         return view('livewire.parents.management');
     }

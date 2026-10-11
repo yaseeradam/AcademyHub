@@ -441,6 +441,15 @@ class Index extends Component
             $this->openConversation($defaultConversation);
         }
 
+        $targetUserId = (int) (request('user_id') ?: request('u', 0));
+        if (! $this->conversationId && $targetUserId > 0 && $targetUserId !== $user->id) {
+            try {
+                $this->startConversation($targetUserId);
+            } catch (\Throwable $e) {
+                // Gracefully ignore if user cannot be messaged
+            }
+        }
+
         return view('livewire.messages.index', [
             'me' => $user,
         ]);
