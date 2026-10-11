@@ -220,6 +220,33 @@ class Teachers extends Component
         $this->dispatch('$refresh');
     }
 
+    /**
+     * Retrieve or create the staff attendance sheet for the selected date/term/session.
+     */
+    private function getOrCreateSheet(): ?TeacherAttendanceSheet
+    {
+        if (!$this->date || !$this->term || !$this->session) {
+            return null;
+        }
+
+        $tenantId = auth()->user()?->tenant_id;
+
+        $sheet = TeacherAttendanceSheet::query()->firstOrCreate(
+            [
+                'date'    => $this->date,
+                'term'    => (int) $this->term,
+                'session' => $this->session,
+            ],
+            [
+                'tenant_id' => $tenantId,
+                'taken_by'  => auth()->id(),
+            ]
+        );
+
+        $this->sheetId = $sheet->id;
+        return $sheet;
+    }
+
     public function setTool(string $tool): void
     {
         if (!in_array($tool, ['Present', 'Absent', 'Late', 'Excused'], true)) {
@@ -241,6 +268,8 @@ class Teachers extends Component
         }
 
         $this->marks[$teacherId]['status'] = $status;
+        unset($this->markCounts);
+        unset($this->teacherSummaries);
 
         if ($status === 'Unmarked') {
             if ($this->sheetId) {
@@ -250,7 +279,35 @@ class Teachers extends Component
                     ->delete();
             }
             $this->marks[$teacherId]['note'] = null;
+
+            $teacher = User::find($teacherId);
+            $name = $teacher ? $teacher->name : "Teacher #{$teacherId}";
+            $this->dispatch('alert', message: "{$name} unmarked", type: 'info');
+            return;
         }
+
+        $sheet = $this->getOrCreateSheet();
+        if (!$sheet) {
+            return;
+        }
+
+        $note = $this->marks[$teacherId]['note'] ?? null;
+
+        TeacherAttendanceMark::query()->updateOrCreate(
+            [
+                'sheet_id'   => $sheet->id,
+                'teacher_id' => $teacherId,
+            ],
+            [
+                'tenant_id' => $sheet->tenant_id ?? auth()->user()?->tenant_id,
+                'status'    => $status,
+                'note'      => $note ? (string) $note : null,
+            ]
+        );
+
+        $teacher = User::find($teacherId);
+        $name = $teacher ? $teacher->name : "Teacher #{$teacherId}";
+        $this->dispatch('alert', message: "{$name} marked {$status}", type: 'success');
     }
 
     public function applyTool(int $teacherId): void
@@ -263,41 +320,42 @@ class Teachers extends Component
         $this->setMark($teacherId, $tool);
     }
 
+    public function updatedMarks($value, $key): void
+    {
+        unset($this->markCounts);
+
+        // Check if a note was updated: e.g. "12.note"
+        if (str_ends_with((string) $key, '.note')) {
+            $parts = explode('.', (string) $key);
+            $teacherId = (int) ($parts[0] ?? 0);
+
+            if ($teacherId > 0 && $this->sheetId) {
+                TeacherAttendanceMark::query()
+                    ->where('sheet_id', $this->sheetId)
+                    ->where('teacher_id', $teacherId)
+                    ->update(['note' => $value ? (string) $value : null]);
+            }
+        }
+    }
+
     public function start(): void
     {
         $this->validateSelection();
 
-        $sheet = TeacherAttendanceSheet::query()->firstOrCreate(
-            [
-                'date' => $this->date,
-                'term' => $this->term,
-                'session' => $this->session,
-            ],
-            [
-                'taken_by' => auth()->id(),
-            ],
-        );
-
-        $this->sheetId = $sheet->id;
-        $this->loadMarks($sheet);
+        $sheet = $this->getOrCreateSheet();
+        if ($sheet) {
+            $this->loadMarks($sheet);
+        }
     }
 
     public function save(): void
     {
         $this->validateSelection();
 
-        $sheet = TeacherAttendanceSheet::query()->firstOrCreate(
-            [
-                'date' => $this->date,
-                'term' => $this->term,
-                'session' => $this->session,
-            ],
-            [
-                'taken_by' => auth()->id(),
-            ],
-        );
-
-        $this->sheetId = $sheet->id;
+        $sheet = $this->getOrCreateSheet();
+        if (!$sheet) {
+            return;
+        }
 
         DB::transaction(function () use ($sheet) {
             foreach ($this->teachers as $teacher) {
@@ -322,16 +380,20 @@ class Teachers extends Component
 
                 TeacherAttendanceMark::query()->updateOrCreate(
                     [
-                        'sheet_id' => $sheet->id,
+                        'sheet_id'   => $sheet->id,
                         'teacher_id' => $teacher->id,
                     ],
                     [
-                        'status' => $status,
-                        'note' => $note ? (string) $note : null,
+                        'tenant_id' => $sheet->tenant_id ?? auth()->user()?->tenant_id,
+                        'status'    => $status,
+                        'note'      => $note ? (string) $note : null,
                     ],
                 );
             }
         });
+
+        unset($this->markCounts);
+        unset($this->teacherSummaries);
 
         $this->dispatch('alert', message: 'Staff attendance saved successfully.', type: 'success');
         $this->dispatchSuccessModal('Staff Attendance Saved', 'Staff attendance sheet for ' . $this->date . ' has been recorded successfully.');
@@ -343,9 +405,34 @@ class Teachers extends Component
             return;
         }
 
-        foreach ($this->teachers as $teacher) {
-            $this->marks[$teacher->id]['status'] = $status;
+        $sheet = $this->getOrCreateSheet();
+        if (!$sheet) {
+            return;
         }
+
+        DB::transaction(function () use ($sheet, $status) {
+            foreach ($this->teachers as $teacher) {
+                $this->marks[$teacher->id]['status'] = $status;
+                $note = $this->marks[$teacher->id]['note'] ?? null;
+
+                TeacherAttendanceMark::query()->updateOrCreate(
+                    [
+                        'sheet_id'   => $sheet->id,
+                        'teacher_id' => $teacher->id,
+                    ],
+                    [
+                        'tenant_id' => $sheet->tenant_id ?? auth()->user()?->tenant_id,
+                        'status'    => $status,
+                        'note'      => $note ? (string) $note : null,
+                    ]
+                );
+            }
+        });
+
+        unset($this->markCounts);
+        unset($this->teacherSummaries);
+
+        $this->dispatch('alert', message: "All staff marked as {$status}.", type: 'success');
     }
 
     public function cycleStatus(int $teacherId): void
@@ -355,14 +442,7 @@ class Teachers extends Component
         $index = array_search($current, $order, true);
         $next = $order[$index === false ? 0 : ($index + 1) % count($order)];
 
-        $this->marks[$teacherId]['status'] = $next;
-
-        if ($next === 'Unmarked' && $this->sheetId) {
-            TeacherAttendanceMark::query()
-                ->where('sheet_id', $this->sheetId)
-                ->where('teacher_id', $teacherId)
-                ->delete();
-        }
+        $this->setMark($teacherId, $next);
     }
 
     public function exportCsv(): StreamedResponse
