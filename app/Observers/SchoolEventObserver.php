@@ -23,10 +23,15 @@ class SchoolEventObserver
         }
 
         // Fetch all parents in this school who have registered a WhatsApp number and are subscribed
-        $parents = User::where('role', 'parent')
+        $parentsQuery = User::where('role', 'parent')
             ->where('whatsapp_subscribed', true)
-            ->whereNotNull('whatsapp_phone')
-            ->get();
+            ->whereNotNull('whatsapp_phone');
+
+        if ($schoolEvent->tenant_id) {
+            $parentsQuery->where('tenant_id', $schoolEvent->tenant_id);
+        }
+
+        $parents = $parentsQuery->get();
 
         if ($parents->isEmpty()) {
             return;

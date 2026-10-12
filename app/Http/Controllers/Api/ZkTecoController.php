@@ -619,7 +619,12 @@ class ZkTecoController extends Controller
      */
     public function liveFeed(Request $request)
     {
-        $tenantId = $request->query('tenant_id', 1);
+        $user = auth('sanctum')->user() ?: auth()->user();
+        if (!$user) {
+            return response()->json(['error' => 'Unauthenticated.'], 401);
+        }
+
+        $tenantId = $user->tenant_id ?: (int) $request->query('tenant_id', 1);
         $date = $request->query('date', Carbon::today()->format('Y-m-d'));
 
         // All active students
@@ -914,6 +919,11 @@ class ZkTecoController extends Controller
      */
     public function gateStatus(Request $request)
     {
+        $user = auth('sanctum')->user() ?: auth()->user();
+        if (!$user) {
+            return response()->json(['error' => 'Unauthenticated.'], 401);
+        }
+
         $gates = [
             [
                 'name'    => 'Gate 1 (K40)',

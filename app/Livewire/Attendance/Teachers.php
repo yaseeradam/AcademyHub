@@ -55,23 +55,6 @@ class Teachers extends Component
         $this->syncSheetFromSelection();
     }
 
-    public function __get($property)
-    {
-        if ($property === 'teachers') {
-            return $this->teachers();
-        }
-        if ($property === 'visibleTeachers') {
-            return $this->visibleTeachers();
-        }
-        if ($property === 'markCounts') {
-            return $this->markCounts();
-        }
-        if ($property === 'teacherSummaries') {
-            return $this->teacherSummaries();
-        }
-
-        return parent::__get($property);
-    }
 
     #[Computed]
     public function teachers()

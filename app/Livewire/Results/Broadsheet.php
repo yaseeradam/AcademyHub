@@ -110,11 +110,14 @@ class Broadsheet extends Component
                 $grandTotal += (int) ($score?->total ?? 0);
             }
 
+            $actualSubjectsCount = count(array_filter($subjectTotals, fn($v) => $v !== null));
+            $divisor = max(1, $actualSubjectsCount > 0 ? $actualSubjectsCount : $subjectCount);
+
             return [
                 'student'       => $student,
                 'subjectTotals' => $subjectTotals,
                 'grandTotal'    => $grandTotal,
-                'average'       => round($grandTotal / $subjectCount, 2),
+                'average'       => round($grandTotal / $divisor, 2),
             ];
         });
 

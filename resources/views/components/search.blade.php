@@ -1,6 +1,6 @@
 @props(['placeholder' => 'Search...', 'showFilters' => true])
 
-<div class="relative">
+<div class="relative" x-data="search">
     <!-- Search Input -->
     <div class="relative">
         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -9,14 +9,14 @@
                 <path d="m21 21-4.35-4.35" />
             </svg>
         </div>
-        <input type="text" class="input-search" placeholder="{{ $placeholder }}" x-data x-model="searchQuery"
+        <input type="text" class="input-search" placeholder="{{ $placeholder }}" x-model="searchQuery"
             @input.debounce.300ms="performSearch">
     </div>
 
     @if ($showFilters)
         <!-- Filters Dropdown -->
-        <div class="absolute top-full left-0 right-0 mt-2 p-4 bg-white rounded-lg shadow-lg border border-gray-100 hidden"
-            x-data="{ open: false }" x-show="open" @click.away="open = false">
+        <div class="absolute top-full left-0 right-0 mt-2 p-4 bg-white rounded-lg shadow-lg border border-gray-100 z-50"
+            x-show="open" x-cloak @click.away="open = false">
             <div class="space-y-4">
                 <!-- Filter by Status -->
                 <div>
@@ -73,6 +73,7 @@
 <script>
     document.addEventListener('alpine:init', () => {
         Alpine.data('search', () => ({
+            open: false,
             searchQuery: '',
             filters: {
                 status: '',

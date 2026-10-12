@@ -16,6 +16,10 @@ class VerifyWhatsAppApiKey
 {
     public function handle(Request $request, Closure $next): Response
     {
+        if ($request->hasValidSignature()) {
+            return $next($request);
+        }
+
         $expected = config('services.whatsapp.api_key');
 
         if (empty($expected)) {

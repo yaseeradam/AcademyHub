@@ -233,10 +233,12 @@ Route::get('/zkteco/iclock', [\App\Http\Controllers\Api\ZkTecoController::class,
 Route::post('/zkteco/punch', [\App\Http\Controllers\Api\ZkTecoController::class, 'receivePunch']);
 
 // AcademyGate Dedicated Kiosk API Endpoints
-Route::get('/zkteco/latest-scan', [\App\Http\Controllers\Api\ZkTecoController::class, 'latestScan']);
-Route::get('/zkteco/live-feed', [\App\Http\Controllers\Api\ZkTecoController::class, 'liveFeed']);
-Route::post('/zkteco/manual-override', [\App\Http\Controllers\Api\ZkTecoController::class, 'manualOverride']);
-Route::get('/zkteco/gate-status', [\App\Http\Controllers\Api\ZkTecoController::class, 'gateStatus']);
-Route::post('/zkteco/test-popup', [\App\Http\Controllers\Api\ZkTecoController::class, 'testPopup']);
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/zkteco/latest-scan', [\App\Http\Controllers\Api\ZkTecoController::class, 'latestScan']);
+    Route::get('/zkteco/live-feed', [\App\Http\Controllers\Api\ZkTecoController::class, 'liveFeed']);
+    Route::post('/zkteco/manual-override', [\App\Http\Controllers\Api\ZkTecoController::class, 'manualOverride']);
+    Route::get('/zkteco/gate-status', [\App\Http\Controllers\Api\ZkTecoController::class, 'gateStatus']);
+    Route::post('/zkteco/test-popup', [\App\Http\Controllers\Api\ZkTecoController::class, 'testPopup']);
+});
 
 

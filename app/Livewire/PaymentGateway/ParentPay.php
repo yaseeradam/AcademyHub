@@ -319,7 +319,7 @@ class ParentPay extends Component
 
         $tenantId = $student->tenant_id;
 
-        $amountInKobo = (int) ($this->paymentAmount * 100);
+        $amountInKobo = (int) round($this->paymentAmount * 100);
         $reference = 'TUI_' . uniqid() . '_' . time();
         $email = str_replace('.local', '.com', $parent->email ?? 'parent@school.com');
 

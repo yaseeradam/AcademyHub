@@ -234,7 +234,12 @@ class Management extends Component
 
     public function openEditWhatsappModal(int $parentId): void
     {
-        $parent = User::query()->where('role', 'parent')->whereKey($parentId)->first();
+        $user = auth()->user();
+        $query = User::query()->where('role', 'parent')->whereKey($parentId);
+        if ($user?->tenant_id) {
+            $query->where('tenant_id', $user->tenant_id);
+        }
+        $parent = $query->first();
         if (!$parent) {
             return;
         }
@@ -287,7 +292,12 @@ class Management extends Component
     public function syncWhatsappPhones(): void
     {
         $updated = 0;
-        $parents = User::query()->where('role', 'parent')->get();
+        $user = auth()->user();
+        $query = User::query()->where('role', 'parent');
+        if ($user?->tenant_id) {
+            $query->where('tenant_id', $user->tenant_id);
+        }
+        $parents = $query->get();
 
         foreach ($parents as $parent) {
             if (!empty($parent->whatsapp_phone)) {
@@ -386,8 +396,12 @@ class Management extends Component
         $user = auth()->user();
         abort_unless($user && in_array($user->role, ['admin', 'proprietor'], true), 403);
 
-        $parent = User::find($parentId);
-        if (!$parent || $parent->role !== 'parent') {
+        $query = User::query()->where('role', 'parent')->whereKey($parentId);
+        if ($user->tenant_id) {
+            $query->where('tenant_id', $user->tenant_id);
+        }
+        $parent = $query->first();
+        if (!$parent) {
             return;
         }
 
@@ -405,7 +419,12 @@ class Management extends Component
 
     public function openEditModal(int $parentId): void
     {
-        $parent = User::query()->where('role', 'parent')->whereKey($parentId)->first();
+        $user = auth()->user();
+        $query = User::query()->where('role', 'parent')->whereKey($parentId);
+        if ($user?->tenant_id) {
+            $query->where('tenant_id', $user->tenant_id);
+        }
+        $parent = $query->first();
         if (!$parent) {
             return;
         }

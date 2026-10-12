@@ -11,7 +11,7 @@ use Livewire\Component;
 #[Title('Score Submissions')]
 class Submissions extends Component
 {
-    public string $statusFilter = 'pending';
+    public string $statusFilter = 'submitted';
 
     public function approve($id)
     {
@@ -48,7 +48,13 @@ class Submissions extends Component
 
         $submissions = ScoreSubmission::query()
             ->with(['teacher', 'schoolClass', 'subject', 'approver'])
-            ->when($this->statusFilter, fn($q) => $q->where('status', $this->statusFilter))
+            ->when($this->statusFilter, function ($q) {
+                if ($this->statusFilter === 'pending' || $this->statusFilter === 'submitted') {
+                    $q->whereIn('status', ['submitted', 'pending']);
+                } else {
+                    $q->where('status', $this->statusFilter);
+                }
+            })
             ->orderByDesc('submitted_at')
             ->limit(100)
             ->get();

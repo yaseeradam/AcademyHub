@@ -255,10 +255,12 @@ Route::middleware(['auth', 'active'])->group(function () {
         Route::get('/print/admission-letters', [PrintLetterController::class, 'printAdmissionLetters'])->name('print.admission-letters');
     });
 
-    Route::get('/students', StudentsIndex::class)->name('students.index');
-    Route::get('/students/export', [StudentsExportController::class, 'export'])->name('students.export');
-    Route::get('/students/{student}', [StudentController::class, 'show'])->name('students.show')->where('student', '[A-Za-z0-9\/\-\.]+');
-    Route::get('/students/{student}/admission-form', [AdmissionFormController::class, 'download'])->name('students.admission-form')->where('student', '[A-Za-z0-9\/\-\.]+');
+    Route::middleware('role:admin,teacher,bursar,proprietor')->group(function () {
+        Route::get('/students', StudentsIndex::class)->name('students.index');
+        Route::get('/students/export', [StudentsExportController::class, 'export'])->name('students.export');
+        Route::get('/students/{student}', [StudentController::class, 'show'])->name('students.show')->where('student', '[A-Za-z0-9\/\-\.]+');
+        Route::get('/students/{student}/admission-form', [AdmissionFormController::class, 'download'])->name('students.admission-form')->where('student', '[A-Za-z0-9\/\-\.]+');
+    });
 
     Route::middleware('role:admin,bursar,proprietor')->group(function () {
         Route::get('/billing', BillingIndex::class)->middleware('permission:billing.transactions,fees.manage,billing.view')->name('billing.index');
@@ -270,6 +272,7 @@ Route::middleware(['auth', 'active'])->group(function () {
             ->name('billing.export.transactions');
 
         Route::get('/savings-loan', SavingsLoanIndex::class)
+            ->middleware('plugin:savings-loan')
             ->name('savings-loan.index');
     });
 

@@ -4,6 +4,7 @@ namespace App\Observers;
 
 use App\Models\Transaction;
 use App\Support\WhatsAppService;
+use Illuminate\Support\Facades\URL;
 
 class TransactionObserver
 {
@@ -15,7 +16,7 @@ class TransactionObserver
      */
     public function saved(Transaction $transaction): void
     {
-        if ($transaction->type !== 'Income') {
+        if ($transaction->type !== 'Income' || $transaction->is_void || ! $transaction->wasRecentlyCreated) {
             return;
         }
 
@@ -38,14 +39,14 @@ class TransactionObserver
             ->get();
 
         foreach ($parents as $parent) {
-            $apiKey = config('services.whatsapp.api_key');
             $currency = config('academyhub.currency_symbol', '₦');
             
-            // Generate full absolute URL to our endpoint
-            $receiptUrl = route('whatsapp.receipt', [
-                'transaction' => $transaction->id,
-                'key'         => $apiKey
-            ]);
+            // Generate secure signed URL valid for 30 days without leaking raw master API key
+            $receiptUrl = URL::temporarySignedRoute(
+                'whatsapp.receipt',
+                now()->addDays(30),
+                ['transaction' => $transaction->id]
+            );
             
             $message = "🧾 *Payment Confirmed:*\n\n" .
                        "A payment of *{$currency}" . number_format($transaction->amount_paid, 2) . "* has been confirmed for *{$student->full_name}* ( tuition/fee category: *{$transaction->category}* ). Your official receipt is attached below.";

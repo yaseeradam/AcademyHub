@@ -44,10 +44,14 @@
         ->whereDate('date', today())
         ->count();
 
-    $financeData = \Illuminate\Support\Facades\Cache::remember('bursar_dashboard_finance', \DateInterval::createFromDateString('15 minutes'), function () {
+    $tenantId = $user?->tenant_id ?? (app()->bound('currentTenant') ? app('currentTenant')->id : 1);
+
+    $financeData = \Illuminate\Support\Facades\Cache::remember('tenant_' . $tenantId . '_bursar_dashboard_finance', \DateInterval::createFromDateString('15 minutes'), function () use ($tenantId) {
         $estimatedTuitionDueAllTime = (float) DB::table('students')
-            ->leftJoin('fee_structures', function ($join) {
+            ->where('students.tenant_id', $tenantId)
+            ->leftJoin('fee_structures', function ($join) use ($tenantId) {
                 $join->on('fee_structures.class_id', '=', 'students.class_id')
+                    ->where('fee_structures.tenant_id', '=', $tenantId)
                     ->where('fee_structures.category', '=', 'Tuition')
                     ->whereNull('fee_structures.term')
                     ->whereNull('fee_structures.session');
@@ -62,8 +66,10 @@
         $outstandingPaymentsEstimate = max(0.0, $estimatedTuitionDueAllTime - $incomeAllTime);
 
         $dueByStudent = DB::table('students')
-            ->leftJoin('fee_structures', function ($join) {
+            ->where('students.tenant_id', $tenantId)
+            ->leftJoin('fee_structures', function ($join) use ($tenantId) {
                 $join->on('fee_structures.class_id', '=', 'students.class_id')
+                    ->where('fee_structures.tenant_id', '=', $tenantId)
                     ->where('fee_structures.category', '=', 'Tuition')
                     ->whereNull('fee_structures.term')
                     ->whereNull('fee_structures.session');
@@ -72,6 +78,7 @@
             ->groupBy('students.id');
 
         $paidByStudent = DB::table('transactions')
+            ->where('transactions.tenant_id', $tenantId)
             ->where('type', 'Income')
             ->where('is_void', false)
             ->whereNotNull('student_id')

@@ -20,7 +20,7 @@
             ->whereBetween('created_at', [now()->subDays(30), now()])
             ->count();
         $presentDays = \App\Models\AttendanceMark::where('student_id', $child->id)
-            ->where('status', 'present')
+            ->whereIn('status', ['Present', 'present'])
             ->whereBetween('created_at', [now()->subDays(30), now()])
             ->count();
 

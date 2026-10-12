@@ -717,7 +717,7 @@ class Index extends Component
             return;
         }
 
-        $amountInKobo = (int) ($bill->total_due * 100);
+        $amountInKobo = (int) round($bill->total_due * 100);
         $email = $user->email ?: ($tenant->contact_email ?: 'admin@school.com');
         $reference = 'BILL_' . $bill->id . '_' . uniqid() . '_' . time();
 
@@ -769,6 +769,14 @@ class Index extends Component
 
                 $bill = \App\Models\TenantPluginBill::where('tenant_id', $tenant->id)->findOrFail($billId);
                 
+                $paidKobo = (int) $response->json('data.amount');
+                $expectedKobo = (int) round($bill->total_due * 100);
+
+                if ($paidKobo < $expectedKobo) {
+                    $this->dispatch('alert', message: 'Paid amount does not match the bill amount due.', type: 'error');
+                    return;
+                }
+
                 if ($bill->status !== 'paid') {
                     $bill->update([
                         'status' => 'paid',

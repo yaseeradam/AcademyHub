@@ -14,7 +14,7 @@
             <div class="text-sm font-semibold text-gray-900">Filter by Status</div>
             <select wire:model.live="statusFilter" class="select w-48">
                 <option value="">All</option>
-                <option value="pending">Pending</option>
+                <option value="submitted">Submitted / Pending</option>
                 <option value="approved">Approved</option>
                 <option value="rejected">Rejected</option>
             </select>
@@ -48,13 +48,13 @@
                                 <span class="font-semibold">Note:</span> {{ $submission->note }}
                             </div>
                         @endif
-                        @if($submission->status !== 'pending')
+                        @if(!in_array($submission->status, ['submitted', 'pending'], true))
                             <div class="mt-2 text-xs text-gray-500">
                                 Reviewed by {{ $submission->approver?->name }} on {{ $submission->reviewed_at?->format('M j, Y g:i A') }}
                             </div>
                         @endif
                     </div>
-                    @if($submission->status === 'pending')
+                    @if(in_array($submission->status, ['submitted', 'pending'], true))
                         <div class="flex gap-2 w-full md:w-auto justify-end mt-2 md:mt-0">
                             <button wire:click="approve({{ $submission->id }})" class="btn-primary w-full sm:w-auto justify-center">
                                 Approve
@@ -84,9 +84,10 @@
     });
 
     $wire.on('reject-modal', (event) => {
-        const id = event[0].id;
+        const payload = Array.isArray(event) ? event[0] : event;
+        const id = payload?.id || payload;
         const note = prompt('Enter rejection reason (optional):');
-        if (note !== null) {
+        if (note !== null && id) {
             $wire.call('reject', id, note);
         }
     });
@@ -97,12 +98,15 @@
         modal.style.animation = 'fadeIn 0.2s ease-out';
         
         const colors = {
-            success: { bg: 'from-emerald-500 to-teal-500', icon: 'M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z' }
+            success: { bg: 'from-emerald-500 to-teal-500', icon: 'M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z' },
+            warning: { bg: 'from-amber-500 to-orange-500', icon: 'M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z' },
+            error:   { bg: 'from-rose-500 to-red-500',     icon: 'M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z' }
         };
+        const theme = colors[type] || colors.success;
         
         modal.innerHTML = `
             <div class="bg-white rounded-3xl shadow-2xl max-w-md w-full transform" style="animation: slideUp 0.3s ease-out">
-                <div class="bg-gradient-to-r ${colors[type].bg} p-6 rounded-t-3xl">
+                <div class="bg-gradient-to-r ${theme.bg} p-6 rounded-t-3xl">
                     <div class="flex items-center gap-4">
                         <svg class="h-12 w-12 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                             <path stroke-linecap="round" stroke-linejoin="round" d="${colors[type].icon}" />

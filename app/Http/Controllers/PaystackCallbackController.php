@@ -78,32 +78,37 @@ class PaystackCallbackController extends Controller
             return redirect()->route('parent.pay')->with('error', 'Invalid payment metadata details.');
         }
 
-        // Prevent duplicate processing
-        $existingTx = Transaction::where('receipt_number', $data['reference'])->first();
-        if ($existingTx) {
-            return redirect()->route('parent.pay')->with('status', 'This transaction was already registered.');
-        }
-
         $student = Student::findOrFail($studentId);
         $parent = User::findOrFail($parentId);
         $amountPaid = (float) ($data['amount'] / 100);
 
-        // Record the transaction
-        $transaction = Transaction::create([
-            'tenant_id'          => $tenantId,
-            'student_id'         => $student->id,
-            'type'               => 'Income',
-            'category'           => 'Tuition',
-            'term'               => $term,
-            'session'            => $session,
-            'amount_paid'        => $amountPaid,
-            'payment_method'     => 'Transfer',
-            'installment_plan'   => $plan,
-            'installment_number' => $plan !== 'full' ? $installmentNumber : null,
-            'receipt_number'     => $data['reference'],
-            'date'               => now()->toDateString(),
-            'is_void'            => false,
-        ]);
+        // Record the transaction atomically to prevent duplicate payments
+        $transaction = \Illuminate\Support\Facades\DB::transaction(function () use ($data, $tenantId, $student, $amountPaid, $term, $session, $plan, $installmentNumber) {
+            $existingTx = Transaction::where('receipt_number', $data['reference'])->lockForUpdate()->first();
+            if ($existingTx) {
+                return $existingTx;
+            }
+
+            return Transaction::create([
+                'tenant_id'          => $tenantId,
+                'student_id'         => $student->id,
+                'type'               => 'Income',
+                'category'           => 'Tuition',
+                'term'               => $term,
+                'session'            => $session,
+                'amount_paid'        => $amountPaid,
+                'payment_method'     => 'Transfer',
+                'installment_plan'   => $plan,
+                'installment_number' => $plan !== 'full' ? $installmentNumber : null,
+                'receipt_number'     => $data['reference'],
+                'date'               => now()->toDateString(),
+                'is_void'            => false,
+            ]);
+        });
+
+        if (!$transaction->wasRecentlyCreated) {
+            return redirect()->route('parent.pay')->with('status', 'This transaction was already registered.');
+        }
 
         // Send WhatsApp receipt if parent has a WhatsApp number
         if ($parent->whatsapp_phone) {
@@ -212,6 +217,13 @@ class PaystackCallbackController extends Controller
             $billId = (int) $matches[1];
             $bill = TenantPluginBill::findOrFail($billId);
 
+            $paidKobo = (int) ($data['amount'] ?? 0);
+            $expectedKobo = (int) round($bill->total_due * 100);
+
+            if ($paidKobo < $expectedKobo) {
+                return redirect()->route('billing.index')->with('error', 'Paid amount does not match the bill amount due.');
+            }
+
             if ($bill->status !== 'paid') {
                 $bill->update([
                     'status' => 'paid',
@@ -232,6 +244,12 @@ class PaystackCallbackController extends Controller
 
     private function processSubscriptionRenewal(string $reference, array $data)
     {
+        $cacheKey = 'paystack_processed_sub_' . $reference;
+        if (\Illuminate\Support\Facades\Cache::has($cacheKey)) {
+            return redirect()->route('settings.subscription')->with('status', 'This renewal transaction was already processed.');
+        }
+        \Illuminate\Support\Facades\Cache::put($cacheKey, true, now()->addDays(30));
+
         $tenantId = TenantSettings::tenantId();
         $tenant = $tenantId ? Tenant::find($tenantId) : null;
         

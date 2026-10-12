@@ -42,7 +42,9 @@
     $absentRate = $attendanceTodayTotal > 0 ? round(($absentToday / $attendanceTodayTotal) * 100) : 0;
     $lateRate = $attendanceTodayTotal > 0 ? round(($lateToday / $attendanceTodayTotal) * 100) : 0;
 
-    $monthlyAttendance = \Illuminate\Support\Facades\Cache::remember('dashboard_attendance_monthly', \DateInterval::createFromDateString('15 minutes'), function () {
+    $tenantId = $user?->tenant_id ?? (app()->bound('currentTenant') ? app('currentTenant')->id : 1);
+
+    $monthlyAttendance = \Illuminate\Support\Facades\Cache::remember('tenant_' . $tenantId . '_dashboard_attendance_monthly', \DateInterval::createFromDateString('15 minutes'), function () {
         $marks = AttendanceMark::query()
             ->whereHas('sheet', fn($q) => $q->whereMonth('date', now()->month)->whereYear('date', now()->year))
             ->get();
@@ -52,7 +54,7 @@
     });
 
     // Calculate Monthly Class Attendance Statistics
-    $classStats = \Illuminate\Support\Facades\Cache::remember('dashboard_class_attendance_stats', \DateInterval::createFromDateString('5 minutes'), function () {
+    $classStats = \Illuminate\Support\Facades\Cache::remember('tenant_' . $tenantId . '_dashboard_class_attendance_stats', \DateInterval::createFromDateString('5 minutes'), function () {
         $sheets = \App\Models\AttendanceSheet::query()
             ->whereMonth('date', now()->month)
             ->whereYear('date', now()->year)
@@ -107,7 +109,7 @@
     });
 
     // Calculate Current Streak
-    $currentStreak = \Illuminate\Support\Facades\Cache::remember('dashboard_attendance_streak', \DateInterval::createFromDateString('15 minutes'), function () {
+    $currentStreak = \Illuminate\Support\Facades\Cache::remember('tenant_' . $tenantId . '_dashboard_attendance_streak', \DateInterval::createFromDateString('15 minutes'), function () {
         $dates = \App\Models\AttendanceSheet::query()
             ->orderBy('date', 'desc')
             ->pluck('date')
@@ -148,7 +150,7 @@
     });
 
     // Calculate Last Month Attendance for comparison
-    $attendanceChange = \Illuminate\Support\Facades\Cache::remember('dashboard_attendance_change', \DateInterval::createFromDateString('15 minutes'), function () use ($monthlyAttendance) {
+    $attendanceChange = \Illuminate\Support\Facades\Cache::remember('tenant_' . $tenantId . '_dashboard_attendance_change', \DateInterval::createFromDateString('15 minutes'), function () use ($monthlyAttendance) {
         $lastMonth = now()->subMonth();
         $marks = \App\Models\AttendanceMark::query()
             ->whereHas('sheet', fn($q) => $q->whereMonth('date', $lastMonth->month)->whereYear('date', $lastMonth->year))

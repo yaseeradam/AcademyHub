@@ -119,7 +119,7 @@
                 <div class="flex items-start gap-3 p-3 bg-violet-50/60 rounded-2xl border border-violet-100 text-xs text-slate-700">
                     <div class="w-6 h-6 rounded-full bg-violet-600 text-white font-black text-xs flex items-center justify-center flex-shrink-0 mt-0.5">2</div>
                     <div>
-                        <span class="font-bold text-slate-900">Or Menu:</span> Click the <strong class="text-violet-700">3 dots (⋮)</strong> $ightarrow$ <strong class="text-violet-700">"Install {{ $pwaSchoolName }}"</strong>.
+                        <span class="font-bold text-slate-900">Or Menu:</span> Click the <strong class="text-violet-700">3 dots (⋮)</strong> &rarr; <strong class="text-violet-700">"Install {{ $pwaSchoolName }}"</strong>.
                     </div>
                 </div>
                 <div class="flex items-start gap-3 p-3 bg-violet-50/60 rounded-2xl border border-violet-100 text-xs text-slate-700">

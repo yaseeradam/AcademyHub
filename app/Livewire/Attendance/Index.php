@@ -325,6 +325,8 @@ class Index extends Component
             return null;
         }
 
+        $this->validateSelection();
+
         $tenantId = auth()->user()?->tenant_id;
 
         $sheet = AttendanceSheet::query()->firstOrCreate(
@@ -468,7 +470,9 @@ class Index extends Component
                         $arrivedAt = $nowTime;
                     }
                 } elseif ($status === 'Absent') {
-                    $arrivedAt = null;
+                    if (!$existing || !str_contains($existing->note ?? '', 'Biometric')) {
+                        $arrivedAt = null;
+                    }
                 }
 
                 AttendanceMark::query()->updateOrCreate(
@@ -717,6 +721,8 @@ class Index extends Component
         }
     }
 
+    #[On('echo-private:biometric.scans.{tenantId},.BiometricScanDetected')]
+    #[On('echo-private:biometric.scans.{tenantId},BiometricScanDetected')]
     #[On('echo-private:tenant.{tenantId},.BiometricScanDetected')]
     #[On('biometric-punch-received')]
     public function handleBiometricScan($event = null): void

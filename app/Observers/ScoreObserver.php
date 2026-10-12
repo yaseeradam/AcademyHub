@@ -26,6 +26,21 @@ class ScoreObserver
             return;
         }
 
+        // Never send alerts on incomplete/draft assessments (exam not entered yet)
+        if ($score->exam === null) {
+            return;
+        }
+
+        // Only notify parents if results for this class, term, and session are formally published
+        $isPublished = \App\Models\ResultPublication::where('class_id', $score->class_id)
+            ->where('term', $score->term)
+            ->where('session', $score->session)
+            ->exists();
+
+        if (! $isPublished) {
+            return;
+        }
+
         // Fetch all parents who are subscribed to WhatsApp notifications
         $parents = $student->parents()
             ->where('whatsapp_subscribed', true)
