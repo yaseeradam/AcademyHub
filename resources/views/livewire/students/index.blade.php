@@ -91,16 +91,18 @@
         {{-- Card Header --}}
         <div class="flex flex-col gap-3.5 border-b border-slate-100 p-3.5 sm:p-5 sm:flex-row sm:items-center sm:justify-between">
             <div>
-                <div class="text-base font-bold text-slate-800">All Students</div>
-                <div class="mt-0.5 text-xs text-slate-400">Manage, search and filter student records</div>
+                <div class="text-base font-bold text-slate-800">{{ auth()->user()?->role === 'parent' ? 'My Children' : 'All Students' }}</div>
+                <div class="mt-0.5 text-xs text-slate-400">{{ auth()->user()?->role === 'parent' ? 'View and track your children\'s profiles and academic status' : 'Manage, search and filter student records' }}</div>
             </div>
             <div class="flex items-center gap-2">
-                <x-export type="students" :filters="[
-                    'class'   => $this->classFilter,
-                    'section' => $this->sectionFilter,
-                    'status'  => $this->statusFilter,
-                    'search'  => $this->search,
-                ]" />
+                @if (auth()->user()?->role !== 'parent')
+                    <x-export type="students" :filters="[
+                        'class'   => $this->classFilter,
+                        'section' => $this->sectionFilter,
+                        'status'  => $this->statusFilter,
+                        'search'  => $this->search,
+                    ]" />
+                @endif
                 @if (auth()->user()?->role === 'admin')
                     <a href="{{ route('students.create') }}"
                         class="inline-flex items-center gap-1.5 sm:gap-2 rounded-xl bg-gradient-to-br from-orange-400 to-amber-500 px-3 sm:px-4 py-2 text-xs sm:text-sm font-bold text-white shadow-sm transition hover:from-orange-500 hover:to-amber-600 active:scale-95">

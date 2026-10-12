@@ -25,6 +25,11 @@ class StudentController extends Controller
             abort_unless($allowed, 403);
         }
 
+        if ($user?->role === 'parent') {
+            $isMyChild = $student->parents()->where('users.id', $user->id)->exists();
+            abort_unless($isMyChild, 403, 'Unauthorized access to student record.');
+        }
+
         $student->load(['schoolClass', 'section']);
 
         return view('pages.students.show', [

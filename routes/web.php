@@ -256,9 +256,9 @@ Route::middleware(['auth', 'active'])->group(function () {
         Route::get('/print/admission-letters', [PrintLetterController::class, 'printAdmissionLetters'])->name('print.admission-letters');
     });
 
-    Route::middleware('role:admin,teacher,bursar,proprietor')->group(function () {
+    Route::middleware('role:admin,teacher,bursar,proprietor,parent')->group(function () {
         Route::get('/students', StudentsIndex::class)->name('students.index');
-        Route::get('/students/export', [StudentsExportController::class, 'export'])->name('students.export');
+        Route::get('/students/export', [StudentsExportController::class, 'export'])->middleware('role:admin,teacher,bursar,proprietor')->name('students.export');
         Route::get('/students/{student}', [StudentController::class, 'show'])->name('students.show')->where('student', '[A-Za-z0-9\/\-\.]+');
         Route::get('/students/{student}/admission-form', [AdmissionFormController::class, 'download'])->name('students.admission-form')->where('student', '[A-Za-z0-9\/\-\.]+');
     });
