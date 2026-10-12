@@ -215,6 +215,8 @@ class SubscriptionBilling extends Component
 
     public function render()
     {
-        return view('livewire.admin.subscription-billing');
+        return view('livewire.admin.subscription-billing', [
+            'studentCount' => $this->studentCount,
+        ]);
     }
 }

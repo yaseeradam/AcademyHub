@@ -119,29 +119,26 @@ class ZkTecoController extends Controller
         $processedCount = 0;
 
         foreach ($lines as $line) {
-            $line = trim($line);
-            if (empty($line) || str_starts_with($line, 'ATTLOG')) continue;
-
-            // Standard ZKTeco ADMS format: USERID \t TIMESTAMP \t STATUS \t VERIFYTYPE ...
-            // Example: 1001 \t 2026-08-20 07:45:12 \t 0 \t 1
-            $parts = preg_split('/\s+/', $line);
-            if (count($parts) < 2) continue;
-
-            $userId = trim($parts[0]);
-
-            // Reconstruct timestamp from space-separated parts
-            $datePart = $parts[1] ?? '';
-            $timePart = $parts[2] ?? '';
-
-            if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $datePart)) {
-                continue;
-            }
-
             try {
+                $line = trim($line);
+                if (empty($line) || str_starts_with($line, 'ATTLOG')) continue;
+
+                // Standard ZKTeco ADMS format: USERID \t TIMESTAMP \t STATUS \t VERIFYTYPE ...
+                // Example: 1001 \t 2026-08-20 07:45:12 \t 0 \t 1
+                $parts = preg_split('/\s+/', $line);
+                if (count($parts) < 2) continue;
+
+                $userId = trim($parts[0]);
+
+                // Reconstruct timestamp from space-separated parts
+                $datePart = $parts[1] ?? '';
+                $timePart = $parts[2] ?? '';
+
+                if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $datePart)) {
+                    continue;
+                }
+
                 $punchTime = Carbon::parse("{$datePart} {$timePart}");
-            } catch (\Throwable $e) {
-                continue;
-            }
 
             $dateStr = $punchTime->format('Y-m-d');
             $timeStr = $punchTime->format('H:i:s');
@@ -182,12 +179,13 @@ class ZkTecoController extends Controller
                     continue;
                 }
 
+                $staffTenantId = $teacher->tenant_id ?? ($targetTenant?->id ?? 1);
                 $shift = $teacher->getShift(); // 'Islamic' or 'Western'
-                $calculatedStatus = \App\Support\AttendanceShiftConfig::evaluateStatus($timeStr, $shift, $teacher->tenant_id);
+                $calculatedStatus = \App\Support\AttendanceShiftConfig::evaluateStatus($timeStr, $shift, $staffTenantId);
 
                 $staffSheet = TeacherAttendanceSheet::firstOrCreate(
                     [
-                        'tenant_id'  => $teacher->tenant_id,
+                        'tenant_id'  => $staffTenantId,
                         'date'       => $dateStr,
                         'term'       => $termNumber,
                         'session'    => $sessionName,
@@ -425,6 +423,9 @@ class ZkTecoController extends Controller
                     Cache::put($alertCacheKey, true, now()->endOfDay());
                     SendWhatsAppAttendanceAlert::dispatch($student, $punchTime->toISOString(), $status);
                 }
+            } catch (\Throwable $e) {
+                Log::error("ZKTeco ADMS punch error on line '{$line}': " . $e->getMessage());
+                continue;
             }
         }
 

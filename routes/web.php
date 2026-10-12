@@ -194,6 +194,7 @@ Route::middleware(['auth', 'active'])->group(function () {
         
         Route::get('/marketplace', MarketplaceIndex::class)->name('marketplace');
         Route::get('/marketplace/product/{product}', \App\Livewire\Marketplace\ProductDetail::class)->name('marketplace.product');
+        Route::get('/marketplace/{product}', \App\Livewire\Marketplace\ProductDetail::class)->name('marketplace.show');
 
         // Parent Portal manage plugin route
         Route::middleware('plugin:parent-portal')->group(function () {
