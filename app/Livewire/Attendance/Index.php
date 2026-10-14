@@ -68,7 +68,7 @@ class Index extends Component
 
         // If classId was not passed in URL or is invalid, auto-select from today's sheet or first class
         if (!$this->classId || !$classes->contains('id', (int) $this->classId)) {
-            $todaySheet = AttendanceSheet::where('date', $this->date)->latest()->first();
+            $todaySheet = AttendanceSheet::whereDate('date', $this->date)->latest()->first();
             if ($todaySheet && $classes->contains('id', (int) $todaySheet->class_id)) {
                 $this->classId = (int) $todaySheet->class_id;
                 $allowedSections = $this->getSections();
@@ -329,11 +329,13 @@ class Index extends Component
 
         $tenantId = auth()->user()?->tenant_id;
 
+        $normalizedDate = Carbon::parse($this->date)->toDateString(); // Y-m-d
+
         $sheet = AttendanceSheet::query()->firstOrCreate(
             [
                 'class_id'   => (int) $this->classId,
                 'section_id' => (int) $this->sectionId,
-                'date'       => $this->date,
+                'date'       => $normalizedDate,
                 'term'       => (int) $this->term,
                 'session'    => $this->session,
             ],
@@ -655,7 +657,7 @@ class Index extends Component
         $sheet = AttendanceSheet::query()
             ->where('class_id', (int) $this->classId)
             ->where('section_id', (int) $this->sectionId)
-            ->where('date', $this->date)
+            ->whereDate('date', Carbon::parse($this->date)->toDateString())
             ->where('term', (int) $this->term)
             ->where('session', $this->session)
             ->first();
@@ -682,6 +684,9 @@ class Index extends Component
     /**
      * Real-time sync: on each poll or render, if a student punched the K40
      * or a sheet was created in the DB, pull the latest marks into memory.
+     *
+     * Uses a full reload (loadMarks) rather than partial merge to prevent stale
+     * in-memory marks from persisting when the date/class/section changes.
      */
     private function syncFromDatabaseIfSheetExists(): void
     {
@@ -690,10 +695,11 @@ class Index extends Component
         }
 
         if (!$this->sheetId) {
+            // No sheet loaded yet — try to discover one in the DB for the current selection
             $sheet = AttendanceSheet::query()
                 ->where('class_id', (int) $this->classId)
                 ->where('section_id', (int) $this->sectionId)
-                ->where('date', $this->date)
+                ->whereDate('date', Carbon::parse($this->date)->toDateString())
                 ->where('term', (int) $this->term)
                 ->where('session', $this->session)
                 ->first();
@@ -701,24 +707,26 @@ class Index extends Component
             if ($sheet) {
                 $this->sheetId = $sheet->id;
                 $this->loadMarks($sheet);
-                return;
             }
-        } else {
-            $dbMarks = AttendanceMark::query()
-                ->where('sheet_id', $this->sheetId)
-                ->get()
-                ->keyBy('student_id');
-
-            foreach ($dbMarks as $studentId => $mark) {
-                $this->marks[$studentId] = [
-                    'status'       => $mark->status,
-                    'note'         => $mark->note,
-                    'arrived_at'   => $mark->arrived_at,
-                    'departed_at'  => $mark->departed_at,
-                    'is_biometric' => !empty($mark->arrived_at) && (str_contains((string) $mark->note, 'Biometric') || str_contains((string) $mark->note, 'Arrived:')),
-                ];
-            }
+            return;
         }
+
+        // Sheet is loaded — verify it still matches the current selection (date/class/section
+        // may have changed via user interaction before the poll cycle catches up).
+        $sheet = AttendanceSheet::find($this->sheetId);
+
+        if (!$sheet
+            || (int) $sheet->class_id   !== (int) $this->classId
+            || (int) $sheet->section_id !== (int) $this->sectionId
+            || Carbon::parse($sheet->date)->toDateString() !== Carbon::parse($this->date)->toDateString()
+        ) {
+            // Stale sheetId — re-sync from current selection
+            $this->syncSheetFromSelection();
+            return;
+        }
+
+        // Full reload instead of partial merge so DB deletions (Unmarked) are reflected
+        $this->loadMarks($sheet);
     }
 
     #[On('echo-private:biometric.scans.{tenantId},.BiometricScanDetected')]

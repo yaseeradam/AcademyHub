@@ -1,4 +1,4 @@
-<div class="space-y-6" wire:poll.5s>
+<div class="space-y-6" wire:poll.10s>
     {{-- Hero Banner --}}
     <div class="relative overflow-hidden rounded-2xl sm:rounded-3xl shadow-xl sm:shadow-2xl" style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);">
         <div class="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-blue-500/10 via-transparent to-transparent"></div>
@@ -333,7 +333,37 @@
                 </div>
             </div>
 
-            {{-- Student Grid --}}
+            {{-- Register Status Banner: shows when a sheet is loaded so teacher can confirm past marks are displayed --}}
+            @if($sheetId)
+                @php
+                    $isToday = \Carbon\Carbon::parse($date)->isToday();
+                    $presentCnt  = $markCounts['Present']  ?? 0;
+                    $absentCnt   = $markCounts['Absent']   ?? 0;
+                    $lateCnt     = $markCounts['Late']     ?? 0;
+                    $excusedCnt  = $markCounts['Excused']  ?? 0;
+                    $unmarkedCnt = $markCounts['Unmarked'] ?? 0;
+                @endphp
+                <div class="mx-4 sm:mx-6 mt-3 mb-0 flex flex-wrap items-center gap-2 px-3 py-2 rounded-xl {{ $isToday ? 'bg-blue-50 border border-blue-200' : 'bg-emerald-50 border border-emerald-200' }}">
+                    <span class="flex items-center gap-1 text-[10px] font-black {{ $isToday ? 'text-blue-700' : 'text-emerald-700' }}">
+                        <svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        {{ $isToday ? "Today's Register Loaded" : "Existing Register Found — " . \Carbon\Carbon::parse($date)->format('M d, Y') }}
+                    </span>
+                    <span class="ml-auto flex flex-wrap items-center gap-1.5 text-[9px] font-bold">
+                        <span class="bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full">✓ {{ $presentCnt }} Present</span>
+                        @if($absentCnt > 0)<span class="bg-red-100 text-red-800 px-2 py-0.5 rounded-full">✗ {{ $absentCnt }} Absent</span>@endif
+                        @if($lateCnt > 0)<span class="bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full">⏱ {{ $lateCnt }} Late</span>@endif
+                        @if($excusedCnt > 0)<span class="bg-purple-100 text-purple-800 px-2 py-0.5 rounded-full">✔ {{ $excusedCnt }} Excused</span>@endif
+                        @if($unmarkedCnt > 0)<span class="bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full">? {{ $unmarkedCnt }} Unmarked</span>@endif
+                    </span>
+                </div>
+            @elseif($classId && $sectionId && $date && !\Carbon\Carbon::parse($date)->isToday())
+                <div class="mx-4 sm:mx-6 mt-3 mb-0 flex items-center gap-2 px-3 py-2 rounded-xl bg-amber-50 border border-amber-200">
+                    <svg class="h-3.5 w-3.5 text-amber-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                    <span class="text-[10px] font-bold text-amber-700">No register found for {{ \Carbon\Carbon::parse($date)->format('M d, Y') }} — clicking any button will create a new register for this date.</span>
+                </div>
+            @endif
+
+
             @if($visibleStudents->count() > 0)
                 <div class="p-3 sm:p-6">
                     <div class="grid grid-cols-2 gap-2.5 sm:gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
@@ -398,20 +428,40 @@
                                 {{-- 2×2 Status Buttons (Instant Save on Click) --}}
                                 <div class="grid grid-cols-2 gap-1 px-2 sm:px-3 pb-2 sm:pb-3">
                                     <button wire:click="setMark({{ $student->id }}, 'Present')" aria-label="Mark Present" wire:loading.attr="disabled"
-                                            class="flex items-center justify-center gap-1 rounded-lg sm:rounded-xl py-1.5 sm:py-2 text-[9px] sm:text-[10px] font-extrabold transition-all duration-150 active:scale-95 {{ $status === 'Present' ? 'bg-emerald-500 text-white shadow-sm' : 'bg-white/80 text-slate-500 hover:bg-emerald-50 hover:text-emerald-700 border border-slate-200' }}">
-                                        <span class="h-1.5 w-1.5 rounded-full {{ $status === 'Present' ? 'bg-white' : 'bg-emerald-500' }}"></span> Present
+                                            class="flex items-center justify-center gap-1 rounded-lg sm:rounded-xl py-1.5 sm:py-2 text-[9px] sm:text-[10px] font-extrabold transition-all duration-150 active:scale-95 {{ $status === 'Present' ? 'bg-emerald-600 text-white shadow-md ring-2 ring-emerald-400 ring-offset-1' : 'bg-white/80 text-slate-500 hover:bg-emerald-50 hover:text-emerald-700 border border-slate-200' }}">
+                                        @if($status === 'Present')
+                                            <svg class="h-2.5 w-2.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                                        @else
+                                            <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
+                                        @endif
+                                        Present
                                     </button>
                                     <button wire:click="setMark({{ $student->id }}, 'Absent')" aria-label="Mark Absent" wire:loading.attr="disabled"
-                                            class="flex items-center justify-center gap-1 rounded-lg sm:rounded-xl py-1.5 sm:py-2 text-[9px] sm:text-[10px] font-extrabold transition-all duration-150 active:scale-95 {{ $status === 'Absent' ? 'bg-red-500 text-white shadow-sm' : 'bg-white/80 text-slate-500 hover:bg-red-50 hover:text-red-700 border border-slate-200' }}">
-                                        <span class="h-1.5 w-1.5 rounded-full {{ $status === 'Absent' ? 'bg-white' : 'bg-red-500' }}"></span> Absent
+                                            class="flex items-center justify-center gap-1 rounded-lg sm:rounded-xl py-1.5 sm:py-2 text-[9px] sm:text-[10px] font-extrabold transition-all duration-150 active:scale-95 {{ $status === 'Absent' ? 'bg-red-600 text-white shadow-md ring-2 ring-red-400 ring-offset-1' : 'bg-white/80 text-slate-500 hover:bg-red-50 hover:text-red-700 border border-slate-200' }}">
+                                        @if($status === 'Absent')
+                                            <svg class="h-2.5 w-2.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                                        @else
+                                            <span class="h-1.5 w-1.5 rounded-full bg-red-500"></span>
+                                        @endif
+                                        Absent
                                     </button>
                                     <button wire:click="setMark({{ $student->id }}, 'Late')" aria-label="Mark Late" wire:loading.attr="disabled"
-                                            class="flex items-center justify-center gap-1 rounded-lg sm:rounded-xl py-1.5 sm:py-2 text-[9px] sm:text-[10px] font-extrabold transition-all duration-150 active:scale-95 {{ $status === 'Late' ? 'bg-amber-500 text-white shadow-sm' : 'bg-white/80 text-slate-500 hover:bg-amber-50 hover:text-amber-700 border border-slate-200' }}">
-                                        <span class="h-1.5 w-1.5 rounded-full {{ $status === 'Late' ? 'bg-white' : 'bg-amber-500' }}"></span> Late
+                                            class="flex items-center justify-center gap-1 rounded-lg sm:rounded-xl py-1.5 sm:py-2 text-[9px] sm:text-[10px] font-extrabold transition-all duration-150 active:scale-95 {{ $status === 'Late' ? 'bg-amber-500 text-white shadow-md ring-2 ring-amber-400 ring-offset-1' : 'bg-white/80 text-slate-500 hover:bg-amber-50 hover:text-amber-700 border border-slate-200' }}">
+                                        @if($status === 'Late')
+                                            <svg class="h-2.5 w-2.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                        @else
+                                            <span class="h-1.5 w-1.5 rounded-full bg-amber-500"></span>
+                                        @endif
+                                        Late
                                     </button>
                                     <button wire:click="setMark({{ $student->id }}, 'Excused')" aria-label="Mark Excused" wire:loading.attr="disabled"
-                                            class="flex items-center justify-center gap-1 rounded-lg sm:rounded-xl py-1.5 sm:py-2 text-[9px] sm:text-[10px] font-extrabold transition-all duration-150 active:scale-95 {{ $status === 'Excused' ? 'bg-purple-500 text-white shadow-sm' : 'bg-white/80 text-slate-500 hover:bg-purple-50 hover:text-purple-700 border border-slate-200' }}">
-                                        <span class="h-1.5 w-1.5 rounded-full {{ $status === 'Excused' ? 'bg-white' : 'bg-purple-500' }}"></span> Excused
+                                            class="flex items-center justify-center gap-1 rounded-lg sm:rounded-xl py-1.5 sm:py-2 text-[9px] sm:text-[10px] font-extrabold transition-all duration-150 active:scale-95 {{ $status === 'Excused' ? 'bg-purple-600 text-white shadow-md ring-2 ring-purple-400 ring-offset-1' : 'bg-white/80 text-slate-500 hover:bg-purple-50 hover:text-purple-700 border border-slate-200' }}">
+                                        @if($status === 'Excused')
+                                            <svg class="h-2.5 w-2.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+                                        @else
+                                            <span class="h-1.5 w-1.5 rounded-full bg-purple-500"></span>
+                                        @endif
+                                        Excused
                                     </button>
                                 </div>
 
