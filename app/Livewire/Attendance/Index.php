@@ -537,11 +537,15 @@ class Index extends Component
         }
 
         DB::transaction(function () use ($sheet) {
+            $existingMarks = AttendanceMark::query()
+                ->where('sheet_id', $sheet->id)
+                ->get()
+                ->keyBy('student_id');
+
             foreach ($this->getStudents() as $student) {
                 $row = $this->marks[$student->id] ?? [];
                 $status = (string) ($row['status'] ?? 'Unmarked');
-                $note = $row['note'] ?? null;
-                $arrivedAt = $row['arrived_at'] ?? null;
+                $existing = $existingMarks->get($student->id);
 
                 // Skip unmarked students — don't persist them
                 if ($status === 'Unmarked') {
@@ -553,6 +557,9 @@ class Index extends Component
                         'marks' => "Invalid attendance status for {$student->full_name}.",
                     ]);
                 }
+
+                $note = !empty($row['note']) ? (string) $row['note'] : $existing?->note;
+                $arrivedAt = $row['arrived_at'] ?? $existing?->arrived_at;
 
                 AttendanceMark::query()->updateOrCreate(
                     [
@@ -584,12 +591,15 @@ class Index extends Component
         $students = $this->getStudents();
         foreach ($students as $student) {
             $mark = $existing->get($student->id);
+            $hasArrived = !empty($mark?->arrived_at);
+            $isBio = $hasArrived || (!empty($mark?->note) && (str_contains((string) $mark->note, 'Biometric') || str_contains((string) $mark->note, 'Arrived:')));
+
             $this->marks[$student->id] = [
                 'status'       => $mark?->status ?? 'Unmarked',
                 'note'         => $mark?->note,
                 'arrived_at'   => $mark?->arrived_at,
                 'departed_at'  => $mark?->departed_at,
-                'is_biometric' => !empty($mark?->arrived_at) && (str_contains((string) $mark?->note, 'Biometric') || str_contains((string) $mark?->note, 'Arrived:')),
+                'is_biometric' => $isBio,
             ];
         }
     }
@@ -735,6 +745,22 @@ class Index extends Component
     #[On('biometric-punch-received')]
     public function handleBiometricScan($event = null): void
     {
+        // Extract scan details if provided
+        $scan = is_array($event) ? ($event['scan'] ?? $event['event'] ?? $event) : null;
+        if ($scan && !empty($scan['user_id'])) {
+            $studentId = (int) $scan['user_id'];
+            $newStatus = $scan['status'] ?? 'Present';
+            $time = $scan['time'] ?? now()->format('g:i A');
+            $studentName = $scan['name'] ?? "Student #{$studentId}";
+
+            if (isset($this->marks[$studentId])) {
+                $this->marks[$studentId]['status'] = $newStatus;
+                $this->marks[$studentId]['arrived_at'] = $scan['scanned_at'] ?? now()->format('H:i:s');
+                $this->marks[$studentId]['is_biometric'] = true;
+                $this->dispatch('alert', message: "⚡ {$studentName} marked {$newStatus} via biometric scan at {$time}", type: 'success');
+            }
+        }
+
         $this->syncFromDatabaseIfSheetExists();
     }
 

@@ -382,6 +382,7 @@
                                     'Unmarked' => ['bar' => 'bg-slate-300',   'ring' => 'ring-slate-300/40',   'border' => 'border-slate-200',   'bg' => 'bg-slate-50/60',   'badge' => 'bg-slate-100 text-slate-500'],
                                 ][$status];
                                 $arrivedAt = $markData['arrived_at'] ?? null;
+                                $isBiometric = !empty($markData['is_biometric']) || !empty($arrivedAt);
                                 $punchDisplay = null;
                                 if ($arrivedAt) {
                                     try {
@@ -394,6 +395,15 @@
                             <div wire:key="student-card-{{ $student->id }}" class="relative flex flex-col rounded-xl sm:rounded-2xl border {{ $statusConfig['border'] }} {{ $statusConfig['bg'] }} overflow-hidden shadow-xs sm:shadow-sm hover:shadow-md transition-all duration-200 ring-1 sm:ring-2 {{ $statusConfig['ring'] }} active:scale-[0.99]">
                                 {{-- Status colour bar --}}
                                 <div class="h-1 sm:h-1.5 w-full {{ $statusConfig['bar'] }}"></div>
+
+                                @if($isBiometric)
+                                    <div class="absolute top-2 right-2 flex items-center gap-1 bg-emerald-50 text-emerald-800 border border-emerald-300 rounded-full px-1.5 py-0.5 text-[8px] font-black shadow-2xs z-10" title="Biometric Punch Recorded">
+                                        <svg class="h-2.5 w-2.5 text-emerald-600 flex-shrink-0 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M7.864 4.243A7.5 7.5 0 0119.5 10.5c0 2.92-.556 5.709-1.568 8.268M5.742 6.364A7.465 7.465 0 004.5 10.5a7.464 7.464 0 01-1.15 3.993m1.989 3.559A11.209 11.209 0 008.25 10.5a3.75 3.75 0 117.5 0c0 .527-.021 1.049-.064 1.565M12 10.5a1.5 1.5 0 011.5 1.5v4.5m-3-1.5v1.5" />
+                                        </svg>
+                                        <span class="hidden sm:inline">Biometric</span>
+                                    </div>
+                                @endif
 
                                 {{-- Photo + Name --}}
                                 <div class="flex flex-col items-center px-2 sm:px-3 pt-3 sm:pt-4 pb-2 sm:pb-3 gap-1.5 sm:gap-2">
@@ -409,15 +419,15 @@
                                         <div class="text-[9px] sm:text-[10px] font-semibold text-slate-400 mt-0.5 truncate">{{ $student->admission_number }}</div>
                                     </div>
 
-                                    {{-- Active status badge --}}
+                                    {{-- Active status badge + Biometric Punch Time --}}
                                     <div class="flex flex-wrap items-center justify-center gap-1">
                                         <span class="text-[8px] sm:text-[9px] font-black px-2 sm:px-2.5 py-0.5 rounded-full {{ $statusConfig['badge'] }} uppercase tracking-wide">
                                             {{ $status }}
                                         </span>
                                         @if($punchDisplay)
-                                            <span class="inline-flex items-center gap-0.5 sm:gap-1 text-[8px] sm:text-[9px] font-bold text-emerald-800 bg-emerald-100/90 border border-emerald-200/80 px-1.5 sm:px-2 py-0.5 rounded-full shadow-xs" title="Biometric K40 Punch Time">
+                                            <span class="inline-flex items-center gap-0.5 sm:gap-1 text-[8px] sm:text-[9px] font-bold text-emerald-800 bg-emerald-100/90 border border-emerald-200/80 px-1.5 sm:px-2 py-0.5 rounded-full shadow-xs" title="Biometric Punch Time">
                                                 <svg class="h-2 w-2 sm:h-2.5 sm:w-2.5 text-emerald-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M7.864 4.243A7.5 7.5 0 0119.5 10.5c0 2.92-.556 5.709-1.568 8.268M5.742 6.364A7.465 7.465 0 004.5 10.5a7.464 7.464 0 01-1.15 3.993m1.989 3.559A11.209 11.209 0 008.25 10.5a3.75 3.75 0 117.5 0c0 .527-.021 1.049-.064 1.565M12 10.5a1.5 1.5 0 011.5 1.5v4.5m-3-1.5v1.5" />
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                                                 </svg>
                                                 {{ $punchDisplay }}
                                             </span>

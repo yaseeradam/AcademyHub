@@ -859,6 +859,16 @@ $activeShadow = "shadow-{$accent}-200";
 
             this.playChime(scan.status);
             this.popupTimer = setTimeout(() => this.dismissPopup(), 2000);
+
+            // Notify Livewire components (e.g. Attendance page) immediately
+            try {
+                if (window.Livewire && typeof window.Livewire.dispatch === 'function') {
+                    window.Livewire.dispatch('biometric-punch-received', { scan: scan });
+                }
+            } catch (err) {
+                console.warn('[Biometric Monitor] Livewire dispatch error:', err);
+            }
+            window.dispatchEvent(new CustomEvent('biometric-punch-received', { detail: scan }));
         },
 
         dismissPopup() {
