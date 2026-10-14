@@ -792,10 +792,15 @@ class Index extends Component
         $classes         = $this->getClasses();
         $sections        = $this->getSections();
         $dateRecords     = $this->getDateRecords();
-        $selectedClass   = $classes->firstWhere('id', (int) $this->classId);
+        $classId         = $this->classId;
+        $sectionId       = $this->sectionId;
+        $date            = $this->date;
+        $sheetId         = $this->sheetId;
+        $marks           = $this->marks;
 
         return view('livewire.attendance.index', compact(
-            'students', 'visibleStudents', 'markCounts', 'classes', 'sections', 'dateRecords', 'selectedClass'
+            'students', 'visibleStudents', 'markCounts', 'classes', 'sections', 'dateRecords', 'selectedClass',
+            'classId', 'sectionId', 'date', 'sheetId', 'marks'
         ));
     }
 }
