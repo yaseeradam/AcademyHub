@@ -795,6 +795,7 @@ class Index extends Component
         $classId         = $this->classId;
         $sectionId       = $this->sectionId;
         $date            = $this->date;
+        $selectedClass   = $classes->firstWhere('id', (int) $this->classId);
         $sheetId         = $this->sheetId;
         $marks           = $this->marks;
 
