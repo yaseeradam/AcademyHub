@@ -1,5 +1,6 @@
 <div
     class="space-y-6"
+    wire:poll.10s
     x-data="{
         // ── Keyboard shortcuts ──
         onKeydown(e) {
@@ -419,6 +420,8 @@
                         @php
                             $status = $marks[$teacher->id]['status'] ?? 'Unmarked';
                             $note = $marks[$teacher->id]['note'] ?? null;
+                            $punchDisplay = $marks[$teacher->id]['punch_display'] ?? null;
+                            $isBiometric = !empty($marks[$teacher->id]['is_biometric']);
 
                             $statusConfig = [
                                 'Present' => [
@@ -493,6 +496,15 @@
                                             @if($teacher->role !== 'teacher')
                                                 <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-600">
                                                     {{ ucfirst($teacher->role) }}
+                                                </span>
+                                            @endif
+
+                                            @if($isBiometric)
+                                                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-black bg-emerald-50 text-emerald-800 border border-emerald-300 shadow-2xs" title="Clocked in via Biometric Device">
+                                                    <svg class="h-2.5 w-2.5 text-emerald-600 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M7.864 4.243A7.5 7.5 0 0119.5 10.5c0 2.92-.556 5.709-1.568 8.268M5.742 6.364A7.465 7.465 0 004.5 10.5a7.464 7.464 0 01-1.15 3.993m1.989 3.559A11.209 11.209 0 008.25 10.5a3.75 3.75 0 117.5 0c0 .527-.021 1.049-.064 1.565M12 10.5a1.5 1.5 0 011.5 1.5v4.5m-3-1.5v1.5" />
+                                                    </svg>
+                                                    Biometric {{ $punchDisplay ? '• ' . $punchDisplay : '' }}
                                                 </span>
                                             @endif
                                         </div>

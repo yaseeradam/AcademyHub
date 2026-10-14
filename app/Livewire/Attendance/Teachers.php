@@ -8,10 +8,12 @@ use App\Models\TeacherAttendanceMark;
 use App\Models\TeacherAttendanceSheet;
 use App\Models\User;
 use App\Traits\DispatchesModals;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
+use Livewire\Attributes\On;
 use Livewire\Attributes\Title;
 use Livewire\Component;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -27,6 +29,7 @@ class Teachers extends Component
     public string $session = '';
 
     public ?int $sheetId = null;
+    public ?int $tenantId = null;
 
     public string $tool = 'Absent';
     public string $search = '';
@@ -48,7 +51,8 @@ class Teachers extends Component
     {
         abort_unless(auth()->user()?->role === 'admin', 403, 'Only administrators can take staff attendance.');
 
-        $this->date = now()->toDateString();
+        $this->tenantId = (int) (auth()->user()?->tenant_id ?? 1);
+        $this->date = $this->date ?: now()->toDateString();
         $this->session = $this->session ?: $this->defaultSession();
         $this->term = $this->term ?: $this->defaultTerm();
 
@@ -504,9 +508,21 @@ class Teachers extends Component
 
         foreach ($this->teachers as $teacher) {
             $mark = $existing->get($teacher->id);
+            $hasIn = !empty($mark?->punch_in_time);
+            $isBio = $hasIn || (!empty($mark?->note) && (str_contains((string) $mark->note, 'In:') || str_contains((string) $mark->note, 'Biometric')));
+
+            $punchTime = null;
+            if ($mark) {
+                $punchTime = $this->formatPunchTime($mark->status, $mark->note, $mark->punch_in_time ?? $mark->created_at);
+            }
+
             $this->marks[$teacher->id] = [
-                'status' => $mark?->status ?? 'Unmarked',
-                'note' => $mark?->note,
+                'status'         => $mark?->status ?? 'Unmarked',
+                'note'           => $mark?->note,
+                'punch_in_time'  => $mark?->punch_in_time,
+                'punch_out_time' => $mark?->punch_out_time,
+                'punch_display'  => ($punchTime !== '-') ? $punchTime : null,
+                'is_biometric'   => $isBio,
             ];
         }
     }
@@ -529,17 +545,23 @@ class Teachers extends Component
             return;
         }
 
+        $normalizedDate = Carbon::parse($this->date)->toDateString();
+
         $sheet = TeacherAttendanceSheet::query()
-            ->where('date', $this->date)
-            ->where('term', $this->term)
+            ->whereDate('date', $normalizedDate)
+            ->where('term', (int) $this->term)
             ->where('session', $this->session)
             ->first();
 
         if (!$sheet) {
             foreach ($this->teachers as $teacher) {
                 $this->marks[$teacher->id] = [
-                    'status' => 'Unmarked',
-                    'note' => null,
+                    'status'         => 'Unmarked',
+                    'note'           => null,
+                    'punch_in_time'  => null,
+                    'punch_out_time' => null,
+                    'punch_display'  => null,
+                    'is_biometric'   => false,
                 ];
             }
             return;
@@ -547,6 +569,65 @@ class Teachers extends Component
 
         $this->sheetId = $sheet->id;
         $this->loadMarks($sheet);
+    }
+
+    /**
+     * Real-time sync: on each poll or render, if a staff member punched the K40
+     * or a sheet was created in the DB, pull the latest marks into memory.
+     */
+    private function syncFromDatabaseIfSheetExists(): void
+    {
+        if (!$this->date || !$this->term || !$this->session) {
+            return;
+        }
+
+        $normalizedDate = Carbon::parse($this->date)->toDateString();
+
+        if (!$this->sheetId) {
+            $sheet = TeacherAttendanceSheet::query()
+                ->whereDate('date', $normalizedDate)
+                ->where('term', (int) $this->term)
+                ->where('session', $this->session)
+                ->first();
+
+            if ($sheet) {
+                $this->sheetId = $sheet->id;
+                $this->loadMarks($sheet);
+            }
+            return;
+        }
+
+        $sheet = TeacherAttendanceSheet::find($this->sheetId);
+        if (!$sheet || Carbon::parse($sheet->date)->toDateString() !== $normalizedDate) {
+            $this->syncSheetFromSelection();
+            return;
+        }
+
+        $this->loadMarks($sheet);
+    }
+
+    #[On('echo-private:biometric.scans.{tenantId},.BiometricScanDetected')]
+    #[On('echo-private:biometric.scans.{tenantId},BiometricScanDetected')]
+    #[On('echo-private:tenant.{tenantId},.BiometricScanDetected')]
+    #[On('biometric-punch-received')]
+    public function handleBiometricScan($event = null): void
+    {
+        $scan = is_array($event) ? ($event['scan'] ?? $event['event'] ?? $event) : null;
+        if ($scan && !empty($scan['type']) && $scan['type'] === 'staff' && !empty($scan['user_id'])) {
+            $teacherId = (int) $scan['user_id'];
+            $newStatus = $scan['status'] ?? 'Present';
+            $time = $scan['time'] ?? now()->format('g:i A');
+            $name = $scan['name'] ?? "Staff #{$teacherId}";
+
+            if (isset($this->marks[$teacherId])) {
+                $this->marks[$teacherId]['status'] = $newStatus;
+                $this->marks[$teacherId]['is_biometric'] = true;
+                $this->marks[$teacherId]['punch_display'] = $time;
+                $this->dispatch('alert', message: "⚡ {$name} ({$newStatus}) clocked in via biometric at {$time}", type: 'success');
+            }
+        }
+
+        $this->syncFromDatabaseIfSheetExists();
     }
 
     private function defaultSession(): string
@@ -594,11 +675,16 @@ class Teachers extends Component
     {
         abort_unless(auth()->user()?->role === 'admin', 403);
 
+        $this->syncFromDatabaseIfSheetExists();
+
         return view('livewire.attendance.teachers', [
             'teachers' => $this->teachers,
             'visibleTeachers' => $this->visibleTeachers,
             'markCounts' => $this->markCounts,
             'teacherSummaries' => $this->teacherSummaries,
+            'marks' => $this->marks,
+            'date' => $this->date,
+            'sheetId' => $this->sheetId,
         ]);
     }
 }
