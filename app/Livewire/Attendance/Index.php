@@ -782,6 +782,27 @@ class Index extends Component
         return AcademicTerm::activeTermNumber();
     }
 
+    private function getLatestExistingSheet(): ?AttendanceSheet
+    {
+        if (!$this->classId || !$this->sectionId) {
+            return null;
+        }
+
+        return AttendanceSheet::query()
+            ->withCount([
+                'marks as present_count' => function ($query) {
+                    $query->where('status', 'Present');
+                },
+                'marks as total_count',
+            ])
+            ->where('class_id', (int) $this->classId)
+            ->where('section_id', (int) $this->sectionId)
+            ->where('term', (int) $this->term)
+            ->where('session', $this->session)
+            ->orderBy('date', 'desc')
+            ->first();
+    }
+
     public function render()
     {
         $this->syncFromDatabaseIfSheetExists();
@@ -798,10 +819,11 @@ class Index extends Component
         $selectedClass   = $classes->firstWhere('id', (int) $this->classId);
         $sheetId         = $this->sheetId;
         $marks           = $this->marks;
+        $latestSheet     = $this->getLatestExistingSheet();
 
         return view('livewire.attendance.index', compact(
             'students', 'visibleStudents', 'markCounts', 'classes', 'sections', 'dateRecords', 'selectedClass',
-            'classId', 'sectionId', 'date', 'sheetId', 'marks'
+            'classId', 'sectionId', 'date', 'sheetId', 'marks', 'latestSheet'
         ));
     }
 }

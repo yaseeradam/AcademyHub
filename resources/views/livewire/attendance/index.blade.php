@@ -357,9 +357,20 @@
                     </span>
                 </div>
             @elseif($classId && $sectionId && $date && !\Carbon\Carbon::parse($date)->isToday())
-                <div class="mx-4 sm:mx-6 mt-3 mb-0 flex items-center gap-2 px-3 py-2 rounded-xl bg-amber-50 border border-amber-200">
-                    <svg class="h-3.5 w-3.5 text-amber-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
-                    <span class="text-[10px] font-bold text-amber-700">No register found for {{ \Carbon\Carbon::parse($date)->format('M d, Y') }} — clicking any button will create a new register for this date.</span>
+                <div class="mx-4 sm:mx-6 mt-3 mb-0 flex flex-wrap items-center justify-between gap-2 px-3.5 py-2.5 rounded-xl bg-amber-50 border border-amber-200">
+                    <div class="flex items-center gap-2">
+                        <svg class="h-4 w-4 text-amber-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                        <span class="text-xs font-bold text-amber-800">
+                            No register was recorded on <strong>{{ \Carbon\Carbon::parse($date)->format('M d, Y') }}</strong> for this class.
+                        </span>
+                    </div>
+                    @if(!empty($latestSheet) && \Carbon\Carbon::parse($latestSheet->date)->toDateString() !== \Carbon\Carbon::parse($date)->toDateString())
+                        <button type="button" wire:click="$set('date', '{{ \Carbon\Carbon::parse($latestSheet->date)->toDateString() }}')"
+                            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-200 hover:bg-amber-300 text-amber-900 font-extrabold text-xs transition-colors shadow-2xs cursor-pointer">
+                            <span>Open recorded register from {{ \Carbon\Carbon::parse($latestSheet->date)->format('M d, Y') }}@if(isset($latestSheet->present_count) && $latestSheet->present_count > 0) ({{ $latestSheet->present_count }} Present)@endif</span>
+                            <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg>
+                        </button>
+                    @endif
                 </div>
             @endif
 
