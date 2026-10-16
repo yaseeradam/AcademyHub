@@ -441,10 +441,11 @@ class ZkTecoController extends Controller
                     Cache::put($alertCacheKey, true, now()->endOfDay());
                     SendWhatsAppAttendanceAlert::dispatch($student, $punchTime->toISOString(), $status, $actionType);
                 }
-            } catch (\Throwable $e) {
-                Log::error("ZKTeco ADMS punch error on line '{$line}': " . $e->getMessage());
-                continue;
             }
+        } catch (\Throwable $e) {
+            Log::error("ZKTeco ADMS punch error on line '{$line}': " . $e->getMessage());
+            continue;
+        }
         }
 
         Log::info("ZKTeco ADMS Sync: Successfully processed {$processedCount} attendance records.");
