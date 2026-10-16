@@ -126,80 +126,134 @@
         </div>
     </div>
 
-    {{-- Today's Live Biometric Scans Feed --}}
+    {{-- Today's Live Biometric Scans Feed (Collapsible) --}}
     @if(auth()->user()?->tenant?->activeMarketplaceComponents()->where('slug', 'k40-biometrics')->exists())
-        <div class="rounded-2xl sm:rounded-3xl bg-white p-4 sm:p-6 shadow-sm sm:shadow-md border border-slate-100">
-            <div class="flex flex-wrap items-center justify-between gap-3 mb-5">
-                <div class="flex items-center gap-2.5">
-                    <span class="flex h-3 w-3 relative">
+        <div x-data="{ isExpanded: @entangle('biometricFeedExpanded') }" class="rounded-2xl sm:rounded-3xl bg-white shadow-xs sm:shadow-sm border border-slate-200/90 overflow-hidden transition-all">
+            {{-- Header / Summary Banner Bar (Always visible, compact) --}}
+            <div class="p-3.5 sm:p-4.5 flex flex-wrap items-center justify-between gap-3 bg-gradient-to-r from-slate-50 via-white to-slate-50 border-b border-slate-100">
+                <div class="flex items-center gap-2.5 min-w-0">
+                    <span class="flex h-3 w-3 relative flex-shrink-0">
                         <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                         <span class="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
                     </span>
-                    <div>
-                        <h3 class="text-base font-extrabold text-slate-900">
-                            Live Biometric Scans
+                    <div class="min-w-0">
+                        <div class="flex flex-wrap items-center gap-2">
+                            <h3 class="text-sm sm:text-base font-extrabold text-slate-900 truncate">
+                                Live Biometric Gate Scans
+                            </h3>
+                            <span class="text-[10px] sm:text-[11px] font-black bg-emerald-100 text-emerald-800 px-2.5 py-0.5 rounded-full border border-emerald-300/80">
+                                {{ $dateRecords->count() }} Scanned
+                            </span>
                             @if($selectedClass && $biometricFeedScope === 'class')
-                                &mdash; <span class="text-blue-600">{{ $selectedClass->name }}</span>
-                            @else
-                                &mdash; <span class="text-slate-600">All Classes</span>
+                                <span class="hidden sm:inline-flex text-[10px] font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded-md border border-blue-200/60">
+                                    {{ $selectedClass->name }}
+                                </span>
                             @endif
-                        </h3>
-                        <p class="text-xs text-slate-400">Students and staff who verified their fingerprint today via the K40 terminal</p>
+                        </div>
+                        <p class="text-[11px] text-slate-500 truncate mt-0.5">
+                            @if($dateRecords->count() > 0)
+                                Latest: <strong class="text-slate-800">{{ $dateRecords->first()->student?->full_name }}</strong> &bull; {{ $dateRecords->count() }} verified punch{{ $dateRecords->count() > 1 ? 'es' : '' }} on {{ \Carbon\Carbon::parse($date)->format('M d, Y') }}
+                            @else
+                                No biometric gate punches recorded yet for {{ \Carbon\Carbon::parse($date)->format('M d, Y') }}
+                            @endif
+                        </p>
                     </div>
                 </div>
-                <div class="flex flex-wrap items-center gap-2">
+
+                {{-- Action controls: Scope Switcher + Collapse/Expand Toggle --}}
+                <div class="flex items-center gap-2 flex-shrink-0">
                     {{-- Scope Switcher --}}
                     @if($classId)
-                        <div class="inline-flex rounded-xl bg-slate-100 p-1 border border-slate-200">
+                        <div class="inline-flex rounded-xl bg-slate-100 p-1 border border-slate-200 text-xs font-bold">
                             <button wire:click="setBiometricScope('class')" type="button"
-                                    class="px-3 py-1 rounded-lg text-xs font-bold transition-all {{ $biometricFeedScope === 'class' ? 'bg-white text-blue-700 shadow-sm' : 'text-slate-500 hover:text-slate-700' }}">
+                                    class="px-2.5 py-1 rounded-lg transition-all {{ $biometricFeedScope === 'class' ? 'bg-white text-blue-700 shadow-xs' : 'text-slate-500 hover:text-slate-700' }}">
                                 {{ $selectedClass?->name ?? 'This Class' }}
                             </button>
                             <button wire:click="setBiometricScope('all')" type="button"
-                                    class="px-3 py-1 rounded-lg text-xs font-bold transition-all {{ $biometricFeedScope === 'all' ? 'bg-white text-blue-700 shadow-sm' : 'text-slate-500 hover:text-slate-700' }}">
+                                    class="px-2.5 py-1 rounded-lg transition-all {{ $biometricFeedScope === 'all' ? 'bg-white text-blue-700 shadow-xs' : 'text-slate-500 hover:text-slate-700' }}">
                                 All School
                             </button>
                         </div>
                     @endif
 
-                    <span class="text-xs font-extrabold bg-emerald-50 text-emerald-700 px-3 py-1.5 rounded-xl border border-emerald-200/60">
-                        {{ $dateRecords->count() }} Scanned Today
-                    </span>
-                    <span class="text-xs font-semibold text-slate-500 bg-slate-100 px-2.5 py-1.5 rounded-xl">
-                        Hours: 7:00 AM - 5:00 PM
-                    </span>
+                    {{-- Collapse / Expand Toggle Button --}}
+                    <button @click="isExpanded = !isExpanded" type="button"
+                            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer border"
+                            :class="isExpanded ? 'bg-slate-200 text-slate-800 border-slate-300 hover:bg-slate-300' : 'bg-emerald-600 text-white border-emerald-700 hover:bg-emerald-500 shadow-xs active:scale-95'">
+                        <svg :class="isExpanded ? 'rotate-180' : ''" class="h-3.5 w-3.5 transition-transform duration-200 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+                        </svg>
+                        <span x-text="isExpanded ? 'Collapse' : 'Show Scans ({{ $dateRecords->count() }})'"></span>
+                    </button>
                 </div>
             </div>
 
-            @if($dateRecords && $dateRecords->count() > 0)
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                    @foreach($dateRecords as $record)
-                        <div class="flex items-center gap-3.5 p-3.5 rounded-2xl bg-slate-50/70 border border-slate-200/80 hover:bg-blue-50/40 hover:border-blue-200 transition-all">
-                            <img src="{{ $record->student?->passport_photo_url }}" class="h-12 w-12 rounded-xl object-cover ring-2 ring-white shadow-sm flex-shrink-0" />
-                            <div class="min-w-0 flex-1">
-                                <div class="text-sm font-bold text-slate-900 truncate">{{ $record->student?->full_name }}</div>
-                                <div class="text-[11px] font-semibold text-slate-500 truncate">
-                                    {{ $record->student?->schoolClass?->name ?? 'Class' }} &bull; Sec {{ $record->student?->section?->name ?? 'A' }} &bull; ADM: {{ $record->student?->admission_number }}
-                                </div>
-                                <div class="flex items-center gap-2 mt-1">
-                                    <span class="text-[10px] font-black px-2 py-0.5 rounded-md {{ $record->status === 'Present' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800' }}">
-                                        {{ $record->status }}
-                                    </span>
-                                    <span class="text-[10px] font-medium text-slate-500">
-                                        {{ str_replace('Biometric scan at ', '', $record->note ?? '') }}
-                                    </span>
+            {{-- Collapsible Content: Scanned Cards Grid --}}
+            <div x-show="isExpanded" x-cloak class="p-4 sm:p-6 bg-white transition-all">
+                @if($dateRecords && $dateRecords->count() > 0)
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                        @foreach($dateRecords as $record)
+                            @php
+                                $inTime = null;
+                                if (!empty($record->arrived_at)) {
+                                    try {
+                                        $inTime = \Carbon\Carbon::parse($record->arrived_at)->format('g:i A');
+                                    } catch (\Throwable $e) {
+                                        $inTime = $record->arrived_at;
+                                    }
+                                } elseif (!empty($record->note) && preg_match('/\b(\d{1,2}:\d{2}\s*(?:AM|PM))\b/i', $record->note, $tm)) {
+                                    $inTime = strtoupper($tm[1]);
+                                }
+
+                                $outTime = null;
+                                if (!empty($record->departed_at)) {
+                                    try {
+                                        $outTime = \Carbon\Carbon::parse($record->departed_at)->format('g:i A');
+                                    } catch (\Throwable $e) {
+                                        $outTime = $record->departed_at;
+                                    }
+                                }
+                            @endphp
+                            <div class="flex items-center gap-3.5 p-3.5 rounded-2xl bg-slate-50/70 border border-slate-200/80 hover:bg-blue-50/40 hover:border-blue-200 transition-all">
+                                @if($record->student?->passport_photo_url)
+                                    <img src="{{ $record->student->passport_photo_url }}" class="h-12 w-12 rounded-xl object-cover ring-2 ring-white shadow-sm flex-shrink-0" />
+                                @else
+                                    <div class="grid h-12 w-12 place-items-center rounded-xl bg-slate-800 text-xs font-black text-white ring-2 ring-white shadow-sm flex-shrink-0">
+                                        {{ substr($record->student?->first_name ?? 'S', 0, 1) }}{{ substr($record->student?->last_name ?? '', 0, 1) }}
+                                    </div>
+                                @endif
+                                <div class="min-w-0 flex-1">
+                                    <div class="text-sm font-bold text-slate-900 truncate">{{ $record->student?->full_name }}</div>
+                                    <div class="text-[11px] font-semibold text-slate-500 truncate">
+                                        {{ $record->student?->schoolClass?->name ?? 'Class' }} &bull; Sec {{ $record->student?->section?->name ?? 'A' }} &bull; ADM: {{ $record->student?->admission_number }}
+                                    </div>
+                                    <div class="flex flex-wrap items-center gap-1.5 mt-1">
+                                        <span class="text-[10px] font-black px-2 py-0.5 rounded-md {{ $record->status === 'Present' ? 'bg-emerald-100 text-emerald-800' : ($record->status === 'Late' ? 'bg-amber-100 text-amber-800' : 'bg-blue-100 text-blue-800') }}">
+                                            {{ $record->status }}
+                                        </span>
+                                        @if($inTime)
+                                            <span class="text-[10px] font-bold text-slate-600 bg-slate-100 px-1.5 py-0.5 rounded-md">
+                                                In: {{ $inTime }}
+                                            </span>
+                                        @endif
+                                        @if($outTime)
+                                            <span class="text-[10px] font-bold text-blue-700 bg-blue-50 px-1.5 py-0.5 rounded-md border border-blue-200/60">
+                                                Out: {{ $outTime }}
+                                            </span>
+                                        @endif
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    @endforeach
-                </div>
-            @else
-                <div class="py-8 text-center text-slate-400 bg-slate-50/50 rounded-2xl border border-dashed border-slate-200">
-                    <svg class="h-8 w-8 mx-auto mb-2 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7.864 4.243A7.5 7.5 0 0119.5 10.5c0 2.92-.556 5.709-1.568 8.268M5.742 6.364A7.465 7.465 0 004.5 10.5a7.464 7.464 0 01-1.15 3.993m1.989 3.559A11.209 11.209 0 008.25 10.5a3.75 3.75 0 117.5 0c0 .527-.021 1.049-.064 1.565M12 10.5a1.5 1.5 0 011.5 1.5v4.5m-3-1.5v1.5"/></svg>
-                    <p class="text-xs font-semibold">No biometric punches recorded for {{ $selectedClass?->name ?? 'this selection' }} today yet.</p>
-                    <p class="text-[11px] text-slate-400 mt-0.5">Students scanning their finger on the K40 will appear here and update their card status automatically.</p>
-                </div>
-            @endif
+                        @endforeach
+                    </div>
+                @else
+                    <div class="py-6 text-center text-slate-400 bg-slate-50/50 rounded-2xl border border-dashed border-slate-200">
+                        <svg class="h-8 w-8 mx-auto mb-2 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7.864 4.243A7.5 7.5 0 0119.5 10.5c0 2.92-.556 5.709-1.568 8.268M5.742 6.364A7.465 7.465 0 004.5 10.5a7.464 7.464 0 01-1.15 3.993m1.989 3.559A11.209 11.209 0 008.25 10.5a3.75 3.75 0 117.5 0c0 .527-.021 1.049-.064 1.565M12 10.5a1.5 1.5 0 011.5 1.5v4.5m-3-1.5v1.5"/></svg>
+                        <p class="text-xs font-semibold">No biometric punches recorded for {{ $selectedClass?->name ?? 'this selection' }} on {{ \Carbon\Carbon::parse($date)->format('M d, Y') }}.</p>
+                        <p class="text-[11px] text-slate-400 mt-0.5">Students scanning their finger on the K40 will appear here in real-time.</p>
+                    </div>
+                @endif
+            </div>
         </div>
     @else
         {{-- Marketplace Promo banner for K40 Biometrics --}}

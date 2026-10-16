@@ -49,8 +49,14 @@ class Index extends Component
 
     // View filter for live biometric scans: 'class' (only selected class) or 'all' (entire school)
     public string $biometricFeedScope = 'class';
+    public bool $biometricFeedExpanded = false;
 
     public ?int $tenantId = null;
+
+    public function toggleBiometricFeed(): void
+    {
+        $this->biometricFeedExpanded = !$this->biometricFeedExpanded;
+    }
 
     /**
      * @var array<int, array{status:string, note:string|null, arrived_at:string|null, departed_at:string|null, is_biometric:bool}>
@@ -167,16 +173,39 @@ class Index extends Component
 
     private function getDateRecords()
     {
-        $query = AttendanceMark::query()
+        $tenantId = auth()->user()?->tenant_id;
+
+        $query = AttendanceMark::withoutGlobalScopes()
             ->with(['student.schoolClass', 'student.section', 'student.user', 'sheet'])
-            ->whereHas('sheet', fn($q) => $q->where('date', $this->date));
+            // Must have a real physical punch: arrived_at, departed_at, or biometric note
+            ->where(function ($q) {
+                $q->whereNotNull('arrived_at')
+                  ->orWhereNotNull('departed_at')
+                  ->orWhere('note', 'like', '%Biometric%')
+                  ->orWhere('note', 'like', '%Arrived:%')
+                  ->orWhere('note', 'like', '%K40%');
+            })
+            // Only valid active attendance statuses
+            ->whereIn('status', ['Present', 'Late', 'Departed'])
+            ->whereHas('sheet', function ($q) use ($tenantId) {
+                $q->withoutGlobalScopes()
+                  ->where('date', $this->date);
+                if ($tenantId) {
+                    $q->where(function ($sq) use ($tenantId) {
+                        $sq->where('tenant_id', $tenantId)->orWhereNull('tenant_id');
+                    });
+                }
+            });
 
         // When scoped to 'class' and a class is selected, filter scans to the selected class
         if ($this->biometricFeedScope === 'class' && $this->classId) {
-            $query->whereHas('sheet', fn($q) => $q->where('class_id', (int) $this->classId));
+            $query->whereHas('sheet', fn($q) => $q->withoutGlobalScopes()->where('class_id', (int) $this->classId));
         }
 
-        return $query->get()->sortBy(fn($m) => $m->student?->last_name);
+        // Return latest scans first (chronological live scan order)
+        return $query->get()->sortByDesc(function ($m) {
+            return $m->arrived_at ?: ($m->updated_at ? $m->updated_at->format('H:i:s') : '00:00:00');
+        })->values();
     }
 
     private function getClasses()
