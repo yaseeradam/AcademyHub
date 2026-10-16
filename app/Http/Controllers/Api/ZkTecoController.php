@@ -305,8 +305,10 @@ class ZkTecoController extends Controller
             $student = Student::with(['schoolClass', 'section'])
                 ->where(function ($q) use ($userId) {
                     $q->where('k40_uid', (int) $userId)          // primary: exact hardware UID
-                      ->orWhere('admission_number', $userId)      // secondary: admission number string
-                      ->orWhere('id', $userId);                   // fallback: raw DB id
+                      ->orWhere('admission_number', $userId);    // secondary: admission number string
+                    if (is_numeric($userId) && (int) $userId >= 200) {
+                        $q->orWhere('id', (int) $userId);        // fallback: only for non-staff range
+                    }
                 })
                 ->first();
 

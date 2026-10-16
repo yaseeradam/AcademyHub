@@ -288,10 +288,15 @@ class Student extends Model
     /**
      * Return the hardware UID used for this student on the ZKTeco K40 device.
      * Matches the value that the device sends as USERID in ADMS punch data.
-     * Priority: explicit k40_uid column → fall back to database id.
+     * Priority: explicit k40_uid column → fall back to database id only if >= 200.
+     * UIDs 1 to 50 are reserved for staff on K40 hardware.
      */
-    public function getK40Uid(): int
+    public function getK40Uid(): ?int
     {
-        return $this->k40_uid ?? $this->id;
+        if ($this->k40_uid) {
+            return (int) $this->k40_uid;
+        }
+
+        return $this->id >= 200 ? (int) $this->id : null;
     }
 }
