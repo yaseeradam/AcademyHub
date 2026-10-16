@@ -59,7 +59,7 @@
     </div>
 
     @if (! $child)
-        {{-- STATE 1: Select Child View (3D Rectangular Cards) --}}
+        {{-- STATE 1: Select Child View --}}
         @if ($this->children->isEmpty())
             <div class="flex flex-col items-center justify-center rounded-3xl border-2 border-dashed border-slate-200 bg-white py-16 text-center shadow-sm">
                 <div class="flex h-16 w-16 items-center justify-center rounded-full bg-slate-50 ring-1 ring-slate-100">
@@ -69,40 +69,76 @@
                 <p class="mt-1 text-sm text-slate-500">Contact the school administrator to link your children.</p>
             </div>
         @else
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-8 p-0 sm:p-1">
+            {{-- Section label --}}
+            <div class="flex items-center gap-3 px-1">
+                <div class="h-px flex-1 bg-slate-200"></div>
+                <span class="text-[11px] font-black uppercase tracking-widest text-slate-400">Select a Child to View Dashboard</span>
+                <div class="h-px flex-1 bg-slate-200"></div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                 @foreach ($this->children as $c)
+                    @php
+                        $cardGradients = [
+                            'from-indigo-500 to-violet-600',
+                            'from-sky-500 to-cyan-600',
+                            'from-emerald-500 to-teal-600',
+                            'from-rose-500 to-pink-600',
+                            'from-amber-500 to-orange-600',
+                            'from-purple-500 to-fuchsia-600',
+                        ];
+                        $avatarGradients = [
+                            'from-indigo-400 to-violet-500',
+                            'from-sky-400 to-cyan-500',
+                            'from-emerald-400 to-teal-500',
+                            'from-rose-400 to-pink-500',
+                            'from-amber-400 to-orange-500',
+                            'from-purple-400 to-fuchsia-500',
+                        ];
+                        $idx = $c->id % count($cardGradients);
+                        $topGrad = $cardGradients[$idx];
+                        $avatarGrad = $avatarGradients[$idx];
+                    @endphp
                     <button wire:click="selectChild({{ $c->id }})"
-                            class="group relative w-full text-left bg-white rounded-2xl sm:rounded-3xl border border-slate-100 shadow-[0_4px_16px_rgb(0,0,0,0.03)] sm:shadow-[0_8px_30px_rgb(0,0,0,0.04)] transition-all duration-200 active:scale-[0.98] sm:hover:-translate-y-1.5 sm:hover:shadow-[0_20px_40px_rgb(0,0,0,0.08)] overflow-hidden flex flex-row sm:flex-col items-center sm:items-stretch min-h-0 sm:min-h-[17rem] p-3.5 sm:p-0">
-                        
-                        {{-- Top Pattern/Color Strip (Desktop only) --}}
-                        <div class="hidden sm:block sm:h-28 w-full relative border-b border-slate-100 overflow-hidden bg-gradient-to-r from-slate-100 to-slate-50">
-                            <div class="absolute inset-0 opacity-20" style="background-image: radial-gradient(#94a3b8 1px, transparent 1px); background-size: 16px 16px;"></div>
+                            class="group relative w-full text-left bg-white rounded-3xl border border-slate-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 active:scale-[0.98] overflow-hidden flex flex-col">
+
+                        {{-- Colored top banner --}}
+                        <div class="relative h-24 w-full bg-gradient-to-br {{ $topGrad }} overflow-hidden shrink-0">
+                            <div class="absolute inset-0 opacity-10" style="background-image: radial-gradient(white 1px, transparent 1px); background-size: 18px 18px;"></div>
+                            <div class="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-white/10"></div>
+                            <div class="absolute -left-4 -bottom-4 h-16 w-16 rounded-full bg-black/10"></div>
+                            {{-- Floating class badge --}}
+                            <span class="absolute bottom-3 right-3 text-[10px] font-black uppercase tracking-wider bg-white/20 backdrop-blur-sm text-white px-2.5 py-1 rounded-lg border border-white/20">
+                                {{ $c->schoolClass?->name ?? 'Unassigned' }}
+                            </span>
                         </div>
 
-                        {{-- Photo --}}
-                        <div class="shrink-0 sm:absolute sm:top-12 sm:left-6">
-                            @if ($c->passport_photo_url)
-                                <img src="{{ $c->passport_photo_url }}" class="h-14 w-14 sm:h-24 sm:w-24 rounded-xl sm:rounded-2xl object-cover ring-2 sm:ring-4 ring-white shadow-md bg-white block" />
-                            @else
-                                <div class="flex h-14 w-14 sm:h-24 sm:w-24 items-center justify-center rounded-xl sm:rounded-2xl bg-gradient-to-br from-indigo-100 to-violet-100 text-xl sm:text-4xl font-black text-indigo-600 ring-2 sm:ring-4 ring-white shadow-md">
-                                    {{ mb_substr($c->first_name, 0, 1) }}
-                                </div>
-                            @endif
-                        </div>
-
-                        {{-- Content --}}
-                        <div class="ml-3.5 sm:ml-0 sm:px-6 sm:pt-12 sm:pb-6 flex-1 flex flex-col justify-center sm:justify-between relative bg-white z-10 min-w-0">
-                            <div>
-                                <h3 class="text-base sm:text-xl font-bold text-slate-800 leading-tight group-hover:text-indigo-600 transition-colors truncate">{{ $c->full_name }}</h3>
-                                <p class="text-xs sm:text-sm font-semibold text-slate-500 mt-0.5 sm:mt-1 truncate">{{ $c->schoolClass?->name ?? 'Unassigned' }}</p>
+                        {{-- Avatar overlapping the banner --}}
+                        <div class="relative px-5 flex flex-col flex-1">
+                            <div class="-mt-8 mb-3">
+                                @if ($c->passport_photo_url)
+                                    <img src="{{ $c->passport_photo_url }}" class="h-16 w-16 rounded-2xl object-cover ring-4 ring-white shadow-lg bg-white" />
+                                @else
+                                    <div class="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br {{ $avatarGrad }} text-2xl font-black text-white ring-4 ring-white shadow-lg">
+                                        {{ mb_substr($c->first_name, 0, 1) }}
+                                    </div>
+                                @endif
                             </div>
-                            
-                            <div class="mt-2 sm:mt-4 flex items-center justify-between sm:border-t sm:border-slate-50 sm:pt-4">
-                                <span class="text-[10px] sm:text-[11px] font-black text-slate-400 tracking-wider sm:tracking-widest uppercase bg-slate-50 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-md sm:rounded-lg">Admin: {{ $c->admission_number }}</span>
-                                <div class="h-7 w-7 sm:h-8 sm:w-8 rounded-full bg-slate-50 flex items-center justify-center group-hover:bg-indigo-50 group-active:bg-indigo-100 transition-colors">
-                                    <svg class="h-4 w-4 text-slate-400 group-hover:text-indigo-600 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
-                                    </svg>
+
+                            <div class="flex-1 pb-5">
+                                <h3 class="text-lg font-black text-slate-800 leading-tight group-hover:text-indigo-600 transition-colors truncate">{{ $c->full_name }}</h3>
+                                <p class="text-[11px] font-black uppercase tracking-widest text-slate-400 mt-1">ADM: {{ $c->admission_number }}</p>
+
+                                <div class="mt-4 flex items-center justify-between">
+                                    <span class="inline-flex items-center gap-1.5 text-xs font-bold text-slate-500">
+                                        <svg class="h-3.5 w-3.5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                                        View Dashboard
+                                    </span>
+                                    <div class="h-8 w-8 rounded-full bg-slate-100 group-hover:bg-indigo-600 flex items-center justify-center transition-colors shadow-sm">
+                                        <svg class="h-4 w-4 text-slate-400 group-hover:text-white transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+                                        </svg>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -114,72 +150,100 @@
     @else
         {{-- STATE 2: Child Data Layout (Compact, Premium Tabbed Control) --}}
         
-        {{-- Very Compact Colorful Header --}}
-        <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 sm:gap-5 bg-slate-800 rounded-3xl p-4 sm:p-6 shadow-md border-0 relative overflow-hidden">
-            <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMSIgY3k9IjEiIHI9IjEiIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4xIi8+PC9zdmc+')] opacity-10"></div>
-            
-            <div class="relative z-10 flex items-center gap-3 sm:gap-5 w-full lg:w-auto">
-                <button wire:click="$set('selectedChildId', null)" class="shrink-0 h-10 w-10 sm:h-12 sm:w-12 flex items-center justify-center rounded-xl sm:rounded-2xl bg-white/10 text-white hover:bg-white hover:text-slate-800 backdrop-blur-md transition-all shadow-sm border border-white/5" wire:loading.attr="disabled" wire:loading.class="opacity-50 cursor-wait">
-                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
-                </button>
-                
-                @if ($child->passport_photo_url)
-                    <img src="{{ $child->passport_photo_url }}" class="shrink-0 h-12 w-12 sm:h-16 sm:w-16 rounded-xl sm:rounded-2xl object-cover ring-2 ring-white/50 shadow-sm" />
-                @else
-                    <div class="shrink-0 flex h-12 w-12 sm:h-16 sm:w-16 items-center justify-center rounded-xl sm:rounded-2xl bg-white/20 backdrop-blur-md text-xl sm:text-2xl font-black text-white ring-2 ring-white/50 shadow-sm">
-                        {{ mb_substr($child->first_name, 0, 1) }}
-                    </div>
-                @endif
-                
-                <div class="flex-1 min-w-0">
-                    <h2 class="text-xl sm:text-2xl font-black text-white leading-tight truncate">{{ $child->full_name }}</h2>
-                    <div class="flex flex-wrap items-center gap-1.5 sm:gap-2 mt-1.5 sm:mt-2">
-                        <span class="rounded-lg bg-white/20 px-2.5 py-0.5 sm:py-1 text-[10px] sm:text-[11px] font-black uppercase tracking-wider text-white backdrop-blur-md shadow-sm">{{ $child->schoolClass?->name ?? 'Unassigned' }}</span>
-                        <span class="rounded-lg bg-black/20 px-2.5 py-0.5 sm:py-1 text-[10px] sm:text-[11px] font-black uppercase tracking-wider text-white backdrop-blur-md shadow-sm">Admin: {{ $child->admission_number }}</span>
-                    </div>
-                </div>
-            </div>
+        {{-- Child Header Bar --}}
+        <div class="relative overflow-hidden rounded-3xl shadow-xl border-0">
+            {{-- Deep gradient background --}}
+            <div class="absolute inset-0 bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900"></div>
+            {{-- Dot pattern overlay --}}
+            <div class="absolute inset-0 opacity-[0.07]" style="background-image: radial-gradient(white 1px, transparent 1px); background-size: 20px 20px;"></div>
+            {{-- Glow orbs --}}
+            <div class="absolute -top-16 -right-16 h-56 w-56 rounded-full bg-indigo-500/20 blur-3xl"></div>
+            <div class="absolute -bottom-10 -left-10 h-40 w-40 rounded-full bg-violet-500/15 blur-2xl"></div>
+            {{-- Top accent line --}}
+            <div class="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-indigo-400/60 to-transparent"></div>
 
-            <div class="relative z-10 grid grid-cols-2 sm:flex gap-2.5 sm:gap-3 w-full lg:w-auto">
-                <div class="flex items-center gap-2 rounded-xl bg-slate-900/50 backdrop-blur-md px-3 py-2 border border-white/10 shadow-sm flex-1 lg:flex-none">
-                    <span class="text-[10px] font-black uppercase tracking-widest text-white/50">Term</span>
-                    <select wire:model.live="term" class="bg-transparent text-sm font-black text-white border-0 p-0 focus:ring-0 cursor-pointer w-full focus:bg-slate-800 transition-colors rounded">
-                        <option class="text-slate-800" value="1">One</option>
-                        <option class="text-slate-800" value="2">Two</option>
-                        <option class="text-slate-800" value="3">Three</option>
-                    </select>
+            <div class="relative z-10 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 sm:gap-5 p-4 sm:p-6">
+                <div class="flex items-center gap-3 sm:gap-5 w-full lg:w-auto">
+                    <button wire:click="$set('selectedChildId', null)" class="shrink-0 h-10 w-10 sm:h-11 sm:w-11 flex items-center justify-center rounded-xl bg-white/10 text-white hover:bg-white hover:text-slate-900 backdrop-blur-md transition-all shadow-sm border border-white/10" wire:loading.attr="disabled" wire:loading.class="opacity-50 cursor-wait">
+                        <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+                    </button>
+
+                    @if ($child->passport_photo_url)
+                        <img src="{{ $child->passport_photo_url }}" class="shrink-0 h-14 w-14 sm:h-16 sm:w-16 rounded-2xl object-cover ring-2 ring-white/30 shadow-lg" />
+                    @else
+                        <div class="shrink-0 flex h-14 w-14 sm:h-16 sm:w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-400 to-violet-500 text-2xl font-black text-white ring-2 ring-white/30 shadow-lg">
+                            {{ mb_substr($child->first_name, 0, 1) }}
+                        </div>
+                    @endif
+
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-center gap-2 mb-1">
+                            <span class="inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-widest text-indigo-300">
+                                <span class="h-1.5 w-1.5 rounded-full bg-indigo-400 shadow-[0_0_6px_rgba(129,140,248,0.8)]"></span>
+                                Student Profile
+                            </span>
+                        </div>
+                        <h2 class="text-xl sm:text-2xl font-black text-white leading-tight truncate">{{ $child->full_name }}</h2>
+                        <div class="flex flex-wrap items-center gap-1.5 mt-1.5">
+                            <span class="rounded-lg bg-white/15 backdrop-blur-sm px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider text-white border border-white/10">{{ $child->schoolClass?->name ?? 'Unassigned' }}</span>
+                            <span class="rounded-lg bg-black/25 backdrop-blur-sm px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider text-white/80 border border-white/5">ADM: {{ $child->admission_number }}</span>
+                        </div>
+                    </div>
                 </div>
-                <div class="flex items-center gap-2 rounded-xl bg-slate-900/50 backdrop-blur-md px-3 py-2 border border-white/10 shadow-sm flex-1 lg:flex-none">
-                    <span class="text-[10px] font-black uppercase tracking-widest text-white/50">Session</span>
-                    <input wire:model.live="session" type="text" class="w-24 bg-transparent text-sm font-black text-white border-0 p-0 focus:ring-0 text-center placeholder-white/20" placeholder="2024/2025" />
+
+                <div class="grid grid-cols-2 sm:flex gap-2.5 sm:gap-3 w-full lg:w-auto">
+                    <div class="flex items-center gap-2 rounded-xl bg-white/10 backdrop-blur-md px-3 py-2.5 border border-white/10 shadow-sm flex-1 lg:flex-none">
+                        <span class="text-[10px] font-black uppercase tracking-widest text-white/40">Term</span>
+                        <select wire:model.live="term" class="bg-transparent text-sm font-black text-white border-0 p-0 focus:ring-0 cursor-pointer w-full rounded">
+                            <option class="text-slate-800" value="1">One</option>
+                            <option class="text-slate-800" value="2">Two</option>
+                            <option class="text-slate-800" value="3">Three</option>
+                        </select>
+                    </div>
+                    <div class="flex items-center gap-2 rounded-xl bg-white/10 backdrop-blur-md px-3 py-2.5 border border-white/10 shadow-sm flex-1 lg:flex-none">
+                        <span class="text-[10px] font-black uppercase tracking-widest text-white/40">Session</span>
+                        <input wire:model.live="session" type="text" class="w-24 bg-transparent text-sm font-black text-white border-0 p-0 focus:ring-0 text-center placeholder-white/20" placeholder="2024/2025" />
+                    </div>
                 </div>
             </div>
         </div>
 
-        {{-- Elegant Tabbed Navigation Bar --}}
-        <div class="flex items-center gap-2 overflow-x-auto pb-2 border-b border-slate-200 no-scrollbar" style="-webkit-overflow-scrolling: touch; touch-action: pan-x;">
-            @php
-                $tabs = [
-                    'overview'   => ['name' => 'Overview & Bulletin', 'icon' => '<svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>'],
-                    'attendance' => ['name' => 'Attendance Tracker', 'icon' => '<svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>'],
-                    'results'    => ['name' => 'Academic Results', 'icon' => '<svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>'],
-                    'topics'     => ['name' => 'Curriculum Topics', 'icon' => '<svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/></svg>'],
-                    'homework'   => ['name' => 'Homework Tracker', 'icon' => '<svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>'],
-                    'timetable'  => ['name' => 'Weekly Timetable', 'icon' => '<svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>'],
-                ];
-                // Only include Fee Ledger tab if Payment Gateway plugin is installed
-                if ($hasPaymentGateway) {
-                    $tabs['bursary'] = ['name' => 'Fee Ledger', 'icon' => '<svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 8h6m-6 2h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>'];
-                }
-                $tabs['teachers']  = ['name' => 'Class Teachers', 'icon' => '<svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>'];
-            @endphp
-            @foreach($tabs as $tabKey => $tabVal)
-                <button type="button" wire:click="$set('activeTab', '{{ $tabKey }}')"
-                        class="flex items-center gap-2 rounded-xl px-3.5 py-2.5 sm:px-4 text-xs font-bold transition-all whitespace-nowrap {{ $activeTab === $tabKey ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/20' : 'text-slate-500 hover:text-slate-800 bg-slate-50 hover:bg-slate-100' }}" wire:loading.attr="disabled" wire:loading.class="opacity-50 cursor-wait">
-                    {!! $tabVal['icon'] !!}
-                    {{ $tabVal['name'] }}
-                </button>
-            @endforeach
+        {{-- Tab Navigation Bar --}}
+        @php
+            $tabs = [
+                'overview'   => ['name' => 'Overview', 'icon' => '<svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>'],
+                'attendance' => ['name' => 'Attendance', 'icon' => '<svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>'],
+                'results'    => ['name' => 'Results', 'icon' => '<svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>'],
+                'topics'     => ['name' => 'Curriculum', 'icon' => '<svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/></svg>'],
+                'homework'   => ['name' => 'Homework', 'icon' => '<svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>'],
+                'timetable'  => ['name' => 'Timetable', 'icon' => '<svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>'],
+            ];
+            if ($hasPaymentGateway) {
+                $tabs['bursary'] = ['name' => 'Fee Ledger', 'icon' => '<svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 8h6m-6 2h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>'];
+            }
+            $tabs['teachers'] = ['name' => 'Teachers', 'icon' => '<svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>'];
+        @endphp
+
+        <div class="relative">
+            {{-- Track --}}
+            <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar bg-slate-100/80 rounded-2xl p-1.5" style="-webkit-overflow-scrolling: touch; touch-action: pan-x;">
+                @foreach($tabs as $tabKey => $tabVal)
+                    <button type="button" wire:click="$set('activeTab', '{{ $tabKey }}')"
+                            wire:loading.attr="disabled" wire:loading.class="opacity-50 cursor-wait"
+                            class="relative flex items-center gap-2 rounded-xl px-3.5 py-2 text-xs font-bold transition-all duration-200 whitespace-nowrap shrink-0
+                                   {{ $activeTab === $tabKey
+                                        ? 'bg-white text-indigo-700 shadow-sm shadow-indigo-100 ring-1 ring-indigo-100'
+                                        : 'text-slate-500 hover:text-slate-700 hover:bg-white/60' }}">
+                        <span class="{{ $activeTab === $tabKey ? 'text-indigo-600' : 'text-slate-400' }}">{!! $tabVal['icon'] !!}</span>
+                        <span class="hidden sm:inline">{{ $tabVal['name'] }}</span>
+                        {{-- Mobile: icon only, show name as tooltip via title --}}
+                        <span class="sm:hidden sr-only">{{ $tabVal['name'] }}</span>
+                        @if($activeTab === $tabKey)
+                            <span class="absolute bottom-1 left-1/2 -translate-x-1/2 h-0.5 w-4 rounded-full bg-indigo-500 sm:hidden"></span>
+                        @endif
+                    </button>
+                @endforeach
+            </div>
         </div>
 
         {{-- TAB CONTENT RENDERERS --}}
