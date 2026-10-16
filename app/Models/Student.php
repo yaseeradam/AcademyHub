@@ -21,6 +21,7 @@ class Student extends Model
         // 'tenant_id' — intentionally excluded. Handled by BelongsToTenant trait only.
         'user_id',
         'admission_number',
+        'k40_uid',
         'first_name',
         'last_name',
         'class_id',
@@ -42,12 +43,13 @@ class Student extends Model
     ];
 
     protected $casts = [
-        'tenant_id' => 'integer',
-        'user_id' => 'integer',
-        'class_id' => 'integer',
-        'section_id' => 'integer',
-        'dob' => 'date',
-        'password' => 'hashed',
+        'tenant_id'    => 'integer',
+        'user_id'      => 'integer',
+        'class_id'     => 'integer',
+        'section_id'   => 'integer',
+        'k40_uid'      => 'integer',
+        'dob'          => 'date',
+        'password'     => 'hashed',
         'custom_fields' => 'array',
     ];
 
@@ -281,5 +283,15 @@ class Student extends Model
     public function getShiftLabel(): string
     {
         return $this->getShift() . ' Section';
+    }
+
+    /**
+     * Return the hardware UID used for this student on the ZKTeco K40 device.
+     * Matches the value that the device sends as USERID in ADMS punch data.
+     * Priority: explicit k40_uid column → fall back to database id.
+     */
+    public function getK40Uid(): int
+    {
+        return $this->k40_uid ?? $this->id;
     }
 }

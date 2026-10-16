@@ -276,12 +276,13 @@ class ZkTecoController extends Controller
             }
 
             // ── Try matching as a Student ────────────────────────────────────────
-            // Find matching student by Admission Number or Database ID.
-            // Eager-load schoolClass and section for the popup card.
+            // Match priority: hardware k40_uid column → admission_number → database id.
+            // Staff UIDs already handled above via custom_fields->k40_uid.
             $student = Student::with(['schoolClass', 'section'])
                 ->where(function ($q) use ($userId) {
-                    $q->where('admission_number', $userId)
-                      ->orWhere('id', $userId);
+                    $q->where('k40_uid', (int) $userId)          // primary: exact hardware UID
+                      ->orWhere('admission_number', $userId)      // secondary: admission number string
+                      ->orWhere('id', $userId);                   // fallback: raw DB id
                 })
                 ->first();
 

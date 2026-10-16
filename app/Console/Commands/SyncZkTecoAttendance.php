@@ -21,8 +21,9 @@ class SyncZkTecoAttendance extends Command
     /**
      * The name and signature of the console command.
      * Usage: php artisan zkteco:sync 192.168.1.201 4370
+     *        php artisan zkteco:sync 192.168.1.201 4370 --days=7  (sync last 7 days of device logs)
      */
-    protected $signature = 'zkteco:sync {ip=192.168.1.201} {port=4370}';
+    protected $signature = 'zkteco:sync {ip=192.168.1.201} {port=4370} {--days=0 : Number of past days to include beyond today (0 = today only)}';
 
     protected $description = 'Sync biometric attendance records from ZKTeco K40 hardware device over LAN';
 
@@ -74,6 +75,8 @@ class SyncZkTecoAttendance extends Command
         });
 
         $syncedCount = 0;
+        $daysBack = max(0, (int) $this->option('days'));
+        $cutoff = Carbon::today()->subDays($daysBack)->startOfDay();
 
         foreach ($attendanceLogs as $log) {
             $userId = trim((string) ($log['id'] ?? $log['user_id'] ?? ''));
@@ -81,8 +84,8 @@ class SyncZkTecoAttendance extends Command
 
             $punchTime = Carbon::parse($log['timestamp']);
 
-            // Only process today's records
-            if (!$punchTime->isToday()) {
+            // Skip punches older than the --days window (default: today only)
+            if ($punchTime->lt($cutoff)) {
                 continue;
             }
 
@@ -171,8 +174,10 @@ class SyncZkTecoAttendance extends Command
             }
 
             // ── Try matching as a Student ────────────────────────────────────────
+            // Match priority: k40_uid column → admission_number → database id
             $student = Student::where(function ($q) use ($userId) {
-                $q->where('admission_number', $userId)
+                $q->where('k40_uid', (int) $userId)
+                  ->orWhere('admission_number', $userId)
                   ->orWhere('id', $userId);
             })->first();
 
@@ -196,21 +201,43 @@ class SyncZkTecoAttendance extends Command
                 ]
             );
 
-            // 2. Record or update student's attendance mark
+            // 2. Record or update student's attendance mark.
+            // arrived_at MUST be written so the biometric badge appears on the student card.
             $studentShift = method_exists($student, 'getShift') ? $student->getShift() : 'Western';
             $studentStatus = \App\Support\AttendanceShiftConfig::evaluateStatus($timeStr, $studentShift, $student->tenant_id);
 
-            AttendanceMark::updateOrCreate(
-                [
-                    'tenant_id'  => $student->tenant_id,
-                    'sheet_id'   => $sheet->id,
-                    'student_id' => $student->id,
-                ],
-                [
-                    'status'     => $studentStatus,
-                    'note'       => "Biometric scan on K40 at {$punchTime->format('g:i A')}",
-                ]
-            );
+            $existingStudentMark = AttendanceMark::where([
+                'tenant_id'  => $student->tenant_id,
+                'sheet_id'   => $sheet->id,
+                'student_id' => $student->id,
+            ])->first();
+
+            if ($existingStudentMark && !empty($existingStudentMark->arrived_at)) {
+                // Second scan = departure
+                $finalStatus = ($existingStudentMark->status === 'Present') ? 'Present' : $studentStatus;
+                $inDisplay   = Carbon::parse($existingStudentMark->arrived_at)->format('g:i A');
+                $outDisplay  = $punchTime->format('g:i A');
+                $existingStudentMark->update([
+                    'status'      => $finalStatus,
+                    'departed_at' => $punchTime->format('H:i:s'),
+                    'note'        => "Arrived: {$inDisplay} | Departed: {$outDisplay} [Biometric K40]",
+                ]);
+                $studentStatus = $finalStatus;
+            } else {
+                // First scan = arrival — write arrived_at so biometric badge shows
+                AttendanceMark::updateOrCreate(
+                    [
+                        'tenant_id'  => $student->tenant_id,
+                        'sheet_id'   => $sheet->id,
+                        'student_id' => $student->id,
+                    ],
+                    [
+                        'status'     => $studentStatus,
+                        'arrived_at' => $punchTime->format('H:i:s'),
+                        'note'       => 'Arrived: ' . $punchTime->format('g:i A') . " ({$studentStatus}) [Biometric K40]",
+                    ]
+                );
+            }
 
             $syncedCount++;
 

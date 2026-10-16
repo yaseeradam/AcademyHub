@@ -741,6 +741,10 @@ $activeShadow = "shadow-{$accent}-200";
                             if (e && e.scan) {
                                 console.log('[Biometric Monitor Echo] Scan received:', e.scan.name);
                                 this.showBiometricPopup(e.scan);
+                                // Notify Livewire attendance page to update student card live
+                                if (typeof Livewire !== 'undefined') {
+                                    Livewire.dispatch('biometric-punch-received', { scan: e.scan });
+                                }
                             }
                         });
 
@@ -751,6 +755,9 @@ $activeShadow = "shadow-{$accent}-200";
                                 if (e && e.scan) {
                                     console.log('[Biometric Monitor Echo Global] Scan received:', e.scan.name);
                                     this.showBiometricPopup(e.scan);
+                                    if (typeof Livewire !== 'undefined') {
+                                        Livewire.dispatch('biometric-punch-received', { scan: e.scan });
+                                    }
                                 }
                             });
                     }
