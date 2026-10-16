@@ -8,6 +8,10 @@
     $scores    = $this->scores;
     $homework  = $this->homework;
     $recent    = $this->recentAttendance;
+    $todayAtt  = $this->todayAttendance;
+    $calData   = $this->attendanceCalendarData;
+    $attHist   = $this->attendanceHistory;
+    $absenceRequests = $this->childAbsenceRequests;
     $published = $this->resultsPublished;
     $maxTotal  = $stats['maxTotal'] ?? 100;
     
@@ -156,11 +160,12 @@
         <div class="flex items-center gap-2 overflow-x-auto pb-2 border-b border-slate-200 no-scrollbar" style="-webkit-overflow-scrolling: touch; touch-action: pan-x;">
             @php
                 $tabs = [
-                    'overview'  => ['name' => 'Overview & Bulletin', 'icon' => '<svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>'],
-                    'results'   => ['name' => 'Academic Results', 'icon' => '<svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>'],
-                    'topics'    => ['name' => 'Curriculum Topics', 'icon' => '<svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/></svg>'],
-                    'homework'  => ['name' => 'Homework Tracker', 'icon' => '<svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>'],
-                    'timetable' => ['name' => 'Weekly Timetable', 'icon' => '<svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>'],
+                    'overview'   => ['name' => 'Overview & Bulletin', 'icon' => '<svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>'],
+                    'attendance' => ['name' => 'Attendance Tracker', 'icon' => '<svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>'],
+                    'results'    => ['name' => 'Academic Results', 'icon' => '<svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>'],
+                    'topics'     => ['name' => 'Curriculum Topics', 'icon' => '<svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/></svg>'],
+                    'homework'   => ['name' => 'Homework Tracker', 'icon' => '<svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>'],
+                    'timetable'  => ['name' => 'Weekly Timetable', 'icon' => '<svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>'],
                 ];
                 // Only include Fee Ledger tab if Payment Gateway plugin is installed
                 if ($hasPaymentGateway) {
@@ -180,6 +185,73 @@
         {{-- TAB CONTENT RENDERERS --}}
 
         @if($activeTab === 'overview')
+            {{-- Today's Live Arrival / Presence Status Banner --}}
+            <div class="rounded-2xl sm:rounded-3xl border border-slate-200 bg-white p-4 sm:p-5 shadow-sm transition-all">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div class="flex items-center gap-3">
+                        <div class="relative flex items-center justify-center shrink-0">
+                            @if(in_array($todayAtt['raw_status'] ?? '', ['Present', 'Late']) || in_array($todayAtt['status'] ?? '', ['Present', 'Late']))
+                                <span class="absolute inline-flex h-full w-full rounded-2xl bg-emerald-400 opacity-20 animate-ping"></span>
+                                <div class="h-10 w-10 sm:h-12 sm:w-12 rounded-2xl bg-emerald-500 text-white flex items-center justify-center shadow-md shadow-emerald-500/20">
+                                    <svg class="h-5 w-5 sm:h-6 sm:w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                                </div>
+                            @elseif(($todayAtt['raw_status'] ?? '') === 'Excused' || ($todayAtt['status'] ?? '') === 'Excused')
+                                <div class="h-10 w-10 sm:h-12 sm:w-12 rounded-2xl bg-purple-500 text-white flex items-center justify-center shadow-md shadow-purple-500/20">
+                                    <svg class="h-5 w-5 sm:h-6 sm:w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                                </div>
+                            @elseif(($todayAtt['raw_status'] ?? '') === 'Absent' || ($todayAtt['status'] ?? '') === 'Absent')
+                                <div class="h-10 w-10 sm:h-12 sm:w-12 rounded-2xl bg-rose-500 text-white flex items-center justify-center shadow-md shadow-rose-500/20">
+                                    <svg class="h-5 w-5 sm:h-6 sm:w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                                </div>
+                            @else
+                                <div class="h-10 w-10 sm:h-12 sm:w-12 rounded-2xl bg-slate-100 text-slate-500 flex items-center justify-center">
+                                    <svg class="h-5 w-5 sm:h-6 sm:w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                </div>
+                            @endif
+                        </div>
+                        <div class="min-w-0">
+                            <div class="flex items-center gap-2 flex-wrap">
+                                <span class="text-xs font-black uppercase tracking-wider text-slate-400">Today's Attendance</span>
+                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider {{ $todayAtt['badge_class'] }}">
+                                    {{ $todayAtt['status'] }}
+                                </span>
+                                @if($todayAtt['is_biometric'])
+                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[9px] font-black uppercase tracking-wide bg-sky-50 text-sky-700 border border-sky-200">
+                                        <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 11c0 3.517-1.009 6.799-2.753 9.571m-3.44-2.04l.054-.09A13.916 13.916 0 008 11a4 4 0 118 0c0 1.017-.07 2.019-.203 3m-2.118 6.844A21.88 21.88 0 0015.171 17m3.839 1.132c.645-2.266.99-4.659.99-7.132A8 8 0 004.07 7.07"/></svg>
+                                        K40 Biometrics
+                                    </span>
+                                @elseif($todayAtt['source'])
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[9px] font-bold text-slate-500 bg-slate-100">
+                                        {{ $todayAtt['source'] }}
+                                    </span>
+                                @endif
+                            </div>
+                            <p class="text-xs sm:text-sm font-bold text-slate-800 mt-1">{{ $todayAtt['message'] }}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center justify-between sm:justify-end gap-3 pt-2 sm:pt-0 border-t sm:border-t-0 border-slate-100 shrink-0">
+                        @if($todayAtt['time_in'])
+                            <div class="text-left sm:text-right">
+                                <span class="block text-[9px] font-black uppercase text-slate-400">Clock In</span>
+                                <span class="text-xs sm:text-sm font-black text-slate-800">{{ $todayAtt['time_in'] }}</span>
+                            </div>
+                        @endif
+                        @if($todayAtt['time_out'])
+                            <div class="text-left sm:text-right">
+                                <span class="block text-[9px] font-black uppercase text-slate-400">Clock Out</span>
+                                <span class="text-xs sm:text-sm font-black text-slate-800">{{ $todayAtt['time_out'] }}</span>
+                            </div>
+                        @endif
+                        <button type="button" wire:click="$set('activeTab', 'attendance')"
+                                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-50 hover:bg-slate-100 text-slate-700 text-xs font-bold transition border border-slate-200">
+                            Details
+                            <svg class="h-3.5 w-3.5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
             {{-- Stat Metrics Row --}}
             <div class="grid grid-cols-2 lg:grid-cols-{{ $hasPaymentGateway ? 4 : 3 }} gap-3 sm:gap-4">
                 {{-- Metric 1: Average --}}
@@ -323,20 +395,29 @@
                             <h3 class="text-sm font-black text-slate-800 uppercase tracking-wide">Attendance Summary</h3>
                             <span class="text-[10px] font-black uppercase tracking-wider text-sky-600 bg-sky-50 px-2.5 py-0.5 rounded-md">Rate: {{ $att['rate'] }}%</span>
                         </div>
-                        <div class="grid grid-cols-3 gap-2 text-center">
-                            <div class="rounded-xl sm:rounded-2xl bg-emerald-50/50 border border-emerald-100/50 p-2.5 sm:p-3">
-                                <div class="text-lg sm:text-xl font-black text-emerald-600">{{ $att['present'] }}</div>
-                                <div class="text-[9px] uppercase tracking-wider font-extrabold text-emerald-500 mt-0.5 sm:mt-1">Present</div>
+                        <div class="grid grid-cols-4 gap-2 text-center">
+                            <div class="rounded-xl sm:rounded-2xl bg-emerald-50/50 border border-emerald-100/50 p-2 sm:p-3">
+                                <div class="text-base sm:text-xl font-black text-emerald-600">{{ $att['present'] }}</div>
+                                <div class="text-[8px] sm:text-[9px] uppercase tracking-wider font-extrabold text-emerald-500 mt-0.5 sm:mt-1">Present</div>
                             </div>
-                            <div class="rounded-xl sm:rounded-2xl bg-amber-50/50 border border-amber-100/50 p-2.5 sm:p-3">
-                                <div class="text-lg sm:text-xl font-black text-amber-600">{{ $att['late'] }}</div>
-                                <div class="text-[9px] uppercase tracking-wider font-extrabold text-amber-500 mt-0.5 sm:mt-1">Late</div>
+                            <div class="rounded-xl sm:rounded-2xl bg-amber-50/50 border border-amber-100/50 p-2 sm:p-3">
+                                <div class="text-base sm:text-xl font-black text-amber-600">{{ $att['late'] }}</div>
+                                <div class="text-[8px] sm:text-[9px] uppercase tracking-wider font-extrabold text-amber-500 mt-0.5 sm:mt-1">Late</div>
                             </div>
-                            <div class="rounded-xl sm:rounded-2xl bg-rose-50/50 border border-rose-100/50 p-2.5 sm:p-3">
-                                <div class="text-lg sm:text-xl font-black text-rose-600">{{ $att['absent'] }}</div>
-                                <div class="text-[9px] uppercase tracking-wider font-extrabold text-rose-500 mt-0.5 sm:mt-1">Absent</div>
+                            <div class="rounded-xl sm:rounded-2xl bg-purple-50/50 border border-purple-100/50 p-2 sm:p-3">
+                                <div class="text-base sm:text-xl font-black text-purple-600">{{ $att['excused'] }}</div>
+                                <div class="text-[8px] sm:text-[9px] uppercase tracking-wider font-extrabold text-purple-500 mt-0.5 sm:mt-1">Excused</div>
+                            </div>
+                            <div class="rounded-xl sm:rounded-2xl bg-rose-50/50 border border-rose-100/50 p-2 sm:p-3">
+                                <div class="text-base sm:text-xl font-black text-rose-600">{{ $att['absent'] }}</div>
+                                <div class="text-[8px] sm:text-[9px] uppercase tracking-wider font-extrabold text-rose-500 mt-0.5 sm:mt-1">Absent</div>
                             </div>
                         </div>
+                        <button type="button" wire:click="$set('activeTab', 'attendance')"
+                                class="mt-3.5 w-full py-2 px-3 text-xs font-bold text-sky-700 bg-sky-50 hover:bg-sky-100 rounded-xl transition flex items-center justify-center gap-1.5 active:scale-[0.98]">
+                            <span>Open Attendance Tracker</span>
+                            <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                        </button>
                     </div>
 
                     {{-- Next Homework Assignment --}}
@@ -377,6 +458,562 @@
                         @endif
                     </div>
                 </div>
+            </div>
+        @endif
+
+        @if($activeTab === 'attendance')
+            {{-- ATTENDANCE TRACKER TAB --}}
+            <div class="space-y-6">
+
+                {{-- Header with Title & Quick Actions --}}
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white rounded-3xl border border-slate-200 p-4 sm:p-6 shadow-sm">
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-black uppercase tracking-wider bg-sky-50 text-sky-700">
+                                <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                                Attendance Tracker
+                            </span>
+                            <span class="text-xs font-bold text-slate-400">Term {{ $term }} &bull; {{ $session }}</span>
+                        </div>
+                        <h2 class="text-lg sm:text-xl font-black text-slate-800 tracking-tight mt-1.5">
+                            Daily Attendance & Punctuality Records
+                        </h2>
+                        <p class="text-xs text-slate-500 font-semibold mt-0.5">
+                            Live time-in and time-out updates, K40 biometric logs, and official roll call history for {{ $child->full_name }}.
+                        </p>
+                    </div>
+
+                    <div class="flex items-center gap-2 shrink-0">
+                        <button type="button" wire:click="openAbsenceModal"
+                                class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-black shadow-md shadow-indigo-600/20 active:scale-[0.98] transition">
+                            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+                            <span>Submit Absence Request</span>
+                        </button>
+                    </div>
+                </div>
+
+                {{-- Real-Time Today's Arrival Status Card --}}
+                <div class="rounded-3xl border border-slate-200 bg-white p-5 sm:p-6 shadow-sm overflow-hidden relative">
+                    <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+                        <div class="flex items-start sm:items-center gap-4">
+                            <div class="relative shrink-0">
+                                @if(in_array($todayAtt['raw_status'] ?? '', ['Present', 'Late']) || in_array($todayAtt['status'] ?? '', ['Present', 'Late']))
+                                    <span class="absolute -inset-1 rounded-3xl bg-emerald-400 opacity-25 animate-ping"></span>
+                                    <div class="h-14 w-14 sm:h-16 sm:w-16 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white flex items-center justify-center shadow-lg shadow-emerald-500/25">
+                                        <svg class="h-7 w-7 sm:h-8 sm:w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                                    </div>
+                                @elseif(($todayAtt['raw_status'] ?? '') === 'Excused' || ($todayAtt['status'] ?? '') === 'Excused')
+                                    <div class="h-14 w-14 sm:h-16 sm:w-16 rounded-2xl bg-gradient-to-br from-purple-500 to-indigo-600 text-white flex items-center justify-center shadow-lg shadow-purple-500/25">
+                                        <svg class="h-7 w-7 sm:h-8 sm:w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                                    </div>
+                                @elseif(($todayAtt['raw_status'] ?? '') === 'Absent' || ($todayAtt['status'] ?? '') === 'Absent')
+                                    <div class="h-14 w-14 sm:h-16 sm:w-16 rounded-2xl bg-gradient-to-br from-rose-500 to-red-600 text-white flex items-center justify-center shadow-lg shadow-rose-500/25">
+                                        <svg class="h-7 w-7 sm:h-8 sm:w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                                    </div>
+                                @else
+                                    <div class="h-14 w-14 sm:h-16 sm:w-16 rounded-2xl bg-slate-100 text-slate-400 flex items-center justify-center">
+                                        <svg class="h-7 w-7 sm:h-8 sm:w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                    </div>
+                                @endif
+                            </div>
+
+                            <div>
+                                <div class="flex items-center gap-2 flex-wrap">
+                                    <span class="text-xs font-extrabold text-slate-400 uppercase tracking-wider">Today's Status</span>
+                                    <span class="text-xs font-bold text-slate-300">&bull;</span>
+                                    <span class="text-xs font-bold text-slate-500">{{ now()->format('l, F j, Y') }}</span>
+                                </div>
+                                <div class="flex items-center gap-2.5 mt-1">
+                                    <h3 class="text-xl sm:text-2xl font-black text-slate-800 tracking-tight">
+                                        {{ $todayAtt['status'] }}
+                                    </h3>
+                                    <span class="px-2.5 py-0.5 rounded-full text-xs font-black uppercase tracking-wider {{ $todayAtt['badge_class'] }}">
+                                        {{ $todayAtt['status'] }}
+                                    </span>
+                                </div>
+                                <p class="text-xs sm:text-sm font-semibold text-slate-600 mt-1">
+                                    {{ $todayAtt['message'] }}
+                                </p>
+                            </div>
+                        </div>
+
+                        {{-- Timestamps & Source Indicators --}}
+                        <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 border-t lg:border-t-0 lg:border-l border-slate-100 pt-4 lg:pt-0 lg:pl-6 shrink-0">
+                            {{-- Clock In --}}
+                            <div class="bg-slate-50 rounded-2xl p-3 border border-slate-100">
+                                <span class="block text-[10px] font-black uppercase tracking-wider text-slate-400">Clock In</span>
+                                <div class="mt-1 flex items-center gap-1.5">
+                                    <svg class="h-4 w-4 text-emerald-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/></svg>
+                                    <span class="text-sm font-black text-slate-800">{{ $todayAtt['time_in'] ?? '--:--' }}</span>
+                                </div>
+                            </div>
+
+                            {{-- Clock Out --}}
+                            <div class="bg-slate-50 rounded-2xl p-3 border border-slate-100">
+                                <span class="block text-[10px] font-black uppercase tracking-wider text-slate-400">Clock Out</span>
+                                <div class="mt-1 flex items-center gap-1.5">
+                                    <svg class="h-4 w-4 text-slate-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+                                    <span class="text-sm font-black text-slate-800">{{ $todayAtt['time_out'] ?? '--:--' }}</span>
+                                </div>
+                            </div>
+
+                            {{-- Punch Source --}}
+                            <div class="col-span-2 sm:col-span-1 bg-slate-50 rounded-2xl p-3 border border-slate-100">
+                                <span class="block text-[10px] font-black uppercase tracking-wider text-slate-400">Recorded Via</span>
+                                <div class="mt-1 flex items-center gap-1.5">
+                                    @if($todayAtt['is_biometric'])
+                                        <svg class="h-4 w-4 text-sky-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 11c0 3.517-1.009 6.799-2.753 9.571m-3.44-2.04l.054-.09A13.916 13.916 0 008 11a4 4 0 118 0c0 1.017-.07 2.019-.203 3m-2.118 6.844A21.88 21.88 0 0015.171 17m3.839 1.132c.645-2.266.99-4.659.99-7.132A8 8 0 004.07 7.07"/></svg>
+                                        <span class="text-xs font-black text-sky-700">K40 Biometric</span>
+                                    @elseif($todayAtt['source'])
+                                        <svg class="h-4 w-4 text-indigo-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                                        <span class="text-xs font-bold text-slate-700 truncate" title="{{ $todayAtt['source'] }}">{{ $todayAtt['source'] }}</span>
+                                    @else
+                                        <span class="text-xs font-bold text-slate-400">Pending</span>
+                                    @endif
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- 5-Metric Summary Statistics --}}
+                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
+                    {{-- Present --}}
+                    <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm flex flex-col justify-between">
+                        <div class="flex items-center justify-between">
+                            <span class="text-[10px] font-black uppercase tracking-wider text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md">Present</span>
+                            <div class="h-7 w-7 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                            </div>
+                        </div>
+                        <div class="mt-3">
+                            <div class="text-2xl sm:text-3xl font-black text-slate-800 tracking-tight">{{ $att['present'] }}</div>
+                            <span class="text-[10px] font-bold text-slate-400">Total days on campus</span>
+                        </div>
+                    </div>
+
+                    {{-- Late --}}
+                    <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm flex flex-col justify-between">
+                        <div class="flex items-center justify-between">
+                            <span class="text-[10px] font-black uppercase tracking-wider text-amber-600 bg-amber-50 px-2 py-0.5 rounded-md">Late</span>
+                            <div class="h-7 w-7 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center">
+                                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                            </div>
+                        </div>
+                        <div class="mt-3">
+                            <div class="text-2xl sm:text-3xl font-black text-slate-800 tracking-tight">{{ $att['late'] }}</div>
+                            <span class="text-[10px] font-bold text-slate-400">Late arrivals</span>
+                        </div>
+                    </div>
+
+                    {{-- Excused --}}
+                    <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm flex flex-col justify-between">
+                        <div class="flex items-center justify-between">
+                            <span class="text-[10px] font-black uppercase tracking-wider text-purple-600 bg-purple-50 px-2 py-0.5 rounded-md">Excused</span>
+                            <div class="h-7 w-7 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center">
+                                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                            </div>
+                        </div>
+                        <div class="mt-3">
+                            <div class="text-2xl sm:text-3xl font-black text-slate-800 tracking-tight">{{ $att['excused'] }}</div>
+                            <span class="text-[10px] font-bold text-slate-400">Official leave / sick notes</span>
+                        </div>
+                    </div>
+
+                    {{-- Absent --}}
+                    <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm flex flex-col justify-between">
+                        <div class="flex items-center justify-between">
+                            <span class="text-[10px] font-black uppercase tracking-wider text-rose-600 bg-rose-50 px-2 py-0.5 rounded-md">Absent</span>
+                            <div class="h-7 w-7 rounded-lg bg-rose-50 text-rose-600 flex items-center justify-center">
+                                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                            </div>
+                        </div>
+                        <div class="mt-3">
+                            <div class="text-2xl sm:text-3xl font-black text-slate-800 tracking-tight">{{ $att['absent'] }}</div>
+                            <span class="text-[10px] font-bold text-slate-400">Unexcused absences</span>
+                        </div>
+                    </div>
+
+                    {{-- Overall Attendance Rate --}}
+                    <div class="col-span-2 sm:col-span-1 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm flex flex-col justify-between">
+                        <div class="flex items-center justify-between">
+                            <span class="text-[10px] font-black uppercase tracking-wider text-sky-600 bg-sky-50 px-2 py-0.5 rounded-md">Rate</span>
+                            <div class="h-7 w-7 rounded-lg bg-sky-50 text-sky-600 flex items-center justify-center font-black text-xs">
+                                %
+                            </div>
+                        </div>
+                        <div class="mt-3">
+                            <div class="text-2xl sm:text-3xl font-black text-slate-800 tracking-tight">
+                                {{ $att['rate'] }}<span class="text-xs font-bold text-slate-400 ml-0.5">%</span>
+                            </div>
+                            <div class="w-full bg-slate-100 rounded-full h-1.5 mt-2 overflow-hidden">
+                                <div class="h-1.5 rounded-full {{ $att['rate'] >= 85 ? 'bg-emerald-500' : ($att['rate'] >= 70 ? 'bg-amber-500' : 'bg-rose-500') }}" style="width: {{ $att['rate'] }}%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Interactive Monthly Attendance Heatmap & Calendar --}}
+                <div class="rounded-3xl border border-slate-200 bg-white shadow-sm overflow-hidden flex flex-col">
+                    {{-- Calendar Header & Navigation Controls --}}
+                    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-slate-100 bg-slate-50/50 px-4 sm:px-6 py-4">
+                        <div>
+                            <h3 class="text-base font-black text-slate-800 uppercase tracking-wide flex items-center gap-2">
+                                <svg class="h-4.5 w-4.5 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                                Monthly Attendance Calendar
+                            </h3>
+                            <p class="text-xs text-slate-500 font-semibold mt-0.5">Heatmap visualization of daily school attendance</p>
+                        </div>
+
+                        {{-- Month Selector Buttons --}}
+                        <div class="flex items-center gap-2 w-full sm:w-auto justify-between sm:justify-end">
+                            <button type="button" wire:click="prevAttendanceMonth"
+                                    class="h-9 w-9 rounded-xl border border-slate-200 bg-white hover:bg-slate-100 text-slate-600 flex items-center justify-center transition active:scale-95 shadow-2xs"
+                                    title="Previous Month">
+                                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+                            </button>
+                            <span class="text-sm font-black text-slate-800 px-3 py-1 bg-white border border-slate-200 rounded-xl shadow-2xs min-w-[130px] text-center">
+                                {{ $calData['month'] }}
+                            </span>
+                            <button type="button" wire:click="nextAttendanceMonth"
+                                    class="h-9 w-9 rounded-xl border border-slate-200 bg-white hover:bg-slate-100 text-slate-600 flex items-center justify-center transition active:scale-95 shadow-2xs"
+                                    title="Next Month">
+                                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+                            </button>
+                            @if(! $calData['is_current'])
+                                <button type="button" wire:click="setAttendanceMonth('{{ now()->format('Y-m') }}')"
+                                        class="px-2.5 py-1.5 rounded-xl border border-indigo-200 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-bold transition">
+                                    Current
+                                </button>
+                            @endif
+                        </div>
+                    </div>
+
+                    {{-- Calendar Grid --}}
+                    <div class="p-3 sm:p-6 overflow-x-auto">
+                        <div class="min-w-[640px]">
+                            {{-- Day of Week Headers (Mon - Sun) --}}
+                            <div class="grid grid-cols-7 gap-2 mb-2 text-center text-[11px] font-black uppercase text-slate-400 tracking-wider">
+                                <div>Mon</div>
+                                <div>Tue</div>
+                                <div>Wed</div>
+                                <div>Thu</div>
+                                <div>Fri</div>
+                                <div class="text-slate-300">Sat</div>
+                                <div class="text-slate-300">Sun</div>
+                            </div>
+
+                            {{-- Calendar Week Rows --}}
+                            <div class="space-y-2">
+                                @foreach($calData['weeks'] as $week)
+                                    <div class="grid grid-cols-7 gap-2">
+                                        @foreach($week as $day)
+                                            @if(! $day['day'])
+                                                {{-- Empty padding slot --}}
+                                                <div class="h-20 sm:h-24 rounded-2xl bg-slate-50/40 border border-transparent"></div>
+                                            @else
+                                                @php
+                                                    $st = $day['status'];
+                                                    $cellBg = match($st) {
+                                                        'present' => 'bg-emerald-50/80 border-emerald-200 text-emerald-950',
+                                                        'late'    => 'bg-amber-50/80 border-amber-200 text-amber-950',
+                                                        'excused' => 'bg-purple-50/80 border-purple-200 text-purple-950',
+                                                        'absent'  => 'bg-rose-50/80 border-rose-200 text-rose-950',
+                                                        'weekend' => 'bg-slate-50/40 border-slate-100 text-slate-300',
+                                                        'future'  => 'bg-white border-slate-100 text-slate-300',
+                                                        default   => 'bg-slate-50/60 border-slate-200/80 text-slate-400'
+                                                    };
+                                                    $statusPill = match($st) {
+                                                        'present' => 'bg-emerald-500 text-white',
+                                                        'late'    => 'bg-amber-500 text-white',
+                                                        'excused' => 'bg-purple-500 text-white',
+                                                        'absent'  => 'bg-rose-500 text-white',
+                                                        default   => null
+                                                    };
+                                                @endphp
+                                                <div class="h-20 sm:h-24 rounded-2xl border p-2 flex flex-col justify-between transition-all {{ $cellBg }} {{ $day['is_today'] ? 'ring-2 ring-indigo-500 ring-offset-1 font-black shadow-sm' : '' }}">
+                                                    <div class="flex items-center justify-between">
+                                                        <span class="text-xs sm:text-sm font-black {{ $day['is_today'] ? 'text-indigo-600' : '' }}">
+                                                            {{ $day['day'] }}
+                                                        </span>
+                                                        @if($day['is_today'])
+                                                            <span class="text-[8px] font-black uppercase tracking-wider bg-indigo-600 text-white px-1.5 py-0.2 rounded-md">Today</span>
+                                                        @elseif($statusPill)
+                                                            <span class="h-2 w-2 rounded-full {{ $statusPill }}"></span>
+                                                        @endif
+                                                    </div>
+
+                                                    <div class="min-w-0">
+                                                        @if($st === 'present')
+                                                            <span class="block text-[9px] sm:text-[10px] font-black uppercase text-emerald-700 truncate">
+                                                                Present
+                                                            </span>
+                                                            @if($day['time_in'])
+                                                                <span class="block text-[9px] font-semibold text-emerald-600 truncate">{{ $day['time_in'] }}</span>
+                                                            @endif
+                                                        @elseif($st === 'late')
+                                                            <span class="block text-[9px] sm:text-[10px] font-black uppercase text-amber-700 truncate">
+                                                                Late
+                                                            </span>
+                                                            @if($day['time_in'])
+                                                                <span class="block text-[9px] font-semibold text-amber-600 truncate">{{ $day['time_in'] }}</span>
+                                                            @endif
+                                                        @elseif($st === 'excused')
+                                                            <span class="block text-[9px] sm:text-[10px] font-black uppercase text-purple-700 truncate" title="{{ $day['note'] }}">
+                                                                Excused
+                                                            </span>
+                                                        @elseif($st === 'absent')
+                                                            <span class="block text-[9px] sm:text-[10px] font-black uppercase text-rose-700 truncate">
+                                                                Absent
+                                                            </span>
+                                                        @elseif($day['is_weekend'])
+                                                            <span class="block text-[9px] font-medium text-slate-300">Off-day</span>
+                                                        @elseif(! $day['is_future'])
+                                                            <span class="block text-[9px] font-medium text-slate-400 italic">No entry</span>
+                                                        @endif
+                                                    </div>
+                                                </div>
+                                            @endif
+                                        @endforeach
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- Calendar Color Legend --}}
+                    <div class="border-t border-slate-100 bg-slate-50/60 px-4 sm:px-6 py-3 flex flex-wrap items-center justify-between gap-3 text-xs">
+                        <span class="text-[10px] font-black uppercase tracking-wider text-slate-400">Legend</span>
+                        <div class="flex flex-wrap items-center gap-3 sm:gap-5 text-xs font-bold">
+                            <div class="flex items-center gap-1.5 text-slate-600">
+                                <span class="h-2.5 w-2.5 rounded-full bg-emerald-500"></span>
+                                <span>Present</span>
+                            </div>
+                            <div class="flex items-center gap-1.5 text-slate-600">
+                                <span class="h-2.5 w-2.5 rounded-full bg-amber-500"></span>
+                                <span>Late</span>
+                            </div>
+                            <div class="flex items-center gap-1.5 text-slate-600">
+                                <span class="h-2.5 w-2.5 rounded-full bg-purple-500"></span>
+                                <span>Excused Leave</span>
+                            </div>
+                            <div class="flex items-center gap-1.5 text-slate-600">
+                                <span class="h-2.5 w-2.5 rounded-full bg-rose-500"></span>
+                                <span>Absent</span>
+                            </div>
+                            <div class="flex items-center gap-1.5 text-slate-400">
+                                <span class="h-2.5 w-2.5 rounded-full bg-slate-300"></span>
+                                <span>Weekend / Holiday</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Parent Absence & Sick Leave Requests Section --}}
+                <div class="rounded-3xl border border-slate-200 bg-white p-4 sm:p-6 shadow-sm flex flex-col">
+                    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b border-slate-100 pb-4 mb-4">
+                        <div>
+                            <h3 class="text-base font-black text-slate-800 uppercase tracking-wide flex items-center gap-2">
+                                <svg class="h-4.5 w-4.5 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                                Absence & Sick Leave Notes
+                            </h3>
+                            <p class="text-xs text-slate-500 font-semibold mt-0.5">Submitted doctor, illness, and family emergency notices for {{ $child->full_name }}</p>
+                        </div>
+                        <button type="button" wire:click="openAbsenceModal"
+                                class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-purple-50 hover:bg-purple-100 text-purple-700 text-xs font-bold transition">
+                            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+                            <span>New Leave Note</span>
+                        </button>
+                    </div>
+
+                    @if($absenceRequests->isEmpty())
+                        <div class="py-8 text-center text-sm font-semibold text-slate-400 bg-slate-50 rounded-2xl border border-dashed border-slate-200">
+                            No absence or sick leave requests filed this session.
+                        </div>
+                    @else
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            @foreach($absenceRequests as $req)
+                                @php
+                                    $stBadge = match($req->status) {
+                                        'approved' => 'bg-emerald-50 text-emerald-700 border-emerald-200',
+                                        'rejected' => 'bg-rose-50 text-rose-700 border-rose-200',
+                                        default    => 'bg-amber-50 text-amber-700 border-amber-200'
+                                    };
+                                @endphp
+                                <div class="rounded-2xl border border-slate-200/80 bg-slate-50/50 p-4 flex flex-col justify-between transition hover:bg-slate-50">
+                                    <div>
+                                        <div class="flex items-start justify-between gap-2 mb-2">
+                                            <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider border {{ $stBadge }}">
+                                                {{ ucfirst($req->status) }}
+                                            </span>
+                                            <span class="text-[10px] text-slate-400 font-bold">Filed {{ $req->created_at->diffForHumans() }}</span>
+                                        </div>
+                                        <h4 class="text-sm font-black text-slate-800">{{ $req->reason }}</h4>
+                                        <p class="text-xs text-slate-500 font-bold mt-1">
+                                            {{ $req->start_date->format('M d, Y') }} &mdash; {{ $req->end_date->format('M d, Y') }}
+                                        </p>
+                                        @if($req->notes)
+                                            <p class="text-xs text-slate-600 mt-2 bg-white p-2.5 rounded-xl border border-slate-100 leading-relaxed">{{ $req->notes }}</p>
+                                        @endif
+                                    </div>
+
+                                    @if($req->status === 'pending')
+                                        <div class="mt-3 pt-3 border-t border-slate-200/60 flex items-center justify-between text-xs">
+                                            <span class="text-slate-400 font-semibold italic">Awaiting school teacher review</span>
+                                            <button type="button" wire:click="deleteAbsenceRequest({{ $req->id }})"
+                                                    wire:confirm="Cancel this absence request?"
+                                                    class="text-rose-600 hover:text-rose-700 font-bold flex items-center gap-1 transition">
+                                                <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                                <span>Cancel</span>
+                                            </button>
+                                        </div>
+                                    @endif
+                                </div>
+                            @endforeach
+                        </div>
+                    @endif
+                </div>
+
+                {{-- Date-by-Date Attendance Log Table --}}
+                <div class="rounded-3xl border border-slate-200 bg-white shadow-sm overflow-hidden flex flex-col">
+                    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-slate-100 bg-slate-50/50 px-4 sm:px-6 py-4 sm:py-5">
+                        <div>
+                            <h3 class="text-base font-black text-slate-800 uppercase tracking-wide">Detailed Attendance Log</h3>
+                            <p class="text-xs font-semibold text-slate-500 mt-1">Full chronological terminal attendance record for Term {{ $term }}, {{ $session }}</p>
+                        </div>
+                        <span class="text-xs font-black uppercase tracking-wider text-slate-500 bg-white border border-slate-200 px-3 py-1.5 rounded-xl shadow-2xs">
+                            {{ $attHist->count() }} Records Logged
+                        </span>
+                    </div>
+
+                    @if($attHist->isEmpty())
+                        <div class="py-16 text-center text-sm font-semibold text-slate-400 px-4">
+                            No attendance sheets or biometric scans recorded for this child in Term {{ $term }}.
+                        </div>
+                    @else
+                        {{-- Mobile Cards View (block md:hidden) --}}
+                        <div class="block md:hidden p-4 space-y-3">
+                            @foreach($attHist as $mark)
+                                @php
+                                    $stClass = match($mark->status) {
+                                        'Present' => 'bg-emerald-50 text-emerald-700 border-emerald-200',
+                                        'Late'    => 'bg-amber-50 text-amber-700 border-amber-200',
+                                        'Excused' => 'bg-purple-50 text-purple-700 border-purple-200',
+                                        'Absent'  => 'bg-rose-50 text-rose-700 border-rose-200',
+                                        default   => 'bg-slate-100 text-slate-700 border-slate-200'
+                                    };
+                                    $isBio = str_contains(strtolower($mark->note ?? ''), 'k40') || str_contains(strtolower($mark->note ?? ''), 'biometric');
+                                    $timeIn = $mark->arrived_at ? \Carbon\Carbon::parse($mark->arrived_at)->format('h:i A') : null;
+                                    $timeOut = $mark->departed_at ? \Carbon\Carbon::parse($mark->departed_at)->format('h:i A') : null;
+                                @endphp
+                                <div class="rounded-2xl border border-slate-150 bg-slate-50/40 p-4 space-y-3 shadow-2xs">
+                                    <div class="flex items-start justify-between gap-2">
+                                        <div>
+                                            <div class="font-black text-slate-800 text-sm">
+                                                {{ \Carbon\Carbon::parse($mark->sheet->date)->format('M d, Y') }}
+                                            </div>
+                                            <div class="text-[11px] font-bold text-slate-400">
+                                                {{ \Carbon\Carbon::parse($mark->sheet->date)->format('l') }}
+                                            </div>
+                                        </div>
+                                        <span class="rounded-lg px-2.5 py-1 text-xs uppercase font-black border {{ $stClass }}">
+                                            {{ $mark->status }}
+                                        </span>
+                                    </div>
+
+                                    <div class="grid grid-cols-2 gap-2 text-center pt-1">
+                                        <div class="bg-white rounded-xl p-2.5 border border-slate-200/70 shadow-2xs">
+                                            <span class="block text-[9px] font-black uppercase tracking-wider text-slate-400">Arrived</span>
+                                            <span class="text-xs font-black text-slate-700">{{ $timeIn ?? '--' }}</span>
+                                        </div>
+                                        <div class="bg-white rounded-xl p-2.5 border border-slate-200/70 shadow-2xs">
+                                            <span class="block text-[9px] font-black uppercase tracking-wider text-slate-400">Departed</span>
+                                            <span class="text-xs font-black text-slate-700">{{ $timeOut ?? '--' }}</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500">
+                                        <span class="font-semibold flex items-center gap-1">
+                                            @if($isBio)
+                                                <span class="text-sky-600 font-bold">K40 Terminal</span>
+                                            @else
+                                                <span>{{ $mark->sheet?->takenBy?->name ?? 'Roll Call' }}</span>
+                                            @endif
+                                        </span>
+                                        @if($mark->note)
+                                            <span class="text-slate-400 font-medium truncate max-w-[150px]" title="{{ $mark->note }}">{{ $mark->note }}</span>
+                                        @endif
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+
+                        {{-- Desktop Table View (hidden md:block) --}}
+                        <div class="hidden md:block overflow-x-auto">
+                            <table class="w-full text-left text-sm border-collapse">
+                                <thead class="bg-slate-50/50 border-b border-slate-100 text-[10px] font-black uppercase text-slate-400 tracking-wider">
+                                    <tr>
+                                        <th class="px-6 py-4">Date</th>
+                                        <th class="px-6 py-4 text-center">Status</th>
+                                        <th class="px-6 py-4 text-center">Arrival</th>
+                                        <th class="px-6 py-4 text-center">Departure</th>
+                                        <th class="px-6 py-4">Recorded By / Device</th>
+                                        <th class="px-6 py-4">Notes & Remarks</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-slate-100">
+                                    @foreach($attHist as $mark)
+                                        @php
+                                            $stClass = match($mark->status) {
+                                                'Present' => 'bg-emerald-50 text-emerald-700 border-emerald-200',
+                                                'Late'    => 'bg-amber-50 text-amber-700 border-amber-200',
+                                                'Excused' => 'bg-purple-50 text-purple-700 border-purple-200',
+                                                'Absent'  => 'bg-rose-50 text-rose-700 border-rose-200',
+                                                default   => 'bg-slate-100 text-slate-700 border-slate-200'
+                                            };
+                                            $isBio = str_contains(strtolower($mark->note ?? ''), 'k40') || str_contains(strtolower($mark->note ?? ''), 'biometric');
+                                            $timeIn = $mark->arrived_at ? \Carbon\Carbon::parse($mark->arrived_at)->format('h:i A') : null;
+                                            $timeOut = $mark->departed_at ? \Carbon\Carbon::parse($mark->departed_at)->format('h:i A') : null;
+                                        @endphp
+                                        <tr class="hover:bg-slate-50/80 transition-colors">
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <div class="font-black text-slate-800">{{ \Carbon\Carbon::parse($mark->sheet->date)->format('M d, Y') }}</div>
+                                                <div class="text-[11px] font-bold text-slate-400">{{ \Carbon\Carbon::parse($mark->sheet->date)->format('l') }}</div>
+                                            </td>
+                                            <td class="px-6 py-4 text-center whitespace-nowrap">
+                                                <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-black uppercase tracking-wider border {{ $stClass }}">
+                                                    {{ $mark->status }}
+                                                </span>
+                                            </td>
+                                            <td class="px-6 py-4 text-center font-bold text-slate-700 whitespace-nowrap">
+                                                {{ $timeIn ?? '--' }}
+                                            </td>
+                                            <td class="px-6 py-4 text-center font-bold text-slate-700 whitespace-nowrap">
+                                                {{ $timeOut ?? '--' }}
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                @if($isBio)
+                                                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-black bg-sky-50 text-sky-700 border border-sky-200">
+                                                        <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 11c0 3.517-1.009 6.799-2.753 9.571m-3.44-2.04l.054-.09A13.916 13.916 0 008 11a4 4 0 118 0c0 1.017-.07 2.019-.203 3m-2.118 6.844A21.88 21.88 0 0015.171 17m3.839 1.132c.645-2.266.99-4.659.99-7.132A8 8 0 004.07 7.07"/></svg>
+                                                        K40 Biometrics
+                                                    </span>
+                                                @else
+                                                    <span class="text-xs font-semibold text-slate-600">
+                                                        {{ $mark->sheet?->takenBy?->name ?? 'Class Roll Call' }}
+                                                    </span>
+                                                @endif
+                                            </td>
+                                            <td class="px-6 py-4 text-xs text-slate-500">
+                                                {{ $mark->note ?: '-' }}
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    @endif
+                </div>
+
             </div>
         @endif
 
@@ -1111,6 +1748,82 @@
                             @endforeach
                         </div>
                     @endif
+                </div>
+            </div>
+        @endif
+
+        {{-- Absence / Sick Leave Request Modal --}}
+        @if($showAbsenceModal)
+            <div class="fixed inset-0 z-50 overflow-y-auto" role="dialog" aria-modal="true">
+                <div class="flex min-h-screen items-center justify-center p-4 text-center sm:p-0">
+                    {{-- Backdrop --}}
+                    <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs transition-opacity" wire:click="closeAbsenceModal"></div>
+
+                    {{-- Modal Card --}}
+                    <div class="relative transform overflow-hidden rounded-3xl bg-white text-left shadow-2xl transition-all sm:my-8 w-full sm:max-w-lg border border-slate-200 p-6 sm:p-8 z-10">
+                        <div class="flex items-center justify-between pb-4 border-b border-slate-100">
+                            <div>
+                                <span class="text-[10px] font-black uppercase tracking-wider text-purple-600 bg-purple-50 px-2 py-0.5 rounded-md">Notice of Absence</span>
+                                <h3 class="text-lg font-black text-slate-800 tracking-tight mt-1">Submit Absence Request</h3>
+                                <p class="text-xs font-semibold text-slate-500">For {{ $child->full_name }} ({{ $child->schoolClass?->name ?? 'Student' }})</p>
+                            </div>
+                            <button type="button" wire:click="closeAbsenceModal" class="h-8 w-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center transition">
+                                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                            </button>
+                        </div>
+
+                        <form wire:submit="submitAbsenceRequest" class="mt-5 space-y-4">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-xs font-black uppercase tracking-wider text-slate-600 mb-1">Start Date <span class="text-rose-500">*</span></label>
+                                    <input type="date" wire:model="absenceStartDate"
+                                           class="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-3 py-2 text-xs font-bold text-slate-800 focus:border-indigo-500 focus:bg-white focus:ring-1 focus:ring-indigo-500" required />
+                                    @error('absenceStartDate') <span class="text-[11px] font-bold text-rose-600 mt-1 block">{{ $message }}</span> @enderror
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-black uppercase tracking-wider text-slate-600 mb-1">End Date <span class="text-rose-500">*</span></label>
+                                    <input type="date" wire:model="absenceEndDate"
+                                           class="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-3 py-2 text-xs font-bold text-slate-800 focus:border-indigo-500 focus:bg-white focus:ring-1 focus:ring-indigo-500" required />
+                                    @error('absenceEndDate') <span class="text-[11px] font-bold text-rose-600 mt-1 block">{{ $message }}</span> @enderror
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-black uppercase tracking-wider text-slate-600 mb-1">Reason Category <span class="text-rose-500">*</span></label>
+                                <select wire:model="absenceReason"
+                                        class="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-3 py-2 text-xs font-bold text-slate-800 focus:border-indigo-500 focus:bg-white focus:ring-1 focus:ring-indigo-500">
+                                    <option value="Illness / Medical">Illness / Medical (Fever, flu, hospitalization)</option>
+                                    <option value="Doctor Appointment">Doctor Appointment / Checkup</option>
+                                    <option value="Family Emergency">Family Emergency / Urgent Personal Matter</option>
+                                    <option value="Religious Observance">Religious Observance</option>
+                                    <option value="Travel / Vacation">Travel / Pre-Planned Vacation</option>
+                                    <option value="Other">Other / Miscellaneous</option>
+                                </select>
+                                @error('absenceReason') <span class="text-[11px] font-bold text-rose-600 mt-1 block">{{ $message }}</span> @enderror
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-black uppercase tracking-wider text-slate-600 mb-1">Explanation & Notes (Optional)</label>
+                                <textarea wire:model="absenceNotes" rows="3"
+                                          placeholder="Provide any additional details or notes for the class teacher and administration..."
+                                          class="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-3 py-2 text-xs font-medium text-slate-800 focus:border-indigo-500 focus:bg-white focus:ring-1 focus:ring-indigo-500 placeholder-slate-400"></textarea>
+                                @error('absenceNotes') <span class="text-[11px] font-bold text-rose-600 mt-1 block">{{ $message }}</span> @enderror
+                            </div>
+
+                            <div class="pt-4 border-t border-slate-100 flex items-center justify-end gap-3">
+                                <button type="button" wire:click="closeAbsenceModal"
+                                        class="px-4 py-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-bold transition">
+                                    Cancel
+                                </button>
+                                <button type="submit"
+                                        class="inline-flex items-center gap-2 px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-black shadow-md shadow-indigo-600/20 active:scale-[0.98] transition"
+                                        wire:loading.attr="disabled" wire:loading.class="opacity-50 cursor-wait">
+                                    <svg wire:loading wire:target="submitAbsenceRequest" class="animate-spin h-3.5 w-3.5 text-white" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg>
+                                    <span>Submit Request</span>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
                 </div>
             </div>
         @endif

@@ -4,6 +4,7 @@ namespace App\Livewire\Parents;
 
 use App\Models\AcademicSession;
 use App\Models\AcademicTerm;
+use App\Models\AttendanceExcuse;
 use App\Models\AttendanceMark;
 use App\Models\Homework;
 use App\Models\ResultPublication;
@@ -11,6 +12,7 @@ use App\Models\SchoolClass;
 use App\Models\Score;
 use App\Models\Student;
 use App\Models\Transaction;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
@@ -27,6 +29,14 @@ class Dashboard extends Component
     public string $activeTab = 'overview';
     public ?int $selectedTopicSubjectId = null;
 
+    // Attendance Tracker State
+    public string $attendanceMonth = '';
+    public bool $showAbsenceModal = false;
+    public string $absenceStartDate = '';
+    public string $absenceEndDate = '';
+    public string $absenceReason = 'Illness / Medical';
+    public string $absenceNotes = '';
+
     public function mount(): void
     {
         $tenant = auth()->user()?->tenant;
@@ -34,8 +44,11 @@ class Dashboard extends Component
             abort(403, 'Your school\'s subscription has expired. Access to Parent Portal is disabled.');
         }
 
-        $this->term    = AcademicTerm::activeTermNumber();
-        $this->session = AcademicSession::activeName() ?? $this->defaultSession();
+        $this->term            = AcademicTerm::activeTermNumber();
+        $this->session         = AcademicSession::activeName() ?? $this->defaultSession();
+        $this->attendanceMonth = now()->format('Y-m');
+        $this->absenceStartDate = now()->toDateString();
+        $this->absenceEndDate   = now()->toDateString();
 
         $children = $this->children;
         if ($children->count() === 1) {
@@ -131,7 +144,9 @@ class Dashboard extends Component
     #[Computed]
     public function attendance(): array
     {
-        if (! $this->selectedChild) return ['present' => 0, 'absent' => 0, 'late' => 0, 'total' => 0, 'rate' => 0];
+        if (! $this->selectedChild) {
+            return ['present' => 0, 'absent' => 0, 'late' => 0, 'excused' => 0, 'total' => 0, 'rate' => 0];
+        }
 
         $marks = AttendanceMark::where('student_id', $this->selectedChild->id)
             ->whereHas('sheet', fn ($q) => $q->where('term', $this->term)->where('session', $this->session))
@@ -140,10 +155,15 @@ class Dashboard extends Component
         $present = $marks->where('status', 'Present')->count();
         $absent  = $marks->where('status', 'Absent')->count();
         $late    = $marks->where('status', 'Late')->count();
+        $excused = $marks->where('status', 'Excused')->count();
         $total   = $marks->count();
-        $rate    = $total > 0 ? round(($present / $total) * 100, 1) : 0;
 
-        return compact('present', 'absent', 'late', 'total', 'rate');
+        // Effective total for percentage: exclude approved excused leaves so student isn't penalized
+        $effectiveTotal = max(1, $total - $excused);
+        $rate = $total > 0 ? round((($present + $late) / $effectiveTotal) * 100, 1) : 0;
+        $rate = min(100, $rate);
+
+        return compact('present', 'absent', 'late', 'excused', 'total', 'rate');
     }
 
     #[Computed]
@@ -191,6 +211,311 @@ class Dashboard extends Component
             ->get()
             ->sortByDesc(fn ($m) => $m->sheet->date)
             ->take(7);
+    }
+
+    #[Computed]
+    public function todayAttendance(): array
+    {
+        if (! $this->selectedChild) {
+            return [
+                'has_record'   => false,
+                'status'       => 'No Child Selected',
+                'badge_class'  => 'bg-slate-100 text-slate-600',
+                'time_in'      => null,
+                'time_out'     => null,
+                'source'       => null,
+                'is_biometric' => false,
+                'note'         => null,
+                'message'      => 'Select a child to view today\'s attendance status.'
+            ];
+        }
+
+        $today = now()->toDateString();
+        $mark = AttendanceMark::where('student_id', $this->selectedChild->id)
+            ->whereHas('sheet', fn ($q) => $q->whereDate('date', $today))
+            ->with('sheet.takenBy')
+            ->first();
+
+        if (! $mark) {
+            $excuse = AttendanceExcuse::activeForStudent($this->selectedChild->id, $today)->first();
+            if ($excuse) {
+                return [
+                    'has_record'   => true,
+                    'status'       => 'Excused',
+                    'badge_class'  => 'bg-purple-50 text-purple-700 border border-purple-200/80',
+                    'time_in'      => null,
+                    'time_out'     => null,
+                    'source'       => 'Parent Notice',
+                    'is_biometric' => false,
+                    'note'         => $excuse->reason . ($excuse->notes ? ": {$excuse->notes}" : ''),
+                    'message'      => "Excused absence recorded for today ({$excuse->reason})."
+                ];
+            }
+
+            $hour = (int) now()->format('H');
+            $isMorning = $hour < 9;
+            return [
+                'has_record'   => false,
+                'status'       => $isMorning ? 'Awaiting Clock-In' : 'Unmarked Today',
+                'badge_class'  => $isMorning ? 'bg-amber-50 text-amber-700 border border-amber-200/80' : 'bg-slate-100 text-slate-600 border border-slate-200',
+                'time_in'      => null,
+                'time_out'     => null,
+                'source'       => null,
+                'is_biometric' => false,
+                'note'         => null,
+                'message'      => $isMorning ? 'Student has not clocked in yet this morning.' : 'No biometric or roll call mark recorded for today.'
+            ];
+        }
+
+        $timeIn = $mark->arrived_at ? Carbon::parse($mark->arrived_at)->format('h:i A') : null;
+        $timeOut = $mark->departed_at ? Carbon::parse($mark->departed_at)->format('h:i A') : null;
+
+        if (! $timeIn && preg_match('/In:\s*([0-9:AMP\s]+)/i', $mark->note ?? '', $m)) {
+            $timeIn = trim($m[1]);
+        }
+        if (! $timeOut && preg_match('/Out:\s*([0-9:AMP\s]+)/i', $mark->note ?? '', $m)) {
+            $timeOut = trim($m[1]);
+        }
+
+        $isBiometric = false;
+        $noteLower = strtolower($mark->note ?? '');
+        if (str_contains($noteLower, 'k40') || str_contains($noteLower, 'biometric') || str_contains($noteLower, 'zk')) {
+            $isBiometric = true;
+        }
+
+        $source = $isBiometric ? 'K40 Biometrics' : ($mark->sheet?->takenBy?->name ?? 'Teacher Roll Call');
+
+        $status = $mark->status;
+        $badgeClass = match ($status) {
+            'Present' => 'bg-emerald-50 text-emerald-700 border border-emerald-200/80',
+            'Late'    => 'bg-amber-50 text-amber-700 border border-amber-200/80',
+            'Excused' => 'bg-purple-50 text-purple-700 border border-purple-200/80',
+            'Absent'  => 'bg-rose-50 text-rose-700 border border-rose-200/80',
+            default   => 'bg-slate-100 text-slate-700 border border-slate-200',
+        };
+
+        $message = match ($status) {
+            'Present' => $timeOut ? "Clocked in at {$timeIn} and departed at {$timeOut}." : ($timeIn ? "Arrived safely and clocked in at {$timeIn}." : "Marked Present today."),
+            'Late'    => $timeIn ? "Arrived late at {$timeIn}." : "Marked Late today.",
+            'Excused' => "Absence excused ({$mark->note}).",
+            'Absent'  => "Marked Absent today.",
+            default   => "Status recorded as {$status}."
+        };
+
+        return [
+            'has_record'   => true,
+            'status'       => $timeOut ? 'Departed' : $status,
+            'raw_status'   => $status,
+            'badge_class'  => $badgeClass,
+            'time_in'      => $timeIn,
+            'time_out'     => $timeOut,
+            'source'       => $source,
+            'is_biometric' => $isBiometric,
+            'note'         => $mark->note,
+            'message'      => $message,
+        ];
+    }
+
+    #[Computed]
+    public function attendanceHistory(): Collection
+    {
+        if (! $this->selectedChild) return collect();
+
+        return AttendanceMark::where('student_id', $this->selectedChild->id)
+            ->whereHas('sheet', fn ($q) => $q->where('term', $this->term)->where('session', $this->session))
+            ->with(['sheet.takenBy'])
+            ->get()
+            ->sortByDesc(fn ($m) => $m->sheet->date)
+            ->values();
+    }
+
+    #[Computed]
+    public function attendanceCalendarData(): array
+    {
+        if (! $this->selectedChild) {
+            return ['month' => now()->format('F Y'), 'weeks' => [], 'is_current' => true, 'month_ym' => now()->format('Y-m')];
+        }
+
+        $monthStr = $this->attendanceMonth ?: now()->format('Y-m');
+        try {
+            $startOfMonth = Carbon::createFromFormat('Y-m', $monthStr)->startOfMonth();
+        } catch (\Throwable) {
+            $startOfMonth = now()->startOfMonth();
+            $monthStr = $startOfMonth->format('Y-m');
+        }
+
+        $endOfMonth   = (clone $startOfMonth)->endOfMonth();
+        $monthLabel   = $startOfMonth->format('F Y');
+
+        $marks = AttendanceMark::where('student_id', $this->selectedChild->id)
+            ->whereHas('sheet', function ($q) use ($startOfMonth, $endOfMonth) {
+                $q->whereBetween('date', [$startOfMonth->toDateString(), $endOfMonth->toDateString()]);
+            })
+            ->with('sheet.takenBy')
+            ->get()
+            ->keyBy(fn ($m) => Carbon::parse($m->sheet->date)->toDateString());
+
+        $excuses = AttendanceExcuse::where('student_id', $this->selectedChild->id)
+            ->where('start_date', '<=', $endOfMonth->toDateString())
+            ->where('end_date', '>=', $startOfMonth->toDateString())
+            ->get();
+
+        $daysInMonth = $startOfMonth->daysInMonth;
+        $startDayOfWeek = $startOfMonth->dayOfWeekIso; // 1 (Mon) - 7 (Sun)
+
+        $calendarDays = [];
+
+        // Leading empty slots for proper alignment to Monday
+        for ($i = 1; $i < $startDayOfWeek; $i++) {
+            $calendarDays[] = [
+                'day'        => null,
+                'date'       => null,
+                'is_current' => false,
+                'status'     => 'blank',
+            ];
+        }
+
+        $todayStr = now()->toDateString();
+
+        for ($d = 1; $d <= $daysInMonth; $d++) {
+            $dateObj = (clone $startOfMonth)->day($d);
+            $dateStr = $dateObj->toDateString();
+            $isWeekend = $dateObj->isWeekend();
+            $isToday = ($dateStr === $todayStr);
+            $isFuture = $dateObj->isFuture() && !$isToday;
+
+            $mark = $marks->get($dateStr);
+            $excuse = $excuses->first(fn ($e) => $dateStr >= $e->start_date->toDateString() && $dateStr <= $e->end_date->toDateString());
+
+            $status = 'unmarked';
+            $timeIn = null;
+            $timeOut = null;
+            $source = null;
+
+            if ($mark) {
+                $status = strtolower($mark->status); // present, late, absent, excused
+                $timeIn = $mark->arrived_at ? Carbon::parse($mark->arrived_at)->format('h:i A') : null;
+                $timeOut = $mark->departed_at ? Carbon::parse($mark->departed_at)->format('h:i A') : null;
+                $isBio = str_contains(strtolower($mark->note ?? ''), 'k40') || str_contains(strtolower($mark->note ?? ''), 'biometric');
+                $source = $isBio ? 'K40 Biometrics' : ($mark->sheet?->takenBy?->name ?? 'Teacher Register');
+            } elseif ($excuse) {
+                $status = 'excused';
+                $source = "Parent Note: {$excuse->reason}";
+            } elseif ($isWeekend) {
+                $status = 'weekend';
+            } elseif ($isFuture) {
+                $status = 'future';
+            }
+
+            $calendarDays[] = [
+                'day'        => $d,
+                'date'       => $dateStr,
+                'day_name'   => $dateObj->format('D'),
+                'is_current' => true,
+                'is_weekend' => $isWeekend,
+                'is_future'  => $isFuture,
+                'is_today'   => $isToday,
+                'status'     => $status,
+                'time_in'    => $timeIn,
+                'time_out'   => $timeOut,
+                'source'     => $source,
+                'note'       => $mark?->note ?? ($excuse?->reason ?? null),
+            ];
+        }
+
+        $weeks = array_chunk($calendarDays, 7);
+
+        return [
+            'month'      => $monthLabel,
+            'month_ym'   => $monthStr,
+            'weeks'      => $weeks,
+            'is_current' => ($monthStr === now()->format('Y-m')),
+        ];
+    }
+
+    #[Computed]
+    public function childAbsenceRequests(): Collection
+    {
+        if (! $this->selectedChild) return collect();
+
+        return AttendanceExcuse::where('student_id', $this->selectedChild->id)
+            ->latest('created_at')
+            ->take(10)
+            ->get();
+    }
+
+    public function prevAttendanceMonth(): void
+    {
+        $current = Carbon::createFromFormat('Y-m', $this->attendanceMonth ?: now()->format('Y-m'))->startOfMonth();
+        $this->attendanceMonth = $current->subMonth()->format('Y-m');
+    }
+
+    public function nextAttendanceMonth(): void
+    {
+        $current = Carbon::createFromFormat('Y-m', $this->attendanceMonth ?: now()->format('Y-m'))->startOfMonth();
+        $this->attendanceMonth = $current->addMonth()->format('Y-m');
+    }
+
+    public function setAttendanceMonth(string $ym): void
+    {
+        $this->attendanceMonth = $ym;
+    }
+
+    public function openAbsenceModal(): void
+    {
+        $this->absenceStartDate = now()->toDateString();
+        $this->absenceEndDate   = now()->toDateString();
+        $this->absenceReason    = 'Illness / Medical';
+        $this->absenceNotes     = '';
+        $this->showAbsenceModal = true;
+    }
+
+    public function closeAbsenceModal(): void
+    {
+        $this->showAbsenceModal = false;
+        $this->resetValidation();
+    }
+
+    public function submitAbsenceRequest(): void
+    {
+        if (! $this->selectedChild) {
+            return;
+        }
+
+        $this->validate([
+            'absenceStartDate' => 'required|date',
+            'absenceEndDate'   => 'required|date|after_or_equal:absenceStartDate',
+            'absenceReason'    => 'required|string|max:100',
+            'absenceNotes'     => 'nullable|string|max:500',
+        ]);
+
+        $user = auth()->user();
+        AttendanceExcuse::create([
+            'tenant_id'   => $user->tenant_id ?? 1,
+            'student_id'  => $this->selectedChild->id,
+            'parent_id'   => $user->id,
+            'start_date'  => $this->absenceStartDate,
+            'end_date'    => $this->absenceEndDate,
+            'reason'      => $this->absenceReason,
+            'notes'       => $this->absenceNotes ?: null,
+            'status'      => 'pending',
+        ]);
+
+        $this->showAbsenceModal = false;
+        $this->dispatch('alert', message: 'Absence request submitted successfully. The school and teachers have been notified.', type: 'success');
+    }
+
+    public function deleteAbsenceRequest(int $id): void
+    {
+        $excuse = AttendanceExcuse::where('id', $id)
+            ->where('parent_id', auth()->id())
+            ->where('status', 'pending')
+            ->first();
+
+        if ($excuse) {
+            $excuse->delete();
+            $this->dispatch('alert', message: 'Absence request removed.', type: 'info');
+        }
     }
 
     public function selectChild(int $id): void

@@ -4,6 +4,7 @@ namespace App\Livewire\Attendance;
 
 use App\Models\AcademicSession;
 use App\Models\AcademicTerm;
+use App\Models\AttendanceExcuse;
 use App\Models\AttendanceMark;
 use App\Models\AttendanceSheet;
 use App\Models\SchoolClass;
@@ -847,9 +848,24 @@ class Index extends Component
         $marks           = $this->marks;
         $latestSheet     = $this->getLatestExistingSheet();
 
+        $activeExcuses = collect();
+        if ($students->isNotEmpty() && $this->date) {
+            try {
+                $targetDate = Carbon::parse($this->date)->toDateString();
+                $activeExcuses = AttendanceExcuse::query()
+                    ->where('start_date', '<=', $targetDate)
+                    ->where('end_date', '>=', $targetDate)
+                    ->whereIn('student_id', $students->pluck('id'))
+                    ->get()
+                    ->keyBy('student_id');
+            } catch (\Throwable) {
+                $activeExcuses = collect();
+            }
+        }
+
         return view('livewire.attendance.index', compact(
             'students', 'visibleStudents', 'markCounts', 'classes', 'sections', 'dateRecords', 'selectedClass',
-            'classId', 'sectionId', 'date', 'sheetId', 'marks', 'latestSheet'
+            'classId', 'sectionId', 'date', 'sheetId', 'marks', 'latestSheet', 'activeExcuses'
         ));
     }
 }

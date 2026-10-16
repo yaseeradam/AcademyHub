@@ -515,6 +515,16 @@
                                             </span>
                                         @endif
                                     </div>
+                                    @if(isset($activeExcuses) && $activeExcuses->has($student->id))
+                                        @php $excuseItem = $activeExcuses->get($student->id); @endphp
+                                        <div class="mt-1 flex items-center justify-center">
+                                            <span class="inline-flex items-center gap-1 text-[8px] sm:text-[9px] font-black text-purple-700 bg-purple-100 border border-purple-200 px-2 py-0.5 rounded-full shadow-2xs"
+                                                  title="Parent Note: {{ $excuseItem->notes ?: $excuseItem->reason }}">
+                                                <svg class="h-2.5 w-2.5 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                                Excuse: {{ \Illuminate\Support\Str::limit($excuseItem->reason, 14) }}
+                                            </span>
+                                        </div>
+                                    @endif
                                 </div>
 
                                 {{-- 2×2 Status Buttons (Instant Save on Click) --}}

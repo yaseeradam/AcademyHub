@@ -228,6 +228,11 @@ class User extends Authenticatable
         return $this->students();
     }
 
+    public function submittedAbsenceRequests()
+    {
+        return $this->hasMany(AttendanceExcuse::class, 'parent_id');
+    }
+
     /**
      * Returns 'Islamic' or 'Western' based on user assignment.
      */

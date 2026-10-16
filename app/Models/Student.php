@@ -144,6 +144,11 @@ class Student extends Model
             ->withTimestamps();
     }
 
+    public function attendanceExcuses(): HasMany
+    {
+        return $this->hasMany(AttendanceExcuse::class);
+    }
+
     public function getFullNameAttribute(): string
     {
         return trim("{$this->first_name} {$this->last_name}");
