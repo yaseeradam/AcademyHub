@@ -171,7 +171,7 @@ class Index extends Component
         return '-';
     }
 
-    private function getDateRecords()
+    public function getDateRecords()
     {
         $tenantId = auth()->user()?->tenant_id;
 
