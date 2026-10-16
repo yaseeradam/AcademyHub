@@ -48,7 +48,7 @@
                         <p class="text-xs text-rose-700 dark:text-rose-300 mt-0.5">
                             {{ $offlineTerminals->count() }} gate terminal(s) unreached:
                             <strong>{{ $offlineTerminals->pluck('name')->implode(', ') }}</strong>.
-                            Verify ethernet cable connection, local subnet routing, and port 4370.
+                            If your terminal is on a local school router (e.g. 192.168.0.x), the cloud server cannot ping private LAN IPs directly. Double-click <strong>zk-live-monitor.bat</strong> on your school desktop to stream punches to AcademyHub in real time.
                         </p>
                     </div>
                 </div>

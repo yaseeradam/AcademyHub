@@ -30,6 +30,13 @@ class ZkTecoController extends Controller
     {
         $sn = $request->input('SN', $request->query('sn', 'UNKNOWN'));
 
+        $tenantId = app()->bound('currentTenant') && app('currentTenant') ? app('currentTenant')->id : 1;
+        Cache::put('k40_last_heartbeat', now()->toDateTimeString(), now()->addDays(7));
+        Cache::put("tenant_{$tenantId}_k40_last_heartbeat", now()->toDateTimeString(), now()->addDays(7));
+        if ($sn && $sn !== 'UNKNOWN') {
+            Cache::put("k40_device_{$sn}_last_seen", now()->toDateTimeString(), now()->addDays(7));
+        }
+
         Log::info("ZKTeco K40 ADMS Handshake received from SN: {$sn}");
 
         // Multi-tenant check: if tenant resolved via domain/header, require active k40-biometrics plugin
@@ -100,7 +107,15 @@ class ZkTecoController extends Controller
             }
         }
 
-        Log::info("ZKTeco K40 ADMS Raw Punch Data Received:\n" . $content);
+        $sn = $request->input('SN', $request->query('sn', $request->query('SN', 'UNKNOWN')));
+        $tenantId = app()->bound('currentTenant') && app('currentTenant') ? app('currentTenant')->id : 1;
+        Cache::put('k40_last_heartbeat', now()->toDateTimeString(), now()->addDays(7));
+        Cache::put("tenant_{$tenantId}_k40_last_heartbeat", now()->toDateTimeString(), now()->addDays(7));
+        if ($sn && $sn !== 'UNKNOWN') {
+            Cache::put("k40_device_{$sn}_last_seen", now()->toDateTimeString(), now()->addDays(7));
+        }
+
+        Log::info("ZKTeco K40 ADMS Raw Punch Data Received from SN: {$sn}\n" . $content);
 
         $lines = explode("\n", str_replace("\r", "", trim($content)));
 

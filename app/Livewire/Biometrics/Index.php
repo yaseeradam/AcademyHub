@@ -94,17 +94,32 @@ class Index extends Component
     public function pingTerminals(): void
     {
         $updated = [];
+        $tenantId = auth()->user()?->tenant_id ?? 1;
+
+        $lastHeartbeat = Cache::get("tenant_{$tenantId}_k40_last_heartbeat")
+            ?? Cache::get('k40_last_heartbeat');
+
+        if (!$lastHeartbeat) {
+            $recentMark = AttendanceMark::whereNotNull('arrived_at')
+                ->where('updated_at', '>=', now()->subHours(24))
+                ->latest('updated_at')
+                ->first();
+            if ($recentMark) {
+                $lastHeartbeat = $recentMark->updated_at?->toDateTimeString();
+            }
+        }
 
         foreach ($this->terminals as $term) {
             $ip = $term['ip'];
             $port = (int) ($term['port'] ?? 4370);
+            $sn = $term['sn'] ?? null;
 
             $start = microtime(true);
             $errno = 0;
             $errstr = '';
 
-            // Fast TCP connection check (timeout 1.0s to avoid blocking UI)
-            $socket = @fsockopen($ip, $port, $errno, $errstr, 1.0);
+            // Fast TCP connection check (timeout 0.8s to avoid blocking UI)
+            $socket = @fsockopen($ip, $port, $errno, $errstr, 0.8);
             $end = microtime(true);
 
             if ($socket) {
@@ -114,9 +129,26 @@ class Index extends Component
                 $term['latency'] = "{$latency}ms";
                 $term['error'] = null;
             } else {
-                $term['status'] = 'Offline';
-                $term['latency'] = null;
-                $term['error'] = $errstr ?: 'Unreachable / Port closed';
+                // When hosted on Cloud VPS, private LAN IPs cannot be socket-probed directly.
+                // Fall back to active cloud sync heartbeat / recent punches.
+                $deviceSeen = ($sn ? Cache::get("k40_device_{$sn}_last_seen") : null) ?: $lastHeartbeat;
+
+                if ($deviceSeen && Carbon::parse($deviceSeen)->diffInMinutes(now()) <= 30) {
+                    $term['status'] = 'Online';
+                    $term['latency'] = 'Cloud Sync Active (' . Carbon::parse($deviceSeen)->diffForHumans() . ')';
+                    $term['error'] = null;
+                } elseif ($deviceSeen && Carbon::parse($deviceSeen)->isToday()) {
+                    $term['status'] = 'Online';
+                    $term['latency'] = 'Synced today at ' . Carbon::parse($deviceSeen)->format('g:i A');
+                    $term['error'] = null;
+                } else {
+                    $isPrivate = !filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE);
+                    $term['status'] = 'Offline';
+                    $term['latency'] = null;
+                    $term['error'] = $isPrivate
+                        ? 'LAN IP unreachable from cloud. Run zk-live-monitor.bat on your PC to sync'
+                        : ($errstr ?: 'Unreachable / Port closed');
+                }
             }
 
             $term['last_checked'] = now()->format('g:i A');
@@ -124,7 +156,6 @@ class Index extends Component
         }
 
         $this->terminals = $updated;
-        $tenantId = auth()->user()?->tenant_id ?? 1;
         Cache::put("tenant_{$tenantId}_k40_terminals", $this->terminals, now()->addDays(30));
     }
 
