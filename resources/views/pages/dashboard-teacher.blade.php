@@ -19,12 +19,11 @@
 
     // Map teacher's scope: [class_id => null (all arms) | array of section_ids]
     $teacherScope = $user->teacherClassSectionScope();
+    $hasScope = !empty($teacherScope);
 
     // Build base query for students assigned to this teacher
     $studentsQuery = Student::where('status', 'Active');
-    if (empty($teacherScope)) {
-        $studentsQuery->whereRaw('1 = 0');
-    } else {
+    if ($hasScope) {
         $studentsQuery->where(function ($q) use ($teacherScope) {
             foreach ($teacherScope as $classId => $sectionIds) {
                 $q->orWhere(function ($sub) use ($classId, $sectionIds) {
@@ -38,7 +37,7 @@
     }
 
     $studentsCount = (clone $studentsQuery)->count();
-    $studentIds = (clone $studentsQuery)->pluck('id');
+    $studentIds = (clone $studentsQuery)->pluck('id')->toArray();
 
     // Build allocated classes / subclasses (arms) breakdown
     $myClassesList = collect();
@@ -81,15 +80,30 @@
     $attendanceData = [];
     for ($i = 6; $i >= 0; $i--) {
         $date = now()->subDays($i);
-        $present = AttendanceMark::whereDate('created_at', $date)
+        $dateStr = $date->toDateString();
+
+        $present = AttendanceMark::where(function ($q) use ($dateStr) {
+                $q->whereHas('sheet', fn($sq) => $sq->whereDate('date', $dateStr))
+                  ->orWhereDate('created_at', $dateStr);
+            })
             ->whereIn('student_id', $studentIds)
-            ->where('status', 'Present')
+            ->whereIn('status', ['Present', 'Late', 'half_day', 'present', 'late'])
             ->count();
-        $absent = AttendanceMark::whereDate('created_at', $date)
+
+        $absent = AttendanceMark::where(function ($q) use ($dateStr) {
+                $q->whereHas('sheet', fn($sq) => $sq->whereDate('date', $dateStr))
+                  ->orWhereDate('created_at', $dateStr);
+            })
             ->whereIn('student_id', $studentIds)
-            ->where('status', 'Absent')
+            ->whereIn('status', ['Absent', 'absent'])
             ->count();
-        $attendanceData[] = ['label' => $date->format('D'), 'present' => $present, 'absent' => $absent];
+
+        $attendanceData[] = [
+            'label'   => $date->format('D'),
+            'date'    => $date->format('M j'),
+            'present' => $present,
+            'absent'  => $absent,
+        ];
     }
 
     // Top students from teacher's assigned subclass/students
@@ -102,14 +116,25 @@
         ->get();
 
     // Subject averages for teacher's subjects and students
-    $subjectStats = Score::whereIn('subject_id', $subjectIds)
-        ->whereIn('student_id', $studentIds)
+    $subjectStatsQuery = Score::query();
+    if ($subjectIds->isNotEmpty()) {
+        $subjectStatsQuery->whereIn('subject_id', $subjectIds);
+    }
+    if (!empty($studentIds)) {
+        $subjectStatsQuery->whereIn('student_id', $studentIds);
+    }
+    $subjectStats = $subjectStatsQuery
         ->selectRaw('subject_id, AVG(total) as avg_score')
         ->with('subject')
         ->groupBy('subject_id')
         ->orderByDesc('avg_score')
         ->limit(5)
         ->get();
+
+    // Teacher's own attendance for today
+    $myTodayMark = \App\Models\TeacherAttendanceMark::where('teacher_id', $user->id)
+        ->whereHas('sheet', fn($q) => $q->whereDate('date', today()))
+        ->first();
 
     $announcements = Announcement::whereNotNull('published_at')
         ->where(fn($q) => $q->where('audience', 'all')->orWhere('audience', 'staff')->orWhere('audience', $user->role))
@@ -156,6 +181,17 @@
                         <svg class="h-3.5 w-3.5 sm:h-4 sm:w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
                         {{ now()->format('l, F j') }}
                     </span>
+                    @if($myTodayMark)
+                        <span class="inline-flex items-center gap-1.5 sm:gap-2 rounded-lg px-3 py-1 sm:px-4 sm:py-1.5 text-xs sm:text-sm font-semibold {{ $myTodayMark->status === 'Present' ? 'bg-emerald-500/20 text-emerald-300 ring-1 ring-emerald-400/40' : 'bg-amber-500/20 text-amber-300 ring-1 ring-amber-400/40' }}">
+                            <span class="h-2 w-2 rounded-full {{ $myTodayMark->status === 'Present' ? 'bg-emerald-400 animate-pulse' : 'bg-amber-400' }}"></span>
+                            My Attendance: {{ $myTodayMark->status }} ({{ $myTodayMark->note ?? $myTodayMark->punch_in_time ?? 'Recorded' }})
+                        </span>
+                    @else
+                        <span class="inline-flex items-center gap-1.5 sm:gap-2 rounded-lg px-3 py-1 sm:px-4 sm:py-1.5 text-xs sm:text-sm font-semibold text-white/80" style="background:rgba(255,255,255,0.12);">
+                            <span class="h-2 w-2 rounded-full bg-slate-400"></span>
+                            My Attendance: Not Scanned Today
+                        </span>
+                    @endif
                 </div>
 
                 <a href="{{ route('curriculum.topics') }}"
@@ -231,14 +267,27 @@
     {{-- Charts Row --}}
     <div class="grid grid-cols-1 gap-5 lg:grid-cols-3 items-start">
         <div class="lg:col-span-2 rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-100">
-            <div class="mb-4 flex items-center justify-between">
-                <div class="text-base font-bold text-slate-800">Attendance (Last 7 Days)</div>
-                <div class="flex gap-2">
-                    <span class="rounded-full bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-600">Present</span>
-                    <span class="rounded-full bg-violet-100 px-3 py-1 text-xs font-semibold text-violet-500">Absent</span>
+            <div class="mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                <div>
+                    <div class="text-base font-bold text-slate-800">Attendance (Last 7 Days)</div>
+                    <div class="text-xs font-medium text-slate-400">
+                        {{ $hasScope ? 'Student attendance trend for your assigned classes' : 'School-wide student attendance trend' }}
+                    </div>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="inline-flex items-center gap-1.5 rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-600 ring-1 ring-blue-500/20">
+                        <span class="h-2 w-2 rounded-full bg-blue-500"></span>
+                        Present
+                    </span>
+                    <span class="inline-flex items-center gap-1.5 rounded-full bg-violet-50 px-3 py-1 text-xs font-semibold text-violet-600 ring-1 ring-violet-500/20">
+                        <span class="h-2 w-2 rounded-full bg-violet-500"></span>
+                        Absent
+                    </span>
                 </div>
             </div>
-            <canvas id="teacherAttendanceChart" height="180"></canvas>
+            <div class="relative w-full" style="height: 220px;">
+                <canvas id="teacherAttendanceChart"></canvas>
+            </div>
         </div>
 
         <div class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-100">
@@ -273,7 +322,9 @@
     <div class="grid grid-cols-1 gap-5 lg:grid-cols-3 items-start">
         <div class="lg:col-span-2 rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-100">
             <div class="mb-4 text-base font-bold text-slate-800">Subject Averages</div>
-            <canvas id="teacherSubjectChart" height="200"></canvas>
+            <div class="relative w-full" style="height: 220px;">
+                <canvas id="teacherSubjectChart"></canvas>
+            </div>
         </div>
 
         <div class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-100">
@@ -319,82 +370,170 @@
 @endsection
 
 @push('scripts')
-@vite('resources/js/pages/dashboard.js')
+{{-- Load Chart.js with local asset and CDN fallback --}}
+<script src="{{ asset('vendor/chartjs/chart.umd.min.js') }}?v=4.4"></script>
+<script>
+    if (!window.Chart) {
+        var s = document.createElement('script');
+        s.src = 'https://cdn.jsdelivr.net/npm/chart.js';
+        document.head.appendChild(s);
+    }
+</script>
 <script>
     window.teacherDashboardData = {
         attendance: @json($attendanceData),
         subjects: @json($subjectStats->map(fn($s) => ['name' => $s->subject?->name ?? 'N/A', 'avg' => round($s->avg_score)])->values()),
     };
-</script>
-<script>
-(function () {
-    const data = window.teacherDashboardData || {};
 
-    // Attendance line chart
-    const attCanvas = document.getElementById('teacherAttendanceChart');
-    if (attCanvas) {
-        const att = data.attendance || [];
-        new Chart(attCanvas, {
-            type: 'line',
-            data: {
-                labels: att.map(d => d.label),
-                datasets: [
-                    {
-                        label: 'Present',
-                        data: att.map(d => d.present),
-                        borderColor: '#3b82f6',
-                        backgroundColor: 'rgba(59,130,246,0.12)',
-                        tension: 0.45, fill: true, pointRadius: 3,
-                        pointBackgroundColor: '#3b82f6', borderWidth: 2.5,
-                    },
-                    {
-                        label: 'Absent',
-                        data: att.map(d => d.absent),
-                        borderColor: '#a78bfa',
-                        backgroundColor: 'rgba(167,139,250,0.10)',
-                        tension: 0.45, fill: true, pointRadius: 3,
-                        pointBackgroundColor: '#a78bfa', borderWidth: 2.5,
-                    },
-                ],
-            },
-            options: {
-                responsive: true,
-                plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, usePointStyle: true, font: { size: 11 } } } },
-                scales: {
-                    x: { grid: { display: false }, ticks: { font: { size: 11 } } },
-                    y: { grid: { color: 'rgba(226,232,240,0.8)' }, ticks: { font: { size: 11 } }, beginAtZero: true },
+    function initTeacherCharts() {
+        if (typeof Chart === 'undefined') {
+            setTimeout(initTeacherCharts, 100);
+            return;
+        }
+
+        const data = window.teacherDashboardData || {};
+
+        // 1. Attendance Line Chart
+        const attCanvas = document.getElementById('teacherAttendanceChart');
+        if (attCanvas) {
+            const existing = Chart.getChart(attCanvas);
+            if (existing) existing.destroy();
+
+            const att = data.attendance || [];
+            new Chart(attCanvas, {
+                type: 'line',
+                data: {
+                    labels: att.map(d => d.label + ' (' + (d.date || '') + ')'),
+                    datasets: [
+                        {
+                            label: 'Present',
+                            data: att.map(d => d.present),
+                            borderColor: '#3b82f6',
+                            backgroundColor: 'rgba(59, 130, 246, 0.12)',
+                            tension: 0.35,
+                            fill: true,
+                            pointRadius: 4,
+                            pointHoverRadius: 6,
+                            pointBackgroundColor: '#3b82f6',
+                            pointBorderColor: '#ffffff',
+                            pointBorderWidth: 2,
+                            borderWidth: 2.5,
+                        },
+                        {
+                            label: 'Absent',
+                            data: att.map(d => d.absent),
+                            borderColor: '#8b5cf6',
+                            backgroundColor: 'rgba(139, 92, 246, 0.08)',
+                            tension: 0.35,
+                            fill: true,
+                            pointRadius: 4,
+                            pointHoverRadius: 6,
+                            pointBackgroundColor: '#8b5cf6',
+                            pointBorderColor: '#ffffff',
+                            pointBorderWidth: 2,
+                            borderWidth: 2.5,
+                        },
+                    ],
                 },
-            },
-        });
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: {
+                        mode: 'index',
+                        intersect: false,
+                    },
+                    plugins: {
+                        legend: {
+                            display: false, // Handled by header badges
+                        },
+                        tooltip: {
+                            backgroundColor: '#0f172a',
+                            titleFont: { size: 12, weight: 'bold' },
+                            bodyFont: { size: 12 },
+                            padding: 10,
+                            cornerRadius: 8,
+                            callbacks: {
+                                label: function(context) {
+                                    return ' ' + context.dataset.label + ': ' + context.parsed.y + ' students';
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: { display: false },
+                            ticks: { font: { size: 11, weight: '500' }, color: '#64748b' }
+                        },
+                        y: {
+                            grid: { color: 'rgba(226, 232, 240, 0.8)' },
+                            ticks: { font: { size: 11 }, color: '#64748b', precision: 0 },
+                            beginAtZero: true,
+                        },
+                    },
+                },
+            });
+        }
+
+        // 2. Subject Averages Bar Chart
+        const subCanvas = document.getElementById('teacherSubjectChart');
+        if (subCanvas) {
+            const existingSub = Chart.getChart(subCanvas);
+            if (existingSub) existingSub.destroy();
+
+            const subjects = data.subjects || [];
+            const palette = ['#3b82f6', '#8b5cf6', '#10b981', '#f59e0b', '#ec4899'];
+            new Chart(subCanvas, {
+                type: 'bar',
+                data: {
+                    labels: subjects.map(s => s.name),
+                    datasets: [{
+                        label: 'Avg Score (%)',
+                        data: subjects.map(s => s.avg),
+                        backgroundColor: subjects.map((_, i) => palette[i % palette.length]),
+                        borderRadius: 6,
+                        borderSkipped: false,
+                        barThickness: 18,
+                    }],
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: '#0f172a',
+                            padding: 10,
+                            cornerRadius: 8,
+                            callbacks: {
+                                label: function(context) {
+                                    return ' Average: ' + context.parsed.x + '%';
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: { color: 'rgba(226, 232, 240, 0.8)' },
+                            ticks: { font: { size: 11 }, color: '#64748b' },
+                            beginAtZero: true,
+                            max: 100
+                        },
+                        y: {
+                            grid: { display: false },
+                            ticks: { font: { size: 11, weight: '500' }, color: '#334155' }
+                        },
+                    },
+                },
+            });
+        }
     }
 
-    // Subject averages bar chart
-    const subCanvas = document.getElementById('teacherSubjectChart');
-    if (subCanvas) {
-        const subjects = data.subjects || [];
-        const palette = ['#3b82f6', '#a78bfa', '#34d399', '#f97316', '#f472b6'];
-        new Chart(subCanvas, {
-            type: 'bar',
-            data: {
-                labels: subjects.map(s => s.name),
-                datasets: [{
-                    label: 'Avg Score',
-                    data: subjects.map(s => s.avg),
-                    backgroundColor: subjects.map((_, i) => palette[i % palette.length]),
-                    borderRadius: 6, borderSkipped: false, barThickness: 18,
-                }],
-            },
-            options: {
-                indexAxis: 'y',
-                responsive: true,
-                plugins: { legend: { display: false } },
-                scales: {
-                    x: { grid: { color: 'rgba(226,232,240,0.8)' }, ticks: { font: { size: 11 } }, beginAtZero: true, max: 100 },
-                    y: { grid: { display: false }, ticks: { font: { size: 11 } } },
-                },
-            },
-        });
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initTeacherCharts);
+    } else {
+        initTeacherCharts();
     }
-})();
+    document.addEventListener('livewire:navigated', initTeacherCharts);
 </script>
 @endpush

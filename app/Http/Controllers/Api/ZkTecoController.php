@@ -174,6 +174,7 @@ class ZkTecoController extends Controller
                     $q->where('custom_fields->k40_uid', (int) $userId)
                       ->orWhere('custom_fields->k40_uid', (string) $userId);
                 })
+                ->orderByRaw("CASE WHEN role = 'teacher' THEN 0 ELSE 1 END")
                 ->first();
 
             // Priority 2: Fall back to staff ID or email ONLY if no student explicitly owns this k40_uid
