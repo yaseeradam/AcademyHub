@@ -151,7 +151,7 @@ class ZkTecoController extends Controller
             $status = ($timeStr > $lateThreshold) ? 'Late' : 'Present';
 
             // ── Try matching as a Teacher/Staff first ──────────────────────────
-            // Prioritize matching by hardware K40 UID so UIDs 1..15 map to the correct staff
+            // Priority 1: Match by hardware K40 UID (custom_fields->k40_uid)
             $teacher = User::withoutGlobalScopes()
                 ->whereIn('role', ['teacher', 'admin', 'bursar'])
                 ->where('is_active', true)
@@ -161,15 +161,19 @@ class ZkTecoController extends Controller
                 })
                 ->first();
 
+            // Priority 2: Fall back to staff ID or email ONLY if no student explicitly owns this k40_uid
             if (!$teacher) {
-                $teacher = User::withoutGlobalScopes()
-                    ->whereIn('role', ['teacher', 'admin', 'bursar'])
-                    ->where('is_active', true)
-                    ->where(function ($q) use ($userId) {
-                        $q->where('id', $userId)
-                          ->orWhere('email', 'like', $userId . '@%');
-                    })
-                    ->first();
+                $hasStudentUid = Student::where('k40_uid', (int) $userId)->exists();
+                if (!$hasStudentUid) {
+                    $teacher = User::withoutGlobalScopes()
+                        ->whereIn('role', ['teacher', 'admin', 'bursar'])
+                        ->where('is_active', true)
+                        ->where(function ($q) use ($userId) {
+                            $q->where('id', $userId)
+                              ->orWhere('email', 'like', $userId . '@%');
+                        })
+                        ->first();
+                }
             }
 
             if ($teacher) {
@@ -183,7 +187,7 @@ class ZkTecoController extends Controller
                 $shift = $teacher->getShift(); // 'Islamic' or 'Western'
                 $calculatedStatus = \App\Support\AttendanceShiftConfig::evaluateStatus($timeStr, $shift, $staffTenantId);
 
-                $staffSheet = TeacherAttendanceSheet::firstOrCreate(
+                $staffSheet = TeacherAttendanceSheet::withoutGlobalScopes()->firstOrCreate(
                     [
                         'tenant_id'  => $staffTenantId,
                         'date'       => $dateStr,
@@ -195,7 +199,8 @@ class ZkTecoController extends Controller
                     ]
                 );
 
-                $existingMark = TeacherAttendanceMark::where('sheet_id', $staffSheet->id)
+                $existingMark = TeacherAttendanceMark::withoutGlobalScopes()
+                    ->where('sheet_id', $staffSheet->id)
                     ->where('teacher_id', $teacher->id)
                     ->first();
 
@@ -218,7 +223,7 @@ class ZkTecoController extends Controller
                     // ── SIGN-IN (first punch of the day) ────────────────────
                     try {
                         TeacherAttendanceMark::create([
-                            'tenant_id'     => $teacher->tenant_id,
+                            'tenant_id'     => $staffTenantId,
                             'sheet_id'      => $staffSheet->id,
                             'teacher_id'    => $teacher->id,
                             'status'        => $calculatedStatus,
@@ -227,7 +232,8 @@ class ZkTecoController extends Controller
                             'note'          => 'In: ' . $punchTime->format('g:i A') . " ({$calculatedStatus})",
                         ]);
                     } catch (\Illuminate\Database\UniqueConstraintViolationException $e) {
-                        $existingMark = TeacherAttendanceMark::where('sheet_id', $staffSheet->id)
+                        $existingMark = TeacherAttendanceMark::withoutGlobalScopes()
+                            ->where('sheet_id', $staffSheet->id)
                             ->where('teacher_id', $teacher->id)
                             ->first();
                         if ($existingMark) {
@@ -589,8 +595,8 @@ class ZkTecoController extends Controller
             $cleanName = substr($cleanName, 0, 24);
 
             $formatted[] = [
-                'user_id'          => (string) $s->id,
-                'uid'              => (int) $s->id,
+                'user_id'          => (string) $s->getK40Uid(),
+                'uid'              => (int) $s->getK40Uid(),
                 'name'             => $cleanName,
                 'raw_name'         => $fullName,
                 'role'             => 'Student',

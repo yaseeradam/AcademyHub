@@ -519,7 +519,7 @@ class Teachers extends Component
     {
         $this->marks = [];
 
-        $existing = TeacherAttendanceMark::query()
+        $existing = TeacherAttendanceMark::withoutGlobalScopes()
             ->where('sheet_id', $sheet->id)
             ->get()
             ->keyBy('teacher_id');
@@ -565,10 +565,15 @@ class Teachers extends Component
 
         $normalizedDate = Carbon::parse($this->date)->toDateString();
 
-        $sheet = TeacherAttendanceSheet::query()
+        $sheet = TeacherAttendanceSheet::withoutGlobalScopes()
             ->whereDate('date', $normalizedDate)
             ->where('term', (int) $this->term)
             ->where('session', $this->session)
+            ->where(function ($q) {
+                if ($this->tenantId) {
+                    $q->where('tenant_id', $this->tenantId)->orWhereNull('tenant_id');
+                }
+            })
             ->first();
 
         if (!$sheet) {
@@ -602,10 +607,15 @@ class Teachers extends Component
         $normalizedDate = Carbon::parse($this->date)->toDateString();
 
         if (!$this->sheetId) {
-            $sheet = TeacherAttendanceSheet::query()
+            $sheet = TeacherAttendanceSheet::withoutGlobalScopes()
                 ->whereDate('date', $normalizedDate)
                 ->where('term', (int) $this->term)
                 ->where('session', $this->session)
+                ->where(function ($q) {
+                    if ($this->tenantId) {
+                        $q->where('tenant_id', $this->tenantId)->orWhereNull('tenant_id');
+                    }
+                })
                 ->first();
 
             if ($sheet) {
@@ -615,7 +625,7 @@ class Teachers extends Component
             return;
         }
 
-        $sheet = TeacherAttendanceSheet::find($this->sheetId);
+        $sheet = TeacherAttendanceSheet::withoutGlobalScopes()->find($this->sheetId);
         if (!$sheet || Carbon::parse($sheet->date)->toDateString() !== $normalizedDate) {
             $this->syncSheetFromSelection();
             return;
@@ -631,7 +641,7 @@ class Teachers extends Component
     public function handleBiometricScan($event = null): void
     {
         $scan = is_array($event) ? ($event['scan'] ?? $event['event'] ?? $event) : null;
-        if ($scan && !empty($scan['type']) && $scan['type'] === 'staff' && !empty($scan['user_id'])) {
+        if ($scan && in_array($scan['type'] ?? '', ['staff', 'teacher'], true) && !empty($scan['user_id'])) {
             $teacherId = (int) $scan['user_id'];
             $newStatus = $scan['status'] ?? 'Present';
             $time = $scan['time'] ?? now()->format('g:i A');
@@ -689,6 +699,26 @@ class Teachers extends Component
         return '-';
     }
 
+    private function getLatestExistingSheet(): ?TeacherAttendanceSheet
+    {
+        return TeacherAttendanceSheet::withoutGlobalScopes()
+            ->withCount([
+                'marks as present_count' => function ($query) {
+                    $query->whereIn('status', ['Present', 'Late']);
+                },
+                'marks as total_count',
+            ])
+            ->where('term', (int) $this->term)
+            ->where('session', $this->session)
+            ->where(function ($q) {
+                if ($this->tenantId) {
+                    $q->where('tenant_id', $this->tenantId)->orWhereNull('tenant_id');
+                }
+            })
+            ->orderBy('date', 'desc')
+            ->first();
+    }
+
     public function render()
     {
         abort_unless(auth()->user()?->role === 'admin', 403);
@@ -703,6 +733,7 @@ class Teachers extends Component
             'marks' => $this->marks,
             'date' => $this->date,
             'sheetId' => $this->sheetId,
+            'latestSheet' => $this->getLatestExistingSheet(),
         ]);
     }
 }

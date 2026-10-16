@@ -747,7 +747,7 @@ class Index extends Component
     {
         // Extract scan details if provided
         $scan = is_array($event) ? ($event['scan'] ?? $event['event'] ?? $event) : null;
-        if ($scan && !empty($scan['user_id'])) {
+        if ($scan && ($scan['type'] ?? 'student') === 'student' && !empty($scan['user_id'])) {
             $studentId = (int) $scan['user_id'];
             $newStatus = $scan['status'] ?? 'Present';
             $time = $scan['time'] ?? now()->format('g:i A');
