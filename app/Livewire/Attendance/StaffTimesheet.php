@@ -65,9 +65,11 @@ class StaffTimesheet extends Component
         $capDate = $endOfMonth->isFuture() ? Carbon::today() : $endOfMonth;
 
         // Count distinct attendance sheets recorded in this month
-        $sheetQuery = TeacherAttendanceSheet::query();
+        $sheetQuery = TeacherAttendanceSheet::withoutGlobalScopes();
         if ($tenantId) {
-            $sheetQuery->where('tenant_id', $tenantId);
+            $sheetQuery->where(function ($q) use ($tenantId) {
+                $q->where('tenant_id', $tenantId)->orWhereNull('tenant_id');
+            });
         }
         $recordedSheetsCount = $sheetQuery
             ->whereBetween('date', [$startOfMonth->toDateString(), $capDate->toDateString()])
@@ -110,15 +112,18 @@ class StaffTimesheet extends Component
         $staffMembers = $staffQuery->get();
 
         // Eager-load all marks for the month
-        $sheetQuery = TeacherAttendanceSheet::query();
+        $sheetQuery = TeacherAttendanceSheet::withoutGlobalScopes();
         if ($tenantId) {
-            $sheetQuery->where('tenant_id', $tenantId);
+            $sheetQuery->where(function ($q) use ($tenantId) {
+                $q->where('tenant_id', $tenantId)->orWhereNull('tenant_id');
+            });
         }
         $sheetIds = $sheetQuery
             ->whereBetween('date', [$startOfMonth, $endOfMonth])
             ->pluck('id');
 
-        $allMarks = TeacherAttendanceMark::whereIn('sheet_id', $sheetIds)
+        $allMarks = TeacherAttendanceMark::withoutGlobalScopes()
+            ->whereIn('sheet_id', $sheetIds)
             ->with('sheet')
             ->get()
             ->groupBy('teacher_id');
@@ -262,15 +267,18 @@ class StaffTimesheet extends Component
             return [];
         }
 
-        $sheetQuery = TeacherAttendanceSheet::query();
+        $sheetQuery = TeacherAttendanceSheet::withoutGlobalScopes();
         if ($tenantId) {
-            $sheetQuery->where('tenant_id', $tenantId);
+            $sheetQuery->where(function ($q) use ($tenantId) {
+                $q->where('tenant_id', $tenantId)->orWhereNull('tenant_id');
+            });
         }
         $sheetIds = $sheetQuery
             ->whereBetween('date', [$startOfMonth, $endOfMonth])
             ->pluck('id', 'date');
 
-        $marks = TeacherAttendanceMark::whereIn('sheet_id', $sheetIds->values())
+        $marks = TeacherAttendanceMark::withoutGlobalScopes()
+            ->whereIn('sheet_id', $sheetIds->values())
             ->where('teacher_id', $teacher->id)
             ->with('sheet')
             ->get()

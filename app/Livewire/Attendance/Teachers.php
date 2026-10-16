@@ -417,10 +417,20 @@ class Teachers extends Component
 
         DB::transaction(function () use ($sheet, $status) {
             foreach ($this->teachers as $teacher) {
-                $this->marks[$teacher->id]['status'] = $status;
-                $note = $this->marks[$teacher->id]['note'] ?? null;
+                $existing = TeacherAttendanceMark::withoutGlobalScopes()
+                    ->where('sheet_id', $sheet->id)
+                    ->where('teacher_id', $teacher->id)
+                    ->first();
 
-                TeacherAttendanceMark::query()->updateOrCreate(
+                // If marking all Absent, protect staff who physically scanned biometric at the gate!
+                if ($status === 'Absent' && $existing && !empty($existing->punch_in_time) && in_array($existing->status, ['Present', 'Late'])) {
+                    continue; // Skip - do not wipe verified biometric punches!
+                }
+
+                $this->marks[$teacher->id]['status'] = $status;
+                $note = $this->marks[$teacher->id]['note'] ?? $existing?->note;
+
+                TeacherAttendanceMark::withoutGlobalScopes()->updateOrCreate(
                     [
                         'sheet_id'   => $sheet->id,
                         'teacher_id' => $teacher->id,

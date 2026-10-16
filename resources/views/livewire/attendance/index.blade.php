@@ -393,13 +393,22 @@
                                     'Unmarked' => ['bar' => 'bg-slate-300',   'ring' => 'ring-slate-300/40',   'border' => 'border-slate-200',   'bg' => 'bg-slate-50/60',   'badge' => 'bg-slate-100 text-slate-500'],
                                 ][$status];
                                 $arrivedAt = $markData['arrived_at'] ?? null;
-                                $isBiometric = !empty($markData['is_biometric']) || !empty($arrivedAt);
+                                $departedAt = $markData['departed_at'] ?? null;
+                                $isBiometric = !empty($markData['is_biometric']);
                                 $punchDisplay = null;
                                 if ($arrivedAt) {
                                     try {
                                         $punchDisplay = \Carbon\Carbon::parse($arrivedAt)->timezone(config('app.timezone', 'Africa/Lagos'))->format('g:i A');
                                     } catch (\Throwable $e) {
                                         $punchDisplay = $arrivedAt;
+                                    }
+                                }
+                                $departDisplay = null;
+                                if ($departedAt) {
+                                    try {
+                                        $departDisplay = \Carbon\Carbon::parse($departedAt)->timezone(config('app.timezone', 'Africa/Lagos'))->format('g:i A');
+                                    } catch (\Throwable $e) {
+                                        $departDisplay = $departedAt;
                                     }
                                 }
                             @endphp
@@ -436,11 +445,19 @@
                                             {{ $status }}
                                         </span>
                                         @if($punchDisplay)
-                                            <span class="inline-flex items-center gap-0.5 sm:gap-1 text-[8px] sm:text-[9px] font-bold text-emerald-800 bg-emerald-100/90 border border-emerald-200/80 px-1.5 sm:px-2 py-0.5 rounded-full shadow-xs" title="Biometric Punch Time">
+                                            <span class="inline-flex items-center gap-0.5 sm:gap-1 text-[8px] sm:text-[9px] font-bold text-emerald-800 bg-emerald-100/90 border border-emerald-200/80 px-1.5 sm:px-2 py-0.5 rounded-full shadow-xs" title="Biometric Arrival Time">
                                                 <svg class="h-2 w-2 sm:h-2.5 sm:w-2.5 text-emerald-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
                                                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                                                 </svg>
-                                                {{ $punchDisplay }}
+                                                {{ $departDisplay ? 'In: ' . $punchDisplay : $punchDisplay }}
+                                            </span>
+                                        @endif
+                                        @if($departDisplay)
+                                            <span class="inline-flex items-center gap-0.5 sm:gap-1 text-[8px] sm:text-[9px] font-bold text-blue-800 bg-blue-100/90 border border-blue-200/80 px-1.5 sm:px-2 py-0.5 rounded-full shadow-xs" title="Biometric Departure Time">
+                                                <svg class="h-2 w-2 sm:h-2.5 sm:w-2.5 text-blue-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                                                </svg>
+                                                Out: {{ $departDisplay }}
                                             </span>
                                         @endif
                                     </div>

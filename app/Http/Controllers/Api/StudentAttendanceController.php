@@ -39,11 +39,15 @@ class StudentAttendanceController extends Controller
             : 0;
 
         $history = $marks->map(function ($mark) {
+            $hasBioNote = !empty($mark->note) && (str_contains((string) $mark->note, 'Biometric') || str_contains((string) $mark->note, 'Arrived:') || str_contains((string) $mark->note, 'K40'));
             return [
                 'id' => $mark->id,
                 'date' => $mark->sheet?->date?->toDateString(),
                 'status' => $mark->status,
                 'note' => $mark->note,
+                'arrived_at' => $mark->arrived_at,
+                'departed_at' => $mark->departed_at,
+                'is_biometric' => !empty($mark->arrived_at) && ($hasBioNote || !empty($mark->departed_at)),
                 'taken_by' => $mark->sheet?->takenBy?->name ?? 'System',
             ];
         })->sortByDesc('date')->values();

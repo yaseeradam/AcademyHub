@@ -156,15 +156,18 @@ class TeacherController extends Controller
             ->exists();
         abort_unless($sectionOk, 422, 'Invalid section_id for this class.');
 
-        $sheet = AttendanceSheet::firstOrCreate(
+        $sheet = AttendanceSheet::withoutGlobalScopes()->firstOrCreate(
             [
-                'class_id' => $request->class_id,
+                'class_id'   => $request->class_id,
                 'section_id' => $sectionId,
-                'date'     => $request->date,
-                'term'     => $request->term,
-                'session'  => $request->session,
+                'date'       => $request->date,
+                'term'       => $request->term,
+                'session'    => $request->session,
             ],
-            ['taken_by' => $request->user()->id]
+            [
+                'tenant_id' => $request->user()->tenant_id,
+                'taken_by'  => $request->user()->id,
+            ]
         );
 
         foreach ($request->marks as $mark) {
@@ -176,9 +179,13 @@ class TeacherController extends Controller
                 ], 422);
             }
 
-            AttendanceMark::updateOrCreate(
+            AttendanceMark::withoutGlobalScopes()->updateOrCreate(
                 ['sheet_id' => $sheet->id, 'student_id' => $mark['student_id']],
-                ['status' => $normalizedStatus, 'note' => $mark['note'] ?? null]
+                [
+                    'tenant_id' => $sheet->tenant_id ?? $request->user()->tenant_id,
+                    'status'    => $normalizedStatus,
+                    'note'      => $mark['note'] ?? null,
+                ]
             );
         }
 

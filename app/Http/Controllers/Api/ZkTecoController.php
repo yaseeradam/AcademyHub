@@ -189,15 +189,18 @@ class ZkTecoController extends Controller
 
                 $staffSheet = TeacherAttendanceSheet::withoutGlobalScopes()->firstOrCreate(
                     [
-                        'tenant_id'  => $staffTenantId,
                         'date'       => $dateStr,
                         'term'       => $termNumber,
                         'session'    => $sessionName,
                     ],
                     [
+                        'tenant_id'  => $staffTenantId,
                         'taken_by'   => $systemUserId,
                     ]
                 );
+                if (!$staffSheet->tenant_id && $staffTenantId) {
+                    $staffSheet->update(['tenant_id' => $staffTenantId]);
+                }
 
                 $existingMark = TeacherAttendanceMark::withoutGlobalScopes()
                     ->where('sheet_id', $staffSheet->id)
@@ -307,9 +310,8 @@ class ZkTecoController extends Controller
             $studentStatus = \App\Support\AttendanceShiftConfig::evaluateStatus($timeStr, $studentShift, $student->tenant_id);
 
             // 1. Create or retrieve daily attendance sheet for student's class
-            $sheet = AttendanceSheet::firstOrCreate(
+            $sheet = AttendanceSheet::withoutGlobalScopes()->firstOrCreate(
                 [
-                    'tenant_id'  => $student->tenant_id,
                     'class_id'   => $student->class_id,
                     'section_id' => $student->section_id,
                     'date'       => $dateStr,
@@ -317,20 +319,26 @@ class ZkTecoController extends Controller
                     'session'    => $sessionName,
                 ],
                 [
+                    'tenant_id'  => $student->tenant_id ?? 1,
                     'taken_by'   => $systemUserId,
                 ]
             );
+            if (!$sheet->tenant_id && $student->tenant_id) {
+                $sheet->update(['tenant_id' => $student->tenant_id]);
+            }
 
             // 2. Record or update Attendance Mark
-            $existingStudentMark = AttendanceMark::where([
-                'tenant_id'  => $student->tenant_id,
+            $existingStudentMark = AttendanceMark::withoutGlobalScopes()->where([
                 'sheet_id'   => $sheet->id,
                 'student_id' => $student->id,
             ])->first();
 
+            $isDeparture = false;
+
             if ($existingStudentMark && !empty($existingStudentMark->arrived_at)) {
                 // ── DEPARTURE (second punch) ───────────────────────────────
                 // Never downgrade Present → Late on departure scan.
+                $isDeparture = true;
                 $finalStatus = ($existingStudentMark->status === 'Present') ? 'Present' : $studentStatus;
 
                 $inDisplay  = Carbon::parse($existingStudentMark->arrived_at)->format('g:i A');
@@ -342,7 +350,7 @@ class ZkTecoController extends Controller
                     'note'        => "Arrived: {$inDisplay} | Departed: {$outDisplay}",
                 ]);
 
-                $status = $finalStatus; // keep status consistent for payload
+                $status = $finalStatus;
             } elseif ($existingStudentMark) {
                 // ── ARRIVAL (first biometric punch of the day on pre-existing mark) ──
                 $existingStudentMark->update([
@@ -356,7 +364,7 @@ class ZkTecoController extends Controller
                 // ── ARRIVAL (first punch, new record) ──────────────────────
                 try {
                     AttendanceMark::create([
-                        'tenant_id'  => $student->tenant_id,
+                        'tenant_id'  => $student->tenant_id ?? 1,
                         'sheet_id'   => $sheet->id,
                         'student_id' => $student->id,
                         'status'     => $studentStatus,
@@ -364,14 +372,15 @@ class ZkTecoController extends Controller
                         'departed_at'=> null,
                         'note'       => 'Arrived: ' . $punchTime->format('g:i A') . " ({$studentStatus})",
                     ]);
+                    $status = $studentStatus;
                 } catch (\Illuminate\Database\UniqueConstraintViolationException $e) {
-                    $existingStudentMark = AttendanceMark::where([
-                        'tenant_id'  => $student->tenant_id,
+                    $existingStudentMark = AttendanceMark::withoutGlobalScopes()->where([
                         'sheet_id'   => $sheet->id,
                         'student_id' => $student->id,
                     ])->first();
                     if ($existingStudentMark) {
                         if (!empty($existingStudentMark->arrived_at)) {
+                            $isDeparture = true;
                             $finalStatus = ($existingStudentMark->status === 'Present') ? 'Present' : $studentStatus;
                             $inDisplay  = Carbon::parse($existingStudentMark->arrived_at)->format('g:i A');
                             $outDisplay = $punchTime->format('g:i A');
@@ -390,13 +399,13 @@ class ZkTecoController extends Controller
                             ]);
                             $status = $studentStatus;
                         }
+                    } else {
+                        $status = $studentStatus;
                     }
                 }
-                $status = $studentStatus;
             }
 
             $processedCount++;
-
 
             // 4. Real-time biometric popup — broadcast to admin via Reverb WebSocket & Cache
             $scanPayload = [
@@ -410,7 +419,8 @@ class ZkTecoController extends Controller
                 'class_name'       => $student->schoolClass?->name ?? '',
                 'section_name'     => $student->section?->name ?? '',
                 'admission_number' => $student->admission_number,
-                'status'           => $status,
+                'status'           => $isDeparture ? 'Departed' : $status,
+                'action'           => $isDeparture ? 'checkout' : 'checkin',
                 'time'             => $punchTime->format('g:i A'),
                 'date'             => $dateStr,
                 'scanned_at'        => now()->toISOString(),
@@ -423,12 +433,13 @@ class ZkTecoController extends Controller
 
             event(new BiometricScanDetected($scanPayload));
 
-            // 3. Send WhatsApp notification via queued job — with duplicate prevention
+            // 3. Send WhatsApp notification via queued job — with duplicate prevention per action (checkin / checkout)
             if (!empty($student->guardian_phone)) {
-                $alertCacheKey = "zk_wa_alert_{$student->id}_{$dateStr}";
+                $actionType = $isDeparture ? 'checkout' : 'checkin';
+                $alertCacheKey = "zk_wa_alert_{$actionType}_{$student->id}_{$dateStr}";
                 if (!Cache::has($alertCacheKey)) {
                     Cache::put($alertCacheKey, true, now()->endOfDay());
-                    SendWhatsAppAttendanceAlert::dispatch($student, $punchTime->toISOString(), $status);
+                    SendWhatsAppAttendanceAlert::dispatch($student, $punchTime->toISOString(), $status, $actionType);
                 }
             } catch (\Throwable $e) {
                 Log::error("ZKTeco ADMS punch error on line '{$line}': " . $e->getMessage());
@@ -835,26 +846,31 @@ class ZkTecoController extends Controller
         $dateStr = $now->format('Y-m-d');
         $timeStr = $now->format('h:i A');
 
-        // Find or create sheet
-        $sheet = AttendanceSheet::firstOrCreate(
+        // Find or create sheet matching unique key: class_id, section_id, date, term, session
+        $activeTerm = AcademicTerm::active()?->term_number ?? 1;
+        $activeSession = AcademicSession::activeName() ?? date('Y') . '/' . (date('Y') + 1);
+
+        $sheet = AttendanceSheet::withoutGlobalScopes()->firstOrCreate(
             [
-                'tenant_id' => $student->tenant_id ?? $tenantId,
-                'class_id'  => $student->class_id,
-                'date'      => $dateStr,
+                'class_id'   => $student->class_id,
+                'section_id' => $student->section_id,
+                'date'       => $dateStr,
+                'term'       => $activeTerm,
+                'session'    => $activeSession,
             ],
             [
-                'section_id' => $student->section_id,
-                'term'       => AcademicTerm::active()?->term_number ?? 1,
-                'session'    => AcademicSession::activeName() ?? date('Y') . '/' . (date('Y') + 1),
-                'taken_by'   => 1,
+                'tenant_id'  => $student->tenant_id ?? $tenantId,
+                'taken_by'   => $user->id ?? 1,
             ]
         );
 
-        $mark = AttendanceMark::firstOrNew([
+        $mark = AttendanceMark::withoutGlobalScopes()->firstOrNew([
             'sheet_id'   => $sheet->id,
             'student_id' => $student->id,
-            'tenant_id'  => $student->tenant_id ?? $tenantId,
         ]);
+        if (!$mark->exists) {
+            $mark->tenant_id = $student->tenant_id ?? $tenantId;
+        }
 
         $studentShift = $student->getShift();
         $status = \App\Support\AttendanceShiftConfig::evaluateStatus($now->format('H:i:s'), $studentShift, $student->tenant_id ?? $tenantId);
@@ -865,6 +881,7 @@ class ZkTecoController extends Controller
             if ($mark->exists && preg_match('/In:\s*([0-9:AMP\s]+)/i', $mark->note, $m)) {
                 $prevIn = trim($m[1]);
             }
+            $mark->departed_at = $now->format('H:i:s');
             $mark->note = "In: {$prevIn} | Out: {$timeStr} (Manual: {$reason})";
             // keep status Present or Late
             if (!$mark->exists) {
@@ -873,6 +890,7 @@ class ZkTecoController extends Controller
         } else {
             // check-in
             $mark->status = $status;
+            $mark->arrived_at = $now->format('H:i:s');
             $mark->note = "In: {$timeStr} (Manual: {$reason})";
         }
         $mark->save();

@@ -67,7 +67,11 @@ class AttendanceMarkObserver
         }
 
         foreach ($parents as $parent) {
-            WhatsAppService::sendMessage($parent->whatsapp_phone, $message);
+            try {
+                WhatsAppService::sendMessage($parent->whatsapp_phone, $message);
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::warning("AttendanceMarkObserver WhatsApp notification failed for parent {$parent->id}: " . $e->getMessage());
+            }
         }
     }
 

@@ -406,11 +406,7 @@ class Index extends Component
         $note = $this->marks[$studentId]['note'] ?? $existingMark?->note;
         $arrivedAt = $existingMark?->arrived_at;
 
-        if ($status === 'Present' || $status === 'Late') {
-            if (!$arrivedAt) {
-                $arrivedAt = now()->format('H:i:s');
-            }
-        } elseif ($status === 'Absent') {
+        if ($status === 'Absent') {
             $arrivedAt = null;
         }
 
@@ -427,12 +423,13 @@ class Index extends Component
             ]
         );
 
+        $hasBioNote = (str_contains((string) $note, 'Biometric') || str_contains((string) $note, 'Arrived:') || str_contains((string) $note, 'K40'));
         $this->marks[$studentId] = [
             'status'       => $status,
             'note'         => $note,
             'arrived_at'   => $arrivedAt,
             'departed_at'  => $existingMark?->departed_at,
-            'is_biometric' => !empty($existingMark?->arrived_at) && (str_contains((string) $note, 'Biometric') || str_contains((string) $note, 'Arrived:')),
+            'is_biometric' => !empty($arrivedAt) && $hasBioNote,
         ];
 
         $student = Student::find($studentId);
@@ -455,26 +452,24 @@ class Index extends Component
         }
 
         $students = $this->getStudents();
-        $nowTime = now()->format('H:i:s');
 
-        DB::transaction(function () use ($sheet, $students, $status, $nowTime) {
+        DB::transaction(function () use ($sheet, $students, $status) {
             foreach ($students as $student) {
                 $existing = AttendanceMark::query()
                     ->where('sheet_id', $sheet->id)
                     ->where('student_id', $student->id)
                     ->first();
 
+                // If marking all Absent, protect students who physically scanned biometric at the gate!
+                if ($status === 'Absent' && $existing && !empty($existing->arrived_at) && in_array($existing->status, ['Present', 'Late'])) {
+                    continue; // Skip student - do not wipe verified biometric gate attendance!
+                }
+
                 $note = $this->marks[$student->id]['note'] ?? $existing?->note;
                 $arrivedAt = $existing?->arrived_at;
 
-                if ($status === 'Present' || $status === 'Late') {
-                    if (!$arrivedAt) {
-                        $arrivedAt = $nowTime;
-                    }
-                } elseif ($status === 'Absent') {
-                    if (!$existing || !str_contains($existing->note ?? '', 'Biometric')) {
-                        $arrivedAt = null;
-                    }
+                if ($status === 'Absent') {
+                    $arrivedAt = null;
                 }
 
                 AttendanceMark::query()->updateOrCreate(
@@ -490,12 +485,13 @@ class Index extends Component
                     ]
                 );
 
+                $hasBioNote = (str_contains((string) $note, 'Biometric') || str_contains((string) $note, 'Arrived:') || str_contains((string) $note, 'K40'));
                 $this->marks[$student->id] = [
                     'status'       => $status,
                     'note'         => $note,
                     'arrived_at'   => $arrivedAt,
                     'departed_at'  => $existing?->departed_at,
-                    'is_biometric' => !empty($existing?->arrived_at) && (str_contains((string) $note, 'Biometric') || str_contains((string) $note, 'Arrived:')),
+                    'is_biometric' => !empty($arrivedAt) && $hasBioNote,
                 ];
             }
         });
@@ -592,7 +588,8 @@ class Index extends Component
         foreach ($students as $student) {
             $mark = $existing->get($student->id);
             $hasArrived = !empty($mark?->arrived_at);
-            $isBio = $hasArrived || (!empty($mark?->note) && (str_contains((string) $mark->note, 'Biometric') || str_contains((string) $mark->note, 'Arrived:')));
+            $hasBioNote = !empty($mark?->note) && (str_contains((string) $mark->note, 'Biometric') || str_contains((string) $mark->note, 'Arrived:') || str_contains((string) $mark->note, 'K40'));
+            $isBio = $hasArrived && ($hasBioNote || !empty($mark?->departed_at));
 
             $this->marks[$student->id] = [
                 'status'       => $mark?->status ?? 'Unmarked',

@@ -61,20 +61,25 @@ class SyncController extends Controller
     private function syncAttendance($user, array $payload): void
     {
         $classId = $payload['class_id'] ?? null;
+        $sectionId = $payload['section_id'] ?? null;
         abort_unless($classId && $this->teacherOwnsClass($user, $classId), 403);
 
-        $sheet = AttendanceSheet::firstOrCreate(
+        $sheet = AttendanceSheet::withoutGlobalScopes()->firstOrCreate(
             [
-                'class_id' => $classId,
-                'date'     => $payload['date'],
-                'term'     => $payload['term'],
-                'session'  => $payload['session'],
+                'class_id'   => $classId,
+                'section_id' => $sectionId,
+                'date'       => $payload['date'],
+                'term'       => $payload['term'],
+                'session'    => $payload['session'],
             ],
-            ['taken_by' => $user->id]
+            [
+                'tenant_id' => $user->tenant_id,
+                'taken_by'  => $user->id,
+            ]
         );
 
         foreach ($payload['marks'] ?? [] as $mark) {
-            $existing = AttendanceMark::where(['sheet_id' => $sheet->id, 'student_id' => $mark['student_id']])->first();
+            $existing = AttendanceMark::withoutGlobalScopes()->where(['sheet_id' => $sheet->id, 'student_id' => $mark['student_id']])->first();
             
             if ($existing && isset($mark['last_known_updated_at'])) {
                 $clientTime = \Carbon\Carbon::parse($mark['last_known_updated_at']);
@@ -83,9 +88,13 @@ class SyncController extends Controller
                 }
             }
 
-            AttendanceMark::updateOrCreate(
+            AttendanceMark::withoutGlobalScopes()->updateOrCreate(
                 ['sheet_id' => $sheet->id, 'student_id' => $mark['student_id']],
-                ['status' => $mark['status'], 'note' => $mark['note'] ?? null]
+                [
+                    'tenant_id' => $sheet->tenant_id ?? $user->tenant_id,
+                    'status'    => $mark['status'],
+                    'note'      => $mark['note'] ?? null,
+                ]
             );
         }
     }

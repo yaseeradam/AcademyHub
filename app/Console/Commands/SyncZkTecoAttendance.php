@@ -93,17 +93,25 @@ class SyncZkTecoAttendance extends Command
             $timeStr = $punchTime->format('H:i:s');
             $status  = ($timeStr > $lateThreshold) ? 'Late' : 'Present';
 
-            // ── Try matching as a Teacher/Staff first ──────────────────────────
-            $teacher = User::withoutGlobalScopes()
-                ->whereIn('role', ['teacher', 'admin', 'bursar'])
-                ->where('is_active', true)
-                ->where(function ($q) use ($userId) {
-                    $q->where('custom_fields->k40_uid', (int) $userId)
-                      ->orWhere('custom_fields->k40_uid', (string) $userId);
-                })
-                ->first();
+            // ── Priority 1: Check for explicit K40 UID assignment ─────────────
+            // Student explicit k40_uid takes precedence before staff DB id
+            $student = Student::where('k40_uid', (int) $userId)->first();
+            $teacher = null;
 
-            if (!$teacher) {
+            if (!$student) {
+                // Check if staff has custom_fields->k40_uid
+                $teacher = User::withoutGlobalScopes()
+                    ->whereIn('role', ['teacher', 'admin', 'bursar'])
+                    ->where('is_active', true)
+                    ->where(function ($q) use ($userId) {
+                        $q->where('custom_fields->k40_uid', (int) $userId)
+                          ->orWhere('custom_fields->k40_uid', (string) $userId);
+                    })
+                    ->first();
+            }
+
+            if (!$student && !$teacher) {
+                // Priority 2: Staff database ID or email prefix
                 $teacher = User::withoutGlobalScopes()
                     ->whereIn('role', ['teacher', 'admin', 'bursar'])
                     ->where('is_active', true)
@@ -114,23 +122,32 @@ class SyncZkTecoAttendance extends Command
                     ->first();
             }
 
+            if (!$student && !$teacher) {
+                // Priority 3: Student admission number or database ID
+                $student = Student::where(function ($q) use ($userId) {
+                    $q->where('admission_number', $userId)
+                      ->orWhere('id', $userId);
+                })->first();
+            }
+
             if ($teacher) {
                 $shift = method_exists($teacher, 'getShift') ? $teacher->getShift() : 'Western';
                 $calculatedStatus = \App\Support\AttendanceShiftConfig::evaluateStatus($timeStr, $shift, $teacher->tenant_id);
 
-                $staffSheet = TeacherAttendanceSheet::firstOrCreate(
+                $staffSheet = TeacherAttendanceSheet::withoutGlobalScopes()->firstOrCreate(
                     [
-                        'tenant_id'  => $teacher->tenant_id ?? 1,
                         'date'       => $dateStr,
                         'term'       => $termNumber,
                         'session'    => $sessionName,
                     ],
                     [
+                        'tenant_id'  => $teacher->tenant_id ?? 1,
                         'taken_by'   => $systemUserId,
                     ]
                 );
 
-                $existingMark = TeacherAttendanceMark::where('sheet_id', $staffSheet->id)
+                $existingMark = TeacherAttendanceMark::withoutGlobalScopes()
+                    ->where('sheet_id', $staffSheet->id)
                     ->where('teacher_id', $teacher->id)
                     ->first();
 
@@ -173,23 +190,14 @@ class SyncZkTecoAttendance extends Command
                 continue;
             }
 
-            // ── Try matching as a Student ────────────────────────────────────────
-            // Match priority: k40_uid column → admission_number → database id
-            $student = Student::where(function ($q) use ($userId) {
-                $q->where('k40_uid', (int) $userId)
-                  ->orWhere('admission_number', $userId)
-                  ->orWhere('id', $userId);
-            })->first();
-
             if (!$student) {
                 $this->warn("Skipping User ID {$userId}: No matching student or staff found in database.");
                 continue;
             }
 
             // 1. Create or retrieve daily attendance sheet for student's class
-            $sheet = AttendanceSheet::firstOrCreate(
+            $sheet = AttendanceSheet::withoutGlobalScopes()->firstOrCreate(
                 [
-                    'tenant_id'  => $student->tenant_id,
                     'class_id'   => $student->class_id,
                     'section_id' => $student->section_id,
                     'date'       => $dateStr,
@@ -197,6 +205,7 @@ class SyncZkTecoAttendance extends Command
                     'session'    => $sessionName,
                 ],
                 [
+                    'tenant_id'  => $student->tenant_id,
                     'taken_by'   => $systemUserId,
                 ]
             );
@@ -206,14 +215,16 @@ class SyncZkTecoAttendance extends Command
             $studentShift = method_exists($student, 'getShift') ? $student->getShift() : 'Western';
             $studentStatus = \App\Support\AttendanceShiftConfig::evaluateStatus($timeStr, $studentShift, $student->tenant_id);
 
-            $existingStudentMark = AttendanceMark::where([
-                'tenant_id'  => $student->tenant_id,
+            $existingStudentMark = AttendanceMark::withoutGlobalScopes()->where([
                 'sheet_id'   => $sheet->id,
                 'student_id' => $student->id,
             ])->first();
 
+            $isDeparture = false;
+
             if ($existingStudentMark && !empty($existingStudentMark->arrived_at)) {
                 // Second scan = departure
+                $isDeparture = true;
                 $finalStatus = ($existingStudentMark->status === 'Present') ? 'Present' : $studentStatus;
                 $inDisplay   = Carbon::parse($existingStudentMark->arrived_at)->format('g:i A');
                 $outDisplay  = $punchTime->format('g:i A');
@@ -227,11 +238,11 @@ class SyncZkTecoAttendance extends Command
                 // First scan = arrival — write arrived_at so biometric badge shows
                 AttendanceMark::updateOrCreate(
                     [
-                        'tenant_id'  => $student->tenant_id,
                         'sheet_id'   => $sheet->id,
                         'student_id' => $student->id,
                     ],
                     [
+                        'tenant_id'  => $student->tenant_id,
                         'status'     => $studentStatus,
                         'arrived_at' => $punchTime->format('H:i:s'),
                         'note'       => 'Arrived: ' . $punchTime->format('g:i A') . " ({$studentStatus}) [Biometric K40]",
@@ -241,12 +252,18 @@ class SyncZkTecoAttendance extends Command
 
             $syncedCount++;
 
-            // 3. Trigger WhatsApp Notification to Parent (with duplicate prevention)
+            // 3. Trigger WhatsApp Notification to Parent (with distinct checkin vs checkout prevention)
             if (!empty($student->guardian_phone)) {
-                $alertCacheKey = "zk_wa_alert_{$student->id}_{$dateStr}";
+                $actionType = $isDeparture ? 'checkout' : 'checkin';
+                $alertCacheKey = "zk_wa_alert_{$actionType}_{$student->id}_{$dateStr}";
                 if (!Cache::has($alertCacheKey)) {
                     Cache::put($alertCacheKey, true, now()->endOfDay());
-                    $this->sendWhatsAppAttendanceAlert($student, $punchTime, $studentStatus);
+                    \App\Jobs\SendWhatsAppAttendanceAlert::dispatch(
+                        $student,
+                        $punchTime->toISOString(),
+                        $studentStatus,
+                        $actionType
+                    );
                 }
             }
         }

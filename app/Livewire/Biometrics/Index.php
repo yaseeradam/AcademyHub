@@ -235,9 +235,8 @@ class Index extends Component
         $status = \App\Support\AttendanceShiftConfig::evaluateStatus($timeStr, $shift, $student->tenant_id ?? $tenantId);
 
         // Ensure daily attendance sheet exists for student's class
-        $sheet = AttendanceSheet::firstOrCreate(
+        $sheet = AttendanceSheet::withoutGlobalScopes()->firstOrCreate(
             [
-                'tenant_id'  => $student->tenant_id ?? $tenantId,
                 'class_id'   => $student->class_id ?? 1,
                 'section_id' => $student->section_id,
                 'date'       => $dateStr,
@@ -245,13 +244,13 @@ class Index extends Component
                 'session'    => $sessionName,
             ],
             [
+                'tenant_id'  => $student->tenant_id ?? $tenantId,
                 'taken_by'   => $systemUserId,
             ]
         );
 
         // Record or update attendance mark
-        $existingMark = AttendanceMark::where([
-            'tenant_id'  => $student->tenant_id ?? $tenantId,
+        $existingMark = AttendanceMark::withoutGlobalScopes()->where([
             'sheet_id'   => $sheet->id,
             'student_id' => $student->id,
         ])->first();
@@ -325,9 +324,8 @@ class Index extends Component
         $timeStr = $punchTime->format('H:i:s');
         $outDisplay = $punchTime->format('g:i A');
 
-        $sheet = AttendanceSheet::firstOrCreate(
+        $sheet = AttendanceSheet::withoutGlobalScopes()->firstOrCreate(
             [
-                'tenant_id'  => $student->tenant_id ?? $tenantId,
                 'class_id'   => $student->class_id ?? 1,
                 'section_id' => $student->section_id,
                 'date'       => $dateStr,
@@ -335,12 +333,12 @@ class Index extends Component
                 'session'    => $sessionName,
             ],
             [
+                'tenant_id'  => $student->tenant_id ?? $tenantId,
                 'taken_by'   => $systemUserId,
             ]
         );
 
-        $existingMark = AttendanceMark::where([
-            'tenant_id'  => $student->tenant_id ?? $tenantId,
+        $existingMark = AttendanceMark::withoutGlobalScopes()->where([
             'sheet_id'   => $sheet->id,
             'student_id' => $student->id,
         ])->first();
@@ -421,19 +419,20 @@ class Index extends Component
         $shift = $teacher->getShift();
         $calculatedStatus = \App\Support\AttendanceShiftConfig::evaluateStatus($timeStr, $shift, $teacher->tenant_id ?? $tenantId);
 
-        $staffSheet = TeacherAttendanceSheet::firstOrCreate(
+        $staffSheet = TeacherAttendanceSheet::withoutGlobalScopes()->firstOrCreate(
             [
-                'tenant_id' => $teacher->tenant_id ?? $tenantId,
                 'date'      => $dateStr,
                 'term'      => $termNumber,
                 'session'   => $sessionName,
             ],
             [
+                'tenant_id' => $teacher->tenant_id ?? $tenantId,
                 'taken_by'  => $systemUserId,
             ]
         );
 
-        $existingMark = TeacherAttendanceMark::where('sheet_id', $staffSheet->id)
+        $existingMark = TeacherAttendanceMark::withoutGlobalScopes()
+            ->where('sheet_id', $staffSheet->id)
             ->where('teacher_id', $teacher->id)
             ->first();
 
