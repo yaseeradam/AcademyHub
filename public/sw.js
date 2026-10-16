@@ -1,6 +1,6 @@
-// AcademyHub Progressive Web App Service Worker (v3)
-const CACHE_NAME = 'academyhub-static-v3';
-const DYNAMIC_CACHE = 'academyhub-pages-v3';
+// AcademyHub Progressive Web App Service Worker (v4)
+const CACHE_NAME = 'academyhub-static-v4';
+const DYNAMIC_CACHE = 'academyhub-pages-v4';
 const OFFLINE_URL = '/offline';
 
 // Core assets to pre-cache on install

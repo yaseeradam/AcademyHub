@@ -35,59 +35,43 @@ class PwaController extends Controller
             $logoUrl = asset('uploads/' . str_replace('\\', '/', $tenant->logo));
         }
 
-        $icons = [];
-
-        // If custom school logo is uploaded, offer it for both any and maskable
-        if ($logoUrl) {
-            $icons[] = [
-                'src' => $logoUrl,
+        // The PWA app icon on mobile and desktop home screens must always be the official AcademyHub logo
+        $icons = [
+            [
+                'src' => asset('icons/icon-192.png'),
                 'sizes' => '192x192',
                 'type' => 'image/png',
                 'purpose' => 'any'
-            ];
-            $icons[] = [
-                'src' => $logoUrl,
+            ],
+            [
+                'src' => asset('icons/icon-192.png'),
+                'sizes' => '192x192',
+                'type' => 'image/png',
+                'purpose' => 'maskable'
+            ],
+            [
+                'src' => asset('icons/icon-512.png'),
                 'sizes' => '512x512',
                 'type' => 'image/png',
                 'purpose' => 'any'
-            ];
-            $icons[] = [
-                'src' => $logoUrl,
+            ],
+            [
+                'src' => asset('icons/icon-512.png'),
                 'sizes' => '512x512',
                 'type' => 'image/png',
                 'purpose' => 'maskable'
-            ];
-        }
-
-        // Standard app icons with separated purposes for best Android/Desktop rendering
-        $icons[] = [
-            'src' => asset('icons/icon-192.png'),
-            'sizes' => '192x192',
-            'type' => 'image/png',
-            'purpose' => 'any'
-        ];
-        $icons[] = [
-            'src' => asset('icons/icon-192.png'),
-            'sizes' => '192x192',
-            'type' => 'image/png',
-            'purpose' => 'maskable'
-        ];
-        $icons[] = [
-            'src' => asset('icons/icon-512.png'),
-            'sizes' => '512x512',
-            'type' => 'image/png',
-            'purpose' => 'any'
-        ];
-        $icons[] = [
-            'src' => asset('icons/icon-512.png'),
-            'sizes' => '512x512',
-            'type' => 'image/png',
-            'purpose' => 'maskable'
-        ];
-        $icons[] = [
-            'src' => asset('favicon.ico'),
-            'sizes' => '64x64',
-            'type' => 'image/x-icon'
+            ],
+            [
+                'src' => asset('apple-touch-icon.png'),
+                'sizes' => '180x180',
+                'type' => 'image/png',
+                'purpose' => 'any'
+            ],
+            [
+                'src' => asset('favicon.ico'),
+                'sizes' => '64x64',
+                'type' => 'image/x-icon'
+            ]
         ];
 
         $manifest = [
@@ -129,7 +113,7 @@ class PwaController extends Controller
 
         return response()->json($manifest)
             ->header('Content-Type', 'application/manifest+json; charset=utf-8')
-            ->header('Cache-Control', 'public, max-age=3600');
+            ->header('Cache-Control', 'no-cache, no-store, must-revalidate');
     }
 
     /**

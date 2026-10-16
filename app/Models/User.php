@@ -168,9 +168,23 @@ class User extends Authenticatable
             return asset('avatars/teachers.png');
         }
 
-        $path = str_replace('\\', '/', $this->profile_photo);
+        $photo = str_replace('\\', '/', $this->profile_photo);
 
-        return asset('uploads/'.$path);
+        if (str_starts_with($photo, 'http://') || str_starts_with($photo, 'https://')) {
+            return $photo;
+        }
+
+        $photo = ltrim($photo, '/');
+
+        if (str_starts_with($photo, 'uploads/')) {
+            return asset($photo);
+        }
+
+        if (str_starts_with($photo, 'storage/')) {
+            return asset($photo);
+        }
+
+        return asset('uploads/' . $photo);
     }
 
     public function isAdmin(): bool

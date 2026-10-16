@@ -4,7 +4,7 @@
         $pwaSchoolName = app('currentTenant')->name;
     }
     $pwaSchoolName = $pwaSchoolName ?: config('app.name', 'AcademyHub');
-    $pwaLogo = config('academyhub.logo_url') ?: asset('icons/icon-192.png');
+    $pwaLogo = asset('icons/icon-192.png');
     $pwaColor = config('academyhub.accent_color', '#7c3aed');
 @endphp
 

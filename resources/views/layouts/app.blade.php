@@ -28,7 +28,8 @@
     <link rel="shortcut icon" href="{{ $activeFavicon }}">
     <link rel="icon" type="image/png" sizes="32x32" href="{{ $activeFavicon }}">
     <link rel="icon" type="image/png" sizes="16x16" href="{{ $activeFavicon }}">
-    <link rel="apple-touch-icon" sizes="180x180" href="{{ $activeFavicon }}">
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('apple-touch-icon.png') }}">
+    <link rel="apple-touch-icon" href="{{ asset('icon.png') }}">
     <script>
         window.onerror = function(message, source, line, col, error) {
             fetch('/log-error', {

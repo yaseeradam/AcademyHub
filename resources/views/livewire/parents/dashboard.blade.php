@@ -835,10 +835,11 @@
                                                 </div>
                                                 <div class="text-xs font-black text-slate-800 truncate">{{ $entry->subject?->name }}</div>
                                                 @if($entry->teacher)
-                                                    <div class="text-[9px] text-slate-500 font-bold mt-1 truncate flex items-center gap-1">
-                                                        <svg class="h-3 w-3 text-slate-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                                                        </svg>
+                                                    <div class="text-[9px] text-slate-500 font-bold mt-1 truncate flex items-center gap-1.5">
+                                                        <img src="{{ $entry->teacher->profile_photo_url }}"
+                                                             onerror="this.onerror=null; this.src='{{ asset('avatars/teachers.png') }}';"
+                                                             class="h-3.5 w-3.5 rounded-full object-cover ring-1 ring-slate-200 shrink-0 bg-slate-50"
+                                                             alt="{{ $entry->teacher->name }}" />
                                                         <span class="truncate">{{ $entry->teacher->name }}</span>
                                                     </div>
                                                 @endif
@@ -1047,13 +1048,12 @@
                                 <div class="rounded-2xl border border-slate-200 bg-white p-4 sm:p-5 shadow-sm transition hover:shadow-md flex flex-col justify-between">
                                     <div>
                                         <div class="flex items-start gap-3 sm:gap-3.5">
-                                            @if ($teacher->profile_photo)
-                                                <img src="{{ $teacher->profile_photo_url }}" class="h-12 w-12 rounded-2xl object-cover ring-2 ring-slate-100 shadow-sm shrink-0" alt="{{ $teacher->name }}" />
-                                            @else
-                                                <div class="shrink-0 flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-50 to-indigo-100 text-lg font-black text-indigo-700 ring-2 ring-slate-100 shadow-sm">
-                                                    {{ mb_substr($teacher->name, 0, 1) }}
-                                                </div>
-                                            @endif
+                                            <div class="relative shrink-0">
+                                                <img src="{{ $teacher->profile_photo_url }}"
+                                                     onerror="this.onerror=null; this.src='{{ asset('avatars/teachers.png') }}';"
+                                                     class="h-12 w-12 rounded-2xl object-cover ring-2 ring-slate-100 shadow-sm shrink-0 bg-slate-50"
+                                                     alt="{{ $teacher->name }}" />
+                                            </div>
                                             <div class="flex-1 min-w-0">
                                                 <div class="flex items-center justify-between gap-1">
                                                     <h4 class="text-base font-black text-slate-800 leading-tight truncate">{{ $teacher->name }}</h4>
