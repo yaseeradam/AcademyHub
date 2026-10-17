@@ -312,7 +312,7 @@
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-3.5 mt-4">
-                @foreach ($updates as $up)
+                @forelse ($updates as $up)
                     @php
                         $cardStyle = match($up['type']) {
                             'fee'      => 'border-rose-100 bg-gradient-to-br from-rose-50/90 via-rose-50/50 to-white hover:border-rose-200',
@@ -345,7 +345,11 @@
                             <span class="text-[10px] text-slate-400 font-semibold block mt-1">{{ $up['time'] }}</span>
                         </div>
                     </div>
-                @endforeach
+                @empty
+                    <div class="col-span-1 md:col-span-3 py-6 text-center text-xs font-semibold text-slate-400 bg-slate-50/50 rounded-2xl border border-dashed border-slate-200">
+                        No pending fee reminders or new school notices.
+                    </div>
+                @endforelse
             </div>
         </div>
 
@@ -377,7 +381,7 @@
 
                         <div>
                             <label class="block text-xs font-bold text-slate-700 mb-1">Student Admission Number</label>
-                            <input type="text" wire:model="addChildAdmissionNumber" placeholder="e.g. AIAA-B26-037"
+                            <input type="text" wire:model="addChildAdmissionNumber" placeholder="e.g. ADM/2026/001"
                                    class="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-xs font-bold text-slate-800 placeholder-slate-400 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500" required />
                             <span class="text-[10px] text-slate-400 mt-1 block">Enter the official student admission number issued by the school.</span>
                         </div>
@@ -545,11 +549,17 @@
                             </div>
                             <div class="min-w-0">
                                 <div class="text-2xl sm:text-3xl font-black text-emerald-600 leading-tight">
-                                    {{ $stats['average'] }}%
+                                    {{ $stats['average'] > 0 ? $stats['average'] . '%' : '--' }}
                                 </div>
                                 <span class="text-[11px] font-semibold text-slate-500 block truncate">Academic Average</span>
-                                <span class="text-[10px] font-black text-emerald-700 mt-0.5 block truncate">
-                                    &uarr; 12% from last term
+                                <span class="text-[10px] font-black {{ ($stats['trend']['direction'] ?? '') === 'down' ? 'text-rose-600' : 'text-emerald-700' }} mt-0.5 block truncate">
+                                    @if(!empty($stats['trend']))
+                                        {{ $stats['trend']['label'] }}
+                                    @elseif($published && $stats['average'] > 0)
+                                        Term {{ $term }} Published
+                                    @else
+                                        Term {{ $term }} in progress
+                                    @endif
                                 </span>
                             </div>
                         </div>
@@ -563,11 +573,21 @@
                             </div>
                             <div class="min-w-0">
                                 <div class="text-2xl sm:text-3xl font-black text-purple-600 leading-tight">
-                                    {{ $published && $stats['position'] ? $ordinal($stats['position']) : '1st' }}
+                                    @if($published && !empty($stats['position']))
+                                        {{ $ordinal($stats['position']) }}
+                                    @else
+                                        <span class="text-slate-400 text-xl font-bold">--</span>
+                                    @endif
                                 </div>
                                 <span class="text-[11px] font-semibold text-slate-500 block truncate">Class Position</span>
                                 <span class="text-[10px] font-semibold text-purple-400 mt-0.5 block truncate">
-                                    (out of {{ $stats['classSize'] ?: 15 }})
+                                    @if($published && !empty($stats['position']) && !empty($stats['classSize']))
+                                        (out of {{ $stats['classSize'] }})
+                                    @elseif(! $published)
+                                        Pending release
+                                    @else
+                                        Active session
+                                    @endif
                                 </span>
                             </div>
                         </div>
@@ -821,14 +841,8 @@
                                         </div>
                                     </div>
                                 @empty
-                                    <div class="flex items-start gap-3">
-                                        <div class="w-8 h-8 rounded-full bg-purple-50 text-indigo-600 flex items-center justify-center shrink-0">
-                                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"/></svg>
-                                        </div>
-                                        <div>
-                                            <h4 class="text-xs font-bold text-slate-800 leading-snug">School Resumption</h4>
-                                            <span class="text-[11px] text-slate-400 font-semibold block mt-0.5">20 Oct 2026</span>
-                                        </div>
+                                    <div class="py-4 text-center text-xs text-slate-400 font-semibold">
+                                        No recent announcements posted.
                                     </div>
                                 @endforelse
                             </div>

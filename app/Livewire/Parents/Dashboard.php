@@ -120,7 +120,17 @@ class Dashboard extends Component
     public function performanceStats(): array
     {
         $scores = $this->scores;
-        if ($scores->isEmpty()) return ['average' => 0, 'subjects' => 0, 'passed' => 0, 'failed' => 0, 'position' => null, 'classSize' => 0];
+        if ($scores->isEmpty()) {
+            return [
+                'average'   => 0,
+                'subjects'  => 0,
+                'passed'    => 0,
+                'failed'    => 0,
+                'position'  => null,
+                'classSize' => 0,
+                'trend'     => null,
+            ];
+        }
 
         $maxTotal = max(1,
             (int) config('academyhub.results_ca1_max', 20) +
@@ -142,7 +152,25 @@ class Dashboard extends Component
             ->count();
         $position = $higher + 1;
 
-        return compact('average', 'passed', 'failed', 'position', 'classSize', 'maxTotal') + ['subjects' => $scores->count()];
+        // Calculate real academic trend compared to previous term
+        $trend = null;
+        if ($this->term > 1) {
+            $prevScores = Score::where('student_id', $this->selectedChild->id)
+                ->where('session', $this->session)
+                ->where('term', $this->term - 1)
+                ->get();
+            if ($prevScores->isNotEmpty()) {
+                $prevAvg = round($prevScores->avg('total'), 1);
+                $diff = round($average - $prevAvg, 1);
+                $trend = [
+                    'diff'      => $diff,
+                    'direction' => $diff >= 0 ? 'up' : 'down',
+                    'label'     => ($diff >= 0 ? '↑ ' : '↓ ') . abs($diff) . '% from Term ' . ($this->term - 1),
+                ];
+            }
+        }
+
+        return compact('average', 'passed', 'failed', 'position', 'classSize', 'maxTotal', 'trend') + ['subjects' => $scores->count()];
     }
 
     #[Computed]
@@ -900,17 +928,6 @@ class Dashboard extends Component
             ];
         }
 
-        if (empty($updates)) {
-            $updates[] = [
-                'type' => 'notice',
-                'title' => 'Welcome',
-                'message' => 'All systems normal. School portal is active and up to date.',
-                'time' => 'Today',
-                'tag_color' => 'bg-emerald-50 text-emerald-700 border-emerald-200',
-                'icon_color' => 'bg-emerald-100 text-emerald-600',
-            ];
-        }
-
         return array_slice($updates, 0, 4);
     }
 
@@ -952,9 +969,10 @@ class Dashboard extends Component
             $short = match(strtolower($subjectName)) {
                 'english language', 'english' => 'English',
                 'mathematics', 'maths', 'math' => 'Math',
-                'islamic religious studies', 'islamic studies', 'irs' => 'Quran',
+                'islamic religious studies', 'islamic studies', 'irs' => 'IRS',
+                'quran', 'al-qur\'an', 'al-quran' => 'Quran',
                 'arabic language', 'arabic' => 'Arabic',
-                'creative arts', 'cultural & creative arts', 'cca' => 'Creative Arts',
+                'creative arts', 'cultural & creative arts', 'cca' => 'Arts',
                 'basic science', 'basic science & technology' => 'Science',
                 'social studies' => 'Social St.',
                 default => \Illuminate\Support\Str::limit($subjectName, 12, '..')
