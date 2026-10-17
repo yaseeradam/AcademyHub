@@ -608,8 +608,16 @@ class Dashboard extends Component
     public function timetable(): Collection
     {
         if (! $this->selectedChild) return collect();
-        return \App\Models\TimetableEntry::where('class_id', $this->selectedChild->class_id)
-            ->with(['subject', 'teacher'])
+
+        $query = \App\Models\TimetableEntry::where('class_id', $this->selectedChild->class_id);
+        if ($this->selectedChild->section_id) {
+            $query->where(function ($q) {
+                $q->where('section_id', $this->selectedChild->section_id)
+                  ->orWhereNull('section_id');
+            });
+        }
+
+        return $query->with(['subject', 'teacher'])
             ->orderBy('day_of_week')
             ->orderBy('starts_at')
             ->get();
@@ -633,11 +641,20 @@ class Dashboard extends Component
         }
 
         $classId = (int) $this->selectedChild->class_id;
+        $sectionId = $this->selectedChild->section_id ? (int) $this->selectedChild->section_id : null;
 
-        // 1. Get teachers via Subject Allocations
-        $allocations = \App\Models\SubjectAllocation::where('class_id', $classId)
-            ->with(['teacher', 'subject'])
-            ->get();
+        // 1. Get teachers via Subject Allocations for this child's specific section (arm)
+        $allocQuery = \App\Models\SubjectAllocation::where('class_id', $classId)
+            ->with(['teacher', 'subject']);
+
+        if ($sectionId) {
+            $allocQuery->where(function ($q) use ($sectionId) {
+                $q->where('section_id', $sectionId)
+                  ->orWhereNull('section_id');
+            });
+        }
+
+        $allocations = $allocQuery->get();
 
         $teachers = $allocations->groupBy('teacher_id')->map(function ($group) {
             $teacher = $group->first()->teacher;
@@ -648,39 +665,33 @@ class Dashboard extends Component
             return $teacher;
         })->filter()->values();
 
-        // 2. Also check if any timetable entries include teachers not in subject allocations
-        $timetableTeachers = \App\Models\TimetableEntry::where('class_id', $classId)
-            ->whereNotNull('teacher_id')
-            ->with(['teacher', 'subject'])
-            ->get();
-
-        $existingTeacherIds = $teachers->pluck('id')->all();
-        $missingGroups = $timetableTeachers->whereNotIn('teacher_id', $existingTeacherIds)->groupBy('teacher_id');
-
-        foreach ($missingGroups as $tGroup) {
-            $t = $tGroup->first()->teacher;
-            if ($t) {
-                $t->assigned_subjects = $tGroup->pluck('subject.name')->filter()->unique()->values()->all();
-                if (empty($t->assigned_subjects)) {
-                    $t->assigned_subjects = ['Class Instructor'];
-                }
-                $teachers->push($t);
-            }
-        }
-
-        // 3. Fallback: If no teachers found for this class, check if any teachers are marked as class teacher in the school
+        // 2. If subject allocations exist, do not add unrelated teachers from timetable.
+        // If no subject allocations exist for this section, check section-specific timetable entries.
         if ($teachers->isEmpty()) {
-            $designated = \App\Models\User::where('role', 'teacher')
-                ->where('is_class_teacher', true)
-                ->where('is_active', true)
-                ->get()
-                ->map(function ($t) {
-                    $t->assigned_subjects = ['Class Teacher'];
-                    return $t;
+            $ttQuery = \App\Models\TimetableEntry::where('class_id', $classId)
+                ->whereNotNull('teacher_id')
+                ->with(['teacher', 'subject']);
+
+            if ($sectionId) {
+                $ttQuery->where(function ($q) use ($sectionId) {
+                    $q->where('section_id', $sectionId)
+                      ->orWhereNull('section_id');
                 });
-            if ($designated->isNotEmpty()) {
-                $teachers = $designated;
             }
+
+            $timetableTeachers = $ttQuery->get();
+
+            $teachers = $timetableTeachers->groupBy('teacher_id')->map(function ($group) {
+                $teacher = $group->first()->teacher;
+                if (!$teacher) {
+                    return null;
+                }
+                $teacher->assigned_subjects = $group->pluck('subject.name')->filter()->unique()->values()->all();
+                if (empty($teacher->assigned_subjects)) {
+                    $teacher->assigned_subjects = ['Class Instructor'];
+                }
+                return $teacher;
+            })->filter()->values();
         }
 
         return $teachers;
