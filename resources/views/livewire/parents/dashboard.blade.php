@@ -118,9 +118,9 @@
                                 <div>
                                     <div class="flex items-start gap-3.5">
                                         @if ($c['photo_url'])
-                                            <img src="{{ $c['photo_url'] }}" alt="{{ $c['name'] }}" class="h-14 w-14 rounded-2xl object-cover ring-2 ring-slate-100 shadow-2xs bg-slate-50 shrink-0" />
+                                            <img src="{{ $c['photo_url'] }}" alt="{{ $c['name'] }}" class="h-14 w-14 rounded-2xl object-cover ring-2 ring-slate-100 shadow-2xs bg-slate-50 shrink-0" style="width: 56px; height: 56px; max-width: 56px; max-height: 56px; object-fit: cover;" />
                                         @else
-                                            <div class="h-14 w-14 rounded-2xl bg-gradient-to-br from-indigo-500 to-indigo-700 text-white flex items-center justify-center font-black text-xl shadow-2xs ring-2 ring-indigo-50 shrink-0">
+                                            <div class="h-14 w-14 rounded-2xl bg-gradient-to-br from-indigo-500 to-indigo-700 text-white flex items-center justify-center font-black text-xl shadow-2xs ring-2 ring-indigo-50 shrink-0" style="width: 56px; height: 56px;">
                                                 {{ mb_substr($c['first_name'], 0, 1) }}
                                             </div>
                                         @endif
@@ -420,9 +420,9 @@
             {{-- Left Profile Details --}}
             <div class="flex items-start gap-4 min-w-0">
                 @if ($child->passport_photo_url)
-                    <img src="{{ $child->passport_photo_url }}" class="shrink-0 h-18 w-18 rounded-2xl object-cover ring-2 ring-slate-100 shadow-xs bg-slate-50" />
+                    <img src="{{ $child->passport_photo_url }}" alt="{{ $child->full_name }}" class="shrink-0 h-14 w-14 rounded-2xl object-cover ring-2 ring-slate-100 shadow-xs bg-slate-50" style="width: 56px; height: 56px; max-width: 56px; max-height: 56px; object-fit: cover;" />
                 @else
-                    <div class="shrink-0 flex h-18 w-18 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-500 to-indigo-700 text-2xl font-black text-white ring-2 ring-indigo-50 shadow-xs">
+                    <div class="shrink-0 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-500 to-indigo-700 text-xl font-black text-white ring-2 ring-indigo-50 shadow-xs" style="width: 56px; height: 56px;">
                         {{ mb_substr($child->first_name, 0, 1) }}
                     </div>
                 @endif
