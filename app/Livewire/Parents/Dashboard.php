@@ -50,9 +50,8 @@ class Dashboard extends Component
         $this->absenceStartDate = now()->toDateString();
         $this->absenceEndDate   = now()->toDateString();
 
-        $children = $this->children;
-        if ($children->count() === 1) {
-            $this->selectedChildId = $children->first()->id;
+        if (request()->has('child')) {
+            $this->selectedChildId = (int) request('child');
         }
     }
 
@@ -697,6 +696,236 @@ class Dashboard extends Component
         return $teachers;
     }
 
+
+    #[Computed]
+    public function childrenCardsData(): array
+    {
+        $cards = [];
+        foreach ($this->children as $child) {
+            // Attendance
+            $marks = AttendanceMark::where('student_id', $child->id)
+                ->whereHas('sheet', fn ($q) => $q->where('term', $this->term)->where('session', $this->session))
+                ->get();
+            $present = $marks->whereIn('status', ['Present', 'Late'])->count();
+            $excused = $marks->where('status', 'Excused')->count();
+            $totalMarks = $marks->count();
+            $effTotal = max(1, $totalMarks - $excused);
+            $attRate = $totalMarks > 0 ? min(100, (int) round(($present / $effTotal) * 100)) : 100;
+
+            // Academic Average
+            $published = ResultPublication::where('class_id', $child->class_id)
+                ->where('term', $this->term)
+                ->where('session', $this->session)
+                ->whereNotNull('published_at')
+                ->exists();
+            $avgScore = 0;
+            if ($published) {
+                $avgScore = round((float) Score::where('student_id', $child->id)
+                    ->where('term', $this->term)
+                    ->where('session', $this->session)
+                    ->avg('total'), 1);
+            } else {
+                $avgScore = round((float) Score::where('student_id', $child->id)->avg('total'), 1) ?: 0;
+            }
+
+            // Fee balance
+            $feeBalance = 0.0;
+            try {
+                $ledger = \App\Support\BillingService::getStudentTermLedger(
+                    $child,
+                    $this->session,
+                    $this->term,
+                    'Tuition'
+                );
+                $feeBalance = (float) ($ledger['total_balance'] ?? 0);
+            } catch (\Throwable $e) {}
+
+            // Pending homework count
+            $pendingHw = 0;
+            try {
+                $pendingHw = Homework::where('class_id', $child->class_id)
+                    ->where(fn ($q) => $q->whereNull('section_id')->orWhere('section_id', $child->section_id))
+                    ->whereDate('due_date', '>=', now()->toDateString())
+                    ->whereDoesntHave('submissions', fn ($q) => $q->where('student_id', $child->id))
+                    ->count();
+            } catch (\Throwable $e) {}
+
+            $cards[] = [
+                'id' => $child->id,
+                'student' => $child,
+                'name' => $child->full_name,
+                'first_name' => $child->first_name,
+                'admission_number' => $child->admission_number,
+                'class_name' => $child->schoolClass?->name ?? 'Unassigned',
+                'section_name' => $child->section?->name ?? '',
+                'photo_url' => $child->passport_photo_url,
+                'attendance_rate' => $attRate,
+                'academic_average' => $avgScore,
+                'fee_balance' => $feeBalance,
+                'pending_homework' => $pendingHw,
+                'status' => $child->status ?? 'Active',
+            ];
+        }
+
+        return $cards;
+    }
+
+    #[Computed]
+    public function familySummary(): array
+    {
+        $cards = $this->childrenCardsData;
+        $count = count($cards);
+        if ($count === 0) {
+            return [
+                'overall_attendance' => 100,
+                'average_performance' => 0,
+                'total_outstanding_fees' => 0,
+                'total_pending_homework' => 0,
+            ];
+        }
+
+        $attSum = array_sum(array_column($cards, 'attendance_rate'));
+        $avgSum = array_sum(array_column($cards, 'academic_average'));
+        $feeSum = array_sum(array_column($cards, 'fee_balance'));
+        $hwSum  = array_sum(array_column($cards, 'pending_homework'));
+
+        return [
+            'overall_attendance' => round($attSum / $count),
+            'average_performance' => round($avgSum / $count),
+            'total_outstanding_fees' => $feeSum,
+            'total_pending_homework' => $hwSum,
+        ];
+    }
+
+    #[Computed]
+    public function recentFamilyUpdates(): array
+    {
+        $updates = [];
+        $cards = $this->childrenCardsData;
+
+        // 1. Fee Reminders
+        foreach ($cards as $c) {
+            if ($c['fee_balance'] > 0) {
+                $updates[] = [
+                    'type' => 'fee',
+                    'title' => 'Fee Reminder',
+                    'message' => "{$c['first_name']} has an outstanding fee balance of ₦" . number_format($c['fee_balance']),
+                    'time' => 'Term ' . $this->term,
+                    'tag_color' => 'bg-rose-50 text-rose-700 border-rose-200',
+                    'icon_color' => 'bg-rose-100 text-rose-600',
+                ];
+            }
+        }
+
+        // 2. Homework
+        foreach ($this->children as $child) {
+            $recentHw = Homework::where('class_id', $child->class_id)
+                ->where(fn ($q) => $q->whereNull('section_id')->orWhere('section_id', $child->section_id))
+                ->latest('created_at')
+                ->take(2)
+                ->get();
+            foreach ($recentHw as $hw) {
+                $updates[] = [
+                    'type' => 'homework',
+                    'title' => 'Homework',
+                    'message' => "New homework has been assigned for {$child->schoolClass?->name}",
+                    'time' => $hw->created_at ? $hw->created_at->diffForHumans() : 'Recent',
+                    'tag_color' => 'bg-blue-50 text-blue-700 border-blue-200',
+                    'icon_color' => 'bg-blue-100 text-blue-600',
+                ];
+            }
+        }
+
+        // 3. Announcements
+        $announcements = \App\Models\Announcement::whereIn('audience', ['parent', 'all'])
+            ->latest('created_at')
+            ->take(3)
+            ->get();
+        foreach ($announcements as $a) {
+            $updates[] = [
+                'type' => 'notice',
+                'title' => 'Notice',
+                'message' => $a->title,
+                'time' => $a->created_at ? $a->created_at->diffForHumans() : 'Recent',
+                'tag_color' => 'bg-emerald-50 text-emerald-700 border-emerald-200',
+                'icon_color' => 'bg-emerald-100 text-emerald-600',
+            ];
+        }
+
+        if (empty($updates)) {
+            $updates[] = [
+                'type' => 'notice',
+                'title' => 'Welcome',
+                'message' => 'All systems normal. School portal is active and up to date.',
+                'time' => 'Today',
+                'tag_color' => 'bg-emerald-50 text-emerald-700 border-emerald-200',
+                'icon_color' => 'bg-emerald-100 text-emerald-600',
+            ];
+        }
+
+        return array_slice($updates, 0, 4);
+    }
+
+    #[Computed]
+    public function subjectPerformanceChart(): array
+    {
+        if (! $this->selectedChild) return [];
+
+        $scores = Score::where('student_id', $this->selectedChild->id)
+            ->where('term', $this->term)
+            ->where('session', $this->session)
+            ->with('subject')
+            ->orderBy('subject_id')
+            ->get();
+
+        if ($scores->isEmpty()) {
+            $scores = Score::where('student_id', $this->selectedChild->id)
+                ->with('subject')
+                ->orderByDesc('session')
+                ->orderByDesc('term')
+                ->take(6)
+                ->get();
+        }
+
+        $colors = [
+            ['bar' => 'bg-emerald-400', 'hex' => '#34d399'],
+            ['bar' => 'bg-sky-400', 'hex' => '#38bdf8'],
+            ['bar' => 'bg-indigo-400', 'hex' => '#818cf8'],
+            ['bar' => 'bg-amber-400', 'hex' => '#fbbf24'],
+            ['bar' => 'bg-teal-400', 'hex' => '#2dd4bf'],
+            ['bar' => 'bg-purple-400', 'hex' => '#c084fc'],
+            ['bar' => 'bg-rose-400', 'hex' => '#fb7185'],
+        ];
+
+        $chartItems = [];
+        $i = 0;
+        foreach ($scores as $s) {
+            $subjectName = $s->subject?->name ?? 'Subject';
+            $short = match(strtolower($subjectName)) {
+                'english language', 'english' => 'English',
+                'mathematics', 'maths', 'math' => 'Math',
+                'islamic religious studies', 'islamic studies', 'irs' => 'Quran',
+                'arabic language', 'arabic' => 'Arabic',
+                'creative arts', 'cultural & creative arts', 'cca' => 'Creative Arts',
+                'basic science', 'basic science & technology' => 'Science',
+                'social studies' => 'Social St.',
+                default => \Illuminate\Support\Str::limit($subjectName, 12, '..')
+            };
+
+            $val = min(100, max(0, round((float) $s->total)));
+            $col = $colors[$i % count($colors)];
+            $chartItems[] = [
+                'name' => $subjectName,
+                'short' => $short,
+                'score' => $val,
+                'bar_class' => $col['bar'],
+                'hex' => $col['hex'],
+            ];
+            $i++;
+        }
+
+        return $chartItems;
+    }
 
     private function defaultSession(): string
     {

@@ -39,124 +39,259 @@
 <div class="space-y-6 pb-12">
     
     @if (! $child)
-        {{-- Global Dashboard Header --}}
-        <div class="relative overflow-hidden rounded-3xl bg-slate-900 p-5 sm:p-8 shadow-lg">
-            <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMSIgY3k9IjEiIHI9IjEiIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4xIi8+PC9zdmc+')] opacity-5"></div>
-            <div class="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-white/5 blur-3xl"></div>
-            <div class="absolute -bottom-10 -left-10 h-40 w-40 rounded-full bg-black/20 blur-2xl"></div>
-            
-            <div class="relative z-10">
-                <div class="inline-flex items-center gap-2 rounded-full bg-white/20 px-3 py-1 mb-3 backdrop-blur-sm shadow-sm">
-                    <div class="h-2 w-2 rounded-full bg-indigo-400 shadow-[0_0_8px_rgba(129,140,248,0.8)]"></div>
-                    <span class="text-[11px] sm:text-xs font-bold text-white tracking-wide uppercase">Parent Portal Control Center</span>
+        @php
+            $hour = (int) now()->format('H');
+            $greeting = $hour < 12 ? 'Good morning' : ($hour < 17 ? 'Good afternoon' : 'Good evening');
+            $childrenCards = $this->childrenCardsData;
+            $summary = $this->familySummary;
+            $updates = $this->recentFamilyUpdates;
+        @endphp
+
+        {{-- SCREEN 1: Top Family Dashboard Header --}}
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white rounded-3xl border border-slate-200/80 p-6 sm:p-7 shadow-xs">
+            <div>
+                <div class="inline-flex items-center gap-2 rounded-full bg-indigo-50 border border-indigo-150/60 px-3 py-1 mb-2">
+                    <span class="h-2 w-2 rounded-full bg-indigo-600 animate-pulse"></span>
+                    <span class="text-[11px] font-bold text-indigo-700 tracking-wide uppercase">Family Portal</span>
                 </div>
-                <h1 class="text-2xl sm:text-3xl lg:text-4xl font-black text-white tracking-tight">Welcome back, {{ auth()->user()->name }}</h1>
-                @if($hasPaymentGateway)
-                    <p class="mt-2 text-xs sm:text-sm text-indigo-150 font-semibold max-w-lg">Track your children's academic progress, attendance, homework, and fees seamlessly from one place.</p>
-                @else
-                    <p class="mt-2 text-xs sm:text-sm text-indigo-150 font-semibold max-w-lg">Track your children's academic progress, attendance, and homework seamlessly from one place.</p>
-                @endif
+                <h1 class="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
+                    {{ $greeting }}, {{ auth()->user()->name }} 👋
+                </h1>
+                <p class="mt-1 text-xs sm:text-sm text-slate-500 font-medium">
+                    Monitor your children's academic journey, attendance, and school activities all in one place.
+                </p>
+            </div>
+
+            <div class="flex items-center gap-2 shrink-0">
+                <div class="inline-flex items-center gap-2 rounded-2xl bg-slate-50 border border-slate-200 px-4 py-2 text-xs font-bold text-slate-700 shadow-2xs">
+                    <svg class="h-4 w-4 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                    </svg>
+                    <span>Academic Session: <strong class="text-slate-900 font-black">{{ $session }}</strong></span>
+                </div>
             </div>
         </div>
 
-        {{-- STATE 1: Select Child View --}}
-        @if ($this->children->isEmpty())
-            <div class="flex flex-col items-center justify-center rounded-3xl border-2 border-dashed border-slate-200 bg-white py-16 text-center shadow-sm">
-                <div class="flex h-16 w-16 items-center justify-center rounded-full bg-slate-50 ring-1 ring-slate-100">
-                    <svg class="h-8 w-8 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+        {{-- SCREEN 1: Main Two-Column Layout --}}
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+            {{-- Left Column: My Children Cards (8 Cols) --}}
+            <div class="lg:col-span-8 space-y-4">
+                <div class="flex items-center justify-between px-1">
+                    <div class="flex items-center gap-2.5">
+                        <h2 class="text-base sm:text-lg font-black text-slate-800 tracking-tight">My Children</h2>
+                        <span class="rounded-full bg-slate-100 border border-slate-200 px-2.5 py-0.5 text-xs font-bold text-slate-600">
+                            {{ count($childrenCards) }} {{ \Illuminate\Support\Str::plural('Child', count($childrenCards)) }}
+                        </span>
+                    </div>
+                    <span class="text-xs font-semibold text-slate-400">Select child to open detail dashboard</span>
                 </div>
-                <h3 class="mt-4 text-lg font-bold text-slate-700">No children linked</h3>
-                <p class="mt-1 text-sm text-slate-500">Contact the school administrator to link your children.</p>
-            </div>
-        @else
-            {{-- Section label --}}
-            <div class="flex items-center gap-3 px-1">
-                <div class="h-px flex-1 bg-slate-200"></div>
-                <span class="text-[11px] font-black uppercase tracking-widest text-slate-400">Select a Child to View Dashboard</span>
-                <div class="h-px flex-1 bg-slate-200"></div>
-            </div>
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-                @foreach ($this->children as $c)
-                    @php
-                        $cardGradients = [
-                            'from-indigo-500 to-violet-600',
-                            'from-sky-500 to-cyan-600',
-                            'from-emerald-500 to-teal-600',
-                            'from-rose-500 to-pink-600',
-                            'from-amber-500 to-orange-600',
-                            'from-purple-500 to-fuchsia-600',
-                        ];
-                        $avatarGradients = [
-                            'from-indigo-400 to-violet-500',
-                            'from-sky-400 to-cyan-500',
-                            'from-emerald-400 to-teal-500',
-                            'from-rose-400 to-pink-500',
-                            'from-amber-400 to-orange-500',
-                            'from-purple-400 to-fuchsia-500',
-                        ];
-                        $idx = $c->id % count($cardGradients);
-                        $topGrad = $cardGradients[$idx];
-                        $avatarGrad = $avatarGradients[$idx];
-                    @endphp
-                    <button wire:click="selectChild({{ $c->id }})"
-                            class="group relative w-full text-left bg-white rounded-3xl border border-slate-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 active:scale-[0.98] overflow-hidden flex flex-col">
-
-                        {{-- Colored top banner --}}
-                        <div class="relative h-24 w-full bg-gradient-to-br {{ $topGrad }} overflow-hidden shrink-0">
-                            <div class="absolute inset-0 opacity-10" style="background-image: radial-gradient(white 1px, transparent 1px); background-size: 18px 18px;"></div>
-                            <div class="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-white/10"></div>
-                            <div class="absolute -left-4 -bottom-4 h-16 w-16 rounded-full bg-black/10"></div>
-                            {{-- Floating class badge --}}
-                            <span class="absolute bottom-3 right-3 text-[10px] font-black uppercase tracking-wider bg-white/20 backdrop-blur-sm text-white px-2.5 py-1 rounded-lg border border-white/20">
-                                {{ $c->schoolClass?->name ?? 'Unassigned' }}
-                            </span>
+                @if (empty($childrenCards))
+                    <div class="flex flex-col items-center justify-center rounded-3xl border-2 border-dashed border-slate-200 bg-white py-16 text-center shadow-xs">
+                        <div class="flex h-16 w-16 items-center justify-center rounded-2xl bg-indigo-50 text-indigo-600">
+                            <svg class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
+                            </svg>
                         </div>
+                        <h3 class="mt-4 text-base font-black text-slate-700">No children linked</h3>
+                        <p class="mt-1 text-xs text-slate-500">Contact the school administration to link your student wards.</p>
+                    </div>
+                @else
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
+                        @foreach ($childrenCards as $c)
+                            <div class="rounded-3xl border border-slate-200/90 bg-white p-5 shadow-xs hover:shadow-md hover:border-slate-300 transition duration-200 flex flex-col justify-between group">
+                                {{-- Top: Avatar & Information --}}
+                                <div>
+                                    <div class="flex items-start gap-3.5">
+                                        @if ($c['photo_url'])
+                                            <img src="{{ $c['photo_url'] }}" alt="{{ $c['name'] }}" class="h-14 w-14 rounded-2xl object-cover ring-2 ring-slate-100 shadow-2xs bg-slate-50 shrink-0" />
+                                        @else
+                                            <div class="h-14 w-14 rounded-2xl bg-gradient-to-br from-indigo-500 to-indigo-700 text-white flex items-center justify-center font-black text-xl shadow-2xs ring-2 ring-indigo-50 shrink-0">
+                                                {{ mb_substr($c['first_name'], 0, 1) }}
+                                            </div>
+                                        @endif
 
-                        {{-- Avatar overlapping the banner --}}
-                        <div class="relative px-5 flex flex-col flex-1">
-                            <div class="-mt-8 mb-3">
-                                @if ($c->passport_photo_url)
-                                    <img src="{{ $c->passport_photo_url }}" class="h-16 w-16 rounded-2xl object-cover ring-4 ring-white shadow-lg bg-white" />
-                                @else
-                                    <div class="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br {{ $avatarGrad }} text-2xl font-black text-white ring-4 ring-white shadow-lg">
-                                        {{ mb_substr($c->first_name, 0, 1) }}
+                                        <div class="min-w-0 flex-1">
+                                            <div class="flex items-center justify-between gap-2">
+                                                <h3 class="text-base font-black text-slate-800 truncate group-hover:text-indigo-600 transition-colors">
+                                                    {{ $c['name'] }}
+                                                </h3>
+                                                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-emerald-50 text-emerald-700 border border-emerald-200 shrink-0">
+                                                    <span class="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                                                    {{ $c['status'] }}
+                                                </span>
+                                            </div>
+                                            <p class="text-[11px] font-semibold text-slate-400 mt-0.5 truncate">
+                                                ADM: <span class="text-slate-600 font-bold">{{ $c['admission_number'] }}</span> &bull; {{ $c['class_name'] }}{{ $c['section_name'] ? ' (' . $c['section_name'] . ')' : '' }}
+                                            </p>
+                                        </div>
                                     </div>
-                                @endif
-                            </div>
 
-                            <div class="flex-1 pb-5">
-                                <h3 class="text-lg font-black text-slate-800 leading-tight group-hover:text-indigo-600 transition-colors truncate">{{ $c->full_name }}</h3>
-                                <p class="text-[11px] font-black uppercase tracking-widest text-slate-400 mt-1">ADM: {{ $c->admission_number }}</p>
+                                    {{-- 3 Circular/Metric Stat Widgets --}}
+                                    <div class="grid grid-cols-3 gap-2 py-3.5 my-3.5 border-y border-slate-100 text-center">
+                                        {{-- 1. Attendance --}}
+                                        <div class="flex flex-col items-center">
+                                            <div class="relative flex items-center justify-center h-10 w-10 rounded-full {{ $c['attendance_rate'] >= 85 ? 'bg-emerald-50 text-emerald-600' : ($c['attendance_rate'] >= 70 ? 'bg-amber-50 text-amber-600' : 'bg-rose-50 text-rose-600') }} font-black text-xs">
+                                                {{ $c['attendance_rate'] }}%
+                                            </div>
+                                            <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 mt-1">Attendance</span>
+                                        </div>
 
-                                <div class="mt-4 flex items-center justify-between">
-                                    <span class="inline-flex items-center gap-1.5 text-xs font-bold text-slate-500">
-                                        <svg class="h-3.5 w-3.5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
-                                        View Dashboard
-                                    </span>
-                                    <div class="h-8 w-8 rounded-full bg-slate-100 group-hover:bg-indigo-600 flex items-center justify-center transition-colors shadow-sm">
-                                        <svg class="h-4 w-4 text-slate-400 group-hover:text-white transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
-                                        </svg>
+                                        {{-- 2. Academic Average --}}
+                                        <div class="flex flex-col items-center border-x border-slate-100 px-1">
+                                            <div class="relative flex items-center justify-center h-10 w-10 rounded-full bg-indigo-50 text-indigo-600 font-black text-xs">
+                                                {{ $c['academic_average'] > 0 ? $c['academic_average'] . '%' : '--' }}
+                                            </div>
+                                            <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 mt-1">Average</span>
+                                        </div>
+
+                                        {{-- 3. Fee Balance --}}
+                                        <div class="flex flex-col items-center">
+                                            <div class="text-xs font-black {{ $c['fee_balance'] > 0 ? 'text-rose-600' : 'text-slate-800' }} mt-1 truncate max-w-full">
+                                                ₦{{ number_format($c['fee_balance']) }}
+                                            </div>
+                                            @if($c['fee_balance'] <= 0)
+                                                <span class="text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 mt-1">Cleared</span>
+                                            @else
+                                                <span class="text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-rose-50 text-rose-700 border border-rose-200 mt-1">Pay Now</span>
+                                            @endif
+                                            <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 mt-0.5">Fees</span>
+                                        </div>
                                     </div>
                                 </div>
+
+                                {{-- Bottom: View Dashboard CTA --}}
+                                <button type="button" wire:click="selectChild({{ $c['id'] }})"
+                                        class="w-full inline-flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-slate-900 hover:bg-indigo-600 text-white font-bold text-xs transition duration-200 shadow-2xs active:scale-[0.98]">
+                                    <span>View Child Dashboard</span>
+                                    <svg class="h-3.5 w-3.5 group-hover:translate-x-0.5 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
+                                    </svg>
+                                </button>
+                            </div>
+                        @endforeach
+                    </div>
+                @endif
+            </div>
+
+            {{-- Right Column: Family Summary & Recent Updates (4 Cols) --}}
+            <div class="lg:col-span-4 space-y-6">
+                {{-- Family Summary Card --}}
+                <div class="rounded-3xl border border-slate-200/90 bg-white p-5 sm:p-6 shadow-xs">
+                    <div class="flex items-center justify-between pb-3.5 border-b border-slate-100">
+                        <div class="flex items-center gap-2">
+                            <span class="h-2 w-2 rounded-full bg-indigo-600"></span>
+                            <h3 class="text-xs font-black uppercase tracking-wider text-slate-800">Family Summary</h3>
+                        </div>
+                        <span class="text-[11px] font-bold text-slate-400">Term {{ $term }}</span>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3 mt-4">
+                        {{-- 1. Family Attendance --}}
+                        <div class="rounded-2xl bg-slate-50 border border-slate-100 p-3.5 flex flex-col justify-between">
+                            <span class="text-[10px] font-black uppercase tracking-wider text-slate-400">Attendance</span>
+                            <div class="mt-2">
+                                <div class="text-xl sm:text-2xl font-black text-slate-800">
+                                    {{ $summary['overall_attendance'] }}<span class="text-xs text-slate-400">%</span>
+                                </div>
+                                <span class="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-600 mt-0.5">
+                                    <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18"/></svg>
+                                    Good Standing
+                                </span>
                             </div>
                         </div>
-                    </button>
-                @endforeach
+
+                        {{-- 2. Performance Average --}}
+                        <div class="rounded-2xl bg-slate-50 border border-slate-100 p-3.5 flex flex-col justify-between">
+                            <span class="text-[10px] font-black uppercase tracking-wider text-slate-400">Performance</span>
+                            <div class="mt-2">
+                                <div class="text-xl sm:text-2xl font-black text-slate-800">
+                                    {{ $summary['average_performance'] > 0 ? $summary['average_performance'] . '%' : '--' }}
+                                </div>
+                                <span class="text-[10px] font-semibold text-slate-400 mt-0.5 block truncate">
+                                    Academic Average
+                                </span>
+                            </div>
+                        </div>
+
+                        {{-- 3. Total Fee Balance --}}
+                        <div class="rounded-2xl bg-slate-50 border border-slate-100 p-3.5 flex flex-col justify-between">
+                            <span class="text-[10px] font-black uppercase tracking-wider text-slate-400">Outstanding</span>
+                            <div class="mt-2">
+                                <div class="text-lg sm:text-xl font-black {{ $summary['total_outstanding_fees'] > 0 ? 'text-rose-600' : 'text-slate-800' }} truncate">
+                                    ₦{{ number_format($summary['total_outstanding_fees']) }}
+                                </div>
+                                <span class="text-[10px] font-semibold text-slate-400 mt-0.5 block truncate">
+                                    {{ $summary['total_outstanding_fees'] > 0 ? 'Balance Due' : 'All Cleared' }}
+                                </span>
+                            </div>
+                        </div>
+
+                        {{-- 4. Pending Homework --}}
+                        <div class="rounded-2xl bg-slate-50 border border-slate-100 p-3.5 flex flex-col justify-between">
+                            <span class="text-[10px] font-black uppercase tracking-wider text-slate-400">Homework</span>
+                            <div class="mt-2">
+                                <div class="text-xl sm:text-2xl font-black text-indigo-600">
+                                    {{ $summary['total_pending_homework'] }}
+                                </div>
+                                <span class="text-[10px] font-semibold text-slate-400 mt-0.5 block truncate">
+                                    Pending Tasks
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Recent Updates Card --}}
+                <div class="rounded-3xl border border-slate-200/90 bg-white p-5 sm:p-6 shadow-xs">
+                    <div class="flex items-center justify-between pb-3.5 border-b border-slate-100">
+                        <div class="flex items-center gap-2">
+                            <span class="h-2 w-2 rounded-full bg-emerald-500"></span>
+                            <h3 class="text-xs font-black uppercase tracking-wider text-slate-800">Recent Updates</h3>
+                        </div>
+                        <span class="text-[10px] font-black uppercase tracking-wider bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded-full border border-emerald-200">Live</span>
+                    </div>
+
+                    <div class="space-y-3 mt-4">
+                        @foreach ($updates as $up)
+                            <div class="rounded-2xl border border-slate-100 bg-slate-50/60 p-3.5 transition hover:bg-slate-50 flex items-start gap-3">
+                                <div class="h-8 w-8 rounded-xl {{ $up['icon_color'] }} flex items-center justify-center shrink-0 mt-0.5 shadow-2xs">
+                                    @if($up['type'] === 'fee')
+                                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"/></svg>
+                                    @elseif($up['type'] === 'homework')
+                                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+                                    @else
+                                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"/></svg>
+                                    @endif
+                                </div>
+                                <div class="min-w-0 flex-1">
+                                    <div class="flex items-center justify-between gap-2 mb-0.5">
+                                        <span class="rounded px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wider {{ $up['tag_color'] }} border">
+                                            {{ $up['title'] }}
+                                        </span>
+                                        <span class="text-[10px] text-slate-400 font-bold">{{ $up['time'] }}</span>
+                                    </div>
+                                    <p class="text-xs font-semibold text-slate-700 leading-snug line-clamp-2">
+                                        {{ $up['message'] }}
+                                    </p>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
             </div>
-        @endif
+        </div>
 
     @else
-        {{-- STATE 2: Child Data Layout (Compact, Premium Tabbed Control) --}}
-        
+        {{-- SCREEN 2: Child Detail Dashboard --}}
+
         {{-- Sibling Switcher Bar & Return Control --}}
         <div class="flex flex-wrap items-center justify-between gap-3">
             <button type="button" wire:click="$set('selectedChildId', null)" 
                     wire:loading.attr="disabled"
-                    class="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white border border-slate-200 text-xs font-bold text-slate-600 hover:text-indigo-600 hover:bg-slate-50 transition shadow-sm group">
+                    class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-white border border-slate-200 text-xs font-bold text-slate-700 hover:text-indigo-600 hover:bg-slate-50 transition shadow-2xs group">
                 <svg class="h-4 w-4 text-slate-400 group-hover:text-indigo-600 group-hover:-translate-x-0.5 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
-                <span>All Children</span>
+                <span>Family Dashboard</span>
             </button>
 
             @if($this->children->count() > 1)
@@ -165,7 +300,7 @@
                     @foreach($this->children as $sib)
                         <button type="button" wire:click="selectChild({{ $sib->id }})"
                                 wire:loading.attr="disabled"
-                                class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-bold transition whitespace-nowrap shadow-sm {{ $sib->id === $child->id ? 'bg-indigo-600 text-white ring-2 ring-indigo-200 shadow-indigo-600/20' : 'bg-white text-slate-600 hover:bg-slate-50 border border-slate-200' }}">
+                                class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-bold transition whitespace-nowrap shadow-2xs {{ $sib->id === $child->id ? 'bg-indigo-600 text-white ring-2 ring-indigo-200 shadow-indigo-600/20' : 'bg-white text-slate-600 hover:bg-slate-50 border border-slate-200' }}">
                             @if($sib->id === $child->id)
                                 <span class="h-2 w-2 rounded-full bg-emerald-400 animate-pulse"></span>
                             @else
@@ -179,68 +314,80 @@
             @endif
         </div>
 
-        {{-- Child Identity Banner --}}
-        <div class="relative overflow-hidden rounded-3xl bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 p-5 sm:p-6 text-white shadow-xl">
-            <div class="absolute inset-0 opacity-10" style="background-image: radial-gradient(white 1px, transparent 1px); background-size: 20px 20px;"></div>
-            <div class="absolute -top-16 -right-16 h-48 w-48 rounded-full bg-indigo-500/20 blur-3xl"></div>
-            <div class="absolute -bottom-10 -left-10 h-36 w-36 rounded-full bg-violet-500/15 blur-2xl"></div>
-
-            <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div class="flex items-center gap-3.5 sm:gap-4 min-w-0">
+        {{-- Child Identity Banner & Motivational Card --}}
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6 items-stretch">
+            {{-- Profile Card (Left) --}}
+            <div class="lg:col-span-7 bg-white rounded-3xl border border-slate-200/90 p-5 sm:p-6 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div class="flex items-center gap-4 min-w-0">
                     @if ($child->passport_photo_url)
-                        <img src="{{ $child->passport_photo_url }}" class="shrink-0 h-14 w-14 sm:h-16 sm:w-16 rounded-2xl object-cover ring-2 ring-white/30 shadow-lg bg-white/10" />
+                        <img src="{{ $child->passport_photo_url }}" class="shrink-0 h-16 w-16 rounded-2xl object-cover ring-2 ring-slate-100 shadow-xs bg-slate-50" />
                     @else
-                        <div class="shrink-0 flex h-14 w-14 sm:h-16 sm:w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-500 to-violet-600 text-2xl font-black text-white ring-2 ring-white/30 shadow-lg">
+                        <div class="shrink-0 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-500 to-indigo-700 text-2xl font-black text-white ring-2 ring-indigo-50 shadow-xs">
                             {{ mb_substr($child->first_name, 0, 1) }}
                         </div>
                     @endif
 
                     <div class="min-w-0 flex-1">
                         <div class="flex items-center gap-2 mb-1">
-                            <span class="inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-wider text-indigo-300">
-                                <span class="h-1.5 w-1.5 rounded-full bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,0.8)]"></span>
-                                Student Dashboard
+                            <span class="inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-wider text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
+                                <span class="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                                Active Student
                             </span>
                         </div>
-                        <h2 class="text-xl sm:text-2xl font-black text-white leading-tight truncate">{{ $child->full_name }}</h2>
+                        <h2 class="text-xl sm:text-2xl font-black text-slate-900 leading-tight truncate">{{ $child->full_name }}</h2>
                         <div class="flex flex-wrap items-center gap-2 mt-1.5">
-                            <span class="rounded-lg bg-white/15 backdrop-blur-sm px-2.5 py-0.5 text-[11px] font-black uppercase tracking-wider text-white border border-white/10">
+                            <span class="rounded-lg bg-slate-100 px-2.5 py-0.5 text-[11px] font-black uppercase tracking-wider text-slate-700 border border-slate-200">
                                 {{ $child->schoolClass?->name ?? 'Unassigned' }}
                             </span>
-                            <span class="rounded-lg bg-black/30 backdrop-blur-sm px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wider text-indigo-200 border border-white/5">
+                            <span class="rounded-lg bg-slate-50 px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wider text-slate-500 border border-slate-200">
                                 ADM: {{ $child->admission_number }}
                             </span>
                         </div>
                     </div>
                 </div>
 
-                {{-- Term & Session Controls --}}
-                <div class="flex items-center gap-2 sm:gap-3 self-stretch md:self-auto">
-                    <div class="flex items-center gap-2 rounded-xl bg-white/10 backdrop-blur-md px-3.5 py-2 border border-white/15 shadow-sm flex-1 md:flex-initial">
-                        <span class="text-[10px] font-black uppercase tracking-widest text-indigo-200">Term</span>
-                        <select wire:model.live="term" class="bg-transparent text-xs sm:text-sm font-black text-white border-0 p-0 focus:ring-0 cursor-pointer w-full rounded">
-                            <option class="text-slate-800" value="1">Term 1</option>
-                            <option class="text-slate-800" value="2">Term 2</option>
-                            <option class="text-slate-800" value="3">Term 3</option>
+                {{-- Session & Term Controls --}}
+                <div class="flex items-center gap-2 shrink-0 border-t sm:border-t-0 pt-3 sm:pt-0 border-slate-100">
+                    <div class="flex items-center gap-2 rounded-xl bg-slate-50 px-3 py-1.5 border border-slate-200 text-xs">
+                        <span class="text-[10px] font-black uppercase tracking-wider text-slate-400">Term</span>
+                        <select wire:model.live="term" class="bg-transparent text-xs font-bold text-slate-800 border-0 p-0 focus:ring-0 cursor-pointer rounded">
+                            <option value="1">Term 1</option>
+                            <option value="2">Term 2</option>
+                            <option value="3">Term 3</option>
                         </select>
                     </div>
-                    <div class="flex items-center gap-2 rounded-xl bg-white/10 backdrop-blur-md px-3.5 py-2 border border-white/15 shadow-sm flex-1 md:flex-initial">
-                        <span class="text-[10px] font-black uppercase tracking-widest text-indigo-200">Session</span>
-                        <input wire:model.live="session" type="text" class="w-24 bg-transparent text-xs sm:text-sm font-black text-white border-0 p-0 focus:ring-0 text-center placeholder-white/40" placeholder="2024/2025" />
+                    <div class="flex items-center gap-2 rounded-xl bg-slate-50 px-3 py-1.5 border border-slate-200 text-xs">
+                        <span class="text-[10px] font-black uppercase tracking-wider text-slate-400">Session</span>
+                        <input wire:model.live="session" type="text" class="w-20 bg-transparent text-xs font-bold text-slate-800 border-0 p-0 focus:ring-0 text-center" />
                     </div>
+                </div>
+            </div>
+
+            {{-- Motivational Banner (Right) --}}
+            <div class="lg:col-span-5 rounded-3xl bg-gradient-to-br from-emerald-600 via-teal-600 to-emerald-700 text-white p-5 sm:p-6 shadow-xs flex items-center gap-4 relative overflow-hidden">
+                <div class="absolute -right-10 -top-10 h-32 w-32 rounded-full bg-white/10 blur-xl"></div>
+                <div class="h-12 w-12 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center shrink-0 border border-white/20 shadow-xs">
+                    <svg class="h-6 w-6 text-emerald-100" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+                    </svg>
+                </div>
+                <div class="relative z-10 min-w-0">
+                    <span class="text-[10px] font-black uppercase tracking-wider text-emerald-200">Inspiring Excellence</span>
+                    <h4 class="text-sm sm:text-base font-black text-white leading-snug">"Small steps for a brighter future"</h4>
+                    <p class="text-xs text-emerald-100/90 font-medium mt-0.5">Consistent attendance and daily revision lead to excellence.</p>
                 </div>
             </div>
         </div>
 
-        {{-- High-Affordance Tab Navigation Bar --}}
+        {{-- Tab Navigation Bar --}}
         @php
             $tabs = [
                 'overview'   => ['name' => 'Overview', 'icon' => '<svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>'],
                 'attendance' => ['name' => 'Attendance', 'icon' => '<svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>'],
                 'results'    => ['name' => 'Results', 'icon' => '<svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>'],
-                'topics'     => ['name' => 'Curriculum', 'icon' => '<svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/></svg>'],
                 'homework'   => ['name' => 'Homework', 'icon' => '<svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>'],
                 'timetable'  => ['name' => 'Timetable', 'icon' => '<svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>'],
+                'topics'     => ['name' => 'Curriculum', 'icon' => '<svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/></svg>'],
             ];
             if ($hasPaymentGateway) {
                 $tabs['bursary'] = ['name' => 'Fee Ledger', 'icon' => '<svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"/></svg>'];
@@ -253,7 +400,7 @@
                 @foreach($tabs as $tabKey => $tabVal)
                     <button type="button" wire:click="$set('activeTab', '{{ $tabKey }}')"
                             wire:loading.attr="disabled" wire:loading.class="opacity-50 cursor-wait"
-                            class="relative inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-bold transition-all duration-200 whitespace-nowrap shrink-0 shadow-sm
+                            class="relative inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-bold transition-all duration-200 whitespace-nowrap shrink-0 shadow-2xs
                                    {{ $activeTab === $tabKey
                                         ? 'bg-indigo-600 text-white shadow-indigo-600/25 ring-2 ring-indigo-600'
                                         : 'bg-white text-slate-600 hover:text-slate-900 hover:bg-slate-50 border border-slate-200/80' }}">
@@ -268,362 +415,397 @@
 
         @if($activeTab === 'overview')
             <div class="space-y-6">
-                {{-- Today's Live Arrival / Presence Status Hero Card --}}
-                <div class="rounded-3xl border border-slate-200/90 bg-white p-5 sm:p-6 shadow-sm transition-all hover:border-slate-300">
-                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                        <div class="flex items-start sm:items-center gap-4">
-                            <div class="relative flex items-center justify-center shrink-0">
-                                @if(in_array($todayAtt['raw_status'] ?? '', ['Present', 'Late']) || in_array($todayAtt['status'] ?? '', ['Present', 'Late']))
-                                    <span class="absolute inline-flex h-full w-full rounded-2xl bg-emerald-400 opacity-20 animate-ping"></span>
-                                    <div class="h-12 w-12 sm:h-14 sm:w-14 rounded-2xl bg-emerald-500 text-white flex items-center justify-center shadow-lg shadow-emerald-500/25">
-                                        <svg class="h-6 w-6 sm:h-7 sm:w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
-                                    </div>
-                                @elseif(($todayAtt['raw_status'] ?? '') === 'Excused' || ($todayAtt['status'] ?? '') === 'Excused')
-                                    <div class="h-12 w-12 sm:h-14 sm:w-14 rounded-2xl bg-purple-500 text-white flex items-center justify-center shadow-lg shadow-purple-500/25">
-                                        <svg class="h-6 w-6 sm:h-7 sm:w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                                    </div>
-                                @elseif(($todayAtt['raw_status'] ?? '') === 'Absent' || ($todayAtt['status'] ?? '') === 'Absent')
-                                    <div class="h-12 w-12 sm:h-14 sm:w-14 rounded-2xl bg-rose-500 text-white flex items-center justify-center shadow-lg shadow-rose-500/25">
-                                        <svg class="h-6 w-6 sm:h-7 sm:w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
-                                    </div>
-                                @else
-                                    <div class="h-12 w-12 sm:h-14 sm:w-14 rounded-2xl bg-slate-100 text-slate-400 flex items-center justify-center border border-slate-200">
-                                        <svg class="h-6 w-6 sm:h-7 sm:w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                                    </div>
-                                @endif
-                            </div>
-                            <div class="min-w-0">
-                                <div class="flex items-center gap-2 flex-wrap">
-                                    <span class="text-xs font-black uppercase tracking-wider text-slate-400">Today's School Attendance</span>
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider {{ $todayAtt['badge_class'] }}">
-                                        {{ $todayAtt['status'] }}
-                                    </span>
-                                    @if($todayAtt['is_biometric'])
-                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[9px] font-black uppercase tracking-wide bg-sky-50 text-sky-700 border border-sky-200">
-                                            <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 11c0 3.517-1.009 6.799-2.753 9.571m-3.44-2.04l.054-.09A13.916 13.916 0 008 11a4 4 0 118 0c0 1.017-.07 2.019-.203 3m-2.118 6.844A21.88 21.88 0 0015.171 17m3.839 1.132c.645-2.266.99-4.659.99-7.132A8 8 0 004.07 7.07"/></svg>
-                                            K40 Biometrics
-                                        </span>
-                                    @elseif($todayAtt['source'])
-                                        <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[9px] font-bold text-slate-500 bg-slate-100">
-                                            {{ $todayAtt['source'] }}
-                                        </span>
-                                    @endif
-                                </div>
-                                <p class="text-sm font-bold text-slate-800 mt-1">{{ $todayAtt['message'] }}</p>
+                {{-- 4 Hero KPI Cards --}}
+                <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+                    {{-- 1. Academic Average --}}
+                    <div class="rounded-3xl border border-slate-200/90 bg-white p-5 shadow-xs flex flex-col justify-between">
+                        <div class="flex items-center justify-between">
+                            <span class="text-[10px] font-black uppercase tracking-wider text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-md">Performance</span>
+                            <div class="h-8 w-8 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
+                                <svg class="h-4.5 w-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
                             </div>
                         </div>
-
-                        <div class="flex items-center justify-between sm:justify-end gap-4 pt-3 sm:pt-0 border-t sm:border-t-0 border-slate-100 shrink-0">
-                            @if($todayAtt['time_in'])
-                                <div class="text-left sm:text-right">
-                                    <span class="block text-[9px] font-black uppercase tracking-wider text-slate-400">Clock In</span>
-                                    <span class="text-sm font-black text-slate-800">{{ $todayAtt['time_in'] }}</span>
-                                </div>
-                            @endif
-                            @if($todayAtt['time_out'])
-                                <div class="text-left sm:text-right">
-                                    <span class="block text-[9px] font-black uppercase tracking-wider text-slate-400">Clock Out</span>
-                                    <span class="text-sm font-black text-slate-800">{{ $todayAtt['time_out'] }}</span>
-                                </div>
-                            @endif
-                            <button type="button" wire:click="$set('activeTab', 'attendance')"
-                                    class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-50 hover:bg-indigo-50 text-slate-700 hover:text-indigo-600 text-xs font-bold transition border border-slate-200">
-                                Full History
-                                <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                {{-- Stat Metrics Row (Clickable High-Impact Tiles) --}}
-                <div class="grid grid-cols-2 lg:grid-cols-{{ $hasPaymentGateway ? 4 : 3 }} gap-3 sm:gap-4">
-                    {{-- Metric 1: Average --}}
-                    <button type="button" wire:click="$set('activeTab', 'results')"
-                            class="text-left rounded-3xl border border-slate-200 bg-white p-4 sm:p-5 shadow-sm flex flex-col justify-between transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md hover:border-indigo-200 group active:scale-[0.98]">
-                        <div class="flex items-start justify-between w-full">
-                            <div class="h-10 w-10 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center group-hover:bg-indigo-600 group-hover:text-white transition-colors">
-                                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
-                            </div>
-                            <span class="text-[9px] sm:text-[10px] font-black uppercase tracking-wider text-slate-400 bg-slate-50 px-2.5 py-1 rounded-lg">Results</span>
-                        </div>
-                        <div class="mt-4">
-                            <div class="text-2xl sm:text-3xl font-black text-slate-800 tracking-tight group-hover:text-indigo-600 transition-colors">
+                        <div class="mt-3">
+                            <div class="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
                                 {{ $stats['average'] }}<span class="text-sm font-bold text-slate-400 ml-0.5">%</span>
                             </div>
-                            <p class="text-[11px] font-semibold text-slate-500 mt-0.5 truncate">Academic Average</p>
-                        </div>
-                    </button>
-
-                    {{-- Metric 2: Position --}}
-                    <button type="button" wire:click="$set('activeTab', 'results')"
-                            class="text-left rounded-3xl border border-slate-200 bg-white p-4 sm:p-5 shadow-sm flex flex-col justify-between transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md hover:border-emerald-200 group active:scale-[0.98]">
-                        <div class="flex items-start justify-between w-full">
-                            <div class="h-10 w-10 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center group-hover:bg-emerald-600 group-hover:text-white transition-colors">
-                                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/></svg>
+                            <div class="flex items-center gap-1.5 mt-1">
+                                <span class="text-[11px] font-bold {{ $stats['average'] >= 70 ? 'text-emerald-600' : ($stats['average'] >= 50 ? 'text-indigo-600' : 'text-rose-600') }}">
+                                    {{ $stats['average'] >= 70 ? '↑ Outstanding' : ($stats['average'] >= 50 ? '↑ Steady' : 'Needs Focus') }}
+                                </span>
+                                <span class="text-slate-300">&bull;</span>
+                                <span class="text-[10px] text-slate-400 font-semibold truncate">Average</span>
                             </div>
-                            <span class="text-[9px] sm:text-[10px] font-black uppercase tracking-wider text-slate-400 bg-slate-50 px-2.5 py-1 rounded-lg">Class Rank</span>
                         </div>
-                        <div class="mt-4">
-                            <div class="text-2xl sm:text-3xl font-black text-slate-800 tracking-tight group-hover:text-emerald-600 transition-colors">
+                    </div>
+
+                    {{-- 2. Class Position --}}
+                    <div class="rounded-3xl border border-slate-200/90 bg-white p-5 shadow-xs flex flex-col justify-between">
+                        <div class="flex items-center justify-between">
+                            <span class="text-[10px] font-black uppercase tracking-wider text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md">Standing</span>
+                            <div class="h-8 w-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                                <svg class="h-4.5 w-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/></svg>
+                            </div>
+                        </div>
+                        <div class="mt-3">
+                            <div class="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
                                 {{ $published && $stats['position'] ? $ordinal($stats['position']) : '--' }}
                             </div>
-                            <p class="text-[11px] font-semibold text-slate-500 mt-0.5 truncate">
-                                {{ $published ? 'Current Term Position' : 'Pending Publication' }}
+                            <p class="text-[11px] font-bold text-slate-500 mt-1 truncate">
+                                {{ $stats['classSize'] ? 'out of ' . $stats['classSize'] . ' students' : 'Current Term Rank' }}
                             </p>
                         </div>
-                    </button>
-
-                    {{-- Metric 3: Attendance --}}
-                    <button type="button" wire:click="$set('activeTab', 'attendance')"
-                            class="text-left rounded-3xl border border-slate-200 bg-white p-4 sm:p-5 shadow-sm flex flex-col justify-between transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md hover:border-sky-200 group active:scale-[0.98]">
-                        <div class="flex items-start justify-between w-full">
-                            <div class="h-10 w-10 rounded-2xl bg-sky-50 text-sky-600 flex items-center justify-center group-hover:bg-sky-600 group-hover:text-white transition-colors">
-                                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                            </div>
-                            <span class="text-[9px] sm:text-[10px] font-black uppercase tracking-wider text-slate-400 bg-slate-50 px-2.5 py-1 rounded-lg">Attendance</span>
-                        </div>
-                        <div class="mt-4">
-                            <div class="text-2xl sm:text-3xl font-black text-slate-800 tracking-tight group-hover:text-sky-600 transition-colors">
-                                {{ $att['rate'] }}<span class="text-sm font-bold text-slate-400 ml-0.5">%</span>
-                            </div>
-                            <p class="text-[11px] font-semibold text-slate-500 mt-0.5 truncate">{{ $att['present'] }} Present &bull; {{ $att['absent'] }} Absent</p>
-                        </div>
-                    </button>
-
-                    @if($hasPaymentGateway)
-                        {{-- Metric 4: Fees --}}
-                        <button type="button" wire:click="$set('activeTab', 'bursary')"
-                                class="text-left rounded-3xl border border-slate-200 bg-white p-4 sm:p-5 shadow-sm flex flex-col justify-between transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md {{ $fees['outstanding'] > 0 ? 'hover:border-rose-200' : 'hover:border-emerald-200' }} group active:scale-[0.98]">
-                            <div class="flex items-start justify-between w-full">
-                                <div class="h-10 w-10 rounded-2xl {{ $fees['outstanding'] > 0 ? 'bg-rose-50 text-rose-600 group-hover:bg-rose-600' : 'bg-emerald-50 text-emerald-600 group-hover:bg-emerald-600' }} flex items-center justify-center group-hover:text-white transition-colors">
-                                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"/></svg>
-                                </div>
-                                <span class="text-[9px] sm:text-[10px] font-black uppercase tracking-wider text-slate-400 bg-slate-50 px-2.5 py-1 rounded-lg">Bursary</span>
-                            </div>
-                            <div class="mt-4">
-                                <div class="text-xl sm:text-2xl font-black {{ $fees['outstanding'] > 0 ? 'text-rose-600' : 'text-slate-800' }} tracking-tight truncate">
-                                    ₦{{ number_format($fees['outstanding'], 2) }}
-                                </div>
-                                <p class="text-[11px] font-semibold text-slate-500 mt-0.5 truncate">
-                                    {{ $fees['outstanding'] > 0 ? 'Outstanding Balance' : 'Fees Cleared' }}
-                                </p>
-                            </div>
-                        </button>
-                    @endif
-                </div>
-
-                {{-- 4 Quick-Action Launchpad Tiles --}}
-                <div class="rounded-3xl border border-slate-200/90 bg-white p-5 sm:p-6 shadow-sm">
-                    <div class="flex items-center justify-between mb-4">
-                        <div class="flex items-center gap-2">
-                            <span class="h-2 w-2 rounded-full bg-indigo-600"></span>
-                            <h3 class="text-xs font-black uppercase tracking-wider text-slate-400">Quick Actions</h3>
-                        </div>
-                        <span class="text-[11px] text-slate-400 font-semibold">1-Tap Shortcuts</span>
                     </div>
 
-                    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
-                        <button type="button" wire:click="$set('activeTab', 'results')"
-                                class="flex items-start gap-3 p-3.5 rounded-2xl bg-slate-50/70 hover:bg-indigo-50/70 border border-slate-100 hover:border-indigo-150 transition-all text-left group">
-                            <div class="h-9 w-9 rounded-xl bg-white text-indigo-600 shadow-sm flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
-                                <svg class="h-4.5 w-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                            </div>
-                            <div class="min-w-0">
-                                <p class="text-xs font-black text-slate-800 group-hover:text-indigo-600 transition-colors truncate">Report Card</p>
-                                <p class="text-[10px] text-slate-500 font-medium truncate mt-0.5">View scores & grades</p>
-                            </div>
-                        </button>
-
-                        <button type="button" wire:click="$set('activeTab', 'attendance')"
-                                class="flex items-start gap-3 p-3.5 rounded-2xl bg-slate-50/70 hover:bg-sky-50/70 border border-slate-100 hover:border-sky-150 transition-all text-left group">
-                            <div class="h-9 w-9 rounded-xl bg-white text-sky-600 shadow-sm flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+                    {{-- 3. Attendance Rate --}}
+                    <div class="rounded-3xl border border-slate-200/90 bg-white p-5 shadow-xs flex flex-col justify-between">
+                        <div class="flex items-center justify-between">
+                            <span class="text-[10px] font-black uppercase tracking-wider text-sky-600 bg-sky-50 px-2 py-0.5 rounded-md">Presence</span>
+                            <div class="h-8 w-8 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center">
                                 <svg class="h-4.5 w-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
                             </div>
-                            <div class="min-w-0">
-                                <p class="text-xs font-black text-slate-800 group-hover:text-sky-600 transition-colors truncate">Attendance</p>
-                                <p class="text-[10px] text-slate-500 font-medium truncate mt-0.5">Monthly log & punches</p>
+                        </div>
+                        <div class="mt-3">
+                            <div class="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
+                                {{ $att['rate'] }}<span class="text-sm font-bold text-slate-400 ml-0.5">%</span>
                             </div>
-                        </button>
+                            <p class="text-[11px] font-bold text-slate-500 mt-1 truncate">
+                                {{ $att['present'] }} Present &bull; {{ $att['absent'] }} Absent
+                            </p>
+                        </div>
+                    </div>
 
-                        <button type="button" wire:click="openAbsenceModal"
-                                class="flex items-start gap-3 p-3.5 rounded-2xl bg-slate-50/70 hover:bg-purple-50/70 border border-slate-100 hover:border-purple-150 transition-all text-left group">
-                            <div class="h-9 w-9 rounded-xl bg-white text-purple-600 shadow-sm flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
-                                <svg class="h-4.5 w-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+                    {{-- 4. Fee Balance --}}
+                    <div class="rounded-3xl border border-slate-200/90 bg-white p-5 shadow-xs flex flex-col justify-between">
+                        <div class="flex items-center justify-between">
+                            <span class="text-[10px] font-black uppercase tracking-wider {{ $fees['outstanding'] > 0 ? 'text-rose-600 bg-rose-50' : 'text-emerald-600 bg-emerald-50' }} px-2 py-0.5 rounded-md">
+                                {{ $fees['outstanding'] > 0 ? 'Balance' : 'Cleared' }}
+                            </span>
+                            <div class="h-8 w-8 rounded-xl {{ $fees['outstanding'] > 0 ? 'bg-rose-50 text-rose-600' : 'bg-emerald-50 text-emerald-600' }} flex items-center justify-center">
+                                <svg class="h-4.5 w-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"/></svg>
                             </div>
-                            <div class="min-w-0">
-                                <p class="text-xs font-black text-slate-800 group-hover:text-purple-600 transition-colors truncate">Absence Note</p>
-                                <p class="text-[10px] text-slate-500 font-medium truncate mt-0.5">Notify the school</p>
+                        </div>
+                        <div class="mt-3">
+                            <div class="text-xl sm:text-2xl font-black {{ $fees['outstanding'] > 0 ? 'text-rose-600' : 'text-slate-900' }} tracking-tight truncate">
+                                ₦{{ number_format($fees['outstanding'], 2) }}
                             </div>
-                        </button>
-
-                        <button type="button" wire:click="$set('activeTab', 'teachers')"
-                                class="flex items-start gap-3 p-3.5 rounded-2xl bg-slate-50/70 hover:bg-emerald-50/70 border border-slate-100 hover:border-emerald-150 transition-all text-left group">
-                            <div class="h-9 w-9 rounded-xl bg-white text-emerald-600 shadow-sm flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
-                                <svg class="h-4.5 w-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
-                            </div>
-                            <div class="min-w-0">
-                                <p class="text-xs font-black text-slate-800 group-hover:text-emerald-600 transition-colors truncate">Teachers</p>
-                                <p class="text-[10px] text-slate-500 font-medium truncate mt-0.5">WhatsApp class staff</p>
-                            </div>
-                        </button>
+                            <p class="text-[11px] font-bold text-slate-500 mt-1 truncate">
+                                {{ $fees['outstanding'] > 0 ? 'Due This Term' : 'All Fees Cleared' }}
+                            </p>
+                        </div>
                     </div>
                 </div>
 
-                {{-- Two-Column Detailed Dashboard Overview --}}
-                <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6 items-start">
-                    {{-- Left Column: Academic Gauge & School Bulletin --}}
-                    <div class="lg:col-span-7 space-y-4 sm:space-y-6">
-                        {{-- Academic Standing Gauge Card --}}
-                        <div class="rounded-3xl border border-slate-200 bg-white p-5 sm:p-6 shadow-sm flex flex-col sm:flex-row items-center gap-5 sm:gap-6">
-                            {{-- Circular Gauge --}}
-                            <div class="relative flex items-center justify-center shrink-0">
-                                @php
-                                    $pct = min(100, max(0, $stats['average']));
-                                    $color = $pct >= 70 ? 'stroke-emerald-500' : ($pct >= 50 ? 'stroke-indigo-500' : 'stroke-rose-500');
-                                @endphp
-                                <svg viewBox="0 0 128 128" class="w-28 h-28 sm:w-32 sm:h-32 transform -rotate-90">
-                                    <circle cx="64" cy="64" r="54" stroke-width="10" stroke="#f1f5f9" fill="transparent" />
-                                    <circle cx="64" cy="64" r="54" stroke-width="10" class="{{ $color }}" fill="transparent"
-                                            stroke-dasharray="339.3"
-                                            stroke-dashoffset="{{ 339.3 - (339.3 * $pct / 100) }}"
-                                            stroke-linecap="round" />
-                                </svg>
-                                <div class="absolute flex flex-col items-center justify-center">
-                                    <span class="text-xl sm:text-2xl font-black text-slate-800 tracking-tight">{{ $stats['average'] }}%</span>
-                                    <span class="text-[9px] uppercase tracking-wider font-extrabold text-slate-400">Average</span>
+                {{-- Two Column Layout: Left Column = Bar Chart & Live Today Attendance, Right Column = Results, Mini-Calendar, Homework & Notices --}}
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+                    {{-- Left Column (lg:col-span-7) --}}
+                    <div class="lg:col-span-7 space-y-6">
+                        {{-- Academic Performance Vertical Bar Chart --}}
+                        <div class="rounded-3xl border border-slate-200/90 bg-white p-5 sm:p-6 shadow-xs flex flex-col justify-between">
+                            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-100">
+                                <div>
+                                    <div class="flex items-center gap-2">
+                                        <span class="h-2 w-2 rounded-full bg-indigo-600"></span>
+                                        <h3 class="text-sm font-black text-slate-800 uppercase tracking-wide">Academic Performance</h3>
+                                    </div>
+                                    <p class="text-xs text-slate-400 font-semibold mt-0.5">Subject-wise score breakdown out of 100</p>
+                                </div>
+
+                                <div class="flex items-center gap-2">
+                                    <select wire:model.live="term" class="text-xs font-bold text-slate-700 bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5 focus:ring-0 cursor-pointer">
+                                        <option value="1">Term 1</option>
+                                        <option value="2">Term 2</option>
+                                        <option value="3">Term 3</option>
+                                    </select>
                                 </div>
                             </div>
-                            
-                            {{-- Standing Details --}}
-                            <div class="flex-1 min-w-0 text-center sm:text-left">
-                                <h3 class="text-base sm:text-lg font-black text-slate-800 leading-tight">Academic Standing</h3>
-                                <p class="text-xs sm:text-sm text-slate-500 font-semibold mt-1">
-                                    @if($stats['average'] >= 70)
-                                        Outstanding academic performance! Your child is demonstrating exceptional mastery.
-                                    @elseif($stats['average'] >= 50)
-                                        Steady progress. With consistent revision and homework completion, grades will improve further.
-                                    @else
-                                        Additional academic focus recommended. Please consult with the subject teachers.
-                                    @endif
-                                </p>
-                                <div class="mt-3 sm:mt-4 flex flex-wrap gap-2 justify-center sm:justify-start items-center">
-                                    <span class="text-[10px] font-black uppercase bg-emerald-50 text-emerald-700 px-2.5 py-1 rounded-lg">Passed: {{ $stats['passed'] }}</span>
-                                    <span class="text-[10px] font-black uppercase bg-rose-50 text-rose-700 px-2.5 py-1 rounded-lg">Failed: {{ $stats['failed'] }}</span>
-                                    <button type="button" wire:click="$set('activeTab', 'results')" class="text-[10px] font-black uppercase text-indigo-600 hover:text-indigo-800 transition ml-auto">
-                                        View Breakdown &rarr;
-                                    </button>
+
+                            @php
+                                $chartItems = $this->subjectPerformanceChart;
+                            @endphp
+
+                            @if(empty($chartItems))
+                                <div class="py-16 text-center text-xs font-bold text-slate-400 bg-slate-50 rounded-2xl border border-dashed border-slate-200 my-4">
+                                    No subject assessment scores recorded yet for Term {{ $term }}.
                                 </div>
+                            @else
+                                {{-- Bar Chart Area --}}
+                                <div class="pt-6 pb-2">
+                                    <div class="relative h-56 sm:h-64 flex items-end justify-between gap-2 sm:gap-4 pl-8 pr-2">
+                                        {{-- Y-Axis Grid Lines & Labels --}}
+                                        <div class="absolute inset-0 pl-8 pointer-events-none flex flex-col justify-between text-[10px] font-bold text-slate-300">
+                                            <div class="border-b border-dashed border-slate-100 w-full flex items-center justify-start"><span class="absolute left-0 -translate-y-1/2">100</span></div>
+                                            <div class="border-b border-dashed border-slate-100 w-full flex items-center justify-start"><span class="absolute left-0 -translate-y-1/2">75</span></div>
+                                            <div class="border-b border-dashed border-slate-100 w-full flex items-center justify-start"><span class="absolute left-0 -translate-y-1/2">50</span></div>
+                                            <div class="border-b border-dashed border-slate-100 w-full flex items-center justify-start"><span class="absolute left-0 -translate-y-1/2">25</span></div>
+                                            <div class="border-b border-slate-200 w-full flex items-center justify-start"><span class="absolute left-0 -translate-y-1/2">0</span></div>
+                                        </div>
+
+                                        {{-- Bars --}}
+                                        @foreach($chartItems as $bar)
+                                            <div class="relative z-10 flex-1 flex flex-col items-center h-full justify-end group">
+                                                {{-- Value floating above the bar --}}
+                                                <span class="text-[10px] sm:text-[11px] font-black text-slate-700 mb-1.5 opacity-90 group-hover:scale-110 transition-transform">
+                                                    {{ $bar['score'] }}%
+                                                </span>
+                                                {{-- The Bar --}}
+                                                <div class="w-full max-w-[36px] sm:max-w-[42px] {{ $bar['bar_class'] }} rounded-t-xl transition-all duration-300 group-hover:brightness-95 shadow-2xs"
+                                                     style="height: {{ max(8, $bar['score']) }}%;"
+                                                     title="{{ $bar['name'] }}: {{ $bar['score'] }}%">
+                                                </div>
+                                                {{-- Label beneath the bar --}}
+                                                <span class="text-[10px] sm:text-[11px] font-bold text-slate-600 mt-2 truncate max-w-[50px] sm:max-w-[65px] text-center" title="{{ $bar['name'] }}">
+                                                    {{ $bar['short'] }}
+                                                </span>
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                </div>
+                            @endif
+
+                            {{-- Card Footer --}}
+                            <div class="flex items-center justify-between pt-4 mt-2 border-t border-slate-100">
+                                <div class="flex items-center gap-2">
+                                    <span class="text-xs font-semibold text-slate-400">Class Average:</span>
+                                    <span class="text-xs font-black text-slate-800">{{ $stats['average'] }}%</span>
+                                </div>
+                                <button type="button" wire:click="$set('activeTab', 'results')"
+                                        class="inline-flex items-center gap-1.5 text-xs font-bold text-indigo-600 hover:text-indigo-800 transition">
+                                    <span>Detailed Report Card</span>
+                                    <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+                                </button>
                             </div>
                         </div>
 
-                        {{-- School Bulletin & Notices --}}
-                        <div class="rounded-3xl border border-slate-200 bg-white p-5 sm:p-6 shadow-sm flex flex-col">
-                            <div class="mb-4 flex items-center justify-between border-b border-slate-100 pb-3">
-                                <h3 class="text-xs font-black text-slate-800 uppercase tracking-wide flex items-center gap-2">
-                                    <svg class="h-4 w-4 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"/></svg>
-                                    School Bulletin & Notices
-                                </h3>
-                                <span class="text-[10px] font-black uppercase tracking-wider bg-indigo-50 text-indigo-700 px-2.5 py-0.5 rounded-md">Live</span>
-                            </div>
-
-                            <div class="space-y-3">
-                                @forelse($this->announcements as $announcement)
-                                    @php
-                                        $prio = $announcement->priority ?? 'Normal';
-                                        $prioColor = match($prio) {
-                                            'Urgent' => 'bg-rose-100 text-rose-800 border-rose-200',
-                                            'Notice' => 'bg-amber-100 text-amber-800 border-amber-200',
-                                            default => 'bg-slate-100 text-slate-700 border-slate-200'
-                                        };
-                                    @endphp
-                                    <div class="rounded-2xl border border-slate-100 bg-slate-50/50 p-4 transition hover:bg-slate-50">
-                                        <div class="flex items-start justify-between gap-3 mb-1.5">
-                                            <span class="rounded-md border px-2 py-0.5 text-[9px] font-black uppercase tracking-wider {{ $prioColor }}">
-                                                {{ $prio }}
+                        {{-- Today's Live Arrival / Presence Status Hero Card --}}
+                        <div class="rounded-3xl border border-slate-200/90 bg-white p-5 sm:p-6 shadow-xs">
+                            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                                <div class="flex items-start sm:items-center gap-4">
+                                    <div class="relative flex items-center justify-center shrink-0">
+                                        @if(in_array($todayAtt['raw_status'] ?? '', ['Present', 'Late']) || in_array($todayAtt['status'] ?? '', ['Present', 'Late']))
+                                            <span class="absolute inline-flex h-full w-full rounded-2xl bg-emerald-400 opacity-20 animate-ping"></span>
+                                            <div class="h-12 w-12 sm:h-14 sm:w-14 rounded-2xl bg-emerald-500 text-white flex items-center justify-center shadow-lg shadow-emerald-500/25">
+                                                <svg class="h-6 w-6 sm:h-7 sm:w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                                            </div>
+                                        @elseif(($todayAtt['raw_status'] ?? '') === 'Excused' || ($todayAtt['status'] ?? '') === 'Excused')
+                                            <div class="h-12 w-12 sm:h-14 sm:w-14 rounded-2xl bg-purple-500 text-white flex items-center justify-center shadow-lg shadow-purple-500/25">
+                                                <svg class="h-6 w-6 sm:h-7 sm:w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                                            </div>
+                                        @elseif(($todayAtt['raw_status'] ?? '') === 'Absent' || ($todayAtt['status'] ?? '') === 'Absent')
+                                            <div class="h-12 w-12 sm:h-14 sm:w-14 rounded-2xl bg-rose-500 text-white flex items-center justify-center shadow-lg shadow-rose-500/25">
+                                                <svg class="h-6 w-6 sm:h-7 sm:w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                                            </div>
+                                        @else
+                                            <div class="h-12 w-12 sm:h-14 sm:w-14 rounded-2xl bg-slate-100 text-slate-400 flex items-center justify-center border border-slate-200">
+                                                <svg class="h-6 w-6 sm:h-7 sm:w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                            </div>
+                                        @endif
+                                    </div>
+                                    <div class="min-w-0">
+                                        <div class="flex items-center gap-2 flex-wrap">
+                                            <span class="text-xs font-black uppercase tracking-wider text-slate-400">Today's Attendance</span>
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider {{ $todayAtt['badge_class'] }}">
+                                                {{ $todayAtt['status'] }}
                                             </span>
-                                            <span class="text-[10px] text-slate-400 font-bold">{{ $announcement->created_at->format('M d, Y') }}</span>
+                                            @if($todayAtt['is_biometric'])
+                                                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[9px] font-black uppercase tracking-wide bg-sky-50 text-sky-700 border border-sky-200">
+                                                    K40 Biometrics
+                                                </span>
+                                            @endif
                                         </div>
-                                        <h4 class="text-sm font-black text-slate-800 leading-snug">{{ $announcement->title }}</h4>
-                                        <p class="mt-1.5 text-xs text-slate-600 leading-relaxed whitespace-pre-line">{{ $announcement->content }}</p>
+                                        <p class="text-sm font-bold text-slate-800 mt-1">{{ $todayAtt['message'] }}</p>
                                     </div>
-                                @empty
-                                    <div class="py-8 text-center text-sm font-bold text-slate-400 bg-slate-50 rounded-2xl border border-dashed border-slate-200">
-                                        No announcements posted recently.
-                                    </div>
-                                @endforelse
+                                </div>
+
+                                <div class="flex items-center justify-between sm:justify-end gap-4 pt-3 sm:pt-0 border-t sm:border-t-0 border-slate-100 shrink-0">
+                                    @if($todayAtt['time_in'])
+                                        <div class="text-left sm:text-right">
+                                            <span class="block text-[9px] font-black uppercase tracking-wider text-slate-400">Clock In</span>
+                                            <span class="text-sm font-black text-slate-800">{{ $todayAtt['time_in'] }}</span>
+                                        </div>
+                                    @endif
+                                    @if($todayAtt['time_out'])
+                                        <div class="text-left sm:text-right">
+                                            <span class="block text-[9px] font-black uppercase tracking-wider text-slate-400">Clock Out</span>
+                                            <span class="text-sm font-black text-slate-800">{{ $todayAtt['time_out'] }}</span>
+                                        </div>
+                                    @endif
+                                    <button type="button" wire:click="$set('activeTab', 'attendance')"
+                                            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-50 hover:bg-indigo-50 text-slate-700 hover:text-indigo-600 text-xs font-bold transition border border-slate-200">
+                                        History &rarr;
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
 
-                    {{-- Right Column: Attendance Summary Breakdown & Recent Homework --}}
-                    <div class="lg:col-span-5 space-y-4 sm:space-y-6">
-                        {{-- Attendance Summary Card --}}
-                        <div class="rounded-3xl border border-slate-200 bg-white p-5 sm:p-6 shadow-sm flex flex-col justify-between">
-                            <div class="mb-4 flex items-center justify-between border-b border-slate-100 pb-3">
-                                <h3 class="text-xs font-black text-slate-800 uppercase tracking-wide">Attendance Summary</h3>
-                                <span class="text-[10px] font-black uppercase tracking-wider text-sky-700 bg-sky-50 px-2.5 py-0.5 rounded-md font-mono">{{ $att['rate'] }}% Rate</span>
+                    {{-- Right Column (lg:col-span-5) --}}
+                    <div class="lg:col-span-5 space-y-6">
+                        {{-- 1. Recent Results Mini-Table --}}
+                        <div class="rounded-3xl border border-slate-200/90 bg-white p-5 sm:p-6 shadow-xs">
+                            <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+                                <h3 class="text-xs font-black uppercase tracking-wider text-slate-800 flex items-center gap-2">
+                                    <span class="h-2 w-2 rounded-full bg-emerald-500"></span>
+                                    Recent Results
+                                </h3>
+                                <button type="button" wire:click="$set('activeTab', 'results')" class="text-[11px] font-bold text-indigo-600 hover:text-indigo-800 transition">
+                                    View All &rarr;
+                                </button>
                             </div>
-                            <div class="grid grid-cols-4 gap-2 text-center">
-                                <div class="rounded-2xl bg-emerald-50/70 border border-emerald-100 p-2.5">
-                                    <div class="text-lg sm:text-xl font-black text-emerald-600">{{ $att['present'] }}</div>
-                                    <div class="text-[8px] sm:text-[9px] uppercase tracking-wider font-extrabold text-emerald-600 mt-0.5">Present</div>
-                                </div>
-                                <div class="rounded-2xl bg-amber-50/70 border border-amber-100 p-2.5">
-                                    <div class="text-lg sm:text-xl font-black text-amber-600">{{ $att['late'] }}</div>
-                                    <div class="text-[8px] sm:text-[9px] uppercase tracking-wider font-extrabold text-amber-600 mt-0.5">Late</div>
-                                </div>
-                                <div class="rounded-2xl bg-purple-50/70 border border-purple-100 p-2.5">
-                                    <div class="text-lg sm:text-xl font-black text-purple-600">{{ $att['excused'] }}</div>
-                                    <div class="text-[8px] sm:text-[9px] uppercase tracking-wider font-extrabold text-purple-600 mt-0.5">Excused</div>
-                                </div>
-                                <div class="rounded-2xl bg-rose-50/70 border border-rose-100 p-2.5">
-                                    <div class="text-lg sm:text-xl font-black text-rose-600">{{ $att['absent'] }}</div>
-                                    <div class="text-[8px] sm:text-[9px] uppercase tracking-wider font-extrabold text-rose-600 mt-0.5">Absent</div>
-                                </div>
-                            </div>
-                            <button type="button" wire:click="$set('activeTab', 'attendance')"
-                                    class="mt-4 w-full py-2.5 px-3 text-xs font-bold text-sky-700 bg-sky-50 hover:bg-sky-100 rounded-xl transition flex items-center justify-center gap-1.5 active:scale-[0.98]">
-                                <span>Open Full Attendance Tracker</span>
-                                <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
-                            </button>
-                        </div>
 
-                        {{-- Recent Homework Assignment --}}
-                        <div class="rounded-3xl border border-slate-200 bg-white p-5 sm:p-6 shadow-sm flex flex-col">
-                            <div class="mb-4 flex items-center justify-between border-b border-slate-100 pb-3">
-                                <h3 class="text-xs font-black text-slate-800 uppercase tracking-wide">Recent Homework</h3>
-                                <span class="text-[10px] font-black uppercase tracking-wider text-indigo-700 bg-indigo-50 px-2.5 py-0.5 rounded-md">Tasks</span>
-                            </div>
-                            
                             @php
-                                $nextHw = $homework->first();
+                                $recentScores = $scores->take(4);
                             @endphp
-                            @if($nextHw)
-                                @php
-                                    $sub = $nextHw->submissions->first();
-                                    $done = (bool) $sub;
-                                    $late = !$done && $nextHw->due_date->isPast();
-                                    $statusBadge = $done ? 'bg-emerald-50 text-emerald-700 border border-emerald-100' : ($late ? 'bg-rose-50 text-rose-700 border border-rose-100' : 'bg-amber-50 text-amber-700 border border-amber-100');
-                                @endphp
-                                <div class="rounded-2xl border border-slate-100 bg-slate-50/50 p-4">
-                                    <div class="flex items-center justify-between gap-3 mb-2">
-                                        <span class="text-[9px] font-black uppercase tracking-wider text-slate-600 bg-white border border-slate-200 px-2 py-0.5 rounded-md">{{ $nextHw->subject?->name }}</span>
-                                        <span class="rounded-md border px-2 py-0.5 text-[9px] font-black uppercase tracking-wider {{ $statusBadge }}">
-                                            {{ $done ? 'Submitted' : ($late ? 'Overdue' : 'Pending') }}
-                                        </span>
-                                    </div>
-                                    <h4 class="text-sm font-black text-slate-800 leading-snug truncate">{{ $nextHw->title }}</h4>
-                                    <p class="text-[10px] text-slate-400 font-bold mt-1">Due: {{ $nextHw->due_date->format('l, d M, Y') }}</p>
-                                    <button type="button" wire:click="$set('activeTab', 'homework')" class="w-full mt-3.5 btn-primary text-xs py-2.5 rounded-xl flex items-center justify-center gap-1.5 shadow-md shadow-indigo-600/10 active:scale-[0.98]" wire:loading.attr="disabled" wire:loading.class="opacity-50 cursor-wait">
-                                        View Homework Tracker
-                                        <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
-                                    </button>
+
+                            @if($recentScores->isEmpty())
+                                <div class="py-8 text-center text-xs font-bold text-slate-400 bg-slate-50 rounded-2xl border border-dashed border-slate-200 mt-3">
+                                    No published test or exam results yet.
                                 </div>
                             @else
-                                <div class="py-8 text-center text-sm font-bold text-slate-400 bg-slate-50 rounded-2xl border border-dashed border-slate-200">
-                                    No homework assigned recently.
+                                <div class="divide-y divide-slate-100 mt-2">
+                                    @foreach($recentScores as $sc)
+                                        <div class="py-2.5 flex items-center justify-between gap-3">
+                                            <div class="min-w-0">
+                                                <h4 class="text-xs font-bold text-slate-800 truncate">{{ $sc->subject?->name }}</h4>
+                                                <span class="text-[10px] text-slate-400">CA: {{ $sc->ca1_score + $sc->ca2_score }} | Exam: {{ $sc->exam_score }}</span>
+                                            </div>
+                                            <div class="flex items-center gap-2 shrink-0">
+                                                <span class="text-xs font-black text-slate-800">{{ $sc->total }}/{{ $maxTotal }}</span>
+                                                <span class="inline-flex items-center justify-center h-6 w-6 rounded-lg text-[10px] font-black border {{ $gradeColor($sc->grade) }}">
+                                                    {{ $sc->grade }}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    @endforeach
                                 </div>
                             @endif
+                        </div>
+
+                        {{-- 2. Attendance History Mini Calendar --}}
+                        <div class="rounded-3xl border border-slate-200/90 bg-white p-5 sm:p-6 shadow-xs">
+                            <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+                                <h3 class="text-xs font-black uppercase tracking-wider text-slate-800 flex items-center gap-2">
+                                    <span class="h-2 w-2 rounded-full bg-sky-500"></span>
+                                    Attendance History
+                                </h3>
+                                <div class="flex items-center gap-1.5">
+                                    <button type="button" wire:click="prevAttendanceMonth" class="h-7 w-7 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 flex items-center justify-center transition active:scale-95" title="Previous Month">
+                                        <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+                                    </button>
+                                    <span class="text-xs font-bold text-slate-700 min-w-[90px] text-center">{{ $calData['month'] }}</span>
+                                    <button type="button" wire:click="nextAttendanceMonth" class="h-7 w-7 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 flex items-center justify-center transition active:scale-95" title="Next Month">
+                                        <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+                                    </button>
+                                </div>
+                            </div>
+
+                            {{-- Mini Calendar Grid --}}
+                            <div class="mt-3">
+                                <div class="grid grid-cols-7 gap-1 text-center text-[10px] font-bold text-slate-400 mb-1">
+                                    <span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span><span>S</span>
+                                </div>
+                                <div class="grid grid-cols-7 gap-1 text-center">
+                                    @foreach($calData['weeks'] as $week)
+                                        @foreach($week as $day)
+                                            <div class="h-8 flex flex-col items-center justify-center rounded-lg text-xs {{ !empty($day['is_today']) ? 'bg-indigo-50 font-black text-indigo-700 ring-1 ring-indigo-300' : (!empty($day['is_weekend']) ? 'text-slate-300' : 'text-slate-700') }}">
+                                                @if($day['day'])
+                                                    <span class="text-[11px] leading-none">{{ $day['day'] }}</span>
+                                                    @if($day['status'] === 'present')
+                                                        <span class="h-1.5 w-1.5 rounded-full bg-emerald-500 mt-0.5"></span>
+                                                    @elseif($day['status'] === 'absent')
+                                                        <span class="h-1.5 w-1.5 rounded-full bg-rose-500 mt-0.5"></span>
+                                                    @elseif(in_array($day['status'], ['late', 'excused']))
+                                                        <span class="h-1.5 w-1.5 rounded-full bg-amber-500 mt-0.5"></span>
+                                                    @else
+                                                        <span class="h-1.5 w-1.5 opacity-0 mt-0.5"></span>
+                                                    @endif
+                                                @endif
+                                            </div>
+                                        @endforeach
+                                    @endforeach
+                                </div>
+                            </div>
+
+                            {{-- Legend --}}
+                            <div class="flex items-center justify-between text-[10px] font-bold text-slate-500 pt-3 mt-2 border-t border-slate-100">
+                                <span class="flex items-center gap-1"><span class="h-2 w-2 rounded-full bg-emerald-500"></span> Present</span>
+                                <span class="flex items-center gap-1"><span class="h-2 w-2 rounded-full bg-rose-500"></span> Absent</span>
+                                <span class="flex items-center gap-1"><span class="h-2 w-2 rounded-full bg-amber-500"></span> Late/Excused</span>
+                            </div>
+                        </div>
+
+                        {{-- 3. Upcoming Homework --}}
+                        <div class="rounded-3xl border border-slate-200/90 bg-white p-5 sm:p-6 shadow-xs">
+                            <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+                                <h3 class="text-xs font-black uppercase tracking-wider text-slate-800 flex items-center gap-2">
+                                    <span class="h-2 w-2 rounded-full bg-indigo-500"></span>
+                                    Upcoming Homework
+                                </h3>
+                                <button type="button" wire:click="$set('activeTab', 'homework')" class="text-[11px] font-bold text-indigo-600 hover:text-indigo-800 transition">
+                                    View All &rarr;
+                                </button>
+                            </div>
+
+                            @php
+                                $upcomingHw = $homework->take(2);
+                            @endphp
+
+                            @if($upcomingHw->isEmpty())
+                                <div class="py-8 text-center text-xs font-bold text-slate-400 bg-slate-50 rounded-2xl border border-dashed border-slate-200 mt-3">
+                                    No pending homework assignments.
+                                </div>
+                            @else
+                                <div class="space-y-3 mt-3">
+                                    @foreach($upcomingHw as $hw)
+                                        @php
+                                            $isDone = (bool) $hw->submissions->first();
+                                            $isLate = !$isDone && $hw->due_date->isPast();
+                                        @endphp
+                                        <div class="p-3 rounded-2xl bg-slate-50 border border-slate-100 flex items-start justify-between gap-3">
+                                            <div class="min-w-0">
+                                                <div class="flex items-center gap-1.5 mb-1">
+                                                    <span class="text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded bg-white border border-slate-200 text-slate-600">
+                                                        {{ $hw->subject?->name }}
+                                                    </span>
+                                                    <span class="text-[9px] font-bold text-slate-400">Due {{ $hw->due_date->format('M d') }}</span>
+                                                </div>
+                                                <h4 class="text-xs font-bold text-slate-800 truncate">{{ $hw->title }}</h4>
+                                            </div>
+                                            <span class="px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider border shrink-0 {{ $isDone ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : ($isLate ? 'bg-rose-50 text-rose-700 border-rose-200' : 'bg-amber-50 text-amber-700 border-amber-200') }}">
+                                                {{ $isDone ? 'Done' : ($isLate ? 'Late' : 'Pending') }}
+                                            </span>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            @endif
+                        </div>
+
+                        {{-- 4. School Announcements / Notices --}}
+                        <div class="rounded-3xl border border-slate-200/90 bg-white p-5 sm:p-6 shadow-xs">
+                            <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+                                <h3 class="text-xs font-black uppercase tracking-wider text-slate-800 flex items-center gap-2">
+                                    <span class="h-2 w-2 rounded-full bg-amber-500"></span>
+                                    School Announcements
+                                </h3>
+                                <span class="text-[10px] font-black uppercase tracking-wider bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full">Notice</span>
+                            </div>
+
+                            @forelse($this->announcements->take(1) as $ann)
+                                <div class="mt-3 p-3.5 rounded-2xl bg-slate-50 border border-slate-100">
+                                    <div class="flex items-center justify-between gap-2 mb-1">
+                                        <span class="text-[9px] font-black uppercase tracking-wider text-amber-700 bg-amber-100 px-1.5 py-0.5 rounded">
+                                            {{ $ann->priority ?? 'General' }}
+                                        </span>
+                                        <span class="text-[10px] font-bold text-slate-400">{{ $ann->created_at->format('M d, Y') }}</span>
+                                    </div>
+                                    <h4 class="text-xs font-black text-slate-800 leading-snug">{{ $ann->title }}</h4>
+                                    <p class="text-[11px] text-slate-600 mt-1 line-clamp-2">{{ $ann->content }}</p>
+                                </div>
+                            @empty
+                                <div class="py-6 text-center text-xs font-bold text-slate-400 bg-slate-50 rounded-2xl border border-dashed border-slate-200 mt-3">
+                                    No announcements at this time.
+                                </div>
+                            @endforelse
                         </div>
                     </div>
                 </div>
