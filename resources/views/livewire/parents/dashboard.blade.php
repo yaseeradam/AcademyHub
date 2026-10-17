@@ -1196,11 +1196,18 @@
                             </h3>
                             <p class="text-xs text-slate-500 font-semibold mt-0.5">Submitted doctor, illness, and family emergency notices for {{ $child->full_name }}</p>
                         </div>
-                        <button type="button" wire:click="openAbsenceModal"
-                                class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-purple-50 hover:bg-purple-100 text-purple-700 text-xs font-bold transition">
-                            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
-                            <span>New Leave Note</span>
-                        </button>
+                        <div class="flex items-center gap-2">
+                            <a href="{{ route('parents.excuse-requests', ['child' => $child->id]) }}" wire:navigate
+                               class="inline-flex items-center gap-1 px-3 py-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-bold transition shadow-2xs">
+                                <span>Manage All</span>
+                                <svg class="w-3.5 h-3.5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+                            </a>
+                            <button type="button" wire:click="openAbsenceModal"
+                                    class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-purple-50 hover:bg-purple-100 text-purple-700 text-xs font-bold transition">
+                                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+                                <span>New Leave Note</span>
+                            </button>
+                        </div>
                     </div>
 
                     @if($absenceRequests->isEmpty())

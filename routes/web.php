@@ -280,6 +280,7 @@ Route::middleware(['auth', 'active'])->group(function () {
     Route::middleware('role:parent')->group(function () {
         Route::get('/parents/dashboard', \App\Livewire\Parents\Dashboard::class)->name('parents.dashboard');
         Route::get('/parents/performance', \App\Livewire\Student\Performance::class)->name('parents.performance');
+        Route::get('/parents/excuse-requests', \App\Livewire\Parents\ExcuseRequest::class)->name('parents.excuse-requests');
     });
 
     // Payment Gateway — only accessible after purchasing/installing the Payment Gateway plugin
@@ -312,6 +313,7 @@ Route::middleware(['auth', 'active'])->group(function () {
         Route::get('/classes/{class}/subjects', ManageSubjects::class)->middleware('role:admin')->name('classes.subjects');
         Route::get('/subjects', [SubjectController::class, 'index'])->name('subjects.index');
         Route::get('/attendance', AttendanceIndex::class)->name('attendance');
+        Route::get('/attendance/excuse-requests', \App\Livewire\Parents\ExcuseRequest::class)->name('attendance.excuses');
         Route::get('/data-collection', DataCollectionWeekly::class)->middleware('permission:data_collection.submit')->name('data-collection');
         Route::view('/examination', 'pages.examination.index')->name('examination');
         // CBT — only accessible after purchasing/installing the CBT plugin

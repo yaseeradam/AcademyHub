@@ -48,6 +48,11 @@ HTML;
         '<path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>',
         request()->routeIs('students.*')) !!}
 
+    {!! $navLink(route('parents.excuse-requests'), 'Excuse Request',
+        'bg-amber-100', 'text-amber-600',
+        '<path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>',
+        request()->routeIs('parents.excuse-requests*')) !!}
+
     {!! $navLink(route('timetable'), 'Timetable',
         'bg-sky-100', 'text-sky-500',
         '<path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>',
@@ -244,7 +249,12 @@ HTML;
                     {!! $navLink(route('attendance'), 'Attendance',
                         'bg-teal-100', 'text-teal-500',
                         '<path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>',
-                        request()->routeIs('attendance')) !!}
+                        request()->routeIs('attendance') && !request()->routeIs('attendance.excuses*')) !!}
+
+                    {!! $navLink(route('attendance.excuses'), 'Excuse Requests',
+                        'bg-amber-100', 'text-amber-600',
+                        '<path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>',
+                        request()->routeIs('attendance.excuses*')) !!}
                 @endif
 
                 @if($user?->role === 'admin' || $user?->role === 'bursar')
