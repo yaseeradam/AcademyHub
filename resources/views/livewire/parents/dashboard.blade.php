@@ -246,45 +246,45 @@
 
                     <div class="grid grid-cols-2 gap-3 mt-4">
                         {{-- 1. Overall Attendance --}}
-                        <div class="rounded-2xl bg-[#f0f9ff] p-3.5 flex flex-col justify-between border border-sky-100/60">
-                            <div class="w-8 h-8 rounded-xl bg-white text-sky-600 flex items-center justify-center shadow-2xs">
+                        <div class="rounded-2xl bg-[#f0f9ff] p-3.5 flex flex-col justify-between border border-sky-100/60 shadow-2xs">
+                            <div class="w-8 h-8 rounded-xl bg-white text-sky-600 flex items-center justify-center shadow-xs">
                                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
                             </div>
                             <div class="mt-3">
-                                <div class="text-2xl font-black text-slate-900 leading-none">{{ $summary['overall_attendance'] }}%</div>
+                                <div class="text-2xl font-black text-sky-600 leading-none">{{ $summary['overall_attendance'] }}%</div>
                                 <div class="text-[11px] font-semibold text-slate-500 mt-1">Overall Attendance</div>
                             </div>
                         </div>
 
                         {{-- 2. Average Performance --}}
-                        <div class="rounded-2xl bg-[#f5f3ff] p-3.5 flex flex-col justify-between border border-indigo-100/60">
-                            <div class="w-8 h-8 rounded-xl bg-white text-indigo-600 flex items-center justify-center shadow-2xs">
+                        <div class="rounded-2xl bg-[#f5f3ff] p-3.5 flex flex-col justify-between border border-indigo-100/60 shadow-2xs">
+                            <div class="w-8 h-8 rounded-xl bg-white text-indigo-600 flex items-center justify-center shadow-xs">
                                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 14l9-5-9-5-9 5 9 5z"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"/></svg>
                             </div>
                             <div class="mt-3">
-                                <div class="text-2xl font-black text-slate-900 leading-none">{{ $summary['average_performance'] > 0 ? $summary['average_performance'] . '%' : '--' }}</div>
+                                <div class="text-2xl font-black text-indigo-600 leading-none">{{ $summary['average_performance'] > 0 ? $summary['average_performance'] . '%' : '--' }}</div>
                                 <div class="text-[11px] font-semibold text-slate-500 mt-1">Average Performance</div>
                             </div>
                         </div>
 
                         {{-- 3. Total Outstanding Fees --}}
-                        <div class="rounded-2xl bg-[#ecfdf5] p-3.5 flex flex-col justify-between border border-emerald-100/60">
-                            <div class="w-8 h-8 rounded-xl bg-white text-emerald-600 flex items-center justify-center shadow-2xs">
+                        <div class="rounded-2xl bg-[#ecfdf5] p-3.5 flex flex-col justify-between border border-emerald-100/60 shadow-2xs">
+                            <div class="w-8 h-8 rounded-xl bg-white text-emerald-600 flex items-center justify-center shadow-xs">
                                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"/></svg>
                             </div>
                             <div class="mt-3">
-                                <div class="text-xl sm:text-2xl font-black text-slate-900 leading-none truncate">₦{{ number_format($summary['total_outstanding_fees']) }}</div>
+                                <div class="text-xl sm:text-2xl font-black text-emerald-600 leading-none truncate">₦{{ number_format($summary['total_outstanding_fees']) }}</div>
                                 <div class="text-[11px] font-semibold text-slate-500 mt-1 truncate">Total Outstanding Fees</div>
                             </div>
                         </div>
 
                         {{-- 4. Pending Homework --}}
-                        <div class="rounded-2xl bg-[#faf5ff] p-3.5 flex flex-col justify-between border border-purple-100/60">
-                            <div class="w-8 h-8 rounded-xl bg-white text-purple-600 flex items-center justify-center shadow-2xs">
+                        <div class="rounded-2xl bg-[#faf5ff] p-3.5 flex flex-col justify-between border border-purple-100/60 shadow-2xs">
+                            <div class="w-8 h-8 rounded-xl bg-white text-purple-600 flex items-center justify-center shadow-xs">
                                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
                             </div>
                             <div class="mt-3">
-                                <div class="text-2xl font-black text-slate-900 leading-none">{{ $summary['total_pending_homework'] }}</div>
+                                <div class="text-2xl font-black text-purple-600 leading-none">{{ $summary['total_pending_homework'] }}</div>
                                 <div class="text-[11px] font-semibold text-slate-500 mt-1">Pending Homework</div>
                             </div>
                         </div>
@@ -313,8 +313,20 @@
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-3.5 mt-4">
                 @foreach ($updates as $up)
-                    <div class="rounded-2xl border border-slate-100 bg-slate-50/70 p-3.5 flex items-start gap-3 transition hover:bg-slate-50">
-                        <div class="w-8 h-8 rounded-xl {{ $up['icon_color'] }} flex items-center justify-center shrink-0 shadow-2xs">
+                    @php
+                        $cardStyle = match($up['type']) {
+                            'fee'      => 'border-rose-100 bg-gradient-to-br from-rose-50/90 via-rose-50/50 to-white hover:border-rose-200',
+                            'homework' => 'border-sky-100 bg-gradient-to-br from-sky-50/90 via-sky-50/50 to-white hover:border-sky-200',
+                            default    => 'border-emerald-100 bg-gradient-to-br from-emerald-50/90 via-emerald-50/50 to-white hover:border-emerald-200',
+                        };
+                        $iconBox = match($up['type']) {
+                            'fee'      => 'bg-white text-rose-600',
+                            'homework' => 'bg-white text-sky-600',
+                            default    => 'bg-white text-emerald-600',
+                        };
+                    @endphp
+                    <div class="rounded-2xl border {{ $cardStyle }} p-3.5 flex items-start gap-3 transition shadow-2xs">
+                        <div class="w-8 h-8 rounded-xl {{ $iconBox }} flex items-center justify-center shrink-0 shadow-xs">
                             @if($up['type'] === 'fee')
                                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"/></svg>
                             @elseif($up['type'] === 'homework')
@@ -526,17 +538,17 @@
                 {{-- 4 Hero KPI Cards Matching Mockup --}}
                 <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
                     {{-- 1. Academic Average --}}
-                    <div class="rounded-3xl border border-slate-200/90 bg-white p-5 shadow-xs flex flex-col justify-between">
+                    <div class="rounded-3xl border border-emerald-100/80 bg-gradient-to-br from-emerald-50/70 via-emerald-50/30 to-white p-5 shadow-2xs hover:shadow-xs hover:border-emerald-200 transition flex flex-col justify-between">
                         <div class="flex items-start gap-3">
-                            <div class="h-10 w-10 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
+                            <div class="h-10 w-10 rounded-2xl bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0 shadow-xs">
                                 <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 14l9-5-9-5-9 5 9 5z"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"/></svg>
                             </div>
                             <div class="min-w-0">
-                                <div class="text-2xl sm:text-3xl font-black text-slate-900 leading-tight">
+                                <div class="text-2xl sm:text-3xl font-black text-emerald-600 leading-tight">
                                     {{ $stats['average'] }}%
                                 </div>
                                 <span class="text-[11px] font-semibold text-slate-500 block truncate">Academic Average</span>
-                                <span class="text-[10px] font-bold text-emerald-600 mt-0.5 block truncate">
+                                <span class="text-[10px] font-black text-emerald-700 mt-0.5 block truncate">
                                     &uarr; 12% from last term
                                 </span>
                             </div>
@@ -544,17 +556,17 @@
                     </div>
 
                     {{-- 2. Class Position --}}
-                    <div class="rounded-3xl border border-slate-200/90 bg-white p-5 shadow-xs flex flex-col justify-between">
+                    <div class="rounded-3xl border border-purple-100/80 bg-gradient-to-br from-purple-50/70 via-purple-50/30 to-white p-5 shadow-2xs hover:shadow-xs hover:border-purple-200 transition flex flex-col justify-between">
                         <div class="flex items-start gap-3">
-                            <div class="h-10 w-10 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center shrink-0">
+                            <div class="h-10 w-10 rounded-2xl bg-purple-100 text-purple-600 flex items-center justify-center shrink-0 shadow-xs">
                                 <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/></svg>
                             </div>
                             <div class="min-w-0">
-                                <div class="text-2xl sm:text-3xl font-black text-slate-900 leading-tight">
+                                <div class="text-2xl sm:text-3xl font-black text-purple-600 leading-tight">
                                     {{ $published && $stats['position'] ? $ordinal($stats['position']) : '1st' }}
                                 </div>
                                 <span class="text-[11px] font-semibold text-slate-500 block truncate">Class Position</span>
-                                <span class="text-[10px] font-medium text-slate-400 mt-0.5 block truncate">
+                                <span class="text-[10px] font-semibold text-purple-400 mt-0.5 block truncate">
                                     (out of {{ $stats['classSize'] ?: 15 }})
                                 </span>
                             </div>
@@ -562,17 +574,17 @@
                     </div>
 
                     {{-- 3. Attendance Rate --}}
-                    <div class="rounded-3xl border border-slate-200/90 bg-white p-5 shadow-xs flex flex-col justify-between">
+                    <div class="rounded-3xl border border-sky-100/80 bg-gradient-to-br from-sky-50/70 via-sky-50/30 to-white p-5 shadow-2xs hover:shadow-xs hover:border-sky-200 transition flex flex-col justify-between">
                         <div class="flex items-start gap-3">
-                            <div class="h-10 w-10 rounded-2xl bg-sky-50 text-sky-600 flex items-center justify-center shrink-0">
+                            <div class="h-10 w-10 rounded-2xl bg-sky-100 text-sky-600 flex items-center justify-center shrink-0 shadow-xs">
                                 <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
                             </div>
                             <div class="min-w-0">
-                                <div class="text-2xl sm:text-3xl font-black text-slate-900 leading-tight">
+                                <div class="text-2xl sm:text-3xl font-black text-sky-600 leading-tight">
                                     {{ $att['rate'] }}%
                                 </div>
                                 <span class="text-[11px] font-semibold text-slate-500 block truncate">Attendance</span>
-                                <span class="text-[10px] font-medium text-slate-400 mt-0.5 block truncate">
+                                <span class="text-[10px] font-semibold text-sky-400 mt-0.5 block truncate">
                                     (This term)
                                 </span>
                             </div>
@@ -580,13 +592,13 @@
                     </div>
 
                     {{-- 4. Fee Balance --}}
-                    <div class="rounded-3xl border border-slate-200/90 bg-white p-5 shadow-xs flex flex-col justify-between">
+                    <div class="rounded-3xl border border-amber-100/80 bg-gradient-to-br from-amber-50/70 via-amber-50/30 to-white p-5 shadow-2xs hover:shadow-xs hover:border-amber-200 transition flex flex-col justify-between">
                         <div class="flex items-start gap-3">
-                            <div class="h-10 w-10 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
+                            <div class="h-10 w-10 rounded-2xl bg-amber-100 text-amber-600 flex items-center justify-center shrink-0 shadow-xs">
                                 <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"/></svg>
                             </div>
                             <div class="min-w-0">
-                                <div class="text-2xl sm:text-3xl font-black text-slate-900 leading-tight truncate">
+                                <div class="text-2xl sm:text-3xl font-black text-amber-600 leading-tight truncate">
                                     ₦{{ number_format($fees['outstanding'], 2) }}
                                 </div>
                                 <span class="text-[11px] font-semibold text-slate-500 block truncate">Outstanding Fees</span>
