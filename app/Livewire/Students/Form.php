@@ -76,11 +76,36 @@ class Form extends Component
             $this->guardian_name = $student->guardian_name;
             $this->guardian_phone = $student->guardian_phone;
             $this->guardian_address = $student->guardian_address;
-            $this->status = $student->status;
-            $this->customFieldValues = $student->custom_fields ?? [];
+            $customValues = $student->custom_fields ?? [];
+            foreach ($this->customFields as $field) {
+                if ($field->type === 'date' && !empty($customValues[$field->name])) {
+                    $customValues[$field->name] = $this->normalizeDateValue($customValues[$field->name]);
+                }
+            }
+            $this->customFieldValues = $customValues;
             $this->parent_ids = $student->parents()->pluck('users.id')->map(fn($id) => (string) $id)->toArray();
         } else {
             $this->admission_number = $this->generateAdmissionNumber();
+        }
+    }
+
+    public function normalizeDateValue($value): ?string
+    {
+        if (empty($value)) {
+            return null;
+        }
+
+        $value = trim((string) $value);
+        if ($value === '') {
+            return null;
+        }
+
+        try {
+            // Strip ordinal suffixes like 14th -> 14, 1st -> 1
+            $clean = preg_replace('/(\d+)(st|nd|rd|th)/i', '$1', $value);
+            return \Carbon\Carbon::parse($clean)->format('Y-m-d');
+        } catch (\Throwable $e) {
+            return $value;
         }
     }
 
@@ -152,6 +177,23 @@ class Form extends Component
 
         $tenantId = auth()->user()?->tenant_id;
 
+        // Clean up dob if empty string
+        if ($this->dob === '') {
+            $this->dob = null;
+        }
+
+        // Normalize date custom fields and trim strings before validation
+        foreach ($this->customFields as $field) {
+            if ($field->type === 'date') {
+                if (isset($this->customFieldValues[$field->name])) {
+                    $this->customFieldValues[$field->name] = $this->normalizeDateValue($this->customFieldValues[$field->name]);
+                }
+            } elseif (isset($this->customFieldValues[$field->name]) && is_string($this->customFieldValues[$field->name])) {
+                $trimmed = trim($this->customFieldValues[$field->name]);
+                $this->customFieldValues[$field->name] = $trimmed === '' ? null : $trimmed;
+            }
+        }
+
         $rules = [
             'first_name' => ['required', 'string', 'max:255'],
             'last_name' => ['required', 'string', 'max:255'],
@@ -201,7 +243,13 @@ class Form extends Component
             
             switch ($field->type) {
                 case 'number':
-                    $fieldRules[] = 'numeric';
+                    $isPhone = str_contains(strtolower($field->name), 'phone') || str_contains(strtolower($field->label), 'phone');
+                    if ($isPhone) {
+                        $fieldRules[] = 'string';
+                        $fieldRules[] = 'max:30';
+                    } else {
+                        $fieldRules[] = 'numeric';
+                    }
                     break;
                 case 'date':
                     $fieldRules[] = 'date';
@@ -209,9 +257,13 @@ class Form extends Component
                 case 'checkbox':
                     $fieldRules[] = 'boolean';
                     break;
+                case 'textarea':
+                    $fieldRules[] = 'string';
+                    $fieldRules[] = 'max:10000';
+                    break;
                 default:
                     $fieldRules[] = 'string';
-                    $fieldRules[] = 'max:255';
+                    $fieldRules[] = 'max:2000';
             }
             
             $rules["customFieldValues.{$field->name}"] = $fieldRules;
@@ -233,7 +285,9 @@ class Form extends Component
         try {
             $data = $this->validate($rules);
         } catch (\Illuminate\Validation\ValidationException $e) {
-            $this->dispatch('validation-error');
+            $this->dispatch('validation-error', [
+                'errors' => $e->validator->errors()->all(),
+            ]);
             throw $e;
         }
 

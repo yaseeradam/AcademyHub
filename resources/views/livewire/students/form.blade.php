@@ -529,9 +529,33 @@
 @script
     let progressModal = null;
 
-    $wire.on('validation-error', () => {
+    $wire.on('validation-error', (event) => {
         if (progressModal) { progressModal.remove(); progressModal = null; }
-        showModal('error', 'Validation Error', 'Please fix the validation errors before saving.');
+        
+        let data = event;
+        if (event && typeof event === 'object') {
+            if ('detail' in event) data = event.detail;
+            else if (Array.isArray(event) && event[0]) data = event[0];
+        }
+        if (Array.isArray(data)) data = data[0];
+
+        const errorList = Array.isArray(data?.errors) && data.errors.length > 0 ? data.errors : [];
+        let message = 'Please fix the validation errors before saving.';
+        if (errorList.length > 0) {
+            message = `<div class="text-left"><p class="mb-2 font-medium text-gray-700">Please correct the following before saving:</p><ul class="list-disc pl-5 space-y-1 text-sm text-red-600 font-normal">`
+                + errorList.slice(0, 6).map(err => `<li>${err}</li>`).join('')
+                + (errorList.length > 6 ? `<li>...and ${errorList.length - 6} more</li>` : '')
+                + `</ul></div>`;
+        }
+
+        showModal('error', 'Validation Error', message);
+
+        setTimeout(() => {
+            const firstError = document.querySelector('.text-red-500, .text-red-600, .border-red-500, [aria-invalid="true"]');
+            if (firstError) {
+                firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }, 300);
     });
 
     $wire.on('upload-error', (event) => {
@@ -604,32 +628,37 @@
             success: { bg: 'from-emerald-500 to-teal-500', icon: 'M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z' },
             error: { bg: 'from-rose-500 to-red-500', icon: 'M9.75 9.75l4.5 4.5m0-4.5l-4.5 4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z' }
         };
+        const color = colors[type] || colors.error;
         
         modal.innerHTML = `
             <div class="bg-white rounded-3xl shadow-2xl max-w-md w-full transform" style="animation: slideUp 0.3s ease-out">
-                <div class="bg-gradient-to-r ${colors[type].bg} p-6 rounded-t-3xl">
+                <div class="bg-gradient-to-r ${color.bg} p-6 rounded-t-3xl">
                     <div class="flex items-center gap-4">
                         <div class="flex-shrink-0">
                             <svg class="h-12 w-12 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="${colors[type].icon}" />
+                                <path stroke-linecap="round" stroke-linejoin="round" d="${color.icon}" />
                             </svg>
                         </div>
                         <h3 class="text-2xl font-bold text-white">${title}</h3>
                     </div>
                 </div>
                 <div class="p-6">
-                    <p class="text-gray-700 text-lg leading-relaxed">${message}</p>
+                    <div class="text-gray-700 text-base leading-relaxed">${message}</div>
                 </div>
                 <div class="p-6 pt-0 flex gap-3">
-                    <button onclick="this.closest('.fixed').remove(); ${onClose ? 'arguments[0]()' : ''}" class="flex-1 bg-gradient-to-r ${colors[type].bg} text-white font-bold py-3 px-6 rounded-xl hover:shadow-lg transition-all" aria-label="Close">
+                    <button type="button" class="modal-btn-close flex-1 bg-gradient-to-r ${color.bg} text-white font-bold py-3 px-6 rounded-xl hover:shadow-lg transition-all" aria-label="Close">
                         ${type === 'success' ? 'View Students' : 'Close'}
                     </button>
                 </div>
             </div>
         `;
         
-        if (onClose) {
-            modal.querySelector('button').onclick = () => { modal.remove(); onClose(); };
+        const closeBtn = modal.querySelector('.modal-btn-close');
+        if (closeBtn) {
+            closeBtn.onclick = () => {
+                modal.remove();
+                if (onClose) onClose();
+            };
         }
         
         document.body.appendChild(modal);
