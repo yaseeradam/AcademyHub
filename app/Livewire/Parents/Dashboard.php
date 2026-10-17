@@ -37,6 +37,11 @@ class Dashboard extends Component
     public string $absenceReason = 'Illness / Medical';
     public string $absenceNotes = '';
 
+    // Add Child Modal State
+    public bool $showAddChildModal = false;
+    public string $addChildAdmissionNumber = '';
+    public string $addChildErrorMessage = '';
+
     public function mount(): void
     {
         $tenant = auth()->user()?->tenant;
@@ -360,12 +365,12 @@ class Dashboard extends Component
             ->get();
 
         $daysInMonth = $startOfMonth->daysInMonth;
-        $startDayOfWeek = $startOfMonth->dayOfWeekIso; // 1 (Mon) - 7 (Sun)
+        $startDayOfWeek = $startOfMonth->dayOfWeek; // 0 (Sun) - 6 (Sat)
 
         $calendarDays = [];
 
-        // Leading empty slots for proper alignment to Monday
-        for ($i = 1; $i < $startDayOfWeek; $i++) {
+        // Leading empty slots for proper alignment to Sunday
+        for ($i = 0; $i < $startDayOfWeek; $i++) {
             $calendarDays[] = [
                 'day'        => null,
                 'date'       => null,
@@ -515,6 +520,49 @@ class Dashboard extends Component
             $excuse->delete();
             $this->dispatch('alert', message: 'Absence request removed.', type: 'info');
         }
+    }
+
+    public function openAddChildModal(): void
+    {
+        $this->addChildAdmissionNumber = '';
+        $this->addChildErrorMessage = '';
+        $this->showAddChildModal = true;
+    }
+
+    public function closeAddChildModal(): void
+    {
+        $this->showAddChildModal = false;
+        $this->addChildErrorMessage = '';
+    }
+
+    public function submitAddChild(): void
+    {
+        $this->validate([
+            'addChildAdmissionNumber' => 'required|string|min:3',
+        ]);
+
+        $tenant = auth()->user()?->tenant;
+        if (! $tenant) {
+            $this->addChildErrorMessage = 'Unauthorized.';
+            return;
+        }
+
+        $student = Student::where('tenant_id', $tenant->id)
+            ->where(function ($q) {
+                $adm = trim($this->addChildAdmissionNumber);
+                $q->where('admission_number', $adm)
+                  ->orWhere('admission_number', 'like', "%{$adm}%");
+            })
+            ->first();
+
+        if (! $student) {
+            $this->addChildErrorMessage = 'No student found with admission number "' . htmlspecialchars($this->addChildAdmissionNumber) . '" in this school. Please check the spelling or contact administration.';
+            return;
+        }
+
+        auth()->user()->students()->syncWithoutDetaching([$student->id]);
+        $this->showAddChildModal = false;
+        $this->dispatch('alert', message: "{$student->full_name} has been linked to your parent portal!", type: 'success');
     }
 
     public function selectChild(int $id): void
@@ -925,6 +973,40 @@ class Dashboard extends Component
         }
 
         return $chartItems;
+    }
+
+    #[Computed]
+    public function overviewRecentResults(): Collection
+    {
+        if (! $this->selectedChild) return collect();
+
+        $scores = Score::where('student_id', $this->selectedChild->id)
+            ->where('term', $this->term)
+            ->where('session', $this->session)
+            ->with('subject')
+            ->orderBy('subject_id')
+            ->take(5)
+            ->get();
+
+        if ($scores->isEmpty()) {
+            $scores = Score::where('student_id', $this->selectedChild->id)
+                ->with('subject')
+                ->latest('updated_at')
+                ->take(5)
+                ->get();
+        }
+
+        return $scores;
+    }
+
+    #[Computed]
+    public function availableSessions(): Collection
+    {
+        $sessions = AcademicSession::orderByDesc('id')->pluck('name');
+        if ($sessions->isEmpty()) {
+            return collect([$this->session ?: $this->defaultSession()]);
+        }
+        return $sessions;
     }
 
     private function defaultSession(): string
