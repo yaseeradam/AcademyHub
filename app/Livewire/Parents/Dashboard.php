@@ -699,6 +699,32 @@ class Dashboard extends Component
     }
 
     #[Computed]
+    public function timetableImage(): ?\App\Models\TimetableImage
+    {
+        if (! $this->selectedChild || ! $this->selectedChild->class_id) {
+            return null;
+        }
+
+        $classId = (int) $this->selectedChild->class_id;
+        $sectionId = $this->selectedChild->section_id ? (int) $this->selectedChild->section_id : null;
+
+        if ($sectionId) {
+            $secImg = \App\Models\TimetableImage::where('class_id', $classId)
+                ->where('section_id', $sectionId)
+                ->latest()
+                ->first();
+            if ($secImg) {
+                return $secImg;
+            }
+        }
+
+        return \App\Models\TimetableImage::where('class_id', $classId)
+            ->whereNull('section_id')
+            ->latest()
+            ->first();
+    }
+
+    #[Computed]
     public function transactions(): Collection
     {
         if (! $this->selectedChild) return collect();

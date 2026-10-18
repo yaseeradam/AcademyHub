@@ -1,21 +1,9 @@
 @php
     use App\Support\TenantSettings;
     
-    $child     = $this->selectedChild;
-    $stats     = $this->performanceStats;
-    $att       = $this->attendance;
-    $fees      = $this->fees;
-    $scores    = $this->scores;
-    $homework  = $this->homework;
-    $recent    = $this->recentAttendance;
-    $todayAtt  = $this->todayAttendance;
-    $calData   = $this->attendanceCalendarData;
-    $attHist   = $this->attendanceHistory;
-    $absenceRequests = $this->childAbsenceRequests;
-    $published = $this->resultsPublished;
-    $maxTotal  = $stats['maxTotal'] ?? 100;
+    $child = $this->selectedChild;
     
-    $ordinal   = fn($n) => $n . match(true) { 
+    $ordinal = fn($n) => $n . match(true) { 
         $n % 100 >= 11 && $n % 100 <= 13 => 'th', 
         $n % 10 === 1 => 'st', 
         $n % 10 === 2 => 'nd', 
@@ -526,6 +514,7 @@
             <div class="flex items-center gap-2 overflow-x-auto no-scrollbar py-1 px-0.5">
                 @foreach($tabs as $tabKey => $tabVal)
                     <button type="button" wire:click="$set('activeTab', '{{ $tabKey }}')"
+                            wire:loading.class="opacity-60 cursor-wait"
                             class="relative inline-flex items-center gap-2 px-4 py-2.5 text-xs font-bold transition-all duration-200 whitespace-nowrap shrink-0 border-b-2
                                    {{ $activeTab === $tabKey
                                         ? 'border-indigo-600 text-indigo-600 font-black'
@@ -540,6 +529,17 @@
         {{-- TAB CONTENT RENDERERS --}}
 
         @if($activeTab === 'overview')
+            @php
+                $stats     = $this->performanceStats;
+                $att       = $this->attendance;
+                $fees      = $this->fees;
+                $recent    = $this->recentAttendance;
+                $todayAtt  = $this->todayAttendance;
+                $calData   = $this->attendanceCalendarData;
+                $homework  = $this->homework;
+                $published = $this->resultsPublished;
+                $maxTotal  = $stats['maxTotal'] ?? 100;
+            @endphp
             <div class="space-y-6">
                 {{-- 4 Hero KPI Cards Matching Mockup --}}
                 <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
@@ -859,6 +859,13 @@
         @endif
 
         @if($activeTab === 'attendance')
+            @php
+                $att             = $this->attendance;
+                $todayAtt        = $this->todayAttendance;
+                $calData         = $this->attendanceCalendarData;
+                $attHist         = $this->attendanceHistory;
+                $absenceRequests = $this->childAbsenceRequests;
+            @endphp
             {{-- ATTENDANCE TRACKER TAB --}}
             <div class="space-y-6">
 
@@ -1423,6 +1430,12 @@
         @endif
 
         @if($activeTab === 'results')
+            @php
+                $stats     = $this->performanceStats;
+                $scores    = $this->scores;
+                $published = $this->resultsPublished;
+                $maxTotal  = $stats['maxTotal'] ?? 100;
+            @endphp
             {{-- Academic Results Tab --}}
             <div class="rounded-3xl border border-slate-200 bg-white shadow-sm overflow-hidden flex flex-col">
                 <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-slate-100 bg-slate-50/50 px-4 sm:px-6 py-4 sm:py-5">
@@ -1721,6 +1734,9 @@
         @endif
 
         @if($activeTab === 'homework')
+            @php
+                $homework = $this->homework;
+            @endphp
             {{-- Homework Tracker Tab --}}
             <div class="rounded-3xl border border-slate-200 bg-white shadow-sm overflow-hidden flex flex-col">
                 <div class="border-b border-slate-100 bg-slate-50/50 px-6 py-4">
@@ -1817,27 +1833,113 @@
 
         @if($activeTab === 'timetable')
             {{-- Timetable Tab --}}
+            @php
+                $daysMap = [1 => 'Monday', 2 => 'Tuesday', 3 => 'Wednesday', 4 => 'Thursday', 5 => 'Friday'];
+                $timetable = $this->timetable;
+                $timetableImg = $this->timetableImage;
+                $hasImage = (bool) $timetableImg;
+                $hasGrid = $timetable->isNotEmpty();
+                $defaultMode = $hasImage ? 'picture' : 'grid';
+            @endphp
             <div class="rounded-3xl border border-slate-200 bg-white shadow-sm overflow-hidden flex flex-col"
-                 x-data="{ activeDay: (new Date().getDay() >= 1 && new Date().getDay() <= 5) ? new Date().getDay() : 1 }">
+                 x-data="{ 
+                     viewMode: '{{ $defaultMode }}', 
+                     activeDay: (new Date().getDay() >= 1 && new Date().getDay() <= 5) ? new Date().getDay() : 1,
+                     showLightbox: false,
+                     zoomScale: 1
+                 }">
+                {{-- Header Bar --}}
                 <div class="border-b border-slate-100 bg-slate-50/50 px-4 sm:px-6 py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                     <div>
-                        <h3 class="text-sm font-black text-slate-800 uppercase tracking-wide">Weekly Timetable Schedule</h3>
-                        <p class="text-xs text-slate-500 font-semibold mt-0.5">Periods and subject allocations for {{ $child->schoolClass?->name ?? 'Class' }}</p>
+                        <div class="flex items-center gap-2">
+                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-black uppercase tracking-wider bg-indigo-50 text-indigo-700">
+                                <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                Class Schedule
+                            </span>
+                            @if($hasImage)
+                                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
+                                    <span class="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                                    Picture Timetable
+                                </span>
+                            @endif
+                        </div>
+                        <h3 class="text-sm sm:text-base font-black text-slate-800 tracking-tight mt-1">Weekly Timetable Schedule</h3>
+                        <p class="text-xs text-slate-500 font-semibold mt-0.5">
+                            For {{ $child->schoolClass?->name ?? 'Class' }}{{ $child->section ? ' (' . $child->section->name . ')' : '' }}
+                        </p>
                     </div>
-                    <div class="inline-flex items-center gap-1.5 self-start sm:self-auto rounded-full bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-700 border border-emerald-200/60">
-                        <span class="h-2 w-2 rounded-full bg-emerald-500"></span>
-                        Active Schedule
+
+                    <div class="flex flex-wrap items-center gap-2">
+                        @if($hasImage && $hasGrid)
+                            {{-- View Switcher between Picture & Digital Grid --}}
+                            <div class="inline-flex p-1 bg-slate-100 rounded-xl border border-slate-200 shadow-2xs">
+                                <button type="button" @click="viewMode = 'picture'"
+                                        :class="viewMode === 'picture' ? 'bg-white text-indigo-700 font-black shadow-xs' : 'text-slate-600 hover:text-slate-900 font-bold'"
+                                        class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-lg transition cursor-pointer">
+                                    <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                                    <span>Picture</span>
+                                </button>
+                                <button type="button" @click="viewMode = 'grid'"
+                                        :class="viewMode === 'grid' ? 'bg-white text-indigo-700 font-black shadow-xs' : 'text-slate-600 hover:text-slate-900 font-bold'"
+                                        class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-lg transition cursor-pointer">
+                                    <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
+                                    <span>Digital Grid</span>
+                                </button>
+                            </div>
+                        @endif
+
+                        @if($hasImage)
+                            <button type="button" @click="showLightbox = true; zoomScale = 1"
+                                    class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white border border-slate-200 text-xs font-bold text-slate-700 hover:bg-slate-50 transition shadow-2xs cursor-pointer">
+                                <svg class="h-3.5 w-3.5 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"/></svg>
+                                <span>Zoom Fullscreen</span>
+                            </button>
+                            <a href="{{ $timetableImg->url }}" download="{{ $timetableImg->file_name ?? 'timetable.jpg' }}" target="_blank"
+                               class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold transition shadow-xs cursor-pointer"
+                               style="background-color: #4f46e5; color: #ffffff;">
+                                <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                                <span>Download</span>
+                            </a>
+                        @endif
                     </div>
                 </div>
-                
-                <div class="p-4 sm:p-6 space-y-4 sm:space-y-6">
-                    @php
-                        $daysMap = [1 => 'Monday', 2 => 'Tuesday', 3 => 'Wednesday', 4 => 'Thursday', 5 => 'Friday'];
-                        $timetable = $this->timetable;
-                    @endphp
+
+                {{-- Picture Timetable View --}}
+                <div x-show="viewMode === 'picture'" class="p-4 sm:p-6 space-y-4">
+                    @if($hasImage)
+                        <div class="relative group rounded-2xl overflow-hidden border border-slate-200 bg-slate-900/5 shadow-inner flex flex-col items-center">
+                            {{-- Info Banner --}}
+                            <div class="w-full bg-slate-100/90 border-b border-slate-200 px-4 py-2.5 flex items-center justify-between text-xs text-slate-600">
+                                <div class="flex items-center gap-2">
+                                    <svg class="h-4 w-4 text-indigo-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                                    <span class="font-bold text-slate-800">Official Timetable Image</span>
+                                    <span class="text-slate-400">&bull;</span>
+                                    <span class="text-slate-500 font-semibold">{{ $timetableImg->formatted_file_size }}</span>
+                                </div>
+                                <span class="hidden sm:inline-flex items-center gap-1 text-[11px] font-bold text-indigo-600">
+                                    Click image to open fullscreen viewer
+                                </span>
+                            </div>
+
+                            {{-- Click-to-Zoom Image Display --}}
+                            <div class="p-3 sm:p-6 w-full flex items-center justify-center cursor-zoom-in" @click="showLightbox = true; zoomScale = 1">
+                                <img src="{{ $timetableImg->url }}" 
+                                     alt="Class Timetable for {{ $child->schoolClass?->name ?? 'Class' }}"
+                                     class="max-w-full h-auto max-h-[85vh] rounded-xl object-contain shadow-md transition-transform duration-200 group-hover:scale-[1.01]" />
+                            </div>
+                        </div>
+                    @else
+                        <div class="py-16 text-center text-sm font-bold text-slate-400 bg-slate-50 rounded-3xl border border-dashed border-slate-200">
+                            No timetable picture uploaded for this class.
+                        </div>
+                    @endif
+                </div>
+
+                {{-- Digital Grid View --}}
+                <div x-show="viewMode === 'grid'" class="p-4 sm:p-6 space-y-4 sm:space-y-6">
                     @if ($timetable->isEmpty())
                         <div class="py-16 text-center text-sm font-bold text-slate-400 bg-slate-50 rounded-3xl border border-dashed border-slate-200">
-                            No class timetable schedule recorded for this class.
+                            No periods recorded in the digital schedule for this class.
                         </div>
                     @else
                         {{-- Mobile Day Filter Pills (Phones only) --}}
@@ -1895,6 +1997,52 @@
                         </div>
                     @endif
                 </div>
+
+                @if($hasImage)
+                    {{-- Fullscreen Lightbox Zoom Modal --}}
+                    <div x-show="showLightbox" x-cloak
+                         @keydown.escape.window="showLightbox = false"
+                         class="fixed inset-0 z-50 overflow-hidden bg-slate-950/85 backdrop-blur-md flex flex-col">
+                        {{-- Lightbox Toolbar --}}
+                        <div class="flex items-center justify-between px-4 sm:px-6 py-3 bg-slate-900/90 border-b border-slate-800 text-white shrink-0">
+                            <div class="flex items-center gap-3 min-w-0">
+                                <h4 class="text-sm font-black truncate">Timetable &bull; {{ $child->schoolClass?->name ?? 'Class' }}{{ $child->section ? ' (' . $child->section->name . ')' : '' }}</h4>
+                                <span class="hidden sm:inline-flex text-[11px] font-bold text-slate-400 bg-slate-800 px-2 py-0.5 rounded-full">
+                                    {{ $timetableImg->formatted_file_size }}
+                                </span>
+                            </div>
+
+                            <div class="flex items-center gap-2">
+                                {{-- Zoom Controls --}}
+                                <div class="inline-flex items-center gap-1 bg-slate-800 rounded-xl p-1 border border-slate-700 text-xs">
+                                    <button type="button" @click="zoomScale = Math.max(0.5, zoomScale - 0.25)" class="h-7 w-7 rounded-lg hover:bg-slate-700 flex items-center justify-center font-black" title="Zoom Out">−</button>
+                                    <span class="px-2 font-mono text-[11px]" x-text="Math.round(zoomScale * 100) + '%'">100%</span>
+                                    <button type="button" @click="zoomScale = Math.min(3, zoomScale + 0.25)" class="h-7 w-7 rounded-lg hover:bg-slate-700 flex items-center justify-center font-black" title="Zoom In">+</button>
+                                    <button type="button" @click="zoomScale = 1" class="px-2 py-1 rounded-lg hover:bg-slate-700 text-[10px] font-bold" title="Reset Zoom">Reset</button>
+                                </div>
+
+                                <a href="{{ $timetableImg->url }}" download="{{ $timetableImg->file_name ?? 'timetable.jpg' }}" target="_blank"
+                                   class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold transition">
+                                    <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                                    <span>Download</span>
+                                </a>
+
+                                <button type="button" @click="showLightbox = false"
+                                        class="h-8 w-8 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white flex items-center justify-center transition">
+                                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                                </button>
+                            </div>
+                        </div>
+
+                        {{-- Lightbox Image Canvas --}}
+                        <div class="flex-1 overflow-auto p-4 sm:p-8 flex items-center justify-center" @click.self="showLightbox = false">
+                            <img src="{{ $timetableImg->url }}" 
+                                 :style="`transform: scale(${zoomScale}); transform-origin: center center; transition: transform 0.15s ease-out;`"
+                                 alt="Timetable"
+                                 class="max-w-full max-h-full object-contain rounded-xl shadow-2xl" />
+                        </div>
+                    </div>
+                @endif
             </div>
         @endif
 

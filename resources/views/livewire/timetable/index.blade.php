@@ -46,6 +46,19 @@
                         <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
                         <span>Add Period</span>
                     </button>
+
+                    @php
+                        $hasTimetableImg = (bool) $this->currentTimetableImage;
+                    @endphp
+                    <button type="button" 
+                            wire:click="openUploadModal"
+                            class="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold rounded-xl transition-all shadow-xs cursor-pointer {{ $hasTimetableImg ? 'bg-emerald-50 text-emerald-800 hover:bg-emerald-100 border border-emerald-300' : 'bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border border-indigo-200' }}">
+                        <svg class="h-4 w-4 {{ $hasTimetableImg ? 'text-emerald-600' : 'text-indigo-600' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                        <span>{{ $hasTimetableImg ? 'Timetable Picture' : 'Upload Picture' }}</span>
+                        @if($hasTimetableImg)
+                            <span class="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                        @endif
+                    </button>
                 @endif
 
                 @if($classId && !$isStaffScope && auth()->user()?->role !== 'parent')
@@ -136,6 +149,52 @@
             </div>
         @endif
     </div>
+
+    {{-- Active Timetable Image Banner for Selected Class/Section --}}
+    @if(!$isStaffScope && $hasTarget && $this->currentTimetableImage)
+        @php
+            $activeImg = $this->currentTimetableImage;
+        @endphp
+        <div class="bg-gradient-to-r from-emerald-50 via-teal-50 to-emerald-50 border border-emerald-200/80 rounded-2xl p-4 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div class="flex items-center gap-3.5 min-w-0">
+                <a href="{{ $activeImg->url }}" target="_blank" class="relative shrink-0 group block overflow-hidden rounded-xl ring-2 ring-emerald-200 shadow-xs">
+                    <img src="{{ $activeImg->url }}" alt="Timetable picture" class="h-14 w-20 object-cover group-hover:scale-105 transition-transform duration-200 bg-white" />
+                    <div class="absolute inset-0 bg-slate-900/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white">
+                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"/></svg>
+                    </div>
+                </a>
+                <div class="min-w-0">
+                    <div class="flex items-center gap-2 flex-wrap">
+                        <h4 class="text-sm font-black text-slate-800 truncate">Official Picture Timetable Active</h4>
+                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800">
+                            {{ $activeImg->formatted_file_size }}
+                        </span>
+                    </div>
+                    <p class="text-xs text-slate-500 mt-0.5 truncate font-medium">
+                        Uploaded for {{ $this->selectedClass?->name }}{{ $this->sectionId ? ' (' . Section::find($this->sectionId)?->name . ')' : ' (Class-wide)' }}. Parents see this image in their portal.
+                    </p>
+                </div>
+            </div>
+            <div class="flex items-center gap-2 shrink-0">
+                <a href="{{ $activeImg->url }}" target="_blank"
+                   class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-xl bg-white text-slate-700 hover:bg-slate-50 border border-slate-200 shadow-xs transition">
+                    <svg class="h-3.5 w-3.5 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                    <span>View Picture</span>
+                </a>
+                <button type="button" wire:click="openUploadModal"
+                        class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white shadow-xs transition">
+                    <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+                    <span>Replace</span>
+                </button>
+                <button type="button" wire:click="deleteTimetableImage"
+                        wire:confirm="Are you sure you want to delete this timetable picture? Parents will no longer see the picture schedule."
+                        class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 transition">
+                    <svg class="h-3.5 w-3.5 text-rose-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                    <span>Delete</span>
+                </button>
+            </div>
+        </div>
+    @endif
 
     @if(!$hasTarget)
         {{-- Empty State: No Target Selected --}}
@@ -1160,6 +1219,75 @@
                             </button>
                         </div>
                     </div>
+                </div>
+            </div>
+        </div>
+    @endif
+
+    {{-- Timetable Picture Upload Modal --}}
+    @if($showImageModal)
+        <div class="fixed inset-0 z-50 overflow-y-auto" role="dialog" aria-modal="true">
+            <div class="flex min-h-screen items-center justify-center p-4 text-center sm:p-0">
+                <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs transition-opacity" wire:click="closeUploadModal"></div>
+
+                <div class="relative transform overflow-hidden rounded-3xl bg-white text-left shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg p-6">
+                    <div class="flex items-center justify-between border-b border-slate-100 pb-4">
+                        <div>
+                            <h3 class="text-base font-black text-slate-800">Upload Timetable Picture</h3>
+                            <p class="text-xs text-slate-500 mt-0.5">
+                                For {{ $this->selectedClass?->name }}{{ $this->sectionId ? ' (' . Section::find($this->sectionId)?->name . ')' : ' (Class-wide)' }}
+                            </p>
+                        </div>
+                        <button type="button" wire:click="closeUploadModal" class="rounded-xl p-1 text-slate-400 hover:text-slate-600 hover:bg-slate-100 cursor-pointer">
+                            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                        </button>
+                    </div>
+
+                    <form wire:submit="saveTimetableImage" class="mt-5 space-y-4">
+                        {{-- Image Upload Box --}}
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-2">Select Picture File (JPEG, PNG, WEBP)</label>
+                            <div class="border-2 border-dashed border-slate-200 hover:border-indigo-400 rounded-2xl p-6 text-center transition bg-slate-50/50">
+                                <input type="file" wire:model="timetableImageFile" accept="image/jpeg,image/png,image/webp" id="timetable-file-input" class="hidden" />
+                                
+                                <label for="timetable-file-input" class="cursor-pointer flex flex-col items-center">
+                                    <div class="h-12 w-12 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center mb-2 shadow-xs">
+                                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                                    </div>
+                                    <span class="text-xs font-bold text-indigo-600 hover:underline">Click to browse or drag picture here</span>
+                                    <span class="text-[11px] text-slate-400 mt-1">PNG, JPG, or WEBP up to 10MB</span>
+                                </label>
+
+                                <div wire:loading wire:target="timetableImageFile" class="mt-2 text-xs font-bold text-indigo-600">
+                                    Uploading picture preview...
+                                </div>
+                            </div>
+                            @error('timetableImageFile')
+                                <p class="text-xs font-bold text-rose-600 mt-1.5">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        {{-- Preview if file chosen --}}
+                        @if ($timetableImageFile)
+                            <div class="rounded-2xl border border-slate-200 p-3 bg-slate-50 flex items-center gap-3">
+                                <img src="{{ $timetableImageFile->temporaryUrl() }}" class="h-16 w-24 object-cover rounded-xl border border-slate-200 shrink-0" />
+                                <div class="min-w-0 flex-1 text-xs">
+                                    <p class="font-black text-slate-800 truncate">{{ $timetableImageFile->getClientOriginalName() }}</p>
+                                    <p class="text-slate-400 text-[10px] mt-0.5">Ready to publish to parents</p>
+                                </div>
+                            </div>
+                        @endif
+
+                        <div class="pt-3 flex items-center justify-end gap-2.5 border-t border-slate-100">
+                            <button type="button" wire:click="closeUploadModal" class="px-4 py-2 rounded-xl border border-slate-200 text-xs font-bold text-slate-600 hover:bg-slate-50 transition cursor-pointer">
+                                Cancel
+                            </button>
+                            <button type="submit" wire:loading.attr="disabled" class="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold transition shadow-xs flex items-center gap-1.5 cursor-pointer" style="background-color: #4f46e5; color: #ffffff;">
+                                <span wire:loading.remove wire:target="saveTimetableImage">Publish Timetable Picture</span>
+                                <span wire:loading wire:target="saveTimetableImage">Saving...</span>
+                            </button>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>

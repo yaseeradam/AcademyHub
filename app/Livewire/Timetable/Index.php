@@ -8,17 +8,21 @@ use App\Models\Subject;
 use App\Models\SubjectAllocation;
 use App\Models\TimetableEntry;
 use App\Models\User;
+use App\Models\TimetableImage;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
+use Livewire\WithFileUploads;
 
 #[Layout('layouts.app')]
 #[Title('Timetable')]
 class Index extends Component
 {
+    use WithFileUploads;
+
     public $classId = null;
     public $sectionId = null;
     public ?int $day = null;
@@ -28,6 +32,11 @@ class Index extends Component
     
     public string $viewMode = 'grid'; // 'grid', 'daily', or 'conventional'
     public int $activeDayTab = 1;
+
+    // Timetable Image Upload State
+    public $timetableImageFile = null;
+    public bool $showImageModal = false;
+    public bool $showPreviewModal = false;
 
     public ?int $editingId = null;
     public ?int $entryClassId = null;
@@ -151,6 +160,140 @@ class Index extends Component
         }
 
         return null;
+    }
+
+    #[Computed]
+    public function currentTimetableImage(): ?TimetableImage
+    {
+        if (! $this->classId) {
+            return null;
+        }
+
+        $query = TimetableImage::where('class_id', $this->classId);
+        if ($this->sectionId) {
+            $query->where('section_id', $this->sectionId);
+        } else {
+            $query->whereNull('section_id');
+        }
+
+        return $query->latest()->first();
+    }
+
+    #[Computed]
+    public function activeTimetableImage(): ?TimetableImage
+    {
+        if (! $this->classId) {
+            return null;
+        }
+
+        if ($this->sectionId) {
+            $secImg = TimetableImage::where('class_id', $this->classId)
+                ->where('section_id', $this->sectionId)
+                ->latest()
+                ->first();
+            if ($secImg) {
+                return $secImg;
+            }
+        }
+
+        return TimetableImage::where('class_id', $this->classId)
+            ->whereNull('section_id')
+            ->latest()
+            ->first();
+    }
+
+    public function openUploadModal(): void
+    {
+        $this->timetableImageFile = null;
+        $this->showImageModal = true;
+    }
+
+    public function closeUploadModal(): void
+    {
+        $this->timetableImageFile = null;
+        $this->showImageModal = false;
+        $this->resetValidation();
+    }
+
+    public function saveTimetableImage(): void
+    {
+        abort_unless(auth()->user()?->role === 'admin' || auth()->user()?->role === 'proprietor', 403);
+        
+        $this->validate([
+            'classId' => 'required|exists:classes,id',
+            'timetableImageFile' => 'required|image|mimes:jpeg,png,jpg,webp|max:10240', // 10MB max
+        ], [
+            'classId.required' => 'Please select a class first.',
+            'timetableImageFile.required' => 'Please choose an image file to upload.',
+            'timetableImageFile.image' => 'The file must be a valid picture (JPEG, PNG, or WEBP).',
+            'timetableImageFile.max' => 'The image size cannot exceed 10MB.',
+        ]);
+
+        $file = $this->timetableImageFile;
+        $ext = $file->getClientOriginalExtension() ?: 'jpg';
+        $safeClassName = \Illuminate\Support\Str::slug($this->selectedClass?->name ?? 'class');
+        $secSuffix = $this->sectionId ? '_sec_' . $this->sectionId : '';
+        $filename = "timetable_{$safeClassName}{$secSuffix}_" . time() . '.' . $ext;
+
+        $path = $file->storeAs('timetables', $filename, 'uploads');
+
+        // Delete previous image file if it exists
+        $existing = TimetableImage::where('class_id', $this->classId)
+            ->where(function ($q) {
+                if ($this->sectionId) {
+                    $q->where('section_id', $this->sectionId);
+                } else {
+                    $q->whereNull('section_id');
+                }
+            })->first();
+
+        if ($existing) {
+            try {
+                \Illuminate\Support\Facades\Storage::disk('uploads')->delete($existing->file_path);
+            } catch (\Throwable $e) {}
+            
+            $existing->update([
+                'file_path'   => $path,
+                'file_name'   => $file->getClientOriginalName(),
+                'file_size'   => $file->getSize(),
+                'uploaded_by' => auth()->id(),
+            ]);
+        } else {
+            TimetableImage::create([
+                'tenant_id'   => auth()->user()?->tenant_id ?? 1,
+                'class_id'    => $this->classId,
+                'section_id'  => $this->sectionId ?: null,
+                'file_path'   => $path,
+                'file_name'   => $file->getClientOriginalName(),
+                'file_size'   => $file->getSize(),
+                'uploaded_by' => auth()->id(),
+            ]);
+        }
+
+        $this->timetableImageFile = null;
+        $this->showImageModal = false;
+        unset($this->currentTimetableImage);
+        unset($this->activeTimetableImage);
+
+        $targetName = $this->selectedClass?->name . ($this->sectionId ? ' (' . Section::find($this->sectionId)?->name . ')' : '');
+        $this->dispatch('alert', message: "Timetable picture for {$targetName} uploaded successfully!", type: 'success');
+    }
+
+    public function deleteTimetableImage(): void
+    {
+        abort_unless(auth()->user()?->role === 'admin' || auth()->user()?->role === 'proprietor', 403);
+
+        $image = $this->currentTimetableImage;
+        if ($image) {
+            try {
+                \Illuminate\Support\Facades\Storage::disk('uploads')->delete($image->file_path);
+            } catch (\Throwable $e) {}
+
+            $image->delete();
+            unset($this->currentTimetableImage);
+            unset($this->activeTimetableImage);
+            $this->dispatch('alert', message: 'Timetable picture removed successfully.', type: 'info');
+        }
     }
 
     #[Computed]
