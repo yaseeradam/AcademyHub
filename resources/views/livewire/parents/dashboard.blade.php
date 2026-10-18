@@ -92,7 +92,8 @@
 
                     {{-- + Add Child CTA Button --}}
                     <button type="button" wire:click="openAddChildModal"
-                            class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#5046e5] hover:bg-indigo-700 text-white text-xs font-bold shadow-xs active:scale-95 transition">
+                            class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow-xs active:scale-95 transition"
+                            style="background-color: #4f46e5; color: #ffffff;">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
                         </svg>
@@ -130,7 +131,7 @@
                                                 <h3 class="text-base font-black text-slate-800 truncate group-hover:text-indigo-600 transition-colors">
                                                     {{ $c['name'] }}
                                                 </h3>
-                                                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[#def7ec] text-[#03543f] shrink-0">
+                                                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 shrink-0" style="background-color: #def7ec; color: #03543f;">
                                                     {{ $c['status'] }}
                                                 </span>
                                             </div>
@@ -194,7 +195,8 @@
                                 {{-- Bottom: View Dashboard CTA & More Options --}}
                                 <div class="flex items-center gap-2 mt-4 pt-4 border-t border-slate-100">
                                     <button type="button" wire:click="selectChild({{ $c['id'] }})"
-                                            class="flex-1 inline-flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-[#5046e5] hover:bg-indigo-700 text-white font-bold text-xs transition duration-200 shadow-2xs active:scale-[0.98]">
+                                            class="flex-1 inline-flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs transition duration-200 shadow-2xs active:scale-[0.98]"
+                                            style="background-color: #4f46e5; color: #ffffff;">
                                         <span>View Dashboard</span>
                                         <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
@@ -246,7 +248,7 @@
 
                     <div class="grid grid-cols-2 gap-3 mt-4">
                         {{-- 1. Overall Attendance --}}
-                        <div class="rounded-2xl bg-[#f0f9ff] p-3.5 flex flex-col justify-between border border-sky-100/60 shadow-2xs">
+                        <div class="rounded-2xl bg-sky-50 p-3.5 flex flex-col justify-between border border-sky-200/80 shadow-2xs" style="background-color: #f0f9ff;">
                             <div class="w-8 h-8 rounded-xl bg-white text-sky-600 flex items-center justify-center shadow-xs">
                                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
                             </div>
@@ -257,7 +259,7 @@
                         </div>
 
                         {{-- 2. Average Performance --}}
-                        <div class="rounded-2xl bg-[#f5f3ff] p-3.5 flex flex-col justify-between border border-indigo-100/60 shadow-2xs">
+                        <div class="rounded-2xl bg-indigo-50 p-3.5 flex flex-col justify-between border border-indigo-200/80 shadow-2xs" style="background-color: #f5f3ff;">
                             <div class="w-8 h-8 rounded-xl bg-white text-indigo-600 flex items-center justify-center shadow-xs">
                                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 14l9-5-9-5-9 5 9 5z"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"/></svg>
                             </div>
@@ -268,7 +270,7 @@
                         </div>
 
                         {{-- 3. Total Outstanding Fees --}}
-                        <div class="rounded-2xl bg-[#ecfdf5] p-3.5 flex flex-col justify-between border border-emerald-100/60 shadow-2xs">
+                        <div class="rounded-2xl bg-emerald-50 p-3.5 flex flex-col justify-between border border-emerald-200/80 shadow-2xs" style="background-color: #ecfdf5;">
                             <div class="w-8 h-8 rounded-xl bg-white text-emerald-600 flex items-center justify-center shadow-xs">
                                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"/></svg>
                             </div>
@@ -279,7 +281,7 @@
                         </div>
 
                         {{-- 4. Pending Homework --}}
-                        <div class="rounded-2xl bg-[#faf5ff] p-3.5 flex flex-col justify-between border border-purple-100/60 shadow-2xs">
+                        <div class="rounded-2xl bg-purple-50 p-3.5 flex flex-col justify-between border border-purple-200/80 shadow-2xs" style="background-color: #faf5ff;">
                             <div class="w-8 h-8 rounded-xl bg-white text-purple-600 flex items-center justify-center shadow-xs">
                                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
                             </div>
@@ -390,7 +392,7 @@
                             <button type="button" wire:click="closeAddChildModal" class="px-4 py-2 rounded-xl border border-slate-200 text-xs font-bold text-slate-600 hover:bg-slate-50 transition">
                                 Cancel
                             </button>
-                            <button type="submit" class="px-5 py-2 rounded-xl bg-[#5046e5] hover:bg-indigo-700 text-white text-xs font-bold transition shadow-xs">
+                            <button type="submit" class="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold transition shadow-xs" style="background-color: #4f46e5; color: #ffffff;">
                                 Link Child
                             </button>
                         </div>
@@ -417,7 +419,7 @@
                     @foreach($this->children as $sib)
                         <button type="button" wire:click="selectChild({{ $sib->id }})"
                                 wire:loading.attr="disabled"
-                                class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-bold transition whitespace-nowrap shadow-2xs {{ $sib->id === $child->id ? 'bg-[#5046e5] text-white ring-2 ring-indigo-200 shadow-indigo-600/20' : 'bg-white text-slate-600 hover:bg-slate-50 border border-slate-200' }}">
+                                class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-bold transition whitespace-nowrap shadow-2xs {{ $sib->id === $child->id ? 'bg-indigo-600 text-white ring-2 ring-indigo-200 shadow-indigo-600/20' : 'bg-white text-slate-600 hover:bg-slate-50 border border-slate-200' }}">
                             @if($sib->id === $child->id)
                                 <span class="h-2 w-2 rounded-full bg-emerald-400 animate-pulse"></span>
                             @else
@@ -446,7 +448,7 @@
                 <div class="min-w-0 flex-1">
                     <div class="flex items-center gap-2.5 flex-wrap">
                         <h2 class="text-xl sm:text-2xl font-black text-slate-900 leading-tight truncate">{{ $child->full_name }}</h2>
-                        <span class="inline-flex items-center gap-1 text-[11px] font-bold text-[#03543f] bg-[#def7ec] px-2.5 py-0.5 rounded-full">
+                        <span class="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-800 bg-emerald-100 px-2.5 py-0.5 rounded-full" style="background-color: #def7ec; color: #03543f;">
                             + Active
                         </span>
                     </div>
@@ -542,7 +544,8 @@
                 {{-- 4 Hero KPI Cards Matching Mockup --}}
                 <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
                     {{-- 1. Academic Average --}}
-                    <div class="rounded-3xl border border-emerald-100/80 bg-gradient-to-br from-emerald-50/70 via-emerald-50/30 to-white p-5 shadow-2xs hover:shadow-xs hover:border-emerald-200 transition flex flex-col justify-between">
+                    <div class="rounded-3xl border border-emerald-200 bg-white bg-gradient-to-br from-emerald-50 to-white p-5 shadow-xs hover:shadow-sm hover:border-emerald-300 transition flex flex-col justify-between"
+                         style="background-color: #ffffff; background-image: linear-gradient(135deg, rgba(236,253,245,0.85) 0%, #ffffff 100%);">
                         <div class="flex items-start gap-3">
                             <div class="h-10 w-10 rounded-2xl bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0 shadow-xs">
                                 <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 14l9-5-9-5-9 5 9 5z"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"/></svg>
@@ -566,7 +569,8 @@
                     </div>
 
                     {{-- 2. Class Position --}}
-                    <div class="rounded-3xl border border-purple-100/80 bg-gradient-to-br from-purple-50/70 via-purple-50/30 to-white p-5 shadow-2xs hover:shadow-xs hover:border-purple-200 transition flex flex-col justify-between">
+                    <div class="rounded-3xl border border-purple-200 bg-white bg-gradient-to-br from-purple-50 to-white p-5 shadow-xs hover:shadow-sm hover:border-purple-300 transition flex flex-col justify-between"
+                         style="background-color: #ffffff; background-image: linear-gradient(135deg, rgba(250,245,255,0.85) 0%, #ffffff 100%);">
                         <div class="flex items-start gap-3">
                             <div class="h-10 w-10 rounded-2xl bg-purple-100 text-purple-600 flex items-center justify-center shrink-0 shadow-xs">
                                 <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/></svg>
@@ -594,7 +598,8 @@
                     </div>
 
                     {{-- 3. Attendance Rate --}}
-                    <div class="rounded-3xl border border-sky-100/80 bg-gradient-to-br from-sky-50/70 via-sky-50/30 to-white p-5 shadow-2xs hover:shadow-xs hover:border-sky-200 transition flex flex-col justify-between">
+                    <div class="rounded-3xl border border-sky-200 bg-white bg-gradient-to-br from-sky-50 to-white p-5 shadow-xs hover:shadow-sm hover:border-sky-300 transition flex flex-col justify-between"
+                         style="background-color: #ffffff; background-image: linear-gradient(135deg, rgba(240,249,255,0.85) 0%, #ffffff 100%);">
                         <div class="flex items-start gap-3">
                             <div class="h-10 w-10 rounded-2xl bg-sky-100 text-sky-600 flex items-center justify-center shrink-0 shadow-xs">
                                 <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
@@ -612,7 +617,8 @@
                     </div>
 
                     {{-- 4. Fee Balance --}}
-                    <div class="rounded-3xl border border-amber-100/80 bg-gradient-to-br from-amber-50/70 via-amber-50/30 to-white p-5 shadow-2xs hover:shadow-xs hover:border-amber-200 transition flex flex-col justify-between">
+                    <div class="rounded-3xl border border-amber-200 bg-white bg-gradient-to-br from-amber-50 to-white p-5 shadow-xs hover:shadow-sm hover:border-amber-300 transition flex flex-col justify-between"
+                         style="background-color: #ffffff; background-image: linear-gradient(135deg, rgba(254,243,199,0.85) 0%, #ffffff 100%);">
                         <div class="flex items-start gap-3">
                             <div class="h-10 w-10 rounded-2xl bg-amber-100 text-amber-600 flex items-center justify-center shrink-0 shadow-xs">
                                 <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"/></svg>
@@ -876,7 +882,8 @@
 
                     <div class="flex items-center gap-2 shrink-0">
                         <button type="button" wire:click="openAbsenceModal"
-                                class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-black shadow-md shadow-indigo-600/20 active:scale-[0.98] transition">
+                                class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-black shadow-md shadow-indigo-600/20 active:scale-[0.98] transition"
+                                style="background-color: #4f46e5; color: #ffffff;">
                             <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
                             <span>Submit Absence Request</span>
                         </button>
@@ -2045,17 +2052,25 @@
                             <span class="flex h-6 w-6 items-center justify-center rounded-lg bg-emerald-50 text-emerald-600">
                                 <svg class="h-4 w-4 fill-current" viewBox="0 0 24 24"><path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.771-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.299.045-.677.063-1.092-.069-.252-.08-.575-.187-.988-.365-1.739-.751-2.874-2.502-2.961-2.617-.087-.116-.708-.94-.708-1.793s.448-1.273.607-1.446c.159-.173.346-.217.462-.217l.332.006c.106.005.249-.04.39.298.144.347.491 1.2.534 1.287.043.087.072.188.014.304-.058.116-.087.188-.173.289l-.26.304c-.087.086-.177.18-.076.354.101.174.449.741.964 1.201.662.591 1.221.774 1.394.86.173.086.275.072.376-.043.101-.116.433-.506.549-.68.116-.173.231-.145.39-.086s1.011.477 1.184.564.289.13.332.203c.043.072.043.419-.101.824z"/></svg>
                             </span>
-                            <h3 class="text-sm font-black text-slate-800 uppercase tracking-wide">Class Teachers & Instructors</h3>
+                            <h3 class="text-sm font-black text-slate-800 uppercase tracking-wide">
+                                {{ $child->schoolClass?->name ?? 'Class' }}@if($child->section) ({{ $child->section->name }})@endif Teachers & Instructors
+                            </h3>
                         </div>
-                        <p class="text-xs text-slate-500 mt-1 font-medium">Connect directly with your child's teachers via WhatsApp for academic questions and guidance.</p>
+                        <p class="text-xs text-slate-500 mt-1 font-medium">
+                            Teachers assigned to {{ $child->first_name }} in {{ $child->schoolClass?->name ?? 'Class' }}@if($child->section) ({{ $child->section->name }})@endif. Connect directly via WhatsApp for academic questions and guidance.
+                        </p>
                     </div>
                     @php
                         $teachers = $this->classTeachers;
                     @endphp
                     @if ($teachers->isNotEmpty())
                         <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-slate-100 text-slate-700 text-xs font-bold border border-slate-200/60 self-start sm:self-auto">
+                            <span class="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span>
                             <span>{{ $teachers->count() }}</span>
                             <span class="text-slate-500">{{ Str::plural('Teacher', $teachers->count()) }}</span>
+                            @if($child->section)
+                                <span class="text-slate-400 font-normal">| {{ $child->section->name }} Arm</span>
+                            @endif
                         </div>
                     @endif
                 </div>
@@ -2066,7 +2081,7 @@
                             <svg class="mx-auto h-10 w-10 text-slate-300 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
                             </svg>
-                            No teachers or subject allocations recorded for this child's class yet.
+                            No teachers or subject allocations recorded for {{ $child->schoolClass?->name ?? 'this child\'s class' }}@if($child->section) ({{ $child->section->name }})@endif yet.
                         </div>
                     @else
                         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
@@ -2074,9 +2089,9 @@
                                 @php
                                     $parentName = auth()->user()?->name ?? 'Parent';
                                     $studentName = $child->full_name ?? ($child->first_name . ' ' . $child->last_name);
-                                    $className = $child->schoolClass?->name ?? 'Class';
+                                    $subclassName = ($child->schoolClass?->name ?? 'Class') . ($child->section ? ' (' . $child->section->name . ')' : '');
                                     $schoolName = \App\Support\TenantSettings::get('school_name') ?? config('app.name', 'AcademyHub');
-                                    $waGreeting = "Hello {$teacher->name}, I am reaching out as the parent of {$studentName} ({$className}) at {$schoolName} regarding their academic performance.";
+                                    $waGreeting = "Hello {$teacher->name}, I am reaching out as the parent of {$studentName} ({$subclassName}) at {$schoolName} regarding their academic performance.";
                                     $waUrl = $teacher->getWhatsappChatUrl($waGreeting);
                                     $cleanPhone = $teacher->clean_whatsapp_phone;
                                     $formattedPhone = $teacher->formatted_whatsapp_phone;
@@ -2217,6 +2232,7 @@
                                 </button>
                                 <button type="submit"
                                         class="inline-flex items-center gap-2 px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-black shadow-md shadow-indigo-600/20 active:scale-[0.98] transition"
+                                        style="background-color: #4f46e5; color: #ffffff;"
                                         wire:loading.attr="disabled" wire:loading.class="opacity-50 cursor-wait">
                                     <svg wire:loading wire:target="submitAbsenceRequest" class="animate-spin h-3.5 w-3.5 text-white" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg>
                                     <span>Submit Request</span>

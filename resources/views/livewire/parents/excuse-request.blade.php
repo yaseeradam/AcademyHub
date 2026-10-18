@@ -23,7 +23,8 @@
         <div class="flex items-center gap-2.5 shrink-0">
             @if($this->isParent)
                 <button type="button" wire:click="openCreateModal"
-                        class="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-[#5046e5] hover:bg-indigo-700 text-white text-xs font-bold shadow-md shadow-indigo-200/50 active:scale-95 transition">
+                        class="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow-md shadow-indigo-200/50 active:scale-95 transition"
+                        style="background-color: #4f46e5; color: #ffffff;">
                     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
                     </svg>
@@ -36,7 +37,8 @@
     {{-- Pastel KPI Cards --}}
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {{-- 1. Pending Approvals --}}
-        <div class="rounded-3xl border border-amber-100/80 bg-gradient-to-br from-amber-50/70 via-amber-50/30 to-white p-5 shadow-2xs hover:shadow-xs hover:border-amber-200 transition flex items-center justify-between">
+        <div class="rounded-3xl border border-amber-200 bg-white bg-gradient-to-br from-amber-50 to-white p-5 shadow-xs hover:shadow-sm hover:border-amber-300 transition flex items-center justify-between"
+             style="background-color: #ffffff; background-image: linear-gradient(135deg, rgba(254,243,199,0.85) 0%, #ffffff 100%);">
             <div class="flex items-center gap-3.5">
                 <div class="h-12 w-12 rounded-2xl bg-amber-100 text-amber-600 flex items-center justify-center shrink-0 shadow-xs">
                     <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
@@ -57,7 +59,8 @@
         </div>
 
         {{-- 2. Approved Excuses --}}
-        <div class="rounded-3xl border border-emerald-100/80 bg-gradient-to-br from-emerald-50/70 via-emerald-50/30 to-white p-5 shadow-2xs hover:shadow-xs hover:border-emerald-200 transition flex items-center justify-between">
+        <div class="rounded-3xl border border-emerald-200 bg-white bg-gradient-to-br from-emerald-50 to-white p-5 shadow-xs hover:shadow-sm hover:border-emerald-300 transition flex items-center justify-between"
+             style="background-color: #ffffff; background-image: linear-gradient(135deg, rgba(236,253,245,0.85) 0%, #ffffff 100%);">
             <div class="flex items-center gap-3.5">
                 <div class="h-12 w-12 rounded-2xl bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0 shadow-xs">
                     <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
@@ -75,7 +78,8 @@
         </div>
 
         {{-- 3. Total Requests --}}
-        <div class="rounded-3xl border border-purple-100/80 bg-gradient-to-br from-purple-50/70 via-purple-50/30 to-white p-5 shadow-2xs hover:shadow-xs hover:border-purple-200 transition flex items-center justify-between">
+        <div class="rounded-3xl border border-purple-200 bg-white bg-gradient-to-br from-purple-50 to-white p-5 shadow-xs hover:shadow-sm hover:border-purple-300 transition flex items-center justify-between"
+             style="background-color: #ffffff; background-image: linear-gradient(135deg, rgba(250,245,255,0.85) 0%, #ffffff 100%);">
             <div class="flex items-center gap-3.5">
                 <div class="h-12 w-12 rounded-2xl bg-purple-100 text-purple-600 flex items-center justify-center shrink-0 shadow-xs">
                     <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
@@ -98,7 +102,7 @@
         {{-- Status Filter Tabs --}}
         <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar">
             <button type="button" wire:click="$set('statusFilter', 'all')"
-                    class="px-3.5 py-1.5 rounded-xl text-xs font-bold transition whitespace-nowrap {{ $statusFilter === 'all' ? 'bg-[#5046e5] text-white shadow-xs' : 'bg-slate-50 text-slate-600 hover:bg-slate-100' }}">
+                    class="px-3.5 py-1.5 rounded-xl text-xs font-bold transition whitespace-nowrap {{ $statusFilter === 'all' ? 'bg-indigo-600 text-white shadow-xs' : 'bg-slate-50 text-slate-600 hover:bg-slate-100' }}">
                 <span>All Requests ({{ $counts['all'] }})</span>
             </button>
             <button type="button" wire:click="$set('statusFilter', 'pending')"
@@ -151,7 +155,8 @@
             </p>
             @if($this->isParent)
                 <button type="button" wire:click="openCreateModal"
-                        class="mt-5 inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#5046e5] hover:bg-indigo-700 text-white text-xs font-bold shadow-xs transition">
+                        class="mt-5 inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow-xs transition"
+                        style="background-color: #4f46e5; color: #ffffff;">
                     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
                     </svg>
@@ -248,15 +253,15 @@
                         <div class="flex items-center sm:flex-col sm:items-end justify-between gap-2 shrink-0">
                             {{-- Status Badge --}}
                             @if($req->status === 'approved')
-                                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-[#def7ec] text-[#03543f] border border-emerald-200">
-                                    <svg class="w-3.5 h-3.5 text-[#03543f]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-200" style="background-color: #def7ec; color: #03543f;">
+                                    <svg class="w-3.5 h-3.5 text-emerald-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
                                     </svg>
                                     <span>Approved</span>
                                 </span>
                             @elseif($req->status === 'rejected')
-                                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-[#fde8e8] text-[#9b1c1c] border border-rose-200">
-                                    <svg class="w-3.5 h-3.5 text-[#9b1c1c]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-rose-100 text-rose-800 border border-rose-200" style="background-color: #fde8e8; color: #9b1c1c;">
+                                    <svg class="w-3.5 h-3.5 text-rose-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
                                     </svg>
                                     <span>Rejected</span>
@@ -379,7 +384,8 @@
                             Cancel
                         </button>
                         <button type="submit" wire:loading.attr="disabled"
-                                class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#5046e5] hover:bg-indigo-700 text-white text-xs font-bold shadow-xs active:scale-95 transition">
+                                class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow-xs active:scale-95 transition"
+                                style="background-color: #4f46e5; color: #ffffff;">
                             <svg wire:loading wire:target="submitRequest" class="animate-spin h-3.5 w-3.5 text-white" fill="none" viewBox="0 0 24 24">
                                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>

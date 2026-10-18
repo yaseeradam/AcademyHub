@@ -718,18 +718,31 @@ class Dashboard extends Component
         $classId = (int) $this->selectedChild->class_id;
         $sectionId = $this->selectedChild->section_id ? (int) $this->selectedChild->section_id : null;
 
-        // 1. Get teachers via Subject Allocations for this child's specific section (arm)
+        // 1. Get teachers via Subject Allocations for this child's specific section (sub-class / arm)
         $allocQuery = \App\Models\SubjectAllocation::where('class_id', $classId)
-            ->with(['teacher', 'subject']);
+            ->with(['teacher', 'subject', 'section']);
 
         if ($sectionId) {
-            $allocQuery->where(function ($q) use ($sectionId) {
-                $q->where('section_id', $sectionId)
-                  ->orWhereNull('section_id');
-            });
-        }
+            // Include allocations specifically designated for this child's section/subclass
+            $sectionAllocations = (clone $allocQuery)->where('section_id', $sectionId)->get();
+            $sectionSubjectIds = $sectionAllocations->pluck('subject_id')->filter()->unique()->all();
 
-        $allocations = $allocQuery->get();
+            // Include class-wide allocations (section_id IS NULL) only for subjects without a section-specific teacher
+            $classWideAllocations = (clone $allocQuery)->whereNull('section_id')
+                ->whereNotIn('subject_id', $sectionSubjectIds)
+                ->get();
+
+            $allocations = $sectionAllocations->concat($classWideAllocations);
+        } else {
+            // If the class has distinct sections but the student has no section assigned,
+            // only show school-wide/class-wide instructors to prevent cross-section leaks.
+            $hasSections = \App\Models\Section::where('class_id', $classId)->exists();
+            if ($hasSections) {
+                $allocations = $allocQuery->whereNull('section_id')->get();
+            } else {
+                $allocations = $allocQuery->get();
+            }
+        }
 
         $teachers = $allocations->groupBy('teacher_id')->map(function ($group) {
             $teacher = $group->first()->teacher;
@@ -748,13 +761,18 @@ class Dashboard extends Component
                 ->with(['teacher', 'subject']);
 
             if ($sectionId) {
-                $ttQuery->where(function ($q) use ($sectionId) {
-                    $q->where('section_id', $sectionId)
-                      ->orWhereNull('section_id');
-                });
+                $sectionTt = (clone $ttQuery)->where('section_id', $sectionId)->get();
+                $ttSubjIds = $sectionTt->pluck('subject_id')->filter()->unique()->all();
+                $classWideTt = (clone $ttQuery)->whereNull('section_id')->whereNotIn('subject_id', $ttSubjIds)->get();
+                $timetableTeachers = $sectionTt->concat($classWideTt);
+            } else {
+                $hasSections = \App\Models\Section::where('class_id', $classId)->exists();
+                if ($hasSections) {
+                    $timetableTeachers = $ttQuery->whereNull('section_id')->get();
+                } else {
+                    $timetableTeachers = $ttQuery->get();
+                }
             }
-
-            $timetableTeachers = $ttQuery->get();
 
             $teachers = $timetableTeachers->groupBy('teacher_id')->map(function ($group) {
                 $teacher = $group->first()->teacher;
@@ -769,7 +787,8 @@ class Dashboard extends Component
             })->filter()->values();
         }
 
-        return $teachers;
+        // Sort so that the designated Class Teacher appears first
+        return $teachers->sortByDesc(fn ($t) => (bool) $t->is_class_teacher)->values();
     }
 
 
