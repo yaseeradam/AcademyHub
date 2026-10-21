@@ -256,7 +256,7 @@ class Management extends Component
     public function openLinkModal(int $parentId): void
     {
         $this->selectedParentId = $parentId;
-        $this->selectedChildren = $this->selectedParent?->students->pluck('id')->toArray() ?? [];
+        $this->selectedChildren = $this->selectedParent()?->students->pluck('id')->toArray() ?? [];
         $this->studentSearch = '';
         $this->showLinkModal = true;
     }
@@ -412,11 +412,12 @@ class Management extends Component
         $user = auth()->user();
         abort_unless($user && in_array($user->role, ['admin', 'proprietor'], true), 403);
 
-        if (!$this->selectedParent) {
+        $parent = $this->selectedParent();
+        if (!$parent) {
             return;
         }
 
-        $tenantId = $this->selectedParent->tenant_id;
+        $tenantId = $parent->tenant_id;
         $selectedIds = array_values(array_filter(array_map('intval', (array) $this->selectedChildren)));
 
         $validChildren = Student::query()
@@ -425,10 +426,10 @@ class Management extends Component
             ->pluck('id')
             ->all();
 
-        $this->selectedParent->students()->sync($validChildren);
+        $parent->students()->sync($validChildren);
 
-        Audit::log('parents.children_linked', $this->selectedParent, [
-            'parent_name' => $this->selectedParent->name,
+        Audit::log('parents.children_linked', $parent, [
+            'parent_name' => $parent->name,
             'children_count' => count($validChildren),
             'children_ids' => $validChildren,
         ]);
