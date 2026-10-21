@@ -16,15 +16,15 @@ return [
         ],
         'results.entry' => [
             'label' => 'Enter / edit scores',
-            'roles' => ['admin', 'teacher'],
+            'roles' => ['admin', 'proprietor', 'teacher'],
         ],
         'results.review' => [
             'label' => 'Approve / reject score submissions',
-            'roles' => ['admin'],
+            'roles' => ['admin', 'proprietor'],
         ],
         'results.publish' => [
             'label' => 'Publish / unpublish results',
-            'roles' => ['admin'],
+            'roles' => ['admin', 'proprietor'],
         ],
         'results.broadsheet' => [
             'label' => 'View broadsheet',

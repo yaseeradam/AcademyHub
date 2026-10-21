@@ -1,7 +1,7 @@
 @php
     $user = auth()->user();
     $submissionStatus = $this->submission?->status;
-    $locked = $user?->role === 'teacher' && (in_array($submissionStatus, ['submitted', 'approved'], true) || $this->isPublished);
+    $locked = ($user?->role === 'teacher' && in_array($submissionStatus, ['submitted', 'approved'], true)) || $this->isPublished;
 @endphp
 
 <div class="space-y-8">
@@ -24,7 +24,7 @@
                 </div>
             </div>
             <div class="flex items-center gap-2 sm:gap-3">
-                @if($user?->role === 'admin')
+                @if($user?->hasPermission('results.review'))
                     <a href="{{ route('results.submissions') }}" 
                        class="flex flex-1 items-center justify-center gap-2 rounded-xl bg-white/20 px-3 py-2.5 sm:px-4 sm:py-3 text-xs sm:text-sm font-bold text-white backdrop-blur-sm transition-all hover:bg-white/30 whitespace-nowrap">
                         <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -188,13 +188,134 @@
                 $maxMarks = $this->maxMarks();
             @endphp
             
+            {{-- Status and Review Banner --}}
+            @if($this->isPublished)
+                <div class="mb-6 rounded-2xl border-2 border-amber-300 bg-amber-50 p-4 sm:p-5 shadow-sm">
+                    <div class="flex items-center gap-3">
+                        <div class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-amber-200 text-amber-800">
+                            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                                <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                            </svg>
+                        </div>
+                        <div class="flex-1">
+                            <h4 class="text-sm font-black text-amber-900">Terminal Results Published (Scores Locked)</h4>
+                            <p class="text-xs font-medium text-amber-800 mt-0.5">Report cards for this class and term have been officially published. Scores are locked against modification. Contact administrator to unpublish if revisions are required.</p>
+                        </div>
+                    </div>
+                </div>
+            @elseif($this->submission)
+                @php
+                    $status = $this->submission->status;
+                @endphp
+
+                @if($status === 'submitted')
+                    <div class="mb-6 rounded-2xl border-2 border-blue-300 bg-blue-50/80 p-4 sm:p-5 shadow-sm">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                            <div class="flex items-start sm:items-center gap-3">
+                                <div class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-blue-200 text-blue-800">
+                                    <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <div class="flex items-center gap-2">
+                                        <h4 class="text-sm font-black text-blue-900">Submitted for Administrative Review</h4>
+                                        <span class="rounded-full bg-blue-200/70 px-2 py-0.5 text-[10px] font-black uppercase text-blue-800 tracking-wider">Pending Review</span>
+                                    </div>
+                                    <p class="text-xs font-medium text-blue-800 mt-0.5">
+                                        @if($user?->role === 'teacher')
+                                            Submitted on {{ $this->submission->submitted_at?->format('d M, Y \a\t h:i A') ?? 'recently' }}. Editing is locked while administrators review your scores.
+                                        @else
+                                            Submitted by <strong>{{ $this->submission->teacher?->name ?? 'Teacher' }}</strong> on {{ $this->submission->submitted_at?->format('d M, Y \a\t h:i A') ?? 'recently' }}.
+                                        @endif
+                                    </p>
+                                </div>
+                            </div>
+
+                            @if($user?->hasPermission('results.review'))
+                                <div class="flex items-center gap-2 sm:self-center self-end">
+                                    <button type="button" wire:click="approveSubmission({{ $this->submission->id }})"
+                                        class="inline-flex items-center gap-1.5 rounded-xl bg-emerald-600 px-4 py-2 text-xs font-bold text-white shadow-sm hover:bg-emerald-700 transition-all">
+                                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                            <path d="M20 6L9 17l-5-5"/>
+                                        </svg>
+                                        Approve
+                                    </button>
+                                    <button type="button" wire:click="startReject({{ $this->submission->id }})"
+                                        class="inline-flex items-center gap-1.5 rounded-xl bg-rose-600 px-4 py-2 text-xs font-bold text-white shadow-sm hover:bg-rose-700 transition-all">
+                                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M6 18L18 6M6 6l12 12"/>
+                                        </svg>
+                                        Return for Revision
+                                    </button>
+                                </div>
+                            @endif
+                        </div>
+                    </div>
+                @elseif($status === 'approved')
+                    <div class="mb-6 rounded-2xl border-2 border-emerald-300 bg-emerald-50/80 p-4 sm:p-5 shadow-sm">
+                        <div class="flex items-center gap-3">
+                            <div class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-emerald-200 text-emerald-800">
+                                <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                    <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <div class="flex items-center gap-2">
+                                    <h4 class="text-sm font-black text-emerald-900">Score Submission Approved</h4>
+                                    <span class="rounded-full bg-emerald-200/70 px-2 py-0.5 text-[10px] font-black uppercase text-emerald-800 tracking-wider">Approved</span>
+                                </div>
+                                <p class="text-xs font-medium text-emerald-800 mt-0.5">
+                                    Approved by <strong>{{ $this->submission->approver?->name ?? 'Administration' }}</strong> on {{ $this->submission->reviewed_at?->format('d M, Y \a\t h:i A') ?? 'recently' }}.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                @elseif($status === 'rejected')
+                    <div class="mb-6 rounded-2xl border-2 border-rose-300 bg-rose-50/90 p-4 sm:p-5 shadow-sm">
+                        <div class="flex items-start gap-3">
+                            <div class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-rose-200 text-rose-800">
+                                <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                                </svg>
+                            </div>
+                            <div class="flex-1">
+                                <div class="flex items-center gap-2">
+                                    <h4 class="text-sm font-black text-rose-900">Returned for Revision</h4>
+                                    <span class="rounded-full bg-rose-200/70 px-2 py-0.5 text-[10px] font-black uppercase text-rose-800 tracking-wider">Revision Requested</span>
+                                </div>
+                                <p class="text-xs font-medium text-rose-800 mt-0.5">
+                                    Reviewed by <strong>{{ $this->submission->approver?->name ?? 'Administration' }}</strong> on {{ $this->submission->reviewed_at?->format('d M, Y \a\t h:i A') ?? 'recently' }}.
+                                </p>
+                                @if($this->submission->note)
+                                    <div class="mt-2.5 rounded-xl border border-rose-200 bg-white/80 p-3 text-xs font-semibold text-rose-900">
+                                        <span class="font-bold text-rose-950">Feedback from Admin:</span> {{ $this->submission->note }}
+                                    </div>
+                                @endif
+                                <p class="text-[11px] text-rose-700 mt-2 font-medium">Please review and adjust scores accordingly, then click "Submit to Admin" when ready.</p>
+                            </div>
+                        </div>
+                    </div>
+                @endif
+            @endif
+            
             {{-- Scoresheet Table Card --}}
             <div class="overflow-hidden rounded-3xl bg-white shadow-2xl ring-1 ring-gray-200">
                 {{-- Table Header --}}
                 <div class="bg-gradient-to-r from-emerald-50 to-teal-50 px-5 sm:px-8 py-6">
                     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                         <div>
-                            <h2 class="text-lg sm:text-xl font-black text-gray-900 leading-tight">Score Entry Sheet</h2>
+                            <div class="flex items-center gap-3">
+                                <h2 class="text-lg sm:text-xl font-black text-gray-900 leading-tight">Score Entry Sheet</h2>
+                                <div wire:loading.delay wire:target="scores" class="inline-flex items-center gap-1.5 rounded-full bg-emerald-100 px-2.5 py-0.5 text-[11px] font-bold text-emerald-800">
+                                    <svg class="animate-spin h-3 w-3 text-emerald-600" viewBox="0 0 24 24" fill="none">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+                                    </svg>
+                                    <span>Saving...</span>
+                                </div>
+                            </div>
                             <p class="text-xs sm:text-sm text-gray-600 mt-0.5">Enter scores for each assessment component</p>
                         </div>
                         <div class="flex flex-wrap items-center gap-2 sm:gap-3 text-xs font-extrabold">
@@ -247,6 +368,7 @@
                                             'B' => ['bg' => 'from-blue-400 to-indigo-500', 'text' => 'text-white'],
                                             'C' => ['bg' => 'from-amber-400 to-orange-500', 'text' => 'text-white'],
                                             'D' => ['bg' => 'from-red-400 to-pink-500', 'text' => 'text-white'],
+                                            'E' => ['bg' => 'from-rose-400 to-red-500', 'text' => 'text-white'],
                                             'F' => ['bg' => 'from-gray-400 to-slate-500', 'text' => 'text-white'],
                                             default => ['bg' => 'from-gray-200 to-gray-300', 'text' => 'text-gray-700'],
                                         };
@@ -275,21 +397,27 @@
                                         <td class="px-6 py-4 text-center">
                                             <input wire:model.blur="scores.{{ $student->id }}.ca1" 
                                                 type="number" min="0" max="{{ $maxMarks['ca1'] }}" step="1"
-                                                class="w-20 rounded-xl border-2 {{ $ca1Error ? 'border-red-400 bg-red-50' : 'border-blue-300 bg-blue-50' }} px-3 py-2 text-center text-sm font-bold text-gray-900 shadow-sm transition-all focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/20 hover:border-blue-400" />
+                                                data-student-id="{{ $student->id }}" data-field="ca1"
+                                                @disabled($locked)
+                                                class="w-20 rounded-xl border-2 {{ $ca1Error ? 'border-red-400 bg-red-50' : 'border-blue-300 bg-blue-50' }} px-3 py-2 text-center text-sm font-bold text-gray-900 shadow-sm transition-all focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/20 hover:border-blue-400 disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-gray-100" />
                                         </td>
                                         
                                         {{-- CA2 Score --}}
                                         <td class="px-6 py-4 text-center">
                                             <input wire:model.blur="scores.{{ $student->id }}.ca2" 
                                                 type="number" min="0" max="{{ $maxMarks['ca2'] }}" step="1"
-                                                class="w-20 rounded-xl border-2 {{ $ca2Error ? 'border-red-400 bg-red-50' : 'border-green-300 bg-green-50' }} px-3 py-2 text-center text-sm font-bold text-gray-900 shadow-sm transition-all focus:border-green-500 focus:bg-white focus:ring-4 focus:ring-green-500/20 hover:border-green-400" />
+                                                data-student-id="{{ $student->id }}" data-field="ca2"
+                                                @disabled($locked)
+                                                class="w-20 rounded-xl border-2 {{ $ca2Error ? 'border-red-400 bg-red-50' : 'border-green-300 bg-green-50' }} px-3 py-2 text-center text-sm font-bold text-gray-900 shadow-sm transition-all focus:border-green-500 focus:bg-white focus:ring-4 focus:ring-green-500/20 hover:border-green-400 disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-gray-100" />
                                         </td>
                                         
                                         {{-- Exam Score --}}
                                         <td class="px-6 py-4 text-center">
                                             <input wire:model.blur="scores.{{ $student->id }}.exam" 
                                                 type="number" min="0" max="{{ $maxMarks['exam'] }}" step="1"
-                                                class="w-20 rounded-xl border-2 {{ $examError ? 'border-red-400 bg-red-50' : 'border-amber-300 bg-amber-50' }} px-3 py-2 text-center text-sm font-bold text-gray-900 shadow-sm transition-all focus:border-amber-500 focus:bg-white focus:ring-4 focus:ring-amber-500/20 hover:border-amber-400" />
+                                                data-student-id="{{ $student->id }}" data-field="exam"
+                                                @disabled($locked)
+                                                class="w-20 rounded-xl border-2 {{ $examError ? 'border-red-400 bg-red-50' : 'border-amber-300 bg-amber-50' }} px-3 py-2 text-center text-sm font-bold text-gray-900 shadow-sm transition-all focus:border-amber-500 focus:bg-white focus:ring-4 focus:ring-amber-500/20 hover:border-amber-400 disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-gray-100" />
                                         </td>
                                         
                                         {{-- Total Score --}}
@@ -344,6 +472,7 @@
                                     'B' => ['bg' => 'from-blue-400 to-indigo-500', 'text' => 'text-white'],
                                     'C' => ['bg' => 'from-amber-400 to-orange-500', 'text' => 'text-white'],
                                     'D' => ['bg' => 'from-red-400 to-pink-500', 'text' => 'text-white'],
+                                    'E' => ['bg' => 'from-rose-400 to-red-500', 'text' => 'text-white'],
                                     'F' => ['bg' => 'from-gray-400 to-slate-500', 'text' => 'text-white'],
                                     default => ['bg' => 'from-gray-200 to-gray-300', 'text' => 'text-gray-700'],
                                 };
@@ -379,19 +508,22 @@
                                         <label class="block text-[10px] font-black text-blue-700 uppercase mb-1">CA1 ({{ $maxMarks['ca1'] }})</label>
                                         <input wire:model.blur="scores.{{ $student->id }}.ca1" type="number" min="0" max="{{ $maxMarks['ca1'] }}"
                                             data-student-id="{{ $student->id }}" data-field="ca1"
-                                            class="w-full rounded-xl border-2 {{ $ca1Error ? 'border-red-400 bg-red-50 text-red-950 focus:border-red-500' : 'border-blue-200 bg-blue-50 text-gray-900 focus:border-blue-500' }} px-2 py-2 text-center text-sm font-bold focus:bg-white focus:ring-0">
+                                            @disabled($locked)
+                                            class="w-full rounded-xl border-2 {{ $ca1Error ? 'border-red-400 bg-red-50 text-red-950 focus:border-red-500' : 'border-blue-200 bg-blue-50 text-gray-900 focus:border-blue-500' }} px-2 py-2 text-center text-sm font-bold focus:bg-white focus:ring-0 disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-gray-100">
                                     </div>
                                     <div>
                                         <label class="block text-[10px] font-black text-green-700 uppercase mb-1">CA2 ({{ $maxMarks['ca2'] }})</label>
                                         <input wire:model.blur="scores.{{ $student->id }}.ca2" type="number" min="0" max="{{ $maxMarks['ca2'] }}"
                                             data-student-id="{{ $student->id }}" data-field="ca2"
-                                            class="w-full rounded-xl border-2 {{ $ca2Error ? 'border-red-400 bg-red-50 text-red-950 focus:border-red-500' : 'border-green-200 bg-green-50 text-gray-900 focus:border-green-500' }} px-2 py-2 text-center text-sm font-bold focus:bg-white focus:ring-0">
+                                            @disabled($locked)
+                                            class="w-full rounded-xl border-2 {{ $ca2Error ? 'border-red-400 bg-red-50 text-red-950 focus:border-red-500' : 'border-green-200 bg-green-50 text-gray-900 focus:border-green-500' }} px-2 py-2 text-center text-sm font-bold focus:bg-white focus:ring-0 disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-gray-100">
                                     </div>
                                     <div>
                                         <label class="block text-[10px] font-black text-amber-700 uppercase mb-1">Exam ({{ $maxMarks['exam'] }})</label>
                                         <input wire:model.blur="scores.{{ $student->id }}.exam" type="number" min="0" max="{{ $maxMarks['exam'] }}"
                                             data-student-id="{{ $student->id }}" data-field="exam"
-                                            class="w-full rounded-xl border-2 {{ $examError ? 'border-red-400 bg-red-50 text-red-950 focus:border-red-500' : 'border-amber-200 bg-amber-50 text-gray-900 focus:border-amber-500' }} px-2 py-2 text-center text-sm font-bold focus:bg-white focus:ring-0">
+                                            @disabled($locked)
+                                            class="w-full rounded-xl border-2 {{ $examError ? 'border-red-400 bg-red-50 text-red-950 focus:border-red-500' : 'border-amber-200 bg-amber-50 text-gray-900 focus:border-amber-500' }} px-2 py-2 text-center text-sm font-bold focus:bg-white focus:ring-0 disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-gray-100">
                                     </div>
                                 </div>
 
@@ -680,6 +812,35 @@
                     <button type="button" wire:click="savePsychomotor"
                         class="rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 px-6 py-2.5 text-sm font-bold text-white shadow-lg hover:from-violet-700 hover:to-indigo-700 transition-all" wire:loading.attr="disabled" wire:loading.class="opacity-50 cursor-wait">
                         Save Assessment
+                    </button>
+                </div>
+            </div>
+        </div>
+    @endif
+
+    {{-- Rejection Modal --}}
+    @if($rejectingId)
+        <div class="fixed inset-0 z-50 flex items-center justify-center p-4" role="dialog" aria-modal="true">
+            <div class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm" wire:click="cancelReject"></div>
+            <div class="relative w-full max-w-lg rounded-3xl bg-white shadow-2xl overflow-hidden">
+                <div class="relative bg-gradient-to-br from-rose-600 to-red-700 px-6 py-5 text-white">
+                    <h3 class="text-base font-black">Return Scores for Revision</h3>
+                    <p class="text-xs text-rose-100 mt-0.5">Explain what adjustments the teacher needs to make</p>
+                </div>
+                <div class="p-6">
+                    <label class="block text-xs font-bold text-gray-700 mb-2">Revision Reason / Instructions <span class="text-rose-500">*</span></label>
+                    <textarea wire:model="rejectNote" rows="4" placeholder="e.g. Please verify CA1 scores for students with high absences..."
+                        class="w-full rounded-2xl border-2 border-gray-300 p-3 text-sm font-medium text-gray-900 focus:border-rose-500 focus:ring-4 focus:ring-rose-500/20"></textarea>
+                    @error('rejectNote')
+                        <p class="text-xs font-bold text-rose-600 mt-1.5">{{ $message }}</p>
+                    @enderror
+                </div>
+                <div class="flex items-center justify-end gap-3 border-t border-gray-100 bg-gray-50/50 px-6 py-4">
+                    <button type="button" wire:click="cancelReject" class="rounded-xl border-2 border-gray-200 bg-white px-5 py-2.5 text-xs font-bold text-gray-700 hover:bg-gray-50 transition-all">
+                        Cancel
+                    </button>
+                    <button type="button" wire:click="confirmReject" class="rounded-xl bg-rose-600 px-6 py-2.5 text-xs font-bold text-white shadow-lg hover:bg-rose-700 transition-all">
+                        Return to Teacher
                     </button>
                 </div>
             </div>

@@ -77,6 +77,36 @@ class Score extends Model
         };
     }
 
+    public static function recalculatePositions(int $classId, int $subjectId, int $term, string $session): void
+    {
+        $scores = self::query()
+            ->where('class_id', $classId)
+            ->where('subject_id', $subjectId)
+            ->where('term', $term)
+            ->where('session', $session)
+            ->orderByDesc('total')
+            ->get();
+
+        if ($scores->isEmpty()) {
+            return;
+        }
+
+        $rank = 0;
+        $prevTotal = null;
+        $count = 0;
+
+        foreach ($scores as $s) {
+            $count++;
+            if ($prevTotal === null || $s->total < $prevTotal) {
+                $rank = $count;
+                $prevTotal = $s->total;
+            }
+            if ($s->position !== $rank) {
+                self::whereKey($s->id)->update(['position' => $rank]);
+            }
+        }
+    }
+
     public function student(): BelongsTo
     {
         return $this->belongsTo(Student::class);

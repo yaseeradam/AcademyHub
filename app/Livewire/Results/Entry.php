@@ -267,7 +267,7 @@ class Entry extends Component
         $query = Student::query()
             ->with(['schoolClass', 'section', 'user'])
             ->where('class_id', $this->classId)
-            ->where('status', 'Active');
+            ->whereIn('status', ['Active', 'active']);
 
         if ($user?->role === 'teacher') {
             $allocQuery = SubjectAllocation::query()
@@ -299,7 +299,7 @@ class Entry extends Component
             $query->where('section_id', (int) $this->sectionId);
         }
 
-        return $query->orderBy('last_name')->get();
+        return $query->orderBy('last_name')->orderBy('first_name')->get();
     }
 
     #[Computed]
@@ -321,21 +321,26 @@ class Entry extends Component
     public function submission()
     {
         $user = auth()->user();
-        if (! $user || $user->role !== 'teacher') {
+        if (! $user) {
             return null;
         }
 
-        if (! $this->classId || ! $this->subjectId || ! $this->session) {
+        if (! $this->classId || ! $this->subjectId || ! $this->session || ! $this->term) {
             return null;
         }
 
-        return ScoreSubmission::query()
-            ->where('teacher_id', $user->id)
+        $query = ScoreSubmission::query()
+            ->with(['teacher:id,name', 'approver:id,name'])
             ->where('class_id', $this->classId)
             ->where('subject_id', $this->subjectId)
-            ->where('term', $this->term)
-            ->where('session', $this->session)
-            ->first();
+            ->where('term', (int) $this->term)
+            ->where('session', (string) $this->session);
+
+        if ($user->role === 'teacher') {
+            $query->where('teacher_id', $user->id);
+        }
+
+        return $query->latest('submitted_at')->first();
     }
 
     public function openPsychomotor(int $studentId, string $studentName): void
@@ -375,7 +380,14 @@ class Entry extends Component
 
     public function savePsychomotor(): void
     {
-        if (!$this->selectedStudentId) return;
+        if (! $this->selectedStudentId || ! $this->classId || ! $this->term || ! $this->session) {
+            return;
+        }
+
+        if ($this->isPublished) {
+            $this->dispatch('alert', message: 'Results are published and locked.', type: 'error');
+            return;
+        }
 
         $user = auth()->user();
         if ($user?->role === 'teacher') {
@@ -448,7 +460,7 @@ class Entry extends Component
     public function submissions()
     {
         $user = auth()->user();
-        if (! $user || $user->role !== 'admin') {
+        if (! $user || ! $user->hasPermission('results.review')) {
             return collect();
         }
 
@@ -495,7 +507,21 @@ class Entry extends Component
     {
         $this->sectionId = $value !== '' && $value !== null ? (int) $value : null;
         $this->validationErrors = [];
-        unset($this->subjects, $this->students);
+
+        $user = auth()->user();
+        if ($user?->role === 'teacher' && $this->classId && $this->subjectId) {
+            $valid = SubjectAllocation::query()
+                ->where('teacher_id', $user->id)
+                ->where('class_id', $this->classId)
+                ->where('subject_id', $this->subjectId)
+                ->when($this->sectionId, fn($q) => $q->where(fn($sub) => $sub->where('section_id', $this->sectionId)->orWhereNull('section_id')))
+                ->exists();
+            if (! $valid) {
+                $this->subjectId = null;
+            }
+        }
+
+        unset($this->subjects, $this->students, $this->submission);
         $this->loadExistingScores();
     }
 
@@ -614,7 +640,7 @@ class Entry extends Component
             }
         }
 
-        if ($user->role !== 'admin') {
+        if (! in_array($user->role, ['admin', 'proprietor'], true)) {
             $allocQuery = SubjectAllocation::query()
                 ->where('teacher_id', $user->id)
                 ->where('class_id', $this->classId)
@@ -668,6 +694,7 @@ class Entry extends Component
             ]
         );
 
+        Score::recalculatePositions($this->classId, $this->subjectId, (int) $this->term, (string) $this->session);
     }
 
 
@@ -697,7 +724,7 @@ class Entry extends Component
             }
         }
 
-        if ($user?->role !== 'admin') {
+        if (! in_array($user?->role, ['admin', 'proprietor'], true)) {
             $allocQuery = SubjectAllocation::query()
                 ->where('teacher_id', $user->id)
                 ->where('class_id', $this->classId)
@@ -757,6 +784,8 @@ class Entry extends Component
                 );
             }
         });
+
+        Score::recalculatePositions($this->classId, $this->subjectId, (int) $this->term, (string) $this->session);
 
         $this->dispatch('alert', message: 'Scores saved.', type: 'success');
         $this->validationErrors = []; // Clear all validation errors after successful save
@@ -1000,6 +1029,11 @@ class Entry extends Component
     {
         $user = auth()->user();
         abort_unless($user && $user->hasPermission('results.entry'), 403);
+
+        if (! $this->classId || ! $this->term || ! $this->session) {
+            $this->dispatch('alert', message: 'Please select a class, term, and session first.', type: 'warning');
+            return;
+        }
 
         if ($this->isPublished) {
             $this->dispatch('alert', message: 'Results are published and locked.', type: 'error');
