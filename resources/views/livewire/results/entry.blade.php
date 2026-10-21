@@ -1,7 +1,8 @@
 @php
     $user = auth()->user();
-    $submissionStatus = $this->submission?->status;
-    $locked = ($user?->role === 'teacher' && in_array($submissionStatus, ['submitted', 'approved'], true)) || $this->isPublished;
+    $submission = $this->submission();
+    $submissionStatus = $submission?->status;
+    $locked = ($user?->role === 'teacher' && in_array($submissionStatus, ['submitted', 'approved'], true)) || $this->isPublished();
 @endphp
 
 <div class="space-y-8">
@@ -189,7 +190,7 @@
             @endphp
             
             {{-- Status and Review Banner --}}
-            @if($this->isPublished)
+            @if($this->isPublished())
                 <div class="mb-6 rounded-2xl border-2 border-amber-300 bg-amber-50 p-4 sm:p-5 shadow-sm">
                     <div class="flex items-center gap-3">
                         <div class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-amber-200 text-amber-800">
@@ -204,9 +205,9 @@
                         </div>
                     </div>
                 </div>
-            @elseif($this->submission)
+            @elseif($submission)
                 @php
-                    $status = $this->submission->status;
+                    $status = $submission->status;
                 @endphp
 
                 @if($status === 'submitted')
@@ -225,9 +226,9 @@
                                     </div>
                                     <p class="text-xs font-medium text-blue-800 mt-0.5">
                                         @if($user?->role === 'teacher')
-                                            Submitted on {{ $this->submission->submitted_at?->format('d M, Y \a\t h:i A') ?? 'recently' }}. Editing is locked while administrators review your scores.
+                                            Submitted on {{ $submission->submitted_at?->format('d M, Y \a\t h:i A') ?? 'recently' }}. Editing is locked while administrators review your scores.
                                         @else
-                                            Submitted by <strong>{{ $this->submission->teacher?->name ?? 'Teacher' }}</strong> on {{ $this->submission->submitted_at?->format('d M, Y \a\t h:i A') ?? 'recently' }}.
+                                            Submitted by <strong>{{ $submission->teacher?->name ?? 'Teacher' }}</strong> on {{ $submission->submitted_at?->format('d M, Y \a\t h:i A') ?? 'recently' }}.
                                         @endif
                                     </p>
                                 </div>
@@ -235,14 +236,14 @@
 
                             @if($user?->hasPermission('results.review'))
                                 <div class="flex items-center gap-2 sm:self-center self-end">
-                                    <button type="button" wire:click="approveSubmission({{ $this->submission->id }})"
+                                    <button type="button" wire:click="approveSubmission({{ $submission->id }})"
                                         class="inline-flex items-center gap-1.5 rounded-xl bg-emerald-600 px-4 py-2 text-xs font-bold text-white shadow-sm hover:bg-emerald-700 transition-all">
                                         <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                                             <path d="M20 6L9 17l-5-5"/>
                                         </svg>
                                         Approve
                                     </button>
-                                    <button type="button" wire:click="startReject({{ $this->submission->id }})"
+                                    <button type="button" wire:click="startReject({{ $submission->id }})"
                                         class="inline-flex items-center gap-1.5 rounded-xl bg-rose-600 px-4 py-2 text-xs font-bold text-white shadow-sm hover:bg-rose-700 transition-all">
                                         <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                             <path d="M6 18L18 6M6 6l12 12"/>
@@ -267,7 +268,7 @@
                                     <span class="rounded-full bg-emerald-200/70 px-2 py-0.5 text-[10px] font-black uppercase text-emerald-800 tracking-wider">Approved</span>
                                 </div>
                                 <p class="text-xs font-medium text-emerald-800 mt-0.5">
-                                    Approved by <strong>{{ $this->submission->approver?->name ?? 'Administration' }}</strong> on {{ $this->submission->reviewed_at?->format('d M, Y \a\t h:i A') ?? 'recently' }}.
+                                    Approved by <strong>{{ $submission->approver?->name ?? 'Administration' }}</strong> on {{ $submission->reviewed_at?->format('d M, Y \a\t h:i A') ?? 'recently' }}.
                                 </p>
                             </div>
                         </div>
@@ -286,11 +287,11 @@
                                     <span class="rounded-full bg-rose-200/70 px-2 py-0.5 text-[10px] font-black uppercase text-rose-800 tracking-wider">Revision Requested</span>
                                 </div>
                                 <p class="text-xs font-medium text-rose-800 mt-0.5">
-                                    Reviewed by <strong>{{ $this->submission->approver?->name ?? 'Administration' }}</strong> on {{ $this->submission->reviewed_at?->format('d M, Y \a\t h:i A') ?? 'recently' }}.
+                                    Reviewed by <strong>{{ $submission->approver?->name ?? 'Administration' }}</strong> on {{ $submission->reviewed_at?->format('d M, Y \a\t h:i A') ?? 'recently' }}.
                                 </p>
-                                @if($this->submission->note)
+                                @if($submission->note)
                                     <div class="mt-2.5 rounded-xl border border-rose-200 bg-white/80 p-3 text-xs font-semibold text-rose-900">
-                                        <span class="font-bold text-rose-950">Feedback from Admin:</span> {{ $this->submission->note }}
+                                        <span class="font-bold text-rose-950">Feedback from Admin:</span> {{ $submission->note }}
                                     </div>
                                 @endif
                                 <p class="text-[11px] text-rose-700 mt-2 font-medium">Please review and adjust scores accordingly, then click "Submit to Admin" when ready.</p>

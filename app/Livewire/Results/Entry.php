@@ -384,7 +384,7 @@ class Entry extends Component
             return;
         }
 
-        if ($this->isPublished) {
+        if ($this->isPublished()) {
             $this->dispatch('alert', message: 'Results are published and locked.', type: 'error');
             return;
         }
@@ -629,12 +629,12 @@ class Entry extends Component
             return;
         }
 
-        if ($this->isPublished) {
+        if ($this->isPublished()) {
             return;
         }
 
         if ($user->role === 'teacher') {
-            $submission = $this->submission;
+            $submission = $this->submission();
             if ($submission && in_array($submission->status, ['submitted', 'approved'], true)) {
                 return;
             }
@@ -709,14 +709,14 @@ class Entry extends Component
         $user = auth()->user();
         abort_unless($user && $user->hasPermission('results.entry'), 403);
 
-        if ($this->isPublished) {
+        if ($this->isPublished()) {
             throw ValidationException::withMessages([
                 'scores' => 'Results have been published and are locked. Ask admin to unpublish to make changes.',
             ]);
         }
 
         if ($user?->role === 'teacher') {
-            $submission = $this->submission;
+            $submission = $this->submission();
             if ($submission && in_array($submission->status, ['submitted', 'approved'], true)) {
                 throw ValidationException::withMessages([
                     'scores' => 'This score entry has already been submitted to admin.',
@@ -1035,7 +1035,7 @@ class Entry extends Component
             return;
         }
 
-        if ($this->isPublished) {
+        if ($this->isPublished()) {
             $this->dispatch('alert', message: 'Results are published and locked.', type: 'error');
             return;
         }
