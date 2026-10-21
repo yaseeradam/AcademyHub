@@ -49,6 +49,7 @@ class Management extends Component
 
     // Link children form
     public array $selectedChildren = [];
+    public string $studentSearch = '';
 
     // In-App Message form
     public bool $showInAppMessageModal = false;
@@ -189,10 +190,44 @@ class Management extends Component
     #[Computed]
     public function availableStudents(): Collection
     {
+        $search = trim($this->studentSearch);
+        $user = auth()->user();
+
         return Student::query()
+            ->when($user?->tenant_id, fn($q) => $q->where('tenant_id', $user->tenant_id))
             ->with(['schoolClass', 'section'])
+            ->when($search !== '', function ($query) use ($search) {
+                $escaped = addcslashes($search, '%_');
+                $query->where(function ($q) use ($escaped) {
+                    $q->where('first_name', 'like', "%{$escaped}%")
+                      ->orWhere('last_name', 'like', "%{$escaped}%")
+                      ->orWhere('admission_number', 'like', "%{$escaped}%")
+                      ->orWhereHas('schoolClass', function ($cq) use ($escaped) {
+                          $cq->where('name', 'like', "%{$escaped}%");
+                      });
+                });
+            })
             ->orderBy('first_name')
             ->orderBy('last_name')
+            ->limit(60)
+            ->get();
+    }
+
+    #[Computed]
+    public function selectedStudentsList(): Collection
+    {
+        $ids = array_values(array_filter(array_map('intval', (array) $this->selectedChildren)));
+        if (empty($ids)) {
+            return collect();
+        }
+
+        $user = auth()->user();
+
+        return Student::query()
+            ->when($user?->tenant_id, fn($q) => $q->where('tenant_id', $user->tenant_id))
+            ->with(['schoolClass', 'section'])
+            ->whereIn('id', $ids)
+            ->orderBy('first_name')
             ->get();
     }
 
@@ -222,6 +257,7 @@ class Management extends Component
     {
         $this->selectedParentId = $parentId;
         $this->selectedChildren = $this->selectedParent?->students->pluck('id')->toArray() ?? [];
+        $this->studentSearch = '';
         $this->showLinkModal = true;
     }
 
@@ -230,6 +266,15 @@ class Management extends Component
         $this->showLinkModal = false;
         $this->selectedParentId = null;
         $this->selectedChildren = [];
+        $this->studentSearch = '';
+    }
+
+    public function removeChildFromSelection(int $studentId): void
+    {
+        $this->selectedChildren = array_values(array_filter(
+            array_map('intval', (array) $this->selectedChildren),
+            fn($id) => $id !== (int) $studentId
+        ));
     }
 
     public function openEditWhatsappModal(int $parentId): void
@@ -372,9 +417,11 @@ class Management extends Component
         }
 
         $tenantId = $this->selectedParent->tenant_id;
+        $selectedIds = array_values(array_filter(array_map('intval', (array) $this->selectedChildren)));
+
         $validChildren = Student::query()
             ->when($tenantId, fn($q) => $q->where('tenant_id', $tenantId))
-            ->whereIn('id', $this->selectedChildren)
+            ->whereIn('id', $selectedIds)
             ->pluck('id')
             ->all();
 
@@ -382,13 +429,56 @@ class Management extends Component
 
         Audit::log('parents.children_linked', $this->selectedParent, [
             'parent_name' => $this->selectedParent->name,
-            'children_count' => count($this->selectedChildren),
-            'children_ids' => $this->selectedChildren,
+            'children_count' => count($validChildren),
+            'children_ids' => $validChildren,
         ]);
 
         $this->dispatch('alert', message: 'Children linked successfully.', type: 'success');
         $this->dispatch('refresh');
         $this->closeLinkModal();
+    }
+
+    public function unlinkChild(int $parentId, int $studentId): void
+    {
+        $user = auth()->user();
+        abort_unless($user && in_array($user->role, ['admin', 'proprietor'], true), 403);
+
+        $query = User::query()->where('role', 'parent')->whereKey($parentId);
+        if ($user->tenant_id) {
+            $query->where('tenant_id', $user->tenant_id);
+        }
+        $parent = $query->first();
+
+        if (!$parent) {
+            $this->dispatch('alert', message: 'Parent not found.', type: 'error');
+            return;
+        }
+
+        $student = Student::query()
+            ->when($parent->tenant_id, fn($q) => $q->where('tenant_id', $parent->tenant_id))
+            ->find($studentId);
+
+        $studentName = $student ? $student->full_name : "Student #{$studentId}";
+
+        $parent->students()->detach($studentId);
+
+        // If the link modal is currently open for this parent, keep selectedChildren array in sync
+        if ($this->selectedParentId === $parentId) {
+            $this->selectedChildren = array_values(array_filter(
+                array_map('intval', (array) $this->selectedChildren),
+                fn($id) => $id !== (int) $studentId
+            ));
+        }
+
+        Audit::log('parents.child_unlinked', $parent, [
+            'parent_id' => $parent->id,
+            'parent_name' => $parent->name,
+            'student_id' => $studentId,
+            'student_name' => $studentName,
+        ]);
+
+        $this->dispatch('alert', message: "Successfully unlinked {$studentName} from {$parent->name}.", type: 'success');
+        $this->dispatch('refresh');
     }
 
     public function deleteParent(int $parentId): void

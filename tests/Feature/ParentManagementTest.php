@@ -561,4 +561,145 @@ class ParentManagementTest extends TestCase
         $this->assertEquals('+234 809 876 5432', $parent->formatted_whatsapp_phone);
         $this->assertEquals('https://wa.me/2348098765432?text=Hello%20Alice', $parent->getWhatsappChatUrl('Hello Alice'));
     }
+
+    public function test_admin_can_link_search_and_unlink_child(): void
+    {
+        $tenant = Tenant::query()->create([
+            'slug' => 'test-school-link',
+            'name' => 'Link School',
+            'plan' => 'pro',
+            'status' => 'active',
+            'max_students' => 500,
+            'max_teachers' => 50,
+        ]);
+
+        app()->instance('currentTenant', $tenant);
+
+        $admin = User::query()->create([
+            'tenant_id' => $tenant->id,
+            'name' => 'Super Admin',
+            'email' => 'admin.link@test.local',
+            'password' => Hash::make('password'),
+            'role' => 'admin',
+            'is_active' => true,
+        ]);
+
+        $parent = User::query()->create([
+            'tenant_id' => $tenant->id,
+            'name' => 'Parent Fatima',
+            'email' => 'fatima@test.local',
+            'password' => Hash::make('password123'),
+            'role' => 'parent',
+            'is_active' => true,
+        ]);
+
+        $class = SchoolClass::query()->create([
+            'tenant_id' => $tenant->id,
+            'name' => 'Basic 4',
+        ]);
+
+        $student1 = Student::query()->create([
+            'tenant_id' => $tenant->id,
+            'admission_number' => 'ADM-001',
+            'first_name' => 'Ahmed',
+            'last_name' => 'Musa',
+            'class_id' => $class->id,
+            'gender' => 'male',
+            'status' => 'active',
+        ]);
+
+        $student2 = Student::query()->create([
+            'tenant_id' => $tenant->id,
+            'admission_number' => 'ADM-002',
+            'first_name' => 'Zainab',
+            'last_name' => 'Bello',
+            'class_id' => $class->id,
+            'gender' => 'female',
+            'status' => 'active',
+        ]);
+
+        // Test Livewire modal search & linking
+        $test = Livewire::actingAs($admin)
+            ->test(ParentsManagement::class)
+            ->call('openLinkModal', $parent->id)
+            ->assertSet('showLinkModal', true)
+            ->assertSet('selectedParentId', $parent->id)
+            ->assertSet('studentSearch', '')
+            ->set('studentSearch', 'Ahmed');
+
+        // Check available students filtered
+        $available = $test->get('availableStudents');
+        $this->assertTrue($available->contains('id', $student1->id));
+        $this->assertFalse($available->contains('id', $student2->id));
+
+        // Link student 1
+        $test->set('selectedChildren', [$student1->id])
+            ->call('linkChildren')
+            ->assertSet('showLinkModal', false);
+
+        // Verify linked in DB
+        $parent->refresh();
+        $this->assertCount(1, $parent->students);
+        $this->assertEquals($student1->id, $parent->students->first()->id);
+
+        // Test unlinking child
+        Livewire::actingAs($admin)
+            ->test(ParentsManagement::class)
+            ->call('unlinkChild', $parent->id, $student1->id);
+
+        $parent->refresh();
+        $this->assertCount(0, $parent->students);
+
+        // Verify student record itself was not deleted
+        $this->assertDatabaseHas('students', ['id' => $student1->id]);
+    }
+
+    public function test_non_admin_cannot_unlink_child(): void
+    {
+        $tenant = Tenant::query()->create([
+            'slug' => 'test-school-unlink-auth',
+            'name' => 'Auth School Unlink',
+            'plan' => 'pro',
+            'status' => 'active',
+            'max_students' => 500,
+            'max_teachers' => 50,
+        ]);
+
+        app()->instance('currentTenant', $tenant);
+
+        $teacher = User::query()->create([
+            'tenant_id' => $tenant->id,
+            'name' => 'Teacher Joe',
+            'email' => 'teacher.joe@test.local',
+            'password' => Hash::make('password'),
+            'role' => 'teacher',
+            'is_active' => true,
+        ]);
+
+        $parent = User::query()->create([
+            'tenant_id' => $tenant->id,
+            'name' => 'Parent Auth',
+            'email' => 'parent.auth@test.local',
+            'password' => Hash::make('password123'),
+            'role' => 'parent',
+            'is_active' => true,
+        ]);
+
+        $student = Student::query()->create([
+            'tenant_id' => $tenant->id,
+            'admission_number' => 'ADM-999',
+            'first_name' => 'Ali',
+            'last_name' => 'Bello',
+            'gender' => 'male',
+            'status' => 'active',
+        ]);
+
+        $parent->students()->attach($student->id);
+
+        $this->expectException(\Symfony\Component\HttpKernel\Exception\HttpException::class);
+
+        Livewire::actingAs($teacher)
+            ->test(ParentsManagement::class)
+            ->call('unlinkChild', $parent->id, $student->id);
+    }
 }

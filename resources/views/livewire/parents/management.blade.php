@@ -87,16 +87,27 @@
                                     <div class="flex flex-wrap items-center gap-1.5" x-data="{ open: false }">
                                         {{-- Display up to 2 children directly --}}
                                         @foreach($parent->students->take(2) as $student)
-                                            <span class="inline-flex items-center gap-1 rounded-md bg-slate-50 border border-slate-200 px-2 py-0.5 text-xs font-medium text-slate-700 shadow-sm" title="Admission: {{ $student->admission_number }}">
+                                            <span class="inline-flex items-center gap-1.5 rounded-md bg-slate-50 border border-slate-200 px-2 py-0.5 text-xs font-medium text-slate-700 shadow-2xs" title="Admission: {{ $student->admission_number }}">
                                                 <span class="font-semibold text-gray-900">{{ $student->full_name }}</span>
                                                 <span class="text-[10px] text-gray-500 font-normal">({{ $student->schoolClass?->name ?? 'N/A' }})</span>
+                                                @if(in_array(auth()->user()->role, ['admin', 'proprietor'], true))
+                                                    <button type="button" 
+                                                            wire:click="unlinkChild({{ $parent->id }}, {{ $student->id }})" 
+                                                            wire:confirm="Are you sure you want to unlink {{ addslashes($student->full_name) }} from {{ addslashes($parent->name) }}?" 
+                                                            class="text-gray-400 hover:text-red-600 transition-colors p-0.5 rounded hover:bg-red-50" 
+                                                            title="Unlink {{ $student->full_name }}">
+                                                        <svg class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
+                                                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+                                                        </svg>
+                                                    </button>
+                                                @endif
                                             </span>
                                         @endforeach
                                         
                                         {{-- If there are more than 2 children, show a "+X more" badge with popover --}}
                                         @if($parent->students->count() > 2)
                                             <div class="relative">
-                                                <button @click="open = !open" @click.away="open = false" class="inline-flex items-center rounded-md bg-brand-50 hover:bg-brand-100 transition-colors px-2 py-0.5 text-xs font-bold text-brand-700 border border-brand-200 shadow-sm cursor-pointer select-none" aria-label="Close">
+                                                <button @click="open = !open" @click.away="open = false" class="inline-flex items-center rounded-md bg-brand-50 hover:bg-brand-100 transition-colors px-2 py-0.5 text-xs font-bold text-brand-700 border border-brand-200 shadow-2xs cursor-pointer select-none" aria-label="Close">
                                                     +{{ $parent->students->count() - 2 }} more
                                                 </button>
                                                 
@@ -108,14 +119,27 @@
                                                      x-transition:leave="transition ease-in duration-75"
                                                      x-transition:leave-start="opacity-100 scale-100"
                                                      x-transition:leave-end="opacity-0 scale-95"
-                                                     class="absolute left-0 mt-2 z-30 w-64 rounded-xl border border-gray-100 bg-white p-3 shadow-xl ring-1 ring-black/5 text-left" 
+                                                     class="absolute left-0 mt-2 z-30 w-72 rounded-xl border border-gray-100 bg-white p-3 shadow-xl ring-1 ring-black/5 text-left" 
                                                      style="display: none;" role="dialog" aria-modal="true">
                                                     <p class="text-[10px] font-bold text-gray-400 mb-2 uppercase tracking-wider">All Children</p>
-                                                    <div class="space-y-2">
+                                                    <div class="space-y-2 max-h-56 overflow-y-auto">
                                                         @foreach($parent->students as $student)
-                                                            <div class="flex flex-col border-b border-gray-50 pb-1.5 last:border-0 last:pb-0">
-                                                                <span class="font-semibold text-xs text-gray-900">{{ $student->full_name }}</span>
-                                                                <span class="text-[10px] text-gray-500">{{ $student->schoolClass?->name ?? 'Unassigned' }} • {{ $student->admission_number }}</span>
+                                                            <div class="flex items-center justify-between border-b border-gray-50 pb-1.5 last:border-0 last:pb-0">
+                                                                <div class="flex flex-col min-w-0 pr-2">
+                                                                    <span class="font-semibold text-xs text-gray-900 truncate">{{ $student->full_name }}</span>
+                                                                    <span class="text-[10px] text-gray-500">{{ $student->schoolClass?->name ?? 'Unassigned' }} • {{ $student->admission_number }}</span>
+                                                                </div>
+                                                                @if(in_array(auth()->user()->role, ['admin', 'proprietor'], true))
+                                                                    <button type="button" 
+                                                                            wire:click="unlinkChild({{ $parent->id }}, {{ $student->id }})" 
+                                                                            wire:confirm="Are you sure you want to unlink {{ addslashes($student->full_name) }} from {{ addslashes($parent->name) }}?" 
+                                                                            class="text-gray-400 hover:text-red-600 p-1 rounded hover:bg-red-50 transition-colors shrink-0" 
+                                                                            title="Unlink student">
+                                                                        <svg class="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor">
+                                                                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+                                                                        </svg>
+                                                                    </button>
+                                                                @endif
                                                             </div>
                                                         @endforeach
                                                     </div>
@@ -304,31 +328,141 @@
     <!-- Link Children Modal -->
     @if($showLinkModal && $this->selectedParent)
         <div class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/50 p-4 backdrop-blur-sm">
-            <div class="w-full max-w-xl max-h-[80vh] flex flex-col overflow-hidden rounded-2xl bg-white shadow-xl">
-                <div class="border-b border-gray-100 px-6 py-4">
-                    <h3 class="text-lg font-semibold text-gray-900">Link Children to {{ $this->selectedParent->name }}</h3>
+            <div class="w-full max-w-xl max-h-[85vh] flex flex-col overflow-hidden rounded-2xl bg-white shadow-2xl ring-1 ring-slate-900/10">
+                {{-- Modal Header --}}
+                <div class="border-b border-gray-100 px-6 py-4 flex items-center justify-between bg-gradient-to-r from-gray-50 to-brand-50/20">
+                    <div>
+                        <h3 class="text-lg font-bold text-gray-900">Link Children to {{ $this->selectedParent->name }}</h3>
+                        <p class="text-xs text-gray-500 mt-0.5">Search and select students to link with this parent account</p>
+                    </div>
+                    <button wire:click="closeLinkModal" class="rounded-lg p-1.5 text-gray-400 hover:text-gray-600 hover:bg-white transition-colors cursor-pointer" aria-label="Close">
+                        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                    </button>
                 </div>
-                <div class="overflow-y-auto px-6 py-4 space-y-3">
-                    @foreach($this->availableStudents as $student)
-                        <label class="flex cursor-pointer items-center gap-3 rounded-xl border border-gray-200 p-3 hover:bg-gray-50">
-                            <input type="checkbox" wire:model="selectedChildren" value="{{ $student->id }}" class="h-4 w-4 rounded border-gray-300 text-brand-600 focus:ring-brand-500" />
-                            @if($student->passport_photo_url)
-                                <img src="{{ $student->passport_photo_url }}" class="h-10 w-10 rounded-full object-cover ring-1 ring-gray-200" />
-                            @else
-                                <div class="flex h-10 w-10 items-center justify-center rounded-full bg-gray-100 text-gray-600 ring-1 ring-gray-200">
-                                    <span class="text-sm font-medium">{{ substr($student->first_name, 0, 1) }}</span>
-                                </div>
-                            @endif
-                            <div class="flex-1">
-                                <div class="text-sm font-medium text-gray-900">{{ $student->full_name }}</div>
-                                <div class="text-xs text-gray-500">{{ $student->admission_number }} • {{ $student->schoolClass?->name ?? 'Unassigned' }}</div>
+
+                {{-- Modal Body --}}
+                <div class="p-6 overflow-y-auto space-y-4 flex-1">
+                    {{-- Currently Selected/Linked Section --}}
+                    @if(count($selectedChildren) > 0)
+                        <div class="rounded-xl border border-brand-100 bg-brand-50/40 p-3.5">
+                            <div class="flex items-center justify-between mb-2.5">
+                                <span class="text-xs font-bold text-brand-900 uppercase tracking-wider flex items-center gap-1.5">
+                                    <svg class="h-3.5 w-3.5 text-brand-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                                        <circle cx="9" cy="7" r="4"/>
+                                        <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                                        <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                                    </svg>
+                                    Linked Children ({{ count($selectedChildren) }})
+                                </span>
+                                <span class="text-[11px] text-brand-600">Click &times; to unlink</span>
                             </div>
-                        </label>
-                    @endforeach
+                            <div class="flex flex-wrap gap-2">
+                                @foreach($this->selectedStudentsList as $selectedStudent)
+                                    <span wire:key="selected-chip-{{ $selectedStudent->id }}" 
+                                          class="inline-flex items-center gap-1.5 rounded-lg bg-white border border-brand-200 px-2.5 py-1 text-xs font-medium text-brand-900 shadow-2xs">
+                                        <span class="font-semibold">{{ $selectedStudent->full_name }}</span>
+                                        <span class="text-[10px] text-brand-600">({{ $selectedStudent->schoolClass?->name ?? 'Unassigned' }})</span>
+                                        <button type="button" 
+                                                wire:click="removeChildFromSelection({{ $selectedStudent->id }})" 
+                                                class="text-gray-400 hover:text-red-600 p-0.5 rounded hover:bg-red-50 transition-colors cursor-pointer"
+                                                title="Remove from selection">
+                                            <svg class="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor">
+                                                <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                                            </svg>
+                                        </button>
+                                    </span>
+                                @endforeach
+                            </div>
+                        </div>
+                    @endif
+
+                    {{-- Search Input --}}
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1.5">Search Students to Link</label>
+                        <div class="relative">
+                            <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-gray-400">
+                                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="11" cy="11" r="8"/>
+                                    <path d="m21 21-4.35-4.35"/>
+                                </svg>
+                            </div>
+                            <input wire:model.live.debounce.300ms="studentSearch" 
+                                   type="text" 
+                                   placeholder="Search students by name, admission no, or class..." 
+                                   class="w-full rounded-xl border-0 py-2.5 pl-10 pr-10 text-sm ring-1 ring-inset ring-gray-200 focus:ring-2 focus:ring-inset focus:ring-brand-500 placeholder:text-gray-400" />
+                            @if($studentSearch !== '')
+                                <button type="button" 
+                                        wire:click="$set('studentSearch', '')" 
+                                        class="absolute inset-y-0 right-0 flex items-center pr-3.5 text-gray-400 hover:text-gray-600 cursor-pointer"
+                                        title="Clear search">
+                                    <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                                    </svg>
+                                </button>
+                            @endif
+                        </div>
+                    </div>
+
+                    {{-- Search Results List --}}
+                    <div class="space-y-2">
+                        <div class="flex items-center justify-between text-xs text-gray-500 px-0.5">
+                            <span>Available Students</span>
+                            <span>{{ $this->availableStudents->count() }} result(s)</span>
+                        </div>
+                        <div class="max-h-64 overflow-y-auto space-y-2 pr-1">
+                            @forelse($this->availableStudents as $student)
+                                @php
+                                    $isSelected = in_array($student->id, array_map('intval', (array) $selectedChildren));
+                                @endphp
+                                <label wire:key="student-option-{{ $student->id }}" 
+                                       class="flex cursor-pointer items-center gap-3 rounded-xl border p-3 transition-all {{ $isSelected ? 'border-brand-300 bg-brand-50/30 ring-1 ring-brand-200 shadow-2xs' : 'border-gray-200 hover:bg-gray-50/80' }}">
+                                    <input type="checkbox" 
+                                           wire:model.live="selectedChildren" 
+                                           value="{{ $student->id }}" 
+                                           class="h-4 w-4 rounded border-gray-300 text-brand-600 focus:ring-brand-500" />
+                                    @if($student->passport_photo_url)
+                                        <img src="{{ $student->passport_photo_url }}" class="h-9 w-9 rounded-full object-cover ring-1 ring-gray-200" />
+                                    @else
+                                        <div class="flex h-9 w-9 items-center justify-center rounded-full bg-gray-100 text-gray-600 ring-1 ring-gray-200 font-semibold text-xs">
+                                            {{ substr($student->first_name, 0, 1) }}
+                                        </div>
+                                    @endif
+                                    <div class="flex-1 min-w-0">
+                                        <div class="flex items-center gap-2">
+                                            <span class="text-sm font-semibold text-gray-900 truncate">{{ $student->full_name }}</span>
+                                            @if($isSelected)
+                                                <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-brand-100 text-brand-700">Linked</span>
+                                            @endif
+                                        </div>
+                                        <div class="text-xs text-gray-500">
+                                            {{ $student->admission_number }} • {{ $student->schoolClass?->name ?? 'Unassigned' }}{{ $student->section ? ' (' . $student->section->name . ')' : '' }}
+                                        </div>
+                                    </div>
+                                </label>
+                            @empty
+                                <div class="rounded-xl border border-dashed border-gray-200 p-6 text-center">
+                                    <svg class="mx-auto h-8 w-8 text-gray-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                        <circle cx="11" cy="11" r="8"/>
+                                        <path d="m21 21-4.35-4.35"/>
+                                    </svg>
+                                    <p class="mt-2 text-sm font-medium text-gray-600">No students found matching "{{ $studentSearch }}"</p>
+                                    <p class="text-xs text-gray-400 mt-0.5">Try searching with a different name, admission number, or class.</p>
+                                </div>
+                            @endforelse
+                        </div>
+                    </div>
                 </div>
-                <div class="border-t border-gray-100 bg-gray-50/50 px-6 py-4 flex items-center justify-end gap-3">
-                    <button wire:click="closeLinkModal" class="rounded-lg px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-100" wire:loading.attr="disabled" wire:loading.class="opacity-50 cursor-wait" aria-label="Close">Cancel</button>
-                    <button wire:click="linkChildren" class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-brand-500" wire:loading.attr="disabled" wire:loading.class="opacity-50 cursor-wait">Link Selected</button>
+
+                {{-- Modal Footer --}}
+                <div class="border-t border-gray-100 bg-gray-50/70 px-6 py-4 flex items-center justify-between">
+                    <span class="text-xs font-medium text-gray-500">
+                        {{ count($selectedChildren) }} student(s) selected
+                    </span>
+                    <div class="flex items-center gap-3">
+                        <button wire:click="closeLinkModal" class="rounded-lg px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-100 transition-colors cursor-pointer" wire:loading.attr="disabled" wire:loading.class="opacity-50 cursor-wait" aria-label="Close">Cancel</button>
+                        <button wire:click="linkChildren" class="rounded-lg bg-brand-600 px-5 py-2 text-sm font-semibold text-white shadow-sm hover:bg-brand-500 transition-colors cursor-pointer" wire:loading.attr="disabled" wire:loading.class="opacity-50 cursor-wait">Save Changes</button>
+                    </div>
                 </div>
             </div>
         </div>
