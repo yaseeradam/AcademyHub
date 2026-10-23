@@ -16,6 +16,7 @@ use Livewire\Attributes\Layout;
 use Livewire\Attributes\On;
 use Livewire\Attributes\Title;
 use Livewire\Component;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 #[Layout('layouts.app')]
@@ -523,6 +524,199 @@ class Teachers extends Component
             'Pragma' => 'no-cache',
             'Expires' => '0',
         ]);
+    }
+
+    public function downloadWeeklyPdf(): ?StreamedResponse
+    {
+        $this->validateSelection();
+
+        $referenceDate = $this->date ? Carbon::parse($this->date) : now();
+        $startOfWeek = $referenceDate->copy()->startOfWeek(Carbon::MONDAY);
+        $endOfWeek = $startOfWeek->copy()->addDays(4); // Friday
+
+        $weekRangeLabel = 'Week of ' . $startOfWeek->format('D, d M') . ' – ' . $endOfWeek->format('D, d M, Y');
+
+        $weekDays = [];
+        for ($i = 0; $i < 5; $i++) {
+            $dayDate = $startOfWeek->copy()->addDays($i);
+            $weekDays[] = [
+                'date' => $dayDate->toDateString(),
+                'name' => $dayDate->format('D'),
+                'formatted' => $dayDate->format('d M'),
+            ];
+        }
+
+        $tenantId = auth()->user()?->tenant_id;
+        $sheetsQuery = TeacherAttendanceSheet::withoutGlobalScopes()
+            ->whereBetween('date', [$startOfWeek->toDateString(), $endOfWeek->toDateString()])
+            ->where('term', (int) $this->term)
+            ->where('session', $this->session);
+
+        if ($tenantId) {
+            $sheetsQuery->where(function ($q) use ($tenantId) {
+                $q->where('tenant_id', $tenantId)->orWhereNull('tenant_id');
+            });
+        }
+
+        $sheets = $sheetsQuery->with(['marks.teacher'])->get();
+        $sheetsByDate = $sheets->keyBy(fn($s) => Carbon::parse($s->date)->toDateString());
+        $activeDaysCount = $sheets->count() > 0 ? $sheets->count() : 5;
+
+        // Collect staff members based on shift filter if applicable
+        $staffMembers = $this->visibleTeachers;
+        $scopeLabel = match(strtolower($this->sectionFilter)) {
+            'western' => 'Western Shift Staff',
+            'islamic' => 'Islamic Shift Staff',
+            default => 'All School Staff (Academic & Administrative)',
+        };
+
+        $staffRows = [];
+        $totalPresentAll = 0;
+        $totalPossibleAll = 0;
+        $punctualityStarsAchievers = [];
+
+        foreach ($staffMembers as $staff) {
+            $daysData = [];
+            $daysPresent = 0;
+            $daysLate = 0;
+
+            foreach ($weekDays as $day) {
+                $sheet = $sheetsByDate->get($day['date']);
+                if ($sheet) {
+                    $mark = $sheet->marks->firstWhere('teacher_id', $staff->id);
+                    $status = $mark ? $mark->status : 'Unmarked';
+                    $punchDisplay = null;
+                    if ($mark) {
+                        $pTime = $this->formatPunchTime($mark->status, $mark->note, $mark->punch_in_time ?? $mark->created_at);
+                        $punchDisplay = ($pTime !== '-') ? $pTime : null;
+                    }
+
+                    if ($status === 'Present') {
+                        $daysPresent++;
+                    } elseif ($status === 'Late') {
+                        $daysPresent++;
+                        $daysLate++;
+                    }
+                } else {
+                    $status = '-';
+                    $punchDisplay = null;
+                }
+
+                $daysData[] = [
+                    'status' => $status,
+                    'punch_display' => $punchDisplay,
+                ];
+            }
+
+            $rate = $activeDaysCount > 0 ? (int) round(($daysPresent / $activeDaysCount) * 100) : 0;
+            if ($rate > 100) {
+                $rate = 100;
+            }
+
+            $stars = 0;
+            if ($activeDaysCount > 0 && $daysPresent > 0) {
+                if ($daysPresent === $activeDaysCount && $daysLate === 0) {
+                    $stars = 5;
+                } elseif ($daysPresent === $activeDaysCount && $daysLate <= 1) {
+                    $stars = 4;
+                } elseif ($daysPresent >= ($activeDaysCount * 0.8)) {
+                    $stars = max(3, 4 - $daysLate);
+                } elseif ($daysPresent >= ($activeDaysCount * 0.6)) {
+                    $stars = 3;
+                } elseif ($daysPresent >= ($activeDaysCount * 0.4)) {
+                    $stars = 2;
+                } else {
+                    $stars = 1;
+                }
+            }
+
+            if ($stars === 5) {
+                $punctualityStarsAchievers[] = [
+                    'name' => $staff->name,
+                    'role' => ucfirst($staff->role),
+                ];
+            }
+
+            $totalPresentAll += $daysPresent;
+            $totalPossibleAll += $activeDaysCount;
+
+            $staffRows[] = [
+                'name' => $staff->name,
+                'role' => $staff->role,
+                'shift' => $staff->getShiftLabel(),
+                'days' => $daysData,
+                'days_present' => $daysPresent,
+                'days_late' => $daysLate,
+                'rate' => $rate,
+                'stars' => $stars,
+            ];
+        }
+
+        $weeklyAttendanceRate = $totalPossibleAll > 0 
+            ? (int) round(($totalPresentAll / $totalPossibleAll) * 100) 
+            : 0;
+
+        $schoolName = config('academyhub.school_name', config('app.name', 'AI INTEGRATED ACADEMY ARGUNGU'));
+        $schoolMotto = config('academyhub.school_motto', 'LEARNING TODAY LEADING TOMORROW');
+        $schoolAddress = config('academyhub.school_address', '');
+        $schoolPhone = config('academyhub.school_phone', '');
+        $schoolEmail = config('academyhub.school_email', '');
+        $logoPath = config('academyhub.school_logo');
+
+        $logoBase64 = null;
+        if ($logoPath) {
+            $candidates = [
+                storage_path('app/public/' . $logoPath),
+                public_path('uploads/' . $logoPath),
+                public_path($logoPath),
+            ];
+            foreach ($candidates as $fullPath) {
+                if (file_exists($fullPath) && !is_dir($fullPath)) {
+                    $mime = mime_content_type($fullPath) ?: 'image/png';
+                    $logoBase64 = 'data:' . $mime . ';base64,' . base64_encode(file_get_contents($fullPath));
+                    break;
+                }
+            }
+        }
+
+        $termLabel = match((int) $this->term) {
+            1 => 'First Term',
+            2 => 'Second Term',
+            3 => 'Third Term',
+            default => 'Term ' . ($this->term ?? '1'),
+        };
+        $sessionLabel = $this->session ?: (AcademicSession::activeName() ?? now()->format('Y') . '/' . (now()->year + 1));
+
+        $pdf = Pdf::loadView('pdf.weekly-staff-attendance', [
+            'staffMembers' => $staffMembers,
+            'staffRows' => $staffRows,
+            'weekDays' => $weekDays,
+            'activeDaysCount' => $activeDaysCount,
+            'weeklyAttendanceRate' => $weeklyAttendanceRate,
+            'punctualityStarsAchievers' => $punctualityStarsAchievers,
+            'scopeLabel' => $scopeLabel,
+            'schoolName' => $schoolName,
+            'schoolMotto' => $schoolMotto,
+            'schoolAddress' => $schoolAddress,
+            'schoolPhone' => $schoolPhone,
+            'schoolEmail' => $schoolEmail,
+            'logoBase64' => $logoBase64,
+            'termLabel' => $termLabel,
+            'sessionLabel' => $sessionLabel,
+            'weekRangeLabel' => $weekRangeLabel,
+        ])->setPaper('a4', 'landscape');
+
+        $weekCode = $startOfWeek->format('Y_m_d');
+        $filename = "Weekly_Staff_Attendance_{$weekCode}.pdf";
+
+        return response()->streamDownload(
+            fn () => print($pdf->output()),
+            $filename,
+            [
+                'Content-Type' => 'application/pdf',
+                'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+            ]
+        );
     }
 
     private function loadMarks(TeacherAttendanceSheet $sheet): void

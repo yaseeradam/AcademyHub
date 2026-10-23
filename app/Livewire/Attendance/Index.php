@@ -21,6 +21,7 @@ use Livewire\Attributes\On;
 use Livewire\Attributes\Title;
 use Livewire\Attributes\Url;
 use Livewire\Component;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 #[Layout('layouts.app')]
@@ -148,6 +149,210 @@ class Index extends Component
             'Content-Type' => 'text/csv; charset=UTF-8',
             'Cache-Control' => 'no-cache, no-store, must-revalidate',
         ]);
+    }
+
+    public function downloadWeeklyPdf(): ?StreamedResponse
+    {
+        if (!$this->classId) {
+            $this->dispatch('alert', message: 'Please select a Class before downloading weekly attendance.', type: 'error');
+            return null;
+        }
+
+        $class = SchoolClass::find($this->classId);
+        if (!$class) {
+            $this->dispatch('alert', message: 'Selected class not found.', type: 'error');
+            return null;
+        }
+
+        $section = $this->sectionId ? Section::find($this->sectionId) : null;
+
+        $referenceDate = $this->date ? Carbon::parse($this->date) : now();
+        $startOfWeek = $referenceDate->copy()->startOfWeek(Carbon::MONDAY);
+        $endOfWeek = $startOfWeek->copy()->addDays(4); // Friday
+
+        $weekRangeLabel = 'Week of ' . $startOfWeek->format('D, d M') . ' – ' . $endOfWeek->format('D, d M, Y');
+
+        $weekDays = [];
+        for ($i = 0; $i < 5; $i++) {
+            $dayDate = $startOfWeek->copy()->addDays($i);
+            $weekDays[] = [
+                'date' => $dayDate->toDateString(),
+                'name' => $dayDate->format('D'),
+                'formatted' => $dayDate->format('d M'),
+            ];
+        }
+
+        $tenantId = auth()->user()?->tenant_id;
+        $sheetsQuery = AttendanceSheet::withoutGlobalScopes()
+            ->where('class_id', (int) $this->classId)
+            ->whereBetween('date', [$startOfWeek->toDateString(), $endOfWeek->toDateString()]);
+
+        if ($this->sectionId) {
+            $sheetsQuery->where('section_id', (int) $this->sectionId);
+        }
+
+        if ($tenantId) {
+            $sheetsQuery->where(function ($q) use ($tenantId) {
+                $q->where('tenant_id', $tenantId)->orWhereNull('tenant_id');
+            });
+        }
+
+        $sheets = $sheetsQuery->with(['marks.student'])->get();
+        $sheetsByDate = $sheets->keyBy(fn($s) => Carbon::parse($s->date)->toDateString());
+        $activeDaysCount = $sheets->count() > 0 ? $sheets->count() : 5;
+
+        $studentsQuery = Student::query()
+            ->where('class_id', (int) $this->classId)
+            ->where('status', 'Active');
+
+        if ($this->sectionId) {
+            $studentsQuery->where('section_id', (int) $this->sectionId);
+        }
+
+        $students = $studentsQuery->orderBy('last_name')->orderBy('first_name')->get();
+
+        $studentRows = [];
+        $totalPresentMarksAll = 0;
+        $totalPossibleMarksAll = 0;
+        $fiveStarAchievers = [];
+
+        foreach ($students as $student) {
+            $daysData = [];
+            $daysPresent = 0;
+
+            foreach ($weekDays as $day) {
+                $sheet = $sheetsByDate->get($day['date']);
+                if ($sheet) {
+                    $mark = $sheet->marks->firstWhere('student_id', $student->id);
+                    $status = $mark ? $mark->status : 'Unmarked';
+                    if (in_array($status, ['Present', 'Late'])) {
+                        $daysPresent++;
+                    }
+                } else {
+                    $status = '-';
+                }
+                $daysData[] = [
+                    'status' => $status,
+                ];
+            }
+
+            $rate = $activeDaysCount > 0 ? (int) round(($daysPresent / $activeDaysCount) * 100) : 0;
+            if ($rate > 100) {
+                $rate = 100;
+            }
+
+            $stars = 0;
+            if ($activeDaysCount > 0) {
+                $ratio = $daysPresent / $activeDaysCount;
+                if ($ratio >= 1.0) {
+                    $stars = 5;
+                } elseif ($ratio >= 0.8) {
+                    $stars = 4;
+                } elseif ($ratio >= 0.6) {
+                    $stars = 3;
+                } elseif ($ratio >= 0.4) {
+                    $stars = 2;
+                } elseif ($ratio >= 0.2) {
+                    $stars = 1;
+                }
+            }
+
+            if ($stars === 5 && $daysPresent > 0) {
+                $fiveStarAchievers[] = [
+                    'name' => $student->full_name,
+                    'adm_no' => $student->admission_number,
+                ];
+            }
+
+            $totalPresentMarksAll += $daysPresent;
+            $totalPossibleMarksAll += $activeDaysCount;
+
+            $studentRows[] = [
+                'name' => $student->full_name,
+                'adm_no' => $student->admission_number,
+                'days' => $daysData,
+                'days_present' => $daysPresent,
+                'rate' => $rate,
+                'stars' => $stars,
+            ];
+        }
+
+        $weeklyAttendanceRate = $totalPossibleMarksAll > 0 
+            ? (int) round(($totalPresentMarksAll / $totalPossibleMarksAll) * 100) 
+            : 0;
+
+        $schoolName = config('academyhub.school_name', config('app.name', 'AI INTEGRATED ACADEMY ARGUNGU'));
+        $schoolMotto = config('academyhub.school_motto', 'LEARNING TODAY LEADING TOMORROW');
+        $schoolAddress = config('academyhub.school_address', '');
+        $schoolPhone = config('academyhub.school_phone', '');
+        $schoolEmail = config('academyhub.school_email', '');
+        $logoPath = config('academyhub.school_logo');
+
+        $logoBase64 = null;
+        if ($logoPath) {
+            $candidates = [
+                storage_path('app/public/' . $logoPath),
+                public_path('uploads/' . $logoPath),
+                public_path($logoPath),
+            ];
+            foreach ($candidates as $fullPath) {
+                if (file_exists($fullPath) && !is_dir($fullPath)) {
+                    $mime = mime_content_type($fullPath) ?: 'image/png';
+                    $logoBase64 = 'data:' . $mime . ';base64,' . base64_encode(file_get_contents($fullPath));
+                    break;
+                }
+            }
+        }
+
+        $classTeacherName = $section?->classTeacher?->name ?? null;
+        if (!$classTeacherName) {
+            $classTeacherName = SubjectAllocation::where('class_id', $this->classId)
+                ->whereNotNull('teacher_id')
+                ->with('teacher:id,name')
+                ->first()?->teacher?->name;
+        }
+
+        $termLabel = match((int) $this->term) {
+            1 => 'First Term',
+            2 => 'Second Term',
+            3 => 'Third Term',
+            default => 'Term ' . ($this->term ?? '1'),
+        };
+        $sessionLabel = $this->session ?: (AcademicSession::activeName() ?? now()->format('Y') . '/' . (now()->year + 1));
+
+        $pdf = Pdf::loadView('pdf.weekly-student-attendance', [
+            'class' => $class,
+            'section' => $section,
+            'students' => $students,
+            'weekDays' => $weekDays,
+            'studentRows' => $studentRows,
+            'activeDaysCount' => $activeDaysCount,
+            'weeklyAttendanceRate' => $weeklyAttendanceRate,
+            'fiveStarAchievers' => $fiveStarAchievers,
+            'classTeacherName' => $classTeacherName,
+            'schoolName' => $schoolName,
+            'schoolMotto' => $schoolMotto,
+            'schoolAddress' => $schoolAddress,
+            'schoolPhone' => $schoolPhone,
+            'schoolEmail' => $schoolEmail,
+            'logoBase64' => $logoBase64,
+            'termLabel' => $termLabel,
+            'sessionLabel' => $sessionLabel,
+            'weekRangeLabel' => $weekRangeLabel,
+        ])->setPaper('a4', 'landscape');
+
+        $safeClassName = preg_replace('/[^A-Za-z0-9_-]+/', '_', (string) $class->name);
+        $weekCode = $startOfWeek->format('Y_m_d');
+        $filename = "Weekly_Attendance_{$safeClassName}_{$weekCode}.pdf";
+
+        return response()->streamDownload(
+            fn () => print($pdf->output()),
+            $filename,
+            [
+                'Content-Type' => 'application/pdf',
+                'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+            ]
+        );
     }
 
     private function formatPunchTime(?string $status, ?string $note, mixed $timestamp): string
