@@ -188,9 +188,10 @@ class Dashboard extends Component
     public function financialStats()
     {
         $user = auth()->user();
-        if (!$user || !in_array($user->role, ['admin', 'bursar'], true)) {
+        if (!$user || !in_array($user->role, ['admin', 'bursar', 'proprietor'], true)) {
             return [
                 'total_revenue' => 0,
+                'transaction_count' => 0,
                 'pending_fees' => 0,
                 'monthly_trend' => [],
                 'payment_methods' => [],

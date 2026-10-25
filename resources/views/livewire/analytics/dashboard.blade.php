@@ -76,7 +76,7 @@
         </div>
 
         <!-- Financial Card -->
-        @if(auth()->user()->role === 'admin' || auth()->user()->role === 'bursar')
+        @if(in_array(auth()->user()->role, ['admin', 'bursar', 'proprietor'], true))
         <div class="rounded-2xl bg-gradient-to-br from-purple-500 to-purple-600 p-6 text-white shadow-lg">
             <div class="flex items-center justify-between">
                 <div>
@@ -130,7 +130,7 @@
         </div>
 
         <!-- Financial Trend Chart -->
-        @if(auth()->user()->role === 'admin' || auth()->user()->role === 'bursar')
+        @if(in_array(auth()->user()->role, ['admin', 'bursar', 'proprietor'], true))
         <div class="rounded-2xl bg-white p-6 shadow-lg">
             <div class="flex items-center justify-between mb-4">
                 <h3 class="text-lg font-bold text-gray-900">Revenue Trend (6 Months)</h3>
@@ -229,111 +229,231 @@
     </div>
     @endif
 
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    {{-- Reactive Chart Dataset (Preserved across Livewire component morphs) --}}
+    <div id="analyticsChartData" class="hidden"
+         data-grade-labels='@json(array_keys($this->academicPerformance['grade_distribution']))'
+         data-grade-values='@json(array_values($this->academicPerformance['grade_distribution']))'
+         data-attendance-labels='@json(array_column($this->attendanceStats['daily_trend'], 'date'))'
+         data-attendance-values='@json(array_column($this->attendanceStats['daily_trend'], 'attendance_rate'))'
+         data-subject-labels='@json(array_column($this->academicPerformance['subject_performance'], 'subject'))'
+         data-subject-values='@json(array_column($this->academicPerformance['subject_performance'], 'average'))'
+         @if(in_array(auth()->user()->role, ['admin', 'bursar', 'proprietor'], true))
+         data-revenue-labels='@json(array_column($this->financialStats['monthly_trend'], 'month'))'
+         data-revenue-values='@json(array_column($this->financialStats['monthly_trend'], 'revenue'))'
+         @endif
+    ></div>
+
+    {{-- Load Chart.js with local asset and CDN fallback --}}
+    <script src="{{ asset('vendor/chartjs/chart.umd.min.js') }}?v=4.4"></script>
     <script>
-        // Chart registry — keyed by canvas ID
-        window.__analyticsCharts = window.__analyticsCharts || {};
+        (function() {
+            window.__analyticsCharts = window.__analyticsCharts || {};
 
-        function buildAnalyticsChartData() {
-            return {
-                grade: {
-                    labels: @json(array_keys($this->academicPerformance['grade_distribution'])),
-                    data:   @json(array_values($this->academicPerformance['grade_distribution'])),
-                },
-                attendance: {
-                    labels: @json(array_column($this->attendanceStats['daily_trend'], 'date')),
-                    data:   @json(array_column($this->attendanceStats['daily_trend'], 'attendance_rate')),
-                },
-                subject: {
-                    labels: @json(array_column($this->academicPerformance['subject_performance'], 'subject')),
-                    data:   @json(array_column($this->academicPerformance['subject_performance'], 'average')),
-                },
-                @if(auth()->user()->role === 'admin' || auth()->user()->role === 'bursar')
-                revenue: {
-                    labels: @json(array_column($this->financialStats['monthly_trend'], 'month')),
-                    data:   @json(array_column($this->financialStats['monthly_trend'], 'revenue')),
-                },
-                @endif
-            };
-        }
-
-        function destroyChart(id) {
-            if (window.__analyticsCharts[id]) {
-                window.__analyticsCharts[id].destroy();
-                delete window.__analyticsCharts[id];
+            function ensureChartJs(callback) {
+                if (window.Chart) {
+                    callback();
+                    return;
+                }
+                if (!document.getElementById('chartjs-script')) {
+                    const script = document.createElement('script');
+                    script.id = 'chartjs-script';
+                    script.src = 'https://cdn.jsdelivr.net/npm/chart.js';
+                    script.onload = () => callback();
+                    document.head.appendChild(script);
+                } else {
+                    const timer = setInterval(() => {
+                        if (window.Chart) {
+                            clearInterval(timer);
+                            callback();
+                        }
+                    }, 60);
+                    setTimeout(() => clearInterval(timer), 5000);
+                }
             }
-        }
 
-        function initAnalyticsCharts() {
-            const cd = buildAnalyticsChartData();
-
-            // Grade Distribution
-            destroyChart('gradeChart');
-            const gradeCtx = document.getElementById('gradeChart');
-            if (gradeCtx && cd.grade.labels.length) {
-                window.__analyticsCharts['gradeChart'] = new Chart(gradeCtx, {
-                    type: 'doughnut',
-                    data: {
-                        labels: cd.grade.labels,
-                        datasets: [{
-                            data: cd.grade.data,
-                            backgroundColor: ['#10B981','#3B82F6','#F59E0B','#EF4444','#8B5CF6'],
-                            borderWidth: 0
-                        }]
+            function getDataset() {
+                const el = document.getElementById('analyticsChartData');
+                if (!el) {
+                    return {
+                        grade: { labels: [], data: [] },
+                        attendance: { labels: [], data: [] },
+                        subject: { labels: [], data: [] },
+                        revenue: null
+                    };
+                }
+                const parseSafe = (val, fallback = []) => {
+                    try { return val ? JSON.parse(val) : fallback; } catch (e) { return fallback; }
+                };
+                return {
+                    grade: {
+                        labels: parseSafe(el.dataset.gradeLabels),
+                        data:   parseSafe(el.dataset.gradeValues)
                     },
-                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
+                    attendance: {
+                        labels: parseSafe(el.dataset.attendanceLabels),
+                        data:   parseSafe(el.dataset.attendanceValues)
+                    },
+                    subject: {
+                        labels: parseSafe(el.dataset.subjectLabels),
+                        data:   parseSafe(el.dataset.subjectValues)
+                    },
+                    revenue: el.dataset.revenueLabels ? {
+                        labels: parseSafe(el.dataset.revenueLabels),
+                        data:   parseSafe(el.dataset.revenueValues)
+                    } : null
+                };
+            }
+
+            function destroyChart(id) {
+                if (window.__analyticsCharts[id]) {
+                    try {
+                        window.__analyticsCharts[id].destroy();
+                    } catch (e) {}
+                    delete window.__analyticsCharts[id];
+                }
+            }
+
+            function initAnalyticsCharts() {
+                if (typeof Chart === 'undefined') {
+                    ensureChartJs(initAnalyticsCharts);
+                    return;
+                }
+
+                const cd = getDataset();
+
+                // 1. Grade Distribution
+                destroyChart('gradeChart');
+                const gradeCtx = document.getElementById('gradeChart');
+                if (gradeCtx) {
+                    const hasGradeData = cd.grade.labels && cd.grade.labels.length > 0;
+                    window.__analyticsCharts['gradeChart'] = new Chart(gradeCtx, {
+                        type: 'doughnut',
+                        data: {
+                            labels: hasGradeData ? cd.grade.labels : ['No Assessments'],
+                            datasets: [{
+                                data: hasGradeData ? cd.grade.data : [1],
+                                backgroundColor: hasGradeData ? ['#10B981','#3B82F6','#F59E0B','#EF4444','#8B5CF6'] : ['#e2e8f0'],
+                                borderWidth: 0
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: { position: 'bottom' },
+                                tooltip: { enabled: hasGradeData }
+                            }
+                        }
+                    });
+                }
+
+                // 2. Attendance Trend
+                destroyChart('attendanceChart');
+                const attCtx = document.getElementById('attendanceChart');
+                if (attCtx) {
+                    window.__analyticsCharts['attendanceChart'] = new Chart(attCtx, {
+                        type: 'line',
+                        data: {
+                            labels: cd.attendance.labels || [],
+                            datasets: [{
+                                label: 'Attendance Rate (%)',
+                                data: cd.attendance.data || [],
+                                borderColor: '#3B82F6',
+                                backgroundColor: 'rgba(59,130,246,0.1)',
+                                fill: true,
+                                tension: 0.4
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            scales: {
+                                y: { beginAtZero: true, max: 100 }
+                            }
+                        }
+                    });
+                }
+
+                // 3. Subject Performance
+                destroyChart('subjectChart');
+                const subCtx = document.getElementById('subjectChart');
+                if (subCtx) {
+                    const hasSubjectData = cd.subject.labels && cd.subject.labels.length > 0;
+                    window.__analyticsCharts['subjectChart'] = new Chart(subCtx, {
+                        type: 'bar',
+                        data: {
+                            labels: hasSubjectData ? cd.subject.labels : ['No Scores'],
+                            datasets: [{
+                                label: 'Average Score',
+                                data: hasSubjectData ? cd.subject.data : [0],
+                                backgroundColor: '#10B981',
+                                borderRadius: 4
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            scales: {
+                                y: { beginAtZero: true }
+                            }
+                        }
+                    });
+                }
+
+                // 4. Revenue Trend (Available for admin, bursar, and proprietor)
+                destroyChart('revenueChart');
+                const revCtx = document.getElementById('revenueChart');
+                if (revCtx && cd.revenue) {
+                    window.__analyticsCharts['revenueChart'] = new Chart(revCtx, {
+                        type: 'line',
+                        data: {
+                            labels: cd.revenue.labels || [],
+                            datasets: [{
+                                label: 'Revenue',
+                                data: cd.revenue.data || [],
+                                borderColor: '#8B5CF6',
+                                backgroundColor: 'rgba(139,92,246,0.1)',
+                                fill: true,
+                                tension: 0.4
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            scales: {
+                                y: { beginAtZero: true }
+                            }
+                        }
+                    });
+                }
+            }
+
+            window.initAnalyticsCharts = initAnalyticsCharts;
+
+            // 1. Initial page load
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', () => ensureChartJs(initAnalyticsCharts));
+            } else {
+                ensureChartJs(initAnalyticsCharts);
+            }
+
+            // 2. Livewire 3 SPA Navigation
+            document.addEventListener('livewire:navigated', () => {
+                ensureChartJs(initAnalyticsCharts);
+            });
+
+            // 3. Livewire 3 DOM Morph Updates (when filters change)
+            if (window.Livewire) {
+                Livewire.hook('morph.updated', () => {
+                    ensureChartJs(initAnalyticsCharts);
+                });
+            } else {
+                document.addEventListener('livewire:init', () => {
+                    Livewire.hook('morph.updated', () => {
+                        ensureChartJs(initAnalyticsCharts);
+                    });
                 });
             }
-
-            // Attendance Trend
-            destroyChart('attendanceChart');
-            const attCtx = document.getElementById('attendanceChart');
-            if (attCtx) {
-                window.__analyticsCharts['attendanceChart'] = new Chart(attCtx, {
-                    type: 'line',
-                    data: {
-                        labels: cd.attendance.labels,
-                        datasets: [{ label: 'Attendance Rate (%)', data: cd.attendance.data, borderColor: '#3B82F6', backgroundColor: 'rgba(59,130,246,0.1)', fill: true, tension: 0.4 }]
-                    },
-                    options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, max: 100 } } }
-                });
-            }
-
-            // Subject Performance
-            destroyChart('subjectChart');
-            const subCtx = document.getElementById('subjectChart');
-            if (subCtx && cd.subject.labels.length) {
-                window.__analyticsCharts['subjectChart'] = new Chart(subCtx, {
-                    type: 'bar',
-                    data: {
-                        labels: cd.subject.labels,
-                        datasets: [{ label: 'Average Score', data: cd.subject.data, backgroundColor: '#10B981', borderRadius: 4 }]
-                    },
-                    options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true } } }
-                });
-            }
-
-            @if(auth()->user()->role === 'admin' || auth()->user()->role === 'bursar')
-            // Revenue Trend
-            destroyChart('revenueChart');
-            const revCtx = document.getElementById('revenueChart');
-            if (revCtx && cd.revenue && cd.revenue.labels.length) {
-                window.__analyticsCharts['revenueChart'] = new Chart(revCtx, {
-                    type: 'line',
-                    data: {
-                        labels: cd.revenue.labels,
-                        datasets: [{ label: 'Revenue', data: cd.revenue.data, borderColor: '#8B5CF6', backgroundColor: 'rgba(139,92,246,0.1)', fill: true, tension: 0.4 }]
-                    },
-                    options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true } } }
-                });
-            }
-            @endif
-        }
-
-        // Run on initial load
-        document.addEventListener('DOMContentLoaded', initAnalyticsCharts);
-
-        // Re-run after every Livewire component update so charts reflect new filter data
-        document.addEventListener('livewire:updated', initAnalyticsCharts);
+        })();
     </script>
 </div>
