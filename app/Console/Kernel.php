@@ -21,6 +21,15 @@ class Kernel extends ConsoleKernel
         $schedule->command('backup:clean')->daily()->at('03:00');
         // Health check: verify latest backup exists and isn't too old
         $schedule->command('backup:monitor')->daily()->at('03:30');
+
+        // ── Automated Biometric Hardware Sync ─────────────────────────────
+        // Automatically sync ZKTeco biometric terminals during school arrival/departure
+        $schedule->command('zkteco:sync')
+            ->everyTenMinutes()
+            ->weekdays()
+            ->between('06:30', '18:00')
+            ->withoutOverlapping()
+            ->runInBackground();
     }
 
     /**

@@ -113,6 +113,13 @@ HTML;
         '<path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/>',
         request()->routeIs('attendance.staff-timesheet')) !!}
 
+    @if($user?->tenant?->activeMarketplaceComponents()->where('slug', 'k40-biometrics')->exists())
+        {!! $navLink(route('biometrics.index'), 'Biometrics & Gate',
+            'bg-purple-100', 'text-purple-500',
+            '<path stroke-linecap="round" stroke-linejoin="round" d="M12 11c0 3.517-1.009 6.799-2.753 9.571m-3.44-2.04l.054-.09A13.916 13.916 0 008 11a4 4 0 118 0c0 1.017-.07 2.019-.203 3m-2.118 6.844A21.88 21.88 0 0015.171 17m3.839 1.132c.645-2.266.99-4.659.99-7.132A8 8 0 004.07 9m4.93 11a13.935 13.935 0 004.93-2.868"/>',
+            request()->routeIs('biometrics.*')) !!}
+    @endif
+
     {!! $navLink(route('messages'), 'Messages',
         'bg-sky-100', 'text-sky-500',
         '<path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>',
@@ -266,14 +273,13 @@ HTML;
                     {!! $navLink(route('attendance.staff-timesheet'), 'Staff Timesheet',
                         'bg-amber-100', 'text-amber-600',
                         '<path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/>',
-                        request()->routeIs('attendance.staff-timesheet')) !!}
-
-                    @if(auth()->user()?->tenant?->activeMarketplaceComponents()->where('slug', 'k40-biometrics')->exists())
-                        {!! $navLink(route('biometrics.index'), 'K40 Biometrics',
-                            'bg-purple-100', 'text-purple-500',
-                            '<path stroke-linecap="round" stroke-linejoin="round" d="M12 11c0 3.517-1.009 6.799-2.753 9.571m-3.44-2.04l.054-.09A13.916 13.916 0 008 11a4 4 0 118 0c0 1.017-.07 2.019-.203 3m-2.118 6.844A21.88 21.88 0 0015.171 17m3.839 1.132c.645-2.266.99-4.659.99-7.132A8 8 0 004.07 9m4.93 11a13.935 13.935 0 004.93-2.868"/>',
-                            request()->routeIs('biometrics.*')) !!}
                     @endif
+
+                @if(auth()->user()?->tenant?->activeMarketplaceComponents()->where('slug', 'k40-biometrics')->exists() && in_array($user?->role, ['admin', 'teacher', 'bursar'], true))
+                    {!! $navLink(route('biometrics.index'), 'K40 Biometrics',
+                        'bg-purple-100', 'text-purple-500',
+                        '<path stroke-linecap="round" stroke-linejoin="round" d="M12 11c0 3.517-1.009 6.799-2.753 9.571m-3.44-2.04l.054-.09A13.916 13.916 0 008 11a4 4 0 118 0c0 1.017-.07 2.019-.203 3m-2.118 6.844A21.88 21.88 0 0015.171 17m3.839 1.132c.645-2.266.99-4.659.99-7.132A8 8 0 004.07 9m4.93 11a13.935 13.935 0 004.93-2.868"/>',
+                        request()->routeIs('biometrics.*')) !!}
                 @endif
             </div>
         </div>

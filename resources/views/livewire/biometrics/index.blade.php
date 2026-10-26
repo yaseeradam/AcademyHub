@@ -17,18 +17,28 @@
                 </p>
             </div>
 
-            <div class="flex flex-wrap items-center gap-2.5">
-                <button wire:click="refreshGateStatus" type="button" class="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold text-white bg-white/10 hover:bg-white/20 rounded-xl border border-white/15 transition-all">
+            <div class="flex flex-wrap items-center gap-2">
+                <button wire:click="syncDeviceNow" wire:loading.attr="disabled" type="button" class="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-500 rounded-xl shadow-md transition-all active:scale-95 disabled:opacity-50">
+                    <svg wire:loading.remove wire:target="syncDeviceNow" class="w-4 h-4 text-amber-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                    <svg wire:loading wire:target="syncDeviceNow" class="w-4 h-4 animate-spin text-white" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                    <span wire:loading.remove wire:target="syncDeviceNow">Sync Biometrics Now</span>
+                    <span wire:loading wire:target="syncDeviceNow">Syncing...</span>
+                </button>
+                <button wire:click="$set('showUploadModal', true)" type="button" class="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-bold text-white bg-white/10 hover:bg-white/20 rounded-xl border border-white/15 transition-all">
+                    <svg class="w-4 h-4 text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+                    Upload USB AttLog
+                </button>
+                <button wire:click="refreshGateStatus" type="button" class="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-bold text-white bg-white/10 hover:bg-white/20 rounded-xl border border-white/15 transition-all">
                     <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
-                    Ping Terminals
+                    Ping
                 </button>
-                <button wire:click="$set('showTerminalModal', true)" type="button" class="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold text-white bg-white/10 hover:bg-white/20 rounded-xl border border-white/15 transition-all">
+                <button wire:click="$set('showTerminalModal', true)" type="button" class="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-bold text-white bg-white/10 hover:bg-white/20 rounded-xl border border-white/15 transition-all">
                     <svg class="w-4 h-4 text-indigo-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-                    Configure IPs
+                    IPs
                 </button>
-                <button wire:click="$set('showWhatsAppModal', true)" type="button" class="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-500 rounded-xl shadow-md transition-all">
+                <button wire:click="$set('showWhatsAppModal', true)" type="button" class="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-500 rounded-xl shadow-md transition-all">
                     <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.711 2.598 2.664-.698c.969.586 1.861.979 3.013.979 3.182 0 5.768-2.587 5.768-5.766.001-3.181-2.585-5.766-5.768-5.766zm9.969 5.766c0 5.523-4.477 10-10 10-1.753 0-3.4-.452-4.836-1.246l-5.164 1.352 1.378-5.034c-.886-1.492-1.378-3.23-1.378-5.072 0-5.523 4.477-10 10-10s10 4.477 10 10z"/></svg>
-                    Parent WhatsApp
+                    WhatsApp
                 </button>
             </div>
         </div>
@@ -251,6 +261,43 @@
                     </a>
                 </div>
             </div>
+
+            {{-- Quick Device Setup (Zero Commands) --}}
+            <div class="bg-gradient-to-br from-slate-900 via-slate-800 to-indigo-950 text-white rounded-2xl p-6 shadow-sm border border-slate-700/60 space-y-4">
+                <div class="flex items-center justify-between">
+                    <span class="text-xs font-bold uppercase tracking-wider text-indigo-400">Zero Command Setup</span>
+                    <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">Auto Real-Time</span>
+                </div>
+                <h4 class="text-sm font-bold text-white">Direct Hardware Stream (ADMS)</h4>
+                <p class="text-xs text-slate-300 leading-relaxed">
+                    Set your physical ZKTeco terminal to automatically stream attendance straight to AcademyHub over WiFi/LAN without running scripts or keeping a PC on:
+                </p>
+                <div class="space-y-2 text-xs font-mono bg-black/40 p-3.5 rounded-xl border border-white/10">
+                    <div class="flex justify-between items-center text-slate-300">
+                        <span class="text-slate-400">1. Device Menu:</span>
+                        <span class="text-white font-semibold">Comm. &rarr; Cloud Server</span>
+                    </div>
+                    <div class="flex justify-between items-center text-slate-300">
+                        <span class="text-slate-400">2. Server Mode:</span>
+                        <span class="text-emerald-400 font-semibold">ADMS / Cloud</span>
+                    </div>
+                    <div class="flex justify-between items-center text-slate-300">
+                        <span class="text-slate-400">3. Server Address:</span>
+                        <span class="text-amber-300 font-bold select-all">{{ request()->getHost() }}</span>
+                    </div>
+                    <div class="flex justify-between items-center text-slate-300">
+                        <span class="text-slate-400">4. Server Port:</span>
+                        <span class="text-white font-bold">80</span>
+                    </div>
+                    <div class="flex justify-between items-center text-slate-300">
+                        <span class="text-slate-400">5. Enable Domain:</span>
+                        <span class="text-emerald-400 font-semibold">{{ filter_var(request()->getHost(), FILTER_VALIDATE_IP) ? 'OFF' : 'ON' }}</span>
+                    </div>
+                </div>
+                <p class="text-[11px] text-slate-400 leading-normal">
+                    ✨ Every student and staff scan is instantly saved, broadcasts to this dashboard, and dispatches parent WhatsApp alerts automatically.
+                </p>
+            </div>
         </div>
     </div>
 
@@ -357,6 +404,58 @@
                     <div class="px-6 py-3 bg-slate-50 dark:bg-slate-700/30 text-right border-t border-slate-200 dark:border-slate-700 flex justify-end gap-2">
                         <button wire:click="$set('showWhatsAppModal', false)" type="button" class="px-4 py-2 text-sm font-semibold text-slate-600 hover:text-slate-800">Close</button>
                         <button wire:click="saveWhatsAppSettings" type="button" class="px-4 py-2 text-sm font-semibold text-white bg-emerald-600 rounded-lg hover:bg-emerald-700">Save Settings</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    @endif
+
+    {{-- Upload USB AttLog Modal --}}
+    @if($showUploadModal)
+        <div class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+            <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+                <div wire:click="$set('showUploadModal', false)" class="fixed inset-0 bg-slate-900/60 transition-opacity"></div>
+                <div class="inline-block align-bottom bg-white dark:bg-slate-800 rounded-2xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+                    <div class="px-6 py-4 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <span class="p-1.5 rounded-lg bg-sky-100 text-sky-700 dark:bg-sky-900/40 dark:text-sky-300">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+                            </span>
+                            <h3 class="text-lg font-bold text-slate-900 dark:text-white">Upload USB Attendance Log</h3>
+                        </div>
+                        <button wire:click="$set('showUploadModal', false)" class="text-slate-400 hover:text-slate-600">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                        </button>
+                    </div>
+
+                    <div class="p-6 space-y-4 text-sm">
+                        <div class="p-3.5 bg-slate-50 dark:bg-slate-700/50 rounded-xl border border-slate-200 dark:border-slate-600 text-xs text-slate-600 dark:text-slate-300 space-y-1.5">
+                            <div class="font-bold text-slate-800 dark:text-white">How to export from ZKTeco K40:</div>
+                            <ol class="list-decimal list-inside space-y-1">
+                                <li>Insert standard USB flash drive into the terminal's USB port.</li>
+                                <li>Press <strong>Menu &rarr; USB Disk &rarr; Download &rarr; Attendance Data</strong>.</li>
+                                <li>Unplug the USB and upload the generated <code>attlog.dat</code> or <code>.txt</code> file below.</li>
+                            </ol>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-2">Select Log File (.dat, .txt, .csv)</label>
+                            <input type="file" wire:model="attlogFile" accept=".dat,.txt,.csv" class="block w-full text-xs text-slate-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 dark:file:bg-indigo-900/40 dark:file:text-indigo-300 cursor-pointer border border-slate-300 dark:border-slate-600 rounded-xl p-2 bg-slate-50/50 dark:bg-slate-700">
+                            @error('attlogFile') <span class="text-xs text-rose-500 mt-1 block">{{ $message }}</span> @enderror
+                        </div>
+
+                        <div wire:loading wire:target="attlogFile" class="text-xs text-indigo-600 font-semibold flex items-center gap-2">
+                            <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                            Uploading file...
+                        </div>
+                    </div>
+
+                    <div class="px-6 py-3 bg-slate-50 dark:bg-slate-700/30 text-right border-t border-slate-200 dark:border-slate-700 flex justify-end gap-2">
+                        <button wire:click="$set('showUploadModal', false)" type="button" class="px-4 py-2 text-sm font-semibold text-slate-600 hover:text-slate-800">Cancel</button>
+                        <button wire:click="uploadAttlog" wire:loading.attr="disabled" type="button" class="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-semibold text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 disabled:opacity-50">
+                            <span wire:loading.remove wire:target="uploadAttlog">Process &amp; Ingest Log</span>
+                            <span wire:loading wire:target="uploadAttlog">Processing...</span>
+                        </button>
                     </div>
                 </div>
             </div>

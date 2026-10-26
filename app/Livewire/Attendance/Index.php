@@ -110,6 +110,50 @@ class Index extends Component
         $this->biometricFeedScope = in_array($scope, ['class', 'all'], true) ? $scope : 'class';
     }
 
+    public function syncBiometrics(): void
+    {
+        $tenantId = (int) ($this->tenantId ?: (auth()->user()?->tenant_id ?? 1));
+        $terminals = \Illuminate\Support\Facades\Cache::get("tenant_{$tenantId}_k40_terminals", [
+            [
+                'name' => 'K40 Terminal (Main Gate)',
+                'ip'   => '192.168.0.201',
+                'port' => 4370,
+            ],
+        ]);
+
+        $totalSynced = 0;
+        $hasSuccess = false;
+        $messages = [];
+
+        foreach ($terminals as $term) {
+            $ip = $term['ip'] ?? '';
+            $port = (int) ($term['port'] ?? 4370);
+            if (empty($ip)) {
+                continue;
+            }
+
+            $res = \App\Support\BiometricSyncService::syncFromTerminal($ip, $port, 0, $tenantId);
+            if ($res['success']) {
+                $hasSuccess = true;
+                $totalSynced += (int) ($res['count'] ?? 0);
+            } else {
+                $messages[] = $res['message'];
+            }
+        }
+
+        $this->syncSheetFromSelection();
+
+        if ($hasSuccess) {
+            $msg = $totalSynced > 0
+                ? "Biometrics synced! {$totalSynced} records updated."
+                : "Terminal synced successfully. No new unread punches.";
+            $this->dispatch('alert', message: $msg, type: 'success');
+        } else {
+            $err = !empty($messages) ? implode(' | ', $messages) : 'Could not reach biometric terminal.';
+            $this->dispatch('alert', message: $err, type: 'error');
+        }
+    }
+
     public function exportCsv(): StreamedResponse
     {
         $records = $this->getDateRecords();

@@ -11,20 +11,29 @@ use App\Models\Student;
 use App\Models\TeacherAttendanceMark;
 use App\Models\TeacherAttendanceSheet;
 use App\Models\User;
+use App\Support\BiometricSyncService;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Cache;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
+use Livewire\WithFileUploads;
 
 #[Layout('layouts.app')]
 #[Title('ZKTeco K40 Biometrics & Hardware Gate Monitor')]
 class Index extends Component
 {
+    use WithFileUploads;
+
     public string $todayDate;
     public array $terminals = [];
     public ?string $lastPingAt = null;
     public string $punchTypeFilter = 'all'; // 'all', 'students', 'staff'
+
+    // USB AttLog File Upload
+    public $attlogFile = null;
+    public bool $showUploadModal = false;
+    public ?string $lastSyncMessage = null;
 
     // WhatsApp Configuration & Test
     public bool $showWhatsAppModal = false;
@@ -236,6 +245,81 @@ class Index extends Component
         } else {
             $this->testAlertStatus = 'Error: ' . $res['message'];
             $this->dispatch('alert', message: $res['message'], type: 'error');
+        }
+    }
+
+    /**
+     * Trigger immediate synchronization from all configured hardware terminals.
+     */
+    public function syncDeviceNow(): void
+    {
+        $tenantId = auth()->user()?->tenant_id ?? 1;
+        $totalSynced = 0;
+        $messages = [];
+        $hasSuccess = false;
+
+        if (empty($this->terminals)) {
+            $this->dispatch('alert', message: 'No hardware terminals configured to sync.', type: 'error');
+            return;
+        }
+
+        foreach ($this->terminals as $term) {
+            $ip = $term['ip'] ?? '';
+            $port = (int) ($term['port'] ?? 4370);
+            if (empty($ip)) {
+                continue;
+            }
+
+            $result = BiometricSyncService::syncFromTerminal($ip, $port, 0, $tenantId);
+            if ($result['success']) {
+                $hasSuccess = true;
+                $totalSynced += (int) ($result['count'] ?? 0);
+                $messages[] = "{$term['name']}: " . $result['message'];
+            } else {
+                $messages[] = "{$term['name']}: " . $result['message'];
+            }
+        }
+
+        $this->refreshGateStatus();
+
+        if ($hasSuccess) {
+            $msg = $totalSynced > 0
+                ? "Biometrics synchronized! {$totalSynced} scan(s) recorded."
+                : "Terminal synced successfully. Device has no unread punches.";
+            $this->dispatch('alert', message: $msg, type: 'success');
+        } else {
+            $this->dispatch('alert', message: implode(' | ', $messages), type: 'error');
+        }
+    }
+
+    /**
+     * Ingest USB attendance log file (attlog.dat, .txt, .csv) exported from ZKTeco.
+     */
+    public function uploadAttlog(): void
+    {
+        $this->validate([
+            'attlogFile' => 'required|file|max:10240', // 10MB max
+        ]);
+
+        $tenantId = auth()->user()?->tenant_id ?? 1;
+
+        try {
+            $content = file_get_contents($this->attlogFile->getRealPath());
+            if (empty($content)) {
+                $this->dispatch('alert', message: 'The uploaded file is empty.', type: 'error');
+                return;
+            }
+
+            $result = BiometricSyncService::processRawLogText($content, $tenantId);
+
+            $this->reset('attlogFile');
+            $this->showUploadModal = false;
+            $this->refreshGateStatus();
+
+            $msg = "USB Attendance Log Processed! {$result['processed']} records updated ({$result['students']} students, {$result['staff']} staff).";
+            $this->dispatch('alert', message: $msg, type: 'success');
+        } catch (\Throwable $e) {
+            $this->dispatch('alert', message: 'Failed to process file: ' . $e->getMessage(), type: 'error');
         }
     }
 

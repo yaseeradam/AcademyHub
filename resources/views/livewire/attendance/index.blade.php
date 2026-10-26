@@ -34,14 +34,25 @@
                 </button>
 
                 @if(auth()->user()?->tenant?->activeMarketplaceComponents()->where('slug', 'k40-biometrics')->exists())
-                    <button type="button" 
-                            onclick="fetch('/attendance/test-popup', {method:'POST', headers:{'X-CSRF-TOKEN': document.querySelector('meta[name=\'csrf-token\']').getAttribute('content'), 'Accept':'application/json'}}).then(r=>r.json()).then(d=>{ if(window.biometricShow && d.scan) window.biometricShow(d.scan); })"
-                            class="inline-flex items-center gap-1.5 sm:gap-2 rounded-xl bg-purple-500/20 hover:bg-purple-500/30 px-3 sm:px-4 py-2 sm:py-2.5 text-xs font-bold text-purple-300 border border-purple-500/30 transition-all active:scale-95 shadow-sm">
+                    <button wire:click="syncBiometrics" wire:loading.attr="disabled" type="button" 
+                            class="inline-flex items-center gap-1.5 sm:gap-2 rounded-xl bg-indigo-500/20 hover:bg-indigo-500/30 px-3 sm:px-4 py-2 sm:py-2.5 text-xs font-bold text-indigo-300 border border-indigo-500/30 transition-all active:scale-95 shadow-sm disabled:opacity-50">
+                        <svg wire:loading.remove wire:target="syncBiometrics" class="h-3.5 w-3.5 sm:h-4 sm:w-4 text-amber-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                        </svg>
+                        <svg wire:loading wire:target="syncBiometrics" class="h-3.5 w-3.5 sm:h-4 sm:w-4 animate-spin text-white" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        <span wire:loading.remove wire:target="syncBiometrics">Sync Biometrics</span>
+                        <span wire:loading wire:target="syncBiometrics">Syncing...</span>
+                    </button>
+
+                    <a href="{{ route('biometrics.index') }}" class="inline-flex items-center gap-1.5 sm:gap-2 rounded-xl bg-purple-500/20 hover:bg-purple-500/30 px-3 sm:px-4 py-2 sm:py-2.5 text-xs font-bold text-purple-300 border border-purple-500/30 transition-all active:scale-95 shadow-sm">
                         <svg class="h-3.5 w-3.5 sm:h-4 sm:w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M7.864 4.243A7.5 7.5 0 0119.5 10.5c0 2.92-.556 5.709-1.568 8.268M5.742 6.364A7.465 7.465 0 004.5 10.5a7.464 7.464 0 01-1.15 3.993m1.989 3.559A11.209 11.209 0 008.25 10.5a3.75 3.75 0 117.5 0c0 .527-.021 1.049-.064 1.565M12 10.5a1.5 1.5 0 011.5 1.5v4.5m-3-1.5v1.5" />
                         </svg>
-                        Test Biometric Modal
-                    </button>
+                        Gate Monitor
+                    </a>
                 @endif
 
                 @if(auth()->user()?->role === 'admin')
