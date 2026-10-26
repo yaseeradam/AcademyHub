@@ -85,4 +85,10 @@ return [
     // Premium licensing (Ed25519)
     // Set this to the base64 encoded Ed25519 public key used to verify licenses.
     'license_public_key' => env('ACADEMYHUB_LICENSE_PUBLIC_KEY', ''),
+
+    // Search Engine Optimization (SEO) & Social Graph Defaults
+    'seo_title_suffix' => env('ACADEMYHUB_SEO_TITLE_SUFFIX', 'School Management System & Portal'),
+    'seo_meta_description' => env('ACADEMYHUB_SEO_META_DESCRIPTION', 'AcademyHub is a comprehensive school management system featuring automated CBT exams, dual-shift student and staff attendance, WAEC-standard report cards, and automated fee collection.'),
+    'seo_keywords' => env('ACADEMYHUB_SEO_KEYWORDS', 'school management system, school portal, online CBT exams, student attendance tracker, school report card generator, school fees billing, Nigeria school software, smart learning portal'),
+    'seo_og_image' => env('ACADEMYHUB_SEO_OG_IMAGE', 'full.png'),
 ];

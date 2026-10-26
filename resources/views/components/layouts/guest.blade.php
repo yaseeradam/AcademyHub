@@ -31,7 +31,12 @@
         <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('apple-touch-icon.png') }}">
         <link rel="apple-touch-icon" href="{{ asset('icon.png') }}">
 
-        <title>{{ config('academyhub.school_name', config('app.name', 'AcademyHub')) }}</title>
+        {{-- Core Web Vitals & Font Preconnects --}}
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+        {{-- Dynamic High-Precision SEO & Social Graph Metadata --}}
+        <x-seo-meta :title="$title ?? 'Portal Login'" />
 
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>

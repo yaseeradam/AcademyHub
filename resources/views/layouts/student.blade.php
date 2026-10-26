@@ -30,7 +30,7 @@
     <link rel="icon" type="image/png" sizes="16x16" href="{{ $activeFavicon }}">
     <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('apple-touch-icon.png') }}">
     <link rel="apple-touch-icon" href="{{ asset('icon.png') }}">
-    <title>{{ config('academyhub.school_name', config('app.name', 'AcademyHub')) }} — Student Portal</title>
+    <x-seo-meta :title="$title ?? 'Student Portal'" robots="noindex, nofollow" />
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @livewireStyles
     <style>

@@ -1,2 +1,37 @@
+# AcademyHub Robots.txt
+# Controls web crawler indexing and protects private school administration endpoints
+
 User-agent: *
-Disallow:
+# Allow public landing, authentication portal, CBT portals, and PWA assets
+Allow: /
+Allow: /login
+Allow: /cbt/portal
+Allow: /cbt/student
+Allow: /offline
+Allow: /manifest.json
+Allow: /build/
+Allow: /images/
+Allow: /icons/
+Allow: /uploads/
+
+# Disallow private application backend, authenticated portals, and internal utilities
+Disallow: /api/
+Disallow: /admin/
+Disallow: /dashboard
+Disallow: /students
+Disallow: /teachers
+Disallow: /attendance
+Disallow: /results
+Disallow: /billing
+Disallow: /savings-loan
+Disallow: /announcements
+Disallow: /messages
+Disallow: /cbt/portal/*
+Disallow: /cbt/student/*
+Disallow: /exports/
+Disallow: /deploy-clear-cache
+Disallow: /csrf-token
+Disallow: /log-error
+
+# Declare Canonical Dynamic Sitemap
+Sitemap: https://academyhub.ng/sitemap.xml

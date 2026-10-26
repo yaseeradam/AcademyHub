@@ -2,7 +2,7 @@
     <div class="flex h-screen w-screen items-center justify-center p-6 bg-black/20">
         <div class="w-full max-w-sm rounded-2xl bg-white/80 backdrop-blur-xl p-6 shadow-2xl">
             <div class="mb-4 text-center">
-                <h2 class="text-xl font-black text-gray-900">Start Your Exam</h2>
+                <h1 class="text-xl font-black text-gray-900">Start Your Exam</h1>
                 @if($examCode)
                     <p class="mt-1 text-xs text-gray-500">Enter your admission number to begin</p>
                 @else

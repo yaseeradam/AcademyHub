@@ -62,8 +62,7 @@
             }).catch(function() {});
         });
     </script>
-    <title>{{ config('academyhub.school_name', config('app.name', 'AcademyHub')) }}</title>
-    <meta name="description" content="{{ config('academyhub.school_name', 'AcademyHub') }} — School Management System for Attendance, Results, CBT, Billing & More">
+    <x-seo-meta :title="$title ?? null" robots="noindex, nofollow" />
     <link rel="manifest" href="/manifest.json">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @livewireStyles

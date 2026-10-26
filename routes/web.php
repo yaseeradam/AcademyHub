@@ -94,6 +94,9 @@ Route::post('/log-error', [UtilityController::class, 'logClientError'])->middlew
 Route::get('/manifest.json', [\App\Http\Controllers\PwaController::class, 'manifest'])->name('pwa.manifest');
 Route::get('/offline', [\App\Http\Controllers\PwaController::class, 'offline'])->name('pwa.offline');
 
+// Search Engine Optimization (SEO) Dynamic XML Sitemap
+Route::get('/sitemap.xml', [\App\Http\Controllers\SitemapController::class, 'index'])->name('seo.sitemap');
+
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthenticatedSessionController::class, 'create'])
         ->middleware('throttle:auth_views')

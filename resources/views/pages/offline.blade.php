@@ -4,6 +4,8 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
     <title>Offline — {{ config('academyhub.school_name', config('app.name', 'AcademyHub')) }}</title>
+    <meta name="robots" content="noindex, follow">
+    <link rel="canonical" href="{{ url('/offline') }}">
     <link rel="icon" type="image/x-icon" href="/favicon.ico">
     <meta name="theme-color" content="{{ config('academyhub.accent_color', '#7c3aed') }}">
     <style>
