@@ -119,4 +119,81 @@ class ScoreSubmissionsTest extends TestCase
         $this->assertNotNull($submission->reviewed_at);
         $this->assertSame('Please correct totals for two students.', $submission->note);
     }
+
+    public function test_multi_arm_submissions_are_independent_and_rejection_does_not_affect_other_arms(): void
+    {
+        $admin = User::factory()->create(['role' => 'admin', 'is_active' => true]);
+        $teacherGold = User::factory()->create(['role' => 'teacher', 'is_active' => true]);
+        $teacherSilver = User::factory()->create(['role' => 'teacher', 'is_active' => true]);
+
+        $class = SchoolClass::query()->create(['name' => 'Nursery 1', 'level' => 1]);
+        $gold = \App\Models\Section::query()->create(['school_class_id' => $class->id, 'name' => 'Gold']);
+        $silver = \App\Models\Section::query()->create(['school_class_id' => $class->id, 'name' => 'Silver']);
+        $subject = Subject::query()->create(['name' => 'English', 'code' => 'ENG-N1']);
+
+        SubjectAllocation::query()->create([
+            'teacher_id' => $teacherGold->id,
+            'subject_id' => $subject->id,
+            'class_id' => $class->id,
+            'section_id' => $gold->id,
+        ]);
+
+        SubjectAllocation::query()->create([
+            'teacher_id' => $teacherSilver->id,
+            'subject_id' => $subject->id,
+            'class_id' => $class->id,
+            'section_id' => $silver->id,
+        ]);
+
+        $subGold = ScoreSubmission::query()->create([
+            'teacher_id' => $teacherGold->id,
+            'class_id' => $class->id,
+            'section_id' => $gold->id,
+            'subject_id' => $subject->id,
+            'term' => 1,
+            'session' => '2025/2026',
+            'status' => 'submitted',
+            'submitted_at' => now(),
+        ]);
+
+        $subSilver = ScoreSubmission::query()->create([
+            'teacher_id' => $teacherSilver->id,
+            'class_id' => $class->id,
+            'section_id' => $silver->id,
+            'subject_id' => $subject->id,
+            'term' => 1,
+            'session' => '2025/2026',
+            'status' => 'submitted',
+            'submitted_at' => now(),
+        ]);
+
+        // Admin rejects Gold submission
+        Livewire::actingAs($admin)
+            ->test(ResultsEntry::class)
+            ->call('startReject', $subGold->id)
+            ->set('rejectNote', 'Some are missing so reupload')
+            ->call('confirmReject');
+
+        $subGold->refresh();
+        $subSilver->refresh();
+
+        // Verify Gold is rejected with note
+        $this->assertSame('rejected', $subGold->status);
+        $this->assertSame('Some are missing so reupload', $subGold->note);
+
+        // Crucial verification: Silver must NOT be affected!
+        $this->assertSame('submitted', $subSilver->status);
+        $this->assertNull($subSilver->note);
+
+        // Admin approves Silver
+        Livewire::actingAs($admin)
+            ->test(ResultsEntry::class)
+            ->call('approveSubmission', $subSilver->id);
+
+        $subGold->refresh();
+        $subSilver->refresh();
+
+        $this->assertSame('approved', $subSilver->status);
+        $this->assertSame('rejected', $subGold->status);
+    }
 }

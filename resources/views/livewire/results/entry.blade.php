@@ -205,6 +205,85 @@
                         </div>
                     </div>
                 </div>
+            @elseif(!$this->sectionId && $this->sections->isNotEmpty())
+                @php
+                    $secSubs = $this->sectionSubmissions;
+                @endphp
+                <div class="mb-6 rounded-2xl border-2 border-indigo-200 bg-gradient-to-br from-indigo-50/70 via-white to-purple-50/70 p-5 shadow-sm">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
+                        <div class="flex items-center gap-2.5">
+                            <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-600 text-white shadow-sm">
+                                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                    <path d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <h4 class="text-sm font-black text-gray-900">Subclass Arms Submission Status</h4>
+                                <p class="text-xs text-gray-500">Each subclass arm is submitted, reviewed, and approved independently</p>
+                            </div>
+                        </div>
+                        <span class="text-xs font-semibold text-gray-500">
+                            Viewing: <span class="font-bold text-gray-700">All Arms (Entire Class)</span>
+                        </span>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                        @foreach($this->sections as $sec)
+                            @php
+                                $secSub = $secSubs->get($sec->id);
+                                $secStatus = $secSub?->status ?? 'unsubmitted';
+                            @endphp
+                            <div class="rounded-xl border border-gray-200 bg-white p-3.5 shadow-xs flex flex-col justify-between gap-3">
+                                <div>
+                                    <div class="flex items-center justify-between gap-2">
+                                        <span class="font-black text-gray-900 text-sm">{{ $sec->name }}</span>
+                                        @if($secStatus === 'approved')
+                                            <span class="rounded-full bg-emerald-100 text-emerald-800 px-2 py-0.5 text-[10px] font-black uppercase">Approved</span>
+                                        @elseif($secStatus === 'submitted')
+                                            <span class="rounded-full bg-blue-100 text-blue-800 px-2 py-0.5 text-[10px] font-black uppercase">Pending Review</span>
+                                        @elseif($secStatus === 'rejected')
+                                            <span class="rounded-full bg-rose-100 text-rose-800 px-2 py-0.5 text-[10px] font-black uppercase">Returned</span>
+                                        @else
+                                            <span class="rounded-full bg-gray-100 text-gray-600 px-2 py-0.5 text-[10px] font-medium uppercase">Not Submitted</span>
+                                        @endif
+                                    </div>
+                                    <div class="mt-2 text-xs text-gray-500 space-y-0.5">
+                                        @if($secSub)
+                                            <div><span class="font-medium text-gray-700">Teacher:</span> {{ $secSub->teacher?->name ?? 'Teacher' }}</div>
+                                            <div><span class="font-medium text-gray-700">Date:</span> {{ $secSub->submitted_at?->format('d M, g:i A') ?? '—' }}</div>
+                                            @if($secSub->note)
+                                                <div class="text-[11px] text-rose-700 font-medium mt-1 truncate" title="{{ $secSub->note }}">Feedback: {{ $secSub->note }}</div>
+                                            @endif
+                                        @else
+                                            <div>No submission yet for this arm.</div>
+                                        @endif
+                                    </div>
+                                </div>
+
+                                <div class="flex items-center gap-1.5 pt-2 border-t border-gray-100">
+                                    <button type="button" wire:click="$set('sectionId', {{ $sec->id }})"
+                                        class="flex-1 text-center rounded-lg bg-gray-100 hover:bg-gray-200 py-1.5 px-2 text-xs font-bold text-gray-700 transition-colors">
+                                        Filter to {{ $sec->name }}
+                                    </button>
+                                    @if($user?->hasPermission('results.review') && $secStatus === 'submitted')
+                                        <button type="button" wire:click="approveSubmission({{ $secSub->id }})" title="Approve {{ $sec->name }}"
+                                            class="rounded-lg bg-emerald-600 hover:bg-emerald-700 p-1.5 text-white transition-colors">
+                                            <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                                                <path d="M20 6L9 17l-5-5"/>
+                                            </svg>
+                                        </button>
+                                        <button type="button" wire:click="startReject({{ $secSub->id }})" title="Return {{ $sec->name }} for revision"
+                                            class="rounded-lg bg-rose-600 hover:bg-rose-700 p-1.5 text-white transition-colors">
+                                            <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                                <path d="M6 18L18 6M6 6l12 12"/>
+                                            </svg>
+                                        </button>
+                                    @endif
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
             @elseif($submission)
                 @php
                     $status = $submission->status;
@@ -222,13 +301,18 @@
                                 <div>
                                     <div class="flex items-center gap-2">
                                         <h4 class="text-sm font-black text-blue-900">Submitted for Administrative Review</h4>
+                                        @if($submission->section)
+                                            <span class="rounded-full bg-blue-200 px-2 py-0.5 text-[10px] font-black uppercase text-blue-900 tracking-wider">
+                                                Arm: {{ $submission->section->name }}
+                                            </span>
+                                        @endif
                                         <span class="rounded-full bg-blue-200/70 px-2 py-0.5 text-[10px] font-black uppercase text-blue-800 tracking-wider">Pending Review</span>
                                     </div>
                                     <p class="text-xs font-medium text-blue-800 mt-0.5">
                                         @if($user?->role === 'teacher')
                                             Submitted on {{ $submission->submitted_at?->format('d M, Y \a\t h:i A') ?? 'recently' }}. Editing is locked while administrators review your scores.
                                         @else
-                                            Submitted by <strong>{{ $submission->teacher?->name ?? 'Teacher' }}</strong> on {{ $submission->submitted_at?->format('d M, Y \a\t h:i A') ?? 'recently' }}.
+                                            Submitted by <strong>{{ $submission->teacher?->name ?? 'Teacher' }}</strong>@if($submission->section) for arm <strong>{{ $submission->section->name }}</strong>@endif on {{ $submission->submitted_at?->format('d M, Y \a\t h:i A') ?? 'recently' }}.
                                         @endif
                                     </p>
                                 </div>
@@ -265,6 +349,11 @@
                             <div>
                                 <div class="flex items-center gap-2">
                                     <h4 class="text-sm font-black text-emerald-900">Score Submission Approved</h4>
+                                    @if($submission->section)
+                                        <span class="rounded-full bg-emerald-200 px-2 py-0.5 text-[10px] font-black uppercase text-emerald-900 tracking-wider">
+                                            Arm: {{ $submission->section->name }}
+                                        </span>
+                                    @endif
                                     <span class="rounded-full bg-emerald-200/70 px-2 py-0.5 text-[10px] font-black uppercase text-emerald-800 tracking-wider">Approved</span>
                                 </div>
                                 <p class="text-xs font-medium text-emerald-800 mt-0.5">
@@ -284,6 +373,11 @@
                             <div class="flex-1">
                                 <div class="flex items-center gap-2">
                                     <h4 class="text-sm font-black text-rose-900">Returned for Revision</h4>
+                                    @if($submission->section)
+                                        <span class="rounded-full bg-rose-200 px-2 py-0.5 text-[10px] font-black uppercase text-rose-900 tracking-wider">
+                                            Arm: {{ $submission->section->name }}
+                                        </span>
+                                    @endif
                                     <span class="rounded-full bg-rose-200/70 px-2 py-0.5 text-[10px] font-black uppercase text-rose-800 tracking-wider">Revision Requested</span>
                                 </div>
                                 <p class="text-xs font-medium text-rose-800 mt-0.5">

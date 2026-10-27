@@ -16,6 +16,7 @@ class ScoreSubmission extends Model
         'tenant_id',
         'teacher_id',
         'class_id',
+        'section_id',
         'subject_id',
         'term',
         'session',
@@ -30,6 +31,7 @@ class ScoreSubmission extends Model
         'tenant_id' => 'integer',
         'teacher_id' => 'integer',
         'class_id' => 'integer',
+        'section_id' => 'integer',
         'subject_id' => 'integer',
         'term' => 'integer',
         'submitted_at' => 'datetime',
@@ -45,6 +47,11 @@ class ScoreSubmission extends Model
     public function schoolClass(): BelongsTo
     {
         return $this->belongsTo(SchoolClass::class, 'class_id');
+    }
+
+    public function section(): BelongsTo
+    {
+        return $this->belongsTo(Section::class, 'section_id');
     }
 
     public function subject(): BelongsTo

@@ -32,16 +32,21 @@ class Submissions extends Component
             'reviewed_by' => $user->id,
         ]);
 
+        $queryParams = [
+            'class' => $submission->class_id,
+            'subject' => $submission->subject_id,
+            'term' => $submission->term,
+            'session' => $submission->session,
+        ];
+        if ($submission->section_id) {
+            $queryParams['section'] = $submission->section_id;
+        }
+
         InAppNotification::query()->create([
             'user_id' => $submission->teacher_id,
             'title' => 'Score submission approved',
             'body' => "Your score submission was approved ({$submission->session} T{$submission->term}).",
-            'link' => '/results/entry?' . http_build_query([
-                'class' => $submission->class_id,
-                'subject' => $submission->subject_id,
-                'term' => $submission->term,
-                'session' => $submission->session,
-            ]),
+            'link' => '/results/entry?' . http_build_query($queryParams),
         ]);
 
         $this->dispatch('submission-approved');
@@ -67,16 +72,21 @@ class Submissions extends Component
             'note' => $cleanNote ?: null,
         ]);
 
+        $queryParams = [
+            'class' => $submission->class_id,
+            'subject' => $submission->subject_id,
+            'term' => $submission->term,
+            'session' => $submission->session,
+        ];
+        if ($submission->section_id) {
+            $queryParams['section'] = $submission->section_id;
+        }
+
         InAppNotification::query()->create([
             'user_id' => $submission->teacher_id,
             'title' => 'Score submission rejected',
             'body' => "Your score submission was rejected" . ($cleanNote ? ": {$cleanNote}" : '.'),
-            'link' => '/results/entry?' . http_build_query([
-                'class' => $submission->class_id,
-                'subject' => $submission->subject_id,
-                'term' => $submission->term,
-                'session' => $submission->session,
-            ]),
+            'link' => '/results/entry?' . http_build_query($queryParams),
         ]);
 
         $this->dispatch('submission-rejected');
@@ -89,7 +99,7 @@ class Submissions extends Component
         abort_unless($user && $user->hasPermission('results.review'), 403);
 
         $submissions = ScoreSubmission::query()
-            ->with(['teacher', 'schoolClass', 'subject', 'approver'])
+            ->with(['teacher', 'schoolClass', 'subject', 'approver', 'section'])
             ->when($this->statusFilter, function ($q) {
                 if ($this->statusFilter === 'pending' || $this->statusFilter === 'submitted') {
                     $q->whereIn('status', ['submitted', 'pending']);

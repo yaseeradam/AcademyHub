@@ -39,7 +39,18 @@
                         </div>
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2 text-sm text-gray-600">
                             <div><span class="font-semibold">Teacher:</span> {{ $submission->teacher?->name }}</div>
-                            <div><span class="font-semibold">Class:</span> {{ $submission->schoolClass?->name }}</div>
+                            <div>
+                                <span class="font-semibold">Class:</span> {{ $submission->schoolClass?->name }}
+                                @if($submission->section)
+                                    <span class="ml-1.5 inline-flex items-center px-2 py-0.5 rounded text-xs font-bold bg-indigo-100 text-indigo-800">
+                                        Arm: {{ $submission->section->name }}
+                                    </span>
+                                @else
+                                    <span class="ml-1.5 inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-gray-100 text-gray-600">
+                                        All Arms
+                                    </span>
+                                @endif
+                            </div>
                             <div><span class="font-semibold">Session:</span> {{ $submission->session }} - Term {{ $submission->term }}</div>
                             <div><span class="font-semibold">Submitted:</span> {{ $submission->submitted_at?->format('M j, Y g:i A') }}</div>
                         </div>
@@ -54,16 +65,30 @@
                             </div>
                         @endif
                     </div>
-                    @if(in_array($submission->status, ['submitted', 'pending'], true))
-                        <div class="flex gap-2 w-full md:w-auto justify-end mt-2 md:mt-0">
-                            <button wire:click="approve({{ $submission->id }})" class="btn-primary w-full sm:w-auto justify-center">
+                    @php
+                        $entryParams = [
+                            'class' => $submission->class_id,
+                            'subject' => $submission->subject_id,
+                            'term' => $submission->term,
+                            'session' => $submission->session,
+                        ];
+                        if ($submission->section_id) {
+                            $entryParams['section'] = $submission->section_id;
+                        }
+                    @endphp
+                    <div class="flex flex-wrap items-center gap-2 w-full md:w-auto justify-end mt-2 md:mt-0">
+                        <a href="{{ route('results.entry', $entryParams) }}" class="btn-outline text-xs w-full sm:w-auto justify-center">
+                            View Scoresheet
+                        </a>
+                        @if(in_array($submission->status, ['submitted', 'pending'], true))
+                            <button wire:click="approve({{ $submission->id }})" class="btn-primary text-xs w-full sm:w-auto justify-center">
                                 Approve
                             </button>
-                            <button wire:click="$dispatch('reject-modal', { id: {{ $submission->id }} })" class="btn-warning w-full sm:w-auto justify-center">
+                            <button wire:click="$dispatch('reject-modal', { id: {{ $submission->id }} })" class="btn-warning text-xs w-full sm:w-auto justify-center">
                                 Reject
                             </button>
-                        </div>
-                    @endif
+                        @endif
+                    </div>
                 </div>
             </div>
         @empty

@@ -330,17 +330,45 @@ class Entry extends Component
         }
 
         $query = ScoreSubmission::query()
-            ->with(['teacher:id,name', 'approver:id,name'])
+            ->with(['teacher:id,name', 'approver:id,name', 'section:id,name'])
             ->where('class_id', $this->classId)
             ->where('subject_id', $this->subjectId)
             ->where('term', (int) $this->term)
             ->where('session', (string) $this->session);
+
+        if ($this->sectionId) {
+            $query->where(function ($q) {
+                $q->where('section_id', $this->sectionId)
+                  ->orWhereNull('section_id');
+            });
+        } else {
+            // When viewing All Arms / Entire Class: only match whole-class submission
+            $query->whereNull('section_id');
+        }
 
         if ($user->role === 'teacher') {
             $query->where('teacher_id', $user->id);
         }
 
         return $query->latest('submitted_at')->first();
+    }
+
+    #[Computed]
+    public function sectionSubmissions()
+    {
+        if (! $this->classId || ! $this->subjectId || ! $this->session || ! $this->term) {
+            return collect();
+        }
+
+        return ScoreSubmission::query()
+            ->with(['teacher:id,name', 'approver:id,name', 'section:id,name'])
+            ->where('class_id', $this->classId)
+            ->where('subject_id', $this->subjectId)
+            ->where('term', (int) $this->term)
+            ->where('session', (string) $this->session)
+            ->whereNotNull('section_id')
+            ->get()
+            ->keyBy('section_id');
     }
 
     public function openPsychomotor(int $studentId, string $studentName): void
@@ -469,6 +497,7 @@ class Entry extends Component
                 'teacher:id,name',
                 'schoolClass:id,name',
                 'subject:id,name',
+                'section:id,name',
             ])
             ->orderByRaw("CASE status WHEN 'submitted' THEN 0 WHEN 'rejected' THEN 1 WHEN 'approved' THEN 2 ELSE 3 END")
             ->orderByDesc('submitted_at')
@@ -634,7 +663,25 @@ class Entry extends Component
         }
 
         if ($user->role === 'teacher') {
-            $submission = $this->submission();
+            $studentSectionId = Student::whereKey($studentId)->value('section_id');
+            $activeSectionId = $this->sectionId ?: $studentSectionId;
+
+            $subQuery = ScoreSubmission::query()
+                ->where('class_id', $this->classId)
+                ->where('subject_id', $this->subjectId)
+                ->where('term', (int) $this->term)
+                ->where('session', (string) $this->session)
+                ->where('teacher_id', $user->id);
+
+            if ($activeSectionId) {
+                $subQuery->where(function ($q) use ($activeSectionId) {
+                    $q->where('section_id', $activeSectionId)->orWhereNull('section_id');
+                });
+            } else {
+                $subQuery->whereNull('section_id');
+            }
+
+            $submission = $subQuery->latest('submitted_at')->first();
             if ($submission && in_array($submission->status, ['submitted', 'approved'], true)) {
                 return;
             }
@@ -803,6 +850,7 @@ class Entry extends Component
             [
                 'teacher_id' => $user->id,
                 'class_id' => $this->classId,
+                'section_id' => $this->sectionId ? (int) $this->sectionId : null,
                 'subject_id' => $this->subjectId,
                 'term' => $this->term,
                 'session' => $this->session,
@@ -819,6 +867,7 @@ class Entry extends Component
         Audit::log('results.submission_created', $submission, [
             'teacher_id' => $submission->teacher_id,
             'class_id' => $submission->class_id,
+            'section_id' => $submission->section_id,
             'subject_id' => $submission->subject_id,
             'term' => $submission->term,
             'session' => $submission->session,
@@ -830,19 +879,26 @@ class Entry extends Component
             ->pluck('id');
 
         $className = SchoolClass::query()->whereKey($this->classId)->value('name') ?? 'Class';
+        $sectionName = $submission->section_id ? \App\Models\Section::query()->whereKey($submission->section_id)->value('name') : null;
+        $classDisplay = $sectionName ? "{$className} ({$sectionName})" : $className;
         $subjectName = Subject::query()->whereKey($this->subjectId)->value('name') ?? 'Subject';
+
+        $queryParams = [
+            'class' => $submission->class_id,
+            'subject' => $submission->subject_id,
+            'term' => $submission->term,
+            'session' => $submission->session,
+        ];
+        if ($submission->section_id) {
+            $queryParams['section'] = $submission->section_id;
+        }
 
         foreach ($adminIds as $adminId) {
             InAppNotification::query()->create([
                 'user_id' => $adminId,
                 'title' => 'Score submission',
-                'body' => "{$user->name} submitted scores for {$className} / {$subjectName} ({$this->session} T{$this->term}).",
-                'link' => '/results/entry?' . http_build_query([
-                    'class' => $submission->class_id,
-                    'subject' => $submission->subject_id,
-                    'term' => $submission->term,
-                    'session' => $submission->session,
-                ]),
+                'body' => "{$user->name} submitted scores for {$classDisplay} / {$subjectName} ({$this->session} T{$this->term}).",
+                'link' => '/results/entry?' . http_build_query($queryParams),
             ]);
         }
 
@@ -872,16 +928,21 @@ class Entry extends Component
             'reviewed_by' => $submission->reviewed_by,
         ]);
 
+        $queryParams = [
+            'class' => $submission->class_id,
+            'subject' => $submission->subject_id,
+            'term' => $submission->term,
+            'session' => $submission->session,
+        ];
+        if ($submission->section_id) {
+            $queryParams['section'] = $submission->section_id;
+        }
+
         InAppNotification::query()->create([
             'user_id' => $submission->teacher_id,
             'title' => 'Score submission approved',
             'body' => "Your score submission was approved ({$submission->session} T{$submission->term}).",
-            'link' => '/results/entry?' . http_build_query([
-                'class' => $submission->class_id,
-                'subject' => $submission->subject_id,
-                'term' => $submission->term,
-                'session' => $submission->session,
-                ]),
+            'link' => '/results/entry?' . http_build_query($queryParams),
         ]);
 
         if ($this->rejectingId === $id) {
@@ -891,6 +952,7 @@ class Entry extends Component
         }
 
         unset($this->submissions);
+        unset($this->sectionSubmissions);
         $this->dispatch('alert', message: 'Submission approved.', type: 'success');
         $this->dispatch('$refresh');
     }
@@ -953,21 +1015,28 @@ class Entry extends Component
             'note' => $submission->note,
         ]);
 
+        $queryParams = [
+            'class' => $submission->class_id,
+            'subject' => $submission->subject_id,
+            'term' => $submission->term,
+            'session' => $submission->session,
+        ];
+        if ($submission->section_id) {
+            $queryParams['section'] = $submission->section_id;
+        }
+
         InAppNotification::query()->create([
             'user_id' => $submission->teacher_id,
             'title' => 'Score submission rejected',
             'body' => "Your score submission was rejected: {$submission->note}",
-            'link' => '/results/entry?' . http_build_query([
-                'class' => $submission->class_id,
-                'subject' => $submission->subject_id,
-                'term' => $submission->term,
-                'session' => $submission->session,
-            ]),
+            'link' => '/results/entry?' . http_build_query($queryParams),
         ]);
 
         $this->rejectingId = null;
         $this->rejectNote = '';
         $this->resetValidation();
+        unset($this->submissions);
+        unset($this->sectionSubmissions);
         $this->dispatch('alert', message: 'Submission rejected.', type: 'success');
         $this->dispatch('$refresh');
     }
