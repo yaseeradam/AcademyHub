@@ -198,6 +198,31 @@ class Student extends Model
         return $this->passport_photo_url;
     }
 
+    public function hasRealPhoto(): bool
+    {
+        if (! $this->passport_photo) {
+            $customPhotoUrl = $this->custom_fields['photo_url'] ?? null;
+            return ! empty($customPhotoUrl) && filter_var($customPhotoUrl, FILTER_VALIDATE_URL);
+        }
+
+        if (filter_var($this->passport_photo, FILTER_VALIDATE_URL)) {
+            return true;
+        }
+
+        $path = str_replace(['\\', '\\\\'], '/', $this->passport_photo);
+        $path = ltrim($path, '/');
+        if (str_starts_with($path, 'uploads/')) {
+            $path = substr($path, 8);
+        }
+
+        return file_exists(public_path('uploads/' . $path));
+    }
+
+    public function getHasRealPhotoAttribute(): bool
+    {
+        return $this->hasRealPhoto();
+    }
+
     public function getRouteKeyName(): string
     {
         return 'admission_number';

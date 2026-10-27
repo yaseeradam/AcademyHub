@@ -475,9 +475,22 @@
                                         {{-- Student Info --}}
                                         <td class="px-6 py-4">
                                             <div class="flex items-center gap-4">
-                                                <div class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-gray-400 to-gray-500 text-white shadow-sm">
-                                                    <span class="text-sm font-black">{{ substr($student->first_name, 0, 1) }}{{ substr($student->last_name, 0, 1) }}</span>
-                                                </div>
+                                                @if($student->hasRealPhoto())
+                                                    <div class="relative flex h-10 w-10 flex-shrink-0 items-center justify-center overflow-hidden rounded-xl bg-gray-100 shadow-sm ring-1 ring-black/5">
+                                                        <img src="{{ $student->passport_photo_url }}" 
+                                                             alt="{{ $student->full_name }}" 
+                                                             class="h-full w-full object-cover"
+                                                             loading="lazy"
+                                                             onerror="this.style.display='none'; if(this.nextElementSibling) this.nextElementSibling.style.display='flex';" />
+                                                        <div style="display:none;" class="flex h-full w-full items-center justify-center bg-gradient-to-br from-gray-400 to-gray-500 text-white font-black text-xs">
+                                                            {{ substr($student->first_name, 0, 1) }}{{ substr($student->last_name, 0, 1) }}
+                                                        </div>
+                                                    </div>
+                                                @else
+                                                    <div class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-gray-400 to-gray-500 text-white shadow-sm">
+                                                        <span class="text-sm font-black">{{ substr($student->first_name, 0, 1) }}{{ substr($student->last_name, 0, 1) }}</span>
+                                                    </div>
+                                                @endif
                                                 <div class="min-w-0">
                                                     <div class="truncate font-bold text-gray-900">{{ $student->full_name }}</div>
                                                     <div class="flex items-center gap-1.5 truncate text-xs text-gray-500">
@@ -584,9 +597,22 @@
                                  class="p-4 transition-all duration-200 {{ $hasError ? 'bg-red-50' : 'bg-white' }}" data-student-id="{{ $student->id }}">
                                 <div class="flex items-center justify-between mb-4">
                                     <div class="flex items-center gap-3">
-                                        <div class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-gray-400 to-gray-500 text-white shadow-sm">
-                                            <span class="text-xs font-black">{{ substr($student->first_name, 0, 1) }}{{ substr($student->last_name, 0, 1) }}</span>
-                                        </div>
+                                        @if($student->hasRealPhoto())
+                                            <div class="relative flex h-10 w-10 flex-shrink-0 items-center justify-center overflow-hidden rounded-xl bg-gray-100 shadow-sm ring-1 ring-black/5">
+                                                <img src="{{ $student->passport_photo_url }}" 
+                                                     alt="{{ $student->full_name }}" 
+                                                     class="h-full w-full object-cover"
+                                                     loading="lazy"
+                                                     onerror="this.style.display='none'; if(this.nextElementSibling) this.nextElementSibling.style.display='flex';" />
+                                                <div style="display:none;" class="flex h-full w-full items-center justify-center bg-gradient-to-br from-gray-400 to-gray-500 text-white font-black text-xs">
+                                                    {{ substr($student->first_name, 0, 1) }}{{ substr($student->last_name, 0, 1) }}
+                                                </div>
+                                            </div>
+                                        @else
+                                            <div class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-gray-400 to-gray-500 text-white shadow-sm">
+                                                <span class="text-xs font-black">{{ substr($student->first_name, 0, 1) }}{{ substr($student->last_name, 0, 1) }}</span>
+                                            </div>
+                                        @endif
                                         <div class="min-w-0">
                                             <div class="truncate text-sm font-bold text-gray-900">{{ $student->full_name }}</div>
                                             <div class="flex items-center gap-1.5 text-[10px] text-gray-500">
@@ -759,9 +785,22 @@
                                     <tr class="group hover:bg-violet-50/20 transition-colors">
                                         <td class="sticky left-0 z-10 bg-white group-hover:bg-violet-50/20 px-8 py-4 transition-colors">
                                             <div class="flex items-center gap-3">
-                                                <div class="h-9 w-9 rounded-xl bg-violet-100 flex items-center justify-center text-xs font-black text-violet-600">
-                                                    {{ substr($student->first_name, 0, 1) }}{{ substr($student->last_name, 0, 1) }}
-                                                </div>
+                                                @if($student->hasRealPhoto())
+                                                    <div class="relative flex h-9 w-9 flex-shrink-0 items-center justify-center overflow-hidden rounded-xl bg-violet-100 shadow-sm ring-1 ring-black/5">
+                                                        <img src="{{ $student->passport_photo_url }}" 
+                                                             alt="{{ $student->full_name }}" 
+                                                             class="h-full w-full object-cover"
+                                                             loading="lazy"
+                                                             onerror="this.style.display='none'; if(this.nextElementSibling) this.nextElementSibling.style.display='flex';" />
+                                                        <div style="display:none;" class="flex h-full w-full items-center justify-center bg-violet-100 text-violet-600 font-black text-xs">
+                                                            {{ substr($student->first_name, 0, 1) }}{{ substr($student->last_name, 0, 1) }}
+                                                        </div>
+                                                    </div>
+                                                @else
+                                                    <div class="h-9 w-9 rounded-xl bg-violet-100 flex items-center justify-center text-xs font-black text-violet-600">
+                                                        {{ substr($student->first_name, 0, 1) }}{{ substr($student->last_name, 0, 1) }}
+                                                    </div>
+                                                @endif
                                                 <div class="whitespace-nowrap">
                                                     <div class="text-sm font-bold text-gray-900">{{ $student->full_name }}</div>
                                                     <div class="text-[10px] text-gray-400 uppercase tracking-wider">{{ $student->admission_number }}</div>
@@ -820,9 +859,22 @@
                             @foreach ($this->students as $student)
                                 <div class="p-5 space-y-4">
                                     <div class="flex items-center gap-3">
-                                        <div class="h-10 w-10 rounded-xl bg-violet-100 flex items-center justify-center text-sm font-black text-violet-600">
-                                            {{ substr($student->first_name, 0, 1) }}{{ substr($student->last_name, 0, 1) }}
-                                        </div>
+                                        @if($student->hasRealPhoto())
+                                            <div class="relative flex h-10 w-10 flex-shrink-0 items-center justify-center overflow-hidden rounded-xl bg-violet-100 shadow-sm ring-1 ring-black/5">
+                                                <img src="{{ $student->passport_photo_url }}" 
+                                                     alt="{{ $student->full_name }}" 
+                                                     class="h-full w-full object-cover"
+                                                     loading="lazy"
+                                                     onerror="this.style.display='none'; if(this.nextElementSibling) this.nextElementSibling.style.display='flex';" />
+                                                <div style="display:none;" class="flex h-full w-full items-center justify-center bg-violet-100 text-violet-600 font-black text-xs">
+                                                    {{ substr($student->first_name, 0, 1) }}{{ substr($student->last_name, 0, 1) }}
+                                                </div>
+                                            </div>
+                                        @else
+                                            <div class="h-10 w-10 rounded-xl bg-violet-100 flex items-center justify-center text-sm font-black text-violet-600">
+                                                {{ substr($student->first_name, 0, 1) }}{{ substr($student->last_name, 0, 1) }}
+                                            </div>
+                                        @endif
                                         <div>
                                             <div class="text-sm font-bold text-gray-900">{{ $student->full_name }}</div>
                                             <div class="text-[10px] text-gray-400 uppercase tracking-wider">{{ $student->admission_number }}</div>
