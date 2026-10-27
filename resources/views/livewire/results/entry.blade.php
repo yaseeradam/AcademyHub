@@ -396,7 +396,8 @@
             @endif
             
             {{-- Scoresheet Table Card --}}
-            <div class="overflow-hidden rounded-3xl bg-white shadow-2xl ring-1 ring-gray-200">
+            <div wire:key="scoresheet-card-{{ $classId }}-{{ $sectionId ?? 'all' }}-{{ $subjectId }}-{{ $term }}-{{ $session }}"
+                 class="overflow-hidden rounded-3xl bg-white shadow-2xl ring-1 ring-gray-200">
                 {{-- Table Header --}}
                 <div class="bg-gradient-to-r from-emerald-50 to-teal-50 px-5 sm:px-8 py-6">
                     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -468,7 +469,8 @@
                                             default => ['bg' => 'from-gray-200 to-gray-300', 'text' => 'text-gray-700'],
                                         };
                                     @endphp
-                                    <tr class="group transition-all duration-200 hover:bg-gradient-to-r hover:from-emerald-50/50 hover:to-teal-50/50 {{ $hasError ? 'bg-red-50' : 'bg-white' }}" 
+                                    <tr wire:key="student-row-{{ $student->id }}"
+                                        class="group transition-all duration-200 hover:bg-gradient-to-r hover:from-emerald-50/50 hover:to-teal-50/50 {{ $hasError ? 'bg-red-50' : 'bg-white' }}" 
                                         data-student-id="{{ $student->id }}">
                                         {{-- Student Info --}}
                                         <td class="px-6 py-4">
@@ -490,7 +492,9 @@
                                         
                                         {{-- CA1 Score --}}
                                         <td class="px-6 py-4 text-center">
-                                            <input wire:model.blur="scores.{{ $student->id }}.ca1" 
+                                            <input wire:key="desktop-ca1-{{ $student->id }}"
+                                                wire:model.blur="scores.{{ $student->id }}.ca1" 
+                                                value="{{ $row['ca1'] }}"
                                                 type="number" min="0" max="{{ $maxMarks['ca1'] }}" step="1"
                                                 data-student-id="{{ $student->id }}" data-field="ca1"
                                                 @disabled($locked)
@@ -499,7 +503,9 @@
                                         
                                         {{-- CA2 Score --}}
                                         <td class="px-6 py-4 text-center">
-                                            <input wire:model.blur="scores.{{ $student->id }}.ca2" 
+                                            <input wire:key="desktop-ca2-{{ $student->id }}"
+                                                wire:model.blur="scores.{{ $student->id }}.ca2" 
+                                                value="{{ $row['ca2'] }}"
                                                 type="number" min="0" max="{{ $maxMarks['ca2'] }}" step="1"
                                                 data-student-id="{{ $student->id }}" data-field="ca2"
                                                 @disabled($locked)
@@ -508,7 +514,9 @@
                                         
                                         {{-- Exam Score --}}
                                         <td class="px-6 py-4 text-center">
-                                            <input wire:model.blur="scores.{{ $student->id }}.exam" 
+                                            <input wire:key="desktop-exam-{{ $student->id }}"
+                                                wire:model.blur="scores.{{ $student->id }}.exam" 
+                                                value="{{ $row['exam'] }}"
                                                 type="number" min="0" max="{{ $maxMarks['exam'] }}" step="1"
                                                 data-student-id="{{ $student->id }}" data-field="exam"
                                                 @disabled($locked)
@@ -572,7 +580,8 @@
                                     default => ['bg' => 'from-gray-200 to-gray-300', 'text' => 'text-gray-700'],
                                 };
                             @endphp
-                            <div class="p-4 transition-all duration-200 {{ $hasError ? 'bg-red-50' : 'bg-white' }}" data-student-id="{{ $student->id }}">
+                            <div wire:key="student-mobile-card-{{ $student->id }}"
+                                 class="p-4 transition-all duration-200 {{ $hasError ? 'bg-red-50' : 'bg-white' }}" data-student-id="{{ $student->id }}">
                                 <div class="flex items-center justify-between mb-4">
                                     <div class="flex items-center gap-3">
                                         <div class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-gray-400 to-gray-500 text-white shadow-sm">
@@ -601,21 +610,30 @@
                                 <div class="grid grid-cols-3 gap-3">
                                     <div>
                                         <label class="block text-[10px] font-black text-blue-700 uppercase mb-1">CA1 ({{ $maxMarks['ca1'] }})</label>
-                                        <input wire:model.blur="scores.{{ $student->id }}.ca1" type="number" min="0" max="{{ $maxMarks['ca1'] }}"
+                                        <input wire:key="mobile-ca1-{{ $student->id }}"
+                                            wire:model.blur="scores.{{ $student->id }}.ca1" 
+                                            value="{{ $row['ca1'] }}"
+                                            type="number" min="0" max="{{ $maxMarks['ca1'] }}"
                                             data-student-id="{{ $student->id }}" data-field="ca1"
                                             @disabled($locked)
                                             class="w-full rounded-xl border-2 {{ $ca1Error ? 'border-red-400 bg-red-50 text-red-950 focus:border-red-500' : 'border-blue-200 bg-blue-50 text-gray-900 focus:border-blue-500' }} px-2 py-2 text-center text-sm font-bold focus:bg-white focus:ring-0 disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-gray-100">
                                     </div>
                                     <div>
                                         <label class="block text-[10px] font-black text-green-700 uppercase mb-1">CA2 ({{ $maxMarks['ca2'] }})</label>
-                                        <input wire:model.blur="scores.{{ $student->id }}.ca2" type="number" min="0" max="{{ $maxMarks['ca2'] }}"
+                                        <input wire:key="mobile-ca2-{{ $student->id }}"
+                                            wire:model.blur="scores.{{ $student->id }}.ca2" 
+                                            value="{{ $row['ca2'] }}"
+                                            type="number" min="0" max="{{ $maxMarks['ca2'] }}"
                                             data-student-id="{{ $student->id }}" data-field="ca2"
                                             @disabled($locked)
                                             class="w-full rounded-xl border-2 {{ $ca2Error ? 'border-red-400 bg-red-50 text-red-950 focus:border-red-500' : 'border-green-200 bg-green-50 text-gray-900 focus:border-green-500' }} px-2 py-2 text-center text-sm font-bold focus:bg-white focus:ring-0 disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-gray-100">
                                     </div>
                                     <div>
                                         <label class="block text-[10px] font-black text-amber-700 uppercase mb-1">Exam ({{ $maxMarks['exam'] }})</label>
-                                        <input wire:model.blur="scores.{{ $student->id }}.exam" type="number" min="0" max="{{ $maxMarks['exam'] }}"
+                                        <input wire:key="mobile-exam-{{ $student->id }}"
+                                            wire:model.blur="scores.{{ $student->id }}.exam" 
+                                            value="{{ $row['exam'] }}"
+                                            type="number" min="0" max="{{ $maxMarks['exam'] }}"
                                             data-student-id="{{ $student->id }}" data-field="exam"
                                             @disabled($locked)
                                             class="w-full rounded-xl border-2 {{ $examError ? 'border-red-400 bg-red-50 text-red-950 focus:border-red-500' : 'border-amber-200 bg-amber-50 text-gray-900 focus:border-amber-500' }} px-2 py-2 text-center text-sm font-bold focus:bg-white focus:ring-0 disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-gray-100">

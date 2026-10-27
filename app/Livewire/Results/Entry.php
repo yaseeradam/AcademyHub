@@ -529,7 +529,7 @@ class Entry extends Component
         }
 
         // Bust Livewire 3 computed property cache
-        unset($this->classes, $this->subjects, $this->sections, $this->students, $this->isPublished, $this->submission, $this->submissions);
+        unset($this->classes, $this->subjects, $this->sections, $this->students, $this->isPublished, $this->submission, $this->submissions, $this->sectionSubmissions);
     }
 
     public function updatedSectionId($value): void
@@ -550,7 +550,7 @@ class Entry extends Component
             }
         }
 
-        unset($this->subjects, $this->students, $this->submission);
+        unset($this->subjects, $this->students, $this->submission, $this->sectionSubmissions);
         $this->loadExistingScores();
     }
 
@@ -558,9 +558,9 @@ class Entry extends Component
     {
         $this->subjectId = $value !== '' && $value !== null ? (int) $value : null;
         $this->validationErrors = [];
+        // Bust Livewire 3 computed property cache before loading scores
+        unset($this->sections, $this->students, $this->isPublished, $this->submission, $this->submissions, $this->sectionSubmissions);
         $this->loadExistingScores();
-        // Bust Livewire 3 computed property cache
-        unset($this->sections, $this->students, $this->isPublished, $this->submission, $this->submissions);
     }
 
     public function updatedTerm($value): void
@@ -1060,12 +1060,13 @@ class Entry extends Component
                     ->get()
                     ->keyBy('student_id');
 
-                foreach ($this->students as $student) {
+                $students = $this->students();
+                foreach ($students as $student) {
                     $score = $existing->get($student->id);
                     $this->scores[$student->id] = [
-                        'ca1'  => $score?->ca1  ?? 0,
-                        'ca2'  => $score?->ca2  ?? 0,
-                        'exam' => $score?->exam ?? 0,
+                        'ca1'  => $score !== null && $score->ca1 !== null ? (int) $score->ca1 : 0,
+                        'ca2'  => $score !== null && $score->ca2 !== null ? (int) $score->ca2 : 0,
+                        'exam' => $score !== null && $score->exam !== null ? (int) $score->exam : 0,
                     ];
                 }
             }
@@ -1077,7 +1078,8 @@ class Entry extends Component
                     ->get()
                     ->keyBy('student_id');
 
-                foreach ($this->students as $student) {
+                $students = $this->students();
+                foreach ($students as $student) {
                     $ps     = $existing->get($student->id);
                     $traits = $ps?->traits ?? [];
 
