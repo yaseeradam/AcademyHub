@@ -98,7 +98,13 @@ class HallOfFame extends Component
         $ranked = [];
 
         foreach ($students as $student) {
-            $scores = $student->scores;
+            // Guardrail: Only consider scores for subjects assigned to this student's class
+            $validSubjectIds = $student->assigned_subjects->pluck('id')->toArray();
+            $scores = $student->scores->filter(function ($s) use ($student, $validSubjectIds) {
+                return in_array($s->subject_id, $validSubjectIds, true)
+                    && (!$s->class_id || (int) $s->class_id === (int) $student->class_id);
+            });
+
             if ($scores->isEmpty()) {
                 continue;
             }
@@ -192,7 +198,7 @@ class HallOfFame extends Component
             return null;
         }
 
-        return Student::with([
+        $student = Student::with([
             'schoolClass',
             'section',
             'scores' => function ($q) {
@@ -201,6 +207,17 @@ class HallOfFame extends Component
                   ->with('subject');
             }
         ])->find($this->selectedStudentId);
+
+        if ($student) {
+            $validSubjectIds = $student->assigned_subjects->pluck('id')->toArray();
+            $filteredScores = $student->scores->filter(function ($s) use ($student, $validSubjectIds) {
+                return in_array($s->subject_id, $validSubjectIds, true)
+                    && (!$s->class_id || (int) $s->class_id === (int) $student->class_id);
+            });
+            $student->setRelation('scores', $filteredScores);
+        }
+
+        return $student;
     }
 
     public function selectStudent(int $studentId): void

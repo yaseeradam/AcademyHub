@@ -206,8 +206,11 @@ class Entry extends Component
         $user = auth()->user();
 
         if ($user?->role !== 'teacher') {
-            // Non-teachers see ALL subjects
-            return Subject::query()->orderBy('name')->get();
+            // Non-teachers see subjects for the selected class (fallback to all if class has none assigned)
+            $classSubjects = \App\Models\SchoolClass::allSubjectsForClass($this->classId);
+            return $classSubjects->isNotEmpty()
+                ? $classSubjects
+                : Subject::query()->orderBy('name')->get();
         }
 
         $ids = SubjectAllocation::query()
