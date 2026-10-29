@@ -273,7 +273,8 @@ HTML;
                     {!! $navLink(route('attendance.staff-timesheet'), 'Staff Timesheet',
                         'bg-amber-100', 'text-amber-600',
                         '<path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/>',
-                    @endif
+                        request()->routeIs('attendance.staff-timesheet')) !!}
+                @endif
 
                 @if(auth()->user()?->tenant?->activeMarketplaceComponents()->where('slug', 'k40-biometrics')->exists() && in_array($user?->role, ['admin', 'teacher', 'bursar'], true))
                     {!! $navLink(route('biometrics.index'), 'K40 Biometrics',
