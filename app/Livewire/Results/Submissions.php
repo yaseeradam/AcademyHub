@@ -21,6 +21,14 @@ class Submissions extends Component
         abort_unless($user && $user->hasPermission('results.review'), 403);
 
         $submission = ScoreSubmission::findOrFail($id);
+
+        if ($submission->status === 'approved') {
+            $this->dispatch('alert', message: 'This submission is already approved.', type: 'info');
+            return;
+        }
+
+        $wasRejected = $submission->status === 'rejected';
+
         $submission->update([
             'status' => 'approved',
             'reviewed_at' => now(),
@@ -30,6 +38,7 @@ class Submissions extends Component
 
         Audit::log('results.submission_approved', $submission, [
             'reviewed_by' => $user->id,
+            'was_rejected' => $wasRejected,
         ]);
 
         $queryParams = [
@@ -59,7 +68,15 @@ class Submissions extends Component
         abort_unless($user && $user->hasPermission('results.review'), 403);
 
         $submission = ScoreSubmission::findOrFail($id);
+
+        if ($submission->status === 'rejected') {
+            $this->dispatch('alert', message: 'This submission has already been returned for revision.', type: 'info');
+            return;
+        }
+
+        $wasApproved = $submission->status === 'approved';
         $cleanNote = trim((string) $note);
+
         $submission->update([
             'status' => 'rejected',
             'reviewed_at' => now(),
@@ -67,9 +84,10 @@ class Submissions extends Component
             'note' => $cleanNote ?: null,
         ]);
 
-        Audit::log('results.submission_rejected', $submission, [
+        Audit::log($wasApproved ? 'results.submission_disapproved' : 'results.submission_rejected', $submission, [
             'reviewed_by' => $user->id,
             'note' => $cleanNote ?: null,
+            'was_approved' => $wasApproved,
         ]);
 
         $queryParams = [
@@ -84,13 +102,15 @@ class Submissions extends Component
 
         InAppNotification::query()->create([
             'user_id' => $submission->teacher_id,
-            'title' => 'Score submission rejected',
-            'body' => "Your score submission was rejected" . ($cleanNote ? ": {$cleanNote}" : '.'),
+            'title' => $wasApproved ? 'Score submission returned for revision' : 'Score submission rejected',
+            'body' => $wasApproved
+                ? ("Your previously approved score submission was returned for revision" . ($cleanNote ? ": {$cleanNote}" : '.'))
+                : ("Your score submission was rejected" . ($cleanNote ? ": {$cleanNote}" : '.')),
             'link' => '/results/entry?' . http_build_query($queryParams),
         ]);
 
         $this->dispatch('submission-rejected');
-        $this->dispatch('alert', message: 'Submission returned for revision.', type: 'warning');
+        $this->dispatch('alert', message: $wasApproved ? 'Submission disapproved and returned for revision.' : 'Submission returned for revision.', type: 'warning');
     }
 
     public function render()

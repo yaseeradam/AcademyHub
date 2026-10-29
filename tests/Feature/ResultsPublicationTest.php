@@ -166,5 +166,35 @@ class ResultsPublicationTest extends TestCase
             'session' => '2026/2027',
         ]);
     }
+
+    public function test_admin_can_toggle_results_publication_from_entry_component(): void
+    {
+        $admin = User::factory()->create(['role' => 'admin', 'is_active' => true]);
+        $class = SchoolClass::query()->create(['name' => 'JSS ENTRY PUB', 'level' => 1]);
+
+        $component = Livewire::actingAs($admin)
+            ->test(ResultsEntry::class)
+            ->set('classId', $class->id)
+            ->set('term', 1)
+            ->set('session', '2025/2026')
+            ->call('togglePublishResults')
+            ->assertDispatched('alert', message: 'Results released! Parents and students can now view grades and download report cards.', type: 'success');
+
+        $this->assertDatabaseHas('result_publications', [
+            'class_id' => $class->id,
+            'term' => 1,
+            'session' => '2025/2026',
+        ]);
+
+        // Toggle again to unpublish
+        $component->call('togglePublishResults')
+            ->assertDispatched('alert', message: 'Results unpublished. Parents and students cannot view scores for this class until re-released.', type: 'info');
+
+        $this->assertDatabaseMissing('result_publications', [
+            'class_id' => $class->id,
+            'term' => 1,
+            'session' => '2025/2026',
+        ]);
+    }
 }
 

@@ -196,4 +196,68 @@ class ScoreSubmissionsTest extends TestCase
         $this->assertSame('approved', $subSilver->status);
         $this->assertSame('rejected', $subGold->status);
     }
+
+    public function test_admin_can_disapprove_an_already_approved_submission(): void
+    {
+        $admin = User::factory()->create(['role' => 'admin', 'is_active' => true]);
+        $teacher = User::factory()->create(['role' => 'teacher', 'is_active' => true]);
+
+        $class = SchoolClass::query()->create(['name' => 'JSS DISAPPROVE', 'level' => 1]);
+        $subject = Subject::query()->create(['name' => 'Math', 'code' => 'MTHD']);
+
+        $submission = ScoreSubmission::query()->create([
+            'teacher_id' => $teacher->id,
+            'class_id' => $class->id,
+            'subject_id' => $subject->id,
+            'term' => 1,
+            'session' => '2025/2026',
+            'status' => 'approved',
+            'reviewed_by' => $admin->id,
+            'reviewed_at' => now(),
+        ]);
+
+        Livewire::actingAs($admin)
+            ->test(ResultsEntry::class)
+            ->call('startReject', $submission->id)
+            ->set('rejectNote', 'CA1 scores need to be adjusted.')
+            ->call('confirmReject');
+
+        $submission->refresh();
+        $this->assertSame('rejected', $submission->status);
+        $this->assertSame('CA1 scores need to be adjusted.', $submission->note);
+
+        $this->assertDatabaseHas('in_app_notifications', [
+            'user_id' => $teacher->id,
+            'title' => 'Score submission returned for revision',
+        ]);
+    }
+
+    public function test_admin_can_reapprove_a_rejected_submission(): void
+    {
+        $admin = User::factory()->create(['role' => 'admin', 'is_active' => true]);
+        $teacher = User::factory()->create(['role' => 'teacher', 'is_active' => true]);
+
+        $class = SchoolClass::query()->create(['name' => 'JSS REAPPROVE', 'level' => 1]);
+        $subject = Subject::query()->create(['name' => 'Math', 'code' => 'MTHR']);
+
+        $submission = ScoreSubmission::query()->create([
+            'teacher_id' => $teacher->id,
+            'class_id' => $class->id,
+            'subject_id' => $subject->id,
+            'term' => 1,
+            'session' => '2025/2026',
+            'status' => 'rejected',
+            'note' => 'Needs revision',
+            'reviewed_by' => $admin->id,
+            'reviewed_at' => now(),
+        ]);
+
+        Livewire::actingAs($admin)
+            ->test(ResultsEntry::class)
+            ->call('approveSubmission', $submission->id);
+
+        $submission->refresh();
+        $this->assertSame('approved', $submission->status);
+        $this->assertNull($submission->note);
+    }
 }

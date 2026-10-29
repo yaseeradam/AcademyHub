@@ -24,10 +24,31 @@
                     <p class="mt-1 text-xs sm:text-base text-emerald-100 truncate">Enter CA and Exam scores for students</p>
                 </div>
             </div>
-            <div class="flex items-center gap-2 sm:gap-3">
+            <div class="flex flex-wrap items-center gap-2 sm:gap-3">
+                @if($classId && ($user?->role === 'admin' || $user?->hasPermission('results.review') || $user?->hasPermission('results.publish')))
+                    @if($this->isPublished())
+                        <button type="button" wire:click="togglePublishResults" wire:loading.attr="disabled"
+                            class="flex items-center justify-center gap-2 rounded-xl bg-emerald-700/90 border border-emerald-400 px-3 py-2.5 sm:px-4 sm:py-3 text-xs sm:text-sm font-bold text-white shadow-lg transition-all hover:bg-emerald-800 whitespace-nowrap"
+                            title="Results are visible to parents & students. Click to hide.">
+                            <span class="h-2 w-2 rounded-full bg-emerald-300 animate-pulse"></span>
+                            <span wire:loading.remove wire:target="togglePublishResults">Results Released</span>
+                            <span wire:loading wire:target="togglePublishResults">Updating...</span>
+                        </button>
+                    @else
+                        <button type="button" wire:click="togglePublishResults" wire:loading.attr="disabled"
+                            class="flex items-center justify-center gap-2 rounded-xl bg-amber-500 hover:bg-amber-600 px-3 py-2.5 sm:px-4 sm:py-3 text-xs sm:text-sm font-bold text-white shadow-lg transition-all whitespace-nowrap"
+                            title="Results are hidden from parents & students. Click to release.">
+                            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 10.5V6.75a4.5 4.5 0 119 0v3.75M3.75 21.75h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H3.75A2.25 2.25 0 001.5 13.5v6.75a2.25 2.25 0 002.25 2.25z" />
+                            </svg>
+                            <span wire:loading.remove wire:target="togglePublishResults">Release to Parents</span>
+                            <span wire:loading wire:target="togglePublishResults">Releasing...</span>
+                        </button>
+                    @endif
+                @endif
                 @if($user?->hasPermission('results.review'))
                     <a href="{{ route('results.submissions') }}" 
-                       class="flex flex-1 items-center justify-center gap-2 rounded-xl bg-white/20 px-3 py-2.5 sm:px-4 sm:py-3 text-xs sm:text-sm font-bold text-white backdrop-blur-sm transition-all hover:bg-white/30 whitespace-nowrap">
+                       class="flex items-center justify-center gap-2 rounded-xl bg-white/20 px-3 py-2.5 sm:px-4 sm:py-3 text-xs sm:text-sm font-bold text-white backdrop-blur-sm transition-all hover:bg-white/30 whitespace-nowrap">
                         <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
                             <polyline points="14,2 14,8 20,8"/>
@@ -39,7 +60,7 @@
                     </a>
                 @endif
                 <a href="{{ route('results.broadsheet') }}" 
-                   class="flex flex-1 items-center justify-center gap-2 rounded-xl bg-white px-3 py-2.5 sm:px-4 sm:py-3 text-xs sm:text-sm font-bold text-emerald-600 shadow-lg transition-all hover:bg-emerald-50 hover:shadow-xl whitespace-nowrap">
+                   class="flex items-center justify-center gap-2 rounded-xl bg-white px-3 py-2.5 sm:px-4 sm:py-3 text-xs sm:text-sm font-bold text-emerald-600 shadow-lg transition-all hover:bg-emerald-50 hover:shadow-xl whitespace-nowrap">
                     <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M3 3h18v18H3zM21 9H3M9 21V9"/>
                     </svg>
@@ -191,21 +212,66 @@
             
             {{-- Status and Review Banner --}}
             @if($this->isPublished())
-                <div class="mb-6 rounded-2xl border-2 border-amber-300 bg-amber-50 p-4 sm:p-5 shadow-sm">
-                    <div class="flex items-center gap-3">
-                        <div class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-amber-200 text-amber-800">
-                            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
-                                <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-                            </svg>
+                <div class="mb-6 rounded-2xl border-2 border-emerald-300 bg-emerald-50/90 p-4 sm:p-5 shadow-sm">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <div class="flex items-center gap-3">
+                            <div class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-emerald-200 text-emerald-800">
+                                <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                    <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                            </div>
+                            <div class="flex-1">
+                                <div class="flex items-center gap-2">
+                                    <h4 class="text-sm font-black text-emerald-950">Results Released to Parents & Students</h4>
+                                    <span class="rounded-full bg-emerald-200 px-2 py-0.5 text-[10px] font-black uppercase text-emerald-900 tracking-wider">Live on Portals</span>
+                                </div>
+                                <p class="text-xs font-medium text-emerald-800 mt-0.5">Report cards and grades for this class are active and visible to parents and students on their portal. Scores are locked against teacher changes.</p>
+                            </div>
                         </div>
-                        <div class="flex-1">
-                            <h4 class="text-sm font-black text-amber-900">Terminal Results Published (Scores Locked)</h4>
-                            <p class="text-xs font-medium text-amber-800 mt-0.5">Report cards for this class and term have been officially published. Scores are locked against modification. Contact administrator to unpublish if revisions are required.</p>
-                        </div>
+                        @if($user?->role === 'admin' || $user?->hasPermission('results.review') || $user?->hasPermission('results.publish'))
+                            <button type="button" wire:click="togglePublishResults" wire:loading.attr="disabled"
+                                class="inline-flex items-center gap-2 rounded-xl bg-rose-600 px-4 py-2.5 text-xs font-bold text-white shadow-sm hover:bg-rose-700 transition-all self-end sm:self-auto whitespace-nowrap">
+                                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                                    <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                                </svg>
+                                <span wire:loading.remove wire:target="togglePublishResults">Unrelease / Hide from Parents</span>
+                                <span wire:loading wire:target="togglePublishResults">Updating...</span>
+                            </button>
+                        @endif
                     </div>
                 </div>
-            @elseif(!$this->sectionId && $this->sections->isNotEmpty())
+            @elseif($user?->role === 'admin' || $user?->hasPermission('results.review') || $user?->hasPermission('results.publish'))
+                <div class="mb-6 rounded-2xl border-2 border-amber-200 bg-amber-50/70 p-4 sm:p-5 shadow-sm">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <div class="flex items-center gap-3">
+                            <div class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-amber-200 text-amber-900">
+                                <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                                    <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                                </svg>
+                            </div>
+                            <div class="flex-1">
+                                <div class="flex items-center gap-2">
+                                    <h4 class="text-sm font-black text-amber-950">Results Hidden from Parents & Students (Draft Mode)</h4>
+                                    <span class="rounded-full bg-amber-200 px-2 py-0.5 text-[10px] font-black uppercase text-amber-900 tracking-wider">Unreleased</span>
+                                </div>
+                                <p class="text-xs font-medium text-amber-800 mt-0.5">Teachers can enter and submit scores. Parents and students cannot view any scores or download report cards until you release them.</p>
+                            </div>
+                        </div>
+                        <button type="button" wire:click="togglePublishResults" wire:loading.attr="disabled"
+                            class="inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-4 py-2.5 text-xs font-bold text-white shadow-sm hover:bg-emerald-700 transition-all self-end sm:self-auto whitespace-nowrap">
+                            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" />
+                            </svg>
+                            <span wire:loading.remove wire:target="togglePublishResults">Release Results to Parents/Students</span>
+                            <span wire:loading wire:target="togglePublishResults">Releasing...</span>
+                        </button>
+                    </div>
+            @endif
+
+            {{-- Submission Review Banner (by Arm or Single) --}}
+            @if(!$this->sectionId && $this->sections->isNotEmpty())
                 @php
                     $secSubs = $this->sectionSubmissions;
                 @endphp
@@ -265,19 +331,35 @@
                                         class="flex-1 text-center rounded-lg bg-gray-100 hover:bg-gray-200 py-1.5 px-2 text-xs font-bold text-gray-700 transition-colors">
                                         Filter to {{ $sec->name }}
                                     </button>
-                                    @if($user?->hasPermission('results.review') && $secStatus === 'submitted')
-                                        <button type="button" wire:click="approveSubmission({{ $secSub->id }})" title="Approve {{ $sec->name }}"
-                                            class="rounded-lg bg-emerald-600 hover:bg-emerald-700 p-1.5 text-white transition-colors">
-                                            <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
-                                                <path d="M20 6L9 17l-5-5"/>
-                                            </svg>
-                                        </button>
-                                        <button type="button" wire:click="startReject({{ $secSub->id }})" title="Return {{ $sec->name }} for revision"
-                                            class="rounded-lg bg-rose-600 hover:bg-rose-700 p-1.5 text-white transition-colors">
-                                            <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                                                <path d="M6 18L18 6M6 6l12 12"/>
-                                            </svg>
-                                        </button>
+                                    @if($user?->hasPermission('results.review'))
+                                        @if($secStatus === 'submitted')
+                                            <button type="button" wire:click="approveSubmission({{ $secSub->id }})" title="Approve {{ $sec->name }}"
+                                                class="rounded-lg bg-emerald-600 hover:bg-emerald-700 p-1.5 text-white transition-colors">
+                                                <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                                                    <path d="M20 6L9 17l-5-5"/>
+                                                </svg>
+                                            </button>
+                                            <button type="button" wire:click="startReject({{ $secSub->id }})" title="Return {{ $sec->name }} for revision"
+                                                class="rounded-lg bg-rose-600 hover:bg-rose-700 p-1.5 text-white transition-colors">
+                                                <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                                    <path d="M6 18L18 6M6 6l12 12"/>
+                                                </svg>
+                                            </button>
+                                        @elseif($secStatus === 'approved')
+                                            <button type="button" wire:click="startReject({{ $secSub->id }})" title="Disapprove {{ $sec->name }} and return for revision"
+                                                class="rounded-lg bg-amber-500 hover:bg-amber-600 p-1.5 text-white transition-colors">
+                                                <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                                    <path d="M6 18L18 6M6 6l12 12"/>
+                                                </svg>
+                                            </button>
+                                        @elseif($secStatus === 'rejected')
+                                            <button type="button" wire:click="approveSubmission({{ $secSub->id }})" title="Re-approve {{ $sec->name }}"
+                                                class="rounded-lg bg-emerald-600 hover:bg-emerald-700 p-1.5 text-white transition-colors">
+                                                <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                                                    <path d="M20 6L9 17l-5-5"/>
+                                                </svg>
+                                            </button>
+                                        @endif
                                     @endif
                                 </div>
                             </div>
@@ -340,56 +422,83 @@
                     </div>
                 @elseif($status === 'approved')
                     <div class="mb-6 rounded-2xl border-2 border-emerald-300 bg-emerald-50/80 p-4 sm:p-5 shadow-sm">
-                        <div class="flex items-center gap-3">
-                            <div class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-emerald-200 text-emerald-800">
-                                <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                                    <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                                </svg>
-                            </div>
-                            <div>
-                                <div class="flex items-center gap-2">
-                                    <h4 class="text-sm font-black text-emerald-900">Score Submission Approved</h4>
-                                    @if($submission->section)
-                                        <span class="rounded-full bg-emerald-200 px-2 py-0.5 text-[10px] font-black uppercase text-emerald-900 tracking-wider">
-                                            Arm: {{ $submission->section->name }}
-                                        </span>
-                                    @endif
-                                    <span class="rounded-full bg-emerald-200/70 px-2 py-0.5 text-[10px] font-black uppercase text-emerald-800 tracking-wider">Approved</span>
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                            <div class="flex items-center gap-3">
+                                <div class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-emerald-200 text-emerald-800">
+                                    <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                        <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                    </svg>
                                 </div>
-                                <p class="text-xs font-medium text-emerald-800 mt-0.5">
-                                    Approved by <strong>{{ $submission->approver?->name ?? 'Administration' }}</strong> on {{ $submission->reviewed_at?->format('d M, Y \a\t h:i A') ?? 'recently' }}.
-                                </p>
+                                <div>
+                                    <div class="flex items-center gap-2">
+                                        <h4 class="text-sm font-black text-emerald-900">Score Submission Approved</h4>
+                                        @if($submission->section)
+                                            <span class="rounded-full bg-emerald-200 px-2 py-0.5 text-[10px] font-black uppercase text-emerald-900 tracking-wider">
+                                                Arm: {{ $submission->section->name }}
+                                            </span>
+                                        @endif
+                                        <span class="rounded-full bg-emerald-200/70 px-2 py-0.5 text-[10px] font-black uppercase text-emerald-800 tracking-wider">Approved</span>
+                                    </div>
+                                    <p class="text-xs font-medium text-emerald-800 mt-0.5">
+                                        Approved by <strong>{{ $submission->approver?->name ?? 'Administration' }}</strong> on {{ $submission->reviewed_at?->format('d M, Y \a\t h:i A') ?? 'recently' }}.
+                                    </p>
+                                </div>
                             </div>
+                            @if($user?->hasPermission('results.review'))
+                                <div class="flex items-center gap-2 sm:self-center self-end">
+                                    <button type="button" wire:click="startReject({{ $submission->id }})"
+                                        class="inline-flex items-center gap-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 px-4 py-2 text-xs font-bold text-white shadow-sm transition-all"
+                                        title="Disapprove this submission and return to teacher for revision">
+                                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M6 18L18 6M6 6l12 12"/>
+                                        </svg>
+                                        Disapprove / Return for Revision
+                                    </button>
+                                </div>
+                            @endif
                         </div>
                     </div>
                 @elseif($status === 'rejected')
                     <div class="mb-6 rounded-2xl border-2 border-rose-300 bg-rose-50/90 p-4 sm:p-5 shadow-sm">
-                        <div class="flex items-start gap-3">
-                            <div class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-rose-200 text-rose-800">
-                                <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
-                                </svg>
-                            </div>
-                            <div class="flex-1">
-                                <div class="flex items-center gap-2">
-                                    <h4 class="text-sm font-black text-rose-900">Returned for Revision</h4>
-                                    @if($submission->section)
-                                        <span class="rounded-full bg-rose-200 px-2 py-0.5 text-[10px] font-black uppercase text-rose-900 tracking-wider">
-                                            Arm: {{ $submission->section->name }}
-                                        </span>
-                                    @endif
-                                    <span class="rounded-full bg-rose-200/70 px-2 py-0.5 text-[10px] font-black uppercase text-rose-800 tracking-wider">Revision Requested</span>
+                        <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+                            <div class="flex items-start gap-3 flex-1">
+                                <div class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-rose-200 text-rose-800">
+                                    <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                                    </svg>
                                 </div>
-                                <p class="text-xs font-medium text-rose-800 mt-0.5">
-                                    Reviewed by <strong>{{ $submission->approver?->name ?? 'Administration' }}</strong> on {{ $submission->reviewed_at?->format('d M, Y \a\t h:i A') ?? 'recently' }}.
-                                </p>
-                                @if($submission->note)
-                                    <div class="mt-2.5 rounded-xl border border-rose-200 bg-white/80 p-3 text-xs font-semibold text-rose-900">
-                                        <span class="font-bold text-rose-950">Feedback from Admin:</span> {{ $submission->note }}
+                                <div class="flex-1">
+                                    <div class="flex items-center gap-2">
+                                        <h4 class="text-sm font-black text-rose-900">Returned for Revision</h4>
+                                        @if($submission->section)
+                                            <span class="rounded-full bg-rose-200 px-2 py-0.5 text-[10px] font-black uppercase text-rose-900 tracking-wider">
+                                                Arm: {{ $submission->section->name }}
+                                            </span>
+                                        @endif
+                                        <span class="rounded-full bg-rose-200/70 px-2 py-0.5 text-[10px] font-black uppercase text-rose-800 tracking-wider">Revision Requested</span>
                                     </div>
-                                @endif
-                                <p class="text-[11px] text-rose-700 mt-2 font-medium">Please review and adjust scores accordingly, then click "Submit to Admin" when ready.</p>
+                                    <p class="text-xs font-medium text-rose-800 mt-0.5">
+                                        Reviewed by <strong>{{ $submission->approver?->name ?? 'Administration' }}</strong> on {{ $submission->reviewed_at?->format('d M, Y \a\t h:i A') ?? 'recently' }}.
+                                    </p>
+                                    @if($submission->note)
+                                        <div class="mt-2.5 rounded-xl border border-rose-200 bg-white/80 p-3 text-xs font-semibold text-rose-900">
+                                            <span class="font-bold text-rose-950">Feedback from Admin:</span> {{ $submission->note }}
+                                        </div>
+                                    @endif
+                                    <p class="text-[11px] text-rose-700 mt-2 font-medium">Please review and adjust scores accordingly, then click "Submit to Admin" when ready.</p>
+                                </div>
                             </div>
+                            @if($user?->hasPermission('results.review'))
+                                <div class="flex items-center gap-2 sm:self-center self-end">
+                                    <button type="button" wire:click="approveSubmission({{ $submission->id }})"
+                                        class="inline-flex items-center gap-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 px-4 py-2 text-xs font-bold text-white shadow-sm transition-all">
+                                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                            <path d="M20 6L9 17l-5-5"/>
+                                        </svg>
+                                        Re-approve
+                                    </button>
+                                </div>
+                            @endif
                         </div>
                     </div>
                 @endif
@@ -1116,4 +1225,48 @@
             document.__scoresheetKeydownAttached = true;
         }
     @endscript
+
+    {{-- Rejection / Disapproval Modal --}}
+    @if($rejectingId)
+        <div class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs" style="animation: fadeIn 0.2s ease-out">
+            <div class="bg-white rounded-3xl shadow-2xl max-w-lg w-full overflow-hidden border border-gray-100" style="animation: slideUp 0.3s ease-out">
+                <div class="bg-gradient-to-r from-amber-500 to-rose-600 p-6 text-white">
+                    <div class="flex items-center gap-3">
+                        <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-white/20">
+                            <svg class="h-5 w-5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-black">Return Submission for Revision</h3>
+                            <p class="text-xs text-white/80 mt-0.5">Provide feedback so the teacher knows what needs correction</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="p-6 space-y-4">
+                    <div>
+                        <label class="block text-xs font-black uppercase tracking-wider text-gray-700 mb-2">
+                            Reason / Feedback for Teacher <span class="text-rose-500">*</span>
+                        </label>
+                        <textarea wire:model="rejectNote" rows="4" placeholder="e.g., Please double-check CA2 marks or exam totals for student..."
+                            class="w-full rounded-2xl border-2 border-gray-200 p-4 text-sm font-medium text-gray-800 placeholder-gray-400 focus:border-rose-500 focus:ring-4 focus:ring-rose-500/10 transition-all"></textarea>
+                        @error('rejectNote')
+                            <p class="mt-1.5 text-xs font-bold text-rose-600">{{ $message }}</p>
+                        @enderror
+                    </div>
+                    <div class="flex items-center justify-end gap-3 pt-2">
+                        <button type="button" wire:click="cancelReject"
+                            class="rounded-xl border border-gray-300 bg-white px-5 py-2.5 text-xs font-bold text-gray-700 hover:bg-gray-50 transition-all">
+                            Cancel
+                        </button>
+                        <button type="button" wire:click="confirmReject" wire:loading.attr="disabled"
+                            class="rounded-xl bg-gradient-to-r from-amber-500 to-rose-600 px-5 py-2.5 text-xs font-bold text-white shadow-md hover:from-amber-600 hover:to-rose-700 transition-all disabled:opacity-50">
+                            <span wire:loading.remove wire:target="confirmReject">Return for Revision</span>
+                            <span wire:loading wire:target="confirmReject">Processing...</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    @endif
 </div>

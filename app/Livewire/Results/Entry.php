@@ -916,8 +916,8 @@ class Entry extends Component
 
         $submission = ScoreSubmission::query()->with('teacher:id,name')->findOrFail($id);
 
-        if ($submission->status !== 'submitted') {
-            $this->dispatch('alert', message: 'This submission has already been reviewed.', type: 'warning');
+        if ($submission->status === 'approved') {
+            $this->dispatch('alert', message: 'This submission is already approved.', type: 'info');
             return;
         }
 
@@ -966,8 +966,8 @@ class Entry extends Component
         abort_unless($user?->hasPermission('results.review'), 403);
 
         $submission = ScoreSubmission::query()->findOrFail($id);
-        if ($submission->status !== 'submitted') {
-            $this->dispatch('alert', message: 'Only submitted items can be rejected.', type: 'warning');
+        if ($submission->status === 'rejected') {
+            $this->dispatch('alert', message: 'This submission has already been returned for revision.', type: 'info');
             return;
         }
 
@@ -1001,21 +1001,23 @@ class Entry extends Component
         ]);
 
         $submission = ScoreSubmission::query()->findOrFail($id);
-        if ($submission->status !== 'submitted') {
-            $this->dispatch('alert', message: 'This submission has already been reviewed.', type: 'warning');
+        if ($submission->status === 'rejected') {
+            $this->dispatch('alert', message: 'This submission has already been returned for revision.', type: 'info');
             $this->cancelReject();
             return;
         }
 
+        $wasApproved = $submission->status === 'approved';
         $submission->status = 'rejected';
         $submission->note = trim($this->rejectNote);
         $submission->reviewed_by = $user->id;
         $submission->reviewed_at = now();
         $submission->save();
 
-        Audit::log('results.submission_rejected', $submission, [
+        Audit::log($wasApproved ? 'results.submission_disapproved' : 'results.submission_rejected', $submission, [
             'reviewed_by' => $submission->reviewed_by,
             'note' => $submission->note,
+            'was_approved' => $wasApproved,
         ]);
 
         $queryParams = [
@@ -1030,8 +1032,10 @@ class Entry extends Component
 
         InAppNotification::query()->create([
             'user_id' => $submission->teacher_id,
-            'title' => 'Score submission rejected',
-            'body' => "Your score submission was rejected: {$submission->note}",
+            'title' => $wasApproved ? 'Score submission returned for revision' : 'Score submission rejected',
+            'body' => $wasApproved
+                ? "Your previously approved score submission has been returned for revision: {$submission->note}"
+                : "Your score submission was rejected: {$submission->note}",
             'link' => '/results/entry?' . http_build_query($queryParams),
         ]);
 
@@ -1040,7 +1044,52 @@ class Entry extends Component
         $this->resetValidation();
         unset($this->submissions);
         unset($this->sectionSubmissions);
-        $this->dispatch('alert', message: 'Submission rejected.', type: 'success');
+        $this->dispatch('alert', message: $wasApproved ? 'Submission disapproved and returned for revision.' : 'Submission returned for revision.', type: 'warning');
+        $this->dispatch('$refresh');
+    }
+
+    public function togglePublishResults(): void
+    {
+        $user = auth()->user();
+        abort_unless($user && ($user->role === 'admin' || $user->hasPermission('results.publish') || $user->hasPermission('results.review')), 403);
+
+        if (! $this->classId || ! $this->session || ! $this->term) {
+            $this->dispatch('alert', message: 'Please select a class, term, and session first.', type: 'warning');
+            return;
+        }
+
+        $existing = ResultPublication::query()
+            ->where('class_id', $this->classId)
+            ->where('term', (int) $this->term)
+            ->where('session', (string) $this->session)
+            ->first();
+
+        if ($existing) {
+            $existing->delete();
+            Audit::log('results.unpublished', null, [
+                'class_id' => $this->classId,
+                'term' => $this->term,
+                'session' => $this->session,
+            ]);
+            unset($this->isPublished);
+            $this->dispatch('alert', message: 'Results unpublished. Parents and students cannot view scores for this class until re-released.', type: 'info');
+        } else {
+            ResultPublication::query()->create([
+                'class_id' => $this->classId,
+                'term' => (int) $this->term,
+                'session' => (string) $this->session,
+                'published_at' => now(),
+                'published_by' => $user->id,
+            ]);
+            Audit::log('results.published', null, [
+                'class_id' => $this->classId,
+                'term' => $this->term,
+                'session' => $this->session,
+            ]);
+            unset($this->isPublished);
+            $this->dispatch('alert', message: 'Results released! Parents and students can now view grades and download report cards.', type: 'success');
+        }
+
         $this->dispatch('$refresh');
     }
 

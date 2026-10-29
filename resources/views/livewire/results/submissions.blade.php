@@ -87,6 +87,17 @@
                             <button wire:click="$dispatch('reject-modal', { id: {{ $submission->id }} })" class="btn-warning text-xs w-full sm:w-auto justify-center">
                                 Reject
                             </button>
+                        @elseif($submission->status === 'approved')
+                            <button wire:click="$dispatch('reject-modal', { id: {{ $submission->id }} })" class="inline-flex items-center gap-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 px-3 py-2 text-xs font-bold text-white shadow-sm transition-all w-full sm:w-auto justify-center" title="Disapprove and return to teacher for revision">
+                                <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M6 18L18 6M6 6l12 12"/>
+                                </svg>
+                                Disapprove / Return
+                            </button>
+                        @elseif($submission->status === 'rejected')
+                            <button wire:click="approve({{ $submission->id }})" class="btn-primary text-xs w-full sm:w-auto justify-center" title="Re-approve submission">
+                                Re-approve
+                            </button>
                         @endif
                     </div>
                 </div>
