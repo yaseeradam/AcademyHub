@@ -16,6 +16,7 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
+use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\On;
 use Livewire\Attributes\Title;
@@ -458,7 +459,8 @@ class Index extends Component
         })->values();
     }
 
-    private function getClasses()
+    #[Computed]
+    public function classes()
     {
         $user = auth()->user();
         if ($user && $user->role === 'teacher') {
@@ -473,7 +475,13 @@ class Index extends Component
         return SchoolClass::query()->orderBy('level')->get();
     }
 
-    private function getSections()
+    public function getClasses()
+    {
+        return $this->classes;
+    }
+
+    #[Computed]
+    public function sections()
     {
         if (!$this->classId) {
             return collect();
@@ -493,7 +501,13 @@ class Index extends Component
         return $query->orderBy('name')->get();
     }
 
-    private function getStudents()
+    public function getSections()
+    {
+        return $this->sections;
+    }
+
+    #[Computed]
+    public function students()
     {
         if (!$this->classId || !$this->sectionId) {
             return collect();
@@ -504,6 +518,11 @@ class Index extends Component
             ->where('status', 'Active')
             ->orderBy('last_name')
             ->get();
+    }
+
+    public function getStudents()
+    {
+        return $this->students;
     }
 
     private function getVisibleStudents($students)

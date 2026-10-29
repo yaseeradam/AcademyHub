@@ -14,6 +14,7 @@ use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
+use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
@@ -34,7 +35,8 @@ class Broadsheet extends Component
         $this->session = $this->session ?: $this->defaultSession();
     }
 
-    private function getIsPublished(): bool
+    #[Computed]
+    public function isPublished(): bool
     {
         if (!$this->classId || !$this->session) {
             return false;
@@ -48,7 +50,13 @@ class Broadsheet extends Component
             ->exists();
     }
 
-    private function getClasses()
+    public function getIsPublished(): bool
+    {
+        return $this->isPublished;
+    }
+
+    #[Computed]
+    public function classes()
     {
         $user = auth()->user();
 
@@ -62,7 +70,13 @@ class Broadsheet extends Component
             ->get();
     }
 
-    private function getSubjects()
+    public function getClasses()
+    {
+        return $this->classes;
+    }
+
+    #[Computed]
+    public function subjects()
     {
         if (!$this->classId) {
             return collect();
@@ -71,11 +85,19 @@ class Broadsheet extends Component
         return SchoolClass::allSubjectsForClass($this->classId);
     }
 
-    private function getRows(Collection $subjects): Collection
+    public function getSubjects()
+    {
+        return $this->subjects;
+    }
+
+    #[Computed]
+    public function rows(): Collection
     {
         if (!$this->classId || !$this->session) {
             return collect();
         }
+
+        $subjects = $this->subjects;
 
         $students = Student::query()
             ->with(['schoolClass', 'section', 'user'])
@@ -132,6 +154,11 @@ class Broadsheet extends Component
             }
             return array_merge($row, ['position' => $rank]);
         });
+    }
+
+    public function getRows(?Collection $subjects = null): Collection
+    {
+        return $this->rows;
     }
 
     private function defaultSession(): string
