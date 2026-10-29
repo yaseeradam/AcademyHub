@@ -23,8 +23,12 @@ class ManageSubjects extends Component
     public function mount(SchoolClass $class)
     {
         $this->class = $class;
+        $subjectIds = $class->defaultSubjects->pluck('id');
+        if ($subjectIds->isEmpty()) {
+            $subjectIds = SchoolClass::allSubjectsForClass($class->id)->pluck('id');
+        }
         // Store as strings so Livewire checkbox wire:model comparison works correctly
-        $this->selectedSubjects = $class->defaultSubjects->pluck('id')->map(fn($id) => (string) $id)->toArray();
+        $this->selectedSubjects = $subjectIds->map(fn($id) => (string) $id)->toArray();
     }
 
     public function openCopyModal(): void
@@ -61,6 +65,8 @@ class ManageSubjects extends Component
             $target->defaultSubjects()->sync($syncData);
         }
 
+        \App\Models\Student::$classSubjectsCache = [];
+
         $count = $targetClasses->count();
         $this->showCopyModal = false;
         $this->targetClassIds = [];
@@ -81,6 +87,7 @@ class ManageSubjects extends Component
         }
 
         $this->class->defaultSubjects()->sync($syncData);
+        \App\Models\Student::$classSubjectsCache = [];
         $this->dispatchSuccessModal('Allocation Complete', 'Class curriculum subjects have been successfully updated.');
     }
 

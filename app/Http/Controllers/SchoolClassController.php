@@ -36,6 +36,10 @@ class SchoolClassController extends Controller
 
         $classes = $classesQuery->get();
 
+        foreach ($classes as $class) {
+            $class->subjects_count = SchoolClass::allSubjectsForClass($class->id)->count();
+        }
+
         return view('pages.classes.index', compact('classes'));
     }
 
