@@ -335,13 +335,13 @@
         @if($showSignatures)
         <div class="sigs-table">
             <div class="sig-cell">
-                @php($tSigUri = $toBase64($signatureImages['teacher'] ?? null))
+                @php $tSigUri = $toBase64($signatureImages['teacher'] ?? null); @endphp
                 @if($tSigUri)<img src="{{ $tSigUri }}" class="sig-img" /><div class="sig-line has-img">Class Teacher</div>
                 @else<div class="sig-line">Class Teacher</div>@endif
                 <div class="sig-sub">Signature &amp; Date</div>
             </div>
             <div class="sig-cell">
-                @php($pSigUri = $toBase64($signatureImages['principal'] ?? null))
+                @php $pSigUri = $toBase64($signatureImages['principal'] ?? null); @endphp
                 @if($pSigUri)<img src="{{ $pSigUri }}" class="sig-img" /><div class="sig-line has-img">{{ $principalTitle ?? 'Principal' }}</div>
                 @else<div class="sig-line">{{ $principalTitle ?? 'Principal' }}</div>@endif
                 <div class="sig-sub">{{ $principalName ? $principalName . ' &bull; ' : '' }}Signature &amp; Stamp</div>

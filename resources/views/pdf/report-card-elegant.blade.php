@@ -417,11 +417,13 @@
                     </div>
                 </div>
 
-                @php($siBorderColor = '#1e3a5f')
-                @php($siBgColor = '#f8fafc')
-                @php($siLabelColor = '#1e3a5f')
-                @php($siValueColor = '#1e293b')
-                @php($siDotColor = '#c4975a')
+                @php
+                    $siBorderColor = '#1e3a5f';
+                    $siBgColor = '#f8fafc';
+                    $siLabelColor = '#1e3a5f';
+                    $siValueColor = '#1e293b';
+                    $siDotColor = '#c4975a';
+                @endphp
                 @include('pdf.partials.rc-student-info')
 
                 <div class="stats-bar">
@@ -548,10 +550,12 @@
                 </div>
                 @endif
 
-                @php($rcBorderColor = '#1e3a5f')
-                @php($rcBgLight = '#f8fafc')
-                @php($rcTitleColor = '#1e3a5f')
-                @php($rcLabelColor = '#1e3a5f')
+                @php
+                    $rcBorderColor = '#1e3a5f';
+                    $rcBgLight = '#f8fafc';
+                    $rcTitleColor = '#1e3a5f';
+                    $rcLabelColor = '#1e3a5f';
+                @endphp
                 @include('pdf.partials.rc-psychomotor')
                 @include('pdf.partials.rc-school-fees')
 

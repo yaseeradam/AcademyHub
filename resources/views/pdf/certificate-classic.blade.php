@@ -239,7 +239,7 @@
                     </div>
                     <div class="header-cell">
                         <div class="school-name">{{ $schoolName }}</div>
-                        @php($address = config('academyhub.school_address'))
+                        @php $address = config('academyhub.school_address'); @endphp
                         @if($address)
                             <div style="margin-top: 4px; font-size: 10px; color: #475569; font-weight: 600;">
                                 {{ $address }}

@@ -438,11 +438,13 @@
                         class="meta-value">{{ now()->format('d/m/Y') }}</span></div>
             </div>
 
-            @php($siBorderColor = '#374151')
-            @php($siBgColor = '#f9fafb')
-            @php($siLabelColor = '#374151')
-            @php($siValueColor = '#1f2937')
-            @php($siDotColor = '#d1d5db')
+            @php
+                $siBorderColor = '#374151';
+                $siBgColor = '#f9fafb';
+                $siLabelColor = '#374151';
+                $siValueColor = '#1f2937';
+                $siDotColor = '#d1d5db';
+            @endphp
             @include('pdf.partials.rc-student-info')
 
             <div class="summary-row">
@@ -576,10 +578,12 @@
             </div>
             @endif
 
-            @php($rcBorderColor = '#374151')
-            @php($rcBgLight = '#f9fafb')
-            @php($rcTitleColor = '#374151')
-            @php($rcLabelColor = '#374151')
+            @php
+                $rcBorderColor = '#374151';
+                $rcBgLight = '#f9fafb';
+                $rcTitleColor = '#374151';
+                $rcLabelColor = '#374151';
+            @endphp
             @include('pdf.partials.rc-psychomotor')
             @include('pdf.partials.rc-school-fees')
 

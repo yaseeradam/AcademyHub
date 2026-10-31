@@ -172,7 +172,13 @@
         </div>
 
         {{-- Student Info --}}
-        @php($siBorderColor = '#991b1b') @php($siBgColor = '#fffbeb') @php($siLabelColor = '#7f1d1d') @php($siValueColor = '#3b0712') @php($siDotColor = '#ca8a04')
+        @php
+            $siBorderColor = '#991b1b';
+            $siBgColor = '#fffbeb';
+            $siLabelColor = '#7f1d1d';
+            $siValueColor = '#3b0712';
+            $siDotColor = '#ca8a04';
+        @endphp
         @include('pdf.partials.rc-student-info')
 
         {{-- Stats --}}
@@ -275,7 +281,12 @@
         @endif
 
         {{-- Psychomotor --}}
-        @php($rcBorderColor='#991b1b') @php($rcBgLight='#fffbeb') @php($rcTitleColor='#7f1d1d') @php($rcLabelColor='#7f1d1d')
+        @php
+            $rcBorderColor = '#991b1b';
+            $rcBgLight = '#fffbeb';
+            $rcTitleColor = '#7f1d1d';
+            $rcLabelColor = '#7f1d1d';
+        @endphp
         @include('pdf.partials.rc-psychomotor')
 
         {{-- Remarks --}}
@@ -287,7 +298,12 @@
         @endif
 
         {{-- School Fees --}}
-        @php($rcBorderColor='#991b1b') @php($rcBgLight='#fffbeb') @php($rcTitleColor='#7f1d1d') @php($rcLabelColor='#7f1d1d')
+        @php
+            $rcBorderColor = '#991b1b';
+            $rcBgLight = '#fffbeb';
+            $rcTitleColor = '#7f1d1d';
+            $rcLabelColor = '#7f1d1d';
+        @endphp
         @include('pdf.partials.rc-school-fees')
 
         {{-- Next Term --}}
