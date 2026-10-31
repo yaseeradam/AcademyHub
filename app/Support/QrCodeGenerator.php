@@ -39,6 +39,54 @@ class QrCodeGenerator
     }
 
     /**
+     * Generate a PNG data URI for the given text.
+     * Fully compatible with DomPDF and offline environments.
+     */
+    public static function generatePng(string $text, int $size = 120): string
+    {
+        $matrix = self::encodeText($text);
+        $moduleCount = count($matrix);
+        $margin = 2;
+        $totalModules = $moduleCount + ($margin * 2);
+
+        if (function_exists('imagecreatetruecolor')) {
+            $img = imagecreatetruecolor($totalModules, $totalModules);
+            if ($img !== false) {
+                $white = imagecolorallocate($img, 255, 255, 255);
+                $black = imagecolorallocate($img, 0, 0, 0);
+                imagefilledrectangle($img, 0, 0, $totalModules, $totalModules, $white);
+
+                for ($r = 0; $r < $moduleCount; $r++) {
+                    for ($c = 0; $c < $moduleCount; $c++) {
+                        if ($matrix[$r][$c]) {
+                            imagesetpixel($img, $c + $margin, $r + $margin, $black);
+                        }
+                    }
+                }
+
+                $scaled = imagecreatetruecolor($size, $size);
+                if ($scaled !== false) {
+                    imagecopyresized($scaled, $img, 0, 0, 0, 0, $size, $size, $totalModules, $totalModules);
+                    imagedestroy($img);
+
+                    ob_start();
+                    imagepng($scaled);
+                    $pngData = ob_get_clean();
+                    imagedestroy($scaled);
+
+                    if ($pngData) {
+                        return 'data:image/png;base64,' . base64_encode($pngData);
+                    }
+                } else {
+                    imagedestroy($img);
+                }
+            }
+        }
+
+        return 'data:image/svg+xml;base64,' . base64_encode(self::generateSvg($text, $size));
+    }
+
+    /**
      * Generate a 2D boolean matrix representing a QR code.
      */
     private static function encodeText(string $text): array

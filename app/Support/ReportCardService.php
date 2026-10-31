@@ -633,14 +633,9 @@ class ReportCardService
     private function generateQrCodeDataUri(string $data): string
     {
         try {
-            $qrApiUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=120x120&margin=1&data=' . urlencode($data);
-            $ctx = stream_context_create(['http' => ['timeout' => 2]]);
-            $imgData = @file_get_contents($qrApiUrl, false, $ctx);
-            if ($imgData && strlen($imgData) > 100) {
-                return 'data:image/png;base64,' . base64_encode($imgData);
-            }
-        } catch (\Throwable) {}
-
-        return 'data:image/svg+xml;base64,' . base64_encode(\App\Support\QrCodeGenerator::generateSvg($data));
+            return \App\Support\QrCodeGenerator::generatePng($data);
+        } catch (\Throwable) {
+            return '';
+        }
     }
 }

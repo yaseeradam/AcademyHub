@@ -78,8 +78,8 @@ class ReportCardController extends Controller
         $template = (string) $request->query('template', config('academyhub.report_card_template', 'compact'));
         $safeTemplate = preg_replace('/[^a-z0-9_-]/i', '', $template) ?: 'compact';
         $optionsHash = substr(md5(json_encode($data['rcOptions'] ?? [])), 0, 10);
-        $storageDir = storage_path('app/academyhub/report_cards');
-        $filename = "report-card-{$student->admission_number}-term-{$term}-{$safeTemplate}-{$optionsHash}.pdf";
+        $safeAdmissionNo = preg_replace('/[^a-zA-Z0-9_-]/', '_', (string) ($student->admission_number ?? $student->id));
+        $filename = "report-card-{$safeAdmissionNo}-term-{$term}-{$safeTemplate}-{$optionsHash}.pdf";
         $fullPath = "{$storageDir}/{$filename}";
 
         $view = ReportCardService::viewForTemplate($safeTemplate);
@@ -134,7 +134,7 @@ class ReportCardController extends Controller
             }
         }
 
-        if ($useCache) {
+        if ($useCache && file_exists($fullPath)) {
             Audit::log('results.report_card_downloaded_from_cache', $student, [
                 'term' => $term,
                 'session' => $session,
@@ -147,7 +147,7 @@ class ReportCardController extends Controller
             ]);
         }
 
-        $view = ReportCardService::viewForTemplate($template);
+        $view = ReportCardService::viewForTemplate($safeTemplate);
 
         if ($request->boolean('html')) {
             return response(view($view, $data));
@@ -158,6 +158,7 @@ class ReportCardController extends Controller
         ])->setPaper('a4', 'portrait')->setOptions([
             'dpi' => 72,
             'isHtml5ParserEnabled' => true,
+            'isRemoteEnabled' => true,
             'isPhpEnabled' => false,
             'defaultFont' => 'dejavu sans',
         ]);
@@ -165,7 +166,7 @@ class ReportCardController extends Controller
         $output = $pdf->output();
 
         // Write the PDF cache file for subsequent millisecond serving
-        \Illuminate\Support\Facades\File::ensureDirectoryExists($storageDir);
+        \Illuminate\Support\Facades\File::ensureDirectoryExists(dirname($fullPath));
         @file_put_contents($fullPath, $output);
 
         Audit::log('results.report_card_downloaded', $student, [
