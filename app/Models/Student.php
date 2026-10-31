@@ -228,6 +228,18 @@ class Student extends Model
         return 'admission_number';
     }
 
+    public function resolveRouteBinding($value, $field = null)
+    {
+        if (is_numeric($value)) {
+            $student = $this->where('id', (int) $value)->first();
+            if ($student) {
+                return $student;
+            }
+        }
+
+        return $this->where($field ?? $this->getRouteKeyName(), $value)->first();
+    }
+
     public function subjectOverrides(): BelongsToMany
     {
         return $this->belongsToMany(Subject::class, 'student_subject_overrides')

@@ -80,6 +80,7 @@ class ReportCardController extends Controller
         $optionsHash = substr(md5(json_encode($data['rcOptions'] ?? [])), 0, 10);
         $safeAdmissionNo = preg_replace('/[^a-zA-Z0-9_-]/', '_', (string) ($student->admission_number ?? $student->id));
         $filename = "report-card-{$safeAdmissionNo}-term-{$term}-{$safeTemplate}-{$optionsHash}.pdf";
+        $storageDir = storage_path('app/academyhub/report_cards');
         $fullPath = "{$storageDir}/{$filename}";
 
         $view = ReportCardService::viewForTemplate($safeTemplate);
@@ -134,6 +135,8 @@ class ReportCardController extends Controller
             }
         }
 
+        $disposition = $request->boolean('download') ? 'attachment' : 'inline';
+
         if ($useCache && file_exists($fullPath)) {
             Audit::log('results.report_card_downloaded_from_cache', $student, [
                 'term' => $term,
@@ -142,7 +145,7 @@ class ReportCardController extends Controller
 
             return response()->file($fullPath, [
                 'Content-Type' => 'application/pdf',
-                'Content-Disposition' => "attachment; filename=\"{$filename}\"",
+                'Content-Disposition' => "{$disposition}; filename=\"{$filename}\"",
                 'Cache-Control' => 'no-cache, no-store, must-revalidate',
             ]);
         }
@@ -176,7 +179,7 @@ class ReportCardController extends Controller
 
         return response($output, 200, [
             'Content-Type' => 'application/pdf',
-            'Content-Disposition' => "attachment; filename=\"{$filename}\"",
+            'Content-Disposition' => "{$disposition}; filename=\"{$filename}\"",
             'Cache-Control' => 'no-cache, no-store, must-revalidate',
             'Pragma' => 'no-cache',
             'Expires' => '0',
