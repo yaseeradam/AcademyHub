@@ -197,6 +197,10 @@ class BulkReportCardsController extends Controller
         $template = $request->filled('template') ? $request->input('template') : (string) config('academyhub.report_card_template', 'compact');
         $view = ReportCardService::viewForTemplate($template);
 
+        if ($request->boolean('html')) {
+            return response(view($view, $payload));
+        }
+
         $pdf = Pdf::loadView($view, [
             ...$payload,
         ])->setPaper('a4', 'portrait')->setOptions([

@@ -466,7 +466,7 @@ class SettingsController extends Controller
                 'student' => $student,
             ];
 
-            if (request()->boolean('html')) {
+            if (request()->boolean('html') || !request()->has('pdf')) {
                 return response(view($view, $data));
             }
 
@@ -572,7 +572,7 @@ class SettingsController extends Controller
                 'qrCodeUri' => 'data:image/svg+xml;base64,' . base64_encode(\App\Support\QrCodeGenerator::generateSvg(url('/results/verify/ADM001'))),
             ];
 
-            if (request()->boolean('html')) {
+            if (request()->boolean('html') || !request()->has('pdf')) {
                 return response(view($view, $data));
             }
 

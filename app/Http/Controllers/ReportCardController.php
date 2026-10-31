@@ -149,6 +149,10 @@ class ReportCardController extends Controller
 
         $view = ReportCardService::viewForTemplate($template);
 
+        if ($request->boolean('html')) {
+            return response(view($view, $data));
+        }
+
         $pdf = Pdf::loadView($view, [
             ...$data,
         ])->setPaper('a4', 'portrait')->setOptions([
