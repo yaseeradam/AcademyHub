@@ -665,13 +665,13 @@
 
         <!-- Preview Modal -->
         <div x-show="open" x-cloak class="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 p-4"
-            @click.self="open = false">
+            @click.self="open = false; src = null">
             <div class="w-full max-w-5xl overflow-hidden rounded-3xl bg-white shadow-2xl ring-1 ring-black/5">
                 <div class="flex items-center justify-between border-b border-slate-100 px-5 py-4">
                     <div class="text-sm font-black text-slate-900" x-text="title"></div>
                     <button type="button"
                         class="rounded-xl bg-slate-100 px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-200"
-                        @click="open = false">
+                        @click="open = false; src = null">
                         Close
                     </button>
                 </div>
