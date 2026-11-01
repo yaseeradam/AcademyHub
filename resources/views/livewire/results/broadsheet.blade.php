@@ -143,7 +143,9 @@
                         </td>
 
                         @foreach ($subjects as $subject)
-                            @php($val = $row['subjectTotals'][$subject->id] ?? null)
+                            @php
+                                $val = $row['subjectTotals'][$subject->id] ?? null;
+                            @endphp
                             <td class="px-4 py-4 text-right text-sm font-bold {{ $val === null ? 'text-slate-300' : 'text-slate-800' }}">
                                 {{ $val ?? '—' }}
                             </td>
@@ -167,31 +169,14 @@
                                 $safeAdm = preg_replace('/[^A-Za-z0-9\-_.]+/', '-', (string) ($row['student']->admission_number ?? $row['student']->id));
                                 $pdfName = "report-card-{$safeAdm}-term{$term}.pdf";
                             @endphp
-                            <button
-                                type="button"
-                                onclick="(function(btn){
-                                    btn.disabled=true;
-                                    btn.textContent='...';
-                                    fetch('{{ $pdfUrl }}')
-                                        .then(function(r){
-                                            if(!r.ok) throw new Error('HTTP '+r.status);
-                                            return r.blob();
-                                        })
-                                        .then(function(blob){
-                                            var a=document.createElement('a');
-                                            a.href=URL.createObjectURL(blob);
-                                            a.download='{{ $pdfName }}';
-                                            document.body.appendChild(a);
-                                            a.click();
-                                            setTimeout(function(){URL.revokeObjectURL(a.href);a.remove();},2000);
-                                        })
-                                        .catch(function(e){alert('Could not download PDF: '+e.message);})
-                                        .finally(function(){btn.disabled=false;btn.textContent='PDF';});
-                                })(this)"
-                                class="rounded-xl bg-indigo-50 px-4 py-2 text-xs font-black text-indigo-600 hover:bg-indigo-600 hover:text-white transition-all shadow-sm disabled:opacity-50 cursor-pointer"
+                            <a
+                                href="{{ $pdfUrl }}"
+                                download="{{ $pdfName }}"
+                                onclick="event.preventDefault(); downloadStudentPdf(this, '{{ $pdfUrl }}', '{{ $pdfName }}');"
+                                class="inline-flex items-center justify-center rounded-xl bg-indigo-50 px-4 py-2 text-xs font-black text-indigo-600 hover:bg-indigo-600 hover:text-white transition-all shadow-sm cursor-pointer"
                             >
                                 PDF
-                            </button>
+                            </a>
                         </td>
                     </tr>
                 @empty
@@ -208,4 +193,39 @@
             </table>
         </div>
     @endif
+
+    <script>
+        function downloadStudentPdf(btn, url, filename) {
+            if (btn.getAttribute('data-downloading') === 'true') return;
+            btn.setAttribute('data-downloading', 'true');
+            var originalText = btn.textContent;
+            btn.textContent = '...';
+
+            fetch(url)
+                .then(function(res) {
+                    if (!res.ok) throw new Error('HTTP ' + res.status);
+                    return res.blob();
+                })
+                .then(function(blob) {
+                    var a = document.createElement('a');
+                    var objectUrl = window.URL.createObjectURL(blob);
+                    a.href = objectUrl;
+                    a.download = filename;
+                    document.body.appendChild(a);
+                    a.click();
+                    setTimeout(function() {
+                        window.URL.revokeObjectURL(objectUrl);
+                        a.remove();
+                    }, 1000);
+                })
+                .catch(function(err) {
+                    console.error('PDF download fetch failed, falling back to direct navigation:', err);
+                    window.location.href = url;
+                })
+                .finally(function() {
+                    btn.removeAttribute('data-downloading');
+                    btn.textContent = originalText;
+                });
+        }
+    </script>
 </div>
