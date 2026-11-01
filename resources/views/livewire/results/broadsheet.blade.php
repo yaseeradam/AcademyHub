@@ -157,14 +157,41 @@
                             </span>
                         </td>
                         <td class="px-6 py-4 text-right">
-                            <a
-                                href="{{ route('results.report-card', ['student' => $row['student'], 'term' => $term, 'session' => $session, 'download' => 1, '_t' => time()]) }}"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                class="rounded-xl bg-indigo-50 px-4 py-2 text-xs font-black text-indigo-600 hover:bg-indigo-600 hover:text-white transition-all shadow-sm"
+                            @php
+                                $pdfUrl = route('results.report-card', [
+                                    'student'  => $row['student'],
+                                    'term'     => $term,
+                                    'session'  => $session,
+                                    'download' => 1,
+                                ]);
+                                $safeAdm = preg_replace('/[^A-Za-z0-9\-_.]+/', '-', (string) ($row['student']->admission_number ?? $row['student']->id));
+                                $pdfName = "report-card-{$safeAdm}-term{$term}.pdf";
+                            @endphp
+                            <button
+                                type="button"
+                                onclick="(function(btn){
+                                    btn.disabled=true;
+                                    btn.textContent='...';
+                                    fetch('{{ $pdfUrl }}')
+                                        .then(function(r){
+                                            if(!r.ok) throw new Error('HTTP '+r.status);
+                                            return r.blob();
+                                        })
+                                        .then(function(blob){
+                                            var a=document.createElement('a');
+                                            a.href=URL.createObjectURL(blob);
+                                            a.download='{{ $pdfName }}';
+                                            document.body.appendChild(a);
+                                            a.click();
+                                            setTimeout(function(){URL.revokeObjectURL(a.href);a.remove();},2000);
+                                        })
+                                        .catch(function(e){alert('Could not download PDF: '+e.message);})
+                                        .finally(function(){btn.disabled=false;btn.textContent='PDF';});
+                                })(this)"
+                                class="rounded-xl bg-indigo-50 px-4 py-2 text-xs font-black text-indigo-600 hover:bg-indigo-600 hover:text-white transition-all shadow-sm disabled:opacity-50 cursor-pointer"
                             >
                                 PDF
-                            </a>
+                            </button>
                         </td>
                     </tr>
                 @empty
