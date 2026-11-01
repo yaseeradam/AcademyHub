@@ -158,7 +158,7 @@
                         </td>
                         <td class="px-6 py-4 text-right">
                             <a
-                                href="{{ route('results.report-card', ['student' => $row['student'], 'term' => $term, 'session' => $session, '_t' => time()]) }}"
+                                href="{{ route('results.report-card', ['student' => $row['student'], 'term' => $term, 'session' => $session, 'download' => 1, '_t' => time()]) }}"
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 class="rounded-xl bg-indigo-50 px-4 py-2 text-xs font-black text-indigo-600 hover:bg-indigo-600 hover:text-white transition-all shadow-sm"
