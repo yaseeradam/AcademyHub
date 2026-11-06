@@ -797,6 +797,91 @@ class Index extends Component
         $this->dispatch('alert', message: "All students marked as {$status}.", type: 'success');
     }
 
+    /**
+     * Mark all currently unmarked students in the active class/section as Absent.
+     * Preserves already marked students (Present, Late, Excused) and verified biometric arrivals.
+     * Automatically applies Excused status if an approved AttendanceExcuse exists for the student.
+     */
+    public function markUnmarkedAsAbsent(): void
+    {
+        $sheet = $this->getOrCreateSheet();
+        if (!$sheet) {
+            $this->dispatch('alert', message: 'Please select class, section, and date first.', type: 'error');
+            return;
+        }
+
+        $students = $this->getStudents();
+        $dateStr = Carbon::parse($this->date)->toDateString();
+        $countMarked = 0;
+
+        DB::transaction(function () use ($sheet, $students, $dateStr, &$countMarked) {
+            $studentIds = $students->pluck('id')->all();
+            $excuses = AttendanceExcuse::whereIn('student_id', $studentIds)
+                ->whereDate('start_date', '<=', $dateStr)
+                ->whereDate('end_date', '>=', $dateStr)
+                ->where('status', 'Approved')
+                ->get()
+                ->keyBy('student_id');
+
+            foreach ($students as $student) {
+                $currentStatus = (string) ($this->marks[$student->id]['status'] ?? 'Unmarked');
+
+                // Skip if already marked in memory
+                if ($currentStatus !== 'Unmarked') {
+                    continue;
+                }
+
+                $existing = AttendanceMark::query()
+                    ->where('sheet_id', $sheet->id)
+                    ->where('student_id', $student->id)
+                    ->first();
+
+                // Skip if already marked in DB
+                if ($existing && $existing->status !== 'Unmarked') {
+                    continue;
+                }
+
+                // Protect verified biometric gate arrival punches
+                if ($existing && !empty($existing->arrived_at)) {
+                    continue;
+                }
+
+                $excuse = $excuses->get($student->id);
+                $finalStatus = $excuse ? 'Excused' : 'Absent';
+                $note = $excuse ? 'Excused: ' . ($excuse->reason ?? 'Approved leave') : 'Automated absent (unmarked)';
+
+                AttendanceMark::query()->updateOrCreate(
+                    [
+                        'sheet_id'   => $sheet->id,
+                        'student_id' => $student->id,
+                    ],
+                    [
+                        'tenant_id'  => $sheet->tenant_id ?? auth()->user()?->tenant_id,
+                        'status'     => $finalStatus,
+                        'note'       => $note,
+                        'arrived_at' => null,
+                    ]
+                );
+
+                $this->marks[$student->id] = [
+                    'status'       => $finalStatus,
+                    'note'         => $note,
+                    'arrived_at'   => null,
+                    'departed_at'  => null,
+                    'is_biometric' => false,
+                ];
+
+                $countMarked++;
+            }
+        });
+
+        if ($countMarked > 0) {
+            $this->dispatch('alert', message: "{$countMarked} unmarked student(s) marked as Absent.", type: 'success');
+        } else {
+            $this->dispatch('alert', message: 'No unmarked students found to update.', type: 'info');
+        }
+    }
+
     public function cycleStatus(int $studentId): void
     {
         $order = ['Unmarked', 'Present', 'Absent', 'Late', 'Excused'];

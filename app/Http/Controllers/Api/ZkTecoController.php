@@ -223,20 +223,34 @@ class ZkTecoController extends Controller
                     ->where('teacher_id', $teacher->id)
                     ->first();
 
-                if ($existingMark) {
-                    // ── SIGN-OUT (subsequent punch) ──────────────────────────
-                    // Status: never downgrade a Present to Late on sign-out.
-                    $finalStatus = ($existingMark->status === 'Present') ? 'Present' : $calculatedStatus;
+                $isStaffSignout = false;
+                if ($existingMark && !empty($existingMark->punch_in_time)) {
+                    if (\App\Support\AttendanceShiftConfig::isDeparturePunch($punchTime, $existingMark->punch_in_time, $shift, $staffTenantId)) {
+                        // ── SIGN-OUT (genuine afternoon sign-out) ──────────────────────────
+                        // Status: never downgrade a Present to Late on sign-out.
+                        $isStaffSignout = true;
+                        $finalStatus = ($existingMark->status === 'Present') ? 'Present' : $calculatedStatus;
 
-                    $inDisplay  = $existingMark->punch_in_time
-                        ? Carbon::parse($existingMark->punch_in_time)->format('g:i A')
-                        : '–';
-                    $outDisplay = $punchTime->format('g:i A');
+                        $inDisplay  = Carbon::parse($existingMark->punch_in_time)->format('g:i A');
+                        $outDisplay = $punchTime->format('g:i A');
 
+                        $existingMark->update([
+                            'status'         => $finalStatus,
+                            'punch_out_time' => $punchTime->format('H:i:s'),
+                            'note'           => "In: {$inDisplay} | Out: {$outDisplay}",
+                        ]);
+                    } else {
+                        // Morning re-scan / duplicate: ignore fast repeat scans within 15 minutes
+                        if (\App\Support\AttendanceShiftConfig::isDuplicateArrival($punchTime, $existingMark->punch_in_time)) {
+                            continue;
+                        }
+                    }
+                } elseif ($existingMark) {
                     $existingMark->update([
-                        'status'         => $finalStatus,
-                        'punch_out_time' => $punchTime->format('H:i:s'),
-                        'note'           => "In: {$inDisplay} | Out: {$outDisplay}",
+                        'status'         => $calculatedStatus,
+                        'punch_in_time'  => $punchTime->format('H:i:s'),
+                        'punch_out_time' => null,
+                        'note'           => 'In: ' . $punchTime->format('g:i A') . " ({$calculatedStatus})",
                     ]);
                 } else {
                     // ── SIGN-IN (first punch of the day) ────────────────────
@@ -255,11 +269,10 @@ class ZkTecoController extends Controller
                             ->where('sheet_id', $staffSheet->id)
                             ->where('teacher_id', $teacher->id)
                             ->first();
-                        if ($existingMark) {
+                        if ($existingMark && !empty($existingMark->punch_in_time) && \App\Support\AttendanceShiftConfig::isDeparturePunch($punchTime, $existingMark->punch_in_time, $shift, $staffTenantId)) {
+                            $isStaffSignout = true;
                             $finalStatus = ($existingMark->status === 'Present') ? 'Present' : $calculatedStatus;
-                            $inDisplay  = $existingMark->punch_in_time
-                                ? Carbon::parse($existingMark->punch_in_time)->format('g:i A')
-                                : '–';
+                            $inDisplay  = Carbon::parse($existingMark->punch_in_time)->format('g:i A');
                             $outDisplay = $punchTime->format('g:i A');
                             $existingMark->update([
                                 'status'         => $finalStatus,
@@ -269,7 +282,6 @@ class ZkTecoController extends Controller
                         }
                     }
                 }
-
 
                 // ── Real-time biometric popup via Laravel Reverb WebSocket ──
                 $resolvedStatus = $existingMark ? ($existingMark->status === 'Present' ? 'Present' : $calculatedStatus) : $calculatedStatus;
@@ -354,21 +366,32 @@ class ZkTecoController extends Controller
             $isDeparture = false;
 
             if ($existingStudentMark && !empty($existingStudentMark->arrived_at)) {
-                // ── DEPARTURE (second punch) ───────────────────────────────
-                // Never downgrade Present → Late on departure scan.
-                $isDeparture = true;
-                $finalStatus = ($existingStudentMark->status === 'Present') ? 'Present' : $studentStatus;
+                // Verify whether this punch qualifies as a genuine afternoon departure
+                if (\App\Support\AttendanceShiftConfig::isDeparturePunch($punchTime, $existingStudentMark->arrived_at, $studentShift, $student->tenant_id)) {
+                    // ── DEPARTURE (genuine afternoon closing punch) ───────────
+                    // Never downgrade Present → Late on departure scan.
+                    $isDeparture = true;
+                    $finalStatus = ($existingStudentMark->status === 'Present') ? 'Present' : $studentStatus;
 
-                $inDisplay  = Carbon::parse($existingStudentMark->arrived_at)->format('g:i A');
-                $outDisplay = $punchTime->format('g:i A');
+                    $inDisplay  = Carbon::parse($existingStudentMark->arrived_at)->format('g:i A');
+                    $outDisplay = $punchTime->format('g:i A');
 
-                $existingStudentMark->update([
-                    'status'      => $finalStatus,
-                    'departed_at' => $punchTime->format('H:i:s'),
-                    'note'        => "Arrived: {$inDisplay} | Departed: {$outDisplay}",
-                ]);
+                    $existingStudentMark->update([
+                        'status'      => $finalStatus,
+                        'departed_at' => $punchTime->format('H:i:s'),
+                        'note'        => "Arrived: {$inDisplay} | Departed: {$outDisplay}",
+                    ]);
 
-                $status = $finalStatus;
+                    $status = $finalStatus;
+                } else {
+                    // ── ARRIVAL RE-SCAN / DUPLICATE (morning punch) ───────────
+                    // Student scanned in the morning. Keep marked Present/Late; never set departed_at in the morning.
+                    $status = ($existingStudentMark->status === 'Present') ? 'Present' : $studentStatus;
+                    if (\App\Support\AttendanceShiftConfig::isDuplicateArrival($punchTime, $existingStudentMark->arrived_at)) {
+                        // Rapid repeat scan within 15 mins: ignore duplicate to avoid spamming alerts
+                        continue;
+                    }
+                }
             } elseif ($existingStudentMark) {
                 // ── ARRIVAL (first biometric punch of the day on pre-existing mark) ──
                 $existingStudentMark->update([
@@ -382,13 +405,13 @@ class ZkTecoController extends Controller
                 // ── ARRIVAL (first punch, new record) ──────────────────────
                 try {
                     AttendanceMark::create([
-                        'tenant_id'  => $student->tenant_id ?? 1,
-                        'sheet_id'   => $sheet->id,
-                        'student_id' => $student->id,
-                        'status'     => $studentStatus,
-                        'arrived_at' => $punchTime->format('H:i:s'),
-                        'departed_at'=> null,
-                        'note'       => 'Arrived: ' . $punchTime->format('g:i A') . " ({$studentStatus})",
+                        'tenant_id'   => $student->tenant_id ?? 1,
+                        'sheet_id'    => $sheet->id,
+                        'student_id'  => $student->id,
+                        'status'      => $studentStatus,
+                        'arrived_at'  => $punchTime->format('H:i:s'),
+                        'departed_at' => null,
+                        'note'        => 'Arrived: ' . $punchTime->format('g:i A') . " ({$studentStatus})",
                     ]);
                     $status = $studentStatus;
                 } catch (\Illuminate\Database\UniqueConstraintViolationException $e) {
@@ -397,7 +420,7 @@ class ZkTecoController extends Controller
                         'student_id' => $student->id,
                     ])->first();
                     if ($existingStudentMark) {
-                        if (!empty($existingStudentMark->arrived_at)) {
+                        if (!empty($existingStudentMark->arrived_at) && \App\Support\AttendanceShiftConfig::isDeparturePunch($punchTime, $existingStudentMark->arrived_at, $studentShift, $student->tenant_id)) {
                             $isDeparture = true;
                             $finalStatus = ($existingStudentMark->status === 'Present') ? 'Present' : $studentStatus;
                             $inDisplay  = Carbon::parse($existingStudentMark->arrived_at)->format('g:i A');
@@ -409,13 +432,7 @@ class ZkTecoController extends Controller
                             ]);
                             $status = $finalStatus;
                         } else {
-                            $existingStudentMark->update([
-                                'status'      => $studentStatus,
-                                'arrived_at'  => $punchTime->format('H:i:s'),
-                                'departed_at' => null,
-                                'note'        => 'Arrived: ' . $punchTime->format('g:i A') . " ({$studentStatus})",
-                            ]);
-                            $status = $studentStatus;
+                            $status = $existingStudentMark->status ?? $studentStatus;
                         }
                     } else {
                         $status = $studentStatus;
@@ -437,7 +454,7 @@ class ZkTecoController extends Controller
                 'class_name'       => $student->schoolClass?->name ?? '',
                 'section_name'     => $student->section?->name ?? '',
                 'admission_number' => $student->admission_number,
-                'status'           => $isDeparture ? 'Departed' : $status,
+                'status'           => $status,
                 'action'           => $isDeparture ? 'checkout' : 'checkin',
                 'time'             => $punchTime->format('g:i A'),
                 'date'             => $dateStr,

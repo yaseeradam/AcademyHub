@@ -99,19 +99,33 @@ class BiometricSyncService
 
             $isDeparture = false;
 
-            if ($existingMark) {
-                $isDeparture = true;
-                // Departure / sign-out: never downgrade Present to Late
-                $finalStatus = ($existingMark->status === 'Present') ? 'Present' : $calculatedStatus;
-                $inDisplay = $existingMark->punch_in_time
-                    ? Carbon::parse($existingMark->punch_in_time)->format('g:i A')
-                    : '–';
-                $outDisplay = $punchTime->format('g:i A');
+            if ($existingMark && !empty($existingMark->punch_in_time)) {
+                if (AttendanceShiftConfig::isDeparturePunch($punchTime, $existingMark->punch_in_time, $shift, $staffTenantId)) {
+                    $isDeparture = true;
+                    // Departure / sign-out: never downgrade Present to Late
+                    $finalStatus = ($existingMark->status === 'Present') ? 'Present' : $calculatedStatus;
+                    $inDisplay = Carbon::parse($existingMark->punch_in_time)->format('g:i A');
+                    $outDisplay = $punchTime->format('g:i A');
 
+                    $existingMark->update([
+                        'status'         => $finalStatus,
+                        'punch_out_time' => $timeStr,
+                        'note'           => "In: {$inDisplay} | Out: {$outDisplay}",
+                    ]);
+                } else {
+                    // Morning re-scan / duplicate: ignore if within 15 minutes
+                    if (AttendanceShiftConfig::isDuplicateArrival($punchTime, $existingMark->punch_in_time)) {
+                        return null;
+                    }
+                    $finalStatus = ($existingMark->status === 'Present') ? 'Present' : $calculatedStatus;
+                }
+            } elseif ($existingMark) {
+                $finalStatus = $calculatedStatus;
                 $existingMark->update([
                     'status'         => $finalStatus,
-                    'punch_out_time' => $timeStr,
-                    'note'           => "In: {$inDisplay} | Out: {$outDisplay}",
+                    'punch_in_time'  => $timeStr,
+                    'punch_out_time' => null,
+                    'note'           => 'In: ' . $punchTime->format('g:i A') . " ({$finalStatus})",
                 ]);
             } else {
                 $finalStatus = $calculatedStatus;
@@ -201,18 +215,26 @@ class BiometricSyncService
         $isDeparture = false;
 
         if ($existingStudentMark && !empty($existingStudentMark->arrived_at)) {
-            // Second scan = departure
-            $isDeparture = true;
-            $finalStatus = ($existingStudentMark->status === 'Present') ? 'Present' : $studentStatus;
-            $inDisplay = Carbon::parse($existingStudentMark->arrived_at)->format('g:i A');
-            $outDisplay = $punchTime->format('g:i A');
+            if (AttendanceShiftConfig::isDeparturePunch($punchTime, $existingStudentMark->arrived_at, $studentShift, $studentTenantId)) {
+                // Second scan during afternoon closing hours = departure
+                $isDeparture = true;
+                $finalStatus = ($existingStudentMark->status === 'Present') ? 'Present' : $studentStatus;
+                $inDisplay = Carbon::parse($existingStudentMark->arrived_at)->format('g:i A');
+                $outDisplay = $punchTime->format('g:i A');
 
-            $existingStudentMark->update([
-                'status'      => $finalStatus,
-                'departed_at' => $timeStr,
-                'note'        => "Arrived: {$inDisplay} | Departed: {$outDisplay} [Biometric]",
-            ]);
-            $studentStatus = $finalStatus;
+                $existingStudentMark->update([
+                    'status'      => $finalStatus,
+                    'departed_at' => $timeStr,
+                    'note'        => "Arrived: {$inDisplay} | Departed: {$outDisplay} [Biometric]",
+                ]);
+                $studentStatus = $finalStatus;
+            } else {
+                // Morning re-scan / duplicate: keep Present/Late, do not set departed_at
+                $studentStatus = ($existingStudentMark->status === 'Present') ? 'Present' : $studentStatus;
+                if (AttendanceShiftConfig::isDuplicateArrival($punchTime, $existingStudentMark->arrived_at)) {
+                    return null;
+                }
+            }
         } else {
             // First scan = arrival
             AttendanceMark::updateOrCreate(

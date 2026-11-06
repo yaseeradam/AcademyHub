@@ -131,4 +131,54 @@ class AttendanceShiftConfig
             return $default;
         }
     }
+
+    /**
+     * Determines whether a biometric punch should be treated as a departure (checkout).
+     *
+     * Rules for Departure:
+     * 1. The student or staff member MUST have an established arrival record (arrived_at / punch_in_time).
+     * 2. Must be at least 90 minutes after arrival (prevents rapid duplicate scans from registering as departure).
+     * 3. Must be during departure hours:
+     *    - Western Shift: >= 12:00:00 (12:00 PM). Punches before 12:00 PM are arrival hours, NEVER departure.
+     *    - Islamic Shift: >= 16:00:00 (4:00 PM). Punches before 4:00 PM are arrival hours, NEVER departure.
+     */
+    public static function isDeparturePunch(Carbon|string $punchTime, ?string $arrivedAt, string $shift = self::SHIFT_WESTERN, ?int $tenantId = null): bool
+    {
+        if (empty($arrivedAt)) {
+            return false;
+        }
+
+        $punchCarbon = ($punchTime instanceof Carbon) ? $punchTime : Carbon::parse($punchTime);
+        $arrivedCarbon = Carbon::parse($arrivedAt);
+
+        // Rule 1: Elapsed time check — minimum 90 minutes after arrival
+        $diffMinutes = $arrivedCarbon->diffInMinutes($punchCarbon, false);
+        if ($diffMinutes < 90) {
+            return false;
+        }
+
+        // Rule 2: Shift departure window check
+        $norm = self::normalizeShift($shift);
+        $timeStr = $punchCarbon->format('H:i:s');
+        $minDeparture = ($norm === self::SHIFT_ISLAMIC) ? '16:00:00' : '12:00:00';
+
+        return $timeStr >= $minDeparture;
+    }
+
+    /**
+     * Check if a punch is an immediate duplicate/re-scan of an existing arrival (e.g. within 15 minutes).
+     */
+    public static function isDuplicateArrival(Carbon|string $punchTime, ?string $arrivedAt): bool
+    {
+        if (empty($arrivedAt)) {
+            return false;
+        }
+
+        $punchCarbon = ($punchTime instanceof Carbon) ? $punchTime : Carbon::parse($punchTime);
+        $arrivedCarbon = Carbon::parse($arrivedAt);
+
+        $diffMinutes = abs($arrivedCarbon->diffInMinutes($punchCarbon, false));
+        return $diffMinutes < 15;
+    }
 }
+

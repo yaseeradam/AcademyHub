@@ -398,11 +398,21 @@
                     </label>
                 </div>
 
-                <div class="flex items-center gap-2">
-                    <span class="text-[11px] sm:text-xs font-bold text-slate-400">Marking Date:</span>
-                    <span class="text-xs font-extrabold text-blue-600 bg-blue-50 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg">
-                        {{ \Carbon\Carbon::parse($date)->format('M d, Y') }}
-                    </span>
+                <div class="flex flex-wrap items-center gap-2">
+                    <button type="button" wire:click="markAll('Present')" wire:confirm="Are you sure you want to mark all students in this section as Present?" class="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-bold rounded-xl bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200 transition-colors shadow-2xs">
+                        <svg class="h-3.5 w-3.5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                        <span>Mark All Present</span>
+                    </button>
+                    <button type="button" wire:click="markUnmarkedAsAbsent" wire:confirm="Are you sure you want to mark all unmarked students as Absent?" class="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-bold rounded-xl bg-red-50 text-red-700 hover:bg-red-100 border border-red-200 transition-colors shadow-2xs">
+                        <svg class="h-3.5 w-3.5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                        <span>Mark Unmarked as Absent</span>
+                    </button>
+                    <div class="flex items-center gap-1.5 pl-1 border-l border-slate-200">
+                        <span class="text-[11px] sm:text-xs font-bold text-slate-400">Date:</span>
+                        <span class="text-xs font-extrabold text-blue-600 bg-blue-50 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg">
+                            {{ \Carbon\Carbon::parse($date)->format('M d, Y') }}
+                        </span>
+                    </div>
                 </div>
             </div>
 
@@ -426,7 +436,12 @@
                         @if($absentCnt > 0)<span class="bg-red-100 text-red-800 px-2 py-0.5 rounded-full">✗ {{ $absentCnt }} Absent</span>@endif
                         @if($lateCnt > 0)<span class="bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full">⏱ {{ $lateCnt }} Late</span>@endif
                         @if($excusedCnt > 0)<span class="bg-purple-100 text-purple-800 px-2 py-0.5 rounded-full">✔ {{ $excusedCnt }} Excused</span>@endif
-                        @if($unmarkedCnt > 0)<span class="bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full">? {{ $unmarkedCnt }} Unmarked</span>@endif
+                        @if($unmarkedCnt > 0)
+                            <button type="button" wire:click="markUnmarkedAsAbsent" wire:confirm="Mark all {{ $unmarkedCnt }} unmarked student(s) as Absent?" class="inline-flex items-center gap-1 bg-red-600 hover:bg-red-700 text-white px-2.5 py-0.5 rounded-full transition-colors cursor-pointer shadow-2xs font-extrabold" title="Click to auto-mark unmarked students as Absent">
+                                <svg class="h-2.5 w-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                                <span>Mark {{ $unmarkedCnt }} Unmarked as Absent</span>
+                            </button>
+                        @endif
                     </span>
                 </div>
             @elseif($classId && $sectionId && $date && !\Carbon\Carbon::parse($date)->isToday())
@@ -607,9 +622,21 @@
                         <span><strong>Real-Time Auto-Save:</strong> Teacher clicks and K40 biometric punches are instantly synchronized to the database.</span>
                     </div>
 
-                    <button wire:click="save"
-                            wire:loading.attr="disabled"
-                            class="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl sm:rounded-2xl bg-amber-500 hover:bg-amber-600 px-5 sm:px-7 py-2.5 sm:py-3.5 text-xs sm:text-sm font-extrabold text-white shadow-lg shadow-amber-500/25 hover:shadow-xl hover:shadow-amber-500/35 transition-all duration-200 active:scale-95 group">
+                    <div class="flex flex-wrap items-center gap-2.5 w-full sm:w-auto">
+                        @if(($markCounts['Unmarked'] ?? 0) > 0)
+                            <button type="button"
+                                    wire:click="markUnmarkedAsAbsent"
+                                    wire:confirm="Are you sure you want to mark all {{ $markCounts['Unmarked'] }} unmarked student(s) as Absent?"
+                                    wire:loading.attr="disabled"
+                                    class="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 rounded-xl sm:rounded-2xl bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 px-4 py-2.5 sm:py-3.5 text-xs sm:text-sm font-bold transition-all duration-200 active:scale-95 cursor-pointer">
+                                <svg class="h-4 w-4 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                                <span>Mark {{ $markCounts['Unmarked'] }} Unmarked as Absent</span>
+                            </button>
+                        @endif
+
+                        <button wire:click="save"
+                                wire:loading.attr="disabled"
+                                class="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl sm:rounded-2xl bg-amber-500 hover:bg-amber-600 px-5 sm:px-7 py-2.5 sm:py-3.5 text-xs sm:text-sm font-extrabold text-white shadow-lg shadow-amber-500/25 hover:shadow-xl hover:shadow-amber-500/35 transition-all duration-200 active:scale-95 group">
                         <svg class="h-4 w-4 text-white group-hover:rotate-12 transition-transform" wire:loading.remove wire:target="save" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
@@ -622,6 +649,7 @@
                             Saving Sheets...
                         </span>
                     </button>
+                    </div>
                 </div>
             @else
                 <div class="px-6 py-16 text-center bg-white">

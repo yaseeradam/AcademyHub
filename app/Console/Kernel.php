@@ -30,6 +30,26 @@ class Kernel extends ConsoleKernel
             ->between('06:30', '18:00')
             ->withoutOverlapping()
             ->runInBackground();
+
+        // ── Automated Missing Student Absent Marking ───────────────────────
+        // After morning arrival gate cutoffs, automatically record missing students as Absent
+        $schedule->command('attendance:mark-absent')
+            ->weekdays()
+            ->at('09:30')
+            ->withoutOverlapping()
+            ->runInBackground();
+
+        $schedule->command('attendance:mark-absent')
+            ->weekdays()
+            ->at('13:30')
+            ->withoutOverlapping()
+            ->runInBackground();
+
+        $schedule->command('attendance:mark-absent')
+            ->weekdays()
+            ->at('17:00')
+            ->withoutOverlapping()
+            ->runInBackground();
     }
 
     /**

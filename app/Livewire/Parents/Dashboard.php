@@ -336,7 +336,8 @@ class Dashboard extends Component
 
         return [
             'has_record'   => true,
-            'status'       => $timeOut ? 'Departed' : $status,
+            'status'       => $status,
+            'is_departed'  => !empty($timeOut),
             'raw_status'   => $status,
             'badge_class'  => $badgeClass,
             'time_in'      => $timeIn,
