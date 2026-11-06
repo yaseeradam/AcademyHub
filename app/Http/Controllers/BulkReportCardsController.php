@@ -23,8 +23,22 @@ class BulkReportCardsController extends Controller
         abort_unless($user?->hasPermission('results.publish'), 403);
 
         $classes = SchoolClass::query()->orderBy('level')->orderBy('name')->get();
+        $sessions = \App\Models\AcademicSession::listSessions();
+        $activeSessionName = \App\Models\AcademicTerm::activeSessionName() ?: \App\Models\AcademicSession::activeName();
+        $availableTerms = \App\Models\AcademicTerm::availableTermsForSession($activeSessionName);
 
-        return response()->view('pages.results.bulk-report-cards', compact('classes'));
+        $termsBySession = [];
+        foreach ($sessions as $s) {
+            $termsBySession[$s->name] = \App\Models\AcademicTerm::availableTermsForSession($s->name);
+        }
+
+        return response()->view('pages.results.bulk-report-cards', compact(
+            'classes',
+            'sessions',
+            'availableTerms',
+            'activeSessionName',
+            'termsBySession'
+        ));
     }
 
     public function getStudents(SchoolClass $class): \Illuminate\Http\JsonResponse

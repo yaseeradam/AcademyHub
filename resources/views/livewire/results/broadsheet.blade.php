@@ -75,17 +75,29 @@
 
                 <div class="space-y-1.5">
                     <label class="text-[10px] font-black uppercase tracking-widest text-slate-400">Session</label>
-                    <input wire:key="session-input-{{ $classId ?: 'empty' }}" wire:model.live.debounce.300ms="session" type="text" placeholder="2025/2026"
-                        class="w-full rounded-xl border-2 border-slate-100 bg-slate-50 px-4 py-2.5 text-sm font-bold text-slate-900 focus:border-brand-500 focus:bg-white focus:ring-4 focus:ring-brand-500/10" />
+                    @if($this->academicSessions->isNotEmpty())
+                        <select wire:key="session-select-{{ $classId ?: 'empty' }}" wire:model.live="session"
+                            class="w-full rounded-xl border-2 border-slate-100 bg-slate-50 px-4 py-2.5 text-sm font-bold text-slate-900 focus:border-brand-500 focus:bg-white focus:ring-4 focus:ring-brand-500/10">
+                            @foreach ($this->academicSessions as $sess)
+                                <option value="{{ $sess->name }}">{{ $sess->name }}{{ $sess->is_active ? ' (Current)' : '' }}</option>
+                            @endforeach
+                            @if(!$this->academicSessions->contains('name', $session) && !empty($session))
+                                <option value="{{ $session }}">{{ $session }}</option>
+                            @endif
+                        </select>
+                    @else
+                        <input wire:key="session-input-{{ $classId ?: 'empty' }}" wire:model.live.debounce.300ms="session" type="text" placeholder="2025/2026"
+                            class="w-full rounded-xl border-2 border-slate-100 bg-slate-50 px-4 py-2.5 text-sm font-bold text-slate-900 focus:border-brand-500 focus:bg-white focus:ring-4 focus:ring-brand-500/10" />
+                    @endif
                 </div>
 
                 <div class="space-y-1.5">
                     <label class="text-[10px] font-black uppercase tracking-widest text-slate-400">Term</label>
                     <select wire:key="term-select-{{ $classId ?: 'empty' }}" wire:model.live="term"
                         class="w-full rounded-xl border-2 border-slate-100 bg-slate-50 px-4 py-2.5 text-sm font-bold text-slate-900 focus:border-brand-500 focus:bg-white focus:ring-4 focus:ring-brand-500/10">
-                        <option value="1">Term 1</option>
-                        <option value="2">Term 2</option>
-                        <option value="3">Term 3</option>
+                        @foreach ($this->availableTerms as $num => $termTitle)
+                            <option value="{{ $num }}">{{ $termTitle }}</option>
+                        @endforeach
                     </select>
                 </div>
             </div>

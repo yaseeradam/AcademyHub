@@ -8,8 +8,19 @@
 @section('content')
     <div class="space-y-8" x-data="{ 
         classId: '', 
-        session: '{{ config('academyhub.current_session', '2025/2026') }}',
-        term: '{{ config('academyhub.current_term', 1) }}',
+        session: '{{ $activeSessionName ?? config('academyhub.current_session', '2025/2026') }}',
+        term: '{{ array_key_first($availableTerms ?? []) ?? config('academyhub.current_term', 1) }}',
+        termsBySession: @js($termsBySession ?? []),
+        fallbackTerms: @js($availableTerms ?? [1 => 'Term 1 (First Term)']),
+        get currentTerms() {
+            return this.termsBySession[this.session] || this.fallbackTerms;
+        },
+        onSessionChange() {
+            const availableKeys = Object.keys(this.currentTerms);
+            if (availableKeys.length > 0 && !availableKeys.includes(String(this.term))) {
+                this.term = availableKeys[0];
+            }
+        },
         template: '',
         students: [], 
         selectedStudents: [], 
@@ -119,14 +130,27 @@
                             <div class="grid grid-cols-2 gap-4">
                                 <div>
                                     <label class="text-xs font-black uppercase tracking-[0.1em] text-gray-500">Session</label>
-                                    <input name="session" type="text" x-model="session" class="mt-2 w-full rounded-2xl border-2 border-gray-50 bg-gray-50 px-5 py-4 text-sm font-bold text-gray-900 transition-all focus:border-indigo-600 focus:bg-white focus:ring-0" required />
+                                    @if(isset($sessions) && $sessions->isNotEmpty())
+                                        <select name="session" x-model="session" @change="onSessionChange()" class="mt-2 w-full rounded-2xl border-2 border-gray-50 bg-gray-50 px-5 py-4 text-sm font-bold text-gray-900 transition-all focus:border-indigo-600 focus:bg-white focus:ring-0" required>
+                                            @foreach ($sessions as $sess)
+                                                <option value="{{ $sess->name }}" @selected($sess->name === ($activeSessionName ?? config('academyhub.current_session')))>
+                                                    {{ $sess->name }}{{ $sess->is_active ? ' (Current)' : '' }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                    @else
+                                        <input name="session" type="text" x-model="session" class="mt-2 w-full rounded-2xl border-2 border-gray-50 bg-gray-50 px-5 py-4 text-sm font-bold text-gray-900 transition-all focus:border-indigo-600 focus:bg-white focus:ring-0" required />
+                                    @endif
                                 </div>
                                 <div>
                                     <label class="text-xs font-black uppercase tracking-[0.1em] text-gray-500">Term</label>
                                     <select name="term" x-model="term" class="mt-2 w-full rounded-2xl border-2 border-gray-50 bg-gray-50 px-5 py-4 text-sm font-bold text-gray-900 transition-all focus:border-indigo-600 focus:bg-white focus:ring-0" required>
-                                        <option value="1">Term 1</option>
-                                        <option value="2">Term 2</option>
-                                        <option value="3">Term 3</option>
+                                        <template x-for="(termName, termNum) in currentTerms" :key="termNum">
+                                            <option :value="termNum" x-text="termName" :selected="term == termNum"></option>
+                                        </template>
+                                        @foreach ($availableTerms ?? [1 => 'Term 1 (First Term)'] as $num => $termTitle)
+                                            <option value="{{ $num }}" x-show="!Object.keys(currentTerms).length">{{ $termTitle }}</option>
+                                        @endforeach
                                     </select>
                                 </div>
                             </div>

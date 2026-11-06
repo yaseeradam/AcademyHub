@@ -31,8 +31,41 @@ class Broadsheet extends Component
 
     public function mount(): void
     {
-        $this->term = $this->term ?: \App\Models\AcademicTerm::activeTermNumber();
         $this->session = $this->session ?: $this->defaultSession();
+        $this->term = $this->term ?: \App\Models\AcademicTerm::activeTermNumber();
+
+        $availTerms = array_keys($this->availableTerms);
+        if (!in_array((int) $this->term, $availTerms, true) && !empty($availTerms)) {
+            $this->term = (int) reset($availTerms);
+        }
+    }
+
+    #[Computed]
+    public function academicSessions()
+    {
+        return AcademicSession::listSessions();
+    }
+
+    #[Computed]
+    public function availableTerms(): array
+    {
+        return \App\Models\AcademicTerm::availableTermsForSession($this->session);
+    }
+
+    public function updatedSession(): void
+    {
+        $availTerms = array_keys($this->availableTerms);
+        if (!in_array((int) $this->term, $availTerms, true) && !empty($availTerms)) {
+            $this->term = (int) reset($availTerms);
+        }
+    }
+
+    public function updatedTerm(): void
+    {
+        $availTerms = array_keys($this->availableTerms);
+        if (!in_array((int) $this->term, $availTerms, true) && !empty($availTerms)) {
+            $this->term = (int) reset($availTerms);
+        }
     }
 
     #[Computed]

@@ -88,4 +88,75 @@ class AcademicTerm extends Model
 
         return AcademicSession::activeName();
     }
+
+    /**
+     * Return list of available term numbers and human-readable names for a given session.
+     * If the session is the active session, only returns terms up to the active term.
+     * If the session is a past session, returns all terms recorded for that session (or 1..3).
+     *
+     * @return array<int, string>
+     */
+    public static function availableTermsForSession(?string $sessionName = null): array
+    {
+        $termDefinitions = [
+            1 => 'Term 1 (First Term)',
+            2 => 'Term 2 (Second Term)',
+            3 => 'Term 3 (Third Term)',
+        ];
+
+        $sessionName = $sessionName ?: self::activeSessionName();
+
+        // Find session model
+        $sessionModel = null;
+        if ($sessionName) {
+            try {
+                $sessionModel = AcademicSession::query()
+                    ->where('name', $sessionName)
+                    ->first();
+            } catch (\Throwable) {
+                $sessionModel = null;
+            }
+        }
+
+        $activeSessionName = AcademicSession::activeName();
+        $isActiveSession = ($sessionModel && $sessionModel->is_active)
+            || ($sessionName === $activeSessionName)
+            || (!$sessionModel && empty($activeSessionName));
+
+        if ($isActiveSession) {
+            $activeTermNumber = self::activeTermNumber(); // 1, 2, or 3 based on is_active = true
+
+            $allowed = [];
+            foreach ($termDefinitions as $num => $label) {
+                if ($num <= $activeTermNumber) {
+                    $allowed[$num] = $label;
+                }
+            }
+
+            return !empty($allowed) ? $allowed : [1 => 'Term 1 (First Term)'];
+        }
+
+        // For historical / past sessions, check if specific terms exist in DB for that session
+        if ($sessionModel) {
+            try {
+                $sessionTerms = self::query()
+                    ->where('academic_session_id', $sessionModel->id)
+                    ->orderBy('term_number')
+                    ->get();
+
+                if ($sessionTerms->isNotEmpty()) {
+                    $allowed = [];
+                    foreach ($sessionTerms as $st) {
+                        $num = (int) $st->term_number;
+                        $allowed[$num] = $termDefinitions[$num] ?? "Term {$num}";
+                    }
+                    return $allowed;
+                }
+            } catch (\Throwable) {
+                // fall back to default
+            }
+        }
+
+        return $termDefinitions;
+    }
 }

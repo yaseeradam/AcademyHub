@@ -65,6 +65,11 @@ class Teachers extends Component
         $this->session = $this->session ?: $this->defaultSession();
         $this->term = $this->term ?: $this->defaultTerm();
 
+        $availTerms = array_keys($this->availableTerms);
+        if (!in_array((int) $this->term, $availTerms, true) && !empty($availTerms)) {
+            $this->term = (int) reset($availTerms);
+        }
+
         $this->syncSheetFromSelection();
     }
 
@@ -83,8 +88,26 @@ class Teachers extends Component
         if ($property === 'teacherSummaries') {
             return $this->teacherSummaries();
         }
+        if ($property === 'academicSessions') {
+            return $this->academicSessions();
+        }
+        if ($property === 'availableTerms') {
+            return $this->availableTerms();
+        }
 
         return parent::__get($property);
+    }
+
+    #[Computed]
+    public function academicSessions()
+    {
+        return AcademicSession::listSessions();
+    }
+
+    #[Computed]
+    public function availableTerms(): array
+    {
+        return AcademicTerm::availableTermsForSession($this->session);
     }
 
     #[Computed]
@@ -214,12 +237,20 @@ class Teachers extends Component
 
     public function updatedTerm(): void
     {
+        $availTerms = array_keys($this->availableTerms);
+        if (!in_array((int) $this->term, $availTerms, true) && !empty($availTerms)) {
+            $this->term = (int) reset($availTerms);
+        }
         $this->syncSheetFromSelection();
         $this->dispatch('$refresh');
     }
 
     public function updatedSession(): void
     {
+        $availTerms = array_keys($this->availableTerms);
+        if (!in_array((int) $this->term, $availTerms, true) && !empty($availTerms)) {
+            $this->term = (int) reset($availTerms);
+        }
         $this->syncSheetFromSelection();
         $this->dispatch('$refresh');
     }

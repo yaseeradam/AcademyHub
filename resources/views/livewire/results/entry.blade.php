@@ -111,16 +111,28 @@
                 <label class="block text-sm font-black text-gray-900 mb-1.5 sm:mb-2">Term</label>
                 <select wire:model.live="term" 
                     class="w-full rounded-xl border-2 border-gray-300 bg-white px-3 py-2.5 sm:px-4 sm:py-3 text-sm font-medium text-gray-900 shadow-sm transition-all focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/20 hover:border-gray-400">
-                    <option value="1">Term 1</option>
-                    <option value="2">Term 2</option>
-                    <option value="3">Term 3</option>
+                    @foreach ($this->availableTerms as $num => $termTitle)
+                        <option value="{{ $num }}">{{ $termTitle }}</option>
+                    @endforeach
                 </select>
             </div>
 
             <div>
                 <label class="block text-sm font-black text-gray-900 mb-1.5 sm:mb-2">Session</label>
-                <input wire:model.live.debounce.300ms="session" type="text" placeholder="2025/2026"
-                    class="w-full rounded-xl border-2 border-gray-300 bg-white px-3 py-2.5 sm:px-4 sm:py-3 text-sm font-medium text-gray-900 shadow-sm transition-all focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/20 hover:border-gray-400" />
+                @if($this->academicSessions->isNotEmpty())
+                    <select wire:model.live="session"
+                        class="w-full rounded-xl border-2 border-gray-300 bg-white px-3 py-2.5 sm:px-4 sm:py-3 text-sm font-medium text-gray-900 shadow-sm transition-all focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/20 hover:border-gray-400">
+                        @foreach ($this->academicSessions as $sess)
+                            <option value="{{ $sess->name }}">{{ $sess->name }}{{ $sess->is_active ? ' (Current)' : '' }}</option>
+                        @endforeach
+                        @if(!$this->academicSessions->contains('name', $session) && !empty($session))
+                            <option value="{{ $session }}">{{ $session }}</option>
+                        @endif
+                    </select>
+                @else
+                    <input wire:model.live.debounce.300ms="session" type="text" placeholder="2025/2026"
+                        class="w-full rounded-xl border-2 border-gray-300 bg-white px-3 py-2.5 sm:px-4 sm:py-3 text-sm font-medium text-gray-900 shadow-sm transition-all focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/20 hover:border-gray-400" />
+                @endif
             </div>
         </div>
 

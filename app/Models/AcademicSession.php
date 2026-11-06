@@ -40,4 +40,16 @@ class AcademicSession extends Model
 
         return is_string($name) ? $name : null;
     }
+
+    public static function listSessions(): \Illuminate\Database\Eloquent\Collection
+    {
+        try {
+            return self::query()
+                ->orderByDesc('is_active')
+                ->orderByDesc('name')
+                ->get();
+        } catch (\Throwable) {
+            return new \Illuminate\Database\Eloquent\Collection();
+        }
+    }
 }

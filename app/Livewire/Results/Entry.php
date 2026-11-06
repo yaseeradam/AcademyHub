@@ -176,9 +176,44 @@ class Entry extends Component
             $this->session = $defaultSession;
         }
 
+        $availTerms = array_keys($this->availableTerms);
+        if (!in_array((int) $this->term, $availTerms, true) && !empty($availTerms)) {
+            $this->term = (int) reset($availTerms);
+        }
+
         if ($this->classId && $this->subjectId) {
             $this->loadExistingScores();
         }
+    }
+
+    #[Computed]
+    public function academicSessions()
+    {
+        return AcademicSession::listSessions();
+    }
+
+    #[Computed]
+    public function availableTerms(): array
+    {
+        return \App\Models\AcademicTerm::availableTermsForSession($this->session);
+    }
+
+    public function updatedSession(): void
+    {
+        $availTerms = array_keys($this->availableTerms);
+        if (!in_array((int) $this->term, $availTerms, true) && !empty($availTerms)) {
+            $this->term = (int) reset($availTerms);
+        }
+        $this->loadExistingScores();
+    }
+
+    public function updatedTerm(): void
+    {
+        $availTerms = array_keys($this->availableTerms);
+        if (!in_array((int) $this->term, $availTerms, true) && !empty($availTerms)) {
+            $this->term = (int) reset($availTerms);
+        }
+        $this->loadExistingScores();
     }
 
     #[Computed]

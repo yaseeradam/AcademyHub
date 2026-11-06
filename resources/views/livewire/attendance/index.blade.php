@@ -126,9 +126,9 @@
                 <label class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Term</label>
                 <div class="relative">
                     <select wire:model.live="term" aria-label="Term" class="w-full pl-4 pr-10 py-3 rounded-xl border-2 border-slate-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all font-semibold text-slate-700 bg-slate-50/50 appearance-none">
-                        <option value="1">Term 1</option>
-                        <option value="2">Term 2</option>
-                        <option value="3">Term 3</option>
+                        @foreach($this->availableTerms as $num => $termTitle)
+                            <option value="{{ $num }}">{{ $termTitle }}</option>
+                        @endforeach
                     </select>
                     <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-slate-400">
                         <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
@@ -139,7 +139,23 @@
             {{-- Session --}}
             <div class="space-y-1.5">
                 <label class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Academic Session</label>
-                <input wire:model.live="session" type="text" aria-label="Academic Session" placeholder="e.g. 2026/2027" class="w-full px-4 py-3 rounded-xl border-2 border-slate-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all font-semibold text-slate-700 bg-slate-50/50" />
+                @if($this->academicSessions->isNotEmpty())
+                    <div class="relative">
+                        <select wire:model.live="session" aria-label="Academic Session" class="w-full pl-4 pr-10 py-3 rounded-xl border-2 border-slate-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all font-semibold text-slate-700 bg-slate-50/50 appearance-none">
+                            @foreach($this->academicSessions as $sess)
+                                <option value="{{ $sess->name }}">{{ $sess->name }}{{ $sess->is_active ? ' (Current)' : '' }}</option>
+                            @endforeach
+                            @if(!$this->academicSessions->contains('name', $session) && !empty($session))
+                                <option value="{{ $session }}">{{ $session }}</option>
+                            @endif
+                        </select>
+                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-slate-400">
+                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                        </div>
+                    </div>
+                @else
+                    <input wire:model.live="session" type="text" aria-label="Academic Session" placeholder="e.g. 2026/2027" class="w-full px-4 py-3 rounded-xl border-2 border-slate-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all font-semibold text-slate-700 bg-slate-50/50" />
+                @endif
             </div>
         </div>
     </div>

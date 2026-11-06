@@ -92,6 +92,11 @@ class Index extends Component
         $this->session = $this->session ?: $this->defaultSession();
         $this->term = $this->term ?: $this->defaultTerm();
 
+        $availTerms = array_keys($this->availableTerms);
+        if (!in_array((int) $this->term, $availTerms, true) && !empty($availTerms)) {
+            $this->term = (int) reset($availTerms);
+        }
+
         $classes = $this->getClasses();
 
         // If classId was not passed in URL or is invalid, auto-select from today's sheet or first class
@@ -529,6 +534,18 @@ class Index extends Component
     }
 
     #[Computed]
+    public function academicSessions()
+    {
+        return AcademicSession::listSessions();
+    }
+
+    #[Computed]
+    public function availableTerms(): array
+    {
+        return AcademicTerm::availableTermsForSession($this->session);
+    }
+
+    #[Computed]
     public function classes()
     {
         $user = auth()->user();
@@ -656,11 +673,19 @@ class Index extends Component
     public function updatedTerm(): void
     {
         $this->term = $this->term ? (int) $this->term : null;
+        $availTerms = array_keys($this->availableTerms);
+        if (!in_array((int) $this->term, $availTerms, true) && !empty($availTerms)) {
+            $this->term = (int) reset($availTerms);
+        }
         $this->syncSheetFromSelection();
     }
 
     public function updatedSession(): void
     {
+        $availTerms = array_keys($this->availableTerms);
+        if (!in_array((int) $this->term, $availTerms, true) && !empty($availTerms)) {
+            $this->term = (int) reset($availTerms);
+        }
         $this->syncSheetFromSelection();
     }
 
