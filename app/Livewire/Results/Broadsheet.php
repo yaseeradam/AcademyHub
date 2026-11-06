@@ -34,10 +34,22 @@ class Broadsheet extends Component
         $this->session = $this->session ?: $this->defaultSession();
         $this->term = $this->term ?: \App\Models\AcademicTerm::activeTermNumber();
 
-        $availTerms = array_keys($this->availableTerms);
+        $availTerms = array_keys($this->availableTerms());
         if (!in_array((int) $this->term, $availTerms, true) && !empty($availTerms)) {
             $this->term = (int) reset($availTerms);
         }
+    }
+
+    public function __get($property)
+    {
+        if ($property === 'academicSessions') {
+            return $this->academicSessions();
+        }
+        if ($property === 'availableTerms') {
+            return $this->availableTerms();
+        }
+
+        return parent::__get($property);
     }
 
     #[Computed]
@@ -54,7 +66,7 @@ class Broadsheet extends Component
 
     public function updatedSession(): void
     {
-        $availTerms = array_keys($this->availableTerms);
+        $availTerms = array_keys($this->availableTerms());
         if (!in_array((int) $this->term, $availTerms, true) && !empty($availTerms)) {
             $this->term = (int) reset($availTerms);
         }
@@ -62,7 +74,7 @@ class Broadsheet extends Component
 
     public function updatedTerm(): void
     {
-        $availTerms = array_keys($this->availableTerms);
+        $availTerms = array_keys($this->availableTerms());
         if (!in_array((int) $this->term, $availTerms, true) && !empty($availTerms)) {
             $this->term = (int) reset($availTerms);
         }

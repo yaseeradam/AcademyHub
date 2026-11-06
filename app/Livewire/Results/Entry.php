@@ -176,7 +176,7 @@ class Entry extends Component
             $this->session = $defaultSession;
         }
 
-        $availTerms = array_keys($this->availableTerms);
+        $availTerms = array_keys($this->availableTerms());
         if (!in_array((int) $this->term, $availTerms, true) && !empty($availTerms)) {
             $this->term = (int) reset($availTerms);
         }
@@ -184,6 +184,18 @@ class Entry extends Component
         if ($this->classId && $this->subjectId) {
             $this->loadExistingScores();
         }
+    }
+
+    public function __get($property)
+    {
+        if ($property === 'academicSessions') {
+            return $this->academicSessions();
+        }
+        if ($property === 'availableTerms') {
+            return $this->availableTerms();
+        }
+
+        return parent::__get($property);
     }
 
     #[Computed]
@@ -588,7 +600,7 @@ class Entry extends Component
         if ($value !== '' && $value !== null) {
             $this->term = (int) $value;
         }
-        $availTerms = array_keys($this->availableTerms);
+        $availTerms = array_keys($this->availableTerms());
         if (!in_array((int) $this->term, $availTerms, true) && !empty($availTerms)) {
             $this->term = (int) reset($availTerms);
         }
@@ -599,7 +611,7 @@ class Entry extends Component
 
     public function updatedSession(): void
     {
-        $availTerms = array_keys($this->availableTerms);
+        $availTerms = array_keys($this->availableTerms());
         if (!in_array((int) $this->term, $availTerms, true) && !empty($availTerms)) {
             $this->term = (int) reset($availTerms);
         }

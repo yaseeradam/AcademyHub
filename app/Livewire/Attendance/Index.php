@@ -92,7 +92,7 @@ class Index extends Component
         $this->session = $this->session ?: $this->defaultSession();
         $this->term = $this->term ?: $this->defaultTerm();
 
-        $availTerms = array_keys($this->availableTerms);
+        $availTerms = array_keys($this->availableTerms());
         if (!in_array((int) $this->term, $availTerms, true) && !empty($availTerms)) {
             $this->term = (int) reset($availTerms);
         }
@@ -533,6 +533,18 @@ class Index extends Component
         })->values();
     }
 
+    public function __get($property)
+    {
+        if ($property === 'academicSessions') {
+            return $this->academicSessions();
+        }
+        if ($property === 'availableTerms') {
+            return $this->availableTerms();
+        }
+
+        return parent::__get($property);
+    }
+
     #[Computed]
     public function academicSessions()
     {
@@ -673,7 +685,7 @@ class Index extends Component
     public function updatedTerm(): void
     {
         $this->term = $this->term ? (int) $this->term : null;
-        $availTerms = array_keys($this->availableTerms);
+        $availTerms = array_keys($this->availableTerms());
         if (!in_array((int) $this->term, $availTerms, true) && !empty($availTerms)) {
             $this->term = (int) reset($availTerms);
         }
@@ -682,7 +694,7 @@ class Index extends Component
 
     public function updatedSession(): void
     {
-        $availTerms = array_keys($this->availableTerms);
+        $availTerms = array_keys($this->availableTerms());
         if (!in_array((int) $this->term, $availTerms, true) && !empty($availTerms)) {
             $this->term = (int) reset($availTerms);
         }
