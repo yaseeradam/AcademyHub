@@ -198,24 +198,6 @@ class Entry extends Component
         return \App\Models\AcademicTerm::availableTermsForSession($this->session);
     }
 
-    public function updatedSession(): void
-    {
-        $availTerms = array_keys($this->availableTerms);
-        if (!in_array((int) $this->term, $availTerms, true) && !empty($availTerms)) {
-            $this->term = (int) reset($availTerms);
-        }
-        $this->loadExistingScores();
-    }
-
-    public function updatedTerm(): void
-    {
-        $availTerms = array_keys($this->availableTerms);
-        if (!in_array((int) $this->term, $availTerms, true) && !empty($availTerms)) {
-            $this->term = (int) reset($availTerms);
-        }
-        $this->loadExistingScores();
-    }
-
     #[Computed]
     public function classes()
     {
@@ -601,9 +583,15 @@ class Entry extends Component
         $this->loadExistingScores();
     }
 
-    public function updatedTerm($value): void
+    public function updatedTerm($value = null): void
     {
-        $this->term = $value !== '' && $value !== null ? (int) $value : null;
+        if ($value !== '' && $value !== null) {
+            $this->term = (int) $value;
+        }
+        $availTerms = array_keys($this->availableTerms);
+        if (!in_array((int) $this->term, $availTerms, true) && !empty($availTerms)) {
+            $this->term = (int) reset($availTerms);
+        }
         $this->validationErrors = [];
         $this->loadExistingScores();
         unset($this->isPublished, $this->submission, $this->submissions);
@@ -611,6 +599,10 @@ class Entry extends Component
 
     public function updatedSession(): void
     {
+        $availTerms = array_keys($this->availableTerms);
+        if (!in_array((int) $this->term, $availTerms, true) && !empty($availTerms)) {
+            $this->term = (int) reset($availTerms);
+        }
         $this->validationErrors = [];
         $this->loadExistingScores();
         unset($this->isPublished, $this->submission, $this->submissions);
