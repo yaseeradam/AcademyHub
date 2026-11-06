@@ -381,10 +381,10 @@
         {{-- Document Title Ribbon --}}
         <div class="doc-title-box">
             <div class="doc-title">
-                Weekly Student Attendance &amp; Punctuality Bulletin
+                Student {{ !empty($isMonthly) ? 'Monthly' : 'Weekly' }} Attendance &amp; Punctuality Bulletin
             </div>
             <div class="doc-subtitle">
-                Class: {{ $class->name }} @if($section) &bull; Section: {{ $section->name }} @endif &bull; {{ $weekRangeLabel }}
+                Class: {{ $class->name }} @if($section) &bull; Section: {{ $section->name }} @if(method_exists($section, 'getShiftLabel')) ({{ $section->getShiftLabel() }}) @endif @endif &bull; {{ $periodRangeLabel ?? $weekRangeLabel }}
             </div>
         </div>
 
@@ -399,99 +399,115 @@
                 </td>
                 <td style="width: 25%;">
                     <div class="kpi-card">
-                        <div class="kpi-label">Weekly Attendance Rate</div>
+                        <div class="kpi-label">{{ !empty($isMonthly) ? 'Monthly' : 'Weekly' }} Attendance Rate</div>
                         <div class="kpi-val" style="color: {{ $weeklyAttendanceRate >= 85 ? '#15803d' : ($weeklyAttendanceRate >= 70 ? '#b45309' : '#b91c1c') }}">
                             {{ $weeklyAttendanceRate }}%
                         </div>
                     </div>
                 </td>
                 <td style="width: 25%;">
-                    <div class="kpi-card gold-card">
-                        <div class="kpi-label"><span style="color:#D97706; font-size:8px;">★</span> 5-Star Honor Achievers</div>
-                        <div class="kpi-val gold">{{ count($fiveStarAchievers) }} Students</div>
+                    <div class="kpi-card">
+                        <div class="kpi-label">Average Present Daily</div>
+                        <div class="kpi-val" style="color: #0C1E40;">
+                            {{ $activeDaysCount > 0 ? round($totalPresentMarksAll / $activeDaysCount) : count($students) }} / {{ count($students) }}
+                        </div>
                     </div>
                 </td>
                 <td style="width: 25%;">
                     <div class="kpi-card">
-                        <div class="kpi-label">School Days in Week</div>
-                        <div class="kpi-val">{{ $activeDaysCount }} / 5 Days</div>
+                        <div class="kpi-label">School Days in {{ !empty($isMonthly) ? 'Month' : 'Week' }}</div>
+                        <div class="kpi-val">{{ $activeDaysCount }} Days</div>
                     </div>
                 </td>
             </tr>
         </table>
 
-        {{-- Star Achievers Honor Roll (100% Attendance Club) --}}
-        @if(count($fiveStarAchievers) > 0)
-            <div class="honor-roll-box">
-                <div class="honor-title">
-                    <span style="font-weight: normal; color: #D97706;">&#9733;</span> WEEKLY STAR ATTENDANCE ACHIEVERS (100% PERFECT ATTENDANCE CLUB) <span style="font-weight: normal; color: #D97706;">&#9733;</span>
-                </div>
-                <div class="honor-badges">
-                    @foreach($fiveStarAchievers as $achiever)
-                        <span class="honor-badge">
-                            ★ {{ $achiever['name'] }}
-                        </span>
-                    @endforeach
-                </div>
-            </div>
-        @endif
-
         {{-- Main Student Attendance Table --}}
         <table class="att-table">
             <thead>
                 <tr>
-                    <th style="width: 24px;">#</th>
-                    <th class="th-left" style="width: 155px;">Student Full Name</th>
-                    <th style="width: 65px;">ADM No</th>
+                    <th style="width: 22px;">#</th>
+                    <th class="th-left" style="{{ !empty($isMonthly) ? 'width: 140px;' : 'width: 155px;' }}">Student Full Name</th>
+                    <th style="{{ !empty($isMonthly) ? 'width: 55px;' : 'width: 65px;' }}">ADM No</th>
                     @foreach($weekDays as $day)
-                        <th style="width: 58px;">
-                            {{ $day['name'] }}<br/>
-                            <span style="font-size: 5.5px; opacity: 0.85;">{{ $day['formatted'] }}</span>
+                        <th style="{{ !empty($isMonthly) ? 'min-width: 16px; font-size: 6px; padding: 2px 1px;' : 'width: 58px;' }}">
+                            {{ !empty($isMonthly) ? ($day['day_num'] ?? $day['name']) : $day['name'] }}<br/>
+                            <span style="font-size: 5px; opacity: 0.85;">{{ $day['formatted'] }}</span>
                         </th>
                     @endforeach
-                    <th style="width: 48px;">Present</th>
-                    <th style="width: 44px;">Rate</th>
-                    <th style="width: 62px;">Star Rating</th>
+                    <th style="{{ !empty($isMonthly) ? 'width: 32px;' : 'width: 48px;' }}">Present</th>
+                    @if(!empty($isMonthly))
+                        <th style="width: 28px;">Late</th>
+                        <th style="width: 28px;">Absent</th>
+                    @endif
+                    <th style="{{ !empty($isMonthly) ? 'width: 34px;' : 'width: 44px;' }}">Rate</th>
+                    @if(empty($isMonthly))
+                        <th style="width: 62px;">Star Rating</th>
+                    @endif
                 </tr>
             </thead>
             <tbody>
                 @forelse($studentRows as $idx => $row)
                     <tr>
                         <td>{{ $idx + 1 }}</td>
-                        <td class="td-left" style="font-weight: bold; color: #0C1E40;">
+                        <td class="td-left" style="font-weight: bold; color: #0C1E40; {{ !empty($isMonthly) ? 'font-size: 6.8px;' : '' }}">
                             {{ $row['name'] }}
                         </td>
-                        <td style="font-family: monospace; font-size: 7px; color: #475569;">
+                        <td style="font-family: monospace; font-size: {{ !empty($isMonthly) ? '6px' : '7px' }}; color: #475569;">
                             {{ $row['adm_no'] ?: '—' }}
                         </td>
                         @foreach($row['days'] as $d)
                             <td>
-                                @if($d['status'] === 'Present')
-                                    <span class="badge badge-present">✓ Present</span>
-                                @elseif($d['status'] === 'Late')
-                                    <span class="badge badge-late">Late</span>
-                                @elseif($d['status'] === 'Absent')
-                                    <span class="badge badge-absent">&times; Absent</span>
-                                @elseif($d['status'] === 'Excused')
-                                    <span class="badge badge-excused">Excused</span>
+                                @if(!empty($isMonthly))
+                                    @if($d['status'] === 'Present')
+                                        <span class="badge badge-present" style="padding: 1px 2px; font-size: 5.5px;">P</span>
+                                    @elseif($d['status'] === 'Late')
+                                        <span class="badge badge-late" style="padding: 1px 2px; font-size: 5.5px;">L</span>
+                                    @elseif($d['status'] === 'Absent')
+                                        <span class="badge badge-absent" style="padding: 1px 2px; font-size: 5.5px;">A</span>
+                                    @elseif($d['status'] === 'Excused')
+                                        <span class="badge badge-excused" style="padding: 1px 2px; font-size: 5.5px;">E</span>
+                                    @else
+                                        <span class="badge badge-none" style="font-size: 5.5px;">—</span>
+                                    @endif
                                 @else
-                                    <span class="badge badge-none">—</span>
+                                    @if($d['status'] === 'Present')
+                                        <span class="badge badge-present">✓ Present</span>
+                                    @elseif($d['status'] === 'Late')
+                                        <span class="badge badge-late">Late</span>
+                                    @elseif($d['status'] === 'Absent')
+                                        <span class="badge badge-absent">&times; Absent</span>
+                                    @elseif($d['status'] === 'Excused')
+                                        <span class="badge badge-excused">Excused</span>
+                                    @else
+                                        <span class="badge badge-none">—</span>
+                                    @endif
                                 @endif
                             </td>
                         @endforeach
-                        <td style="font-weight: bold;">
+                        <td style="font-weight: bold; {{ !empty($isMonthly) ? 'font-size: 6.5px;' : '' }}">
                             {{ $row['days_present'] }}/{{ $activeDaysCount }}
                         </td>
-                        <td style="font-weight: bold; color: {{ $row['rate'] >= 80 ? '#15803d' : ($row['rate'] >= 60 ? '#b45309' : '#b91c1c') }}">
+                        @if(!empty($isMonthly))
+                            <td style="font-weight: bold; color: #b45309; font-size: 6.5px;">
+                                {{ $row['days_late'] ?? 0 }}
+                            </td>
+                            <td style="font-weight: bold; color: #b91c1c; font-size: 6.5px;">
+                                {{ $row['days_absent'] ?? 0 }}
+                            </td>
+                        @endif
+                        <td style="font-weight: bold; color: {{ $row['rate'] >= 80 ? '#15803d' : ($row['rate'] >= 60 ? '#b45309' : '#b91c1c') }}; {{ !empty($isMonthly) ? 'font-size: 6.5px;' : '' }}">
                             {{ $row['rate'] }}%
                         </td>
-                        <td>
-                            <span class="star-gold">{{ str_repeat('★', $row['stars']) }}</span><span class="star-dim">{{ str_repeat('☆', 5 - $row['stars']) }}</span>
-                        </td>
+                        @if(empty($isMonthly))
+                            <td>
+                                <span class="star-gold">{{ str_repeat('★', $row['stars']) }}</span><span class="star-dim">{{ str_repeat('☆', 5 - $row['stars']) }}</span>
+                            </td>
+                        @endif
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="10" style="padding: 15px; text-align: center; color: #64748B;">
+                        <td colspan="{{ count($weekDays) + (empty($isMonthly) ? 6 : 8) }}" style="padding: 15px; text-align: center; color: #64748B;">
                             No active students found in this class/section.
                         </td>
                     </tr>

@@ -398,10 +398,10 @@
         {{-- Document Title Ribbon --}}
         <div class="doc-title-box">
             <div class="doc-title">
-                Staff Weekly Attendance &amp; Punctuality Bulletin
+                Staff {{ !empty($isMonthly) ? 'Monthly' : 'Weekly' }} Attendance &amp; Punctuality Bulletin
             </div>
             <div class="doc-subtitle">
-                Staff Category: {{ $scopeLabel }} &bull; {{ $weekRangeLabel }}
+                Staff Category: {{ $scopeLabel }} &bull; {{ $periodRangeLabel ?? $weekRangeLabel }}
             </div>
         </div>
 
@@ -416,109 +416,125 @@
                 </td>
                 <td style="width: 25%;">
                     <div class="kpi-card">
-                        <div class="kpi-label">Weekly Attendance Rate</div>
+                        <div class="kpi-label">{{ !empty($isMonthly) ? 'Monthly' : 'Weekly' }} Attendance Rate</div>
                         <div class="kpi-val" style="color: {{ $weeklyAttendanceRate >= 85 ? '#15803d' : ($weeklyAttendanceRate >= 70 ? '#b45309' : '#b91c1c') }}">
                             {{ $weeklyAttendanceRate }}%
                         </div>
                     </div>
                 </td>
                 <td style="width: 25%;">
-                    <div class="kpi-card gold-card">
-                        <div class="kpi-label"><span style="color:#D97706; font-size:8px;">★</span> Punctuality Honor Roll</div>
-                        <div class="kpi-val gold">{{ count($punctualityStarsAchievers) }} Staff</div>
+                    <div class="kpi-card">
+                        <div class="kpi-label">Average Punctuality</div>
+                        <div class="kpi-val" style="color: #0C1E40;">
+                            {{ $averagePunctualityRate ?? 100 }}%
+                        </div>
                     </div>
                 </td>
                 <td style="width: 25%;">
                     <div class="kpi-card">
-                        <div class="kpi-label">Working Days in Week</div>
-                        <div class="kpi-val">{{ $activeDaysCount }} / 5 Days</div>
+                        <div class="kpi-label">Working Days in {{ !empty($isMonthly) ? 'Month' : 'Week' }}</div>
+                        <div class="kpi-val">{{ $activeDaysCount }} Days</div>
                     </div>
                 </td>
             </tr>
         </table>
 
-        {{-- Punctuality & Dedication Stars Honor Roll --}}
-        @if(count($punctualityStarsAchievers) > 0)
-            <div class="honor-roll-box">
-                <div class="honor-title">
-                    <span style="font-weight: normal; color: #D97706;">&#9733;</span> WEEKLY PUNCTUALITY &amp; DEDICATION HONORS (PERFECT ON-TIME ATTENDANCE) <span style="font-weight: normal; color: #D97706;">&#9733;</span>
-                </div>
-                <div class="honor-badges">
-                    @foreach($punctualityStarsAchievers as $achiever)
-                        <span class="honor-badge">
-                            ★ {{ $achiever['name'] }} ({{ $achiever['role'] }})
-                        </span>
-                    @endforeach
-                </div>
-            </div>
-        @endif
-
         {{-- Main Staff Attendance Table --}}
         <table class="att-table">
             <thead>
                 <tr>
-                    <th style="width: 22px;">#</th>
-                    <th class="th-left" style="width: 140px;">Staff Member</th>
-                    <th style="width: 55px;">Role</th>
-                    <th style="width: 50px;">Shift</th>
+                    <th style="width: 20px;">#</th>
+                    <th class="th-left" style="{{ !empty($isMonthly) ? 'width: 125px;' : 'width: 140px;' }}">Staff Member</th>
+                    <th style="{{ !empty($isMonthly) ? 'width: 45px;' : 'width: 55px;' }}">Role</th>
+                    <th style="{{ !empty($isMonthly) ? 'width: 48px;' : 'width: 50px;' }}">Shift</th>
                     @foreach($weekDays as $day)
-                        <th style="width: 60px;">
-                            {{ $day['name'] }}<br/>
-                            <span style="font-size: 5.5px; opacity: 0.85;">{{ $day['formatted'] }}</span>
+                        <th style="{{ !empty($isMonthly) ? 'min-width: 16px; font-size: 6px; padding: 2px 1px;' : 'width: 60px;' }}">
+                            {{ !empty($isMonthly) ? ($day['day_num'] ?? $day['name']) : $day['name'] }}<br/>
+                            <span style="font-size: 5px; opacity: 0.85;">{{ $day['formatted'] }}</span>
                         </th>
                     @endforeach
-                    <th style="width: 44px;">Present</th>
-                    <th style="width: 42px;">Rate</th>
-                    <th style="width: 62px;">Punctuality</th>
+                    <th style="{{ !empty($isMonthly) ? 'width: 30px;' : 'width: 44px;' }}">Present</th>
+                    @if(!empty($isMonthly))
+                        <th style="width: 26px;">Late</th>
+                        <th style="width: 26px;">Absent</th>
+                    @endif
+                    <th style="{{ !empty($isMonthly) ? 'width: 32px;' : 'width: 42px;' }}">Rate</th>
+                    @if(empty($isMonthly))
+                        <th style="width: 55px;">Punctuality</th>
+                    @endif
                 </tr>
             </thead>
             <tbody>
                 @forelse($staffRows as $idx => $row)
                     <tr>
                         <td>{{ $idx + 1 }}</td>
-                        <td class="td-left" style="font-weight: bold; color: #0C1E40;">
+                        <td class="td-left" style="font-weight: bold; color: #0C1E40; {{ !empty($isMonthly) ? 'font-size: 6.5px;' : '' }}">
                             {{ $row['name'] }}
                         </td>
-                        <td style="font-size: 6.5px; color: #475569; text-transform: capitalize;">
+                        <td style="font-size: 6px; color: #475569; text-transform: capitalize;">
                             {{ $row['role'] }}
                         </td>
-                        <td style="font-size: 6.5px; color: #475569;">
+                        <td style="font-size: 6px; color: #475569;">
                             {{ $row['shift'] }}
                         </td>
                         @foreach($row['days'] as $d)
                             <td>
-                                @if($d['status'] === 'Present')
-                                    <span class="badge badge-present">✓ Present</span>
-                                    @if(!empty($d['punch_display']))
-                                        <span class="punch-time">{{ $d['punch_display'] }}</span>
+                                @if(!empty($isMonthly))
+                                    @if($d['status'] === 'Present')
+                                        <span class="badge badge-present" style="padding: 1px 2px; font-size: 5.5px;">P</span>
+                                    @elseif($d['status'] === 'Late')
+                                        <span class="badge badge-late" style="padding: 1px 2px; font-size: 5.5px;">L</span>
+                                    @elseif($d['status'] === 'Absent')
+                                        <span class="badge badge-absent" style="padding: 1px 2px; font-size: 5.5px;">A</span>
+                                    @elseif($d['status'] === 'Excused')
+                                        <span class="badge badge-excused" style="padding: 1px 2px; font-size: 5.5px;">E</span>
+                                    @else
+                                        <span class="badge badge-none" style="font-size: 5.5px;">—</span>
                                     @endif
-                                @elseif($d['status'] === 'Late')
-                                    <span class="badge badge-late">Late</span>
-                                    @if(!empty($d['punch_display']))
-                                        <span class="punch-time">{{ $d['punch_display'] }}</span>
-                                    @endif
-                                @elseif($d['status'] === 'Absent')
-                                    <span class="badge badge-absent">&times; Absent</span>
-                                @elseif($d['status'] === 'Excused')
-                                    <span class="badge badge-excused">Excused</span>
                                 @else
-                                    <span class="badge badge-none">—</span>
+                                    @if($d['status'] === 'Present')
+                                        <span class="badge badge-present">✓ Present</span>
+                                        @if(!empty($d['punch_display']))
+                                            <span class="punch-time">{{ $d['punch_display'] }}</span>
+                                        @endif
+                                    @elseif($d['status'] === 'Late')
+                                        <span class="badge badge-late">Late</span>
+                                        @if(!empty($d['punch_display']))
+                                            <span class="punch-time">{{ $d['punch_display'] }}</span>
+                                        @endif
+                                    @elseif($d['status'] === 'Absent')
+                                        <span class="badge badge-absent">&times; Absent</span>
+                                    @elseif($d['status'] === 'Excused')
+                                        <span class="badge badge-excused">Excused</span>
+                                    @else
+                                        <span class="badge badge-none">—</span>
+                                    @endif
                                 @endif
                             </td>
                         @endforeach
-                        <td style="font-weight: bold;">
+                        <td style="font-weight: bold; {{ !empty($isMonthly) ? 'font-size: 6.5px;' : '' }}">
                             {{ $row['days_present'] }}/{{ $activeDaysCount }}
                         </td>
-                        <td style="font-weight: bold; color: {{ $row['rate'] >= 80 ? '#15803d' : ($row['rate'] >= 60 ? '#b45309' : '#b91c1c') }}">
+                        @if(!empty($isMonthly))
+                            <td style="font-weight: bold; color: #b45309; font-size: 6.5px;">
+                                {{ $row['days_late'] ?? 0 }}
+                            </td>
+                            <td style="font-weight: bold; color: #b91c1c; font-size: 6.5px;">
+                                {{ $row['days_absent'] ?? 0 }}
+                            </td>
+                        @endif
+                        <td style="font-weight: bold; color: {{ $row['rate'] >= 80 ? '#15803d' : ($row['rate'] >= 60 ? '#b45309' : '#b91c1c') }}; {{ !empty($isMonthly) ? 'font-size: 6.5px;' : '' }}">
                             {{ $row['rate'] }}%
                         </td>
-                        <td>
-                            <span class="star-gold">{{ str_repeat('★', $row['stars']) }}</span><span class="star-dim">{{ str_repeat('☆', 5 - $row['stars']) }}</span>
-                        </td>
+                        @if(empty($isMonthly))
+                            <td>
+                                <span class="star-gold">{{ str_repeat('★', $row['stars']) }}</span><span class="star-dim">{{ str_repeat('☆', 5 - $row['stars']) }}</span>
+                            </td>
+                        @endif
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="11" style="padding: 15px; text-align: center; color: #64748B;">
+                        <td colspan="{{ count($weekDays) + (empty($isMonthly) ? 6 : 8) }}" style="padding: 15px; text-align: center; color: #64748B;">
                             No active staff members found.
                         </td>
                     </tr>

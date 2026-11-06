@@ -33,7 +33,7 @@ class Section extends Model
 
     public function getShiftLabel(): string
     {
-        return $this->getShift() . ' Section';
+        return $this->getShift() . ' Shift';
     }
 
     public function schoolClass(): BelongsTo

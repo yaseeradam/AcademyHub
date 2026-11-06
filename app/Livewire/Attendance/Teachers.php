@@ -38,6 +38,14 @@ class Teachers extends Component
     public string $sectionFilter = 'all'; // 'all', 'Western', 'Islamic'
     public string $viewMode = 'sheet'; // 'sheet' or 'summary'
 
+    // Report modal selection state
+    public bool $showReportModal = false;
+    public string $reportPeriodType = 'week'; // 'week' or 'month'
+    public string $selectedWeek = 'current'; // 'current', 'previous', 'custom'
+    public string $customWeekDate = '';
+    public string $selectedMonthYear = ''; // 'Y-m'
+    public string $reportShiftFilter = 'all'; // 'all', 'Western', 'Islamic'
+
     /**
      * @var array<int, array{status:string, note:string|null}>
      */
@@ -526,31 +534,106 @@ class Teachers extends Component
         ]);
     }
 
-    public function downloadWeeklyPdf(): ?StreamedResponse
+    public function openReportModal(): void
+    {
+        $this->selectedMonthYear = Carbon::parse($this->date ?: now())->format('Y-m');
+        $this->customWeekDate = Carbon::parse($this->date ?: now())->toDateString();
+        $this->reportShiftFilter = $this->sectionFilter ?: 'all';
+        $this->showReportModal = true;
+    }
+
+    public function closeReportModal(): void
+    {
+        $this->showReportModal = false;
+    }
+
+    public function toggleTeacherShift(int $teacherId): void
+    {
+        $teacher = User::find($teacherId);
+        if (!$teacher) {
+            return;
+        }
+
+        $newShift = ($teacher->getShift() === 'Islamic') ? 'Western' : 'Islamic';
+        $teacher->shift = $newShift;
+        $cf = $teacher->custom_fields ?? [];
+        $cf['shift'] = $newShift;
+        $teacher->custom_fields = $cf;
+        $teacher->save();
+
+        $this->dispatch('alert', message: "{$teacher->name}'s shift changed to {$newShift} Shift.", type: 'success');
+    }
+
+    public function downloadWeeklyPdf(?string $forcedPeriodType = null): ?StreamedResponse
     {
         $this->validateSelection();
 
-        $referenceDate = $this->date ? Carbon::parse($this->date) : now();
-        $startOfWeek = $referenceDate->copy()->startOfWeek(Carbon::MONDAY);
-        $endOfWeek = $startOfWeek->copy()->addDays(4); // Friday
-
-        $weekRangeLabel = 'Week of ' . $startOfWeek->format('D, d M') . ' – ' . $endOfWeek->format('D, d M, Y');
-
-        $weekDays = [];
-        for ($i = 0; $i < 5; $i++) {
-            $dayDate = $startOfWeek->copy()->addDays($i);
-            $weekDays[] = [
-                'date' => $dayDate->toDateString(),
-                'name' => $dayDate->format('D'),
-                'formatted' => $dayDate->format('d M'),
-            ];
-        }
+        $periodType = $forcedPeriodType ?: $this->reportPeriodType;
+        $isMonthly = ($periodType === 'month');
 
         $tenantId = auth()->user()?->tenant_id;
-        $sheetsQuery = TeacherAttendanceSheet::withoutGlobalScopes()
-            ->whereBetween('date', [$startOfWeek->toDateString(), $endOfWeek->toDateString()])
-            ->where('term', (int) $this->term)
-            ->where('session', $this->session);
+        $reportShift = $this->reportShiftFilter ?: $this->sectionFilter;
+
+        $weekDays = [];
+
+        if ($isMonthly) {
+            $monthStr = $this->selectedMonthYear ?: Carbon::parse($this->date ?: now())->format('Y-m');
+            $startOfMonth = Carbon::parse($monthStr . '-01')->startOfMonth();
+            $endOfMonth = $startOfMonth->copy()->endOfMonth();
+
+            $periodRangeLabel = 'Month of ' . $startOfMonth->format('F Y');
+            $reportPeriodTitle = 'Monthly';
+
+            $cur = $startOfMonth->copy();
+            while ($cur->lte($endOfMonth)) {
+                if (!$cur->isWeekend()) {
+                    $weekDays[] = [
+                        'date'       => $cur->toDateString(),
+                        'name'       => $cur->format('D'),
+                        'name_short' => substr($cur->format('D'), 0, 1),
+                        'formatted'  => $cur->format('d/m'),
+                        'day_num'    => $cur->format('j'),
+                    ];
+                }
+                $cur->addDay();
+            }
+
+            $sheetsQuery = TeacherAttendanceSheet::withoutGlobalScopes()
+                ->whereBetween('date', [$startOfMonth->toDateString(), $endOfMonth->toDateString()])
+                ->where('term', (int) $this->term)
+                ->where('session', $this->session);
+        } else {
+            // Weekly
+            if ($this->selectedWeek === 'previous') {
+                $ref = Carbon::parse($this->date ?: now())->subWeek();
+            } elseif ($this->selectedWeek === 'custom' && !empty($this->customWeekDate)) {
+                $ref = Carbon::parse($this->customWeekDate);
+            } else {
+                $ref = $this->date ? Carbon::parse($this->date) : now();
+            }
+
+            $startOfWeek = $ref->copy()->startOfWeek(Carbon::MONDAY);
+            $endOfWeek = $startOfWeek->copy()->addDays(4); // Friday
+
+            $periodRangeLabel = 'Week of ' . $startOfWeek->format('D, d M') . ' – ' . $endOfWeek->format('D, d M, Y');
+            $reportPeriodTitle = 'Weekly';
+
+            for ($i = 0; $i < 5; $i++) {
+                $dayDate = $startOfWeek->copy()->addDays($i);
+                $weekDays[] = [
+                    'date'       => $dayDate->toDateString(),
+                    'name'       => $dayDate->format('D'),
+                    'name_short' => substr($dayDate->format('D'), 0, 1),
+                    'formatted'  => $dayDate->format('d M'),
+                    'day_num'    => $dayDate->format('j'),
+                ];
+            }
+
+            $sheetsQuery = TeacherAttendanceSheet::withoutGlobalScopes()
+                ->whereBetween('date', [$startOfWeek->toDateString(), $endOfWeek->toDateString()])
+                ->where('term', (int) $this->term)
+                ->where('session', $this->session);
+        }
 
         if ($tenantId) {
             $sheetsQuery->where(function ($q) use ($tenantId) {
@@ -560,11 +643,16 @@ class Teachers extends Component
 
         $sheets = $sheetsQuery->with(['marks.teacher'])->get();
         $sheetsByDate = $sheets->keyBy(fn($s) => Carbon::parse($s->date)->toDateString());
-        $activeDaysCount = $sheets->count() > 0 ? $sheets->count() : 5;
+        $activeDaysCount = $sheets->count() > 0 ? $sheets->count() : count($weekDays);
 
-        // Collect staff members based on shift filter if applicable
-        $staffMembers = $this->visibleTeachers;
-        $scopeLabel = match(strtolower($this->sectionFilter)) {
+        // Filter staff by shift
+        $staffMembers = $this->teachers;
+        if ($reportShift !== 'all') {
+            $filter = strtolower($reportShift);
+            $staffMembers = $staffMembers->filter(fn(User $u) => strtolower($u->getShift()) === $filter)->values();
+        }
+
+        $scopeLabel = match(strtolower($reportShift)) {
             'western' => 'Western Shift Staff',
             'islamic' => 'Islamic Shift Staff',
             default => 'All School Staff (Academic & Administrative)',
@@ -573,12 +661,13 @@ class Teachers extends Component
         $staffRows = [];
         $totalPresentAll = 0;
         $totalPossibleAll = 0;
-        $punctualityStarsAchievers = [];
+        $totalLateAll = 0;
 
         foreach ($staffMembers as $staff) {
             $daysData = [];
             $daysPresent = 0;
             $daysLate = 0;
+            $daysAbsent = 0;
 
             foreach ($weekDays as $day) {
                 $sheet = $sheetsByDate->get($day['date']);
@@ -596,6 +685,8 @@ class Teachers extends Component
                     } elseif ($status === 'Late') {
                         $daysPresent++;
                         $daysLate++;
+                    } elseif ($status === 'Absent') {
+                        $daysAbsent++;
                     }
                 } else {
                     $status = '-';
@@ -603,7 +694,7 @@ class Teachers extends Component
                 }
 
                 $daysData[] = [
-                    'status' => $status,
+                    'status'        => $status,
                     'punch_display' => $punchDisplay,
                 ];
             }
@@ -630,31 +721,30 @@ class Teachers extends Component
                 }
             }
 
-            if ($stars === 5) {
-                $punctualityStarsAchievers[] = [
-                    'name' => $staff->name,
-                    'role' => ucfirst($staff->role),
-                ];
-            }
-
             $totalPresentAll += $daysPresent;
             $totalPossibleAll += $activeDaysCount;
+            $totalLateAll += $daysLate;
 
             $staffRows[] = [
-                'name' => $staff->name,
-                'role' => $staff->role,
-                'shift' => $staff->getShiftLabel(),
-                'days' => $daysData,
+                'name'         => $staff->name,
+                'role'         => $staff->role,
+                'shift'        => $staff->getShiftLabel(),
+                'days'         => $daysData,
                 'days_present' => $daysPresent,
-                'days_late' => $daysLate,
-                'rate' => $rate,
-                'stars' => $stars,
+                'days_late'    => $daysLate,
+                'days_absent'  => $daysAbsent,
+                'rate'         => $rate,
+                'stars'        => $stars,
             ];
         }
 
         $weeklyAttendanceRate = $totalPossibleAll > 0 
             ? (int) round(($totalPresentAll / $totalPossibleAll) * 100) 
             : 0;
+
+        $averagePunctualityRate = $totalPresentAll > 0
+            ? (int) round((($totalPresentAll - $totalLateAll) / $totalPresentAll) * 100)
+            : 100;
 
         $schoolName = config('academyhub.school_name', config('app.name', 'AI INTEGRATED ACADEMY ARGUNGU'));
         $schoolMotto = config('academyhub.school_motto', 'LEARNING TODAY LEADING TOMORROW');
@@ -688,32 +778,40 @@ class Teachers extends Component
         $sessionLabel = $this->session ?: (AcademicSession::activeName() ?? now()->format('Y') . '/' . (now()->year + 1));
 
         $pdf = Pdf::loadView('pdf.weekly-staff-attendance', [
-            'staffMembers' => $staffMembers,
-            'staffRows' => $staffRows,
-            'weekDays' => $weekDays,
-            'activeDaysCount' => $activeDaysCount,
-            'weeklyAttendanceRate' => $weeklyAttendanceRate,
-            'punctualityStarsAchievers' => $punctualityStarsAchievers,
-            'scopeLabel' => $scopeLabel,
-            'schoolName' => $schoolName,
-            'schoolMotto' => $schoolMotto,
-            'schoolAddress' => $schoolAddress,
-            'schoolPhone' => $schoolPhone,
-            'schoolEmail' => $schoolEmail,
-            'logoBase64' => $logoBase64,
-            'termLabel' => $termLabel,
-            'sessionLabel' => $sessionLabel,
-            'weekRangeLabel' => $weekRangeLabel,
+            'staffMembers'           => $staffMembers,
+            'staffRows'              => $staffRows,
+            'weekDays'               => $weekDays,
+            'activeDaysCount'        => $activeDaysCount,
+            'weeklyAttendanceRate'   => $weeklyAttendanceRate,
+            'averagePunctualityRate' => $averagePunctualityRate,
+            'isMonthly'              => $isMonthly,
+            'reportPeriodTitle'      => $reportPeriodTitle,
+            'periodRangeLabel'       => $periodRangeLabel,
+            'scopeLabel'             => $scopeLabel,
+            'schoolName'             => $schoolName,
+            'schoolMotto'            => $schoolMotto,
+            'schoolAddress'          => $schoolAddress,
+            'schoolPhone'            => $schoolPhone,
+            'schoolEmail'            => $schoolEmail,
+            'logoBase64'             => $logoBase64,
+            'termLabel'              => $termLabel,
+            'sessionLabel'           => $sessionLabel,
+            'weekRangeLabel'         => $periodRangeLabel,
         ])->setPaper('a4', 'landscape');
 
-        $weekCode = $startOfWeek->format('Y_m_d');
-        $filename = "Weekly_Staff_Attendance_{$weekCode}.pdf";
+        $timeCode = $isMonthly 
+            ? ($this->selectedMonthYear ?: now()->format('Y_m')) 
+            : (isset($startOfWeek) ? $startOfWeek->format('Y_m_d') : now()->format('Y_m_d'));
+
+        $prefix = $isMonthly ? 'Monthly' : 'Weekly';
+        $shiftCode = ($reportShift !== 'all') ? '_' . $reportShift : '';
+        $filename = "{$prefix}_Staff_Attendance_{$timeCode}{$shiftCode}.pdf";
 
         return response()->streamDownload(
             fn () => print($pdf->output()),
             $filename,
             [
-                'Content-Type' => 'application/pdf',
+                'Content-Type'        => 'application/pdf',
                 'Content-Disposition' => 'attachment; filename="' . $filename . '"',
             ]
         );

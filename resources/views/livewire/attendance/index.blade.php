@@ -25,12 +25,11 @@
                     Export CSV / Excel
                 </button>
 
-                <button wire:click="downloadWeeklyPdf" wire:loading.attr="disabled" class="inline-flex items-center gap-1.5 sm:gap-2 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 px-3 sm:px-4 py-2 sm:py-2.5 text-xs font-bold text-amber-300 border border-amber-500/30 transition-all active:scale-95 shadow-sm">
-                    <svg class="h-3.5 w-3.5 sm:h-4 sm:w-4 text-amber-400" fill="currentColor" viewBox="0 0 20 20">
-                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                <button wire:click="openReportModal" type="button" class="inline-flex items-center gap-1.5 sm:gap-2 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 px-3 sm:px-4 py-2 sm:py-2.5 text-xs font-bold text-amber-300 border border-amber-500/30 transition-all active:scale-95 shadow-sm">
+                    <svg class="h-3.5 w-3.5 sm:h-4 sm:w-4 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                     </svg>
-                    <span wire:loading.remove wire:target="downloadWeeklyPdf">Weekly Attendance PDF</span>
-                    <span wire:loading wire:target="downloadWeeklyPdf">Generating...</span>
+                    <span>Attendance Report (PDF) &rarr;</span>
                 </button>
 
                 @if(auth()->user()?->tenant?->activeMarketplaceComponents()->where('slug', 'k40-biometrics')->exists())
@@ -673,6 +672,106 @@
             </div>
             <h3 class="text-base font-extrabold text-slate-800">Select Class & Section to Begin</h3>
             <p class="mt-1.5 text-xs text-slate-400 max-w-xs mx-auto">Please choose a school class and section from the control filter card above to load the student registry and start tracking daily attendance.</p>
+        </div>
+    @endif
+
+    {{-- Attendance Report PDF Modal (Week or Month Selection) --}}
+    @if($showReportModal)
+        <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs transition-opacity"
+            x-data
+            @keydown.escape.window="$wire.closeReportModal()">
+            <div class="relative w-full max-w-lg rounded-3xl bg-white p-6 shadow-2xl border border-slate-200 transition-all">
+                {{-- Header --}}
+                <div class="flex items-center justify-between pb-4 border-b border-slate-100">
+                    <div class="flex items-center gap-3">
+                        <div class="grid h-10 w-10 place-items-center rounded-2xl bg-amber-50 text-amber-600 border border-amber-200">
+                            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 class="text-base font-extrabold text-slate-900">Download Attendance Report</h3>
+                            <p class="text-xs text-slate-400">Class: {{ $selectedClass?->name ?? 'Selected Class' }} @if($sectionId) &bull; Section {{ $sections->firstWhere('id', $sectionId)?->name }} @endif</p>
+                        </div>
+                    </div>
+                    <button type="button" wire:click="closeReportModal"
+                        class="rounded-xl p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition">
+                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
+                </div>
+
+                {{-- Body --}}
+                <div class="mt-5 space-y-4">
+                    {{-- Period Type: Week vs Month --}}
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">Report Duration</label>
+                        <div class="grid grid-cols-2 gap-2 p-1 bg-slate-100 rounded-2xl border border-slate-200">
+                            <button type="button" wire:click="$set('reportPeriodType', 'week')"
+                                class="flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl text-xs font-black transition-all {{ $reportPeriodType === 'week' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-600 hover:text-slate-900' }}">
+                                <svg class="h-4 w-4 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                                <span>Weekly (Mon – Fri)</span>
+                            </button>
+                            <button type="button" wire:click="$set('reportPeriodType', 'month')"
+                                class="flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl text-xs font-black transition-all {{ $reportPeriodType === 'month' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-600 hover:text-slate-900' }}">
+                                <svg class="h-4 w-4 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+                                <span>Whole Month</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    @if($reportPeriodType === 'week')
+                        {{-- Week Selector --}}
+                        <div class="rounded-2xl bg-slate-50 p-4 border border-slate-200/80 space-y-3">
+                            <label class="block text-xs font-bold text-slate-700">Choose Week Period</label>
+                            <div class="grid grid-cols-3 gap-2">
+                                <button type="button" wire:click="$set('selectedWeek', 'current')"
+                                    class="py-2 px-2.5 rounded-xl text-xs font-bold border transition-all text-center {{ $selectedWeek === 'current' ? 'bg-amber-500 text-white border-amber-600 shadow-xs' : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-100' }}">
+                                    This Week
+                                </button>
+                                <button type="button" wire:click="$set('selectedWeek', 'previous')"
+                                    class="py-2 px-2.5 rounded-xl text-xs font-bold border transition-all text-center {{ $selectedWeek === 'previous' ? 'bg-amber-500 text-white border-amber-600 shadow-xs' : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-100' }}">
+                                    Last Week
+                                </button>
+                                <button type="button" wire:click="$set('selectedWeek', 'custom')"
+                                    class="py-2 px-2.5 rounded-xl text-xs font-bold border transition-all text-center {{ $selectedWeek === 'custom' ? 'bg-amber-500 text-white border-amber-600 shadow-xs' : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-100' }}">
+                                    Specific Date
+                                </button>
+                            </div>
+
+                            @if($selectedWeek === 'custom')
+                                <div class="pt-2">
+                                    <label class="block text-[11px] font-bold text-slate-500 mb-1">Pick Any Date in Target Week</label>
+                                    <input type="date" wire:model="customWeekDate"
+                                        class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-800 focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20" />
+                                </div>
+                            @endif
+                        </div>
+                    @else
+                        {{-- Month Selector --}}
+                        <div class="rounded-2xl bg-slate-50 p-4 border border-slate-200/80 space-y-2">
+                            <label class="block text-xs font-bold text-slate-700">Choose Month &amp; Year</label>
+                            <input type="month" wire:model="selectedMonthYear"
+                                class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-800 focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20" />
+                            <p class="text-[11px] text-slate-400">All Monday to Friday school days in this month will be compiled on the A4 landscape sheet.</p>
+                        </div>
+                    @endif
+                </div>
+
+                {{-- Footer Actions --}}
+                <div class="mt-6 pt-4 border-t border-slate-100 flex items-center justify-end gap-2.5">
+                    <button type="button" wire:click="closeReportModal"
+                        class="px-4 py-2.5 rounded-xl border border-slate-200 text-xs font-extrabold text-slate-600 hover:bg-slate-50 transition active:scale-95">
+                        Cancel
+                    </button>
+                    <button type="button" wire:click="downloadWeeklyPdf"
+                        class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-xs font-black text-white shadow-md shadow-amber-500/20 hover:shadow-lg transition-all active:scale-95"
+                        wire:loading.attr="disabled" wire:loading.class="opacity-60 cursor-wait">
+                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                        <span wire:loading.remove wire:target="downloadWeeklyPdf">Generate &amp; Download PDF</span>
+                        <span wire:loading wire:target="downloadWeeklyPdf">Generating PDF...</span>
+                    </button>
+                </div>
+            </div>
         </div>
     @endif
 </div>

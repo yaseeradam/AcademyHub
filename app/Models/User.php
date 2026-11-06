@@ -243,11 +243,11 @@ class User extends Authenticatable
     }
 
     /**
-     * Returns human-readable section label.
+     * Returns human-readable shift label for staff.
      */
     public function getShiftLabel(): string
     {
-        return $this->getShift() . ' Section';
+        return $this->getShift() . ' Shift';
     }
 
     /**

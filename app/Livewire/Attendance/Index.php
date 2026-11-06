@@ -54,7 +54,26 @@ class Index extends Component
     public string $biometricFeedScope = 'class';
     public bool $biometricFeedExpanded = false;
 
+    // Report modal selection state
+    public bool $showReportModal = false;
+    public string $reportPeriodType = 'week'; // 'week' or 'month'
+    public string $selectedWeek = 'current'; // 'current', 'previous', 'custom'
+    public string $customWeekDate = '';
+    public string $selectedMonthYear = ''; // 'Y-m'
+
     public ?int $tenantId = null;
+
+    public function openReportModal(): void
+    {
+        $this->selectedMonthYear = Carbon::parse($this->date ?: now())->format('Y-m');
+        $this->customWeekDate = Carbon::parse($this->date ?: now())->toDateString();
+        $this->showReportModal = true;
+    }
+
+    public function closeReportModal(): void
+    {
+        $this->showReportModal = false;
+    }
 
     public function toggleBiometricFeed(): void
     {
@@ -196,10 +215,10 @@ class Index extends Component
         ]);
     }
 
-    public function downloadWeeklyPdf(): ?StreamedResponse
+    public function downloadWeeklyPdf(?string $forcedPeriodType = null): ?StreamedResponse
     {
         if (!$this->classId) {
-            $this->dispatch('alert', message: 'Please select a Class before downloading weekly attendance.', type: 'error');
+            $this->dispatch('alert', message: 'Please select a Class before downloading attendance report.', type: 'error');
             return null;
         }
 
@@ -211,31 +230,73 @@ class Index extends Component
 
         $section = $this->sectionId ? Section::find($this->sectionId) : null;
 
-        $referenceDate = $this->date ? Carbon::parse($this->date) : now();
-        $startOfWeek = $referenceDate->copy()->startOfWeek(Carbon::MONDAY);
-        $endOfWeek = $startOfWeek->copy()->addDays(4); // Friday
-
-        $weekRangeLabel = 'Week of ' . $startOfWeek->format('D, d M') . ' – ' . $endOfWeek->format('D, d M, Y');
+        $periodType = $forcedPeriodType ?: $this->reportPeriodType;
+        $isMonthly = ($periodType === 'month');
 
         $weekDays = [];
-        for ($i = 0; $i < 5; $i++) {
-            $dayDate = $startOfWeek->copy()->addDays($i);
-            $weekDays[] = [
-                'date' => $dayDate->toDateString(),
-                'name' => $dayDate->format('D'),
-                'formatted' => $dayDate->format('d M'),
-            ];
-        }
 
-        $tenantId = auth()->user()?->tenant_id;
-        $sheetsQuery = AttendanceSheet::withoutGlobalScopes()
-            ->where('class_id', (int) $this->classId)
-            ->whereBetween('date', [$startOfWeek->toDateString(), $endOfWeek->toDateString()]);
+        if ($isMonthly) {
+            $monthStr = $this->selectedMonthYear ?: Carbon::parse($this->date ?: now())->format('Y-m');
+            $startOfMonth = Carbon::parse($monthStr . '-01')->startOfMonth();
+            $endOfMonth = $startOfMonth->copy()->endOfMonth();
+
+            $periodRangeLabel = 'Month of ' . $startOfMonth->format('F Y');
+            $reportPeriodTitle = 'Monthly';
+
+            $cur = $startOfMonth->copy();
+            while ($cur->lte($endOfMonth)) {
+                if (!$cur->isWeekend()) {
+                    $weekDays[] = [
+                        'date'       => $cur->toDateString(),
+                        'name'       => $cur->format('D'),
+                        'name_short' => substr($cur->format('D'), 0, 1),
+                        'formatted'  => $cur->format('d/m'),
+                        'day_num'    => $cur->format('j'),
+                    ];
+                }
+                $cur->addDay();
+            }
+
+            $sheetsQuery = AttendanceSheet::withoutGlobalScopes()
+                ->where('class_id', (int) $this->classId)
+                ->whereBetween('date', [$startOfMonth->toDateString(), $endOfMonth->toDateString()]);
+        } else {
+            // Weekly
+            if ($this->selectedWeek === 'previous') {
+                $ref = Carbon::parse($this->date ?: now())->subWeek();
+            } elseif ($this->selectedWeek === 'custom' && !empty($this->customWeekDate)) {
+                $ref = Carbon::parse($this->customWeekDate);
+            } else {
+                $ref = $this->date ? Carbon::parse($this->date) : now();
+            }
+
+            $startOfWeek = $ref->copy()->startOfWeek(Carbon::MONDAY);
+            $endOfWeek = $startOfWeek->copy()->addDays(4); // Friday
+
+            $periodRangeLabel = 'Week of ' . $startOfWeek->format('D, d M') . ' – ' . $endOfWeek->format('D, d M, Y');
+            $reportPeriodTitle = 'Weekly';
+
+            for ($i = 0; $i < 5; $i++) {
+                $dayDate = $startOfWeek->copy()->addDays($i);
+                $weekDays[] = [
+                    'date'       => $dayDate->toDateString(),
+                    'name'       => $dayDate->format('D'),
+                    'name_short' => substr($dayDate->format('D'), 0, 1),
+                    'formatted'  => $dayDate->format('d M'),
+                    'day_num'    => $dayDate->format('j'),
+                ];
+            }
+
+            $sheetsQuery = AttendanceSheet::withoutGlobalScopes()
+                ->where('class_id', (int) $this->classId)
+                ->whereBetween('date', [$startOfWeek->toDateString(), $endOfWeek->toDateString()]);
+        }
 
         if ($this->sectionId) {
             $sheetsQuery->where('section_id', (int) $this->sectionId);
         }
 
+        $tenantId = auth()->user()?->tenant_id;
         if ($tenantId) {
             $sheetsQuery->where(function ($q) use ($tenantId) {
                 $q->where('tenant_id', $tenantId)->orWhereNull('tenant_id');
@@ -244,7 +305,7 @@ class Index extends Component
 
         $sheets = $sheetsQuery->with(['marks.student'])->get();
         $sheetsByDate = $sheets->keyBy(fn($s) => Carbon::parse($s->date)->toDateString());
-        $activeDaysCount = $sheets->count() > 0 ? $sheets->count() : 5;
+        $activeDaysCount = $sheets->count() > 0 ? $sheets->count() : count($weekDays);
 
         $studentsQuery = Student::query()
             ->where('class_id', (int) $this->classId)
@@ -259,19 +320,25 @@ class Index extends Component
         $studentRows = [];
         $totalPresentMarksAll = 0;
         $totalPossibleMarksAll = 0;
-        $fiveStarAchievers = [];
 
         foreach ($students as $student) {
             $daysData = [];
             $daysPresent = 0;
+            $daysLate = 0;
+            $daysAbsent = 0;
 
             foreach ($weekDays as $day) {
                 $sheet = $sheetsByDate->get($day['date']);
                 if ($sheet) {
                     $mark = $sheet->marks->firstWhere('student_id', $student->id);
                     $status = $mark ? $mark->status : 'Unmarked';
-                    if (in_array($status, ['Present', 'Late'])) {
+                    if ($status === 'Present') {
                         $daysPresent++;
+                    } elseif ($status === 'Late') {
+                        $daysPresent++;
+                        $daysLate++;
+                    } elseif ($status === 'Absent') {
+                        $daysAbsent++;
                     }
                 } else {
                     $status = '-';
@@ -302,23 +369,18 @@ class Index extends Component
                 }
             }
 
-            if ($stars === 5 && $daysPresent > 0) {
-                $fiveStarAchievers[] = [
-                    'name' => $student->full_name,
-                    'adm_no' => $student->admission_number,
-                ];
-            }
-
             $totalPresentMarksAll += $daysPresent;
             $totalPossibleMarksAll += $activeDaysCount;
 
             $studentRows[] = [
-                'name' => $student->full_name,
-                'adm_no' => $student->admission_number,
-                'days' => $daysData,
+                'name'         => $student->full_name,
+                'adm_no'       => $student->admission_number,
+                'days'         => $daysData,
                 'days_present' => $daysPresent,
-                'rate' => $rate,
-                'stars' => $stars,
+                'days_late'    => $daysLate,
+                'days_absent'  => $daysAbsent,
+                'rate'         => $rate,
+                'stars'        => $stars,
             ];
         }
 
@@ -366,35 +428,42 @@ class Index extends Component
         $sessionLabel = $this->session ?: (AcademicSession::activeName() ?? now()->format('Y') . '/' . (now()->year + 1));
 
         $pdf = Pdf::loadView('pdf.weekly-student-attendance', [
-            'class' => $class,
-            'section' => $section,
-            'students' => $students,
-            'weekDays' => $weekDays,
-            'studentRows' => $studentRows,
-            'activeDaysCount' => $activeDaysCount,
+            'class'                => $class,
+            'section'              => $section,
+            'students'             => $students,
+            'weekDays'             => $weekDays,
+            'studentRows'          => $studentRows,
+            'activeDaysCount'      => $activeDaysCount,
             'weeklyAttendanceRate' => $weeklyAttendanceRate,
-            'fiveStarAchievers' => $fiveStarAchievers,
-            'classTeacherName' => $classTeacherName,
-            'schoolName' => $schoolName,
-            'schoolMotto' => $schoolMotto,
-            'schoolAddress' => $schoolAddress,
-            'schoolPhone' => $schoolPhone,
-            'schoolEmail' => $schoolEmail,
-            'logoBase64' => $logoBase64,
-            'termLabel' => $termLabel,
-            'sessionLabel' => $sessionLabel,
-            'weekRangeLabel' => $weekRangeLabel,
+            'totalPresentMarksAll' => $totalPresentMarksAll,
+            'classTeacherName'     => $classTeacherName,
+            'isMonthly'            => $isMonthly,
+            'reportPeriodTitle'    => $reportPeriodTitle,
+            'periodRangeLabel'     => $periodRangeLabel,
+            'schoolName'           => $schoolName,
+            'schoolMotto'          => $schoolMotto,
+            'schoolAddress'        => $schoolAddress,
+            'schoolPhone'          => $schoolPhone,
+            'schoolEmail'          => $schoolEmail,
+            'logoBase64'           => $logoBase64,
+            'termLabel'            => $termLabel,
+            'sessionLabel'         => $sessionLabel,
+            'weekRangeLabel'       => $periodRangeLabel,
         ])->setPaper('a4', 'landscape');
 
         $safeClassName = preg_replace('/[^A-Za-z0-9_-]+/', '_', (string) $class->name);
-        $weekCode = $startOfWeek->format('Y_m_d');
-        $filename = "Weekly_Attendance_{$safeClassName}_{$weekCode}.pdf";
+        $timeCode = $isMonthly 
+            ? ($this->selectedMonthYear ?: now()->format('Y_m')) 
+            : (isset($startOfWeek) ? $startOfWeek->format('Y_m_d') : now()->format('Y_m_d'));
+
+        $prefix = $isMonthly ? 'Monthly' : 'Weekly';
+        $filename = "{$prefix}_Attendance_{$safeClassName}_{$timeCode}.pdf";
 
         return response()->streamDownload(
             fn () => print($pdf->output()),
             $filename,
             [
-                'Content-Type' => 'application/pdf',
+                'Content-Type'        => 'application/pdf',
                 'Content-Disposition' => 'attachment; filename="' . $filename . '"',
             ]
         );
