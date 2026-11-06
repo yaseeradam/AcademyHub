@@ -535,14 +535,8 @@ class Index extends Component
 
     public function __get($property)
     {
-        if ($property === 'academicSessions') {
-            return $this->academicSessions();
-        }
-        if ($property === 'availableTerms') {
-            return $this->availableTerms();
-        }
-        if ($property === 'classes') {
-            return $this->classes();
+        if (in_array($property, ['academicSessions', 'availableTerms', 'classes', 'sections', 'students'], true)) {
+            return $this->{$property}();
         }
 
         return parent::__get($property);
