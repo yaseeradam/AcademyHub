@@ -541,6 +541,9 @@ class Index extends Component
         if ($property === 'availableTerms') {
             return $this->availableTerms();
         }
+        if ($property === 'classes') {
+            return $this->classes();
+        }
 
         return parent::__get($property);
     }
