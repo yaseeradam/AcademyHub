@@ -118,16 +118,45 @@ class Performance extends Component
     }
 
     #[Computed]
+    public function feeStatus(): array
+    {
+        if (!$this->student) {
+            return ['is_debtor' => false, 'balance' => 0.0, 'block_access' => false];
+        }
+
+        $blockDebtors = (bool) \App\Support\TenantSettings::get('rc_block_debtors', true);
+        if (!$blockDebtors) {
+            return ['is_debtor' => false, 'balance' => 0.0, 'block_access' => false];
+        }
+
+        try {
+            $ledger = \App\Support\BillingService::getStudentTermLedger($this->student, $this->selectedSession);
+            $balance = (float) ($ledger['total_balance'] ?? 0.0);
+            return [
+                'is_debtor'    => $balance > 0,
+                'balance'      => $balance,
+                'block_access' => $balance > 0,
+            ];
+        } catch (\Throwable $e) {
+            return ['is_debtor' => false, 'balance' => 0.0, 'block_access' => false];
+        }
+    }
+
+    #[Computed]
     public function bookletDossier(): ?array
     {
         if (!$this->student || !$this->selectedSession) {
             return null;
         }
 
+        $isParentOrStudent = !auth()->check() || in_array(auth()->user()->role, ['student', 'parent'], true);
+
         try {
             return app(\App\Support\StudentDossierService::class)->buildDossier(
                 $this->student,
-                $this->selectedSession
+                $this->selectedSession,
+                [],
+                $isParentOrStudent
             );
         } catch (\Throwable $e) {
             return null;

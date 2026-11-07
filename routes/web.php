@@ -98,6 +98,11 @@ Route::get('/offline', [\App\Http\Controllers\PwaController::class, 'offline'])-
 // Search Engine Optimization (SEO) Dynamic XML Sitemap
 Route::get('/sitemap.xml', [\App\Http\Controllers\SitemapController::class, 'index'])->name('seo.sitemap');
 
+// Public Academic Result & Booklet QR Verification
+Route::get('/results/verify/{admission}', [\App\Http\Controllers\ResultVerificationController::class, 'verify'])
+    ->name('results.verify')
+    ->where('admission', '.*');
+
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthenticatedSessionController::class, 'create'])
         ->middleware('throttle:auth_views')

@@ -171,6 +171,7 @@ class TenantSettings
                 'rc_show_qr_code',
                 'rc_show_cumulative_summary',
                 'rc_show_color_badges',
+                'rc_block_debtors',
                 'rc_principal_name',
                 'rc_principal_title',
                 'subscription_due_date',
@@ -201,6 +202,7 @@ class TenantSettings
                 'rc_show_psychomotor', 'rc_show_school_fees', 'rc_show_signatures',
                 'rc_show_class_highest_lowest', 'rc_show_subject_teacher_remarks',
                 'rc_show_qr_code', 'rc_show_cumulative_summary', 'rc_show_color_badges',
+                'rc_block_debtors',
             ], true)) {
                 $value = (bool) $value;
             }

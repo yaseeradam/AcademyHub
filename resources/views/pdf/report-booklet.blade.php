@@ -113,9 +113,9 @@
 </head>
 <body>
 @php
-    $schoolName = config('academyhub.school_name', config('app.name', 'AcademyHub'));
-    $logo = config('academyhub.school_logo');
-    $logoPath = $logo ? public_path('uploads/'.str_replace('\\', '/', $logo)) : null;
+    $schoolName = $schoolName ?? config('academyhub.school_name', config('app.name', 'AcademyHub'));
+    $logo = $schoolLogo ?? config('academyhub.school_logo');
+    $logoPath = $logo ? (file_exists($logo) ? $logo : public_path('uploads/'.str_replace('\\', '/', $logo))) : null;
 
     $base64Logo = null;
     if ($logoPath && file_exists($logoPath)) {
@@ -132,9 +132,9 @@
         $base64StudentPhoto = 'data:image/' . $type . ';base64,' . base64_encode($data);
     }
 
-    $address = config('academyhub.school_address', '');
-    $phone = config('academyhub.school_phone', '');
-    $motto = config('academyhub.school_motto', 'Excellence and Integrity in Education');
+    $address = $schoolAddress ?? config('academyhub.school_address', '');
+    $phone = $schoolPhone ?? config('academyhub.school_phone', '');
+    $motto = $schoolMotto ?? config('academyhub.school_motto', 'Excellence and Integrity in Education');
 
     $studentName = trim("{$student->first_name} {$student->middle_name} {$student->last_name}");
     $className = $student->schoolClass?->name ?? 'Class';

@@ -32,6 +32,18 @@ class BiometricSyncService
 
         $tenantId = $tenantId ?: (app()->bound('currentTenant') && app('currentTenant') ? app('currentTenant')->id : 1);
 
+        // Discard absurd clock timestamps (hardware RTC glitches: > 1 day future or > 1 year past)
+        if ($punchTime->isAfter(now()->addDay()) || $punchTime->isBefore(now()->subYear())) {
+            Log::warning("BiometricSyncService: Discarded invalid hardware clock punch {$punchTime->toDateTimeString()} for UID {$userId}.");
+            return null;
+        }
+
+        // Guard against weekend punches creating academic attendance sheets unless explicitly allowed
+        if ($punchTime->isWeekend() && !config('academyhub.allow_weekend_attendance', false)) {
+            Log::debug("BiometricSyncService: Skipped punch for user {$userId} on weekend ({$punchTime->format('Y-m-d')}).");
+            return null;
+        }
+
         $dateStr = $punchTime->format('Y-m-d');
         $timeStr = $punchTime->format('H:i:s');
 

@@ -31,8 +31,16 @@ class StudentDossierService
     public function buildDossier(Student $student, string $session, array $optionsOverrides = []): array
     {
         $student->load(['schoolClass', 'section']);
-        $classId = (int) $student->class_id;
-        $sectionId = (int) ($student->section_id ?? 0);
+        $displayClassId = (int) $student->class_id;
+        $displaySectionId = (int) ($student->section_id ?? 0);
+
+        // Historical Class Lookup: Check if student was recorded in an earlier class for this session
+        $scoreClassId = Score::query()
+            ->where('student_id', $student->id)
+            ->where('session', $session)
+            ->value('class_id');
+        $classId = (int) ($scoreClassId ?: $displayClassId);
+        $sectionId = $displaySectionId;
 
         // Get all subjects configured or scored for this class
         $subjects = SchoolClass::allSubjectsForClass($classId);
@@ -43,6 +51,10 @@ class StudentDossierService
         $availableTermsMap = AcademicTerm::availableTermsForSession($session);
         $maxAvailableTerm = !empty($availableTermsMap) ? max(array_keys($availableTermsMap)) : 3;
 
+        // Publication filter: if only_published requested (e.g. by parent/student)
+        $onlyPublished = (bool) ($optionsOverrides['only_published'] ?? false);
+        $publishedTerms = $onlyPublished ? ResultPublication::publishedTermsForClass($classId, $session) : [1, 2, 3];
+
         // Fetch all scores for this student across the entire session
         $studentScores = Score::query()
             ->with('subject')
@@ -50,6 +62,15 @@ class StudentDossierService
             ->where('session', $session)
             ->whereIn('subject_id', $subjectIds)
             ->get();
+
+        // Elective Subject Trimming:
+        // If student has scores in the session, exclude class subjects where the student has ZERO scores in all terms
+        $scoredSubjIds = $studentScores->pluck('subject_id')->unique();
+        if ($scoredSubjIds->isNotEmpty()) {
+            $subjects = $subjects->filter(fn(Subject $s) => $scoredSubjIds->contains($s->id))->values();
+            $subjectIds = $subjects->pluck('id');
+            $subjectCount = max(1, (int) $subjectIds->count());
+        }
 
         $scoresByTerm = $studentScores->groupBy('term')->map(fn($rows) => $rows->keyBy('subject_id'));
 
@@ -68,17 +89,18 @@ class StudentDossierService
         $allClassScores = $this->getClassScoresForSession($classId, $session, $subjectIds);
 
         // Calculate per-subject statistics (T1, T2, T3, and Annual Cumulative)
-        $subjectRows = $subjects->map(function (Subject $subject) use ($scoresByTerm, $allClassScores, $student, $maxAvailableTerm) {
+        $subjectRows = $subjects->map(function (Subject $subject) use ($scoresByTerm, $allClassScores, $student, $maxAvailableTerm, $onlyPublished, $publishedTerms) {
             $subjId = $subject->id;
 
             $termDetails = [];
             $annualTotalsList = [];
 
             for ($t = 1; $t <= 3; $t++) {
-                $termScores = $scoresByTerm->get($t);
+                $isPublishedTerm = in_array($t, $publishedTerms, true);
+                $termScores = ($onlyPublished && !$isPublishedTerm) ? null : $scoresByTerm->get($t);
                 /** @var Score|null $score */
                 $score = $termScores ? $termScores->get($subjId) : null;
-                $isPending = ($t > $maxAvailableTerm && !$score);
+                $isPending = ($t > $maxAvailableTerm && !$score) || ($onlyPublished && !$isPublishedTerm);
 
                 if ($score && $score->total !== null) {
                     $annualTotalsList[] = (float) $score->total;
@@ -158,7 +180,8 @@ class StudentDossierService
         $termSummaries = [];
         $studentTermAverages = [];
         for ($t = 1; $t <= 3; $t++) {
-            $tScores = $scoresByTerm->get($t);
+            $isPublishedTerm = in_array($t, $publishedTerms, true);
+            $tScores = ($onlyPublished && !$isPublishedTerm) ? null : $scoresByTerm->get($t);
             $hasData = ($tScores && $tScores->isNotEmpty());
             $tGrandTotal = $hasData ? (int) $tScores->sum('total') : null;
             $tCount = $hasData ? max(1, $tScores->count()) : 1;
@@ -177,15 +200,14 @@ class StudentDossierService
                 $studentAvgs = $tClassScores->groupBy('student_id')->map(fn($r) => $r->sum('total') / max(1, $r->count()));
                 $tClassAverage = round((float) $studentAvgs->avg(), 2);
 
-                $sorted = $studentTotals->sortDesc();
+                $sorted = $studentTotals->sortDesc()->values();
                 $rank = 1; $last = null;
-                foreach ($sorted as $id => $tot) {
+                foreach ($sorted as $idx => $tot) {
                     if ($last !== null && $tot !== $last) {
-                        $rank++;
+                        $rank = $idx + 1; // Standard competition rank (1, 1, 3)
                     }
-                    if ((int) $id === (int) $student->id) {
+                    if ((int) $sorted->keys()[$idx] === (int) $student->id || (int) $studentTotals->search($tot) === (int) $student->id) {
                         $tPosition = $rank;
-                        break;
                     }
                     $last = $tot;
                 }
@@ -197,7 +219,7 @@ class StudentDossierService
                 'average'       => $tAvg,
                 'position'      => $tPosition,
                 'class_average' => $tClassAverage,
-                'is_pending'    => ($t > $maxAvailableTerm && !$hasData),
+                'is_pending'    => ($t > $maxAvailableTerm && !$hasData) || ($onlyPublished && !$isPublishedTerm),
             ];
         }
 
@@ -218,13 +240,13 @@ class StudentDossierService
 
         $annualPosition = 1;
         if ($classStudentAnnualAverages->isNotEmpty() && $cumulativeAnnualAverage > 0) {
-            $sortedAnnual = $classStudentAnnualAverages->sortDesc();
+            $sortedAnnual = $classStudentAnnualAverages->sortDesc()->values();
             $rank = 1; $last = null;
-            foreach ($sortedAnnual as $id => $avg) {
+            foreach ($sortedAnnual as $idx => $avg) {
                 if ($last !== null && abs($avg - $last) > 0.001) {
-                    $rank++;
+                    $rank = $idx + 1; // Standard competition rank (1, 1, 3)
                 }
-                if ((int) $id === (int) $student->id) {
+                if (abs($avg - $cumulativeAnnualAverage) < 0.001) {
                     $annualPosition = $rank;
                     break;
                 }
@@ -245,8 +267,8 @@ class StudentDossierService
         // Multi-term Psychomotor & Affective Traits Evolution
         $psychomotorTimeline = $this->buildPsychomotorTimeline($student, $session);
 
-        // Promotion & Progression Engine
-        $promotion = $this->determinePromotionStatus($student, $cumulativeAnnualAverage, $maxAvailableTerm);
+        // Promotion & Progression Engine (Checks core subjects: English & Mathematics)
+        $promotion = $this->determinePromotionStatus($student, $cumulativeAnnualAverage, $maxAvailableTerm, $subjectRows);
 
         // School Settings & Branding
         $rawSettings = $this->settings();
@@ -307,6 +329,11 @@ class StudentDossierService
             'promotion'                 => $promotion,
             'principalRemarks'          => $principalRemarks,
             'teacherRemarks'            => $teacherRemarks,
+            'schoolName'                => $rawSettings['school_name'] ?? config('academyhub.school_name', config('app.name', 'AcademyHub')),
+            'schoolLogo'                => $rawSettings['school_logo'] ?? config('academyhub.school_logo'),
+            'schoolAddress'             => $rawSettings['school_address'] ?? config('academyhub.school_address', ''),
+            'schoolPhone'               => $rawSettings['school_phone'] ?? config('academyhub.school_phone', ''),
+            'schoolMotto'               => $rawSettings['school_motto'] ?? config('academyhub.school_motto', 'Excellence and Integrity in Education'),
             'principalName'             => $rawSettings['rc_principal_name'] ?? config('academyhub.rc_principal_name'),
             'principalTitle'            => $rawSettings['rc_principal_title'] ?? config('academyhub.rc_principal_title', 'Principal'),
             'nextTermDate'              => $nextTermDate,
@@ -446,7 +473,7 @@ class StudentDossierService
     /**
      * Determine promotion decision and next class progression.
      */
-    protected function determinePromotionStatus(Student $student, float $cumulativeAverage, int $maxAvailableTerm): array
+    protected function determinePromotionStatus(Student $student, float $cumulativeAverage, int $maxAvailableTerm, mixed $subjectRows = null): array
     {
         $class = $student->schoolClass;
         $passThreshold = (float) ($this->settings()['rc_promotion_pass_mark'] ?? 50.0);
@@ -472,8 +499,33 @@ class StudentDossierService
             ];
         }
 
+        // Core subject check (English and Mathematics prerequisite rule)
+        $failedCoreSubjects = [];
+        if ($subjectRows) {
+            foreach ($subjectRows as $row) {
+                $sName = $row['subject']->name ?? '';
+                $isCore = preg_match('/(english|mathematics|maths)/i', $sName);
+                if ($isCore && $row['annual_average'] !== null && $row['annual_average'] < $passThreshold) {
+                    $failedCoreSubjects[] = $sName;
+                }
+            }
+        }
+
         // Full year promotion determination
         if ($cumulativeAverage >= $passThreshold) {
+            // Check if student passed overall but failed core prerequisites
+            if (!empty($failedCoreSubjects)) {
+                $target = $nextClass ? strtoupper($nextClass->name) : 'NEXT LEVEL';
+                $deficiency = implode(' & ', $failedCoreSubjects);
+                return [
+                    'is_final'   => true,
+                    'status'     => 'PROMOTED ON TRIAL',
+                    'badge'      => 'warning',
+                    'message'    => "PROMOTED ON TRIAL TO {$target} (Prerequisite deficiency in {$deficiency})",
+                    'next_class' => $nextClass?->name,
+                ];
+            }
+
             if ($nextClass) {
                 return [
                     'is_final'   => true,

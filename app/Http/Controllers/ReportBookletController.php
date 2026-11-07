@@ -57,9 +57,28 @@ class ReportBookletController extends Controller
         $session = (string) $request->query('session', $this->defaultSession());
         abort_unless(preg_match('/^\d{4}\/\d{4}$/', $session) === 1, 422, 'Invalid session format.');
 
+        $isParentOrStudent = in_array($user->role, ['parent', 'student'], true);
+
+        if ($isParentOrStudent) {
+            // Check publication: must have at least one term published for this student's class
+            $publishedTerms = \App\Models\ResultPublication::publishedTermsForClass($student->class_id, $session);
+            if (empty($publishedTerms)) {
+                abort(403, 'Academic results for this session have not yet been published by the school administration.');
+            }
+
+            // Check debtor gate
+            $blockDebtors = (bool) TenantSettings::get('rc_block_debtors', true);
+            if ($blockDebtors) {
+                $ledger = \App\Support\BillingService::getStudentTermLedger($student, $session);
+                if (($ledger['total_balance'] ?? 0.0) > 0) {
+                    abort(403, 'Academic report booklet access is restricted due to outstanding school fees. Please settle the balance with the bursary/accounts department.');
+                }
+            }
+        }
+
         $student->load(['schoolClass', 'section']);
         $service = app(StudentDossierService::class);
-        $data = $service->buildDossier($student, $session);
+        $data = $service->buildDossier($student, $session, [], $isParentOrStudent);
 
         $safeSession = str_replace('/', '-', $session);
         $safeAdmissionNo = preg_replace('/[^a-zA-Z0-9_-]/', '_', (string) ($student->admission_number ?? $student->id));
@@ -157,8 +176,27 @@ class ReportBookletController extends Controller
         abort_unless($user, 401);
 
         $session = (string) $request->query('session', $this->defaultSession());
+        abort_unless(preg_match('/^\d{4}\/\d{4}$/', $session) === 1, 422, 'Invalid session format.');
+
+        $isParentOrStudent = in_array($user->role, ['parent', 'student'], true);
+
+        if ($isParentOrStudent) {
+            $publishedTerms = \App\Models\ResultPublication::publishedTermsForClass($student->class_id, $session);
+            if (empty($publishedTerms)) {
+                abort(403, 'Academic results for this session have not yet been published by the school administration.');
+            }
+
+            $blockDebtors = (bool) TenantSettings::get('rc_block_debtors', true);
+            if ($blockDebtors) {
+                $ledger = \App\Support\BillingService::getStudentTermLedger($student, $session);
+                if (($ledger['total_balance'] ?? 0.0) > 0) {
+                    abort(403, 'Academic report booklet access is restricted due to outstanding school fees. Please settle the balance with the bursary/accounts department.');
+                }
+            }
+        }
+
         $service = app(StudentDossierService::class);
-        $data = $service->buildDossier($student, $session);
+        $data = $service->buildDossier($student, $session, [], $isParentOrStudent);
 
         if ($request->boolean('html')) {
             return response(view('pdf.report-booklet', $data));

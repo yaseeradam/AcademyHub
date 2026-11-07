@@ -37,4 +37,27 @@ class ResultPublication extends Model
     {
         return $this->belongsTo(User::class, 'published_by');
     }
+
+    public static function isPublished(int $classId, int $term, string $session): bool
+    {
+        return self::query()
+            ->where('class_id', $classId)
+            ->where('term', $term)
+            ->where('session', $session)
+            ->whereNotNull('published_at')
+            ->exists();
+    }
+
+    public static function publishedTermsForClass(int $classId, string $session): array
+    {
+        return self::query()
+            ->where('class_id', $classId)
+            ->where('session', $session)
+            ->whereNotNull('published_at')
+            ->pluck('term')
+            ->map(fn($t) => (int) $t)
+            ->unique()
+            ->values()
+            ->toArray();
+    }
 }

@@ -60,7 +60,7 @@ class ReportCardController extends Controller
         abort_unless($term >= 1 && $term <= 3, 422);
         abort_unless(preg_match('/^\d{4}\/\d{4}$/', $session) === 1, 422);
 
-        if ($user->role === 'teacher' || $user->role === 'parent') {
+        if (in_array($user->role, ['teacher', 'parent', 'student'], true)) {
             $published = ResultPublication::query()
                 ->where('class_id', $student->class_id)
                 ->where('term', $term)
@@ -68,7 +68,17 @@ class ReportCardController extends Controller
                 ->whereNotNull('published_at')
                 ->exists();
 
-            abort_unless($published, 403);
+            abort_unless($published, 403, 'Academic results for this term have not yet been published.');
+        }
+
+        if (in_array($user->role, ['parent', 'student'], true)) {
+            $blockDebtors = (bool) \App\Support\TenantSettings::get('rc_block_debtors', true);
+            if ($blockDebtors) {
+                $ledger = \App\Support\BillingService::getStudentTermLedger($student, $session, $term);
+                if (($ledger['total_balance'] ?? 0.0) > 0) {
+                    abort(403, 'Academic report card access is restricted due to outstanding school fees. Please settle the balance with the bursary/accounts department.');
+                }
+            }
         }
 
         $student->load(['schoolClass', 'section']);

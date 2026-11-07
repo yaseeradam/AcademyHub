@@ -47,6 +47,23 @@ class MarkAbsentStudents extends Command
         }
 
         $activeTerm = AcademicTerm::active();
+        if (!$activeTerm && !$force) {
+            $this->warn("No active academic term configured. Skipping absent reconciliation to prevent false absences during school vacation (use --force to override).");
+            return 0;
+        }
+
+        // Check if date falls outside active term dates
+        if ($activeTerm && !$force) {
+            if ($activeTerm->start_date && $date->lt(Carbon::parse($activeTerm->start_date)->startOfDay())) {
+                $this->info("Date {$dateStr} is prior to the start of active Term {$activeTerm->term_number} ({$activeTerm->start_date->format('Y-m-d')}). Skipping absent reconciliation.");
+                return 0;
+            }
+            if ($activeTerm->end_date && $date->gt(Carbon::parse($activeTerm->end_date)->endOfDay())) {
+                $this->info("Date {$dateStr} is after the end of active Term {$activeTerm->term_number} ({$activeTerm->end_date->format('Y-m-d')}). Skipping absent reconciliation.");
+                return 0;
+            }
+        }
+
         $termNumber = $activeTerm?->term_number ?? 1;
         $sessionName = AcademicSession::activeName() ?? (date('Y') . '/' . (date('Y') + 1));
 
