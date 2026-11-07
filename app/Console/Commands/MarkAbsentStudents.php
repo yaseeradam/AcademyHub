@@ -67,6 +67,16 @@ class MarkAbsentStudents extends Command
         $termNumber = $activeTerm?->term_number ?? 1;
         $sessionName = AcademicSession::activeName() ?? (date('Y') . '/' . (date('Y') + 1));
 
+        // Check if date's year is compatible with active session (e.g. 2026/2027 covers 2026 and 2027)
+        if (!$force && preg_match('/^(\d{4})\/(\d{4})$/', $sessionName, $matches)) {
+            $startYear = (int) $matches[1];
+            $endYear = (int) $matches[2];
+            if ($date->year < $startYear || $date->year > $endYear) {
+                $this->warn("Date {$dateStr} (year {$date->year}) falls outside active academic session {$sessionName} ({$startYear}-{$endYear}). Skipping reconciliation (use --force to override).");
+                return 0;
+            }
+        }
+
         $systemUserId = User::where('role', 'admin')->orderBy('id')->value('id') 
             ?? User::orderBy('id')->value('id') 
             ?? 1;
