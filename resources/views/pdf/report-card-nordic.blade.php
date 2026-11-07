@@ -16,8 +16,9 @@
         .header { border-bottom: 1.5px solid #475569; padding-bottom: 3px; margin-bottom: 4px; }
         .header-table { display: table; width: 100%; }
         .header-cell { display: table-cell; vertical-align: middle; }
-        .logo-wrap { width: 55px; }
-        .logo { width: 44px; height: 44px; object-fit: contain; filter: grayscale(100%); opacity: 0.85; border: 1px solid #cbd5e1; border-radius: 4px; padding: 2px; }
+        .logo-wrap { width: 55px; text-align: left; vertical-align: middle; }
+        .logo-box { width: 44px; height: 44px; border: 1px solid #cbd5e1; border-radius: 4px; background: #fff; }
+        .logo { max-width: 40px; max-height: 40px; width: auto !important; height: auto !important; display: block; margin: 0 auto; filter: grayscale(100%); opacity: 0.85; }
         .school-name { font-size: 15px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; color: #1e293b; }
         .school-meta { margin-top: 1px; font-size: 7.5px; color: #64748b; font-weight: 500; }
         .badge { display: inline-block; margin-top: 3px; background: #475569; color: #fff; padding: 2px 7px; border-radius: 3px; font-size: 7px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; }
@@ -144,7 +145,15 @@
         <div class="header">
             <div class="header-table">
                 <div class="header-cell logo-wrap">
-                    @if($logoExists)<img class="logo" src="{{ $logoDataUri }}" alt="">@endif
+                    @if($logoExists)
+                        <table class="logo-box" cellpadding="0" cellspacing="0">
+                            <tr>
+                                <td align="center" valign="middle" style="width: 44px; height: 44px; text-align: center; vertical-align: middle;">
+                                    <img class="logo" src="{{ $logoDataUri }}" alt="">
+                                </td>
+                            </tr>
+                        </table>
+                    @endif
                 </div>
                 <div class="header-cell">
                     <div class="school-name">{{ $schoolName }}</div>

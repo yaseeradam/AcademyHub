@@ -160,20 +160,34 @@ class Student extends Model
             ? '/avatars/girl_student_pink.png'
             : '/avatars/student_blue.png';
 
-        if (! $this->passport_photo) {
+        $rawPhoto = $this->passport_photo;
+
+        if (! $rawPhoto) {
             $customPhotoUrl = $this->custom_fields['photo_url'] ?? null;
-            if ($customPhotoUrl && filter_var($customPhotoUrl, FILTER_VALIDATE_URL)) {
+            if ($customPhotoUrl && filter_var($customPhotoUrl, FILTER_VALIDATE_URL) && ! str_contains($customPhotoUrl, 'portal.academyhub.com.ng')) {
                 return $customPhotoUrl;
             }
             return $avatarFallback;
         }
 
-        if (filter_var($this->passport_photo, FILTER_VALIDATE_URL)) {
-            return $this->passport_photo;
+        // Check for dead external host
+        if (str_contains($rawPhoto, 'portal.academyhub.com.ng')) {
+            $adm = preg_replace('/[^a-zA-Z0-9_\-]/', '', (string) $this->admission_number);
+            if (! empty($adm)) {
+                $matches = glob(public_path("uploads/Students/{$adm}*"));
+                if (! empty($matches)) {
+                    return '/uploads/Students/' . basename($matches[0]);
+                }
+            }
+            return $avatarFallback;
+        }
+
+        if (filter_var($rawPhoto, FILTER_VALIDATE_URL)) {
+            return $rawPhoto;
         }
 
         // Handle both forward and backward slashes
-        $path = str_replace(['\\', '\\\\'], '/', $this->passport_photo);
+        $path = str_replace(['\\', '\\\\'], '/', $rawPhoto);
         
         // Remove 'uploads/' prefix if it exists
         $path = ltrim($path, '/');
@@ -182,15 +196,29 @@ class Student extends Model
         }
 
         // Check if file actually exists on uploads disk or public path
-        if (! file_exists(public_path('uploads/' . $path))) {
-            $customPhotoUrl = $this->custom_fields['photo_url'] ?? null;
-            if ($customPhotoUrl && filter_var($customPhotoUrl, FILTER_VALIDATE_URL)) {
-                return $customPhotoUrl;
-            }
-            return $avatarFallback;
+        if (file_exists(public_path('uploads/' . $path))) {
+            return '/uploads/'.$path;
         }
 
-        return '/uploads/'.$path;
+        if (file_exists(public_path($path))) {
+            return '/'.$path;
+        }
+
+        // Fallback: check matching file in Students directory
+        $adm = preg_replace('/[^a-zA-Z0-9_\-]/', '', (string) $this->admission_number);
+        if (! empty($adm)) {
+            $matches = glob(public_path("uploads/Students/{$adm}*"));
+            if (! empty($matches)) {
+                return '/uploads/Students/' . basename($matches[0]);
+            }
+        }
+
+        $customPhotoUrl = $this->custom_fields['photo_url'] ?? null;
+        if ($customPhotoUrl && filter_var($customPhotoUrl, FILTER_VALIDATE_URL) && ! str_contains($customPhotoUrl, 'portal.academyhub.com.ng')) {
+            return $customPhotoUrl;
+        }
+
+        return $avatarFallback;
     }
 
     public function getProfilePhotoUrlAttribute(): ?string
@@ -200,27 +228,89 @@ class Student extends Model
 
     public function hasRealPhoto(): bool
     {
-        if (! $this->passport_photo) {
+        $rawPhoto = $this->passport_photo;
+        if (! $rawPhoto) {
             $customPhotoUrl = $this->custom_fields['photo_url'] ?? null;
-            return ! empty($customPhotoUrl) && filter_var($customPhotoUrl, FILTER_VALIDATE_URL);
+            return ! empty($customPhotoUrl) && filter_var($customPhotoUrl, FILTER_VALIDATE_URL) && ! str_contains($customPhotoUrl, 'portal.academyhub.com.ng');
         }
 
-        if (filter_var($this->passport_photo, FILTER_VALIDATE_URL)) {
+        if (str_contains($rawPhoto, 'portal.academyhub.com.ng')) {
+            $adm = preg_replace('/[^a-zA-Z0-9_\-]/', '', (string) $this->admission_number);
+            if (! empty($adm)) {
+                $matches = glob(public_path("uploads/Students/{$adm}*"));
+                return ! empty($matches);
+            }
+            return false;
+        }
+
+        if (filter_var($rawPhoto, FILTER_VALIDATE_URL)) {
             return true;
         }
 
-        $path = str_replace(['\\', '\\\\'], '/', $this->passport_photo);
+        $path = str_replace(['\\', '\\\\'], '/', $rawPhoto);
         $path = ltrim($path, '/');
         if (str_starts_with($path, 'uploads/')) {
             $path = substr($path, 8);
         }
 
-        return file_exists(public_path('uploads/' . $path));
+        if (file_exists(public_path('uploads/' . $path)) || file_exists(public_path($path))) {
+            return true;
+        }
+
+        $adm = preg_replace('/[^a-zA-Z0-9_\-]/', '', (string) $this->admission_number);
+        if (! empty($adm)) {
+            $matches = glob(public_path("uploads/Students/{$adm}*"));
+            return ! empty($matches);
+        }
+
+        return false;
     }
 
     public function getHasRealPhotoAttribute(): bool
     {
         return $this->hasRealPhoto();
+    }
+
+    /**
+     * Get Base64 Data URI for PDF report cards and booklets.
+     * Prevents broken image icons and avoids external network latency in DomPDF.
+     */
+    public function getPassportPhotoDataUriAttribute(): ?string
+    {
+        $photoUrl = $this->passport_photo_url;
+        if (! $photoUrl) {
+            return null;
+        }
+
+        $filePath = null;
+        if (str_starts_with($photoUrl, '/uploads/')) {
+            $filePath = public_path(substr($photoUrl, 1));
+        } elseif (str_starts_with($photoUrl, '/avatars/')) {
+            $filePath = public_path(substr($photoUrl, 1));
+        } elseif (str_starts_with($photoUrl, '/')) {
+            $filePath = public_path(substr($photoUrl, 1));
+        }
+
+        if ($filePath && file_exists($filePath)) {
+            $ext = strtolower(pathinfo($filePath, PATHINFO_EXTENSION));
+            $mime = match ($ext) {
+                'png' => 'image/png',
+                'gif' => 'image/gif',
+                'webp' => 'image/webp',
+                'svg' => 'image/svg+xml',
+                default => 'image/jpeg',
+            };
+            $content = @file_get_contents($filePath);
+            if ($content !== false && $content !== '') {
+                return 'data:' . $mime . ';base64,' . base64_encode($content);
+            }
+        }
+
+        if (filter_var($photoUrl, FILTER_VALIDATE_URL)) {
+            return $photoUrl;
+        }
+
+        return null;
     }
 
     public function getRouteKeyName(): string

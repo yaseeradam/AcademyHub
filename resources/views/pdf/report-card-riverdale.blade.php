@@ -23,8 +23,9 @@
         .header-cell { display: table-cell; vertical-align: middle; }
         
         /* Logo (Crest) */
-        .logo-wrap { width: 55px; text-align: left; }
-        .logo { width: 42px; height: 42px; object-fit: contain; border: 1px solid {{ $accentColor }}; border-radius: 4px; padding: 2px; background: #fff; }
+        .logo-wrap { width: 55px; text-align: left; vertical-align: middle; }
+        .logo-box { width: 44px; height: 44px; border: 1px solid {{ $accentColor }}; border-radius: 4px; background: #fff; }
+        .logo { max-width: 40px; max-height: 40px; width: auto !important; height: auto !important; display: block; margin: 0 auto; }
         
         /* School Info Centered */
         .school-info { text-align: center; padding: 0 6px; }
@@ -185,12 +186,13 @@
     $homeroomTeacher = $homeroomTeacher ?? 'Ms. Emily Johnson';
 
     // 3. Attendance summaries
-    $enrolled = $timesOpened ?? 90;
-    $present = $timesPresent ?? 84;
-    $absent = $timesAbsent ?? 6;
+    $hasAttendance = ($timesOpened !== null && $timesOpened > 0);
+    $enrolled = $hasAttendance ? $timesOpened : '—';
+    $present = $hasAttendance ? $timesPresent : '—';
+    $absent = $hasAttendance ? $timesAbsent : '—';
     $tardy = 0;
     
-    if (isset($student) && isset($term) && isset($session)) {
+    if ($hasAttendance && isset($student) && isset($term) && isset($session)) {
         $sectionId = (int) ($student->section_id ?? 0);
         if ($sectionId > 0) {
             $tardy = (int) \App\Models\AttendanceMark::query()
@@ -203,15 +205,13 @@
                 ->where('attendance_marks.status', 'Late')
                 ->count();
         }
+    } else {
+        $tardy = '—';
     }
     
-    if ($enrolled == 0) {
-        $enrolled = 90;
-        $present = 84;
-        $absent = 6;
-        $tardy = 2;
-    }
-    $attendanceRate = $enrolled > 0 ? round(($present / $enrolled) * 100) : 93;
+    $attendanceRate = ($hasAttendance && is_numeric($enrolled) && $enrolled > 0 && is_numeric($present))
+        ? round(($present / $enrolled) * 100)
+        : '—';
 
     // 4. Psychomotor Trait mapping
     $pt = get_defined_vars()['psychomotorTraits'] ?? [];
@@ -263,7 +263,13 @@
             <div class="header-table">
                 <div class="header-cell logo-wrap">
                     @if($logoExists)
-                        <img class="logo" src="{{ $logoDataUri }}" alt="Logo">
+                        <table class="logo-box" cellpadding="0" cellspacing="0">
+                            <tr>
+                                <td align="center" valign="middle" style="width: 44px; height: 44px; text-align: center; vertical-align: middle;">
+                                    <img class="logo" src="{{ $logoDataUri }}" alt="Logo">
+                                </td>
+                            </tr>
+                        </table>
                     @endif
                 </div>
                 <div class="header-cell school-info">
@@ -496,7 +502,7 @@
                                     {{-- Attendance Rate Summary --}}
                                     <div style="margin-top: 6px; background: {{ $bgLight }}; border: 1.5px solid {{ $themeColor }}; border-radius: 5px; padding: 6px; text-align: center;">
                                         <div style="font-size: 7px; font-weight: bold; color: {{ $themeColor }}; text-transform: uppercase; letter-spacing: 0.5px;">Attendance Rate</div>
-                                        <div style="font-size: 15px; font-weight: 900; color: {{ $themeColor }}; margin-top: 1px;">{{ $attendanceRate }}%</div>
+                                        <div style="font-size: 15px; font-weight: 900; color: {{ $themeColor }}; margin-top: 1px;">{{ is_numeric($attendanceRate) ? $attendanceRate . '%' : '—' }}</div>
                                     </div>
                                 </div>
                             @endif

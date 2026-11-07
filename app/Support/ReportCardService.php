@@ -342,38 +342,60 @@ class ReportCardService
     private function attendanceSummary(Student $student, int $term, string $session): array
     {
         $sectionId = (int) ($student->section_id ?? 0);
+        $allowWeekends = (bool) TenantSettings::get('allow_weekend_attendance', false);
 
-        $sheetsQuery = AttendanceSheet::query()
+        // Parse valid academic session years (e.g. "2026/2027" -> [2026, 2027])
+        $sessionYears = [];
+        if (preg_match('/^(\d{4})\/(\d{4})$/', $session, $m)) {
+            $sessionYears = [(int) $m[1], (int) $m[2]];
+        }
+
+        // Query all attendance sheets for this class and section
+        $sheets = AttendanceSheet::query()
             ->where('class_id', $student->class_id)
             ->when($sectionId > 0, fn($q) => $q->where('section_id', $sectionId), fn($q) => $q->whereNull('section_id'))
             ->where('term', $term)
-            ->where('session', $session);
+            ->where('session', $session)
+            ->get(['id', 'date']);
 
-        $timesOpened = (int) $sheetsQuery->count();
+        // Filter out corrupted dates and unwanted weekends
+        $validSheetIds = $sheets->filter(function ($sheet) use ($allowWeekends, $sessionYears) {
+            if (! $sheet->date) {
+                return false;
+            }
+            try {
+                $c = \Carbon\Carbon::parse($sheet->date);
+                if (! empty($sessionYears) && ! in_array($c->year, $sessionYears, true)) {
+                    return false;
+                }
+                if (! $allowWeekends && $c->isWeekend()) {
+                    return false;
+                }
+                return true;
+            } catch (\Throwable) {
+                return false;
+            }
+        })->pluck('id');
 
-        $countsQuery = AttendanceMark::query()
-            ->join('attendance_sheets', 'attendance_sheets.id', '=', 'attendance_marks.sheet_id')
-            ->where('attendance_marks.student_id', $student->id)
-            ->where('attendance_sheets.class_id', $student->class_id)
-            ->when($sectionId > 0, fn($q) => $q->where('attendance_sheets.section_id', $sectionId), fn($q) => $q->whereNull('attendance_sheets.section_id'))
-            ->where('attendance_sheets.term', $term)
-            ->where('attendance_sheets.session', $session);
+        $timesOpened = $validSheetIds->count();
 
-        $counts = $countsQuery
-            ->selectRaw("SUM(CASE WHEN attendance_marks.status = 'Absent' THEN 1 ELSE 0 END) AS absent_count")
-            ->selectRaw("SUM(CASE WHEN attendance_marks.status IN ('Present','Late','Excused') THEN 1 ELSE 0 END) AS present_count")
-            ->first();
-
-        $timesAbsent = (int) ($counts?->absent_count ?? 0);
-        $timesPresent = (int) ($counts?->present_count ?? 0);
-
-        if ($timesOpened === 0 && ($timesPresent + $timesAbsent) > 0) {
-            $timesOpened = $timesPresent + $timesAbsent;
-        }
-
-        if ($timesOpened <= 0 && $timesPresent === 0 && $timesAbsent === 0) {
+        if ($timesOpened === 0) {
             return [null, null, null];
         }
+
+        // Query attendance marks for this student on the valid sheets
+        $marks = AttendanceMark::query()
+            ->whereIn('sheet_id', $validSheetIds)
+            ->where('student_id', $student->id)
+            ->get(['id', 'sheet_id', 'status']);
+
+        $timesPresent = (int) $marks->whereIn('status', ['Present', 'Late', 'Excused'])->count();
+        $explicitAbsent = (int) $marks->where('status', 'Absent')->count();
+
+        // Enforce mathematical integrity:
+        // A student is either Present or Absent on each valid session the school opened.
+        $timesAbsent = max($explicitAbsent, $timesOpened - $timesPresent);
+        $timesOpened = $timesPresent + $timesAbsent;
 
         return [$timesOpened, $timesPresent, $timesAbsent];
     }

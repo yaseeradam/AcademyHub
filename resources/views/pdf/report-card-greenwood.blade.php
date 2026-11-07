@@ -14,9 +14,9 @@
 
         /* Top Header */
         .header-table { display: table; width: 100%; border-bottom: 2px solid #004b49; padding-bottom: 3px; margin-bottom: 4px; }
-        .header-cell { display: table-cell; vertical-align: middle; }
-        .logo-wrap { width: 55px; text-align: left; }
-        .logo { width: 44px; height: 44px; object-fit: contain; border: 1px solid #c5a059; border-radius: 4px; padding: 1px; background: #fff; }
+        .logo-wrap { width: 55px; text-align: left; vertical-align: middle; }
+        .logo-box { width: 44px; height: 44px; border: 1px solid #c5a059; border-radius: 4px; background: #fff; }
+        .logo { max-width: 40px; max-height: 40px; width: auto !important; height: auto !important; display: block; margin: 0 auto; }
         .school-info { text-align: left; padding-left: 4px; }
         .school-name { font-size: 15px; font-weight: 900; color: #004b49; text-transform: uppercase; letter-spacing: 0.5px; }
         .school-tagline { font-size: 8px; font-weight: bold; color: #c5a059; font-style: italic; margin-top: 1px; }
@@ -176,10 +176,13 @@
     $homeroomTeacher = $homeroomTeacher ?? 'Class Teacher';
 
     // Attendance Calculations
-    $enrolled = $timesOpened ?? 0;
-    $present = $timesPresent ?? 0;
-    $absent = $timesAbsent ?? 0;
-    $attendanceRate = $enrolled > 0 ? round(($present / $enrolled) * 100) : 0;
+    $hasAttendance = ($timesOpened !== null && $timesOpened > 0);
+    $enrolled = $hasAttendance ? $timesOpened : '—';
+    $present = $hasAttendance ? $timesPresent : '—';
+    $absent = $hasAttendance ? $timesAbsent : '—';
+    $attendanceRate = ($hasAttendance && is_numeric($enrolled) && $enrolled > 0 && is_numeric($present))
+        ? round(($present / $enrolled) * 100)
+        : '—';
 
     // Helper for performance label
     $getPerformanceText = function($total) {
@@ -202,7 +205,13 @@
         <div class="header-table">
             <div class="header-cell logo-wrap">
                 @if($logoExists)
-                    <img class="logo" src="{{ $logoDataUri }}" alt="Logo">
+                    <table class="logo-box" cellpadding="0" cellspacing="0">
+                        <tr>
+                            <td align="center" valign="middle" style="width: 44px; height: 44px; text-align: center; vertical-align: middle;">
+                                <img class="logo" src="{{ $logoDataUri }}" alt="Logo">
+                            </td>
+                        </tr>
+                    </table>
                 @endif
             </div>
             <div class="header-cell school-info">
@@ -350,7 +359,7 @@
                                 </tr>
                                 <tr>
                                     <td><strong>Attendance Rate</strong></td>
-                                    <td class="val" style="color: #004b49; font-weight: 900;">{{ $attendanceRate }}%</td>
+                                    <td class="val" style="color: #004b49; font-weight: 900;">{{ is_numeric($attendanceRate) ? $attendanceRate . '%' : '—' }}</td>
                                 </tr>
                             </tbody>
                         </table>

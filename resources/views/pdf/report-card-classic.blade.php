@@ -45,18 +45,26 @@
         }
 
         .logo-cell {
-            width: 70px;
+            width: 62px;
             text-align: center;
+            vertical-align: middle;
+        }
+
+        .logo-box {
+            width: 52px;
+            height: 52px;
+            border: 1.5px solid #374151;
+            border-radius: 4px;
+            background: white;
         }
 
         .logo {
-            width: 54px;
-            height: 54px;
-            object-fit: contain;
-            border: 1.5px solid #374151;
-            border-radius: 4px;
-            padding: 2px;
-            background: white;
+            max-width: 46px;
+            max-height: 46px;
+            width: auto !important;
+            height: auto !important;
+            display: block;
+            margin: 0 auto;
         }
 
         .school-name {
@@ -402,7 +410,13 @@
                 <div class="header-table">
                     @if($logoExists)
                         <div class="header-cell logo-cell">
-                            <img src="{{ $logoDataUri }}" alt="Logo" class="logo" />
+                            <table class="logo-box" cellpadding="0" cellspacing="0">
+                                <tr>
+                                    <td align="center" valign="middle" style="width: 52px; height: 52px; text-align: center; vertical-align: middle;">
+                                        <img src="{{ $logoDataUri }}" alt="Logo" class="logo" />
+                                    </td>
+                                </tr>
+                            </table>
                         </div>
                     @endif
                     <div class="header-cell" style="text-align: center;">
@@ -423,7 +437,13 @@
                     </div>
                     @if($logoExists)
                         <div class="header-cell logo-cell">
-                            <img src="{{ $logoPath }}" alt="Logo" class="logo" />
+                            <table class="logo-box" cellpadding="0" cellspacing="0">
+                                <tr>
+                                    <td align="center" valign="middle" style="width: 52px; height: 52px; text-align: center; vertical-align: middle;">
+                                        <img src="{{ $logoDataUri }}" alt="Logo" class="logo" />
+                                    </td>
+                                </tr>
+                            </table>
                         </div>
                     @endif
                 </div>

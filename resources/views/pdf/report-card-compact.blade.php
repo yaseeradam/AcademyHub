@@ -117,15 +117,7 @@
     $logoDataUri = $toBase64($logoPath);
 
     // Resolve student photo and encode as Base64 Data URI
-    $photoDataUri = null;
-    if ($student->passport_photo) {
-        $cleanRel = str_replace('\\', '/', $student->passport_photo);
-        if (file_exists(public_path('uploads/' . $cleanRel))) {
-            $photoDataUri = $toBase64(public_path('uploads/' . $cleanRel));
-        } elseif (file_exists(public_path($cleanRel))) {
-            $photoDataUri = $toBase64(public_path($cleanRel));
-        }
-    }
+    $photoDataUri = $student->passport_photo_data_uri;
 
     $opts = $rcOptions ?? [];
     $showPosition                  = $opts['show_position'] ?? true;

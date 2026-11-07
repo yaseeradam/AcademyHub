@@ -41,11 +41,18 @@
                 </div>
             </div>
         </div>
-        @if($student->passport_photo)
-            <div style="display: table-cell; width: 55px; text-align: center; vertical-align: middle; padding-left: 4px;">
-                <img src="{{ public_path('uploads/' . str_replace('\\', '/', $student->passport_photo)) }}"
-                    alt="Photo" style="width: 46px; height: 56px; border: 1.5px solid {{ $siBorderColor }}; border-radius: 3px; object-fit: cover;" />
-            </div>
-        @endif
+        @php
+            $rcPhotoUri = $student->passport_photo_data_uri;
+        @endphp
+        <div style="display: table-cell; width: 52px; text-align: center; vertical-align: middle; padding-left: 4px;">
+            @if($rcPhotoUri)
+                <img src="{{ $rcPhotoUri }}"
+                    alt="Photo" style="width: 44px; height: 52px; border: 1.5px solid {{ $siBorderColor }}; border-radius: 3px; object-fit: cover;" />
+            @else
+                <div style="width: 44px; height: 52px; border: 1.5px solid {{ $siBorderColor }}; border-radius: 3px; background: #f8fafc; text-align: center; line-height: 50px; font-size: 13px; font-weight: bold; color: {{ $siBorderColor }};">
+                    {{ strtoupper(substr($student->first_name ?? 'S', 0, 1)) }}
+                </div>
+            @endif
+        </div>
     </div>
 </div>

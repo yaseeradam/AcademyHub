@@ -124,13 +124,7 @@
         $base64Logo = 'data:image/' . $type . ';base64,' . base64_encode($data);
     }
 
-    $base64StudentPhoto = null;
-    $studentPhotoPath = $student->photo ? public_path('uploads/' . str_replace('\\', '/', $student->photo)) : null;
-    if ($studentPhotoPath && file_exists($studentPhotoPath)) {
-        $type = pathinfo($studentPhotoPath, PATHINFO_EXTENSION);
-        $data = file_get_contents($studentPhotoPath);
-        $base64StudentPhoto = 'data:image/' . $type . ';base64,' . base64_encode($data);
-    }
+    $base64StudentPhoto = $student->passport_photo_data_uri;
 
     $address = $schoolAddress ?? config('academyhub.school_address', '');
     $phone = $schoolPhone ?? config('academyhub.school_phone', '');
