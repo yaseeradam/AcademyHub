@@ -391,9 +391,9 @@
                                             Academic Session {{ $dossier['session'] }}
                                         </h2>
                                         <p class="text-xs text-slate-300 font-medium mt-1">
-                                            Class: <span class="font-bold text-white">{{ $dossier['student']['class_name'] }}</span>
-                                            @if($dossier['student']['admission_number'])
-                                                • Admission No: <span class="font-bold text-white">{{ $dossier['student']['admission_number'] }}</span>
+                                            Class: <span class="font-bold text-white">{{ $dossier['student']->schoolClass?->name ?? 'N/A' }}</span>
+                                            @if($dossier['student']->admission_number)
+                                                • Admission No: <span class="font-bold text-white">{{ $dossier['student']->admission_number }}</span>
                                             @endif
                                         </p>
                                     </div>
@@ -424,15 +424,17 @@
                                 <div class="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4 border-t border-white/10 pt-4">
                                     <div>
                                         <div class="text-[10px] font-black uppercase tracking-wider text-slate-400">Cumulative Average</div>
-                                        <div class="text-xl font-black text-white">{{ $dossier['summary']['cumulative_average'] ?? 0 }}%</div>
+                                        <div class="text-xl font-black text-white">{{ $dossier['cumulativeAnnualAverage'] ?? 0 }}%</div>
                                     </div>
                                     <div>
-                                        <div class="text-[10px] font-black uppercase tracking-wider text-slate-400">Annual Grade</div>
-                                        <div class="text-xl font-black text-emerald-400">{{ $dossier['summary']['cumulative_grade'] ?? '-' }}</div>
+                                        <div class="text-[10px] font-black uppercase tracking-wider text-slate-400">Annual Position</div>
+                                        <div class="text-xl font-black text-emerald-400">
+                                            {{ $dossier['annualPosition'] ?? '—' }} <span class="text-xs text-emerald-300 font-bold">/ {{ $dossier['totalStudents'] ?? 0 }}</span>
+                                        </div>
                                     </div>
                                     <div>
                                         <div class="text-[10px] font-black uppercase tracking-wider text-slate-400">Attendance Rate</div>
-                                        <div class="text-xl font-black text-cyan-300">{{ $dossier['attendance']['rate'] ?? 0 }}%</div>
+                                        <div class="text-xl font-black text-cyan-300">{{ $dossier['attendanceTimeline']['rate'] ?? 0 }}%</div>
                                     </div>
                                     <div>
                                         <div class="text-[10px] font-black uppercase tracking-wider text-slate-400">Progression Status</div>
@@ -445,7 +447,7 @@
                             <div class="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
                                 <div class="bg-gray-50/80 px-5 py-3 border-b border-gray-100 flex items-center justify-between">
                                     <h3 class="text-xs font-black uppercase tracking-wider text-gray-700">Multi-Term Subject Matrix</h3>
-                                    <span class="text-xs text-gray-400 font-semibold">{{ count($dossier['subjects']) }} Subjects Tracked</span>
+                                    <span class="text-xs text-gray-400 font-semibold">{{ count($dossier['subjectRows']) }} Subjects Tracked</span>
                                 </div>
                                 <div class="overflow-x-auto">
                                     <table class="w-full text-left text-xs">
@@ -461,27 +463,32 @@
                                             </tr>
                                         </thead>
                                         <tbody class="divide-y divide-gray-100 font-medium">
-                                            @foreach($dossier['subjects'] as $sub)
+                                            @foreach($dossier['subjectRows'] as $row)
+                                                @php
+                                                    $t1 = $row['terms'][1] ?? ['is_pending' => true, 'total' => null];
+                                                    $t2 = $row['terms'][2] ?? ['is_pending' => true, 'total' => null];
+                                                    $t3 = $row['terms'][3] ?? ['is_pending' => true, 'total' => null];
+                                                @endphp
                                                 <tr class="hover:bg-gray-50/50 transition-colors">
-                                                    <td class="py-3 px-4 font-bold text-gray-900">{{ $sub['name'] }}</td>
-                                                    <td class="py-3 px-3 text-center {{ $sub['term1']['is_pending'] ? 'text-gray-300' : 'text-gray-700' }}">
-                                                        {{ $sub['term1']['is_pending'] ? '-' : ($sub['term1']['total'] ?? '-') }}
+                                                    <td class="py-3 px-4 font-bold text-gray-900">{{ $row['subject']?->name ?? 'Subject' }}</td>
+                                                    <td class="py-3 px-3 text-center {{ $t1['is_pending'] ? 'text-gray-300' : 'text-gray-700 font-bold' }}">
+                                                        {{ $t1['is_pending'] ? '-' : ($t1['total'] ?? '-') }}
                                                     </td>
-                                                    <td class="py-3 px-3 text-center {{ $sub['term2']['is_pending'] ? 'text-gray-300' : 'text-gray-700' }}">
-                                                        {{ $sub['term2']['is_pending'] ? '-' : ($sub['term2']['total'] ?? '-') }}
+                                                    <td class="py-3 px-3 text-center {{ $t2['is_pending'] ? 'text-gray-300' : 'text-gray-700 font-bold' }}">
+                                                        {{ $t2['is_pending'] ? '-' : ($t2['total'] ?? '-') }}
                                                     </td>
-                                                    <td class="py-3 px-3 text-center {{ $sub['term3']['is_pending'] ? 'text-gray-300' : 'text-gray-700' }}">
-                                                        {{ $sub['term3']['is_pending'] ? '-' : ($sub['term3']['total'] ?? '-') }}
+                                                    <td class="py-3 px-3 text-center {{ $t3['is_pending'] ? 'text-gray-300' : 'text-gray-700 font-bold' }}">
+                                                        {{ $t3['is_pending'] ? '-' : ($t3['total'] ?? '-') }}
                                                     </td>
                                                     <td class="py-3 px-3 text-center font-black bg-indigo-50/30 text-indigo-900">
-                                                        {{ $sub['annual_average'] ?? '-' }}%
+                                                        {{ $row['annual_average'] !== null ? $row['annual_average'].'%' : '-' }}
                                                     </td>
                                                     <td class="py-3 px-3 text-center font-bold">
-                                                        <span class="rounded px-1.5 py-0.5 text-[10px] {{ ($sub['annual_average'] ?? 0) >= 50 ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-700' }}">
-                                                            {{ $sub['annual_grade'] ?? '-' }}
+                                                        <span class="rounded px-1.5 py-0.5 text-[10px] {{ ($row['annual_average'] ?? 0) >= 50 ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-700' }}">
+                                                            {{ $row['annual_grade'] ?? '-' }}
                                                         </span>
                                                     </td>
-                                                    <td class="py-3 px-3 text-center text-gray-500 font-semibold">{{ $sub['rank'] ?? '-' }}</td>
+                                                    <td class="py-3 px-3 text-center text-gray-500 font-semibold">{{ $row['annual_rank'] ?? '-' }}</td>
                                                 </tr>
                                             @endforeach
                                         </tbody>
@@ -503,9 +510,9 @@
                                         <div class="text-sm font-black text-slate-900">{{ $dossier['promotion']['status_label'] }}</div>
                                         <div class="text-xs text-slate-500 mt-1">{{ $dossier['promotion']['verdict_reason'] }}</div>
                                     </div>
-                                    @if(!empty($dossier['remarks']['principal']))
+                                    @if(!empty($dossier['principalRemarks']))
                                         <div class="mt-3 text-xs text-slate-600 italic">
-                                            "{{ $dossier['remarks']['principal'] }}"
+                                            "{{ $dossier['principalRemarks'] }}"
                                             <span class="block not-italic text-[10px] text-slate-400 font-bold mt-1">— Principal / Head of School</span>
                                         </div>
                                     @endif
@@ -522,20 +529,20 @@
                                     <div class="grid grid-cols-3 gap-2 text-center">
                                         <div class="rounded-xl bg-gray-50 p-3">
                                             <div class="text-[10px] font-bold text-gray-400">Term 1</div>
-                                            <div class="text-sm font-black text-gray-800">{{ $dossier['attendance']['term1']['present'] ?? 0 }} / {{ $dossier['attendance']['term1']['opened'] ?? 0 }}</div>
+                                            <div class="text-sm font-black text-gray-800">{{ $dossier['attendanceTimeline']['timeline'][1]['present'] ?? 0 }} / {{ $dossier['attendanceTimeline']['timeline'][1]['opened'] ?? 0 }}</div>
                                         </div>
                                         <div class="rounded-xl bg-gray-50 p-3">
                                             <div class="text-[10px] font-bold text-gray-400">Term 2</div>
-                                            <div class="text-sm font-black text-gray-800">{{ $dossier['attendance']['term2']['present'] ?? 0 }} / {{ $dossier['attendance']['term2']['opened'] ?? 0 }}</div>
+                                            <div class="text-sm font-black text-gray-800">{{ $dossier['attendanceTimeline']['timeline'][2]['present'] ?? 0 }} / {{ $dossier['attendanceTimeline']['timeline'][2]['opened'] ?? 0 }}</div>
                                         </div>
                                         <div class="rounded-xl bg-gray-50 p-3">
                                             <div class="text-[10px] font-bold text-gray-400">Term 3</div>
-                                            <div class="text-sm font-black text-gray-800">{{ $dossier['attendance']['term3']['present'] ?? 0 }} / {{ $dossier['attendance']['term3']['opened'] ?? 0 }}</div>
+                                            <div class="text-sm font-black text-gray-800">{{ $dossier['attendanceTimeline']['timeline'][3]['present'] ?? 0 }} / {{ $dossier['attendanceTimeline']['timeline'][3]['opened'] ?? 0 }}</div>
                                         </div>
                                     </div>
                                     <div class="mt-3 text-xs text-gray-500 flex justify-between items-center px-1">
-                                        <span>Total Days Present: <strong>{{ $dossier['attendance']['annual_present'] }}</strong> / {{ $dossier['attendance']['annual_opened'] }}</span>
-                                        <span class="font-bold text-emerald-600">{{ $dossier['attendance']['rate'] }}% Attendance</span>
+                                        <span>Total Days Present: <strong>{{ $dossier['attendanceTimeline']['totalPresent'] ?? 0 }}</strong> / {{ $dossier['attendanceTimeline']['totalOpened'] ?? 0 }}</span>
+                                        <span class="font-bold text-emerald-600">{{ $dossier['attendanceTimeline']['rate'] ?? 0 }}% Attendance</span>
                                     </div>
                                 </div>
                             </div>
