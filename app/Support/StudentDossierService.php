@@ -368,11 +368,11 @@ class StudentDossierService
             $opened = $sheetIds->count();
             if ($opened > 0) {
                 $marks = AttendanceMark::query()
-                    ->whereIn('attendance_sheet_id', $sheetIds)
+                    ->whereIn('sheet_id', $sheetIds)
                     ->where('student_id', $student->id)
                     ->get();
 
-                $present = $marks->whereIn('status', ['Present', 'Late'])->count();
+                $present = $marks->whereIn('status', ['Present', 'Late', 'Excused'])->count();
                 $absent = $marks->where('status', 'Absent')->count();
             } else {
                 $present = 0;
