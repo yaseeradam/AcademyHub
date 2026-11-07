@@ -57,7 +57,7 @@ return [
     'certificate_default_body' => env('ACADEMYHUB_CERTIFICATE_DEFAULT_BODY'),
     'certificate_template' => env('ACADEMYHUB_CERTIFICATE_TEMPLATE', 'modern'),
 
-    'report_card_template' => env('ACADEMYHUB_REPORT_CARD_TEMPLATE', 'compact'),
+    'report_card_template' => env('ACADEMYHUB_REPORT_CARD_TEMPLATE', 'elegant'),
 
     // Report Card display options
     'rc_show_position' => true,

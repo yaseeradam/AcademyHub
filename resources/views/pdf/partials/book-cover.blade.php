@@ -20,22 +20,14 @@
     $className = $student->schoolClass?->name ?? 'Class';
     $sectionName = $student->section?->name ? " - {$student->section->name}" : '';
     $classFull = "{$className}{$sectionName}";
-
-    $termsEnclosed = $termsEnclosed ?? [1];
 @endphp
 
 <div class="book-cover-page">
     <div class="cover-outer-frame">
         <div class="cover-inner-frame">
-            {{-- Corner Ornaments --}}
-            <div class="corner-ornament corner-top-left"></div>
-            <div class="corner-ornament corner-top-right"></div>
-            <div class="corner-ornament corner-bottom-left"></div>
-            <div class="corner-ornament corner-bottom-right"></div>
-
-            {{-- School Header --}}
+            {{-- Institutional Masthead --}}
             <div class="cover-header">
-                <div class="cover-logo-container">
+                <div class="cover-logo-wrapper">
                     @if ($base64Logo)
                         <div class="cover-logo-box">
                             <img src="{{ $base64Logo }}" class="cover-logo-img" alt="School Crest" />
@@ -48,29 +40,31 @@
                 </div>
 
                 <div class="cover-school-name">{{ $schoolName }}</div>
-                <div class="cover-school-motto">"{{ $motto }}"</div>
-                <div class="cover-school-address">
-                    {{ $address }}@if($phone) • Tel: {{ $phone }}@endif
+                @if ($motto)
+                    <div class="cover-school-motto">{{ $motto }}</div>
+                @endif
+                <div class="cover-school-meta">
+                    {{ $address }}@if($phone) &bull; Tel: {{ $phone }}@endif
                 </div>
             </div>
 
-            {{-- Academic Divider Ribbon --}}
-            <div class="cover-divider-wrapper">
-                <div class="cover-divider-line"></div>
-                <div class="cover-divider-badge">✦ OFFICIAL ACADEMIC DOSSIER ✦</div>
-                <div class="cover-divider-line"></div>
+            {{-- Classical Divider --}}
+            <div class="cover-fillet">
+                <div class="fillet-line"></div>
+                <div class="fillet-tag">OFFICIAL ACADEMIC ARCHIVE</div>
+                <div class="fillet-line"></div>
             </div>
 
-            {{-- Document Title Ribbon --}}
-            <div class="cover-title-section">
-                <div class="cover-main-title">OFFICIAL STUDENT REPORT BOOK</div>
-                <div class="cover-subtitle">Continuous Assessment Portfolio & Cumulative Terminal Records</div>
-                <div class="cover-session-pill">
+            {{-- Document Title --}}
+            <div class="cover-title-area">
+                <div class="cover-doc-type">CONTINUOUS ASSESSMENT & TERMINAL RECORDS</div>
+                <div class="cover-doc-title">STUDENT REPORT BOOKLET</div>
+                <div class="cover-session-badge">
                     {{ $session }} ACADEMIC SESSION
                 </div>
             </div>
 
-            {{-- Student Showcase Card --}}
+            {{-- Student Credential Plaque --}}
             <div class="cover-student-card">
                 <table class="cover-student-table">
                     <tr>
@@ -80,37 +74,36 @@
                                     <img src="{{ $base64StudentPhoto }}" class="cover-photo-img" alt="{{ $studentName }}" />
                                 @else
                                     <div class="cover-photo-placeholder">
-                                        <div class="placeholder-avatar">{{ strtoupper(substr($student->first_name ?? 'S', 0, 1)) }}</div>
-                                        <div class="placeholder-sub">STUDENT</div>
+                                        <div class="placeholder-initial">{{ strtoupper(substr($student->first_name ?? 'S', 0, 1)) }}</div>
+                                        <div class="placeholder-label">STUDENT</div>
                                     </div>
                                 @endif
                             </div>
                         </td>
                         <td class="cover-meta-cell">
-                            <div class="cover-student-name">{{ $studentName }}</div>
-                            <div class="cover-student-badge-row">
-                                <span class="cover-status-tag">OFFICIAL REGISTERED PUPIL</span>
-                                <span class="cover-class-tag">{{ $classFull }}</span>
+                            <div class="cover-name-banner">
+                                <div class="cover-student-name">{{ $studentName }}</div>
+                                <div class="cover-student-class">{{ $classFull }}</div>
                             </div>
 
-                            <table class="cover-bio-grid">
+                            <table class="cover-data-grid">
                                 <tr>
-                                    <td class="bio-k">Admission Number:</td>
-                                    <td class="bio-v"><strong>{{ $student->admission_number ?? 'N/A' }}</strong></td>
-                                    <td class="bio-k">Gender:</td>
-                                    <td class="bio-v"><strong>{{ ucfirst($student->gender ?? '—') }}</strong></td>
+                                    <td class="data-key">Admission Number</td>
+                                    <td class="data-val"><strong>{{ $student->admission_number ?? 'N/A' }}</strong></td>
+                                    <td class="data-key">Gender</td>
+                                    <td class="data-val">{{ ucfirst($student->gender ?? '—') }}</td>
                                 </tr>
                                 <tr>
-                                    <td class="bio-k">Class & Arm:</td>
-                                    <td class="bio-v"><strong>{{ $classFull }}</strong></td>
-                                    <td class="bio-k">Date of Birth:</td>
-                                    <td class="bio-v"><strong>{{ $student->dob ? \Carbon\Carbon::parse($student->dob)->format('d M, Y') : '—' }}</strong></td>
+                                    <td class="data-key">Date of Birth</td>
+                                    <td class="data-val">{{ $student->dob ? \Carbon\Carbon::parse($student->dob)->format('d F, Y') : '—' }}</td>
+                                    <td class="data-key">Blood Group</td>
+                                    <td class="data-val">{{ $student->blood_group ?: '—' }}</td>
                                 </tr>
                                 <tr>
-                                    <td class="bio-k">Student Registry ID:</td>
-                                    <td class="bio-v">#{{ str_pad($student->id, 5, '0', STR_PAD_LEFT) }}</td>
-                                    <td class="bio-k">Blood Group:</td>
-                                    <td class="bio-v">{{ $student->blood_group ?: '—' }}</td>
+                                    <td class="data-key">Enrolment Status</td>
+                                    <td class="data-val">Active Scholar</td>
+                                    <td class="data-key">Record ID</td>
+                                    <td class="data-val">#{{ str_pad($student->id, 5, '0', STR_PAD_LEFT) }}</td>
                                 </tr>
                             </table>
                         </td>
@@ -118,89 +111,74 @@
                 </table>
             </div>
 
-            {{-- Terminal Index / Table of Contents --}}
-            <div class="cover-registry-section">
-                <div class="cover-registry-heading">COMPREHENSIVE TERMINAL RECORDS REGISTRY</div>
-                <table class="cover-registry-table">
+            {{-- Folio Index --}}
+            <div class="cover-folio-section">
+                <div class="folio-heading">CONTENTS OF THIS RECORD BOOK</div>
+                <table class="folio-table">
                     <thead>
                         <tr>
-                            <th style="width: 26%;">RECORD TITLE</th>
-                            <th style="width: 52%;">SCOPE & DESCRIPTION</th>
-                            <th style="width: 22%;">RECORD STATUS</th>
+                            <th style="width: 25%;">FOLIO SECTION</th>
+                            <th style="width: 55%;">DESCRIPTION & COVERAGE</th>
+                            <th style="width: 20%; text-align: center;">RECORD</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr>
-                            <td class="reg-title">FIRST TERM REPORT</td>
-                            <td class="reg-desc">Continuous Assessment Tests, Terminal Examination, Affective Traits & Attendance</td>
-                            <td class="reg-status">
-                                <span class="status-pill {{ in_array(1, $termsEnclosed) ? 'status-enclosed' : 'status-pending' }}">
-                                    {{ in_array(1, $termsEnclosed) ? 'ENCLOSED IN BOOK' : 'NOT RECORDED' }}
-                                </span>
-                            </td>
+                            <td class="folio-num">FOLIO I</td>
+                            <td class="folio-desc">First Term Continuous Assessment, Tests & Terminal Examination</td>
+                            <td class="folio-tag">Enclosed</td>
                         </tr>
                         <tr>
-                            <td class="reg-title">SECOND TERM REPORT</td>
-                            <td class="reg-desc">Continuous Assessment Tests, Terminal Examination, Affective Traits & Attendance</td>
-                            <td class="reg-status">
-                                <span class="status-pill {{ in_array(2, $termsEnclosed) ? 'status-enclosed' : 'status-pending' }}">
-                                    {{ in_array(2, $termsEnclosed) ? 'ENCLOSED IN BOOK' : 'PENDING' }}
-                                </span>
-                            </td>
+                            <td class="folio-num">FOLIO II</td>
+                            <td class="folio-desc">Second Term Continuous Assessment, Tests & Terminal Examination</td>
+                            <td class="folio-tag">Enclosed</td>
                         </tr>
                         <tr>
-                            <td class="reg-title">THIRD TERM REPORT</td>
-                            <td class="reg-desc">Continuous Assessment Tests, Promotional Examination, Affective Traits & Attendance</td>
-                            <td class="reg-status">
-                                <span class="status-pill {{ in_array(3, $termsEnclosed) ? 'status-enclosed' : 'status-pending' }}">
-                                    {{ in_array(3, $termsEnclosed) ? 'ENCLOSED IN BOOK' : 'PENDING' }}
-                                </span>
-                            </td>
+                            <td class="folio-num">FOLIO III</td>
+                            <td class="folio-desc">Third Term Continuous Assessment, Tests & Promotional Examination</td>
+                            <td class="folio-tag">Enclosed</td>
                         </tr>
                         <tr>
-                            <td class="reg-title">ANNUAL ACADEMIC DOSSIER</td>
-                            <td class="reg-desc">Cumulative 3-Term Ledger, Longitudinal Attendance, Psychomotor Portfolio & Progression Verdict</td>
-                            <td class="reg-status">
-                                <span class="status-pill status-enclosed">ENCLOSED IN BOOK</span>
-                            </td>
+                            <td class="folio-num">ANNUAL DOSSIER</td>
+                            <td class="folio-desc">Cumulative Three-Term Ledger, Attendance Portfolio & Promotion Verdict</td>
+                            <td class="folio-tag">Enclosed</td>
                         </tr>
                     </tbody>
                 </table>
             </div>
 
-            {{-- Institutional Certification & Verification Seal --}}
-            <div class="cover-cert-section">
-                <table class="cover-cert-table">
+            {{-- Institutional Endorsement & Seal --}}
+            <div class="cover-endorsement-section">
+                <table class="cover-endorsement-table">
                     <tr>
-                        <td class="cover-cert-cell cert-left">
-                            <div class="cert-label">INSTITUTIONAL CERTIFICATION</div>
-                            <div class="cert-text">
-                                This official student report booklet is a certified continuous academic record issued under the authority of {{ $schoolName }}. Any alteration or erasure renders this document void.
+                        <td class="endorse-left">
+                            <div class="endorse-heading">OFFICIAL CERTIFICATION</div>
+                            <div class="endorse-text">
+                                This volume constitutes the continuous assessment record of {{ $schoolName }}. Certified valid only when bearing the official institutional watermark and executive signature.
                             </div>
-                            <div class="cert-issue-date">
-                                Date of Issuance: <strong>{{ now()->format('d F, Y') }}</strong>
+                            <div class="endorse-date">
+                                Date of Issue: <strong>{{ now()->format('d F, Y') }}</strong>
                             </div>
                         </td>
 
-                        <td class="cover-cert-cell cert-center">
+                        <td class="endorse-center">
                             @if (!empty($qrCodeUri) && ($rcOptions['show_qr_code'] ?? true))
-                                <div class="cover-qr-frame">
-                                    <img src="{{ $qrCodeUri }}" class="cover-qr-img" alt="Digital Verification" />
+                                <div class="endorse-qr-box">
+                                    <img src="{{ $qrCodeUri }}" class="endorse-qr-img" alt="Digital Seal" />
                                 </div>
-                                <div class="cover-qr-caption">SCAN TO VERIFY RECORD</div>
+                                <div class="endorse-qr-text">DIGITAL RECORD SEAL</div>
                             @endif
                         </td>
 
-                        <td class="cover-cert-cell cert-right">
+                        <td class="endorse-right">
                             @if (!empty($signatureImages['principal']) && file_exists($signatureImages['principal']))
-                                <img src="data:image/png;base64,{{ base64_encode(file_get_contents($signatureImages['principal'])) }}" class="cover-sig-img" alt="Principal Signature" />
-                                <div class="cover-sig-line has-img">{{ $principalName }}</div>
+                                <img src="data:image/png;base64,{{ base64_encode(file_get_contents($signatureImages['principal'])) }}" class="endorse-sig-img" alt="Principal Signature" />
+                                <div class="endorse-sig-line has-img">{{ $principalName }}</div>
                             @else
-                                <div class="cover-sig-spacer"></div>
-                                <div class="cover-sig-line">{{ $principalName }}</div>
+                                <div class="endorse-sig-spacer"></div>
+                                <div class="endorse-sig-line">{{ $principalName }}</div>
                             @endif
-                            <div class="cover-sig-sub">{{ $principalTitle }} / Head of School</div>
-                            <div class="cover-seal-stamp">OFFICIAL SEAL & SIGNATURE</div>
+                            <div class="endorse-sig-title">{{ $principalTitle }} &bull; Head of Institution</div>
                         </td>
                     </tr>
                 </table>

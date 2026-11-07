@@ -85,8 +85,11 @@ class ReportCardController extends Controller
 
         $data = app(ReportCardService::class)->build($student, $term, $session);
 
-        $template = (string) $request->query('template', config('academyhub.report_card_template', 'compact'));
-        $safeTemplate = preg_replace('/[^a-z0-9_-]/i', '', $template) ?: 'compact';
+        $tenantId = $student->tenant_id ?? \App\Support\TenantSettings::tenantId();
+        $selectedTemplate = $tenantId ? \App\Support\TenantSettings::getForTenant('report_card_template', $tenantId) : null;
+        $defaultTemplate = $selectedTemplate ?: \App\Support\TenantSettings::get('report_card_template', 'elegant');
+        $template = (string) $request->query('template', $defaultTemplate);
+        $safeTemplate = preg_replace('/[^a-z0-9_-]/i', '', $template) ?: $defaultTemplate;
         $optionsHash = substr(md5(json_encode($data['rcOptions'] ?? [])), 0, 10);
         $safeAdmissionNo = preg_replace('/[^a-zA-Z0-9_-]/', '_', (string) ($student->admission_number ?? $student->id));
         $filename = "report-card-{$safeAdmissionNo}-term-{$term}-{$safeTemplate}-{$optionsHash}.pdf";

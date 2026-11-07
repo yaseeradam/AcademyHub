@@ -7,6 +7,7 @@ use App\Models\SchoolClass;
 use App\Models\Student;
 use App\Support\Audit;
 use App\Support\ReportCardService;
+use App\Support\TenantSettings;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -132,7 +133,9 @@ class BulkReportCardsController extends Controller
 
                 $payload = $service->build($student, $term, $session, $optionsOverrides);
 
-                $template = $request->filled('template') ? $request->input('template') : (string) config('academyhub.report_card_template', 'compact');
+                $tenantId = $student->tenant_id ?? TenantSettings::tenantId();
+                $defaultTemplate = TenantSettings::getForTenant('report_card_template', $tenantId) ?: 'elegant';
+                $template = $request->filled('template') ? (string) $request->input('template') : $defaultTemplate;
                 $view = ReportCardService::viewForTemplate($template);
 
                 $pdf = Pdf::loadView($view, [
@@ -208,7 +211,9 @@ class BulkReportCardsController extends Controller
 
         $payload = $service->build($student, $term, $session, $optionsOverrides);
 
-        $template = $request->filled('template') ? $request->input('template') : (string) config('academyhub.report_card_template', 'compact');
+        $tenantId = $student->tenant_id ?? TenantSettings::tenantId();
+        $defaultTemplate = TenantSettings::getForTenant('report_card_template', $tenantId) ?: 'elegant';
+        $template = $request->filled('template') ? (string) $request->input('template') : $defaultTemplate;
         $view = ReportCardService::viewForTemplate($template);
 
         if ($request->boolean('html')) {

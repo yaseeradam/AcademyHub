@@ -10,6 +10,7 @@ use App\Models\Subject;
 use App\Models\SubjectAllocation;
 use App\Support\Audit;
 use App\Support\ReportCardService;
+use App\Support\TenantSettings;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\File;
@@ -267,7 +268,8 @@ class Broadsheet extends Component
         try {
             foreach ($students as $student) {
                 $payload = $service->build($student, $this->term, $this->session);
-                $template = (string) config('academyhub.report_card_template', 'compact');
+                $tenantId = $student->tenant_id ?? TenantSettings::tenantId();
+                $template = TenantSettings::getForTenant('report_card_template', $tenantId) ?: 'elegant';
                 $view = ReportCardService::viewForTemplate($template);
                 $pdf = Pdf::loadView($view, $payload)->setPaper('a4');
                 $safeAdm = preg_replace('/[^A-Za-z0-9\\-_.]+/', '-', (string) $student->admission_number) ?: (string) $student->id;

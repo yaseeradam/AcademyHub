@@ -300,7 +300,9 @@ class UtilityController extends Controller
 
         $data = $reportCardService->build($student, $term, $session);
 
-        $template = (string) config('academyhub.report_card_template', 'compact');
+        $tenantId = $student->tenant_id ?? TenantSettings::tenantId();
+        $template = ($tenantId ? TenantSettings::getForTenant('report_card_template', $tenantId) : null)
+            ?: TenantSettings::get('report_card_template', 'elegant');
         $view = ReportCardService::viewForTemplate($template);
 
         $pdf = Pdf::loadView($view, $data)->setPaper('a4');

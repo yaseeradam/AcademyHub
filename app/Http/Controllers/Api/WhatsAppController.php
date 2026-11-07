@@ -1193,8 +1193,10 @@ class WhatsAppController extends Controller
             abort(403, 'The report card for this term and session has not been officially published yet by the school administration.');
         }
 
-        $template = (string) config('academyhub.report_card_template', 'compact');
-        $safeTemplate = preg_replace('/[^a-z0-9_-]/i', '', $template) ?: 'compact';
+        $tenantId = $student->tenant_id ?? \App\Support\TenantSettings::tenantId();
+        $template = ($tenantId ? \App\Support\TenantSettings::getForTenant('report_card_template', $tenantId) : null)
+            ?: \App\Support\TenantSettings::get('report_card_template', 'elegant');
+        $safeTemplate = preg_replace('/[^a-z0-9_-]/i', '', $template) ?: 'elegant';
         $sessionSlug = str_replace('/', '-', $session);
 
         $cacheDir = storage_path('app/public/report-cards');
