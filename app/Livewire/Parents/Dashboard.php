@@ -93,15 +93,16 @@ class Dashboard extends Component
     #[Computed]
     public function selectedChild(): ?Student
     {
+        $children = $this->children();
         if (! $this->selectedChildId) {
-            $this->selectedChildId = $this->children->first()?->id;
+            $this->selectedChildId = $children->first()?->id;
         }
 
         if (! $this->selectedChildId) {
             return null;
         }
 
-        return $this->children->firstWhere('id', $this->selectedChildId);
+        return $children->firstWhere('id', $this->selectedChildId);
     }
 
     #[Computed]
