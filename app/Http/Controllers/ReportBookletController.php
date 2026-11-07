@@ -78,7 +78,6 @@ class ReportBookletController extends Controller
 
         $student->load(['schoolClass', 'section']);
         $service = app(StudentDossierService::class);
-        $data = $service->buildDossier($student, $session, [], $isParentOrStudent);
 
         $safeSession = str_replace('/', '-', $session);
         $safeAdmissionNo = preg_replace('/[^a-zA-Z0-9_-]/', '_', (string) ($student->admission_number ?? $student->id));
@@ -86,9 +85,11 @@ class ReportBookletController extends Controller
         $storageDir = storage_path('app/academyhub/report_booklets');
         $fullPath = "{$storageDir}/{$filename}";
 
-        $view = 'pdf.report-booklet';
-        $viewPath = resource_path('views/pdf/report-booklet.blade.php');
-        $viewTimestamp = file_exists($viewPath) ? filemtime($viewPath) : null;
+        $coverViewPath = resource_path('views/pdf/partials/book-cover.blade.php');
+        $ledgerViewPath = resource_path('views/pdf/partials/book-dossier-ledger.blade.php');
+        $coverTimestamp = file_exists($coverViewPath) ? filemtime($coverViewPath) : null;
+        $ledgerTimestamp = file_exists($ledgerViewPath) ? filemtime($ledgerViewPath) : null;
+        $viewTimestamp = max((int) $coverTimestamp, (int) $ledgerTimestamp);
 
         // Cache Invalidation Check
         $lastScoreAt = \App\Models\Score::where('student_id', $student->id)
@@ -114,7 +115,7 @@ class ReportBookletController extends Controller
             if ($studentTimestamp !== null && $cacheTimestamp < $studentTimestamp) {
                 $stale = true;
             }
-            if ($viewTimestamp !== null && $cacheTimestamp < $viewTimestamp) {
+            if ($viewTimestamp > 0 && $cacheTimestamp < $viewTimestamp) {
                 $stale = true;
             }
 
@@ -137,11 +138,13 @@ class ReportBookletController extends Controller
             ]);
         }
 
+        $compiledHtml = $service->compileBookletHtml($student, $session, $request->all(), $isParentOrStudent);
+
         if ($request->boolean('html')) {
-            return response(view($view, $data));
+            return response($compiledHtml, 200, ['Content-Type' => 'text/html']);
         }
 
-        $pdf = Pdf::loadView($view, $data)
+        $pdf = Pdf::loadHTML($compiledHtml)
             ->setPaper('a4', 'portrait')
             ->setOptions([
                 'dpi' => 72,
@@ -196,13 +199,13 @@ class ReportBookletController extends Controller
         }
 
         $service = app(StudentDossierService::class);
-        $data = $service->buildDossier($student, $session, [], $isParentOrStudent);
+        $compiledHtml = $service->compileBookletHtml($student, $session, $request->all(), $isParentOrStudent);
 
         if ($request->boolean('html')) {
-            return response(view('pdf.report-booklet', $data));
+            return response($compiledHtml, 200, ['Content-Type' => 'text/html']);
         }
 
-        $pdf = Pdf::loadView('pdf.report-booklet', $data)
+        $pdf = Pdf::loadHTML($compiledHtml)
             ->setPaper('a4', 'portrait')
             ->setOptions([
                 'dpi' => 72,

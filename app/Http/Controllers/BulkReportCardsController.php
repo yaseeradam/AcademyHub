@@ -284,8 +284,8 @@ class BulkReportCardsController extends Controller
 
         try {
             foreach ($students as $student) {
-                $payload = $service->buildDossier($student, $session);
-                $pdf = Pdf::loadView('pdf.report-booklet', $payload)
+                $compiledHtml = $service->compileBookletHtml($student, $session, [], false);
+                $pdf = Pdf::loadHTML($compiledHtml)
                     ->setPaper('a4', 'portrait')
                     ->setOptions([
                         'dpi' => 72,

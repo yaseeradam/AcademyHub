@@ -337,8 +337,8 @@ class Broadsheet extends Component
 
         try {
             foreach ($students as $student) {
-                $payload = $service->buildDossier($student, $this->session);
-                $pdf = Pdf::loadView('pdf.report-booklet', $payload)
+                $compiledHtml = $service->compileBookletHtml($student, $this->session, [], false);
+                $pdf = Pdf::loadHTML($compiledHtml)
                     ->setPaper('a4', 'portrait')
                     ->setOptions([
                         'dpi' => 72,

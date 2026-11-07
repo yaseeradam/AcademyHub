@@ -7,6 +7,7 @@ use App\Models\AcademicTerm;
 use App\Models\AttendanceMark;
 use App\Models\AttendanceSheet;
 use App\Models\PsychomotorScore;
+use App\Models\ResultPublication;
 use App\Models\SchoolClass;
 use App\Models\Score;
 use App\Models\Student;
@@ -640,4 +641,636 @@ class StudentDossierService
             return '';
         }
     }
+
+    /**
+     * Compile the complete Student Report Book HTML:
+     * 1. Royal Academic Cover Page with student photo and bio
+     * 2. Full-page Report Cards for each available term formatted in the school's active template (elegant, riverdale, etc.)
+     * 3. Multi-Term Cumulative Dossier Ledger & Verdict
+     */
+    public function compileBookletHtml(Student $student, string $session, array $optionsOverrides = [], bool $isParentOrStudent = false): string
+    {
+        // 1. Ensure tenant context and settings are loaded
+        $tenantId = $student->tenant_id ?? TenantSettings::tenantId();
+        if ($tenantId && (!app()->bound('currentTenant') || (app('currentTenant')->id ?? null) !== $tenantId)) {
+            $tenant = \App\Models\Tenant::find($tenantId);
+            if ($tenant) {
+                app()->instance('currentTenant', $tenant);
+                TenantSettings::loadToConfig();
+            }
+        }
+
+        // 2. Build multi-term dossier data
+        $dossierData = $this->buildDossier($student, $session, $optionsOverrides);
+
+        // 3. Determine selected report card template
+        $template = $optionsOverrides['template']
+            ?? TenantSettings::getForTenant('report_card_template', $tenantId, config('academyhub.report_card_template', 'elegant'));
+
+        // 4. Determine terms to render in this book
+        $scoresByTerm = Score::query()
+            ->where('student_id', $student->id)
+            ->where('session', $session)
+            ->select('term')
+            ->distinct()
+            ->pluck('term')
+            ->toArray();
+
+        $termsToRender = !empty($scoresByTerm) ? $scoresByTerm : [1];
+        sort($termsToRender);
+
+        if ($isParentOrStudent) {
+            $publishedTerms = ResultPublication::publishedTermsForClass($student->class_id, $session);
+            $termsToRender = array_values(array_intersect($termsToRender, $publishedTerms));
+            if (empty($termsToRender)) {
+                $termsToRender = !empty($publishedTerms) ? [min($publishedTerms)] : [1];
+            }
+        }
+
+        $dossierData['termsEnclosed'] = $termsToRender;
+
+        // 5. Render Cover Page
+        $coverHtml = view('pdf.partials.book-cover', $dossierData)->render();
+        [$coverCss, $coverBody] = $this->extractCssAndBody($coverHtml);
+
+        // 6. Render each term's report card in the configured template
+        $rcService = app(ReportCardService::class);
+        $rcView = ReportCardService::viewForTemplate($template);
+        $termSections = [];
+        $templateCss = '';
+
+        foreach ($termsToRender as $termNum) {
+            $termData = $rcService->build($student, (int) $termNum, $session, $optionsOverrides);
+            $termHtml = view($rcView, $termData)->render();
+            [$tCss, $tBody] = $this->extractCssAndBody($termHtml);
+            if (empty($templateCss)) {
+                $templateCss = $tCss;
+            }
+            $termSections[] = $tBody;
+        }
+
+        // 7. Render Cumulative Dossier Ledger & Verdict
+        $ledgerHtml = view('pdf.partials.book-dossier-ledger', $dossierData)->render();
+        [$ledgerCss, $ledgerBody] = $this->extractCssAndBody($ledgerHtml);
+
+        // 8. Assemble unified styles and master HTML container
+        $bookletCss = $this->getBookletMasterCss($templateCss);
+
+        $html = '<!doctype html>' . "\n"
+            . '<html lang="en">' . "\n"
+            . '<head>' . "\n"
+            . '    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>' . "\n"
+            . '    <title>Student Academic Report Book - ' . htmlspecialchars($student->admission_number ?? (string) $student->id) . '</title>' . "\n"
+            . '    <style>' . "\n"
+            . $bookletCss . "\n"
+            . '    </style>' . "\n"
+            . '</head>' . "\n"
+            . '<body>' . "\n"
+            . '    <div class="booklet-section-cover">' . "\n"
+            . $coverBody . "\n"
+            . '    </div>' . "\n"
+            . '    <div class="booklet-page-break"></div>' . "\n";
+
+        foreach ($termSections as $tBody) {
+            $html .= '    <div class="booklet-section-term">' . "\n"
+                . $tBody . "\n"
+                . '    </div>' . "\n"
+                . '    <div class="booklet-page-break"></div>' . "\n";
+        }
+
+        $html .= '    <div class="booklet-section-ledger">' . "\n"
+            . $ledgerBody . "\n"
+            . '    </div>' . "\n"
+            . '</body>' . "\n"
+            . '</html>';
+
+        return $html;
+    }
+
+    /**
+     * Extract <style> contents and <body> contents from rendered HTML.
+     */
+    protected function extractCssAndBody(string $html): array
+    {
+        $css = '';
+        if (preg_match_all('/<style\b[^>]*>(.*?)<\/style>/is', $html, $matches)) {
+            $css = implode("\n", $matches[1]);
+        }
+
+        $body = $html;
+        if (preg_match('/<body\b[^>]*>(.*?)<\/body>/is', $html, $matches)) {
+            $body = $matches[1];
+        }
+
+        return [$css, $body];
+    }
+
+    /**
+     * Master CSS stylesheet for the entire Student Report Book.
+     */
+    protected function getBookletMasterCss(string $templateCss = ''): string
+    {
+        return <<<'CSS'
+@page { margin: 4mm 6mm; }
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    font-family: DejaVu Sans, Arial, sans-serif;
+    font-size: 8pt;
+    color: #1e293b;
+    background: #ffffff;
+    line-height: 1.25;
 }
+.booklet-page-break {
+    page-break-after: always;
+    clear: both;
+}
+.page-break {
+    page-break-after: always;
+    clear: both;
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   COVER PAGE ROYAL STYLING
+   ══════════════════════════════════════════════════════════════════ */
+.book-cover-page {
+    width: 100%;
+}
+.cover-outer-frame {
+    border: 3.5px double #1e3a8a;
+    padding: 4px;
+    background: #ffffff;
+}
+.cover-inner-frame {
+    border: 1.5px solid #c59b27;
+    padding: 10px 14px 8px 14px;
+    position: relative;
+    background: #ffffff;
+}
+.corner-ornament {
+    position: absolute;
+    width: 14px;
+    height: 14px;
+    border-color: #c59b27;
+}
+.corner-top-left { top: 3px; left: 3px; border-top: 2.5px solid #c59b27; border-left: 2.5px solid #c59b27; }
+.corner-top-right { top: 3px; right: 3px; border-top: 2.5px solid #c59b27; border-right: 2.5px solid #c59b27; }
+.corner-bottom-left { bottom: 3px; left: 3px; border-bottom: 2.5px solid #c59b27; border-left: 2.5px solid #c59b27; }
+.corner-bottom-right { bottom: 3px; right: 3px; border-bottom: 2.5px solid #c59b27; border-right: 2.5px solid #c59b27; }
+
+.cover-header {
+    text-align: center;
+    margin-bottom: 6px;
+}
+.cover-logo-container {
+    margin-bottom: 4px;
+}
+.cover-logo-box {
+    width: 58px;
+    height: 58px;
+    margin: 0 auto;
+    border: 1.5px solid #c59b27;
+    border-radius: 6px;
+    background: #ffffff;
+    display: table;
+}
+.cover-logo-img {
+    max-width: 52px;
+    max-height: 52px;
+    width: auto !important;
+    height: auto !important;
+    display: block;
+    margin: 3px auto;
+}
+.placeholder-crest {
+    background: #1e3a8a;
+    color: #ffffff;
+    font-size: 20pt;
+    font-weight: 800;
+    text-align: center;
+    line-height: 58px;
+}
+.cover-school-name {
+    font-size: 17pt;
+    font-weight: 900;
+    color: #1e3a8a;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    line-height: 1.1;
+    margin-bottom: 2px;
+}
+.cover-school-motto {
+    font-size: 8.5pt;
+    font-style: italic;
+    color: #b45309;
+    margin-bottom: 2px;
+}
+.cover-school-address {
+    font-size: 7.5pt;
+    color: #475569;
+}
+
+.cover-divider-wrapper {
+    display: table;
+    width: 100%;
+    margin: 6px 0 8px 0;
+}
+.cover-divider-line {
+    display: table-cell;
+    vertical-align: middle;
+    border-bottom: 1.5px solid #c59b27;
+    width: 32%;
+}
+.cover-divider-badge {
+    display: table-cell;
+    text-align: center;
+    font-size: 7pt;
+    font-weight: 800;
+    color: #1e3a8a;
+    letter-spacing: 1.5px;
+    width: 36%;
+    padding: 0 4px;
+}
+
+.cover-title-section {
+    text-align: center;
+    margin-bottom: 8px;
+}
+.cover-main-title {
+    font-size: 13pt;
+    font-weight: 900;
+    color: #1e3a8a;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin-bottom: 2px;
+}
+.cover-subtitle {
+    font-size: 7.5pt;
+    color: #64748b;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    margin-bottom: 5px;
+}
+.cover-session-pill {
+    display: inline-block;
+    background: #1e3a8a;
+    color: #ffffff;
+    font-size: 8pt;
+    font-weight: 800;
+    padding: 3px 14px;
+    border-radius: 12px;
+    letter-spacing: 1px;
+}
+
+/* Student Showcase Card */
+.cover-student-card {
+    background: #f8fafc;
+    border: 1.5px solid #cbd5e1;
+    border-left: 4px solid #1e3a8a;
+    border-radius: 5px;
+    padding: 6px 10px;
+    margin-bottom: 8px;
+}
+.cover-student-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+.cover-photo-cell {
+    width: 82px;
+    vertical-align: middle;
+    padding-right: 12px;
+}
+.cover-photo-frame {
+    width: 76px;
+    height: 94px;
+    border: 2px solid #c59b27;
+    border-radius: 5px;
+    background: #ffffff;
+    overflow: hidden;
+    display: table;
+    margin: 0 auto;
+}
+.cover-photo-img {
+    width: 72px;
+    height: 90px;
+    object-fit: cover;
+    display: block;
+    margin: 2px auto;
+    border-radius: 3px;
+}
+.cover-photo-placeholder {
+    width: 76px;
+    height: 94px;
+    background: #e2e8f0;
+    text-align: center;
+    padding-top: 20px;
+}
+.placeholder-avatar {
+    font-size: 26pt;
+    font-weight: 800;
+    color: #64748b;
+    line-height: 1;
+}
+.placeholder-sub {
+    font-size: 6pt;
+    font-weight: 800;
+    color: #94a3b8;
+    letter-spacing: 1px;
+    margin-top: 4px;
+}
+.cover-meta-cell {
+    vertical-align: middle;
+}
+.cover-student-name {
+    font-size: 13.5pt;
+    font-weight: 900;
+    color: #0f172a;
+    letter-spacing: 0.5px;
+    line-height: 1.1;
+    margin-bottom: 3px;
+}
+.cover-student-badge-row {
+    margin-bottom: 5px;
+}
+.cover-status-tag {
+    display: inline-block;
+    background: #dcfce7;
+    color: #15803d;
+    font-size: 6.5pt;
+    font-weight: 800;
+    padding: 1.5px 6px;
+    border-radius: 8px;
+    border: 0.5px solid #86efac;
+    margin-right: 4px;
+}
+.cover-class-tag {
+    display: inline-block;
+    background: #e0f2fe;
+    color: #0369a1;
+    font-size: 6.5pt;
+    font-weight: 800;
+    padding: 1.5px 6px;
+    border-radius: 8px;
+    border: 0.5px solid #7dd3fc;
+}
+.cover-bio-grid {
+    width: 100%;
+    border-collapse: collapse;
+}
+.cover-bio-grid td {
+    padding: 2px 3px;
+    font-size: 7.5pt;
+}
+.cover-bio-grid .bio-k {
+    color: #64748b;
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 6.5pt;
+    width: 22%;
+}
+.cover-bio-grid .bio-v {
+    color: #0f172a;
+    width: 28%;
+}
+
+/* Registry Section */
+.cover-registry-section {
+    margin-bottom: 8px;
+}
+.cover-registry-heading {
+    font-size: 7pt;
+    font-weight: 800;
+    color: #1e3a8a;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin-bottom: 3px;
+    border-bottom: 1px solid #e2e8f0;
+    padding-bottom: 2px;
+}
+.cover-registry-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+.cover-registry-table th {
+    background: #f1f5f9;
+    color: #0f172a;
+    font-size: 6.5pt;
+    font-weight: 800;
+    text-transform: uppercase;
+    border: 1px solid #cbd5e1;
+    padding: 3.5px 5px;
+    text-align: left;
+}
+.cover-registry-table td {
+    border: 1px solid #e2e8f0;
+    padding: 3.5px 5px;
+    font-size: 7pt;
+    vertical-align: middle;
+}
+.cover-registry-table tr:nth-child(even) td {
+    background: #f8fafc;
+}
+.reg-title {
+    font-weight: 800;
+    color: #1e3a8a;
+    font-size: 7pt;
+}
+.reg-desc {
+    color: #475569;
+    font-size: 6.5pt;
+}
+.reg-status {
+    text-align: center;
+}
+.status-pill {
+    display: inline-block;
+    padding: 1.5px 6px;
+    border-radius: 8px;
+    font-size: 6pt;
+    font-weight: 800;
+    letter-spacing: 0.3px;
+}
+.status-enclosed {
+    background: #dcfce7;
+    color: #15803d;
+    border: 0.5px solid #86efac;
+}
+.status-pending {
+    background: #f1f5f9;
+    color: #94a3b8;
+    border: 0.5px solid #cbd5e1;
+}
+
+/* Certification Footer */
+.cover-cert-section {
+    border-top: 1.5px solid #c59b27;
+    padding-top: 6px;
+    margin-top: 4px;
+}
+.cover-cert-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+.cover-cert-cell {
+    vertical-align: top;
+    padding: 0 4px;
+}
+.cert-left {
+    width: 44%;
+}
+.cert-label {
+    font-size: 6.5pt;
+    font-weight: 800;
+    color: #1e3a8a;
+    letter-spacing: 0.5px;
+    margin-bottom: 2px;
+}
+.cert-text {
+    font-size: 6.5pt;
+    color: #64748b;
+    line-height: 1.25;
+    margin-bottom: 4px;
+}
+.cert-issue-date {
+    font-size: 6.5pt;
+    color: #0f172a;
+}
+.cert-center {
+    width: 22%;
+    text-align: center;
+    vertical-align: middle;
+}
+.cover-qr-frame {
+    display: inline-block;
+    padding: 2px;
+    background: #ffffff;
+    border: 1px solid #cbd5e1;
+    border-radius: 3px;
+}
+.cover-qr-img {
+    width: 46px;
+    height: 46px;
+    display: block;
+}
+.cover-qr-caption {
+    font-size: 5.5pt;
+    font-weight: 800;
+    color: #1e3a8a;
+    letter-spacing: 0.3px;
+    margin-top: 2px;
+}
+.cert-right {
+    width: 34%;
+    text-align: center;
+    vertical-align: bottom;
+}
+.cover-sig-img {
+    max-height: 24px;
+    max-width: 80px;
+    object-fit: contain;
+    margin-bottom: 2px;
+}
+.cover-sig-spacer {
+    height: 20px;
+}
+.cover-sig-line {
+    border-top: 1px solid #94a3b8;
+    padding-top: 2px;
+    font-size: 7.5pt;
+    font-weight: 800;
+    color: #0f172a;
+}
+.cover-sig-line.has-img {
+    margin-top: 1px;
+}
+.cover-sig-sub {
+    font-size: 6pt;
+    color: #64748b;
+    font-style: italic;
+    margin-bottom: 2px;
+}
+.cover-seal-stamp {
+    font-size: 5.5pt;
+    font-weight: 800;
+    color: #c59b27;
+    letter-spacing: 0.5px;
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   DOSSIER LEDGER STYLING
+   ══════════════════════════════════════════════════════════════════ */
+.dossier-page { width: 100%; }
+.school-header { border-bottom: 2px solid #1e3a8a; padding-bottom: 6px; margin-bottom: 8px; width: 100%; display: table; }
+.logo-cell { display: table-cell; width: 62px; vertical-align: middle; text-align: left; }
+.logo-img { max-height: 52px; max-width: 58px; object-fit: contain; }
+.logo-placeholder { width: 48px; height: 48px; border-radius: 50%; background: #1e3a8a; color: #ffffff; text-align: center; line-height: 48px; font-size: 15pt; font-weight: 800; }
+.title-cell { display: table-cell; vertical-align: middle; text-align: center; padding: 0 8px; }
+.school-motto { font-size: 7.5pt; font-style: italic; color: #64748b; margin-bottom: 2px; }
+.school-address { font-size: 7pt; color: #475569; }
+.qr-header-cell { display: table-cell; width: 55px; vertical-align: middle; text-align: right; }
+.qr-header-img { width: 48px; height: 48px; }
+.booklet-ribbon { background: #1e3a8a; color: #ffffff; text-align: center; padding: 4px 6px; font-size: 8pt; font-weight: 800; text-transform: uppercase; letter-spacing: 1.2px; border-radius: 3px; margin-bottom: 8px; }
+.student-profile { display: table; width: 100%; margin-bottom: 8px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 4px; padding: 5px 8px; }
+.photo-cell { display: table-cell; width: 52px; vertical-align: middle; padding-right: 10px; }
+.student-photo { width: 46px; height: 46px; border-radius: 50%; object-fit: cover; border: 2px solid #cbd5e1; }
+.student-photo-placeholder { width: 46px; height: 46px; border-radius: 50%; background: #e2e8f0; border: 2px solid #cbd5e1; text-align: center; line-height: 44px; font-size: 16pt; font-weight: 800; color: #64748b; }
+.bio-cell { display: table-cell; vertical-align: middle; }
+.bio-table { width: 100%; border-collapse: collapse; }
+.bio-table td { padding: 1.5px 3px; font-size: 7.5pt; }
+.bio-label { color: #64748b; font-weight: 600; text-transform: uppercase; font-size: 6pt; width: 15%; }
+.bio-val { color: #0f172a; font-weight: 700; width: 35%; }
+table.ledger-table { width: 100%; border-collapse: collapse; margin-bottom: 8px; table-layout: fixed; }
+table.ledger-table th { background: #f1f5f9; color: #0f172a; padding: 4px 2px; font-size: 6pt; font-weight: 800; text-transform: uppercase; letter-spacing: 0.2px; border: 1px solid #cbd5e1; text-align: center; }
+table.ledger-table th.subj-th { text-align: left; padding-left: 5px; width: 24%; }
+table.ledger-table td { padding: 3.5px 2px; border: 1px solid #e2e8f0; text-align: center; font-size: 7pt; color: #334155; }
+table.ledger-table td.subj-td { text-align: left; padding-left: 5px; font-weight: 700; color: #0f172a; word-wrap: break-word; }
+table.ledger-table tr:nth-child(even) td { background: #fafafa; }
+table.ledger-table td.highlight { background: #f8fafc; font-weight: 700; color: #1e3a8a; }
+table.ledger-table td.bold { font-weight: 700; color: #0f172a; }
+.grade-badge { display: inline-block; padding: 1px 3px; border-radius: 2px; font-weight: 800; font-size: 6.5pt; text-align: center; }
+.badge-a { background: #dcfce7; color: #15803d; }
+.badge-b { background: #e0f2fe; color: #0369a1; }
+.badge-c { background: #fef9c3; color: #a16207; }
+.badge-d { background: #ffedd5; color: #c2410c; }
+.badge-f { background: #fee2e2; color: #b91c1c; }
+.kpi-row { display: table; width: 100%; margin-bottom: 8px; border-spacing: 5px 0; margin-left: -5px; margin-right: -5px; }
+.kpi-card { display: table-cell; width: 25%; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 4px; padding: 5px 6px; text-align: center; }
+.kpi-label { font-size: 6pt; font-weight: 800; text-transform: uppercase; color: #64748b; letter-spacing: 0.4px; margin-bottom: 1px; }
+.kpi-value { font-size: 11pt; font-weight: 800; color: #1e3a8a; line-height: 1.1; }
+.kpi-sub { font-size: 6pt; font-weight: 600; color: #94a3b8; margin-top: 1px; }
+.page2-header { display: table; width: 100%; background: #f1f5f9; border-left: 3.5px solid #1e3a8a; padding: 5px 8px; margin-bottom: 8px; }
+.page2-header-title { display: table-cell; font-size: 7.5pt; font-weight: 800; color: #1e3a8a; text-transform: uppercase; }
+.page2-header-info { display: table-cell; text-align: right; font-size: 7pt; font-weight: 600; color: #475569; }
+.two-col-table { display: table; width: 100%; margin-bottom: 8px; }
+.col-left { display: table-cell; width: 50%; padding-right: 6px; vertical-align: top; }
+.col-right { display: table-cell; width: 50%; padding-left: 6px; vertical-align: top; }
+.section-box { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 4px; overflow: hidden; margin-bottom: 8px; }
+.section-header { background: #f8fafc; padding: 3.5px 6px; font-size: 7pt; font-weight: 800; text-transform: uppercase; color: #1e3a8a; border-bottom: 1px solid #e2e8f0; letter-spacing: 0.2px; }
+.section-body { padding: 5px 6px; }
+table.mini-table { width: 100%; border-collapse: collapse; font-size: 6.5pt; }
+table.mini-table th { background: #f8fafc; border: 1px solid #cbd5e1; padding: 2.5px 2px; font-weight: 800; text-align: center; color: #475569; font-size: 6pt; }
+table.mini-table td { border: 1px solid #e2e8f0; padding: 2.5px 2px; text-align: center; color: #334155; }
+table.mini-table td.label-td { text-align: left; padding-left: 3px; font-weight: 600; color: #0f172a; }
+.verdict-box { border-radius: 4px; padding: 6px 10px; text-align: center; margin-bottom: 8px; border: 1.5px solid; }
+.verdict-success { background: #f0fdf4; border-color: #22c55e; color: #15803d; }
+.verdict-warning { background: #fffbeb; border-color: #f59e0b; color: #b45309; }
+.verdict-danger { background: #fef2f2; border-color: #ef4444; color: #b91c1c; }
+.verdict-progress { background: #eff6ff; border-color: #3b82f6; color: #1d4ed8; }
+.verdict-title { font-size: 9.5pt; font-weight: 900; letter-spacing: 0.8px; text-transform: uppercase; margin-bottom: 1px; }
+.verdict-sub { font-size: 7pt; font-weight: 600; }
+.remark-row { margin-bottom: 5px; }
+.remark-title { font-size: 6.5pt; font-weight: 800; text-transform: uppercase; color: #1e3a8a; margin-bottom: 1px; }
+.remark-text { font-size: 7pt; font-style: italic; color: #1e293b; line-height: 1.25; }
+.resumption-bar { background: #1e3a8a; color: #ffffff; text-align: center; padding: 4px; font-size: 7.5pt; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; border-radius: 3px; margin-bottom: 8px; }
+.sigs-table { display: table; width: 100%; margin-top: 6px; }
+.sig-cell { display: table-cell; width: 33.33%; text-align: center; padding: 0 8px; vertical-align: bottom; }
+.sig-img { max-height: 22px; max-width: 75px; object-fit: contain; margin-bottom: 1px; }
+.sig-line { border-top: 1px solid #94a3b8; margin-top: 12px; padding-top: 2px; font-size: 7pt; font-weight: 700; color: #0f172a; }
+.sig-line.has-img { margin-top: 1px; }
+.sig-sub { font-size: 6pt; color: #64748b; font-style: italic; }
+.footer { margin-top: 6px; text-align: center; font-size: 6pt; color: #94a3b8; }
+CSS
+        . "\n\n/* ═══ Template-Specific Styles ═══ */\n"
+        . $templateCss;
+    }
+}
+
