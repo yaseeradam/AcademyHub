@@ -17,7 +17,13 @@
         $rcShowTeacherRemarks = old('rc_show_teacher_remarks', config('academyhub.rc_show_teacher_remarks', true));
         $rcShowPrincipalRemarks = old('rc_show_principal_remarks', config('academyhub.rc_show_principal_remarks', true));
         $rcShowPsychomotor = old('rc_show_psychomotor', config('academyhub.rc_show_psychomotor', false));
-        $rcPsychomotorStyle = old('rc_psychomotor_style', config('academyhub.rc_psychomotor_style', 'progress'));
+        $rcPsychomotorStyle = old('rc_psychomotor_style', config('academyhub.rc_psychomotor_style', 'grid'));
+        $rcPsychomotorScale = old('rc_psychomotor_scale', config('academyhub.rc_psychomotor_scale', '5_point'));
+        $psychomotorDefaults = \App\Support\PsychomotorService::defaultProfiles();
+        $savedProfiles = $savedProfiles ?? \App\Support\TenantSettings::get('rc_psychomotor_profiles', $psychomotorDefaults);
+        if (is_string($savedProfiles)) {
+            $savedProfiles = json_decode($savedProfiles, true) ?: $psychomotorDefaults;
+        }
         $rcShowSchoolFees = old('rc_show_school_fees', config('academyhub.rc_show_school_fees', false));
         
         $rcShowClassHighestLowest = old('rc_show_class_highest_lowest', config('academyhub.rc_show_class_highest_lowest', false));
@@ -50,6 +56,25 @@
             showSchoolFees: {{ $rcShowSchoolFees ? 'true' : 'false' }},
             showSignatures: {{ $rcShowSignatures ? 'true' : 'false' }},
             showPsychomotor: {{ $rcShowPsychomotor ? 'true' : 'false' }},
+            psychomotorTab: 'primary',
+            profiles: @js($savedProfiles),
+            defaults: @js($psychomotorDefaults),
+            addTrait(stage, domain) {
+                let name = prompt('Enter new ' + (domain === 'affective' ? 'Affective (Character)' : 'Psychomotor (Physical/Practical)') + ' trait:');
+                if (name && name.trim().length > 0) {
+                    if (!this.profiles[stage]) this.profiles[stage] = { affective: [], psychomotor: [] };
+                    if (!this.profiles[stage][domain]) this.profiles[stage][domain] = [];
+                    this.profiles[stage][domain].push(name.trim());
+                }
+            },
+            removeTrait(stage, domain, index) {
+                this.profiles[stage][domain].splice(index, 1);
+            },
+            resetStageToDefaults(stage) {
+                if (confirm('Reset this educational stage back to standard curriculum defaults?')) {
+                    this.profiles[stage] = JSON.parse(JSON.stringify(this.defaults[stage]));
+                }
+            }
         }">
         <x-page-header title="Report Card Settings" subtitle="Choose template and customize what appears on the report card."
             accent="settings" />
@@ -466,24 +491,165 @@
                         </div>
                     </label>
 
-                    {{-- Psychomotor Domain --}}
-                    <div class="rounded-2xl border border-gray-200 bg-white/80 p-4 shadow-sm hover:border-violet-300 transition">
-                        <label class="flex items-center gap-3 cursor-pointer">
-                            <input type="hidden" name="rc_show_psychomotor" value="0" />
-                            <input type="checkbox" name="rc_show_psychomotor" value="1" class="h-5 w-5 rounded-lg border-gray-300 text-violet-600 focus:ring-violet-500" x-model="showPsychomotor" @checked($rcShowPsychomotor) />
-                            <div>
-                                <div class="text-sm font-bold text-gray-900">Psychomotor Domain</div>
-                                <div class="text-xs text-gray-500">Handwriting, sports, punctuality, neatness, etc.</div>
+                    {{-- Psychomotor Domain Toggle --}}
+                    <label class="flex items-center gap-3 rounded-2xl border border-gray-200 bg-white/80 p-4 shadow-sm cursor-pointer hover:border-violet-300 transition">
+                        <input type="hidden" name="rc_show_psychomotor" value="0" />
+                        <input type="checkbox" name="rc_show_psychomotor" value="1" class="h-5 w-5 rounded-lg border-gray-300 text-violet-600 focus:ring-violet-500" x-model="showPsychomotor" @checked($rcShowPsychomotor) />
+                        <div>
+                            <div class="text-sm font-bold text-gray-900">Psychomotor &amp; Affective Domains</div>
+                            <div class="text-xs text-gray-500">Character demeanour, fine motor skills, crafts &amp; athletics</div>
+                        </div>
+                    </label>
+                </div>
+            </div>
+
+            {{-- ═══════════════ PSYCHOMOTOR & AFFECTIVE DOMAIN CONFIGURATION ═══════════════ --}}
+            <div x-show="showPsychomotor" x-transition class="rounded-3xl border border-gray-100 bg-gradient-to-br from-purple-50 to-pink-50/60 p-6 shadow-lg space-y-6">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <div class="icon-3d grid h-12 w-12 place-items-center rounded-xl bg-gradient-to-br from-purple-500 to-indigo-600 text-white shadow-lg shadow-purple-500/30">
+                            <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                <path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm0 18a8 8 0 1 1 8-8 8 8 0 0 1-8 8z"/>
+                                <path d="M12 6a2 2 0 1 0 2 2 2 2 0 0 0-2-2zm-1 5h2v6h-2z"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <div class="text-lg font-black text-gray-900">Psychomotor &amp; Affective Domain Management</div>
+                            <div class="text-sm font-semibold text-gray-600">Customize physical dexterity &amp; character traits per educational level</div>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Presentation Layout & Rating Scale Options --}}
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div class="rounded-2xl border border-gray-200 bg-white/90 p-4 shadow-sm">
+                        <label class="block text-xs font-bold text-gray-800 uppercase tracking-wider mb-1">Presentation Layout Style</label>
+                        <select name="rc_psychomotor_style" class="w-full rounded-xl border-gray-300 py-2.5 pl-3 pr-10 text-sm font-semibold focus:border-purple-500 focus:ring-purple-500">
+                            <option value="grid" @selected($rcPsychomotorStyle === 'grid')>Grid Checkbox Matrix (Formal 2-Column Tables)</option>
+                            <option value="numeric" @selected($rcPsychomotorStyle === 'numeric')>Numeric Grade Scale (1–5 Blocks with Score)</option>
+                            <option value="progress" @selected($rcPsychomotorStyle === 'progress')>Horizontal Progress Bars (Modern Colored Meters)</option>
+                        </select>
+                        <p class="text-[11px] text-gray-500 mt-1">Controls how traits are displayed on the printed report card.</p>
+                    </div>
+
+                    <div class="rounded-2xl border border-gray-200 bg-white/90 p-4 shadow-sm">
+                        <label class="block text-xs font-bold text-gray-800 uppercase tracking-wider mb-1">Evaluation Rating Scale</label>
+                        <select name="rc_psychomotor_scale" class="w-full rounded-xl border-gray-300 py-2.5 pl-3 pr-10 text-sm font-semibold focus:border-purple-500 focus:ring-purple-500">
+                            <option value="5_point" @selected($rcPsychomotorScale === '5_point')>5-Point Numeric Scale (5 = Excellent, 1 = Poor)</option>
+                            <option value="letter" @selected($rcPsychomotorScale === 'letter')>Letter Scale (A = Distinction, E = Poor)</option>
+                            <option value="descriptive" @selected($rcPsychomotorScale === 'descriptive')>Descriptive Words (Excellent, Good, Average, Fair, Poor)</option>
+                        </select>
+                        <p class="text-[11px] text-gray-500 mt-1">Scale used during teacher score entry and legend descriptions.</p>
+                    </div>
+                </div>
+
+                {{-- Educational Stage Tabs --}}
+                <div class="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm space-y-4">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-gray-100 pb-3">
+                        <div class="flex gap-2 p-1 bg-gray-100 rounded-xl">
+                            <button type="button" @click="psychomotorTab = 'early_years'"
+                                :class="psychomotorTab === 'early_years' ? 'bg-white shadow text-purple-700 font-black' : 'text-gray-600 font-semibold hover:text-gray-900'"
+                                class="px-4 py-2 text-xs rounded-lg transition">
+                                🌱 Early Years / Nursery / KG
+                            </button>
+                            <button type="button" @click="psychomotorTab = 'primary'"
+                                :class="psychomotorTab === 'primary' ? 'bg-white shadow text-purple-700 font-black' : 'text-gray-600 font-semibold hover:text-gray-900'"
+                                class="px-4 py-2 text-xs rounded-lg transition">
+                                🎒 Primary School (Basic 1–6)
+                            </button>
+                            <button type="button" @click="psychomotorTab = 'secondary'"
+                                :class="psychomotorTab === 'secondary' ? 'bg-white shadow text-purple-700 font-black' : 'text-gray-600 font-semibold hover:text-gray-900'"
+                                class="px-4 py-2 text-xs rounded-lg transition">
+                                🎓 Secondary School / College
+                            </button>
+                        </div>
+
+                        <button type="button" @click="resetStageToDefaults(psychomotorTab)"
+                            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-gray-200 text-xs font-bold text-gray-600 hover:bg-gray-50 transition">
+                            <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+                                <path d="M3 3v5h5"/>
+                            </svg>
+                            Reset Stage to Defaults
+                        </button>
+                    </div>
+
+                    {{-- Hidden Form Inputs Synced to Alpine State --}}
+                    <template x-for="stageKey in ['early_years', 'primary', 'secondary']" :key="'sync-' + stageKey">
+                        <div>
+                            <template x-for="(trait, idx) in (profiles[stageKey]?.affective || [])" :key="stageKey + '-aff-' + idx">
+                                <input type="hidden" :name="'rc_psychomotor_profiles[' + stageKey + '][affective][]'" :value="trait">
+                            </template>
+                            <template x-for="(trait, idx) in (profiles[stageKey]?.psychomotor || [])" :key="stageKey + '-psy-' + idx">
+                                <input type="hidden" :name="'rc_psychomotor_profiles[' + stageKey + '][psychomotor][]'" :value="trait">
+                            </template>
+                        </div>
+                    </template>
+
+                    {{-- Trait Columns --}}
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
+                        {{-- Column 1: Affective Domain --}}
+                        <div class="rounded-xl border border-purple-200 bg-purple-50/40 p-4 space-y-3">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <div class="text-xs font-black text-purple-900 uppercase tracking-wider flex items-center gap-1.5">
+                                        <span class="h-2 w-2 rounded-full bg-purple-600"></span>
+                                        Affective Domain (Character &amp; Social Habits)
+                                    </div>
+                                    <div class="text-[11px] text-gray-500">Manners, personal discipline, peer relationships</div>
+                                </div>
+                                <button type="button" @click="addTrait(psychomotorTab, 'affective')"
+                                    class="px-2.5 py-1 text-xs font-bold bg-purple-600 text-white rounded-lg hover:bg-purple-700 shadow-sm transition">
+                                    + Add Trait
+                                </button>
                             </div>
-                        </label>
-                        <div x-show="showPsychomotor" x-transition class="mt-3 pl-8 space-y-2 border-t border-gray-100 pt-3">
-                            <label class="block text-xs font-bold text-gray-700">Psychomotor Presentation Style</label>
-                            <select name="rc_psychomotor_style" class="w-full rounded-xl border-gray-300 py-2 pl-3 pr-10 text-sm focus:border-violet-500 focus:ring-violet-500">
-                                <option value="progress" @selected($rcPsychomotorStyle === 'progress')>Progress Bars (Default)</option>
-                                <option value="grid" @selected($rcPsychomotorStyle === 'grid')>Grid Checkbox (Nigerian Standard)</option>
-                                <option value="numeric" @selected($rcPsychomotorStyle === 'numeric')>Numeric Grade Scale (1-5 Blocks)</option>
-                            </select>
-                            <p class="text-[10px] text-gray-500">Choose how psychomotor / affective traits are rendered on student report cards.</p>
+
+                            <div class="space-y-1.5">
+                                <template x-for="(trait, idx) in (profiles[psychomotorTab]?.affective || [])" :key="psychomotorTab + '-aff-list-' + idx">
+                                    <div class="flex items-center justify-between p-2 bg-white rounded-lg border border-purple-100 shadow-xs text-xs">
+                                        <span class="font-bold text-gray-800" x-text="trait"></span>
+                                        <button type="button" @click="removeTrait(psychomotorTab, 'affective', idx)"
+                                            class="text-red-500 hover:text-red-700 p-1" title="Delete trait">
+                                            <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                                <line x1="18" y1="6" x2="6" y2="18"/>
+                                                <line x1="6" y1="6" x2="18" y2="18"/>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
+
+                        {{-- Column 2: Psychomotor Domain --}}
+                        <div class="rounded-xl border border-indigo-200 bg-indigo-50/40 p-4 space-y-3">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <div class="text-xs font-black text-indigo-900 uppercase tracking-wider flex items-center gap-1.5">
+                                        <span class="h-2 w-2 rounded-full bg-indigo-600"></span>
+                                        Psychomotor Domain (Physical &amp; Practical Skills)
+                                    </div>
+                                    <div class="text-[11px] text-gray-500">Fine/gross motor control, sports, craft &amp; apparatus dexterity</div>
+                                </div>
+                                <button type="button" @click="addTrait(psychomotorTab, 'psychomotor')"
+                                    class="px-2.5 py-1 text-xs font-bold bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 shadow-sm transition">
+                                    + Add Trait
+                                </button>
+                            </div>
+
+                            <div class="space-y-1.5">
+                                <template x-for="(trait, idx) in (profiles[psychomotorTab]?.psychomotor || [])" :key="psychomotorTab + '-psy-list-' + idx">
+                                    <div class="flex items-center justify-between p-2 bg-white rounded-lg border border-indigo-100 shadow-xs text-xs">
+                                        <span class="font-bold text-gray-800" x-text="trait"></span>
+                                        <button type="button" @click="removeTrait(psychomotorTab, 'psychomotor', idx)"
+                                            class="text-red-500 hover:text-red-700 p-1" title="Delete trait">
+                                            <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                                <line x1="18" y1="6" x2="6" y2="18"/>
+                                                <line x1="6" y1="6" x2="18" y2="18"/>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </template>
+                            </div>
                         </div>
                     </div>
                 </div>

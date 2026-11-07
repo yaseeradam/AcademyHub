@@ -1,188 +1,195 @@
-{{-- Psychomotor Domain Partial --}}
+{{-- Psychomotor & Affective Domain Partial --}}
 @if($showPsychomotor ?? false)
 @php
     $style = $opts['psychomotor_style'] ?? $rcOptions['psychomotor_style'] ?? 'progress';
-    
-    $traits = [];
+    $studentClassId = $student->class_id ?? null;
+    $profile = \App\Support\PsychomotorService::getTraitsForClass($studentClassId);
+    $domainMap = $profile['trait_domain'] ?? [];
+    $scale = $profile['scale'] ?? \App\Support\PsychomotorService::SCALE_5_POINT;
+
+    $affectiveTraits = [];
+    $psychomotorTraitsList = [];
+
     if (isset($psychomotorTraits) && !empty($psychomotorTraits)) {
-        foreach($psychomotorTraits as $name => $rating) {
-            $traits[] = ['name' => $name, 'rating' => $rating];
+        foreach ($psychomotorTraits as $name => $rating) {
+            $domain = $domainMap[$name] ?? (in_array($name, $profile['affective'] ?? [], true) ? 'affective' : 'psychomotor');
+            if ($domain === 'affective') {
+                $affectiveTraits[] = ['name' => $name, 'rating' => $rating];
+            } else {
+                $psychomotorTraitsList[] = ['name' => $name, 'rating' => $rating];
+            }
         }
-    } else {
-        $traits = [
-            ['name' => 'Handwriting', 'rating' => 'Good'],
-            ['name' => 'Verbal Fluency', 'rating' => 'Good'],
-            ['name' => 'Games / Sports', 'rating' => 'Average'],
-            ['name' => 'Craft / Drawing', 'rating' => 'Good'],
-            ['name' => 'Musical Skills', 'rating' => 'Average'],
-            ['name' => 'Punctuality', 'rating' => 'Excellent'],
-            ['name' => 'Neatness', 'rating' => 'Good'],
-            ['name' => 'Politeness / Courtesy', 'rating' => 'Excellent'],
-            ['name' => 'Honesty', 'rating' => 'Excellent'],
-            ['name' => 'Self-Control', 'rating' => 'Good'],
-            ['name' => 'Attentiveness', 'rating' => 'Good'],
-            ['name' => 'Relationship with Others', 'rating' => 'Excellent'],
-        ];
+    }
+
+    if (empty($affectiveTraits) && empty($psychomotorTraitsList)) {
+        $defaultVal = \App\Support\PsychomotorService::defaultRating($scale);
+        foreach (($profile['affective'] ?? []) as $name) {
+            $affectiveTraits[] = ['name' => $name, 'rating' => $defaultVal];
+        }
+        foreach (($profile['psychomotor'] ?? []) as $name) {
+            $psychomotorTraitsList[] = ['name' => $name, 'rating' => $defaultVal];
+        }
     }
 @endphp
 
-<div style="border: 1.5px solid {{ $rcBorderColor ?? '#ccc' }}; border-radius: 4px; padding: 4px 6px; margin-bottom: 4px; background: {{ $rcBgLight ?? '#f9fafb' }};">
-    <div style="font-size: 7.5px; font-weight: 800; color: {{ $rcTitleColor ?? '#374151' }}; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; text-align: center;">
-        Psychomotor / Affective Skills
+<div style="border: 1px solid {{ $rcBorderColor ?? '#ccc' }}; border-radius: 4px; padding: 4px; margin-bottom: 4px; background: {{ $rcBgLight ?? '#f9fafb' }};">
+    <div style="display: table; width: 100%; border-spacing: 0;">
+        <div style="display: table-row;">
+            {{-- COLUMN 1: AFFECTIVE DOMAIN --}}
+            <div style="display: table-cell; width: 49.5%; vertical-align: top; padding-right: 2px;">
+                <div style="border: 1px solid {{ $rcBorderColor ?? '#e2e8f0' }}; border-radius: 3px; background: white; overflow: hidden;">
+                    <div style="background: {{ $rcBorderColor ?? '#1e3a5f' }}; color: white; padding: 2.5px 4px; font-size: 6.5px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; text-align: center;">
+                        Affective &amp; Behavioural Domain
+                    </div>
+
+                    @if($style === 'grid')
+                        <table style="width: 100%; border-collapse: collapse; font-size: 6px;">
+                            <thead>
+                                <tr style="background: #f1f5f9; color: #334155; border-bottom: 1px solid #e2e8f0;">
+                                    <th style="text-align: left; padding: 2px 4px; font-weight: 800;">Trait</th>
+                                    <th style="width: 10%; text-align: center; padding: 2px 1px; font-weight: 800;">5</th>
+                                    <th style="width: 10%; text-align: center; padding: 2px 1px; font-weight: 800;">4</th>
+                                    <th style="width: 10%; text-align: center; padding: 2px 1px; font-weight: 800;">3</th>
+                                    <th style="width: 10%; text-align: center; padding: 2px 1px; font-weight: 800;">2</th>
+                                    <th style="width: 10%; text-align: center; padding: 2px 1px; font-weight: 800;">1</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach($affectiveTraits as $trait)
+                                    @php $sc = \App\Support\PsychomotorService::ratingToScore($trait['rating']); @endphp
+                                    <tr style="border-bottom: 1px solid #f1f5f9;">
+                                        <td style="padding: 1.5px 4px; font-weight: 700; color: {{ $rcLabelColor ?? '#374151' }};">{{ $trait['name'] }}</td>
+                                        <td style="text-align: center; font-weight: 900; color: #059669; font-size: 7px;">@if($sc === 5)&check;@endif</td>
+                                        <td style="text-align: center; font-weight: 900; color: #2563eb; font-size: 7px;">@if($sc === 4)&check;@endif</td>
+                                        <td style="text-align: center; font-weight: 900; color: #d97706; font-size: 7px;">@if($sc === 3)&check;@endif</td>
+                                        <td style="text-align: center; font-weight: 900; color: #ea580c; font-size: 7px;">@if($sc === 2)&check;@endif</td>
+                                        <td style="text-align: center; font-weight: 900; color: #dc2626; font-size: 7px;">@if($sc === 1)&check;@endif</td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    @elseif($style === 'numeric')
+                        <div style="padding: 2px 4px;">
+                            @foreach($affectiveTraits as $trait)
+                                @php $sc = \App\Support\PsychomotorService::ratingToScore($trait['rating']); @endphp
+                                <div style="display: table; width: 100%; padding: 1.5px 0; border-bottom: 1px dotted #e2e8f0;">
+                                    <div style="display: table-cell; font-size: 6.5px; font-weight: 700; color: {{ $rcLabelColor ?? '#374151' }}; vertical-align: middle;">{{ $trait['name'] }}</div>
+                                    <div style="display: table-cell; text-align: right; vertical-align: middle; width: 62px;">
+                                        @for($i = 1; $i <= 5; $i++)
+                                            @php
+                                                $active = ($sc === $i);
+                                                $bg = $active ? ($i === 5 ? '#059669' : ($i === 4 ? '#2563eb' : ($i === 3 ? '#d97706' : ($i === 2 ? '#ea580c' : '#dc2626')))) : '#f1f5f9';
+                                                $color = $active ? '#ffffff' : '#94a3b8';
+                                            @endphp
+                                            <span style="display: inline-block; width: 9px; height: 9px; line-height: 9px; text-align: center; background: {{ $bg }}; color: {{ $color }}; font-size: 6px; font-weight: 900; border-radius: 2px; margin-left: 1px;">{{ $i }}</span>
+                                        @endfor
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                    @else
+                        {{-- PROGRESS STYLE (DEFAULT) --}}
+                        <div style="padding: 2px 4px;">
+                            @foreach($affectiveTraits as $trait)
+                                @php
+                                    $sc = \App\Support\PsychomotorService::ratingToScore($trait['rating']);
+                                    $pct = $sc * 20;
+                                    $barColor = $sc >= 4 ? '#059669' : ($sc === 3 ? '#d97706' : '#dc2626');
+                                @endphp
+                                <div style="display: table; width: 100%; padding: 1.5px 0; border-bottom: 1px dotted #e2e8f0;">
+                                    <div style="display: table-cell; font-size: 6.5px; font-weight: 700; color: {{ $rcLabelColor ?? '#374151' }}; vertical-align: middle;">{{ $trait['name'] }}</div>
+                                    <div style="display: table-cell; text-align: right; vertical-align: middle; width: 62px;">
+                                        <span style="font-size: 6px; font-weight: 700; color: #475569; margin-right: 2px;">{{ $trait['rating'] }}</span>
+                                        <span style="display: inline-block; width: 30px; height: 4px; background: #e2e8f0; border-radius: 2px; overflow: hidden; vertical-align: middle;">
+                                            <span style="display: block; height: 100%; width: {{ $pct }}%; background: {{ $barColor }}; border-radius: 2px;"></span>
+                                        </span>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                    @endif
+                </div>
+            </div>
+
+            {{-- COLUMN 2: PSYCHOMOTOR DOMAIN --}}
+            <div style="display: table-cell; width: 49.5%; vertical-align: top; padding-left: 2px;">
+                <div style="border: 1px solid {{ $rcBorderColor ?? '#e2e8f0' }}; border-radius: 3px; background: white; overflow: hidden;">
+                    <div style="background: {{ $rcBorderColor ?? '#1e3a5f' }}; color: white; padding: 2.5px 4px; font-size: 6.5px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; text-align: center;">
+                        Psychomotor &amp; Practical Skills
+                    </div>
+
+                    @if($style === 'grid')
+                        <table style="width: 100%; border-collapse: collapse; font-size: 6px;">
+                            <thead>
+                                <tr style="background: #f1f5f9; color: #334155; border-bottom: 1px solid #e2e8f0;">
+                                    <th style="text-align: left; padding: 2px 4px; font-weight: 800;">Skill</th>
+                                    <th style="width: 10%; text-align: center; padding: 2px 1px; font-weight: 800;">5</th>
+                                    <th style="width: 10%; text-align: center; padding: 2px 1px; font-weight: 800;">4</th>
+                                    <th style="width: 10%; text-align: center; padding: 2px 1px; font-weight: 800;">3</th>
+                                    <th style="width: 10%; text-align: center; padding: 2px 1px; font-weight: 800;">2</th>
+                                    <th style="width: 10%; text-align: center; padding: 2px 1px; font-weight: 800;">1</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach($psychomotorTraitsList as $trait)
+                                    @php $sc = \App\Support\PsychomotorService::ratingToScore($trait['rating']); @endphp
+                                    <tr style="border-bottom: 1px solid #f1f5f9;">
+                                        <td style="padding: 1.5px 4px; font-weight: 700; color: {{ $rcLabelColor ?? '#374151' }};">{{ $trait['name'] }}</td>
+                                        <td style="text-align: center; font-weight: 900; color: #059669; font-size: 7px;">@if($sc === 5)&check;@endif</td>
+                                        <td style="text-align: center; font-weight: 900; color: #2563eb; font-size: 7px;">@if($sc === 4)&check;@endif</td>
+                                        <td style="text-align: center; font-weight: 900; color: #d97706; font-size: 7px;">@if($sc === 3)&check;@endif</td>
+                                        <td style="text-align: center; font-weight: 900; color: #ea580c; font-size: 7px;">@if($sc === 2)&check;@endif</td>
+                                        <td style="text-align: center; font-weight: 900; color: #dc2626; font-size: 7px;">@if($sc === 1)&check;@endif</td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    @elseif($style === 'numeric')
+                        <div style="padding: 2px 4px;">
+                            @foreach($psychomotorTraitsList as $trait)
+                                @php $sc = \App\Support\PsychomotorService::ratingToScore($trait['rating']); @endphp
+                                <div style="display: table; width: 100%; padding: 1.5px 0; border-bottom: 1px dotted #e2e8f0;">
+                                    <div style="display: table-cell; font-size: 6.5px; font-weight: 700; color: {{ $rcLabelColor ?? '#374151' }}; vertical-align: middle;">{{ $trait['name'] }}</div>
+                                    <div style="display: table-cell; text-align: right; vertical-align: middle; width: 62px;">
+                                        @for($i = 1; $i <= 5; $i++)
+                                            @php
+                                                $active = ($sc === $i);
+                                                $bg = $active ? ($i === 5 ? '#059669' : ($i === 4 ? '#2563eb' : ($i === 3 ? '#d97706' : ($i === 2 ? '#ea580c' : '#dc2626')))) : '#f1f5f9';
+                                                $color = $active ? '#ffffff' : '#94a3b8';
+                                            @endphp
+                                            <span style="display: inline-block; width: 9px; height: 9px; line-height: 9px; text-align: center; background: {{ $bg }}; color: {{ $color }}; font-size: 6px; font-weight: 900; border-radius: 2px; margin-left: 1px;">{{ $i }}</span>
+                                        @endfor
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                    @else
+                        {{-- PROGRESS STYLE (DEFAULT) --}}
+                        <div style="padding: 2px 4px;">
+                            @foreach($psychomotorTraitsList as $trait)
+                                @php
+                                    $sc = \App\Support\PsychomotorService::ratingToScore($trait['rating']);
+                                    $pct = $sc * 20;
+                                    $barColor = $sc >= 4 ? '#059669' : ($sc === 3 ? '#d97706' : '#dc2626');
+                                @endphp
+                                <div style="display: table; width: 100%; padding: 1.5px 0; border-bottom: 1px dotted #e2e8f0;">
+                                    <div style="display: table-cell; font-size: 6.5px; font-weight: 700; color: {{ $rcLabelColor ?? '#374151' }}; vertical-align: middle;">{{ $trait['name'] }}</div>
+                                    <div style="display: table-cell; text-align: right; vertical-align: middle; width: 62px;">
+                                        <span style="font-size: 6px; font-weight: 700; color: #475569; margin-right: 2px;">{{ $trait['rating'] }}</span>
+                                        <span style="display: inline-block; width: 30px; height: 4px; background: #e2e8f0; border-radius: 2px; overflow: hidden; vertical-align: middle;">
+                                            <span style="display: block; height: 100%; width: {{ $pct }}%; background: {{ $barColor }}; border-radius: 2px;"></span>
+                                        </span>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                    @endif
+                </div>
+            </div>
+        </div>
     </div>
-
-    @if($style === 'grid')
-        {{-- GRID MATRIX STYLE --}}
-        @php
-            $half = ceil(count($traits) / 2);
-            $column1 = array_slice($traits, 0, $half);
-            $column2 = array_slice($traits, $half);
-        @endphp
-        <div style="display: table; width: 100%;">
-            <div style="display: table-row;">
-                {{-- Column 1 --}}
-                <div style="display: table-cell; width: 49%; padding-right: 1%;">
-                    <table style="width: 100%; border-collapse: collapse; border: 1px solid {{ $rcBorderColor ?? '#e5e7eb' }}; font-size: 6.5px;">
-                        <thead>
-                            <tr style="background: {{ $rcBorderColor ?? '#bae6fd' }}; color: white;">
-                                <th style="text-align: left; padding: 2px 4px; border: 1px solid {{ $rcBorderColor ?? '#e5e7eb' }}; font-weight: 800; font-size: 6px;">Trait</th>
-                                <th style="width: 11%; text-align: center; padding: 2px 1px; border: 1px solid {{ $rcBorderColor ?? '#e5e7eb' }}; font-weight: 800; font-size: 6px;">E</th>
-                                <th style="width: 11%; text-align: center; padding: 2px 1px; border: 1px solid {{ $rcBorderColor ?? '#e5e7eb' }}; font-weight: 800; font-size: 6px;">G</th>
-                                <th style="width: 11%; text-align: center; padding: 2px 1px; border: 1px solid {{ $rcBorderColor ?? '#e5e7eb' }}; font-weight: 800; font-size: 6px;">A</th>
-                                <th style="width: 11%; text-align: center; padding: 2px 1px; border: 1px solid {{ $rcBorderColor ?? '#e5e7eb' }}; font-weight: 800; font-size: 6px;">F</th>
-                                <th style="width: 11%; text-align: center; padding: 2px 1px; border: 1px solid {{ $rcBorderColor ?? '#e5e7eb' }}; font-weight: 800; font-size: 6px;">P</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach($column1 as $trait)
-                                @php
-                                    $rating = $trait['rating'];
-                                    $isE = ($rating === 'Excellent' || $rating === '5');
-                                    $isG = ($rating === 'Good' || $rating === '4');
-                                    $isA = ($rating === 'Average' || $rating === '3');
-                                    $isF = ($rating === 'Fair' || $rating === '2');
-                                    $isP = ($rating === 'Poor' || $rating === '1');
-                                @endphp
-                                <tr style="background: white;">
-                                    <td style="padding: 1.5px 4px; border: 1px solid #e2e8f0; font-weight: 700; color: {{ $rcLabelColor ?? '#374151' }}; font-size: 7px;">{{ $trait['name'] }}</td>
-                                    <td style="text-align: center; border: 1px solid #e2e8f0; font-weight: 900; color: #059669; font-size: 8px;">@if($isE)✓@endif</td>
-                                    <td style="text-align: center; border: 1px solid #e2e8f0; font-weight: 900; color: #2563eb; font-size: 8px;">@if($isG)✓@endif</td>
-                                    <td style="text-align: center; border: 1px solid #e2e8f0; font-weight: 900; color: #d97706; font-size: 8px;">@if($isA)✓@endif</td>
-                                    <td style="text-align: center; border: 1px solid #e2e8f0; font-weight: 900; color: #ea580c; font-size: 8px;">@if($isF)✓@endif</td>
-                                    <td style="text-align: center; border: 1px solid #e2e8f0; font-weight: 900; color: #dc2626; font-size: 8px;">@if($isP)✓@endif</td>
-                                </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                </div>
-
-                {{-- Column 2 --}}
-                <div style="display: table-cell; width: 49%; padding-left: 1%;">
-                    <table style="width: 100%; border-collapse: collapse; border: 1px solid {{ $rcBorderColor ?? '#e5e7eb' }}; font-size: 6.5px;">
-                        <thead>
-                            <tr style="background: {{ $rcBorderColor ?? '#bae6fd' }}; color: white;">
-                                <th style="text-align: left; padding: 2px 4px; border: 1px solid {{ $rcBorderColor ?? '#e5e7eb' }}; font-weight: 800; font-size: 6px;">Trait</th>
-                                <th style="width: 11%; text-align: center; padding: 2px 1px; border: 1px solid {{ $rcBorderColor ?? '#e5e7eb' }}; font-weight: 800; font-size: 6px;">E</th>
-                                <th style="width: 11%; text-align: center; padding: 2px 1px; border: 1px solid {{ $rcBorderColor ?? '#e5e7eb' }}; font-weight: 800; font-size: 6px;">G</th>
-                                <th style="width: 11%; text-align: center; padding: 2px 1px; border: 1px solid {{ $rcBorderColor ?? '#e5e7eb' }}; font-weight: 800; font-size: 6px;">A</th>
-                                <th style="width: 11%; text-align: center; padding: 2px 1px; border: 1px solid {{ $rcBorderColor ?? '#e5e7eb' }}; font-weight: 800; font-size: 6px;">F</th>
-                                <th style="width: 11%; text-align: center; padding: 2px 1px; border: 1px solid {{ $rcBorderColor ?? '#e5e7eb' }}; font-weight: 800; font-size: 6px;">P</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach($column2 as $trait)
-                                @php
-                                    $rating = $trait['rating'];
-                                    $isE = ($rating === 'Excellent' || $rating === '5');
-                                    $isG = ($rating === 'Good' || $rating === '4');
-                                    $isA = ($rating === 'Average' || $rating === '3');
-                                    $isF = ($rating === 'Fair' || $rating === '2');
-                                    $isP = ($rating === 'Poor' || $rating === '1');
-                                @endphp
-                                <tr style="background: white;">
-                                    <td style="padding: 1.5px 4px; border: 1px solid #e2e8f0; font-weight: 700; color: {{ $rcLabelColor ?? '#374151' }}; font-size: 7px;">{{ $trait['name'] }}</td>
-                                    <td style="text-align: center; border: 1px solid #e2e8f0; font-weight: 900; color: #059669; font-size: 8px;">@if($isE)✓@endif</td>
-                                    <td style="text-align: center; border: 1px solid #e2e8f0; font-weight: 900; color: #2563eb; font-size: 8px;">@if($isG)✓@endif</td>
-                                    <td style="text-align: center; border: 1px solid #e2e8f0; font-weight: 900; color: #d97706; font-size: 8px;">@if($isA)✓@endif</td>
-                                    <td style="text-align: center; border: 1px solid #e2e8f0; font-weight: 900; color: #ea580c; font-size: 8px;">@if($isF)✓@endif</td>
-                                    <td style="text-align: center; border: 1px solid #e2e8f0; font-weight: 900; color: #dc2626; font-size: 8px;">@if($isP)✓@endif</td>
-                                </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-        <div style="font-size: 6px; text-align: right; color: #64748b; font-style: italic; margin-top: 2px;">
-            Key: E = Excellent, G = Good, A = Average, F = Fair, P = Poor
-        </div>
-
-    @elseif($style === 'numeric')
-        {{-- NUMERIC scale 1-5 BLOCKS --}}
-        @php
-            $chunked = array_chunk($traits, 2);
-            $scoreMap = [
-                'Excellent' => 5, '5' => 5,
-                'Good' => 4, '4' => 4,
-                'Average' => 3, '3' => 3,
-                'Fair' => 2, '2' => 2,
-                'Poor' => 1, '1' => 1
-            ];
-        @endphp
-        <div style="display: table; width: 100%;">
-            @foreach($chunked as $pair)
-            <div style="display: table-row;">
-                @foreach($pair as $trait)
-                @php $score = $scoreMap[$trait['rating']] ?? 3; @endphp
-                <div style="display: table-cell; width: 50%; padding: 1.5px 4px;">
-                    <div style="background: white; border: 1px solid #e5e7eb; border-radius: 3px; padding: 3px 6px;">
-                        <span style="font-size: 7px; color: {{ $rcLabelColor ?? '#374151' }}; font-weight: 700; display: inline-block; width: 50%;">{{ $trait['name'] }}</span>
-                        <span style="font-size: 7px; font-weight: 600; color: #6b7280; display: inline-block; width: 45%; text-align: right; vertical-align: middle;">
-                            @for($i = 1; $i <= 5; $i++)
-                                @php
-                                    $active = ($score === $i);
-                                    $bg = $active ? ($i === 5 ? '#059669' : ($i === 4 ? '#2563eb' : ($i === 3 ? '#d97706' : ($i === 2 ? '#ea580c' : '#dc2626')))) : '#f3f4f6';
-                                    $color = $active ? '#ffffff' : '#9ca3af';
-                                @endphp
-                                <span style="display: inline-block; width: 10px; height: 10px; line-height: 10px; text-align: center; background: {{ $bg }}; color: {{ $color }}; font-size: 6.5px; font-weight: 900; border-radius: 2px; margin-left: 1px;">{{ $i }}</span>
-                            @endfor
-                        </span>
-                    </div>
-                </div>
-                @endforeach
-            </div>
-            @endforeach
-        </div>
-
-    @else
-        {{-- PROGRESS BARS (DEFAULT STYLE) --}}
-        @php $chunked = array_chunk($traits, 2); @endphp
-        <div style="display: table; width: 100%;">
-            @foreach($chunked as $pair)
-            <div style="display: table-row;">
-                @foreach($pair as $trait)
-                <div style="display: table-cell; width: 50%; padding: 1.5px 4px;">
-                    <div style="background: white; border: 1px solid #e5e7eb; border-radius: 3px; padding: 3px 7px;">
-                        <span style="font-size: 7px; color: {{ $rcLabelColor ?? '#374151' }}; font-weight: 700; display: inline-block; width: 55%;">{{ $trait['name'] }}</span>
-                        <span style="font-size: 7px; font-weight: 600; color: #6b7280; display: inline-block; width: 40%; text-align: right;">
-                            {{ $trait['rating'] }}
-                            <span style="display: inline-block; width: 36px; height: 5px; background: #e5e7eb; border-radius: 2px; overflow: hidden; vertical-align: middle; margin-left: 3px;">
-                                <span style="display: block; height: 100%; border-radius: 2px;
-                                    @if($trait['rating'] === 'Excellent' || $trait['rating'] === '5') background: #059669; width: 100%;
-                                    @elseif($trait['rating'] === 'Good' || $trait['rating'] === '4') background: #2563eb; width: 75%;
-                                    @elseif($trait['rating'] === 'Average' || $trait['rating'] === '3') background: #d97706; width: 50%;
-                                    @elseif($trait['rating'] === 'Fair' || $trait['rating'] === '2') background: #ea580c; width: 35%;
-                                    @else background: #dc2626; width: 20%;
-                                    @endif
-                                "></span>
-                            </span>
-                        </span>
-                    </div>
-                </div>
-                @endforeach
-            </div>
-            @endforeach
-        </div>
-    @endif
+    <div style="font-size: 5.5px; text-align: right; color: #64748b; font-style: italic; margin-top: 2px; padding-right: 4px;">
+        Rating Scale: 5 = Excellent &bull; 4 = Good &bull; 3 = Average &bull; 2 = Fair &bull; 1 = Poor
+    </div>
 </div>
 @endif

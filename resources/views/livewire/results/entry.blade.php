@@ -837,8 +837,38 @@
                     </div>
                 </div>
             </div>
-        @else
             {{-- Bulk Psychomotor Entry View --}}
+            @php
+                $psychomotorProfile = $this->psychomotorProfile();
+                $psychomotorScale = $psychomotorProfile['scale'] ?? \App\Support\PsychomotorService::SCALE_5_POINT;
+                $scaleOptions = \App\Support\PsychomotorService::scaleOptions($psychomotorScale);
+                $scaleShort = \App\Support\PsychomotorService::scaleShort($psychomotorScale);
+                $traitDomainMap = $psychomotorProfile['trait_domain'] ?? [];
+                
+                $presetButtons = match($psychomotorScale) {
+                    \App\Support\PsychomotorService::SCALE_LETTER => [
+                        ['val' => 'A', 'label' => '🌟 A · Distinction', 'class' => 'bg-emerald-600 hover:bg-emerald-700'],
+                        ['val' => 'B', 'label' => '👍 B · Very Good', 'class' => 'bg-blue-600 hover:bg-blue-700'],
+                        ['val' => 'C', 'label' => '😐 C · Credit', 'class' => 'bg-amber-600 hover:bg-amber-700'],
+                        ['val' => 'D', 'label' => '⚠️ D · Pass', 'class' => 'bg-orange-600 hover:bg-orange-700'],
+                        ['val' => 'E', 'label' => '❌ E · Poor', 'class' => 'bg-red-600 hover:bg-red-700'],
+                    ],
+                    \App\Support\PsychomotorService::SCALE_DESCRIPTIVE => [
+                        ['val' => 'Excellent', 'label' => '🌟 Excellent', 'class' => 'bg-emerald-600 hover:bg-emerald-700'],
+                        ['val' => 'Good', 'label' => '👍 Good', 'class' => 'bg-blue-600 hover:bg-blue-700'],
+                        ['val' => 'Average', 'label' => '😐 Average', 'class' => 'bg-amber-600 hover:bg-amber-700'],
+                        ['val' => 'Fair', 'label' => '⚠️ Fair', 'class' => 'bg-orange-600 hover:bg-orange-700'],
+                        ['val' => 'Poor', 'label' => '❌ Poor', 'class' => 'bg-red-600 hover:bg-red-700'],
+                    ],
+                    default => [
+                        ['val' => '5', 'label' => '🌟 5 · Excellent', 'class' => 'bg-emerald-600 hover:bg-emerald-700'],
+                        ['val' => '4', 'label' => '👍 4 · Good', 'class' => 'bg-blue-600 hover:bg-blue-700'],
+                        ['val' => '3', 'label' => '😐 3 · Average', 'class' => 'bg-amber-600 hover:bg-amber-700'],
+                        ['val' => '2', 'label' => '⚠️ 2 · Fair', 'class' => 'bg-orange-600 hover:bg-orange-700'],
+                        ['val' => '1', 'label' => '❌ 1 · Poor', 'class' => 'bg-red-600 hover:bg-red-700'],
+                    ],
+                };
+            @endphp
             <div class="space-y-6">
                 <div class="overflow-hidden rounded-3xl bg-white shadow-xl ring-1 ring-gray-100">
                     {{-- Header --}}
@@ -853,8 +883,13 @@
                                     </svg>
                                 </div>
                                 <div>
-                                    <h2 class="text-xl sm:text-2xl font-black text-white tracking-tight">Psychomotor Traits</h2>
-                                    <p class="text-violet-200 text-sm mt-0.5">Rate each student's affective & psychomotor skills</p>
+                                    <div class="flex items-center gap-2 flex-wrap">
+                                        <h2 class="text-xl sm:text-2xl font-black text-white tracking-tight">Psychomotor &amp; Affective Assessment</h2>
+                                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black bg-white/20 text-white border border-white/25 shadow-sm">
+                                            🎓 {{ $psychomotorProfile['stage_label'] }}
+                                        </span>
+                                    </div>
+                                    <p class="text-violet-200 text-sm mt-0.5">Rate each student's affective character &amp; psychomotor skills using configured standard scales</p>
                                 </div>
                             </div>
                             <button wire:click="setTab('scores')" class="flex items-center gap-2 rounded-xl bg-white/15 px-5 py-2.5 text-sm font-bold text-white backdrop-blur-sm border border-white/20 hover:bg-white/25 transition-all" wire:loading.attr="disabled" wire:loading.class="opacity-50 cursor-wait">
@@ -871,10 +906,9 @@
                             <p class="text-xs text-violet-700 font-bold mt-0.5">Set ALL traits for ALL students in this class in one single click:</p>
                         </div>
                         <div class="grid grid-cols-2 sm:flex items-center gap-2 w-full lg:w-auto">
-                            <button type="button" wire:click="setAllBulkTraits('Excellent')" class="rounded-xl bg-emerald-600 px-4 py-2.5 text-xs font-bold text-white shadow hover:bg-emerald-700 transition-all flex items-center justify-center gap-1.5" wire:loading.attr="disabled" wire:loading.class="opacity-50 cursor-wait">🌟 Excellent</button>
-                            <button type="button" wire:click="setAllBulkTraits('Good')" class="rounded-xl bg-blue-600 px-4 py-2.5 text-xs font-bold text-white shadow hover:bg-blue-700 transition-all flex items-center justify-center gap-1.5" wire:loading.attr="disabled" wire:loading.class="opacity-50 cursor-wait">👍 Good</button>
-                            <button type="button" wire:click="setAllBulkTraits('Average')" class="rounded-xl bg-amber-600 px-4 py-2.5 text-xs font-bold text-white shadow hover:bg-amber-700 transition-all flex items-center justify-center gap-1.5" wire:loading.attr="disabled" wire:loading.class="opacity-50 cursor-wait">😐 Average</button>
-                            <button type="button" wire:click="setAllBulkTraits('Poor')" class="rounded-xl bg-red-600 px-4 py-2.5 text-xs font-bold text-white shadow hover:bg-red-700 transition-all flex items-center justify-center gap-1.5" wire:loading.attr="disabled" wire:loading.class="opacity-50 cursor-wait">⚠️ Poor</button>
+                            @foreach($presetButtons as $btn)
+                                <button type="button" wire:click="setAllBulkTraits('{{ $btn['val'] }}')" class="rounded-xl {{ $btn['class'] }} px-3.5 py-2.5 text-xs font-bold text-white shadow transition-all flex items-center justify-center gap-1.5" wire:loading.attr="disabled" wire:loading.class="opacity-50 cursor-wait">{{ $btn['label'] }}</button>
+                            @endforeach
                         </div>
                     </div>
 
@@ -885,16 +919,23 @@
                                 <tr class="border-b border-gray-100 bg-violet-50/40">
                                     <th class="sticky left-0 z-20 bg-violet-50/40 px-8 py-5 text-left text-xs font-black uppercase tracking-widest text-gray-500">Student</th>
                                     @foreach($this->traitMap() as $slug => $trait)
+                                        @php
+                                            $isAffective = ($traitDomainMap[$trait] ?? 'affective') === 'affective';
+                                        @endphp
                                         <th class="px-4 py-5 text-center min-w-[200px]">
                                             <div class="space-y-2">
-                                                <span class="block text-[10px] font-black uppercase tracking-widest text-violet-900">{{ $trait }}</span>
+                                                <div>
+                                                    <span class="inline-block px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-wider {{ $isAffective ? 'bg-indigo-100 text-indigo-700' : 'bg-emerald-100 text-emerald-700' }}">
+                                                        {{ $isAffective ? 'Affective' : 'Psychomotor' }}
+                                                    </span>
+                                                    <span class="block text-[11px] font-black uppercase tracking-wider text-violet-950 mt-1">{{ $trait }}</span>
+                                                </div>
                                                 <select wire:change="applyTraitToAll('{{ $slug }}', $event.target.value)" 
                                                     class="w-full rounded-xl border-2 border-violet-300 bg-white px-3 py-1.5 text-[10px] font-extrabold text-violet-800 focus:border-violet-600 focus:ring-2 focus:ring-violet-600/20 transition-all cursor-pointer">
                                                     <option value="">Apply to all...</option>
-                                                    <option value="Excellent">Excellent</option>
-                                                    <option value="Good">Good</option>
-                                                    <option value="Average">Average</option>
-                                                    <option value="Poor">Poor</option>
+                                                    @foreach($scaleOptions as $optVal => $optLabel)
+                                                        <option value="{{ $optVal }}">{{ $optLabel }}</option>
+                                                    @endforeach
                                                 </select>
                                             </div>
                                         </th>
@@ -933,10 +974,9 @@
                                                 <span data-trait="{{ $slug }}" data-student-id="{{ $student->id }}" class="hidden"></span>
                                                 <select wire:model="bulkPsychomotorScores.{{ $student->id }}.{{ $slug }}"
                                                         class="w-full min-w-[130px] rounded-xl border-2 border-slate-300 bg-white px-3 py-2 text-xs font-black text-slate-800 focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20 transition-all cursor-pointer">
-                                                    <option value="Excellent">Excellent</option>
-                                                    <option value="Good">Good</option>
-                                                    <option value="Average">Average</option>
-                                                    <option value="Poor">Poor</option>
+                                                    @foreach($scaleOptions as $optVal => $optLabel)
+                                                        <option value="{{ $optVal }}">{{ $optLabel }}</option>
+                                                    @endforeach
                                                 </select>
                                             </td>
                                         @endforeach
@@ -963,10 +1003,9 @@
                                         <select wire:change="applyTraitToAll('{{ $slug }}', $event.target.value)"
                                             class="w-full rounded-xl border border-violet-200 bg-white px-3 py-2 text-xs font-bold text-violet-700 focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20">
                                             <option value="">Apply to all...</option>
-                                            <option value="Excellent">Excellent</option>
-                                            <option value="Good">Good</option>
-                                            <option value="Average">Average</option>
-                                            <option value="Poor">Poor</option>
+                                            @foreach($scaleOptions as $optVal => $optLabel)
+                                                <option value="{{ $optVal }}">{{ $optLabel }}</option>
+                                            @endforeach
                                         </select>
                                     </div>
                                 @endforeach
@@ -1008,10 +1047,9 @@
                                                 <span data-trait="{{ $slug }}" data-student-id="{{ $student->id }}" class="hidden"></span>
                                                 <select wire:model="bulkPsychomotorScores.{{ $student->id }}.{{ $slug }}"
                                                         class="w-full rounded-xl border-2 border-slate-300 bg-white px-3 py-2.5 text-xs font-black text-slate-900 focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20 transition-all cursor-pointer">
-                                                    <option value="Excellent">Excellent</option>
-                                                    <option value="Good">Good</option>
-                                                    <option value="Average">Average</option>
-                                                    <option value="Poor">Poor</option>
+                                                    @foreach($scaleOptions as $optVal => $optLabel)
+                                                        <option value="{{ $optVal }}">{{ $optLabel }}</option>
+                                                    @endforeach
                                                 </select>
                                             </div>
                                         @endforeach
@@ -1051,7 +1089,7 @@
                             </div>
                             <div>
                                 <h3 class="text-base font-black text-white">{{ $selectedStudentName }}</h3>
-                                <p class="text-xs text-violet-200">Psychomotor Assessment</p>
+                                <p class="text-xs text-violet-200">Psychomotor &amp; Affective Assessment &bull; {{ $psychomotorProfile['stage_label'] ?? 'Class Profile' }}</p>
                             </div>
                         </div>
                         <button wire:click="closePsychomotor" class="flex h-8 w-8 items-center justify-center rounded-xl bg-white/15 text-white hover:bg-white/25 transition-all" wire:loading.attr="disabled" wire:loading.class="opacity-50 cursor-wait" aria-label="Close">
@@ -1061,32 +1099,64 @@
                 </div>
 
                 {{-- Modal Body --}}
-                <div class="p-6 max-h-[60vh] overflow-y-auto">
+                <div class="p-6 max-h-[60vh] overflow-y-auto space-y-6">
                     {{-- Quick Presets Panel --}}
-                    <div class="mb-6 rounded-2xl border-2 border-violet-200 bg-violet-50/50 p-4 shadow-sm">
+                    <div class="rounded-2xl border-2 border-violet-200 bg-violet-50/50 p-4 shadow-sm">
                         <span class="block text-xs font-black uppercase tracking-wider text-violet-950 mb-3 text-center">⚡ Quick Presets (Set All Traits to)</span>
-                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                            <button type="button" wire:click="setAllTraitsForSelected('Excellent')" class="rounded-xl bg-emerald-600 px-3 py-2.5 text-xs font-bold text-white shadow hover:bg-emerald-700 transition-all flex items-center justify-center gap-1" wire:loading.attr="disabled" wire:loading.class="opacity-50 cursor-wait">🌟 Excellent</button>
-                            <button type="button" wire:click="setAllTraitsForSelected('Good')" class="rounded-xl bg-blue-600 px-3 py-2.5 text-xs font-bold text-white shadow hover:bg-blue-700 transition-all flex items-center justify-center gap-1" wire:loading.attr="disabled" wire:loading.class="opacity-50 cursor-wait">👍 Good</button>
-                            <button type="button" wire:click="setAllTraitsForSelected('Average')" class="rounded-xl bg-amber-600 px-3 py-2.5 text-xs font-bold text-white shadow hover:bg-amber-700 transition-all flex items-center justify-center gap-1" wire:loading.attr="disabled" wire:loading.class="opacity-50 cursor-wait">😐 Average</button>
-                            <button type="button" wire:click="setAllTraitsForSelected('Poor')" class="rounded-xl bg-red-600 px-3 py-2.5 text-xs font-bold text-white shadow hover:bg-red-700 transition-all flex items-center justify-center gap-1" wire:loading.attr="disabled" wire:loading.class="opacity-50 cursor-wait">⚠️ Poor</button>
+                        <div class="grid grid-cols-2 sm:grid-cols-5 gap-2">
+                            @foreach($presetButtons as $btn)
+                                <button type="button" wire:click="setAllTraitsForSelected('{{ $btn['val'] }}')" class="rounded-xl {{ $btn['class'] }} px-3 py-2.5 text-xs font-bold text-white shadow transition-all flex items-center justify-center gap-1" wire:loading.attr="disabled" wire:loading.class="opacity-50 cursor-wait">{{ $btn['label'] }}</button>
+                            @endforeach
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        @foreach($this->traitMap() as $slug => $trait)
-                            <div class="rounded-2xl border-2 border-slate-200 bg-slate-50/50 p-4 hover:border-violet-300 hover:bg-violet-50/20 transition-all">
-                                <label class="block text-xs font-extrabold uppercase tracking-wider text-slate-800 mb-2">{{ $trait }}</label>
-                                <select wire:model="psychomotorScores.{{ $slug }}"
-                                        class="w-full rounded-xl border-2 border-slate-400 bg-white px-3 py-3 text-sm font-black text-slate-900 focus:border-violet-600 focus:ring-4 focus:ring-violet-100 transition-all cursor-pointer">
-                                    <option value="Excellent">Excellent</option>
-                                    <option value="Good">Good</option>
-                                    <option value="Average">Average</option>
-                                    <option value="Poor">Poor</option>
-                                </select>
+                    {{-- Affective Domain Section --}}
+                    @if(!empty($psychomotorProfile['affective']))
+                        <div class="rounded-2xl border border-indigo-200 bg-indigo-50/30 p-4">
+                            <div class="flex items-center gap-2 mb-3">
+                                <span class="h-2.5 w-2.5 rounded-full bg-indigo-600"></span>
+                                <h4 class="text-xs font-black uppercase tracking-wider text-indigo-950">Affective &amp; Behavioural Domain</h4>
                             </div>
-                        @endforeach
-                    </div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                @foreach($psychomotorProfile['affective'] as $trait)
+                                    @php $slug = \Illuminate\Support\Str::slug($trait, '_'); @endphp
+                                    <div class="rounded-xl border border-indigo-100 bg-white p-3 shadow-sm hover:border-indigo-300 transition-all">
+                                        <label class="block text-xs font-extrabold uppercase tracking-wider text-slate-800 mb-1.5">{{ $trait }}</label>
+                                        <select wire:model="psychomotorScores.{{ $slug }}"
+                                                class="w-full rounded-xl border-2 border-slate-300 bg-white px-3 py-2 text-xs font-black text-slate-900 focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100 transition-all cursor-pointer">
+                                            @foreach($scaleOptions as $optVal => $optLabel)
+                                                <option value="{{ $optVal }}">{{ $optLabel }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
+                    @endif
+
+                    {{-- Psychomotor Domain Section --}}
+                    @if(!empty($psychomotorProfile['psychomotor']))
+                        <div class="rounded-2xl border border-emerald-200 bg-emerald-50/30 p-4">
+                            <div class="flex items-center gap-2 mb-3">
+                                <span class="h-2.5 w-2.5 rounded-full bg-emerald-600"></span>
+                                <h4 class="text-xs font-black uppercase tracking-wider text-emerald-950">Psychomotor &amp; Practical Skills</h4>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                @foreach($psychomotorProfile['psychomotor'] as $trait)
+                                    @php $slug = \Illuminate\Support\Str::slug($trait, '_'); @endphp
+                                    <div class="rounded-xl border border-emerald-100 bg-white p-3 shadow-sm hover:border-emerald-300 transition-all">
+                                        <label class="block text-xs font-extrabold uppercase tracking-wider text-slate-800 mb-1.5">{{ $trait }}</label>
+                                        <select wire:model="psychomotorScores.{{ $slug }}"
+                                                class="w-full rounded-xl border-2 border-slate-300 bg-white px-3 py-2 text-xs font-black text-slate-900 focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100 transition-all cursor-pointer">
+                                            @foreach($scaleOptions as $optVal => $optLabel)
+                                                <option value="{{ $optVal }}">{{ $optLabel }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
+                    @endif
                 </div>
 
                 {{-- Modal Footer --}}

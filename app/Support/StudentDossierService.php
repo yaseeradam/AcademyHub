@@ -326,7 +326,10 @@ class StudentDossierService
             'annualClassAverage'        => $annualClassAverage,
             'totalStudents'             => $totalStudents,
             'attendanceTimeline'        => $attendanceTimeline,
-            'psychomotorTimeline'       => $psychomotorTimeline,
+            'psychomotorTimeline'       => $psychomotorTimeline['all'] ?? $psychomotorTimeline,
+            'affectiveTimeline'         => $psychomotorTimeline['affective'] ?? [],
+            'psychomotorDomainTimeline' => $psychomotorTimeline['psychomotor'] ?? [],
+            'psychomotorStageLabel'     => $psychomotorTimeline['stage_label'] ?? '',
             'promotion'                 => $promotion,
             'principalRemarks'          => $principalRemarks,
             'teacherRemarks'            => $teacherRemarks,
@@ -443,32 +446,51 @@ class StudentDossierService
             ->get()
             ->keyBy('term');
 
-        $traitLabels = [
-            'handwriting'              => 'Handwriting / Penmanship',
-            'verbal_fluency'           => 'Verbal Fluency & Communication',
-            'games_sports'             => 'Games & Physical Sports',
-            'craft_drawing'            => 'Crafts, Creative & Visual Arts',
-            'musical_skills'           => 'Musical & Rhythmic Skills',
-            'punctuality'              => 'Punctuality & Regularity',
-            'neatness'                 => 'Neatness & Personal Hygiene',
-            'politeness_courtesy'      => 'Politeness, Courtesy & Respect',
-            'honesty'                  => 'Honesty & Integrity',
-            'self_control'             => 'Self-Control & Emotional Calmness',
-            'attentiveness'            => 'Attentiveness & Focus in Class',
-            'relationship_with_others' => 'Peer Relations & Teamwork',
-        ];
+        $profile = PsychomotorService::getTraitsForClass($student->class_id);
+        $affectiveList = $profile['affective'] ?? [];
+        $psychomotorList = $profile['psychomotor'] ?? [];
 
-        $matrix = [];
-        foreach ($traitLabels as $key => $label) {
-            $matrix[$key] = [
+        $getRating = function (int $termNum, string $label, string $slug) use ($allScores) {
+            $ps = $allScores->get($termNum);
+            if (!$ps || empty($ps->traits)) {
+                return '—';
+            }
+            $traits = $ps->traits;
+            return $traits[$label] ?? $traits[$slug] ?? $traits[strtolower($label)] ?? '—';
+        };
+
+        $affective = [];
+        foreach ($affectiveList as $label) {
+            $slug = \Illuminate\Support\Str::slug($label, '_');
+            $affective[$slug] = [
                 'label'  => $label,
-                'term_1' => $allScores->get(1)?->traits[$key] ?? '—',
-                'term_2' => $allScores->get(2)?->traits[$key] ?? '—',
-                'term_3' => $allScores->get(3)?->traits[$key] ?? '—',
+                'domain' => 'affective',
+                'term_1' => $getRating(1, $label, $slug),
+                'term_2' => $getRating(2, $label, $slug),
+                'term_3' => $getRating(3, $label, $slug),
             ];
         }
 
-        return $matrix;
+        $psychomotor = [];
+        foreach ($psychomotorList as $label) {
+            $slug = \Illuminate\Support\Str::slug($label, '_');
+            $psychomotor[$slug] = [
+                'label'  => $label,
+                'domain' => 'psychomotor',
+                'term_1' => $getRating(1, $label, $slug),
+                'term_2' => $getRating(2, $label, $slug),
+                'term_3' => $getRating(3, $label, $slug),
+            ];
+        }
+
+        return [
+            'stage'       => $profile['stage'],
+            'stage_label' => $profile['stage_label'],
+            'scale'       => $profile['scale'],
+            'affective'   => $affective,
+            'psychomotor' => $psychomotor,
+            'all'         => array_merge($affective, $psychomotor),
+        ];
     }
 
     /**

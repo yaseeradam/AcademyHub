@@ -272,7 +272,15 @@ class SettingsController extends Controller
     public function showTemplates()
     {
         $classes = SchoolClass::query()->orderBy('level')->orderBy('name')->get();
-        return view('pages.settings.templates', compact('classes'));
+        $psychomotorDefaults = \App\Support\PsychomotorService::defaultProfiles();
+        $psychomotorScales = \App\Support\PsychomotorService::scales();
+        $tenantId = \App\Support\TenantSettings::tenantId();
+        $savedProfiles = \App\Support\TenantSettings::getForTenant('rc_psychomotor_profiles', $tenantId) ?: $psychomotorDefaults;
+        if (is_string($savedProfiles)) {
+            $savedProfiles = json_decode($savedProfiles, true) ?: $psychomotorDefaults;
+        }
+
+        return view('pages.settings.templates', compact('classes', 'psychomotorDefaults', 'psychomotorScales', 'savedProfiles'));
     }
 
     public function updateTemplates(Request $request)
@@ -291,6 +299,8 @@ class SettingsController extends Controller
                 'rc_show_principal_remarks' => ['nullable', 'boolean'],
                 'rc_show_psychomotor' => ['nullable', 'boolean'],
                 'rc_psychomotor_style' => ['nullable', 'string', 'in:progress,grid,numeric'],
+                'rc_psychomotor_scale' => ['nullable', 'string', 'in:5_point,letter,descriptive'],
+                'rc_psychomotor_profiles' => ['nullable', 'array'],
                 'rc_show_school_fees' => ['nullable', 'boolean'],
                 'rc_school_fees_account_number' => ['nullable', 'string', 'max:50'],
                 'rc_school_fees_bank_name' => ['nullable', 'string', 'max:100'],
@@ -337,8 +347,30 @@ class SettingsController extends Controller
                 $settings[$key] = $request->input($key) === '1';
             }
 
-            // Psychomotor Style
+            // Psychomotor Style & Scale
             $settings['rc_psychomotor_style'] = $data['rc_psychomotor_style'] ?? 'progress';
+            $settings['rc_psychomotor_scale'] = $data['rc_psychomotor_scale'] ?? '5_point';
+
+            // Custom Psychomotor & Affective Profiles per Educational Stage
+            if ($request->has('rc_psychomotor_profiles')) {
+                $profiles = $request->input('rc_psychomotor_profiles');
+                if (is_array($profiles)) {
+                    $cleanProfiles = [];
+                    foreach (['early_years', 'primary', 'secondary'] as $stg) {
+                        $aff = isset($profiles[$stg]['affective']) && is_array($profiles[$stg]['affective'])
+                            ? array_values(array_filter(array_map('trim', $profiles[$stg]['affective'])))
+                            : [];
+                        $psy = isset($profiles[$stg]['psychomotor']) && is_array($profiles[$stg]['psychomotor'])
+                            ? array_values(array_filter(array_map('trim', $profiles[$stg]['psychomotor'])))
+                            : [];
+                        $cleanProfiles[$stg] = [
+                            'affective'   => $aff,
+                            'psychomotor' => $psy,
+                        ];
+                    }
+                    $settings['rc_psychomotor_profiles'] = $cleanProfiles;
+                }
+            }
 
             // School fees details
             $settings['rc_school_fees_account_number'] = $data['rc_school_fees_account_number'] ?? null;

@@ -67,36 +67,23 @@ class Entry extends Component
         ];
     }
 
+    public function psychomotorProfile(): array
+    {
+        return \App\Support\PsychomotorService::getTraitsForClass($this->classId);
+    }
+
     /**
      * @return array<string, string> Map of slugified trait keys to display/DB names
      */
     public function traitMap(): array
     {
-        return [
-            'handwriting' => 'Handwriting',
-            'verbal_fluency' => 'Verbal Fluency',
-            'games_sports' => 'Games / Sports',
-            'craft_drawing' => 'Craft / Drawing',
-            'musical_skills' => 'Musical Skills',
-            'punctuality' => 'Punctuality',
-            'neatness' => 'Neatness',
-            'politeness_courtesy' => 'Politeness / Courtesy',
-            'honesty' => 'Honesty',
-            'self_control' => 'Self-Control',
-            'attentiveness' => 'Attentiveness',
-            'relationship_with_others' => 'Relationship with Others',
-        ];
+        return $this->psychomotorProfile()['trait_map'];
     }
 
     public function traitDefault(string $label): string
     {
-        if (in_array($label, ['Games / Sports', 'Musical Skills'], true)) {
-            return 'Average';
-        }
-        if (in_array($label, ['Punctuality', 'Politeness / Courtesy', 'Honesty', 'Relationship with Others'], true)) {
-            return 'Excellent';
-        }
-        return 'Good';
+        $scale = $this->psychomotorProfile()['scale'] ?? null;
+        return \App\Support\PsychomotorService::defaultRating($scale);
     }
 
     public function mount(): void
@@ -465,7 +452,7 @@ class Entry extends Component
 
         $dbTraits = [];
         foreach ($this->traitMap() as $slug => $label) {
-            $dbTraits[$label] = $this->psychomotorScores[$slug] ?? 'Good';
+            $dbTraits[$label] = $this->psychomotorScores[$slug] ?? $this->traitDefault($label);
         }
 
         \App\Models\PsychomotorScore::updateOrCreate(
@@ -1225,7 +1212,7 @@ class Entry extends Component
                 }
                 $dbTraits = [];
                 foreach ($this->traitMap() as $slug => $label) {
-                    $dbTraits[$label] = $mappedTraits[$slug] ?? 'Good';
+                    $dbTraits[$label] = $mappedTraits[$slug] ?? $this->traitDefault($label);
                 }
                 \App\Models\PsychomotorScore::updateOrCreate(
                     [

@@ -277,10 +277,19 @@
                     </div>
                 </div>
 
-                {{-- Right: Affective Traits --}}
+                {{-- Right: Affective & Psychomotor Traits --}}
+                @php
+                    $affectiveRows = !empty($affectiveTimeline) ? $affectiveTimeline : array_filter($psychomotorTimeline, fn($t) => ($t['domain'] ?? 'affective') === 'affective');
+                    $psychomotorRows = !empty($psychomotorDomainTimeline) ? $psychomotorDomainTimeline : array_filter($psychomotorTimeline, fn($t) => ($t['domain'] ?? '') === 'psychomotor');
+                    if (empty($psychomotorRows)) {
+                        $half = ceil(count($psychomotorTimeline) / 2);
+                        $affectiveRows = array_slice($psychomotorTimeline, 0, $half);
+                        $psychomotorRows = array_slice($psychomotorTimeline, $half);
+                    }
+                @endphp
                 <div class="col-right">
                     <div class="sub-card">
-                        <div class="sub-card-header">AFFECTIVE &amp; BEHAVIOURAL PORTFOLIO</div>
+                        <div class="sub-card-header">AFFECTIVE &amp; BEHAVIOURAL DOMAIN</div>
                         <table class="scores" style="margin:0; border:none;">
                             <thead>
                                 <tr>
@@ -291,12 +300,36 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach ($psychomotorTimeline as $trait)
+                                @foreach ($affectiveRows as $trait)
                                 <tr>
-                                    <td class="subj" style="font-size:7.5px;">{{ $trait['label'] }}</td>
-                                    <td class="bold" style="font-size:7.5px;">{{ $trait['term_1'] }}</td>
-                                    <td class="bold" style="font-size:7.5px;">{{ $trait['term_2'] }}</td>
-                                    <td class="bold" style="font-size:7.5px;">{{ $trait['term_3'] }}</td>
+                                    <td class="subj" style="font-size:7px; padding:1.5px 4px;">{{ $trait['label'] }}</td>
+                                    <td class="bold" style="font-size:7px; padding:1.5px 2px;">{{ $trait['term_1'] }}</td>
+                                    <td class="bold" style="font-size:7px; padding:1.5px 2px;">{{ $trait['term_2'] }}</td>
+                                    <td class="bold" style="font-size:7px; padding:1.5px 2px;">{{ $trait['term_3'] }}</td>
+                                </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="sub-card" style="margin-top:5px;">
+                        <div class="sub-card-header">PSYCHOMOTOR &amp; PRACTICAL SKILLS</div>
+                        <table class="scores" style="margin:0; border:none;">
+                            <thead>
+                                <tr>
+                                    <th style="width:58%; text-align:left; padding-left:6px;">Practical Skill</th>
+                                    <th style="width:14%;">Term 1</th>
+                                    <th style="width:14%;">Term 2</th>
+                                    <th style="width:14%;">Term 3</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach ($psychomotorRows as $trait)
+                                <tr>
+                                    <td class="subj" style="font-size:7px; padding:1.5px 4px;">{{ $trait['label'] }}</td>
+                                    <td class="bold" style="font-size:7px; padding:1.5px 2px;">{{ $trait['term_1'] }}</td>
+                                    <td class="bold" style="font-size:7px; padding:1.5px 2px;">{{ $trait['term_2'] }}</td>
+                                    <td class="bold" style="font-size:7px; padding:1.5px 2px;">{{ $trait['term_3'] }}</td>
                                 </tr>
                                 @endforeach
                             </tbody>
