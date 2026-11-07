@@ -201,17 +201,30 @@
                             </div>
                         </div>
 
-                        <div class="pt-8">
+                        <div class="pt-8 space-y-3">
                             <button type="submit" 
                                 :disabled="selectedStudents.length === 0"
-                                class="w-full rounded-2xl bg-gradient-to-r from-indigo-600 to-purple-600 py-4 text-sm font-black text-white shadow-xl shadow-indigo-100 transition-all hover:shadow-indigo-200 active:scale-[0.98] disabled:opacity-50 disabled:grayscale">
+                                class="w-full rounded-2xl bg-gradient-to-r from-indigo-600 to-purple-600 py-3.5 text-sm font-black text-white shadow-xl shadow-indigo-100 transition-all hover:shadow-indigo-200 active:scale-[0.98] disabled:opacity-50 disabled:grayscale">
                                 <span class="flex items-center justify-center gap-2">
                                     <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                                         <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
                                         <polyline points="7 10 12 15 17 10"/>
                                         <line x1="12" y1="15" x2="12" y2="3"/>
                                     </svg>
-                                    GENERATE ZIP (<span x-text="selectedStudents.length"></span>)
+                                    GENERATE REPORT CARDS ZIP (<span x-text="selectedStudents.length"></span>)
+                                </span>
+                            </button>
+
+                            <button type="submit" 
+                                formaction="{{ route('results.bulk-report-booklets.generate') }}"
+                                :disabled="selectedStudents.length === 0"
+                                class="w-full rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-700 py-3.5 text-sm font-black text-white shadow-xl shadow-emerald-100 transition-all hover:shadow-emerald-200 active:scale-[0.98] disabled:opacity-50 disabled:grayscale">
+                                <span class="flex items-center justify-center gap-2">
+                                    <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+                                        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+                                    </svg>
+                                    GENERATE REPORT BOOKLETS ZIP (<span x-text="selectedStudents.length"></span>)
                                 </span>
                             </button>
                         </div>

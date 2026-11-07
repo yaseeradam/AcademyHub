@@ -11,6 +11,7 @@ use App\Http\Controllers\UtilityController;
 use App\Http\Controllers\BulkReportCardsController;
 use App\Http\Controllers\CertificateController;
 use App\Http\Controllers\ReportCardController;
+use App\Http\Controllers\ReportBookletController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\StudentController;
@@ -245,6 +246,9 @@ Route::middleware(['auth', 'active'])->group(function () {
         Route::post('/results/bulk-report-cards', [BulkReportCardsController::class, 'generate'])
             ->middleware('permission:results.publish')
             ->name('results.bulk-report-cards.generate');
+        Route::post('/results/bulk-report-booklets', [BulkReportCardsController::class, 'generateBooklets'])
+            ->middleware('permission:results.publish')
+            ->name('results.bulk-report-booklets.generate');
         Route::get('/results/bulk-report-cards/preview', [BulkReportCardsController::class, 'preview'])
             ->middleware('permission:results.publish')
             ->name('results.bulk-report-cards.preview');
@@ -401,6 +405,16 @@ Route::middleware(['auth', 'active'])->group(function () {
     Route::get('/results/report-card/{student}', [ReportCardController::class, 'download'])
         ->middleware('role:admin,teacher,parent')
         ->name('results.report-card')
+        ->where('student', '[A-Za-z0-9\/\-\.]+');
+
+    Route::get('/results/report-booklet/{student}', [ReportBookletController::class, 'download'])
+        ->middleware('role:admin,teacher,parent,proprietor')
+        ->name('results.report-booklet')
+        ->where('student', '[A-Za-z0-9\/\-\.]+');
+
+    Route::get('/results/report-booklet/{student}/preview', [ReportBookletController::class, 'preview'])
+        ->middleware('role:admin,teacher,proprietor')
+        ->name('results.report-booklet.preview')
         ->where('student', '[A-Za-z0-9\/\-\.]+');
 
     Route::middleware('role:bursar')->group(function () {

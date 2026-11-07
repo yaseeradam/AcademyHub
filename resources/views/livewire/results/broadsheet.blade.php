@@ -49,6 +49,14 @@
                         <span wire:loading.remove wire:target="generateBulk">Report Cards</span>
                         <span wire:loading wire:target="generateBulk">Working...</span>
                     </button>
+                    <button wire:click="generateBulkBooklets" wire:loading.attr="disabled"
+                            class="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 rounded-2xl bg-indigo-600/90 hover:bg-indigo-600 px-5 py-3 text-sm font-bold text-white transition-all shadow-lg shadow-indigo-950/40 disabled:opacity-50">
+                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                            <path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+                        </svg>
+                        <span wire:loading.remove wire:target="generateBulkBooklets">Report Booklets</span>
+                        <span wire:loading wire:target="generateBulkBooklets">Compiling...</span>
+                    </button>
                 @endif
             </div>
         </div>
@@ -171,24 +179,44 @@
                             </span>
                         </td>
                         <td class="px-6 py-4 text-right">
-                            @php
-                                $pdfUrl = route('results.report-card', [
-                                    'student'  => $row['student'],
-                                    'term'     => $term,
-                                    'session'  => $session,
-                                    'download' => 1,
-                                ]);
-                                $safeAdm = preg_replace('/[^A-Za-z0-9\-_.]+/', '-', (string) ($row['student']->admission_number ?? $row['student']->id));
-                                $pdfName = "report-card-{$safeAdm}-term{$term}.pdf";
-                            @endphp
-                            <a
-                                href="{{ $pdfUrl }}"
-                                download="{{ $pdfName }}"
-                                onclick="event.preventDefault(); downloadStudentPdf(this, '{{ $pdfUrl }}', '{{ $pdfName }}');"
-                                class="inline-flex items-center justify-center rounded-xl bg-indigo-50 px-4 py-2 text-xs font-black text-indigo-600 hover:bg-indigo-600 hover:text-white transition-all shadow-sm cursor-pointer"
-                            >
-                                PDF
-                            </a>
+                            <div class="inline-flex items-center gap-1.5 justify-end">
+                                @php
+                                    $pdfUrl = route('results.report-card', [
+                                        'student'  => $row['student'],
+                                        'term'     => $term,
+                                        'session'  => $session,
+                                        'download' => 1,
+                                    ]);
+                                    $safeAdm = preg_replace('/[^A-Za-z0-9\-_.]+/', '-', (string) ($row['student']->admission_number ?? $row['student']->id));
+                                    $pdfName = "report-card-{$safeAdm}-term{$term}.pdf";
+
+                                    $bookletUrl = route('results.report-booklet', [
+                                        'student'  => $row['student'],
+                                        'session'  => $session,
+                                        'download' => 1,
+                                    ]);
+                                    $safeSess = str_replace('/', '-', $session);
+                                    $bookletName = "booklet-{$safeAdm}-{$safeSess}.pdf";
+                                @endphp
+                                <a
+                                    href="{{ $pdfUrl }}"
+                                    download="{{ $pdfName }}"
+                                    title="Download Single-Term Report Card (Term {{ $term }})"
+                                    onclick="event.preventDefault(); downloadStudentPdf(this, '{{ $pdfUrl }}', '{{ $pdfName }}');"
+                                    class="inline-flex items-center justify-center rounded-xl bg-slate-100 px-3 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-200 transition-all shadow-sm cursor-pointer"
+                                >
+                                    Card
+                                </a>
+                                <a
+                                    href="{{ $bookletUrl }}"
+                                    download="{{ $bookletName }}"
+                                    title="Download Complete Annual Report Booklet (All Terms)"
+                                    onclick="event.preventDefault(); downloadStudentPdf(this, '{{ $bookletUrl }}', '{{ $bookletName }}');"
+                                    class="inline-flex items-center justify-center rounded-xl bg-indigo-50 px-3 py-1.5 text-xs font-black text-indigo-700 hover:bg-indigo-600 hover:text-white transition-all shadow-sm cursor-pointer"
+                                >
+                                    Booklet
+                                </a>
+                            </div>
                         </td>
                     </tr>
                 @empty

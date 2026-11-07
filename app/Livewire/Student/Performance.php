@@ -90,13 +90,56 @@ class Performance extends Component
     }
 
     #[Computed]
+    public function availableSessions(): array
+    {
+        return \App\Models\AcademicSession::query()
+            ->orderByDesc('name')
+            ->pluck('name')
+            ->toArray() ?: [now()->format('Y') . '/' . (now()->format('Y') + 1)];
+    }
+
+    #[Computed]
     public function availableTerms(): array
     {
-        return [
-            ['value' => 1, 'label' => 'First Term'],
-            ['value' => 2, 'label' => 'Second Term'],
-            ['value' => 3, 'label' => 'Third Term'],
-        ];
+        $termsMap = AcademicTerm::availableTermsForSession($this->selectedSession);
+        $result = [];
+        foreach ($termsMap as $val => $label) {
+            $result[] = ['value' => $val, 'label' => $label];
+        }
+        return $result;
+    }
+
+    public function updatedSelectedSession($value): void
+    {
+        $available = array_keys(AcademicTerm::availableTermsForSession($value));
+        if (!in_array($this->selectedTerm, $available, true)) {
+            $this->selectedTerm = !empty($available) ? end($available) : 1;
+        }
+    }
+
+    #[Computed]
+    public function bookletDossier(): ?array
+    {
+        if (!$this->student || !$this->selectedSession) {
+            return null;
+        }
+
+        try {
+            return app(\App\Support\StudentDossierService::class)->buildDossier(
+                $this->student,
+                $this->selectedSession
+            );
+        } catch (\Throwable $e) {
+            return null;
+        }
+    }
+
+    public function __get($property)
+    {
+        if (method_exists($this, $property)) {
+            return $this->{$property}();
+        }
+        return parent::__get($property);
     }
 
     public function setTab(string $tab)

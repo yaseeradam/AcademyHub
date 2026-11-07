@@ -295,6 +295,86 @@ class Broadsheet extends Component
         ])->deleteFileAfterSend(true);
     }
 
+    public function generateBulkBooklets(): BinaryFileResponse
+    {
+        $user = auth()->user();
+        abort_unless($user && $user->hasPermission('results.broadsheet'), 403);
+
+        if (!$this->classId) {
+            session()->flash('error', 'Please select a class.');
+            abort(400, 'Please select a class.');
+        }
+
+        set_time_limit(0);
+
+        $students = Student::query()
+            ->where('class_id', $this->classId)
+            ->where('status', 'Active')
+            ->orderBy('last_name')
+            ->get();
+
+        if ($students->isEmpty()) {
+            session()->flash('error', 'No active students found.');
+            abort(400, 'No active students found.');
+        }
+
+        $service = app(\App\Support\StudentDossierService::class);
+        $safeSession = str_replace('/', '-', $this->session);
+        $tmpDir = storage_path('app/_bulk_report_booklets/' . \Illuminate\Support\Str::random(12));
+        $pdfDir = $tmpDir . DIRECTORY_SEPARATOR . 'pdfs';
+        File::ensureDirectoryExists($pdfDir);
+
+        $timestamp = now()->format('Y-m-d_H-i-s');
+        $zipDir = storage_path('app/report-booklets');
+        File::ensureDirectoryExists($zipDir);
+        $zipPath = $zipDir . DIRECTORY_SEPARATOR . "academic_booklets_class{$this->classId}_{$safeSession}_{$timestamp}.zip";
+
+        $zip = new ZipArchive();
+        if ($zip->open($zipPath, ZipArchive::CREATE) !== true) {
+            File::deleteDirectory($tmpDir);
+            abort(500, 'Unable to create zip archive.');
+        }
+
+        try {
+            foreach ($students as $student) {
+                $payload = $service->buildDossier($student, $this->session);
+                $pdf = Pdf::loadView('pdf.report-booklet', $payload)
+                    ->setPaper('a4', 'portrait')
+                    ->setOptions([
+                        'dpi' => 72,
+                        'isHtml5ParserEnabled' => true,
+                        'isRemoteEnabled' => true,
+                        'isPhpEnabled' => false,
+                        'defaultFont' => 'dejavu sans',
+                    ]);
+
+                $safeAdm = preg_replace('/[^A-Za-z0-9\\-_.]+/', '-', (string) ($student->admission_number ?? $student->id));
+                $filename = "academic-booklet-{$safeAdm}-{$safeSession}.pdf";
+                $path = $pdfDir . DIRECTORY_SEPARATOR . $filename;
+                File::put($path, $pdf->output());
+                $zip->addFile($path, $filename);
+
+                unset($pdf);
+                gc_collect_cycles();
+            }
+        } finally {
+            $zip->close();
+            File::deleteDirectory($tmpDir);
+        }
+
+        Audit::log('results.bulk_report_booklets_generated', null, [
+            'class_id' => $this->classId,
+            'session'  => $this->session,
+            'count'    => $students->count(),
+        ]);
+
+        return response()->download($zipPath, null, [
+            'Cache-Control' => 'no-cache, no-store, must-revalidate',
+            'Pragma'        => 'no-cache',
+            'Expires'       => '0',
+        ])->deleteFileAfterSend(true);
+    }
+
     public function publish(): void
     {
         $user = auth()->user();

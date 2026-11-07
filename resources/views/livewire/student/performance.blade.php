@@ -26,9 +26,50 @@
 <div class="space-y-6">
 
     {{-- Page Header --}}
-    <div class="rounded-xl bg-slate-900 px-5 py-4 shadow-sm">
-        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-            <h1 class="text-xl font-bold text-white">Performance</h1>
+    <div class="rounded-2xl bg-slate-900 p-5 shadow-lg text-white">
+        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+            <div>
+                <h1 class="text-xl font-black text-white flex items-center gap-2">
+                    <svg class="h-6 w-6 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                    </svg>
+                    Student Academic Performance
+                </h1>
+                <p class="text-xs text-slate-400 font-medium mt-1">Continuous progress tracking, terminal analysis, and cumulative academic dossier.</p>
+            </div>
+
+            <div class="flex flex-wrap items-center gap-3">
+                {{-- Session Selector --}}
+                <div class="flex items-center gap-1.5 bg-slate-800/80 px-3 py-1.5 rounded-xl border border-slate-700">
+                    <span class="text-xs font-bold text-slate-400">Session:</span>
+                    <select wire:model.live="selectedSession" class="bg-transparent text-xs font-black text-white border-none focus:ring-0 p-0 cursor-pointer">
+                        @foreach($this->availableSessions as $s)
+                            <option value="{{ $s }}" class="bg-slate-900 text-white">{{ $s }}</option>
+                        @endforeach
+                    </select>
+                </div>
+
+                {{-- Term Selector --}}
+                <div class="flex items-center gap-1.5 bg-slate-800/80 px-3 py-1.5 rounded-xl border border-slate-700">
+                    <span class="text-xs font-bold text-slate-400">Term:</span>
+                    <select wire:model.live="selectedTerm" class="bg-transparent text-xs font-black text-white border-none focus:ring-0 p-0 cursor-pointer">
+                        @foreach($this->availableTerms as $t)
+                            <option value="{{ $t['value'] }}" class="bg-slate-900 text-white">{{ $t['label'] }}</option>
+                        @endforeach
+                    </select>
+                </div>
+
+                @if($this->student)
+                    <a href="{{ route('results.report-booklet', ['student' => $this->student->id, 'session' => $selectedSession, 'download' => 1]) }}"
+                       target="_blank"
+                       class="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 px-4 py-2 text-xs font-black text-white shadow-md hover:from-emerald-500 hover:to-teal-500 transition active:scale-95">
+                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                        </svg>
+                        Annual Report Book
+                    </a>
+                @endif
+            </div>
         </div>
     </div>
 
@@ -100,6 +141,7 @@
                         ['subjects',     'Subjects'],
                         ['trends',       'Trends'],
                         ['improvement',  'Improvement'],
+                        ['booklet',      'Academic Report Book'],
                     ] as [$key, $label])
                         <button wire:click="setTab('{{ $key }}')"
                                 class="px-5 py-4 text-sm font-semibold whitespace-nowrap border-b-2 transition
@@ -328,6 +370,181 @@
                             </div>
                         @endforeach
                     </div>
+                @endif
+
+                {{-- ── Booklet Dossier Tab ── --}}
+                @if($activeTab === 'booklet')
+                    @php
+                        $dossier = $this->bookletDossier;
+                    @endphp
+
+                    @if($dossier)
+                        <div class="space-y-6">
+                            {{-- Dossier Header Banner --}}
+                            <div class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 p-6 text-white shadow-xl">
+                                <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                                    <div>
+                                        <span class="inline-flex items-center gap-1.5 rounded-full bg-indigo-500/20 px-3 py-1 text-xs font-black uppercase tracking-wider text-indigo-300 ring-1 ring-indigo-400/30">
+                                            Continuous Assessment Dossier
+                                        </span>
+                                        <h2 class="mt-2 text-2xl font-black text-white tracking-tight">
+                                            Academic Session {{ $dossier['session'] }}
+                                        </h2>
+                                        <p class="text-xs text-slate-300 font-medium mt-1">
+                                            Class: <span class="font-bold text-white">{{ $dossier['student']['class_name'] }}</span>
+                                            @if($dossier['student']['admission_number'])
+                                                • Admission No: <span class="font-bold text-white">{{ $dossier['student']['admission_number'] }}</span>
+                                            @endif
+                                        </p>
+                                    </div>
+
+                                    <div class="flex items-center gap-3">
+                                        <a href="{{ route('results.report-booklet.preview', ['student' => $this->student->id, 'session' => $selectedSession]) }}"
+                                           target="_blank"
+                                           class="inline-flex items-center gap-2 rounded-xl bg-white/10 px-4 py-2.5 text-xs font-black text-white backdrop-blur hover:bg-white/20 transition active:scale-95">
+                                            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                            </svg>
+                                            Preview PDF
+                                        </a>
+
+                                        <a href="{{ route('results.report-booklet', ['student' => $this->student->id, 'session' => $selectedSession, 'download' => 1]) }}"
+                                           target="_blank"
+                                           class="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 px-4 py-2.5 text-xs font-black text-white shadow-lg shadow-emerald-900/30 hover:from-emerald-400 hover:to-teal-500 transition active:scale-95">
+                                            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                                            </svg>
+                                            Download Official PDF
+                                        </a>
+                                    </div>
+                                </div>
+
+                                {{-- Quick Dossier KPIs --}}
+                                <div class="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4 border-t border-white/10 pt-4">
+                                    <div>
+                                        <div class="text-[10px] font-black uppercase tracking-wider text-slate-400">Cumulative Average</div>
+                                        <div class="text-xl font-black text-white">{{ $dossier['summary']['cumulative_average'] ?? 0 }}%</div>
+                                    </div>
+                                    <div>
+                                        <div class="text-[10px] font-black uppercase tracking-wider text-slate-400">Annual Grade</div>
+                                        <div class="text-xl font-black text-emerald-400">{{ $dossier['summary']['cumulative_grade'] ?? '-' }}</div>
+                                    </div>
+                                    <div>
+                                        <div class="text-[10px] font-black uppercase tracking-wider text-slate-400">Attendance Rate</div>
+                                        <div class="text-xl font-black text-cyan-300">{{ $dossier['attendance']['rate'] ?? 0 }}%</div>
+                                    </div>
+                                    <div>
+                                        <div class="text-[10px] font-black uppercase tracking-wider text-slate-400">Progression Status</div>
+                                        <div class="text-sm font-black text-amber-300 truncate">{{ $dossier['promotion']['status_label'] ?? 'Pending' }}</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {{-- Multi-Term Comparative Matrix Table --}}
+                            <div class="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
+                                <div class="bg-gray-50/80 px-5 py-3 border-b border-gray-100 flex items-center justify-between">
+                                    <h3 class="text-xs font-black uppercase tracking-wider text-gray-700">Multi-Term Subject Matrix</h3>
+                                    <span class="text-xs text-gray-400 font-semibold">{{ count($dossier['subjects']) }} Subjects Tracked</span>
+                                </div>
+                                <div class="overflow-x-auto">
+                                    <table class="w-full text-left text-xs">
+                                        <thead>
+                                            <tr class="border-b border-gray-100 bg-gray-50 text-[10px] font-black uppercase text-gray-400 tracking-wider">
+                                                <th class="py-3 px-4">Subject</th>
+                                                <th class="py-3 px-3 text-center">Term 1</th>
+                                                <th class="py-3 px-3 text-center">Term 2</th>
+                                                <th class="py-3 px-3 text-center">Term 3</th>
+                                                <th class="py-3 px-3 text-center bg-indigo-50/50 text-indigo-700">Annual Avg</th>
+                                                <th class="py-3 px-3 text-center">Grade</th>
+                                                <th class="py-3 px-3 text-center">Rank</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="divide-y divide-gray-100 font-medium">
+                                            @foreach($dossier['subjects'] as $sub)
+                                                <tr class="hover:bg-gray-50/50 transition-colors">
+                                                    <td class="py-3 px-4 font-bold text-gray-900">{{ $sub['name'] }}</td>
+                                                    <td class="py-3 px-3 text-center {{ $sub['term1']['is_pending'] ? 'text-gray-300' : 'text-gray-700' }}">
+                                                        {{ $sub['term1']['is_pending'] ? '-' : ($sub['term1']['total'] ?? '-') }}
+                                                    </td>
+                                                    <td class="py-3 px-3 text-center {{ $sub['term2']['is_pending'] ? 'text-gray-300' : 'text-gray-700' }}">
+                                                        {{ $sub['term2']['is_pending'] ? '-' : ($sub['term2']['total'] ?? '-') }}
+                                                    </td>
+                                                    <td class="py-3 px-3 text-center {{ $sub['term3']['is_pending'] ? 'text-gray-300' : 'text-gray-700' }}">
+                                                        {{ $sub['term3']['is_pending'] ? '-' : ($sub['term3']['total'] ?? '-') }}
+                                                    </td>
+                                                    <td class="py-3 px-3 text-center font-black bg-indigo-50/30 text-indigo-900">
+                                                        {{ $sub['annual_average'] ?? '-' }}%
+                                                    </td>
+                                                    <td class="py-3 px-3 text-center font-bold">
+                                                        <span class="rounded px-1.5 py-0.5 text-[10px] {{ ($sub['annual_average'] ?? 0) >= 50 ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-700' }}">
+                                                            {{ $sub['annual_grade'] ?? '-' }}
+                                                        </span>
+                                                    </td>
+                                                    <td class="py-3 px-3 text-center text-gray-500 font-semibold">{{ $sub['rank'] ?? '-' }}</td>
+                                                </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                            {{-- Promotion & Longitudinal Summary --}}
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                {{-- Progression Decision --}}
+                                <div class="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
+                                    <h4 class="text-xs font-black uppercase tracking-wider text-gray-500 mb-3 flex items-center gap-1.5">
+                                        <svg class="h-4 w-4 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                        </svg>
+                                        Promotion Verdict
+                                    </h4>
+                                    <div class="rounded-xl bg-slate-50 p-4 border border-slate-100">
+                                        <div class="text-sm font-black text-slate-900">{{ $dossier['promotion']['status_label'] }}</div>
+                                        <div class="text-xs text-slate-500 mt-1">{{ $dossier['promotion']['verdict_reason'] }}</div>
+                                    </div>
+                                    @if(!empty($dossier['remarks']['principal']))
+                                        <div class="mt-3 text-xs text-slate-600 italic">
+                                            "{{ $dossier['remarks']['principal'] }}"
+                                            <span class="block not-italic text-[10px] text-slate-400 font-bold mt-1">— Principal / Head of School</span>
+                                        </div>
+                                    @endif
+                                </div>
+
+                                {{-- Longitudinal Attendance --}}
+                                <div class="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
+                                    <h4 class="text-xs font-black uppercase tracking-wider text-gray-500 mb-3 flex items-center gap-1.5">
+                                        <svg class="h-4 w-4 text-cyan-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                        </svg>
+                                        Attendance Progression
+                                    </h4>
+                                    <div class="grid grid-cols-3 gap-2 text-center">
+                                        <div class="rounded-xl bg-gray-50 p-3">
+                                            <div class="text-[10px] font-bold text-gray-400">Term 1</div>
+                                            <div class="text-sm font-black text-gray-800">{{ $dossier['attendance']['term1']['present'] ?? 0 }} / {{ $dossier['attendance']['term1']['opened'] ?? 0 }}</div>
+                                        </div>
+                                        <div class="rounded-xl bg-gray-50 p-3">
+                                            <div class="text-[10px] font-bold text-gray-400">Term 2</div>
+                                            <div class="text-sm font-black text-gray-800">{{ $dossier['attendance']['term2']['present'] ?? 0 }} / {{ $dossier['attendance']['term2']['opened'] ?? 0 }}</div>
+                                        </div>
+                                        <div class="rounded-xl bg-gray-50 p-3">
+                                            <div class="text-[10px] font-bold text-gray-400">Term 3</div>
+                                            <div class="text-sm font-black text-gray-800">{{ $dossier['attendance']['term3']['present'] ?? 0 }} / {{ $dossier['attendance']['term3']['opened'] ?? 0 }}</div>
+                                        </div>
+                                    </div>
+                                    <div class="mt-3 text-xs text-gray-500 flex justify-between items-center px-1">
+                                        <span>Total Days Present: <strong>{{ $dossier['attendance']['annual_present'] }}</strong> / {{ $dossier['attendance']['annual_opened'] }}</span>
+                                        <span class="font-bold text-emerald-600">{{ $dossier['attendance']['rate'] }}% Attendance</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    @else
+                        <div class="rounded-2xl bg-amber-50 p-8 text-center ring-1 ring-amber-100">
+                            <p class="text-sm font-semibold text-gray-600">No report booklet dossier available for session {{ $selectedSession }}.</p>
+                        </div>
+                    @endif
                 @endif
 
             </div>
