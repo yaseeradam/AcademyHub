@@ -77,19 +77,30 @@ class Dashboard extends Component
         if (is_string($allowedClassIds)) {
             $allowedClassIds = json_decode($allowedClassIds, true) ?: [];
         }
-        $allowedClassIds = is_array($allowedClassIds) ? $allowedClassIds : [];
+        $allowedClassIds = is_array($allowedClassIds) ? array_filter($allowedClassIds) : [];
 
-        return auth()->user()->students()
-            ->whereIn('class_id', $allowedClassIds)
+        $query = auth()->user()->students()
             ->with(['schoolClass', 'section', 'user', 'scores'])
-            ->orderBy('first_name')
-            ->get();
+            ->orderBy('first_name');
+
+        if (! empty($allowedClassIds)) {
+            $query->whereIn('class_id', $allowedClassIds);
+        }
+
+        return $query->get();
     }
 
     #[Computed]
     public function selectedChild(): ?Student
     {
-        if (! $this->selectedChildId) return null;
+        if (! $this->selectedChildId) {
+            $this->selectedChildId = $this->children->first()?->id;
+        }
+
+        if (! $this->selectedChildId) {
+            return null;
+        }
+
         return $this->children->firstWhere('id', $this->selectedChildId);
     }
 

@@ -180,10 +180,15 @@ Route::get('/student/hall-of-fame', \App\Livewire\Academics\HallOfFame::class)
     ->middleware('student.session')
     ->name('student.hall-of-fame');
 
+// Paystack Payment Callbacks & Webhook (Publicly accessible to prevent session dropouts)
+Route::get('/paystack/callback', [PaystackCallbackController::class, 'handleCallback'])
+    ->middleware('throttle:payment_callback')
+    ->name('paystack.callback');
+Route::post('/paystack/webhook', [PaystackCallbackController::class, 'handleWebhook'])
+    ->withoutMiddleware([\App\Http\Middleware\VerifyCsrfToken::class])
+    ->name('paystack.webhook');
+
 Route::middleware(['auth', 'active'])->group(function () {
-    Route::get('/paystack/callback', [PaystackCallbackController::class, 'handleCallback'])
-        ->middleware('throttle:payment_callback')
-        ->name('paystack.callback');
     Route::get('/dashboard', [UtilityController::class, 'dashboard'])->name('dashboard');
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile');

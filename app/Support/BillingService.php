@@ -104,48 +104,56 @@ class BillingService
             ->get(['term', 'amount_paid', 'date', 'receipt_number']);
 
         $termsBreakdown = [];
+        $unallocatedPaid = (float) $transactions->whereNull('term')->sum('amount_paid');
+        $availableCredit = $unallocatedPaid;
         $totalDue = 0.0;
-        $totalPaid = 0.0;
+        $totalPaid = $unallocatedPaid;
         $pastArrears = 0.0;
 
         for ($t = 1; $t <= $upToTerm; $t++) {
             $termDue = self::resolveFeeAmount($student->class_id, $category, $t, $session, $student->tenant_id);
-            $termPaid = (float) $transactions->where('term', $t)->sum('amount_paid');
-            $termBalance = max(0.0, $termDue - $termPaid);
+            $directPaid = (float) $transactions->where('term', $t)->sum('amount_paid');
+            $totalDue += $termDue;
+            $totalPaid += $directPaid;
+
+            // Apply direct payment + any rolling credit from prior terms / unallocated
+            $funds = $directPaid + $availableCredit;
+
+            if ($funds >= $termDue) {
+                $creditApplied = max(0.0, min($availableCredit, $termDue - $directPaid));
+                $effectivePaid = $directPaid + $creditApplied;
+                $termBalance = 0.0;
+                $availableCredit = $funds - $termDue;
+            } else {
+                $creditApplied = $availableCredit;
+                $effectivePaid = $funds;
+                $termBalance = $termDue - $funds;
+                $availableCredit = 0.0;
+            }
 
             $isCurrent = ($t === $upToTerm);
             if (! $isCurrent) {
                 $pastArrears += $termBalance;
             }
 
-            $totalDue += $termDue;
-            $totalPaid += $termPaid;
-
             $termsBreakdown[$t] = [
-                'term'        => $t,
-                'term_label'  => "Term {$t}",
-                'due'         => $termDue,
-                'paid'        => $termPaid,
-                'balance'     => $termBalance,
-                'is_current'  => $isCurrent,
+                'term'           => $t,
+                'term_label'     => "Term {$t}",
+                'due'            => $termDue,
+                'direct_paid'    => $directPaid,
+                'credit_applied' => $creditApplied,
+                'paid'           => $effectivePaid,
+                'balance'        => $termBalance,
+                'is_current'     => $isCurrent,
             ];
         }
 
-        // Also check if there are unallocated payments (where term is null)
-        $unallocatedPaid = (float) $transactions->whereNull('term')->sum('amount_paid');
-        $totalPaid += $unallocatedPaid;
-
         $currentTermDue = $termsBreakdown[$upToTerm]['due'] ?? 0.0;
         $currentTermPaid = $termsBreakdown[$upToTerm]['paid'] ?? 0.0;
-        $currentTermBalance = max(0.0, $currentTermDue - $currentTermPaid);
+        $currentTermBalance = $termsBreakdown[$upToTerm]['balance'] ?? 0.0;
 
         // Net total balance considering all payments and dues
         $totalBalance = max(0.0, $totalDue - $totalPaid);
-
-        // Recalculate past arrears if unallocated payments existed
-        if ($unallocatedPaid > 0) {
-            $pastArrears = max(0.0, $totalBalance - $currentTermBalance);
-        }
 
         return [
             'student_id'            => $student->id,
@@ -271,31 +279,39 @@ class BillingService
 
                 $totalDue = 0.0;
                 $totalPaid = (float) $studentPayments->sum('paid');
+                $unallocatedPaid = (float) $studentPayments->whereNull('term')->sum('paid');
+                $availableCredit = $unallocatedPaid;
                 $pastArrears = 0.0;
                 $currentDue = 0.0;
                 $currentPaid = 0.0;
+                $currentBalance = 0.0;
 
                 for ($t = 1; $t <= $term; $t++) {
                     $dueForTerm = $resolveCachedFee($student->class_id, $t);
-                    $paidForTerm = (float) $studentPayments->where('term', $t)->sum('paid');
-
+                    $directPaid = (float) $studentPayments->where('term', $t)->sum('paid');
                     $totalDue += $dueForTerm;
+
+                    $funds = $directPaid + $availableCredit;
+                    if ($funds >= $dueForTerm) {
+                        $effectivePaid = $dueForTerm;
+                        $termBalance = 0.0;
+                        $availableCredit = $funds - $dueForTerm;
+                    } else {
+                        $effectivePaid = $funds;
+                        $termBalance = $dueForTerm - $funds;
+                        $availableCredit = 0.0;
+                    }
 
                     if ($t === $term) {
                         $currentDue = $dueForTerm;
-                        $currentPaid = $paidForTerm;
+                        $currentPaid = $effectivePaid;
+                        $currentBalance = $termBalance;
                     } else {
-                        $pastArrears += max(0.0, $dueForTerm - $paidForTerm);
+                        $pastArrears += $termBalance;
                     }
                 }
 
                 $totalBalance = max(0.0, $totalDue - $totalPaid);
-                $currentBalance = max(0.0, $currentDue - $currentPaid);
-
-                // Adjust arrears if unallocated payments covered them
-                if ($totalBalance < ($pastArrears + $currentBalance)) {
-                    $pastArrears = max(0.0, $totalBalance - $currentBalance);
-                }
 
                 return [
                     'student'          => $student,

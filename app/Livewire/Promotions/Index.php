@@ -222,6 +222,37 @@ class Index extends Component
         $this->dispatch('alert', message: 'Students promoted.', type: 'success');
     }
 
+    public function revertPromotion(int $promotionId): void
+    {
+        $user = auth()->user();
+        abort_unless($user?->role === 'admin', 403);
+
+        $promotion = Promotion::with('student')->findOrFail($promotionId);
+        $student = $promotion->student;
+
+        if (! $student) {
+            $this->dispatch('alert', message: 'Student record not found.', type: 'error');
+            return;
+        }
+
+        // Safety check: is the student still in the class they were promoted to?
+        if ((int) $student->class_id !== (int) $promotion->to_class_id) {
+            $this->dispatch('alert', message: 'Cannot revert: student has moved to another class since this promotion.', type: 'warning');
+            return;
+        }
+
+        DB::transaction(function () use ($promotion, $student) {
+            $student->class_id = $promotion->from_class_id;
+            $student->section_id = $promotion->from_section_id;
+            $student->save();
+
+            $promotion->delete();
+        });
+
+        $this->dispatch('alert', message: "Promotion for {$student->full_name} has been reverted successfully.", type: 'success');
+        unset($this->students);
+    }
+
     public function render()
     {
         $user = auth()->user();

@@ -66,6 +66,7 @@ Route::get('/', function () {
 Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:login_attempts');
 Route::post('/student/login', [StudentAuthController::class, 'login'])->middleware('throttle:login_attempts');
 Route::get('/tenant/{slug}', [TenantDiscoveryController::class, 'show']);
+Route::post('/paystack/webhook', [\App\Http\Controllers\PaystackCallbackController::class, 'handleWebhook'])->name('api.paystack.webhook');
 
 // Protected
 Route::middleware(['auth:sanctum', 'active', 'enforce.tenant', \App\Http\Middleware\PreventProprietorMutations::class])->group(function () {

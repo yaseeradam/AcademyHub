@@ -35,6 +35,9 @@ class Take extends Component
     public int $durationSeconds = 0;
     public ?string $startedAtIso = null;
 
+    /** @var array<int> Persistent deterministic question order for this attempt */
+    public array $questionOrder = [];
+
     public function minSubmitSeconds(): int
     {
         $attempt = $this->attempt();
@@ -212,11 +215,19 @@ class Take extends Component
         $this->startedAtIso = $startedAt?->toIso8601String();
         $this->durationSeconds = max(1, (int) ($attempt->exam->duration_minutes ?? 1)) * 60;
 
-        // Shuffle question order per-student if enabled (seed by attempt id for consistency)
-        if ($attempt->exam->shuffle_questions) {
-            $questions = $attempt->exam->questions->shuffle();
-            $attempt->exam->setRelation('questions', $questions);
+        // Deterministically seed and persist question order for this attempt if shuffle enabled
+        $allQuestionIds = $attempt->exam->questions->pluck('id')->values()->all();
+        if ($attempt->exam->shuffle_questions && !empty($allQuestionIds)) {
+            mt_srand((int) $attempt->id);
+            for ($i = count($allQuestionIds) - 1; $i > 0; $i--) {
+                $j = mt_rand(0, $i);
+                $tmp = $allQuestionIds[$i];
+                $allQuestionIds[$i] = $allQuestionIds[$j];
+                $allQuestionIds[$j] = $tmp;
+            }
+            mt_srand();
         }
+        $this->questionOrder = $allQuestionIds;
 
         $this->loadAnswers();
         $this->currentIndex = 0;
@@ -239,6 +250,47 @@ class Take extends Component
                 'exam' => fn($q) => $q->with(['schoolClass:id,name', 'subject:id,name', 'questions.options']),
             ])
             ->findOrFail($this->attemptId);
+
+        // Enforce the persistent deterministic question and option order
+        if ($this->cachedAttempt->exam && $this->cachedAttempt->exam->questions) {
+            $questionsMap = $this->cachedAttempt->exam->questions->keyBy('id');
+            $orderedQuestions = collect();
+
+            if (!empty($this->questionOrder)) {
+                foreach ($this->questionOrder as $qid) {
+                    if ($questionsMap->has($qid)) {
+                        $orderedQuestions->push($questionsMap->get($qid));
+                    }
+                }
+            }
+
+            // Include any questions not present in questionOrder
+            foreach ($this->cachedAttempt->exam->questions as $q) {
+                if (!$orderedQuestions->contains('id', $q->id)) {
+                    $orderedQuestions->push($q);
+                }
+            }
+
+            // Deterministic option shuffle per question if exam->shuffle_options is enabled
+            if ($this->cachedAttempt->exam->shuffle_options) {
+                foreach ($orderedQuestions as $q) {
+                    if ($q->options && $q->options->isNotEmpty()) {
+                        $opts = $q->options->values()->all();
+                        mt_srand((int) ($this->attemptId * 1000 + $q->id));
+                        for ($i = count($opts) - 1; $i > 0; $i--) {
+                            $j = mt_rand(0, $i);
+                            $tmp = $opts[$i];
+                            $opts[$i] = $opts[$j];
+                            $opts[$j] = $tmp;
+                        }
+                        mt_srand();
+                        $q->setRelation('options', collect($opts));
+                    }
+                }
+            }
+
+            $this->cachedAttempt->exam->setRelation('questions', $orderedQuestions);
+        }
 
         return $this->cachedAttempt;
     }

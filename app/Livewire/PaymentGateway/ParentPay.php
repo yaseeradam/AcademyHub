@@ -58,6 +58,9 @@ class ParentPay extends Component
     /** Human-readable label for the current installment position */
     public string $installmentLabel = '';
 
+    /** Reference for manual payment verification/recovery */
+    public string $manualReference = '';
+
     public function mount(): void
     {
         $user = auth()->user();
@@ -367,6 +370,75 @@ class ParentPay extends Component
         $authorizationUrl = $response->json('data.authorization_url');
         
         $this->redirect($authorizationUrl, navigate: false);
+    }
+
+    public function verifyPaymentReference(): void
+    {
+        $ref = trim($this->manualReference);
+        if (empty($ref)) {
+            $this->dispatch('alert', message: 'Please enter a Paystack payment reference.', type: 'warning');
+            return;
+        }
+
+        // 1. Check if this reference was already processed in transactions
+        $existing = Transaction::where('receipt_number', $ref)->first();
+        if ($existing) {
+            $this->paymentSuccess = true;
+            $this->receiptNumber = $existing->receipt_number;
+            $this->receiptDate = $existing->created_at?->format('d M Y, h:i A') ?? now()->format('d M Y, h:i A');
+            $this->paymentAmount = (float) $existing->amount_paid;
+            $this->installmentLabel = 'Payment verified (Already recorded)';
+            $this->calculateBalances();
+            $this->dispatch('alert', message: 'Payment reference confirmed! It is already recorded in school accounts.', type: 'info');
+            return;
+        }
+
+        // 2. Query Paystack directly to verify reference
+        $secretKey = config('services.paystack.secret_key');
+        if (empty($secretKey)) {
+            $this->dispatch('alert', message: 'Payment gateway configuration missing.', type: 'error');
+            return;
+        }
+
+        try {
+            $response = Http::withToken($secretKey)
+                ->withOptions(['verify' => false])
+                ->get("https://api.paystack.co/transaction/verify/{$ref}");
+
+            if (!$response->successful() || !$response->json('status')) {
+                $msg = $response->json('message') ?? 'Could not verify reference with Paystack.';
+                $this->dispatch('alert', message: "Verification failed: {$msg}", type: 'error');
+                return;
+            }
+
+            $data = $response->json('data');
+            if (($data['status'] ?? '') !== 'success') {
+                $status = $data['status'] ?? 'unknown';
+                $this->dispatch('alert', message: "Payment status is '{$status}', not successful.", type: 'warning');
+                return;
+            }
+
+            $metadata = $data['metadata'] ?? [];
+            $paymentType = $metadata['payment_type'] ?? null;
+
+            if ($paymentType === 'tuition' || str_starts_with($ref, 'TUI_')) {
+                $controller = app(\App\Http\Controllers\PaystackCallbackController::class);
+                $controller->processTuitionPayment($data, $metadata, isWebhook: true);
+
+                $this->paymentSuccess = true;
+                $this->receiptNumber = $ref;
+                $this->receiptDate = now()->format('d M Y, h:i A');
+                $this->paymentAmount = ($data['amount'] ?? 0) / 100;
+                $this->installmentLabel = 'Payment recovered and applied successfully';
+                $this->calculateBalances();
+                $this->dispatch('alert', message: 'Payment verified and school records updated!', type: 'success');
+            } else {
+                $this->dispatch('alert', message: 'This reference is not a tuition payment.', type: 'warning');
+            }
+        } catch (\Throwable $e) {
+            Log::error('Manual reference verification failed: ' . $e->getMessage());
+            $this->dispatch('alert', message: 'Error verifying payment: ' . $e->getMessage(), type: 'error');
+        }
     }
 
     private function sendOutboundWhatsApp(string $toPhone, string $messageText): void

@@ -64,7 +64,49 @@ class PaystackCallbackController extends Controller
         return redirect()->route('dashboard')->with('error', 'Unknown payment reference prefix.');
     }
 
-    private function processTuitionPayment(array $data, array $metadata)
+    /**
+     * Server-to-server webhook from Paystack to handle async/headless payments.
+     */
+    public function handleWebhook(Request $request)
+    {
+        $signature = $request->header('x-paystack-signature');
+        $secretKey = config('services.paystack.secret_key');
+        $payload = $request->getContent();
+
+        if (!$signature || !$secretKey || hash_hmac('sha512', $payload, $secretKey) !== $signature) {
+            Log::warning('Paystack webhook signature verification failed.', ['ip' => $request->ip()]);
+            return response()->json(['message' => 'Invalid signature'], 400);
+        }
+
+        $event = $request->input('event');
+        $data = $request->input('data');
+
+        if ($event === 'charge.success' && !empty($data)) {
+            $reference = (string) ($data['reference'] ?? '');
+            $metadata = $data['metadata'] ?? [];
+
+            Log::info("Paystack webhook: processing charge.success for {$reference}");
+
+            try {
+                if (str_starts_with($reference, 'TUI_')) {
+                    $this->processTuitionPayment($data, $metadata, isWebhook: true);
+                } elseif (str_starts_with($reference, 'PLG-')) {
+                    $this->processMarketplacePurchase($data, $metadata, isWebhook: true);
+                } elseif (str_starts_with($reference, 'BILL_')) {
+                    $this->processPluginBillPayment($reference, $data, isWebhook: true);
+                } elseif (str_starts_with($reference, 'SUB_')) {
+                    $this->processSubscriptionRenewal($reference, $data, isWebhook: true);
+                }
+            } catch (\Throwable $e) {
+                Log::error("Paystack webhook processing error for {$reference}: " . $e->getMessage());
+                return response()->json(['message' => 'Processing exception', 'error' => $e->getMessage()], 500);
+            }
+        }
+
+        return response()->json(['status' => 'handled'], 200);
+    }
+
+    public function processTuitionPayment(array $data, array $metadata, bool $isWebhook = false)
     {
         $studentId = $metadata['student_id'] ?? null;
         $plan = $metadata['installment_plan'] ?? 'full';
@@ -75,7 +117,7 @@ class PaystackCallbackController extends Controller
         $parentId = $metadata['parent_id'] ?? null;
 
         if (!$studentId || !$tenantId || !$parentId) {
-            return redirect()->route('parent.pay')->with('error', 'Invalid payment metadata details.');
+            return $isWebhook ? false : redirect()->route('parent.pay')->with('error', 'Invalid payment metadata details.');
         }
 
         $student = Student::findOrFail($studentId);
@@ -107,7 +149,7 @@ class PaystackCallbackController extends Controller
         });
 
         if (!$transaction->wasRecentlyCreated) {
-            return redirect()->route('parent.pay')->with('status', 'This transaction was already registered.');
+            return $isWebhook ? true : redirect()->route('parent.pay')->with('status', 'This transaction was already registered.');
         }
 
         // Send WhatsApp receipt if parent has a WhatsApp number
@@ -134,6 +176,10 @@ class PaystackCallbackController extends Controller
             $this->sendOutboundWhatsApp($parent->whatsapp_phone, $msg);
         }
 
+        if ($isWebhook) {
+            return true;
+        }
+
         // Store status in session and redirect back to parent pay
         session()->flash('parent_pay_success', true);
         session()->flash('receipt_number', $transaction->receipt_number);
@@ -144,14 +190,14 @@ class PaystackCallbackController extends Controller
         return redirect()->route('parent.pay')->with('status', 'Tuition payment processed successfully!');
     }
 
-    private function processMarketplacePurchase(array $data, array $metadata)
+    private function processMarketplacePurchase(array $data, array $metadata, bool $isWebhook = false)
     {
         $componentId = $metadata['component_id'] ?? null;
         $tenantId = $metadata['tenant_id'] ?? null;
         $userId = $metadata['user_id'] ?? null;
 
         if (!$componentId || !$tenantId || !$userId) {
-            return redirect()->route('marketplace')->with('error', 'Invalid marketplace checkout metadata.');
+            return $isWebhook ? false : redirect()->route('marketplace')->with('error', 'Invalid marketplace checkout metadata.');
         }
 
         $tenant = Tenant::findOrFail($tenantId);
@@ -163,7 +209,7 @@ class PaystackCallbackController extends Controller
         $expectedKobo = (int) ($component->price * 100);
 
         if ($amountPaidKobo < $expectedKobo) {
-            return redirect()->route('marketplace')->with('error', 'Payment amount mismatch.');
+            return $isWebhook ? false : redirect()->route('marketplace')->with('error', 'Payment amount mismatch.');
         }
 
         $setupFee = (float) $component->setup_fee;
@@ -208,10 +254,14 @@ class PaystackCallbackController extends Controller
             ]);
         }
 
+        if ($isWebhook) {
+            return true;
+        }
+
         return redirect()->route('marketplace')->with('status', 'Plugin payment successful! Module is now activated.');
     }
 
-    private function processPluginBillPayment(string $reference, array $data)
+    private function processPluginBillPayment(string $reference, array $data, bool $isWebhook = false)
     {
         if (preg_match('/^BILL_(\d+)_/', $reference, $matches)) {
             $billId = (int) $matches[1];
@@ -221,7 +271,7 @@ class PaystackCallbackController extends Controller
             $expectedKobo = (int) round($bill->total_due * 100);
 
             if ($paidKobo < $expectedKobo) {
-                return redirect()->route('billing.index')->with('error', 'Paid amount does not match the bill amount due.');
+                return $isWebhook ? false : redirect()->route('billing.index')->with('error', 'Paid amount does not match the bill amount due.');
             }
 
             if ($bill->status !== 'paid') {
@@ -236,17 +286,21 @@ class PaystackCallbackController extends Controller
                 ]);
             }
 
+            if ($isWebhook) {
+                return true;
+            }
+
             return redirect()->route('billing.index')->with('status', 'Bill payment verified and marked as paid.');
         }
 
-        return redirect()->route('billing.index')->with('error', 'Invalid bill reference pattern.');
+        return $isWebhook ? false : redirect()->route('billing.index')->with('error', 'Invalid bill reference pattern.');
     }
 
-    private function processSubscriptionRenewal(string $reference, array $data)
+    private function processSubscriptionRenewal(string $reference, array $data, bool $isWebhook = false)
     {
         $cacheKey = 'paystack_processed_sub_' . $reference;
         if (\Illuminate\Support\Facades\Cache::has($cacheKey)) {
-            return redirect()->route('settings.subscription')->with('status', 'This renewal transaction was already processed.');
+            return $isWebhook ? true : redirect()->route('settings.subscription')->with('status', 'This renewal transaction was already processed.');
         }
         \Illuminate\Support\Facades\Cache::put($cacheKey, true, now()->addDays(30));
 
@@ -274,6 +328,10 @@ class PaystackCallbackController extends Controller
         TenantSettings::persist($settingsPath, $existing);
 
         \Illuminate\Support\Facades\Cache::forget(TenantSettings::settingsCacheKey());
+
+        if ($isWebhook) {
+            return true;
+        }
 
         return redirect()->route('settings.subscription')->with('status', 'Subscription renewed successfully!');
     }

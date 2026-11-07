@@ -121,12 +121,25 @@
 
         <div class="mt-4 space-y-2">
             @forelse($recentPromotions as $p)
-                <div class="rounded-2xl border border-gray-100 bg-white p-4 text-sm text-gray-700">
-                    <div class="font-semibold text-gray-900">
-                        {{ $p->student?->full_name ?? 'Student' }} ({{ $p->student?->admission_number }})
+                <div class="rounded-2xl border border-gray-100 bg-white p-4 text-sm text-gray-700 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                    <div>
+                        <div class="font-semibold text-gray-900">
+                            {{ $p->student?->full_name ?? 'Student' }} ({{ $p->student?->admission_number }})
+                        </div>
+                        <div class="mt-1 text-xs text-gray-500">
+                            {{ $p->fromClass?->name }} → {{ $p->toClass?->name }} • {{ $p->promoted_at?->diffForHumans() }}
+                            @if($p->note)
+                                <span class="italic text-gray-400">({{ $p->note }})</span>
+                            @endif
+                        </div>
                     </div>
-                    <div class="mt-1 text-xs text-gray-500">
-                        {{ $p->fromClass?->name }} → {{ $p->toClass?->name }} • {{ $p->promoted_at?->diffForHumans() }}
+                    <div>
+                        <button type="button"
+                            wire:click="revertPromotion({{ $p->id }})"
+                            wire:confirm="Are you sure you want to revert this promotion for {{ $p->student?->full_name }}? They will be returned to {{ $p->fromClass?->name }}."
+                            class="inline-flex items-center px-3 py-1.5 border border-red-200 text-xs font-semibold rounded-lg text-red-600 bg-red-50 hover:bg-red-100 transition">
+                            Revert
+                        </button>
                     </div>
                 </div>
             @empty
