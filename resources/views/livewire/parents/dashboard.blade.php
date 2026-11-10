@@ -641,7 +641,7 @@
                 {{-- Two-Column Overview: Left Column = Academic Performance (5 Cols), Right Column = 2x2 Grid (7 Cols) --}}
                 <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
                     {{-- Left Column: Academic Performance Bar Chart (lg:col-span-5) --}}
-                    <div class="lg:col-span-5 bg-white rounded-3xl border border-slate-200/90 p-5 sm:p-6 shadow-xs flex flex-col justify-between">
+                    <div class="lg:col-span-5 min-w-0 bg-white rounded-3xl border border-slate-200/90 p-5 sm:p-6 shadow-xs flex flex-col justify-between overflow-hidden">
                         <div class="flex items-center justify-between pb-3 border-b border-slate-100">
                             <div class="flex items-center gap-2">
                                 <div class="w-7 h-7 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center">
@@ -649,11 +649,16 @@
                                 </div>
                                 <h3 class="text-xs font-black uppercase tracking-wider text-slate-800">Academic Performance</h3>
                             </div>
-                            <select wire:model.live="term" class="text-xs font-bold text-slate-700 bg-white border border-slate-200 rounded-xl px-2.5 py-1 focus:ring-0 cursor-pointer shadow-2xs">
-                                <option value="1">Term 1 ▾</option>
-                                <option value="2">Term 2 ▾</option>
-                                <option value="3">Term 3 ▾</option>
-                            </select>
+                            <div class="flex items-center gap-2">
+                                @if(!empty($this->subjectPerformanceChart) && count($this->subjectPerformanceChart) > 6)
+                                    <span class="hidden sm:inline-block text-[10px] font-semibold text-slate-400 bg-slate-50 px-2 py-0.5 rounded-full border border-slate-100">Swipe &rarr;</span>
+                                @endif
+                                <select wire:model.live="term" class="text-xs font-bold text-slate-700 bg-white border border-slate-200 rounded-xl px-2.5 py-1 focus:ring-0 cursor-pointer shadow-2xs">
+                                    <option value="1">Term 1 ▾</option>
+                                    <option value="2">Term 2 ▾</option>
+                                    <option value="3">Term 3 ▾</option>
+                                </select>
+                            </div>
                         </div>
 
                         @php
@@ -665,37 +670,53 @@
                                 No assessment records found for Term {{ $term }}.
                             </div>
                         @else
-                            {{-- Vertical Bar Chart Area with Y-axis 100, 80, 60, 40, 20, 0 --}}
-                            <div class="pt-6 pb-2">
-                                <div class="relative h-64 flex items-end justify-between gap-2 sm:gap-3 pl-8 pr-2">
-                                    {{-- Y-Axis Grid Lines & Labels --}}
-                                    <div class="absolute inset-0 pl-8 pointer-events-none flex flex-col justify-between text-[10px] font-bold text-slate-300">
-                                        <div class="border-b border-dashed border-slate-100 w-full flex items-center justify-start"><span class="absolute left-0 -translate-y-1/2">100</span></div>
-                                        <div class="border-b border-dashed border-slate-100 w-full flex items-center justify-start"><span class="absolute left-0 -translate-y-1/2">80</span></div>
-                                        <div class="border-b border-dashed border-slate-100 w-full flex items-center justify-start"><span class="absolute left-0 -translate-y-1/2">60</span></div>
-                                        <div class="border-b border-dashed border-slate-100 w-full flex items-center justify-start"><span class="absolute left-0 -translate-y-1/2">40</span></div>
-                                        <div class="border-b border-dashed border-slate-100 w-full flex items-center justify-start"><span class="absolute left-0 -translate-y-1/2">20</span></div>
-                                        <div class="border-b border-slate-200 w-full flex items-center justify-start"><span class="absolute left-0 -translate-y-1/2">0</span></div>
+                            {{-- Vertical Bar Chart Area with Pinned Y-axis and Scrollable Canvas --}}
+                            <div class="pt-6 pb-2 w-full min-w-0">
+                                <div class="relative h-64 flex items-end">
+                                    {{-- Fixed Y-Axis Labels --}}
+                                    <div class="w-7 shrink-0 h-full flex flex-col justify-between text-[10px] font-bold text-slate-300 pr-1 pb-6 select-none">
+                                        <div class="flex items-center justify-end h-0"><span class="-translate-y-1/2">100</span></div>
+                                        <div class="flex items-center justify-end h-0"><span class="-translate-y-1/2">80</span></div>
+                                        <div class="flex items-center justify-end h-0"><span class="-translate-y-1/2">60</span></div>
+                                        <div class="flex items-center justify-end h-0"><span class="-translate-y-1/2">40</span></div>
+                                        <div class="flex items-center justify-end h-0"><span class="-translate-y-1/2">20</span></div>
+                                        <div class="flex items-center justify-end h-0"><span class="-translate-y-1/2">0</span></div>
                                     </div>
 
-                                    {{-- Bars --}}
-                                    @foreach($chartItems as $bar)
-                                        <div class="relative z-10 flex-1 flex flex-col items-center h-full justify-end group">
-                                            {{-- Value floating above the bar --}}
-                                            <span class="text-[10px] sm:text-[11px] font-black text-slate-700 mb-1.5 opacity-90 group-hover:scale-110 transition-transform">
-                                                {{ $bar['score'] }}
-                                            </span>
-                                            {{-- The Bar --}}
-                                            <div class="w-full max-w-[34px] sm:max-w-[40px] {{ $bar['bar_class'] }} rounded-t-xl transition-all duration-300 group-hover:brightness-95 shadow-2xs"
-                                                 style="height: {{ max(8, $bar['score']) }}%;"
-                                                 title="{{ $bar['name'] }}: {{ $bar['score'] }}%">
-                                            </div>
-                                            {{-- Label beneath the bar --}}
-                                            <span class="text-[10px] sm:text-[11px] font-bold text-slate-600 mt-2 truncate max-w-[50px] sm:max-w-[65px] text-center" title="{{ $bar['name'] }}">
-                                                {{ $bar['short'] }}
-                                            </span>
+                                    {{-- Plot Area with gridlines and scrollable bars --}}
+                                    <div class="relative flex-1 h-full min-w-0">
+                                        {{-- Horizontal dashed grid lines across plot area --}}
+                                        <div class="absolute inset-0 pb-6 pointer-events-none flex flex-col justify-between">
+                                            <div class="border-b border-dashed border-slate-100 w-full h-0"></div>
+                                            <div class="border-b border-dashed border-slate-100 w-full h-0"></div>
+                                            <div class="border-b border-dashed border-slate-100 w-full h-0"></div>
+                                            <div class="border-b border-dashed border-slate-100 w-full h-0"></div>
+                                            <div class="border-b border-dashed border-slate-100 w-full h-0"></div>
+                                            <div class="border-b border-slate-200 w-full h-0"></div>
                                         </div>
-                                    @endforeach
+
+                                        {{-- Scrollable/Responsive Bars Container --}}
+                                        <div class="relative z-10 h-full w-full overflow-x-auto overflow-y-hidden pb-1 scrollbar-thin scrollbar-thumb-slate-200 scrollbar-track-transparent">
+                                            <div class="h-full flex items-end gap-2 sm:gap-3 px-1 {{ count($chartItems) <= 6 ? 'justify-around w-full' : 'min-w-max' }}">
+                                                @foreach($chartItems as $bar)
+                                                    <div class="flex flex-col items-center h-full justify-end group {{ count($chartItems) <= 6 ? 'flex-1 max-w-[48px]' : 'w-12 shrink-0' }}" title="{{ $bar['name'] }}: {{ $bar['score'] }}%">
+                                                        {{-- Score floating above the bar --}}
+                                                        <span class="text-[10px] sm:text-[11px] font-black text-slate-700 mb-1.5 opacity-90 group-hover:scale-110 transition-transform whitespace-nowrap">
+                                                            {{ $bar['score'] }}
+                                                        </span>
+                                                        {{-- The Bar --}}
+                                                        <div class="w-full max-w-[34px] sm:max-w-[38px] {{ $bar['bar_class'] }} rounded-t-xl transition-all duration-300 group-hover:brightness-95 shadow-2xs"
+                                                             style="height: {{ max(8, $bar['score']) }}%;">
+                                                        </div>
+                                                        {{-- Label beneath the bar --}}
+                                                        <span class="text-[10px] sm:text-[11px] font-bold text-slate-600 mt-2 truncate w-full text-center group-hover:text-indigo-600 transition-colors block" title="{{ $bar['name'] }}">
+                                                            {{ $bar['short'] }}
+                                                        </span>
+                                                    </div>
+                                                @endforeach
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         @endif
