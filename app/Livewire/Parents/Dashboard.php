@@ -134,13 +134,15 @@ class Dashboard extends Component
         $scores = $this->scores;
         if ($scores->isEmpty()) {
             return [
-                'average'   => 0,
-                'subjects'  => 0,
-                'passed'    => 0,
-                'failed'    => 0,
-                'position'  => null,
-                'classSize' => 0,
-                'trend'     => null,
+                'average'     => 0,
+                'subjects'    => 0,
+                'passed'      => 0,
+                'failed'      => 0,
+                'position'    => null,
+                'classSize'   => 0,
+                'sectionName' => $this->selectedChild?->section?->name,
+                'className'   => $this->selectedChild?->schoolClass?->name,
+                'trend'       => null,
             ];
         }
 
@@ -155,9 +157,20 @@ class Dashboard extends Component
         $failed    = $scores->whereIn('grade', ['F', 'E'])->count();
         $myTotal   = $scores->sum('total');
 
-        $classSize = Student::where('class_id', $this->selectedChild->class_id)->where('status', 'Active')->count();
-        $higher    = Score::where('class_id', $this->selectedChild->class_id)
+        $sectionId = $this->selectedChild->section_id;
+
+        $classSize = Student::where('class_id', $this->selectedChild->class_id)
+            ->when($sectionId, fn ($q) => $q->where('section_id', $sectionId))
+            ->where('status', 'Active')
+            ->count();
+
+        $higher = Score::where('class_id', $this->selectedChild->class_id)
             ->where('session', $this->session)->where('term', $this->term)
+            ->when($sectionId, function ($q) use ($sectionId) {
+                $q->whereIn('student_id', function ($sub) use ($sectionId) {
+                    $sub->select('id')->from('students')->where('section_id', $sectionId)->where('status', 'Active');
+                });
+            })
             ->selectRaw('student_id, SUM(total) as grand_total')
             ->groupBy('student_id')
             ->havingRaw('SUM(total) > ?', [$myTotal])
@@ -182,7 +195,10 @@ class Dashboard extends Component
             }
         }
 
-        return compact('average', 'passed', 'failed', 'position', 'classSize', 'maxTotal', 'trend') + ['subjects' => $scores->count()];
+        $sectionName = $this->selectedChild->section?->name;
+        $className = $this->selectedChild->schoolClass?->name;
+
+        return compact('average', 'passed', 'failed', 'position', 'classSize', 'sectionName', 'className', 'maxTotal', 'trend') + ['subjects' => $scores->count()];
     }
 
     #[Computed]

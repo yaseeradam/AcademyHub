@@ -414,7 +414,7 @@
                                 <span class="h-2 w-2 rounded-full bg-slate-300"></span>
                             @endif
                             <span>{{ $sib->first_name }}</span>
-                            <span class="text-[10px] {{ $sib->id === $child->id ? 'text-indigo-200' : 'text-slate-400' }}">({{ $sib->schoolClass?->name ?? 'Class' }})</span>
+                            <span class="text-[10px] {{ $sib->id === $child->id ? 'text-indigo-200' : 'text-slate-400' }}">({{ $sib->schoolClass?->name ?? 'Class' }}{{ $sib->section?->name ? ' ' . $sib->section->name : '' }})</span>
                         </button>
                     @endforeach
                 </div>
@@ -442,7 +442,7 @@
                     </div>
 
                     <p class="text-xs font-semibold text-slate-500 mt-1">
-                        ADM: {{ $child->admission_number }} &nbsp;|&nbsp; {{ $child->schoolClass?->name ?? 'Unassigned' }}
+                        ADM: {{ $child->admission_number }} &nbsp;|&nbsp; {{ $child->schoolClass?->name ?? 'Unassigned' }}{{ $child->section?->name ? ' ' . $child->section->name : '' }}
                     </p>
 
                     <div class="flex items-center gap-2 mt-2.5">
@@ -586,7 +586,7 @@
                                 <span class="text-[11px] font-semibold text-slate-500 block truncate">Class Position</span>
                                 <span class="text-[10px] font-semibold text-purple-400 mt-0.5 block truncate">
                                     @if($published && !empty($stats['position']) && !empty($stats['classSize']))
-                                        (out of {{ $stats['classSize'] }})
+                                        (out of {{ $stats['classSize'] }}{{ !empty($stats['sectionName']) ? ' in ' . $stats['sectionName'] : '' }})
                                     @elseif(! $published)
                                         Pending release
                                     @else
@@ -1574,7 +1574,7 @@
                             </div>
                             <h3 class="text-lg sm:text-xl font-black text-slate-800 tracking-tight">Curriculum Syllabus & Topics</h3>
                             <p class="text-xs text-slate-500 font-semibold mt-1">
-                                Tracking topics taught and planned for {{ $child->schoolClass?->name ?? 'Class' }} — Term {{ $term == 1 ? 'One' : ($term == 2 ? 'Two' : 'Three') }} ({{ $session }})
+                                Tracking topics taught and planned for {{ $child->schoolClass?->name ?? 'Class' }}{{ $child->section?->name ? ' ' . $child->section->name : '' }} — Term {{ $term == 1 ? 'One' : ($term == 2 ? 'Two' : 'Three') }} ({{ $session }})
                             </p>
                         </div>
 
@@ -2349,7 +2349,7 @@
                             <div>
                                 <span class="text-[10px] font-black uppercase tracking-wider text-purple-600 bg-purple-50 px-2 py-0.5 rounded-md">Notice of Absence</span>
                                 <h3 class="text-lg font-black text-slate-800 tracking-tight mt-1">Submit Absence Request</h3>
-                                <p class="text-xs font-semibold text-slate-500">For {{ $child->full_name }} ({{ $child->schoolClass?->name ?? 'Student' }})</p>
+                                <p class="text-xs font-semibold text-slate-500">For {{ $child->full_name }} ({{ $child->schoolClass?->name ?? 'Student' }}{{ $child->section?->name ? ' ' . $child->section->name : '' }})</p>
                             </div>
                             <button type="button" wire:click="closeAbsenceModal" class="h-8 w-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center transition">
                                 <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>

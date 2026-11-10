@@ -129,11 +129,23 @@ class ReportCardService
         // Per-subject class averages and positions
         $allClassScores = $this->getClassScores($student->class_id, $term, $session, $subjectIds);
 
-        $subjectClassAvgs = $allClassScores
+        // Scope cohort scores to the student's arm/section if assigned
+        $cohortScores = $allClassScores;
+        if ($displaySectionId > 0) {
+            $sectionStudentIds = Student::where('class_id', $student->class_id)
+                ->where('section_id', $displaySectionId)
+                ->pluck('id')
+                ->all();
+            if (! empty($sectionStudentIds)) {
+                $cohortScores = $allClassScores->whereIn('student_id', $sectionStudentIds);
+            }
+        }
+
+        $subjectClassAvgs = $cohortScores
             ->groupBy('subject_id')
             ->map(fn ($rows) => round($rows->avg('total'), 1));
 
-        $subjectPositions = $allClassScores
+        $subjectPositions = $cohortScores
             ->groupBy('subject_id')
             ->map(function ($rows) use ($student) {
                 $sorted = $rows->sortByDesc('total')->values();
@@ -146,11 +158,11 @@ class ReportCardService
                 return $pos;
             });
 
-        $rows = $subjects->map(function (Subject $subject) use ($scores, $subjectClassAvgs, $subjectPositions, $allClassScores) {
+        $rows = $subjects->map(function (Subject $subject) use ($scores, $subjectClassAvgs, $subjectPositions, $cohortScores) {
             /** @var \App\Models\Score|null $score */
             $score = $scores->get($subject->id);
 
-            $subjClassScores = $allClassScores->where('subject_id', $subject->id);
+            $subjClassScores = $cohortScores->where('subject_id', $subject->id);
             $subjHighest = $subjClassScores->max('total');
             $subjLowest  = $subjClassScores->min('total');
 
@@ -177,22 +189,31 @@ class ReportCardService
             classId: $student->class_id,
             subjectIds: $subjectIds,
             term: $term,
-            session: $session
+            session: $session,
+            sectionId: $displaySectionId > 0 ? $displaySectionId : null
         );
 
         [$timesOpened, $timesPresent, $timesAbsent] = $this->attendanceSummary($student, $term, $session);
 
-        if (isset($this->studentCountCache[$student->class_id])) {
-            $totalStudents = $this->studentCountCache[$student->class_id];
+        $countCacheKey = $student->class_id . ($displaySectionId > 0 ? "-{$displaySectionId}" : '');
+        if (isset($this->studentCountCache[$countCacheKey])) {
+            $totalStudents = $this->studentCountCache[$countCacheKey];
         } else {
             $totalStudents = Student::query()
                 ->where('class_id', $student->class_id)
+                ->when($displaySectionId > 0, fn ($q) => $q->where('section_id', $displaySectionId))
                 ->where('status', 'Active')
                 ->count();
-            $this->studentCountCache[$student->class_id] = $totalStudents;
+            $this->studentCountCache[$countCacheKey] = $totalStudents;
         }
 
-        [$highestAverage, $lowestAverage] = $this->highestLowestAverage($student->class_id, $subjectIds, $term, $session);
+        [$highestAverage, $lowestAverage] = $this->highestLowestAverage(
+            $student->class_id,
+            $subjectIds,
+            $term,
+            $session,
+            $displaySectionId > 0 ? $displaySectionId : null
+        );
 
         // Cumulative annual summary for 1st, 2nd, 3rd term
         $cumulativeSummary = [];
@@ -430,9 +451,24 @@ class ReportCardService
         int $classId,
         Collection $subjectIds,
         int $term,
-        string $session
+        string $session,
+        ?int $sectionId = null
     ): array {
         $scores = $this->getClassScores($classId, $term, $session, $subjectIds);
+
+        if ($scores->isEmpty()) {
+            return [1, 0.0];
+        }
+
+        if ($sectionId) {
+            $sectionStudentIds = Student::where('class_id', $classId)
+                ->where('section_id', $sectionId)
+                ->pluck('id')
+                ->all();
+            if (! empty($sectionStudentIds)) {
+                $scores = $scores->whereIn('student_id', $sectionStudentIds);
+            }
+        }
 
         if ($scores->isEmpty()) {
             return [1, 0.0];
@@ -478,9 +514,24 @@ class ReportCardService
         int $classId,
         Collection $subjectIds,
         int $term,
-        string $session
+        string $session,
+        ?int $sectionId = null
     ): array {
         $scores = $this->getClassScores($classId, $term, $session, $subjectIds);
+
+        if ($scores->isEmpty()) {
+            return [0.0, 0.0];
+        }
+
+        if ($sectionId) {
+            $sectionStudentIds = Student::where('class_id', $classId)
+                ->where('section_id', $sectionId)
+                ->pluck('id')
+                ->all();
+            if (! empty($sectionStudentIds)) {
+                $scores = $scores->whereIn('student_id', $sectionStudentIds);
+            }
+        }
 
         if ($scores->isEmpty()) {
             return [0.0, 0.0];

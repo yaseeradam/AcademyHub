@@ -192,8 +192,18 @@ class StudentDossierService
                 $studentTermAverages[] = $tAvg;
             }
 
-            // Calculate term overall position in class
+            // Calculate term overall position in class / arm
             $tClassScores = $allClassScores->where('term', $t);
+            if ($displaySectionId > 0) {
+                $sectionStudentIds = Student::where('class_id', $classId)
+                    ->where('section_id', $displaySectionId)
+                    ->pluck('id')
+                    ->all();
+                if (! empty($sectionStudentIds)) {
+                    $tClassScores = $tClassScores->whereIn('student_id', $sectionStudentIds);
+                }
+            }
+
             $tPosition = null;
             $tClassAverage = null;
             if ($hasData && $tClassScores->isNotEmpty()) {
@@ -229,8 +239,19 @@ class StudentDossierService
         $cumulativeAnnualAverage = $termsCount > 0 ? round(array_sum($studentTermAverages) / $termsCount, 2) : 0.0;
         $annualGrandTotal = (int) $subjectRows->sum(fn($r) => (int) ($r['annual_total'] ?? 0));
 
-        // Annual Class Rank
-        $classStudentAnnualAverages = $allClassScores->groupBy('student_id')->map(function ($scores) {
+        // Annual Class / Arm Rank
+        $cohortAnnualScores = $allClassScores;
+        if ($displaySectionId > 0) {
+            $sectionStudentIds = Student::where('class_id', $classId)
+                ->where('section_id', $displaySectionId)
+                ->pluck('id')
+                ->all();
+            if (! empty($sectionStudentIds)) {
+                $cohortAnnualScores = $allClassScores->whereIn('student_id', $sectionStudentIds);
+            }
+        }
+
+        $classStudentAnnualAverages = $cohortAnnualScores->groupBy('student_id')->map(function ($scores) {
             $byTerm = $scores->groupBy('term');
             $tAvgs = [];
             foreach ($byTerm as $tRows) {
@@ -259,8 +280,8 @@ class StudentDossierService
             ? round((float) $classStudentAnnualAverages->avg(), 2)
             : 0.0;
 
-        // Total Students in Class
-        $totalStudents = $this->getStudentCount($classId);
+        // Total Students in Class / Arm
+        $totalStudents = $this->getStudentCount($classId, $displaySectionId > 0 ? $displaySectionId : null);
 
         // Longitudinal Attendance Tracking across Term 1, 2, 3
         $attendanceTimeline = $this->buildAttendanceTimeline($student, $session);
@@ -393,14 +414,16 @@ class StudentDossierService
             ->get(['subject_id', 'student_id', 'term', 'total']);
     }
 
-    protected function getStudentCount(int $classId): int
+    protected function getStudentCount(int $classId, ?int $sectionId = null): int
     {
-        if (isset($this->studentCountCache[$classId])) {
-            return $this->studentCountCache[$classId];
+        $cacheKey = $classId . ($sectionId ? "-{$sectionId}" : '');
+        if (isset($this->studentCountCache[$cacheKey])) {
+            return $this->studentCountCache[$cacheKey];
         }
 
-        return $this->studentCountCache[$classId] = Student::query()
+        return $this->studentCountCache[$cacheKey] = Student::query()
             ->where('class_id', $classId)
+            ->when($sectionId, fn ($q) => $q->where('section_id', $sectionId))
             ->where('status', 'Active')
             ->count();
     }
