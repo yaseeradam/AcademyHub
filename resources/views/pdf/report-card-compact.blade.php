@@ -56,9 +56,9 @@
                 default         => '8.5pt',
             };
         @endphp
-        table.scores-table { width: 100%; border-collapse: collapse; margin-bottom: 16px; table-layout: fixed; }
+        table.scores-table { width: 100%; border-collapse: collapse; margin-bottom: 16px; }
         table.scores-table th { background: #f8fafc; color: #0f172a; padding: {{ $padY }} {{ $padX }}; font-size: 7.5pt; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; border-bottom: 1px solid #e2e8f0; border-top: 1px solid #e2e8f0; text-align: center; }
-        table.scores-table th.subj-th { text-align: left; padding-left: 12px; width: 34%; }
+        table.scores-table th.subj-th { text-align: left; padding-left: 12px; }
         table.scores-table td { padding: {{ $padY }} {{ $padX }}; border-bottom: 1px solid #f1f5f9; text-align: center; font-size: {{ $fontSize }}; color: #334155; }
         table.scores-table tr:nth-child(even) td { background: #fafafa; }
         table.scores-table td.subj-td { text-align: left; padding-left: 12px; font-weight: 600; color: #0f172a; word-wrap: break-word; }
@@ -136,6 +136,7 @@
     $showQrCode                    = $opts['show_qr_code'] ?? true;
     $showCumulativeSummary         = $opts['show_cumulative_summary'] ?? false;
     $showColorBadges               = $opts['show_color_badges'] ?? true;
+    $showPerformance               = $opts['show_performance'] ?? false;
 @endphp
 
 @if($logoDataUri && $showWatermark)
@@ -196,6 +197,32 @@
                         </div>
                     </div>
                 </div>
+                <div class="pill-row">
+                    <div class="pill-col" style="width: 25%;">
+                        <div class="pill">
+                            <span class="label">Total Score:</span> <strong>{{ $grandTotal }}</strong>
+                        </div>
+                    </div>
+                    <div class="pill-col" style="width: 25%;">
+                        <div class="pill">
+                            <span class="label">Average:</span> <strong>{{ number_format($average, 1) }}%</strong>
+                        </div>
+                    </div>
+                    @if($showPosition)
+                    <div class="pill-col" style="width: 25%;">
+                        <div class="pill">
+                            <span class="label">Position:</span> <strong>{{ $position }}{{ !empty($totalStudents) ? ' / ' . $totalStudents : '' }}</strong>
+                        </div>
+                    </div>
+                    @endif
+                    @if($showAttendance && !empty($timesOpened))
+                    <div class="pill-col" style="{{ $showPosition ? 'width: 25%;' : 'width: 50%;' }}">
+                        <div class="pill">
+                            <span class="label">Attendance:</span> <strong>{{ $timesPresent }}/{{ $timesOpened }}</strong>
+                        </div>
+                    </div>
+                    @endif
+                </div>
             </div>
         </div>
 
@@ -215,6 +242,7 @@
                         <th style="width:6%;">LOW</th>
                     @endif
                     @if($showPosition)<th style="width:6%;">POS</th>@endif
+                    @if($showPerformance)<th style="width:10%;">PERF</th>@endif
                     @if($showSubjectTeacherRemarks)<th style="width:12%;">REMARK</th>@endif
                 </tr>
             </thead>
@@ -258,6 +286,7 @@
                         <td>{{ $r['lowest'] ?? '—' }}</td>
                     @endif
                     @if($showPosition)<td>{{ $r['position'] ?? '—' }}</td>@endif
+                    @if($showPerformance)<td style="font-size:7.5pt;font-weight:600;">{{ \App\Support\ReportCardService::getPerformanceText($r['total'] ?? 0) }}</td>@endif
                     @if($showSubjectTeacherRemarks)<td style="font-size:7.5pt;font-style:italic;">{{ $r['teacher_remark'] ?? 'Good' }}</td>@endif
                 </tr>
                 @endforeach
@@ -302,6 +331,15 @@
             </div>
         </div>
         @endif
+
+        @php
+            $rcBorderColor = '#3b82f6';
+            $rcBgLight = '#f8fafc';
+            $rcTitleColor = '#1e3a8a';
+            $rcLabelColor = '#1e293b';
+        @endphp
+        @include('pdf.partials.rc-psychomotor')
+        @include('pdf.partials.rc-school-fees')
 
         {{-- Remarks --}}
         @if($showTeacherRemarks && !empty($teacherRemarks))

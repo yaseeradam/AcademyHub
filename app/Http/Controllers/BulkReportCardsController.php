@@ -122,15 +122,9 @@ class BulkReportCardsController extends Controller
         }
 
         try {
-            foreach ($students as $student) {
-                $optionsOverrides = $request->input('options', []);
-                $optionsOverrides = [
-                    'show_psychomotor' => isset($optionsOverrides['show_psychomotor']),
-                    'show_attendance' => isset($optionsOverrides['show_attendance']),
-                    'show_position' => isset($optionsOverrides['show_position']),
-                    'show_class_average' => isset($optionsOverrides['show_class_average']),
-                ];
+            $optionsOverrides = $this->resolveOptionsOverrides($request);
 
+            foreach ($students as $student) {
                 $payload = $service->build($student, $term, $session, $optionsOverrides);
 
                 $tenantId = $student->tenant_id ?? TenantSettings::tenantId();
@@ -201,13 +195,7 @@ class BulkReportCardsController extends Controller
         $session = $data['session'];
         $term = (int) $data['term'];
 
-        $optionsOverrides = $request->input('options', []);
-        $optionsOverrides = [
-            'show_psychomotor' => isset($optionsOverrides['show_psychomotor']),
-            'show_attendance' => isset($optionsOverrides['show_attendance']),
-            'show_position' => isset($optionsOverrides['show_position']),
-            'show_class_average' => isset($optionsOverrides['show_class_average']),
-        ];
+        $optionsOverrides = $this->resolveOptionsOverrides($request);
 
         $payload = $service->build($student, $term, $session, $optionsOverrides);
 
@@ -331,5 +319,40 @@ class BulkReportCardsController extends Controller
             'Pragma'        => 'no-cache',
             'Expires'       => '0',
         ])->deleteFileAfterSend(true);
+    }
+
+    /**
+     * Resolve explicit display option overrides from request.
+     * Returns empty array if options parameter is not present.
+     */
+    protected function resolveOptionsOverrides(Request $request): array
+    {
+        if (!$request->has('options')) {
+            return [];
+        }
+
+        $raw = $request->input('options', []);
+        if (!is_array($raw)) {
+            return [];
+        }
+
+        $supported = [
+            'show_psychomotor',
+            'show_attendance',
+            'show_position',
+            'show_class_average',
+            'show_class_highest_lowest',
+            'show_subject_teacher_remarks',
+            'show_cumulative_summary',
+            'show_color_badges',
+            'show_qr_code',
+        ];
+
+        $overrides = [];
+        foreach ($supported as $opt) {
+            $overrides[$opt] = isset($raw[$opt]) && ($raw[$opt] === '1' || $raw[$opt] === 1 || $raw[$opt] === true || $raw[$opt] === 'on');
+        }
+
+        return $overrides;
     }
 }

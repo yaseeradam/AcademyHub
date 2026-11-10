@@ -1187,10 +1187,20 @@ class WhatsAppController extends Controller
         $isPublished = \App\Models\ResultPublication::whereIn('class_id', $scoreClassIds)
             ->where('term', $term)
             ->where('session', $session)
+            ->whereNotNull('published_at')
             ->exists();
 
         if (!$isPublished) {
             abort(403, 'The report card for this term and session has not been officially published yet by the school administration.');
+        }
+
+        // Check debtor gate
+        $blockDebtors = (bool) \App\Support\TenantSettings::get('rc_block_debtors', true);
+        if ($blockDebtors) {
+            $ledger = \App\Support\BillingService::getStudentTermLedger($student, $session);
+            if (($ledger['total_balance'] ?? 0.0) > 0) {
+                abort(403, 'Report card access is restricted due to outstanding school fees. Please settle your balance with the bursary/accounts department.');
+            }
         }
 
         $tenantId = $student->tenant_id ?? \App\Support\TenantSettings::tenantId();
@@ -1246,7 +1256,8 @@ class WhatsAppController extends Controller
 
         $pdfOutput = $pdf->output();
 
-        $filename = 'report-card-' . $student->admission_number . '-' . $sessionSlug . '-T' . $term . '.pdf';
+        $safeAdmissionNo = preg_replace('/[^a-zA-Z0-9_-]/', '_', (string) ($student->admission_number ?? $student->id));
+        $filename = 'report-card-' . $safeAdmissionNo . '-' . $sessionSlug . '-T' . $term . '.pdf';
 
         return response($pdfOutput, 200, [
             'Content-Type' => 'application/pdf',

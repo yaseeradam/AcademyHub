@@ -517,6 +517,7 @@
                                         <div style="padding: 7px 10px; font-size: 8.5px; line-height: 1.4; color: #334155;">
                                             {{ $teacherRemarks ?? 'No remarks provided.' }}
                                         </div>
+                                        @if($showSignatures)
                                         <div style="text-align: center; border-top: 1px dashed #cbd5e1; padding: 4px 8px;">
                                             @if(($signatureImages['teacher'] ?? null) && file_exists($signatureImages['teacher']))
                                                 <img src="{{ $signatureImages['teacher'] }}" style="max-height: 28px; max-width: 95px; object-fit: contain; display: block; margin: 0 auto;" />
@@ -524,6 +525,7 @@
                                             <div style="font-size: 7px; font-weight: bold; color: {{ $themeColor }}; text-transform: uppercase;">{{ $homeroomTeacher }}</div>
                                             <div style="font-size: 6px; color: #64748b;">Class Teacher</div>
                                         </div>
+                                        @endif
                                     </div>
                                 </div>
                             @endif
@@ -590,6 +592,7 @@
                                         <div style="padding: 5px 8px; font-size: 8px; line-height: 1.35; color: #334155;">
                                             {{ $principalRemarks ?? 'No remarks provided.' }}
                                         </div>
+                                        @if($showSignatures)
                                         <div style="text-align: center; border-top: 1px dashed #cbd5e1; padding: 4px 8px;">
                                             @if(($signatureImages['principal'] ?? null) && file_exists($signatureImages['principal']))
                                                 <img src="{{ $signatureImages['principal'] }}" style="max-height: 25px; max-width: 90px; object-fit: contain; display: block; margin: 0 auto;" />
@@ -599,6 +602,7 @@
                                             <div style="font-size: 7px; font-weight: bold; color: {{ $themeColor }}; text-transform: uppercase;">{{ $principalName ?: ($principalTitle ?? 'Principal') }}</div>
                                             <div style="font-size: 6px; color: #64748b; margin-top: 0.5px;">{{ $principalTitle ?? 'Principal' }}</div>
                                         </div>
+                                        @endif
                                     </div>
                                 </div>
                             @endif

@@ -380,7 +380,7 @@ class Broadsheet extends Component
     public function publish(): void
     {
         $user = auth()->user();
-        abort_unless($user?->role === 'admin', 403);
+        abort_unless($user && ($user->role === 'admin' || $user->role === 'proprietor' || $user->hasPermission('results.publish')), 403);
 
         if (!$this->classId || !$this->session) {
             $this->dispatch('alert', message: 'Select class and session first.', type: 'error');
@@ -411,7 +411,7 @@ class Broadsheet extends Component
     public function unpublish(): void
     {
         $user = auth()->user();
-        abort_unless($user?->role === 'admin', 403);
+        abort_unless($user && ($user->role === 'admin' || $user->role === 'proprietor' || $user->hasPermission('results.publish')), 403);
 
         if (!$this->classId || !$this->session) {
             $this->dispatch('alert', message: 'Select class and session first.', type: 'error');

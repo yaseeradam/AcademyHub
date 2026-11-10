@@ -91,7 +91,11 @@ class TenantSettings
 
     public static function clearCache(?\App\Models\Tenant $tenant = null): void
     {
+        $tenantId = $tenant?->id ?? self::tenantId();
         \Illuminate\Support\Facades\Cache::forget(self::settingsCacheKey($tenant));
+        if ($tenantId) {
+            \Illuminate\Support\Facades\Cache::forget('academyhub_settings_raw_tenant_'.$tenantId);
+        }
     }
 
     public static function uploadsSubdir(string $baseDir): string
@@ -173,6 +177,9 @@ class TenantSettings
                 'rc_show_qr_code',
                 'rc_show_cumulative_summary',
                 'rc_show_color_badges',
+                'rc_show_performance',
+                'rc_promotion_pass_mark',
+                'rc_next_term_date',
                 'rc_block_debtors',
                 'rc_principal_name',
                 'rc_principal_title',
@@ -204,7 +211,7 @@ class TenantSettings
                 'rc_show_psychomotor', 'rc_show_school_fees', 'rc_show_signatures',
                 'rc_show_class_highest_lowest', 'rc_show_subject_teacher_remarks',
                 'rc_show_qr_code', 'rc_show_cumulative_summary', 'rc_show_color_badges',
-                'rc_block_debtors',
+                'rc_show_performance', 'rc_block_debtors',
             ], true)) {
                 $value = (bool) $value;
             }
@@ -226,7 +233,7 @@ class TenantSettings
             return self::get($key, $default);
         }
 
-        $cacheKey = 'academyhub_settings_cache_tenant_' . $tenantId;
+        $cacheKey = 'academyhub_settings_raw_tenant_' . $tenantId;
         $settings = \Illuminate\Support\Facades\Cache::get($cacheKey);
         if ($settings === null) {
             $path = storage_path('app/academyhub/tenants/' . $tenantId . '/settings.json');

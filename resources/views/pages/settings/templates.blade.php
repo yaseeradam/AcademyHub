@@ -36,10 +36,12 @@
         $rcSchoolFeesAccountNumber = old('rc_school_fees_account_number', config('academyhub.rc_school_fees_account_number'));
         $rcSchoolFeesBankName = old('rc_school_fees_bank_name', config('academyhub.rc_school_fees_bank_name'));
         $rcSchoolFeesAccountName = old('rc_school_fees_account_name', config('academyhub.rc_school_fees_account_name'));
-        $rcSchoolFeesByClass = config('academyhub.rc_school_fees_by_class', []);
+        $rcSchoolFeesByClass = old('rc_school_fees_by_class', config('academyhub.rc_school_fees_by_class', []));
         if (is_string($rcSchoolFeesByClass)) {
             $rcSchoolFeesByClass = json_decode($rcSchoolFeesByClass, true) ?? [];
         }
+        $rcBlockDebtors = old('rc_block_debtors', config('academyhub.rc_block_debtors', true));
+        $rcNextTermDateVal = old('rc_next_term_date', config('academyhub.rc_next_term_date', ''));
         $rcShowSignatures = old('rc_show_signatures', config('academyhub.rc_show_signatures', false));
         $rcPrincipalSignatureImage = config('academyhub.rc_principal_signature_image');
         $rcTeacherSignatureImage = config('academyhub.rc_teacher_signature_image');
@@ -491,6 +493,16 @@
                         </div>
                     </label>
 
+                    {{-- Block Debtors Gate --}}
+                    <label class="flex items-center gap-3 rounded-2xl border border-gray-200 bg-white/80 p-4 shadow-sm cursor-pointer hover:border-violet-300 transition">
+                        <input type="hidden" name="rc_block_debtors" value="0" />
+                        <input type="checkbox" name="rc_block_debtors" value="1" class="h-5 w-5 rounded-lg border-gray-300 text-violet-600 focus:ring-violet-500" @checked($rcBlockDebtors) />
+                        <div>
+                            <div class="text-sm font-bold text-gray-900">Restrict Debtor Downloads</div>
+                            <div class="text-xs text-gray-500">Block report cards for students with outstanding school fees</div>
+                        </div>
+                    </label>
+
                     {{-- Psychomotor Domain Toggle --}}
                     <label class="flex items-center gap-3 rounded-2xl border border-gray-200 bg-white/80 p-4 shadow-sm cursor-pointer hover:border-violet-300 transition">
                         <input type="hidden" name="rc_show_psychomotor" value="0" />
@@ -500,6 +512,16 @@
                             <div class="text-xs text-gray-500">Character demeanour, fine motor skills, crafts &amp; athletics</div>
                         </div>
                     </label>
+                </div>
+
+                {{-- Next Term Resumption Date Manual Override --}}
+                <div class="mt-4 pt-4 border-t border-violet-100/80">
+                    <div class="max-w-md">
+                        <label class="block text-xs font-bold uppercase tracking-wider text-gray-700">Next Term Resumption Date Override (Optional)</label>
+                        <input type="text" name="rc_next_term_date" value="{{ $rcNextTermDateVal }}" placeholder="e.g. 15th September, 2026 (Leave blank to use academic calendar)"
+                            class="mt-1 w-full rounded-xl border border-gray-200 bg-white px-4 py-2 text-sm text-gray-900 shadow-sm focus:border-violet-500 focus:ring-2 focus:ring-violet-500" />
+                        <div class="mt-1 text-[11px] text-gray-500">Overrides the calculated resumption date shown on report cards and booklets.</div>
+                    </div>
                 </div>
             </div>
 

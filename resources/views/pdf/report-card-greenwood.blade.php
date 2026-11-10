@@ -432,6 +432,7 @@
                                 <div class="remarks-text">
                                     {{ $teacherRemarks ?? 'An excellent student with outstanding performance.' }}
                                 </div>
+                                @if($showSignatures)
                                 <div class="sig-container">
                                     @if(($signatureImages['teacher'] ?? null) && file_exists($signatureImages['teacher']))
                                         <img src="{{ $signatureImages['teacher'] }}" class="sig-img" alt="Teacher Signature" />
@@ -439,6 +440,7 @@
                                     <div class="sig-name">{{ $homeroomTeacher }}</div>
                                     <div class="sig-role">Class Teacher</div>
                                 </div>
+                                @endif
                             </div>
                         </div>
                     @endif
@@ -450,6 +452,7 @@
                                 <div class="remarks-text">
                                     {{ $principalRemarks ?? 'A commendable result. Continue to strive for excellence.' }}
                                 </div>
+                                @if($showSignatures)
                                 <div class="sig-container">
                                     @if(($signatureImages['principal'] ?? null) && file_exists($signatureImages['principal']))
                                         <img src="{{ $signatureImages['principal'] }}" class="sig-img" alt="Principal Signature" />
@@ -457,6 +460,7 @@
                                     <div class="sig-name">{{ $principalName ?: ($principalTitle ?? 'Principal') }}</div>
                                     <div class="sig-role">{{ $principalTitle ?? 'Principal' }}</div>
                                 </div>
+                                @endif
                             </div>
                         </div>
                     @endif
@@ -491,22 +495,24 @@
         @endif
 
         <!-- School Fees Information (if enabled) -->
-        @if($showSchoolFees && isset($schoolFees))
+        @if($showSchoolFees && isset($schoolFees) && !empty($schoolFees['amount']))
             <div class="fees-banner">
                 <strong>OUTSTANDING / NEXT TERM FEES INFORMATION:</strong> 
-                Fee Amount: {{ $schoolFees['currency'] ?? '₦' }}{{ number_format($schoolFees['amount'] ?? 45000, 2) }} | 
-                Bank Name: {{ $schoolFees['bank_name'] ?? 'Zenith Bank' }} | 
-                Account Number: {{ $schoolFees['account_number'] ?? '1023456789' }}
+                Fee Amount: {{ $schoolFees['currency'] ?? '₦' }}{{ number_format($schoolFees['amount'], 2) }}
+                @if(!empty($schoolFees['bank_name'])) | Bank: {{ $schoolFees['bank_name'] }} @endif
+                @if(!empty($schoolFees['account_number'])) | Acct: {{ $schoolFees['account_number'] }} @endif
+                @if(!empty($schoolFees['account_name'])) | Name: {{ $schoolFees['account_name'] }} @endif
             </div>
         @endif
 
         <!-- Next Term Resumes Banner -->
-        @if($showNextTermDate)
+        @if($showNextTermDate && !empty($nextTermDate))
             <div class="resumes-banner">
-                NEXT TERM BEGINS: {{ $nextTermDate ?? 'SEPTEMBER 8, 2025' }}
+                NEXT TERM BEGINS: {{ $nextTermDate }}
             </div>
         @endif
 
+        @if($showSignatures)
         <!-- Parent Signature & Date Line -->
         <div class="parent-sig-table">
             <div class="parent-sig-cell">
@@ -516,6 +522,7 @@
                 DATE: <span class="parent-sig-line" style="width: 120px;"></span>
             </div>
         </div>
+        @endif
 
         <!-- Footer -->
         <div class="footer">

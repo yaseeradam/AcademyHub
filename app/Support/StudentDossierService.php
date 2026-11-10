@@ -274,19 +274,46 @@ class StudentDossierService
         // School Settings & Branding
         $rawSettings = $this->settings();
         $rcOptions = [
-            'show_position'            => isset($optionsOverrides['show_position']) ? (bool) $optionsOverrides['show_position'] : $this->settingBool('rc_show_position', true),
-            'show_attendance'          => isset($optionsOverrides['show_attendance']) ? (bool) $optionsOverrides['show_attendance'] : $this->settingBool('rc_show_attendance', true),
-            'show_grading_key'         => isset($optionsOverrides['show_grading_key']) ? (bool) $optionsOverrides['show_grading_key'] : $this->settingBool('rc_show_grading_key', true),
-            'show_class_average'       => isset($optionsOverrides['show_class_average']) ? (bool) $optionsOverrides['show_class_average'] : $this->settingBool('rc_show_class_average', true),
-            'show_watermark'           => isset($optionsOverrides['show_watermark']) ? (bool) $optionsOverrides['show_watermark'] : $this->settingBool('rc_show_watermark', true),
-            'show_next_term_date'      => isset($optionsOverrides['show_next_term_date']) ? (bool) $optionsOverrides['show_next_term_date'] : $this->settingBool('rc_show_next_term_date', true),
-            'show_teacher_remarks'     => isset($optionsOverrides['show_teacher_remarks']) ? (bool) $optionsOverrides['show_teacher_remarks'] : $this->settingBool('rc_show_teacher_remarks', true),
-            'show_principal_remarks'   => isset($optionsOverrides['show_principal_remarks']) ? (bool) $optionsOverrides['show_principal_remarks'] : $this->settingBool('rc_show_principal_remarks', true),
-            'show_psychomotor'         => isset($optionsOverrides['show_psychomotor']) ? (bool) $optionsOverrides['show_psychomotor'] : $this->settingBool('rc_show_psychomotor', true),
-            'show_school_fees'         => isset($optionsOverrides['show_school_fees']) ? (bool) $optionsOverrides['show_school_fees'] : $this->settingBool('rc_show_school_fees', false),
-            'show_signatures'          => isset($optionsOverrides['show_signatures']) ? (bool) $optionsOverrides['show_signatures'] : $this->settingBool('rc_show_signatures', true),
-            'show_qr_code'             => isset($optionsOverrides['show_qr_code']) ? (bool) $optionsOverrides['show_qr_code'] : $this->settingBool('rc_show_qr_code', true),
+            'show_position'                  => isset($optionsOverrides['show_position']) ? (bool) $optionsOverrides['show_position'] : $this->settingBool('rc_show_position', true),
+            'show_attendance'                => isset($optionsOverrides['show_attendance']) ? (bool) $optionsOverrides['show_attendance'] : $this->settingBool('rc_show_attendance', true),
+            'show_grading_key'               => isset($optionsOverrides['show_grading_key']) ? (bool) $optionsOverrides['show_grading_key'] : $this->settingBool('rc_show_grading_key', true),
+            'show_class_average'             => isset($optionsOverrides['show_class_average']) ? (bool) $optionsOverrides['show_class_average'] : $this->settingBool('rc_show_class_average', true),
+            'show_watermark'                 => isset($optionsOverrides['show_watermark']) ? (bool) $optionsOverrides['show_watermark'] : $this->settingBool('rc_show_watermark', true),
+            'show_next_term_date'            => isset($optionsOverrides['show_next_term_date']) ? (bool) $optionsOverrides['show_next_term_date'] : $this->settingBool('rc_show_next_term_date', true),
+            'show_teacher_remarks'           => isset($optionsOverrides['show_teacher_remarks']) ? (bool) $optionsOverrides['show_teacher_remarks'] : $this->settingBool('rc_show_teacher_remarks', true),
+            'show_principal_remarks'         => isset($optionsOverrides['show_principal_remarks']) ? (bool) $optionsOverrides['show_principal_remarks'] : $this->settingBool('rc_show_principal_remarks', true),
+            'show_psychomotor'               => isset($optionsOverrides['show_psychomotor']) ? (bool) $optionsOverrides['show_psychomotor'] : $this->settingBool('rc_show_psychomotor', false),
+            'show_school_fees'               => isset($optionsOverrides['show_school_fees']) ? (bool) $optionsOverrides['show_school_fees'] : $this->settingBool('rc_show_school_fees', false),
+            'show_signatures'                => isset($optionsOverrides['show_signatures']) ? (bool) $optionsOverrides['show_signatures'] : $this->settingBool('rc_show_signatures', false),
+            'show_class_highest_lowest'      => isset($optionsOverrides['show_class_highest_lowest']) ? (bool) $optionsOverrides['show_class_highest_lowest'] : $this->settingBool('rc_show_class_highest_lowest', false),
+            'show_subject_teacher_remarks'   => isset($optionsOverrides['show_subject_teacher_remarks']) ? (bool) $optionsOverrides['show_subject_teacher_remarks'] : $this->settingBool('rc_show_subject_teacher_remarks', false),
+            'show_qr_code'                   => isset($optionsOverrides['show_qr_code']) ? (bool) $optionsOverrides['show_qr_code'] : $this->settingBool('rc_show_qr_code', true),
+            'show_cumulative_summary'        => isset($optionsOverrides['show_cumulative_summary']) ? (bool) $optionsOverrides['show_cumulative_summary'] : $this->settingBool('rc_show_cumulative_summary', false),
+            'show_color_badges'              => isset($optionsOverrides['show_color_badges']) ? (bool) $optionsOverrides['show_color_badges'] : $this->settingBool('rc_show_color_badges', true),
+            'show_performance'               => isset($optionsOverrides['show_performance']) ? (bool) $optionsOverrides['show_performance'] : $this->settingBool('rc_show_performance', false),
         ];
+
+        // School fees calculation
+        $schoolFees = null;
+        if ($rcOptions['show_school_fees']) {
+            $feesByClass   = $rawSettings['rc_school_fees_by_class'] ?? null;
+            if (is_string($feesByClass)) {
+                $feesByClass = json_decode($feesByClass, true) ?? [];
+            }
+            $feesByClass = is_array($feesByClass) ? $feesByClass : [];
+            $classId     = $student->class_id;
+            $feeAmount   = $feesByClass[(string) $classId] ?? null;
+
+            if ($feeAmount !== null) {
+                $schoolFees = [
+                    'amount'         => (float) $feeAmount,
+                    'account_number' => $rawSettings['rc_school_fees_account_number'] ?? config('academyhub.rc_school_fees_account_number'),
+                    'bank_name'      => $rawSettings['rc_school_fees_bank_name'] ?? config('academyhub.rc_school_fees_bank_name'),
+                    'account_name'   => $rawSettings['rc_school_fees_account_name'] ?? config('academyhub.rc_school_fees_account_name'),
+                    'currency'       => $rawSettings['currency_symbol'] ?? config('academyhub.currency_symbol', '₦'),
+                ];
+            }
+        }
 
         // Annual Teacher & Principal Remarks
         $principalRemarks = $this->generateAnnualPrincipalRemarks($cumulativeAnnualAverage, $annualPosition, $totalStudents, $promotion['status']);
@@ -344,6 +371,7 @@ class StudentDossierService
             'signatureImages'           => $signatureImages,
             'qrCodeUri'                 => $qrCodeUri,
             'rcOptions'                 => $rcOptions,
+            'schoolFees'                => $schoolFees,
         ];
     }
 
@@ -383,28 +411,60 @@ class StudentDossierService
     protected function buildAttendanceTimeline(Student $student, string $session): array
     {
         $sectionId = (int) ($student->section_id ?? 0);
+        $allowWeekends = (bool) TenantSettings::get('allow_weekend_attendance', false);
+        $sessionYears = [];
+        if (preg_match('/^(\d{4})\/(\d{4})$/', $session, $m)) {
+            $sessionYears = [(int) $m[1], (int) $m[2]];
+        }
+
         $timeline = [];
         $totalOpened = 0;
         $totalPresent = 0;
         $totalAbsent = 0;
 
         for ($t = 1; $t <= 3; $t++) {
-            $sheetIds = AttendanceSheet::query()
+            $sheets = AttendanceSheet::query()
                 ->where('class_id', $student->class_id)
                 ->when($sectionId > 0, fn($q) => $q->where('section_id', $sectionId), fn($q) => $q->whereNull('section_id'))
                 ->where('term', $t)
                 ->where('session', $session)
-                ->pluck('id');
+                ->get(['id', 'date']);
 
-            $opened = $sheetIds->count();
+            $validSheetIds = $sheets->filter(function ($sheet) use ($allowWeekends, $sessionYears) {
+                if (!$sheet->date) {
+                    return false;
+                }
+                try {
+                    $c = \Carbon\Carbon::parse($sheet->date);
+                    if (!empty($sessionYears) && !in_array($c->year, $sessionYears, true)) {
+                        return false;
+                    }
+                    if (!$allowWeekends && $c->isWeekend()) {
+                        return false;
+                    }
+                    return true;
+                } catch (\Throwable) {
+                    return false;
+                }
+            })->pluck('id');
+
+            $opened = $validSheetIds->count();
             if ($opened > 0) {
                 $marks = AttendanceMark::query()
-                    ->whereIn('sheet_id', $sheetIds)
+                    ->whereIn('sheet_id', $validSheetIds)
                     ->where('student_id', $student->id)
-                    ->get();
+                    ->get(['id', 'sheet_id', 'status']);
 
                 $present = $marks->whereIn('status', ['Present', 'Late', 'Excused'])->count();
                 $absent = $marks->where('status', 'Absent')->count();
+
+                // Reconcile matching ReportCardService logic
+                $recordedTotal = $present + $absent;
+                if ($recordedTotal > $opened) {
+                    $opened = $recordedTotal;
+                } elseif ($recordedTotal < $opened) {
+                    $absent += ($opened - $recordedTotal);
+                }
             } else {
                 $present = 0;
                 $absent = 0;

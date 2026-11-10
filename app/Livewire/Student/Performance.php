@@ -155,8 +155,7 @@ class Performance extends Component
             return app(\App\Support\StudentDossierService::class)->buildDossier(
                 $this->student,
                 $this->selectedSession,
-                [],
-                $isParentOrStudent
+                ['only_published' => $isParentOrStudent]
             );
         } catch (\Throwable $e) {
             return null;

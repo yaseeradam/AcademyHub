@@ -82,7 +82,8 @@ class ReportBookletController extends Controller
         $safeSession = str_replace('/', '-', $session);
         $safeAdmissionNo = preg_replace('/[^a-zA-Z0-9_-]/', '_', (string) ($student->admission_number ?? $student->id));
         $filename = "academic-booklet-{$safeAdmissionNo}-{$safeSession}.pdf";
-        $storageDir = storage_path('app/academyhub/report_booklets');
+        $tenantId = $student->tenant_id ?? TenantSettings::tenantId() ?? 'global';
+        $storageDir = storage_path("app/academyhub/tenants/{$tenantId}/report_booklets");
         $fullPath = "{$storageDir}/{$filename}";
 
         $coverViewPath = resource_path('views/pdf/partials/book-cover.blade.php');
@@ -97,6 +98,14 @@ class ReportBookletController extends Controller
             ->max('updated_at');
         $lastScoreTimestamp = $lastScoreAt ? Carbon::parse($lastScoreAt)->timestamp : null;
 
+        $lastPsychomotorAt = \App\Models\PsychomotorScore::where('student_id', $student->id)
+            ->where('session', $session)
+            ->max('updated_at');
+        $lastPsychomotorTimestamp = $lastPsychomotorAt ? Carbon::parse($lastPsychomotorAt)->timestamp : null;
+
+        $lastAttendanceAt = \App\Models\AttendanceMark::where('student_id', $student->id)->max('updated_at');
+        $lastAttendanceTimestamp = $lastAttendanceAt ? Carbon::parse($lastAttendanceAt)->timestamp : null;
+
         $settingsPath = TenantSettings::settingsPath();
         $settingsTimestamp = file_exists($settingsPath) ? filemtime($settingsPath) : null;
         $studentTimestamp = $student->updated_at ? $student->updated_at->timestamp : null;
@@ -107,6 +116,12 @@ class ReportBookletController extends Controller
             $stale = false;
 
             if ($lastScoreTimestamp !== null && $cacheTimestamp < $lastScoreTimestamp) {
+                $stale = true;
+            }
+            if ($lastPsychomotorTimestamp !== null && $cacheTimestamp < $lastPsychomotorTimestamp) {
+                $stale = true;
+            }
+            if ($lastAttendanceTimestamp !== null && $cacheTimestamp < $lastAttendanceTimestamp) {
                 $stale = true;
             }
             if ($settingsTimestamp !== null && $cacheTimestamp < $settingsTimestamp) {
@@ -177,6 +192,41 @@ class ReportBookletController extends Controller
     {
         $user = $request->user();
         abort_unless($user, 401);
+
+        $tenant = $user->tenant;
+        if ($tenant && $tenant->isSubscriptionExpired()) {
+            abort(403, 'Your school\'s subscription has expired. Please contact school administration.');
+        }
+
+        if ($user->role === 'parent') {
+            abort_unless($user->students()->where('students.id', $student->id)->exists(), 403);
+
+            if ($tenant) {
+                $dbComponent = $tenant->activeMarketplaceComponents()->where('slug', 'student-dashboard')->first();
+                if (!$dbComponent) {
+                    abort(403, 'Student Dashboard is not active.');
+                }
+                $allowedClassIds = $dbComponent->pivot->allowed_class_ids ?? [];
+                if (is_string($allowedClassIds)) {
+                    $allowedClassIds = json_decode($allowedClassIds, true) ?: [];
+                }
+                $allowedClassIds = is_array($allowedClassIds) ? $allowedClassIds : [];
+                abort_unless(in_array($student->class_id, $allowedClassIds), 403, 'Student Dashboard is not active for your child\'s class.');
+            }
+        } elseif ($user->role === 'student') {
+            abort_unless($user->email === $student->admission_number || session('student_id') == $student->id, 403);
+        } else {
+            abort_unless($user->hasPermission('results.broadsheet') || in_array($user->role, ['admin', 'proprietor'], true), 403);
+
+            if ($user->role === 'teacher') {
+                $allowed = SubjectAllocation::query()
+                    ->where('teacher_id', $user->id)
+                    ->where('class_id', $student->class_id)
+                    ->exists();
+
+                abort_unless($allowed, 403);
+            }
+        }
 
         $session = (string) $request->query('session', $this->defaultSession());
         abort_unless(preg_match('/^\d{4}\/\d{4}$/', $session) === 1, 422, 'Invalid session format.');

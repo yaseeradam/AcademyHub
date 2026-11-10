@@ -318,6 +318,8 @@ class SettingsController extends Controller
                 'rc_show_cumulative_summary' => ['nullable', 'boolean'],
                 'rc_show_color_badges' => ['nullable', 'boolean'],
                 'rc_show_performance' => ['nullable', 'boolean'],
+                'rc_block_debtors' => ['nullable', 'boolean'],
+                'rc_next_term_date' => ['nullable', 'string', 'max:50'],
                 'rc_principal_name' => ['nullable', 'string', 'max:150'],
                 'rc_principal_title' => ['nullable', 'string', 'max:100'],
             ]);
@@ -329,6 +331,10 @@ class SettingsController extends Controller
             $settings['report_card_template'] = (string) $data['report_card_template'];
             $settings['rc_principal_name'] = $data['rc_principal_name'] ?? null;
             $settings['rc_principal_title'] = $data['rc_principal_title'] ?? null;
+            if ($request->has('rc_next_term_date')) {
+                $val = trim((string) $request->input('rc_next_term_date'));
+                $settings['rc_next_term_date'] = $val !== '' ? $val : null;
+            }
 
             // Boolean toggles - explicitly handle unchecked state
             $boolKeys = [
@@ -338,13 +344,13 @@ class SettingsController extends Controller
                 'rc_show_psychomotor', 'rc_show_school_fees', 'rc_show_signatures',
                 'rc_show_class_highest_lowest', 'rc_show_subject_teacher_remarks',
                 'rc_show_qr_code', 'rc_show_cumulative_summary', 'rc_show_color_badges',
-                'rc_show_performance',
+                'rc_show_performance', 'rc_block_debtors',
             ];
             foreach ($boolKeys as $key) {
-                // A hidden input with value="0" is always submitted; the checkbox
-                // with value="1" is only submitted when checked. So has($key)==true
-                // always — we compare input($key) directly to '1'.
-                $settings[$key] = $request->input($key) === '1';
+                // A hidden input with value="0" is submitted when unchecked; the checkbox
+                // with value="1" is submitted when checked. Compare flexibly.
+                $val = $request->input($key);
+                $settings[$key] = ($val === '1' || $val === 1 || $val === true || $val === 'on');
             }
 
             // Psychomotor Style & Scale
@@ -433,12 +439,26 @@ class SettingsController extends Controller
             $this->persistSettings($settingsPath, $settings);
 
             $this->refreshSettingsCache();
+            TenantSettings::clearCache();
+            TenantSettings::loadToConfig();
 
-            // Clear cached report card PDFs so new configuration takes effect immediately
-            $cacheDir = storage_path('app/public/report-cards');
-            if (File::exists($cacheDir)) {
-                File::deleteDirectory($cacheDir);
-                File::makeDirectory($cacheDir, 0755, true);
+            // Clear cached report card PDFs across all cache locations so new configuration takes effect immediately
+            $tenantId = TenantSettings::tenantId();
+            $cacheDirs = [
+                storage_path('app/public/report-cards'),
+                storage_path('app/academyhub/report_cards'),
+                storage_path('app/academyhub/report_booklets'),
+                storage_path('app/report-cards'),
+            ];
+            if ($tenantId) {
+                $cacheDirs[] = storage_path('app/academyhub/tenants/' . $tenantId . '/report_cards');
+                $cacheDirs[] = storage_path('app/academyhub/tenants/' . $tenantId . '/report_booklets');
+            }
+            foreach ($cacheDirs as $dir) {
+                if (File::exists($dir)) {
+                    File::deleteDirectory($dir);
+                    File::makeDirectory($dir, 0755, true);
+                }
             }
 
             return back()->with('status', 'Report card settings saved.');

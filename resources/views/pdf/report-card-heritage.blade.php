@@ -141,6 +141,7 @@
     $showQrCode                    = $opts['show_qr_code'] ?? true;
     $showCumulativeSummary         = $opts['show_cumulative_summary'] ?? false;
     $showColorBadges               = $opts['show_color_badges'] ?? true;
+    $showPerformance               = $opts['show_performance'] ?? false;
 @endphp
 
 @if($logoExists && $showWatermark)
@@ -197,6 +198,8 @@
             @if($showPosition)<div class="stat"><div class="stat-inner blue"><div class="stat-label">Position</div><div class="stat-value">{{ $position }}</div></div></div>@endif
             @if($showClassAverage)
             <div class="stat"><div class="stat-inner purple"><div class="stat-label">Class Avg</div><div class="stat-value">{{ number_format($classAverage,1) }}%</div></div></div>
+            @endif
+            @if($showClassHighestLowest)
             <div class="stat"><div class="stat-inner teal"><div class="stat-label">Highest</div><div class="stat-value">{{ number_format($highestAverage??0,1) }}%</div></div></div>
             <div class="stat"><div class="stat-inner rose"><div class="stat-label">Lowest</div><div class="stat-value">{{ number_format($lowestAverage??0,1) }}%</div></div></div>
             @endif
@@ -218,6 +221,7 @@
                         <th style="width:6%;">Low</th>
                     @endif
                     @if($showPosition)<th style="width:6%;">Pos</th>@endif
+                    @if($showPerformance)<th style="width:9%;">Perf</th>@endif
                     @if($showSubjectTeacherRemarks)<th style="width:10%;text-align:left;padding-left:4px;">Remark</th>@endif
                 </tr>
             </thead>
@@ -247,6 +251,7 @@
                         <td>{{ $r['lowest'] ?? '—' }}</td>
                     @endif
                     @if($showPosition)<td>{{ $r['position'] ?? '—' }}</td>@endif
+                    @if($showPerformance)<td style="font-size:7.5px;font-weight:600;">{{ \App\Support\ReportCardService::getPerformanceText($r['total'] ?? 0) }}</td>@endif
                     @if($showSubjectTeacherRemarks)<td style="font-size:7px;text-align:left;padding-left:4px;font-style:italic;">{{ $r['teacher_remark'] ?? 'Good' }}</td>@endif
                 </tr>
                 @endforeach

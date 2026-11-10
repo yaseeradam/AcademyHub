@@ -93,19 +93,26 @@ class ReportCardController extends Controller
         $optionsHash = substr(md5(json_encode($data['rcOptions'] ?? [])), 0, 10);
         $safeAdmissionNo = preg_replace('/[^a-zA-Z0-9_-]/', '_', (string) ($student->admission_number ?? $student->id));
         $filename = "report-card-{$safeAdmissionNo}-term-{$term}-{$safeTemplate}-{$optionsHash}.pdf";
-        $storageDir = storage_path('app/academyhub/report_cards');
+        $tenantId = $student->tenant_id ?? \App\Support\TenantSettings::tenantId() ?? 'global';
+        $storageDir = storage_path("app/academyhub/tenants/{$tenantId}/report_cards");
         $fullPath = "{$storageDir}/{$filename}";
 
         $view = ReportCardService::viewForTemplate($safeTemplate);
         $viewPath = resource_path('views/' . str_replace('.', '/', $view) . '.blade.php');
         $viewTimestamp = file_exists($viewPath) ? filemtime($viewPath) : null;
 
-        // Cache invalidation: regenerate when scores, settings, student details, view template, or attendance change.
+        // Cache invalidation: regenerate when scores, psychomotor, settings, student details, view template, or attendance change.
         $lastScoreAt = \App\Models\Score::where('student_id', $student->id)
             ->where('term', $term)
             ->where('session', $session)
             ->max('updated_at');
         $lastScoreTimestamp = $lastScoreAt ? \Carbon\Carbon::parse($lastScoreAt)->timestamp : null;
+
+        $lastPsychomotorAt = \App\Models\PsychomotorScore::where('student_id', $student->id)
+            ->where('term', $term)
+            ->where('session', $session)
+            ->max('updated_at');
+        $lastPsychomotorTimestamp = $lastPsychomotorAt ? \Carbon\Carbon::parse($lastPsychomotorAt)->timestamp : null;
 
         $lastAttendanceAt = \App\Models\AttendanceMark::where('student_id', $student->id)->max('updated_at');
         $lastAttendanceTimestamp = $lastAttendanceAt ? \Carbon\Carbon::parse($lastAttendanceAt)->timestamp : null;
@@ -124,6 +131,10 @@ class ReportCardController extends Controller
             $stale = false;
 
             if ($lastScoreTimestamp !== null && $cacheTimestamp < $lastScoreTimestamp) {
+                $stale = true;
+            }
+
+            if ($lastPsychomotorTimestamp !== null && $cacheTimestamp < $lastPsychomotorTimestamp) {
                 $stale = true;
             }
 

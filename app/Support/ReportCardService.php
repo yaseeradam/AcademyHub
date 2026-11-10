@@ -39,6 +39,16 @@ class ReportCardService
         };
     }
 
+    public static function getPerformanceText(float|int $total): string
+    {
+        if ($total >= 90) return 'Excellent';
+        if ($total >= 80) return 'Very Good';
+        if ($total >= 70) return 'Good';
+        if ($total >= 60) return 'Credit';
+        if ($total >= 50) return 'Pass';
+        return 'Needs Work';
+    }
+
     protected function getClassScores(int $classId, int $term, string $session, Collection $subjectIds): Collection
     {
         $tenantId = TenantSettings::tenantId() ?? 0;
@@ -256,7 +266,7 @@ class ReportCardService
             }
             $feesByClass = is_array($feesByClass) ? $feesByClass : [];
             $classId     = $student->class_id;
-            $feeAmount   = $feesByClass[(string) $classId] ?? null;
+            $feeAmount   = $feesByClass[(string) $classId] ?? ($feesByClass[(string) $displayClassId] ?? null);
 
             if ($feeAmount !== null) {
                 $schoolFees = [

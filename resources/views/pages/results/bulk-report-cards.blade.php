@@ -63,7 +63,11 @@
             });
             
             // Collect display options
-            const options = ['show_psychomotor', 'show_attendance', 'show_position', 'show_class_average'];
+            const options = [
+                'show_psychomotor', 'show_attendance', 'show_position', 'show_class_average',
+                'show_class_highest_lowest', 'show_subject_teacher_remarks',
+                'show_cumulative_summary', 'show_color_badges', 'show_qr_code'
+            ];
             options.forEach(opt => {
                 const el = document.querySelector(`input[name='options[${opt}]']`);
                 if (el && el.checked) {
@@ -158,17 +162,15 @@
                             <div>
                                 <label class="text-xs font-black uppercase tracking-[0.1em] text-gray-500">Visual Template</label>
                                 <select name="template" x-model="template" class="mt-2 w-full rounded-2xl border-2 border-gray-50 bg-gray-50 px-5 py-4 text-sm font-bold text-gray-900 transition-all focus:border-indigo-600 focus:bg-white focus:ring-0">
-                                    <option value="">Default Setting</option>
-                                    <option value="standard">Standard</option>
-                                    <option value="compact">Compact</option>
-                                    <option value="elegant">Elegant</option>
-                                    <option value="modern">Modern</option>
+                                    <option value="">Default School Setting</option>
+                                    <option value="elegant">Elegant (Default)</option>
                                     <option value="classic">Classic</option>
-                                    <option value="vibrant">Vibrant</option>
-                                    <option value="professional">Professional</option>
-                                    <option value="royal">Royal</option>
-                                    <option value="fresh">Fresh</option>
-                                    <option value="sunset">Sunset</option>
+                                    <option value="heritage">Heritage</option>
+                                    <option value="signature">Signature</option>
+                                    <option value="nordic">Nordic</option>
+                                    <option value="riverdale">Riverdale</option>
+                                    <option value="greenwood">Greenwood</option>
+                                    <option value="compact">Compact</option>
                                 </select>
                             </div>
                         </div>
