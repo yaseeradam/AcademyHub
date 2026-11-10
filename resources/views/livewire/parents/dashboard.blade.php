@@ -671,8 +671,8 @@
                             </div>
                         @else
                             {{-- Vertical Bar Chart Area with Pinned Y-axis and Scrollable Canvas --}}
-                            <div class="pt-6 pb-2 w-full min-w-0">
-                                <div class="relative h-64 flex items-end">
+                            <div class="pt-6 pb-2 w-full min-w-0 overflow-hidden" style="max-width: 100%;">
+                                <div class="relative h-64 flex items-end w-full min-w-0 overflow-hidden">
                                     {{-- Fixed Y-Axis Labels --}}
                                     <div class="w-7 shrink-0 h-full flex flex-col justify-between text-[10px] font-bold text-slate-300 pr-1 pb-6 select-none">
                                         <div class="flex items-center justify-end h-0"><span class="-translate-y-1/2">100</span></div>
@@ -684,7 +684,7 @@
                                     </div>
 
                                     {{-- Plot Area with gridlines and scrollable bars --}}
-                                    <div class="relative flex-1 h-full min-w-0">
+                                    <div class="relative flex-1 h-full min-w-0 overflow-hidden" style="max-width: calc(100% - 1.75rem);">
                                         {{-- Horizontal dashed grid lines across plot area --}}
                                         <div class="absolute inset-0 pb-6 pointer-events-none flex flex-col justify-between">
                                             <div class="border-b border-dashed border-slate-100 w-full h-0"></div>
@@ -696,7 +696,7 @@
                                         </div>
 
                                         {{-- Scrollable/Responsive Bars Container --}}
-                                        <div class="relative z-10 h-full w-full overflow-x-auto overflow-y-hidden pb-1 scrollbar-thin scrollbar-thumb-slate-200 scrollbar-track-transparent">
+                                        <div class="relative z-10 h-full w-full overflow-x-auto overflow-y-hidden pb-1 scrollbar-thin scrollbar-thumb-slate-200 scrollbar-track-transparent" style="width: 100%; max-width: 100%; overflow-x: auto; overflow-y: hidden; -webkit-overflow-scrolling: touch;">
                                             <div class="h-full flex items-end gap-2 sm:gap-3 px-1 {{ count($chartItems) <= 6 ? 'justify-around w-full' : 'min-w-max' }}">
                                                 @foreach($chartItems as $bar)
                                                     <div class="flex flex-col items-center h-full justify-end group {{ count($chartItems) <= 6 ? 'flex-1 max-w-[48px]' : 'w-12 shrink-0' }}" title="{{ $bar['name'] }}: {{ $bar['score'] }}%">
@@ -704,9 +704,9 @@
                                                         <span class="text-[10px] sm:text-[11px] font-black text-slate-700 mb-1.5 opacity-90 group-hover:scale-110 transition-transform whitespace-nowrap">
                                                             {{ $bar['score'] }}
                                                         </span>
-                                                        {{-- The Bar --}}
+                                                        {{-- The Bar (Inline background-color ensures vibrant color is never white/purged) --}}
                                                         <div class="w-full max-w-[34px] sm:max-w-[38px] {{ $bar['bar_class'] }} rounded-t-xl transition-all duration-300 group-hover:brightness-95 shadow-2xs"
-                                                             style="height: {{ max(8, $bar['score']) }}%;">
+                                                             style="height: {{ max(8, $bar['score']) }}%; background-color: {{ $bar['hex'] }};">
                                                         </div>
                                                         {{-- Label beneath the bar --}}
                                                         <span class="text-[10px] sm:text-[11px] font-bold text-slate-600 mt-2 truncate w-full text-center group-hover:text-indigo-600 transition-colors block" title="{{ $bar['name'] }}">

@@ -1027,13 +1027,16 @@ class Dashboard extends Component
         }
 
         $colors = [
-            ['bar' => 'bg-emerald-400', 'hex' => '#34d399'],
-            ['bar' => 'bg-sky-400', 'hex' => '#38bdf8'],
-            ['bar' => 'bg-indigo-400', 'hex' => '#818cf8'],
-            ['bar' => 'bg-amber-400', 'hex' => '#fbbf24'],
-            ['bar' => 'bg-teal-400', 'hex' => '#2dd4bf'],
-            ['bar' => 'bg-purple-400', 'hex' => '#c084fc'],
-            ['bar' => 'bg-rose-400', 'hex' => '#fb7185'],
+            ['bar' => 'bg-emerald-500', 'hex' => '#10b981'],
+            ['bar' => 'bg-sky-500',     'hex' => '#0ea5e9'],
+            ['bar' => 'bg-indigo-500',  'hex' => '#6366f1'],
+            ['bar' => 'bg-amber-500',   'hex' => '#f59e0b'],
+            ['bar' => 'bg-teal-500',    'hex' => '#14b8a6'],
+            ['bar' => 'bg-purple-500',  'hex' => '#a855f7'],
+            ['bar' => 'bg-rose-500',    'hex' => '#f43f5e'],
+            ['bar' => 'bg-blue-600',    'hex' => '#2563eb'],
+            ['bar' => 'bg-orange-500',  'hex' => '#f97316'],
+            ['bar' => 'bg-violet-600',  'hex' => '#7c3aed'],
         ];
 
         $chartItems = [];
