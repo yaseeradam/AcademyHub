@@ -1,42 +1,49 @@
 <div align="center">
 
   <!-- Header Banner -->
-  <img src="https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=12,24,35,42&height=220&section=header&text=AcademyHub&fontSize=65&animation=fadeIn&fontColor=ffffff&desc=Cloud-Based%20Next-Gen%20School%20Management%20System&descSize=20&descAlignColor=a5f3fc&descAlign=50" width="100%" alt="AcademyHub Banner" />
+  <img src="https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=12,24,35,42&height=240&section=header&text=AcademyHub&fontSize=70&animation=fadeIn&fontColor=ffffff&desc=Enterprise-Grade%20Cloud%20School%20Management%20%26%20Biometrics%20Platform&descSize=20&descAlignColor=a5f3fc&descAlign=50" width="100%" alt="AcademyHub Banner" />
 
   <br/>
 
   <!-- Animated Typing Tagline -->
-  <a href="https://github.com">
-    <img src="https://readme-typing-svg.demolab.com?font=Fira+Code&weight=600&size=22&pause=1000&color=38BDF8&center=true&vCenter=true&width=750&lines=%F0%9F%8D%93+Comprehensive+Cloud-Based+School+Management;%F0%9F%9A%80+Laravel+11+%7C+Livewire+v3+%7C+Tailwind+CSS;%F0%9F%90%8A+Real-Time+Student+Performance+Analytics;%F0%9F%A4%96+Integrated+WhatsApp+Bot+%26+Parent+Portal;%F0%9F%93%84+Instant+PDF+Report+Cards+%26+Certificates;%F0%9F%92%BE+1-Click+Automated+Backup+%26+Restore" alt="Typing SVG" />
+  <a href="https://github.com/yaseeradam/AcademyHub">
+    <img src="https://readme-typing-svg.demolab.com?font=Fira+Code&weight=600&size=22&pause=1000&color=38BDF8&center=true&vCenter=true&width=800&lines=%F0%9F%8F%AB+Next-Gen+Cloud+School+Management+System;%F0%9F%A7%AC+Physical+ZKTeco+K40+Biometric+Gate+Integration;%E2%9A%A1+Laravel+11+%7C+Livewire+v3+%7C+Tailwind+CSS;%F0%9F%A4%96+Automated+WhatsApp+Arrival+Alerts+%26+Parent+Bot;%F0%9F%93%8A+Interactive+Student+%26+Staff+Attendance+Consoles;%F0%9F%93%84+Automated+Broadsheets%2C+PDF+Cards+%26+Certificates" alt="Typing SVG" />
   </a>
 
   <br/><br/>
 
   <!-- Badges -->
   <p align="center">
-    <a href="#-tech-stack"><img src="https://img.shields.io/badge/Laravel-11.x-FF2D20?style=for-the-badge&logo=laravel&logoColor=white" alt="Laravel 11"></a>
-    <a href="#-tech-stack"><img src="https://img.shields.io/badge/PHP-8.2+-777BB4?style=for-the-badge&logo=php&logoColor=white" alt="PHP 8.2"></a>
-    <a href="#-tech-stack"><img src="https://img.shields.io/badge/Livewire-v3-4E56A6?style=for-the-badge&logo=livewire&logoColor=white" alt="Livewire v3"></a>
-    <a href="#-tech-stack"><img src="https://img.shields.io/badge/Tailwind_CSS-3.x-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white" alt="Tailwind CSS"></a>
-    <a href="#-tech-stack"><img src="https://img.shields.io/badge/MySQL-8.0+-4479A1?style=for-the-badge&logo=mysql&logoColor=white" alt="MySQL"></a>
-    <a href="#-whatsapp-bot"><img src="https://img.shields.io/badge/WhatsApp-Bot_Enabled-25D366?style=for-the-badge&logo=whatsapp&logoColor=white" alt="WhatsApp Bot"></a>
+    <a href="https://laravel.com"><img src="https://img.shields.io/badge/Laravel-11.x-FF2D20?style=for-the-badge&logo=laravel&logoColor=white" alt="Laravel 11"></a>
+    <a href="https://www.php.net"><img src="https://img.shields.io/badge/PHP-8.2+-777BB4?style=for-the-badge&logo=php&logoColor=white" alt="PHP 8.2+"></a>
+    <a href="https://livewire.laravel.com"><img src="https://img.shields.io/badge/Livewire-v3-4E56A6?style=for-the-badge&logo=livewire&logoColor=white" alt="Livewire v3"></a>
+    <a href="https://tailwindcss.com"><img src="https://img.shields.io/badge/Tailwind_CSS-3.x-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white" alt="Tailwind CSS"></a>
+    <a href="https://www.mysql.com"><img src="https://img.shields.io/badge/MySQL-8.0+-4479A1?style=for-the-badge&logo=mysql&logoColor=white" alt="MySQL 8"></a>
+    <a href="#-biometric-hardware-integration"><img src="https://img.shields.io/badge/ZKTeco-K40_Biometrics-10B981?style=for-the-badge&logo=fingerprint&logoColor=white" alt="Biometrics"></a>
+    <a href="#-whatsapp-bot--notifications"><img src="https://img.shields.io/badge/WhatsApp-Bot_Enabled-25D366?style=for-the-badge&logo=whatsapp&logoColor=white" alt="WhatsApp Bot"></a>
+    <a href="https://docker.com"><img src="https://img.shields.io/badge/Docker-Ready-2496ED?style=for-the-badge&logo=docker&logoColor=white" alt="Docker Ready"></a>
   </p>
 
   <!-- Quick Nav -->
   <p align="center">
-    <a href="#-key-features"><b>🌟 Key Features</b></a> •
+    <a href="#-overview"><b>📖 Overview</b></a> •
+    <a href="#-key-features"><b>🌟 Features</b></a> •
+    <a href="#-biometric-hardware-integration"><b>📟 Biometrics</b></a> •
     <a href="#-system-architecture"><b>📐 Architecture</b></a> •
-    <a href="#-roles--permissions-matrix"><b>🔐 Roles & Access</b></a> •
-    <a href="#-quick-start--installation"><b>⚡ Quick Start</b></a>
+    <a href="#-roles--permissions"><b>🔐 Roles</b></a> •
+    <a href="#-quick-start--installation"><b>⚡ Quick Start</b></a> •
+    <a href="#-production-deployment"><b>🚀 Deployment</b></a>
   </p>
 
 </div>
 
 <img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif" width="100%">
 
-## 🚀 About AcademyHub
+## 📖 Overview
 
-**AcademyHub** is a state-of-the-art, multi-tenant cloud School Management Platform built on **Laravel 11**, **Livewire v3**, and **Tailwind CSS**. Designed for modern educational institutions, AcademyHub streamlines administration, automates result computation, powers parent-school communication via an integrated **WhatsApp Bot**, and delivers rich real-time student performance analytics.
+**AcademyHub** is an enterprise-grade, multi-tenant cloud School Management System designed for forward-thinking primary, secondary, and tertiary institutions. Built on **Laravel 11**, **Livewire v3**, and **Tailwind CSS**, AcademyHub unifies physical gate security, academic computation, parent engagement, and financial governance into a singular, lightning-fast platform.
+
+Whether handling physical ZKTeco K40 biometric gate punches, generating instant terminal broadsheets, dispatching automated WhatsApp arrival alerts to parents, or taking daily attendance with real-time auto-saving, AcademyHub provides an unmatched educational operations experience.
 
 ---
 
@@ -45,55 +52,59 @@
 <table>
   <tr>
     <td width="50%" valign="top">
-      <h3>📊 Real-Time Analytics Engine</h3>
+      <h3>⚡ Real-Time Attendance Consoles</h3>
       <ul>
-        <li><b>Performance Tracking:</b> Dynamic correlation between attendance, homework, CBT, and exam scores.</li>
-        <li><b>Smart Insights:</b> Automatic identification of student strengths (🏆 70%+) and weaknesses (⚠️ &lt;60%).</li>
-        <li><b>Trend Visualization:</b> Term-by-term comparative progress graphs.</li>
+        <li><b>Unified Modern UI:</b> Identical, high-productivity interface for both <b>Students</b> and <b>Staff/Teachers</b>.</li>
+        <li><b>Instant 2×2 Touch Controls:</b> Fast marking (<i>Present</i>, <i>Absent</i>, <i>Late</i>, <i>Excused</i>) with zero-latency auto-save.</li>
+        <li><b>Live KPI Dashboard:</b> 6 real-time stat cards with percentage rates and pending count indicators.</li>
+        <li><b>Smart Auto-Absent:</b> 1-click batch marking with biometric punch protection so physical gate scans are never overridden.</li>
+        <li><b>A4 Landscape Reports:</b> High-resolution weekly and monthly PDF exports with star punctuality ratings.</li>
       </ul>
     </td>
     <td width="50%" valign="top">
-      <h3>🤖 WhatsApp Bot Integration</h3>
+      <h3>📟 Physical Biometric Hardware</h3>
       <ul>
-        <li><b>Instant Results:</b> Parents can request report cards directly via WhatsApp.</li>
-        <li><b>Automated Alerts:</b> Instant notifications for fee due dates, attendance, and announcements.</li>
-        <li><b>24/7 Portal Access:</b> Automated chat menus for quick info retrieval.</li>
-      </ul>
-    </td>
-  </tr>
-  <tr>
-    <td width="50%" valign="top">
-      <h3>📄 PDF Report Cards & Certificates</h3>
-      <ul>
-        <li><b>Broadsheet Generation:</b> Automated term and session result computation.</li>
-        <li><b>Custom Certificates:</b> High-resolution certificate generation powered by GD & DomPDF.</li>
-        <li><b>QR Verification:</b> Instant digital verification for official documents.</li>
-      </ul>
-    </td>
-    <td width="50%" valign="top">
-      <h3>💳 Bursary & Finance Suite</h3>
-      <ul>
-        <li><b>Fee Management:</b> Track payments, outstanding balances, and discounts.</li>
-        <li><b>Receipt Generation:</b> Automatic PDF payment receipts.</li>
-        <li><b>Financial Reports:</b> Real-time cash flow & collection analytics for bursars.</li>
+        <li><b>ZKTeco K40 Integration:</b> Plug-and-play biometric gate terminal connectivity via TCP/IP sockets (port 4370).</li>
+        <li><b>Real-Time Gate Monitoring:</b> Live scan feed with arrival (<i>In</i>) and departure (<i>Out</i>) timestamps.</li>
+        <li><b>Dual-Shift Schedules:</b> Native support for <i>Western Shift (8:00 AM)</i> and <i>Islamic Shift (12:30 PM)</i>.</li>
+        <li><b>Automated Gate Daemons:</b> Python background polling daemon with automatic network reconnect and offline queuing.</li>
       </ul>
     </td>
   </tr>
   <tr>
     <td width="50%" valign="top">
-      <h3>🏫 Student & Parent Portals</h3>
+      <h3>🤖 WhatsApp Bot & Instant Alerts</h3>
       <ul>
-        <li><b>Dedicated Dashboards:</b> Tailored experience for students and parents.</li>
-        <li><b>Homework Management:</b> Online submission and teacher feedback.</li>
-        <li><b>Multi-Child Support:</b> Single parent account to manage all siblings.</li>
+        <li><b>Arrival & Departure Alerts:</b> Sends automated WhatsApp notifications to parents the instant a student punches the gate reader.</li>
+        <li><b>Interactive Chat Menus:</b> 24/7 automated parent bot for checking term results, balances, and schedules.</li>
+        <li><b>School Broadcasts:</b> Mass announcement distribution for emergencies, holidays, and event reminders.</li>
       </ul>
     </td>
     <td width="50%" valign="top">
-      <h3>🛡️ One-Click Backup & Restore</h3>
+      <h3>📊 Academic Intelligence & Analytics</h3>
       <ul>
-        <li><b>Full System Snapshots:</b> Database SQL dump + <code>public/uploads</code> ZIP.</li>
-        <li><b>Safe Maintenance Mode:</b> Automatic system locking during restore ops.</li>
-        <li><b>Automated Backups:</b> Scheduled cloud and local backup routines.</li>
+        <li><b>Automated Broadsheets:</b> Automatic position ranking, grade calculation, and GPA computation.</li>
+        <li><b>Arm & Class Segregation:</b> Position and ranking calculated accurately by class arm or main school class.</li>
+        <li><b>Visual Performance Trends:</b> High-contrast subject charts and term-by-term comparative trajectories.</li>
+        <li><b>Smart Diagnostics:</b> Automatic detection of subject strengths (🏆 70%+) and weaknesses (⚠️ &lt;60%).</li>
+      </ul>
+    </td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top">
+      <h3>👨‍👩‍👧 Mobile Parent & Student Portal</h3>
+      <ul>
+        <li><b>Multi-Child Support:</b> Single parent login to monitor all wards across different classes and sections.</li>
+        <li><b>Academic History:</b> Real-time homework submissions, score transcripts, and gate attendance calendars.</li>
+        <li><b>Mobile-First PWA:</b> Progressive Web App installable on iOS and Android devices for offline viewing.</li>
+      </ul>
+    </td>
+    <td width="50%" valign="top">
+      <h3>💳 Bursary & Financial Suite</h3>
+      <ul>
+        <li><b>Fee Billing & Invoicing:</b> Customizable fee structures per class with sibling discount support.</li>
+        <li><b>Payment Receipts:</b> Instant generation of tamper-proof PDF receipts with QR verification.</li>
+        <li><b>Debtors Tracking:</b> Real-time financial reports, debt aging, and cash flow ledgers for bursars.</li>
       </ul>
     </td>
   </tr>
@@ -101,139 +112,226 @@
 
 ---
 
+## 📟 Biometric Hardware Integration
+
+AcademyHub connects physical biometric devices (e.g., **ZKTeco K40, uFace, MB20**) directly to the cloud or local school network without expensive third-party SaaS middleware.
+
+```
+       ┌────────────────────────┐
+       │   Physical ZKTeco K40  │
+       │  Fingerprint / RFID    │
+       └───────────┬────────────┘
+                   │ TCP / Port 4370
+                   ▼
+       ┌────────────────────────┐
+       │   zk_terminal.py       │  ◄── Background Python daemon
+       │   (Local Sync Daemon)  │
+       └───────────┬────────────┘
+                   │ Secure HTTPS REST API
+                   ▼
+       ┌────────────────────────┐
+       │   AcademyHub Core API  │  ◄── Dual Shift Evaluation (Western / Islamic)
+       │   (Laravel 11 Backend) │
+       └─────┬────────────┬─────┘
+             │            │
+             ▼            ▼
+  ┌─────────────────┐  ┌──────────────────┐
+  │ Livewire UI     │  │ WhatsApp Bot     │
+  │ Real-Time Scans │  │ Instant Parent   │
+  │ & KPI Counters  │  │ Arrival Alerts   │
+  └─────────────────┘  └──────────────────┘
+```
+
+- **Dual-Shift Rules**: Automatically classifies arrivals as `Present` or `Late` depending on the registered staff/student shift (Western: 8:00 AM vs Islamic: 12:30 PM).
+- **Anti-Override Lock**: Students and teachers verified by hardware scans cannot be accidentally overwritten as absent during manual sheet taking.
+
+---
+
 ## 📐 System Architecture
 
 ```mermaid
 graph TD
-    User([🌐 Users: Admin / Bursar / Teacher / Student / Parent]) --> Gate{🔐 Role-Based Auth}
-    
-    Gate -->|Admin / Teacher| Dash[💻 Management Dashboard]
-    Gate -->|Student / Parent| Portal[📱 Student & Parent Portal]
-    Gate -->|WhatsApp API| Bot[🤖 WhatsApp Bot System]
+    subgraph Clients["🌐 Client Interfaces"]
+        AdminUI["💻 Admin & Staff Console"]
+        ParentPortal["📱 Parent & Student Portal"]
+        K40Device["📟 ZKTeco K40 Gate Terminal"]
+        WhatsAppUser["💬 WhatsApp Chat"]
+    end
 
-    Dash --> Core[⚙️ Laravel 11 Core Engine]
-    Portal --> Core
-    Bot --> Core
+    subgraph Ingestion["🔌 Gateway & Ingestion"]
+        LivewireBridge["⚡ Livewire v3 Reactive Engine"]
+        RESTGateway["🛡️ REST API & Webhooks"]
+        PythonDaemon["🐍 zk_terminal.py Daemon"]
+    end
 
-    Core --> Livewire[⚡ Livewire v3 Reactive UI]
-    Core --> Analytics[📊 Performance Analytics Service]
-    Core --> PDF[📄 DomPDF Certificate Engine]
-    Core --> DB[(🗄️ MySQL Database)]
-    Core --> Storage[📦 Storage & Backup Module]
+    subgraph CoreEngine["⚙️ AcademyHub Core (Laravel 11)"]
+        AttendanceEngine["🕒 Attendance & Shift Engine"]
+        GradingEngine["📈 Broadsheet & Grade Computation"]
+        WhatsAppService["🤖 WhatsApp Messaging Service"]
+        ReportEngine["📄 DomPDF Landscape Generator"]
+        SecurityService["🔐 Multi-Tenant Authorization"]
+    end
+
+    subgraph DataStorage["🗄️ Storage & Cache"]
+        MySQL[(MySQL 8 Database)]
+        RedisCache[(Redis Cache & Queues)]
+        FileStorage[📦 Public & Encrypted Storage]
+    end
+
+    AdminUI --> LivewireBridge
+    ParentPortal --> LivewireBridge
+    K40Device --> PythonDaemon
+    PythonDaemon --> RESTGateway
+    WhatsAppUser --> RESTGateway
+
+    LivewireBridge --> CoreEngine
+    RESTGateway --> CoreEngine
+
+    CoreEngine --> DataStorage
 ```
 
 ---
 
-## 🔐 Roles & Permissions Matrix
+## 🔐 Roles & Permissions
 
-| Role | Badge | Access Scope | Key Responsibilities |
+| Role | Badge | Access Level | Primary Capabilities |
 | :--- | :---: | :--- | :--- |
-| **Admin** | <img src="https://img.shields.io/badge/Full_Access-Red?style=flat-square" /> | Global System & Settings | Full control, User Management, Backup/Restore, System Config |
-| **Bursar** | <img src="https://img.shields.io/badge/Finance_Only-Green?style=flat-square" /> | Financial Modules | Fee collection, Receipts, Financial Audits, Debtors tracking |
-| **Teacher** | <img src="https://img.shields.io/badge/Academics-Blue?style=flat-square" /> | Academic Modules | Score entry, Attendance, Broadsheets, Homework grading |
-| **Student** | <img src="https://img.shields.io/badge/Student_Portal-Purple?style=flat-square" /> | Personal Portal | Homework submission, Result checking, Attendance history |
-| **Parent** | <img src="https://img.shields.io/badge/Parent_Portal-Orange?style=flat-square" /> | Children's Portal | Track performance, View fees, Report card downloads |
+| **Admin** | `Full Access` | Institution-wide | Complete system configuration, staff management, biometric settings, database backup/restore |
+| **Bursar** | `Finance` | Financial modules | Fee creation, invoice assignment, payment recording, PDF receipt issuance, financial audit |
+| **Teacher** | `Academic` | Allocated classes & arms | Daily student attendance, continuous assessments (CA), exam marks, homework management |
+| **Parent** | `Portal` | Wards only | Real-time arrival gate notifications, term broadsheets, fee balance tracking, excuse submissions |
+| **Student** | `Personal` | Personal records | Homework downloads/submissions, timetable schedules, terminal reports, attendance log |
 
 ---
 
 ## 🛠️ Tech Stack
 
-<p align="left">
-  <img src="https://img.shields.io/badge/PHP-777BB4?style=for-the-badge&logo=php&logoColor=white" />
-  <img src="https://img.shields.io/badge/Laravel-FF2D20?style=for-the-badge&logo=laravel&logoColor=white" />
-  <img src="https://img.shields.io/badge/Livewire-4E56A6?style=for-the-badge&logo=livewire&logoColor=white" />
-  <img src="https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white" />
-  <img src="https://img.shields.io/badge/Vite-646CFF?style=for-the-badge&logo=vite&logoColor=white" />
-  <img src="https://img.shields.io/badge/MySQL-4479A1?style=for-the-badge&logo=mysql&logoColor=white" />
-  <img src="https://img.shields.io/badge/WhatsApp_API-25D366?style=for-the-badge&logo=whatsapp&logoColor=white" />
-  <img src="https://img.shields.io/badge/Composer-885630?style=for-the-badge&logo=composer&logoColor=white" />
-  <img src="https://img.shields.io/badge/NPM-CB3837?style=for-the-badge&logo=npm&logoColor=white" />
-</p>
+<div align="center">
+
+| Component | Technology | Version / Details |
+| :--- | :--- | :--- |
+| **Backend Framework** | [Laravel](https://laravel.com) | `11.x` (Modern Structure, PHP 8.2+) |
+| **Frontend Architecture** | [Livewire](https://livewire.laravel.com) | `v3` (Reactive, Zero-SPA Complexity) |
+| **Styling & Theme** | [Tailwind CSS](https://tailwindcss.com) | `3.4+` (Custom Slate/Navy Gradient Design) |
+| **Database** | [MySQL](https://mysql.com) | `8.0+` (InnoDB, Full Multi-Tenancy) |
+| **Biometric Integration** | Python + `pyzk` | TCP/IP Socket (Port 4370) Daemon |
+| **PDF Generation** | [DomPDF](https://github.com/barryvdh/laravel-dompdf) | A4 Landscape Broadsheets & Cards |
+| **Charts & Visuals** | [Chart.js](https://chartjs.org) | Dynamic Performance & Trend Graphing |
+| **Containerization** | [Docker](https://docker.com) | Alpine PHP-FPM, Nginx & MySQL Stack |
+
+</div>
 
 ---
 
 ## ⚡ Quick Start & Installation
 
 ### 📋 Prerequisites
-- **PHP** `^8.2` (with GD extension enabled)
-- **MySQL** `^5.7` or **MariaDB** `^10.3`
-- **Node.js** `^18.0` & **NPM** / **pnpm**
-- **Composer** `^2.0`
+- **PHP** `^8.2` with `pdo_mysql`, `gd`, `bcmath`, `mbstring`, `zip`, `xml`
+- **Composer** `^2.5`
+- **Node.js** `^18.0` & **NPM**
+- **MySQL** `^8.0` or **MariaDB** `^10.4`
 
-### 🔧 Step-by-Step Setup
+### 🔧 Step-by-Step Installation
 
 ```bash
 # 1. Clone the repository
-git clone https://github.com/your-org/academyhub.git
-cd academyhub
+git clone https://github.com/yaseeradam/AcademyHub.git
+cd AcademyHub
 
 # 2. Install PHP & Node dependencies
-php composer.phar install
+composer install --optimize-autoloader --no-dev
 npm install
 
-# 3. Configure environment file
+# 3. Environment configuration
 cp .env.example .env
 php artisan key:generate
-```
 
-<details>
-<summary><b>🔍 View Required <code>.env</code> Configurations</b></summary>
+# 4. Configure your database in .env
+# DB_CONNECTION=mysql
+# DB_HOST=127.0.0.1
+# DB_PORT=3306
+# DB_DATABASE=academyhub
+# DB_USERNAME=your_username
+# DB_PASSWORD=your_password
 
-```env
-APP_NAME=AcademyHub
-APP_ENV=production
-APP_DEBUG=false
-APP_URL=https://your-school-domain.com
-
-DB_CONNECTION=mysql
-DB_HOST=127.0.0.1
-DB_PORT=3306
-DB_DATABASE=academyhub
-DB_USERNAME=root
-DB_PASSWORD=your_secure_password
-
-ACADEMYHUB_ADMIN_EMAIL=admin@academyhub.local
-ACADEMYHUB_ADMIN_PASSWORD=your_admin_password
-```
-</details>
-
-```bash
-# 4. Run database migrations & seed demo data
+# 5. Run database migrations & seeders
 php artisan migrate --force
 php artisan db:seed --force
 
-# 5. Build frontend assets
+# 6. Create storage symlink
+php artisan storage:link
+
+# 7. Compile frontend assets
 npm run build
 
-# 6. Start local development server
+# 8. Start local development server
 php artisan serve
 ```
 
 ---
 
-## 💾 Backup & Restore Guide
+## 🚀 Production Deployment (Docker)
 
-1. Navigate to **Settings** ➔ **Backup & Restore** in the Admin panel.
-2. **Create Backup:** Click `Backup Now` to generate a full `.zip` snapshot containing:
-   - Complete `database.sql` MySQL export
-   - Uploaded assets from `public/uploads`
-3. **Restore Backup:** Upload a previously exported `.zip` file. The system will automatically enter maintenance mode, verify file integrity, restore data, and re-enable services.
+AcademyHub is container-ready. To launch via Docker Compose:
+
+```bash
+# Build and run containers
+docker-compose up -d --build
+
+# Run migrations inside container
+docker exec -it academyhub-app php artisan migrate --force
+
+# Clear and optimize cache
+docker exec -it academyhub-app php artisan optimize:clear
+docker exec -it academyhub-app php artisan config:cache
+docker exec -it academyhub-app php artisan route:cache
+docker exec -it academyhub-app php artisan view:cache
+```
+
+### ⏱️ Cron Automation Setup
+Add the Laravel scheduler to your server crontab (`crontab -e`):
+
+```bash
+* * * * * cd /path/to/academyhub && php artisan schedule:run >> /dev/null 2>&1
+```
 
 ---
 
-## 🤝 Support & Contribution
+## 🛡️ Disaster Recovery: 1-Click Backup & Restore
 
-If you find this project helpful, please consider giving it a ⭐️ star on GitHub!
+AcademyHub includes an embedded, high-reliability disaster recovery module:
 
-- 🐛 **Issue Tracker:** Report bugs or request features via GitHub Issues.
-- 📧 **Support:** Contact the AcademyHub core team for Enterprise setup & customized deployments.
+1. Navigate to **Admin Console** ➔ **Settings** ➔ **Backup & Restore**.
+2. **Instant Snapshot**: Generates an encrypted `.zip` archive containing:
+   - Full MySQL dump (`database.sql`).
+   - Uploaded student photos, receipts, and media files (`public/uploads`).
+3. **Automated Safety Restore**: Restoring an archive automatically enables maintenance mode, checks data integrity, performs atomic database re-import, and restores uploaded media seamlessly.
 
-<img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif" width="100%">
+---
+
+## 🤝 Contributing
+
+Contributions are welcomed! Please adhere to the following workflow:
+
+1. Fork the repository.
+2. Create your feature branch (`git checkout -b feature/amazing-feature`).
+3. Commit your changes (`git commit -m 'Add amazing feature'`).
+4. Push to the branch (`git push origin feature/amazing-feature`).
+5. Open a Pull Request.
+
+---
+
+## 📄 License & Credits
+
+- **Author**: [Yasir Adam](https://github.com/yaseeradam)
+- **Framework**: Powered by [Laravel](https://laravel.com) and [Livewire](https://livewire.laravel.com).
+- **License**: Proprietary / Educational License. See `LICENSE` for details.
 
 <div align="center">
 
   <img src="https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=42,35,24,12&height=120&section=footer" width="100%" />
 
-  <p><b>© 2026 AcademyHub — Next-Gen Cloud School Management System</b></p>
-  
+  <p><b>Built with ❤️ for modern education excellence.</b></p>
+  <p><i>© 2026 AcademyHub — Next-Gen Cloud School Management System</i></p>
+
 </div>

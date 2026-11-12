@@ -339,7 +339,9 @@ class Dashboard extends Component
 
         $isBiometric = false;
         $noteLower = strtolower($mark->note ?? '');
-        if (str_contains($noteLower, 'k40') || str_contains($noteLower, 'biometric') || str_contains($noteLower, 'zk')) {
+        if (!empty($mark->arrived_at) && !str_contains($noteLower, 'no biometric') && (
+            str_contains($noteLower, 'k40') || str_contains($noteLower, 'biometric') || str_contains($noteLower, 'zk') || str_contains($noteLower, 'arrived:')
+        )) {
             $isBiometric = true;
         }
 
@@ -354,10 +356,15 @@ class Dashboard extends Component
             default   => 'bg-slate-100 text-slate-700 border border-slate-200',
         };
 
+        $cleanNote = $mark->note;
+        if (in_array($status, ['Present', 'Late'], true) && str_contains(strtolower($cleanNote ?? ''), 'absent')) {
+            $cleanNote = null;
+        }
+
         $message = match ($status) {
             'Present' => $timeOut ? "Clocked in at {$timeIn} and departed at {$timeOut}." : ($timeIn ? "Arrived safely and clocked in at {$timeIn}." : "Marked Present today."),
             'Late'    => $timeIn ? "Arrived late at {$timeIn}." : "Marked Late today.",
-            'Excused' => "Absence excused ({$mark->note}).",
+            'Excused' => $cleanNote ? "Absence excused ({$cleanNote})." : "Absence excused.",
             'Absent'  => "Marked Absent today.",
             default   => "Status recorded as {$status}."
         };
@@ -372,7 +379,7 @@ class Dashboard extends Component
             'time_out'     => $timeOut,
             'source'       => $source,
             'is_biometric' => $isBiometric,
-            'note'         => $mark->note,
+            'note'         => $cleanNote,
             'message'      => $message,
         ];
     }
@@ -452,16 +459,25 @@ class Dashboard extends Component
             $timeIn = null;
             $timeOut = null;
             $source = null;
+            $calNote = null;
 
             if ($mark) {
                 $status = strtolower($mark->status); // present, late, absent, excused
                 $timeIn = $mark->arrived_at ? Carbon::parse($mark->arrived_at)->format('h:i A') : null;
                 $timeOut = $mark->departed_at ? Carbon::parse($mark->departed_at)->format('h:i A') : null;
-                $isBio = str_contains(strtolower($mark->note ?? ''), 'k40') || str_contains(strtolower($mark->note ?? ''), 'biometric');
+                $noteLower = strtolower($mark->note ?? '');
+                $isBio = !empty($mark->arrived_at) && !str_contains($noteLower, 'no biometric') && (
+                    str_contains($noteLower, 'k40') || str_contains($noteLower, 'biometric') || str_contains($noteLower, 'arrived:') || str_contains($noteLower, 'zk')
+                );
                 $source = $isBio ? 'K40 Biometrics' : ($mark->sheet?->takenBy?->name ?? 'Teacher Register');
+                $calNote = $mark->note;
+                if (in_array($mark->status, ['Present', 'Late'], true) && str_contains(strtolower($calNote ?? ''), 'absent')) {
+                    $calNote = null;
+                }
             } elseif ($excuse) {
                 $status = 'excused';
                 $source = "Parent Note: {$excuse->reason}";
+                $calNote = $excuse->reason ?? null;
             } elseif ($isWeekend) {
                 $status = 'weekend';
             } elseif ($isFuture) {
@@ -480,7 +496,7 @@ class Dashboard extends Component
                 'time_in'    => $timeIn,
                 'time_out'   => $timeOut,
                 'source'     => $source,
-                'note'       => $mark?->note ?? ($excuse?->reason ?? null),
+                'note'       => $calNote,
             ];
         }
 

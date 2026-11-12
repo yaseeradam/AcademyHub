@@ -1335,9 +1335,16 @@
                                         'Absent'  => 'bg-rose-50 text-rose-700 border-rose-200',
                                         default   => 'bg-slate-100 text-slate-700 border-slate-200'
                                     };
-                                    $isBio = str_contains(strtolower($mark->note ?? ''), 'k40') || str_contains(strtolower($mark->note ?? ''), 'biometric');
+                                    $noteLower = strtolower($mark->note ?? '');
+                                    $isBio = !empty($mark->arrived_at) && !str_contains($noteLower, 'no biometric') && (
+                                        str_contains($noteLower, 'k40') || str_contains($noteLower, 'biometric') || str_contains($noteLower, 'arrived:') || str_contains($noteLower, 'zk')
+                                    );
                                     $timeIn = $mark->arrived_at ? \Carbon\Carbon::parse($mark->arrived_at)->format('h:i A') : null;
                                     $timeOut = $mark->departed_at ? \Carbon\Carbon::parse($mark->departed_at)->format('h:i A') : null;
+                                    $displayNote = $mark->note;
+                                    if (in_array($mark->status, ['Present', 'Late'], true) && str_contains(strtolower($displayNote ?? ''), 'absent')) {
+                                        $displayNote = null;
+                                    }
                                 @endphp
                                 <div class="rounded-2xl border border-slate-150 bg-slate-50/40 p-4 space-y-3 shadow-2xs">
                                     <div class="flex items-start justify-between gap-2">
@@ -1370,11 +1377,11 @@
                                             @if($isBio)
                                                 <span class="text-sky-600 font-bold">K40 Terminal</span>
                                             @else
-                                                <span>{{ $mark->sheet?->takenBy?->name ?? 'Roll Call' }}</span>
+                                                <span>{{ $mark->sheet?->takenBy?->name ?? 'Class Roll Call' }}</span>
                                             @endif
                                         </span>
-                                        @if($mark->note)
-                                            <span class="text-slate-400 font-medium truncate max-w-[150px]" title="{{ $mark->note }}">{{ $mark->note }}</span>
+                                        @if($displayNote)
+                                            <span class="text-slate-400 font-medium truncate max-w-[150px]" title="{{ $displayNote }}">{{ $displayNote }}</span>
                                         @endif
                                     </div>
                                 </div>
@@ -1404,9 +1411,16 @@
                                                 'Absent'  => 'bg-rose-50 text-rose-700 border-rose-200',
                                                 default   => 'bg-slate-100 text-slate-700 border-slate-200'
                                             };
-                                            $isBio = str_contains(strtolower($mark->note ?? ''), 'k40') || str_contains(strtolower($mark->note ?? ''), 'biometric');
+                                            $noteLower = strtolower($mark->note ?? '');
+                                            $isBio = !empty($mark->arrived_at) && !str_contains($noteLower, 'no biometric') && (
+                                                str_contains($noteLower, 'k40') || str_contains($noteLower, 'biometric') || str_contains($noteLower, 'arrived:') || str_contains($noteLower, 'zk')
+                                            );
                                             $timeIn = $mark->arrived_at ? \Carbon\Carbon::parse($mark->arrived_at)->format('h:i A') : null;
                                             $timeOut = $mark->departed_at ? \Carbon\Carbon::parse($mark->departed_at)->format('h:i A') : null;
+                                            $displayNote = $mark->note;
+                                            if (in_array($mark->status, ['Present', 'Late'], true) && str_contains(strtolower($displayNote ?? ''), 'absent')) {
+                                                $displayNote = null;
+                                            }
                                         @endphp
                                         <tr class="hover:bg-slate-50/80 transition-colors">
                                             <td class="px-6 py-4 whitespace-nowrap">
@@ -1437,7 +1451,7 @@
                                                 @endif
                                             </td>
                                             <td class="px-6 py-4 text-xs text-slate-500">
-                                                {{ $mark->note ?: '-' }}
+                                                {{ $displayNote ?: '-' }}
                                             </td>
                                         </tr>
                                     @endforeach

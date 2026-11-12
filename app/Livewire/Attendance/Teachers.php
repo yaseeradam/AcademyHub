@@ -38,6 +38,10 @@ class Teachers extends Component
     public string $sectionFilter = 'all'; // 'all', 'Western', 'Islamic'
     public string $viewMode = 'sheet'; // 'sheet' or 'summary'
 
+    // View filter for live biometric scans: 'all', 'Western', 'Islamic'
+    public string $biometricFeedScope = 'all';
+    public bool $biometricFeedExpanded = false;
+
     // Report modal selection state
     public bool $showReportModal = false;
     public string $reportPeriodType = 'week'; // 'week' or 'month'
@@ -490,6 +494,88 @@ class Teachers extends Component
         $this->dispatch('alert', message: "All staff marked as {$status}.", type: 'success');
     }
 
+    /**
+     * Mark all currently unmarked staff members as Absent.
+     * Protects staff who physically clocked in at the gate or were already marked.
+     */
+    public function markUnmarkedAsAbsent(): void
+    {
+        $sheet = $this->getOrCreateSheet();
+        if (!$sheet) {
+            $this->dispatch('alert', message: 'Staff attendance sheet could not be created.', type: 'error');
+            return;
+        }
+
+        $teachers = $this->teachers;
+        $countMarked = 0;
+
+        DB::transaction(function () use ($sheet, $teachers, &$countMarked) {
+            foreach ($teachers as $teacher) {
+                $currentStatus = (string) ($this->marks[$teacher->id]['status'] ?? 'Unmarked');
+                if ($currentStatus !== 'Unmarked') {
+                    continue;
+                }
+
+                $existing = TeacherAttendanceMark::withoutGlobalScopes()
+                    ->where('sheet_id', $sheet->id)
+                    ->where('teacher_id', $teacher->id)
+                    ->first();
+
+                if ($existing && $existing->status !== 'Unmarked') {
+                    continue;
+                }
+
+                // Protect staff who physically scanned biometric at the gate
+                if ($existing && !empty($existing->punch_in_time)) {
+                    continue;
+                }
+
+                $note = 'Automated absent (unmarked)';
+
+                TeacherAttendanceMark::withoutGlobalScopes()->updateOrCreate(
+                    [
+                        'sheet_id'   => $sheet->id,
+                        'teacher_id' => $teacher->id,
+                    ],
+                    [
+                        'tenant_id' => $sheet->tenant_id ?? auth()->user()?->tenant_id,
+                        'status'    => 'Absent',
+                        'note'      => $note,
+                    ]
+                );
+
+                $this->marks[$teacher->id]['status'] = 'Absent';
+                $this->marks[$teacher->id]['note'] = $note;
+                $countMarked++;
+            }
+        });
+
+        unset($this->markCounts);
+        unset($this->teacherSummaries);
+
+        if ($countMarked > 0) {
+            $this->dispatch('alert', message: "{$countMarked} unmarked staff member(s) marked as Absent.", type: 'success');
+        } else {
+            $this->dispatch('alert', message: 'No unmarked staff members found to update.', type: 'info');
+        }
+    }
+
+    public function updateNote(int $teacherId, ?string $note): void
+    {
+        if (!isset($this->marks[$teacherId])) {
+            return;
+        }
+
+        $this->marks[$teacherId]['note'] = $note ? (string) $note : null;
+
+        if ($this->sheetId) {
+            TeacherAttendanceMark::withoutGlobalScopes()
+                ->where('sheet_id', $this->sheetId)
+                ->where('teacher_id', $teacherId)
+                ->update(['note' => $note ? (string) $note : null]);
+        }
+    }
+
     public function cycleStatus(int $teacherId): void
     {
         $order = ['Unmarked', 'Present', 'Absent', 'Late', 'Excused'];
@@ -576,6 +662,96 @@ class Teachers extends Component
     public function closeReportModal(): void
     {
         $this->showReportModal = false;
+    }
+
+    public function toggleBiometricFeed(): void
+    {
+        $this->biometricFeedExpanded = !$this->biometricFeedExpanded;
+    }
+
+    public function setBiometricScope(string $scope): void
+    {
+        $this->biometricFeedScope = in_array($scope, ['all', 'Western', 'Islamic'], true) ? $scope : 'all';
+    }
+
+    public function syncBiometrics(): void
+    {
+        $tenantId = (int) ($this->tenantId ?: (auth()->user()?->tenant_id ?? 1));
+        $terminals = \Illuminate\Support\Facades\Cache::get("tenant_{$tenantId}_k40_terminals", [
+            [
+                'name' => 'K40 Terminal (Main Gate)',
+                'ip'   => '192.168.0.201',
+                'port' => 4370,
+            ],
+        ]);
+
+        $totalSynced = 0;
+        $hasSuccess = false;
+        $messages = [];
+
+        foreach ($terminals as $term) {
+            $ip = $term['ip'] ?? '';
+            $port = (int) ($term['port'] ?? 4370);
+            if (empty($ip)) {
+                continue;
+            }
+
+            $res = \App\Support\BiometricSyncService::syncFromTerminal($ip, $port, 0, $tenantId);
+            if ($res['success']) {
+                $hasSuccess = true;
+                $totalSynced += (int) ($res['count'] ?? 0);
+            } else {
+                $messages[] = $res['message'];
+            }
+        }
+
+        $this->syncSheetFromSelection();
+
+        if ($hasSuccess) {
+            $msg = $totalSynced > 0
+                ? "Biometrics synced! {$totalSynced} staff/student records updated."
+                : "Terminal synced successfully. No new unread punches.";
+            $this->dispatch('alert', message: $msg, type: 'success');
+        } else {
+            $err = !empty($messages) ? implode(' | ', $messages) : 'Could not reach biometric terminal.';
+            $this->dispatch('alert', message: $err, type: 'error');
+        }
+    }
+
+    public function getDateRecords()
+    {
+        $tenantId = auth()->user()?->tenant_id;
+
+        $query = TeacherAttendanceMark::withoutGlobalScopes()
+            ->with(['teacher', 'sheet'])
+            ->where(function ($q) {
+                $q->whereNotNull('punch_in_time')
+                  ->orWhereNotNull('punch_out_time')
+                  ->orWhere('note', 'like', '%Biometric%')
+                  ->orWhere('note', 'like', '%In:%')
+                  ->orWhere('note', 'like', '%K40%');
+            })
+            ->whereIn('status', ['Present', 'Late'])
+            ->whereHas('sheet', function ($q) use ($tenantId) {
+                $q->withoutGlobalScopes()
+                  ->where('date', $this->date);
+                if ($tenantId) {
+                    $q->where(function ($sq) use ($tenantId) {
+                        $sq->where('tenant_id', $tenantId)->orWhereNull('tenant_id');
+                    });
+                }
+            });
+
+        if ($this->biometricFeedScope !== 'all') {
+            $shift = strtolower($this->biometricFeedScope);
+            $query->whereHas('teacher', function ($q) use ($shift) {
+                $q->whereRaw('LOWER(COALESCE(shift, "Western")) = ?', [$shift]);
+            });
+        }
+
+        return $query->get()->sortByDesc(function ($m) {
+            return $m->punch_in_time ?: ($m->updated_at ? $m->updated_at->format('H:i:s') : '00:00:00');
+        })->values();
     }
 
     public function toggleTeacherShift(int $teacherId): void
@@ -1059,14 +1235,32 @@ class Teachers extends Component
         $this->syncFromDatabaseIfSheetExists();
 
         return view('livewire.attendance.teachers', [
-            'teachers' => $this->teachers,
-            'visibleTeachers' => $this->visibleTeachers,
-            'markCounts' => $this->markCounts,
-            'teacherSummaries' => $this->teacherSummaries,
-            'marks' => $this->marks,
-            'date' => $this->date,
-            'sheetId' => $this->sheetId,
-            'latestSheet' => $this->getLatestExistingSheet(),
+            'teachers'               => $this->teachers,
+            'visibleTeachers'        => $this->visibleTeachers,
+            'markCounts'             => $this->markCounts,
+            'teacherSummaries'       => $this->teacherSummaries,
+            'marks'                  => $this->marks,
+            'date'                   => $this->date,
+            'term'                   => $this->term,
+            'session'                => $this->session,
+            'sheetId'                => $this->sheetId,
+            'latestSheet'            => $this->getLatestExistingSheet(),
+            'dateRecords'            => $this->getDateRecords(),
+            'availableTerms'         => $this->availableTerms,
+            'academicSessions'       => $this->academicSessions,
+            'viewMode'               => $this->viewMode,
+            'sectionFilter'          => $this->sectionFilter,
+            'tool'                   => $this->tool,
+            'search'                 => $this->search,
+            'onlyExceptions'         => $this->onlyExceptions,
+            'biometricFeedScope'     => $this->biometricFeedScope,
+            'biometricFeedExpanded'  => $this->biometricFeedExpanded,
+            'showReportModal'        => $this->showReportModal,
+            'reportPeriodType'       => $this->reportPeriodType,
+            'selectedWeek'           => $this->selectedWeek,
+            'customWeekDate'         => $this->customWeekDate,
+            'selectedMonthYear'      => $this->selectedMonthYear,
+            'reportShiftFilter'      => $this->reportShiftFilter,
         ]);
     }
 }

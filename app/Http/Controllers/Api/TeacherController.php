@@ -170,6 +170,10 @@ class TeacherController extends Controller
             ]
         );
 
+        if ($request->user() && ($sheet->taken_by == 1 || empty($sheet->taken_by))) {
+            $sheet->update(['taken_by' => $request->user()->id]);
+        }
+
         foreach ($request->marks as $mark) {
             $normalizedStatus = $this->normalizeAttendanceStatus($mark['status'] ?? null);
             if (! $normalizedStatus) {
@@ -179,12 +183,24 @@ class TeacherController extends Controller
                 ], 422);
             }
 
+            $rawNote = $mark['note'] ?? null;
+            if ($rawNote) {
+                $trimmed = trim((string) $rawNote);
+                if (str_contains($trimmed, 'No biometric gate punch recorded')) {
+                    $rawNote = null;
+                } elseif (in_array($normalizedStatus, ['Present', 'Late'], true) && str_contains(strtolower($trimmed), 'absent')) {
+                    $rawNote = null;
+                } else {
+                    $rawNote = $trimmed !== '' ? $trimmed : null;
+                }
+            }
+
             AttendanceMark::withoutGlobalScopes()->updateOrCreate(
                 ['sheet_id' => $sheet->id, 'student_id' => $mark['student_id']],
                 [
                     'tenant_id' => $sheet->tenant_id ?? $request->user()->tenant_id,
                     'status'    => $normalizedStatus,
-                    'note'      => $mark['note'] ?? null,
+                    'note'      => $rawNote,
                 ]
             );
         }

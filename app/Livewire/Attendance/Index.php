@@ -746,6 +746,10 @@ class Index extends Component
             ]
         );
 
+        if (auth()->check() && ($sheet->taken_by == 1 || empty($sheet->taken_by))) {
+            $sheet->update(['taken_by' => auth()->id()]);
+        }
+
         $this->sheetId = $sheet->id;
         return $sheet;
     }
@@ -756,6 +760,33 @@ class Index extends Component
         if ($sheet) {
             $this->loadMarks($sheet);
         }
+    }
+
+    private function sanitizeNote(?string $note, string $status, ?string $existingNote = null): ?string
+    {
+        $trimmed = trim((string) $note);
+        if ($trimmed !== '') {
+            if (str_contains($trimmed, 'No biometric gate punch recorded')) {
+                return null;
+            }
+            if (in_array($status, ['Present', 'Late'], true) && str_contains(strtolower($trimmed), 'absent')) {
+                return null;
+            }
+            return $trimmed;
+        }
+
+        if ($existingNote) {
+            $existingTrimmed = trim((string) $existingNote);
+            if (str_contains($existingTrimmed, 'No biometric gate punch recorded') || str_starts_with($existingTrimmed, 'Absent (No biometric')) {
+                return null;
+            }
+            if (in_array($status, ['Present', 'Late'], true) && str_contains(strtolower($existingTrimmed), 'absent')) {
+                return null;
+            }
+            return $existingTrimmed !== '' ? $existingTrimmed : null;
+        }
+
+        return null;
     }
 
     /**
@@ -799,12 +830,17 @@ class Index extends Component
             return;
         }
 
+        if (auth()->check() && ($sheet->taken_by == 1 || empty($sheet->taken_by))) {
+            $sheet->update(['taken_by' => auth()->id()]);
+        }
+
         $existingMark = AttendanceMark::query()
             ->where('sheet_id', $sheet->id)
             ->where('student_id', $studentId)
             ->first();
 
-        $note = $this->marks[$studentId]['note'] ?? $existingMark?->note;
+        $rawNote = $this->marks[$studentId]['note'] ?? null;
+        $note = $this->sanitizeNote($rawNote, $status, $existingMark?->note);
         $arrivedAt = $existingMark?->arrived_at;
 
         if ($status === 'Absent') {
@@ -824,7 +860,9 @@ class Index extends Component
             ]
         );
 
-        $hasBioNote = (str_contains((string) $note, 'Biometric') || str_contains((string) $note, 'Arrived:') || str_contains((string) $note, 'K40'));
+        $hasBioNote = !empty($note) && !str_contains((string) $note, 'No biometric') && (
+            str_contains((string) $note, 'Biometric') || str_contains((string) $note, 'Arrived:') || str_contains((string) $note, 'K40')
+        );
         $this->marks[$studentId] = [
             'status'       => $status,
             'note'         => $note,
@@ -852,6 +890,10 @@ class Index extends Component
             return;
         }
 
+        if (auth()->check() && ($sheet->taken_by == 1 || empty($sheet->taken_by))) {
+            $sheet->update(['taken_by' => auth()->id()]);
+        }
+
         $students = $this->getStudents();
 
         DB::transaction(function () use ($sheet, $students, $status) {
@@ -866,7 +908,8 @@ class Index extends Component
                     continue; // Skip student - do not wipe verified biometric gate attendance!
                 }
 
-                $note = $this->marks[$student->id]['note'] ?? $existing?->note;
+                $rawNote = $this->marks[$student->id]['note'] ?? null;
+                $note = $this->sanitizeNote($rawNote, $status, $existing?->note);
                 $arrivedAt = $existing?->arrived_at;
 
                 if ($status === 'Absent') {
@@ -886,7 +929,9 @@ class Index extends Component
                     ]
                 );
 
-                $hasBioNote = (str_contains((string) $note, 'Biometric') || str_contains((string) $note, 'Arrived:') || str_contains((string) $note, 'K40'));
+                $hasBioNote = !empty($note) && !str_contains((string) $note, 'No biometric') && (
+                    str_contains((string) $note, 'Biometric') || str_contains((string) $note, 'Arrived:') || str_contains((string) $note, 'K40')
+                );
                 $this->marks[$student->id] = [
                     'status'       => $status,
                     'note'         => $note,
@@ -1018,6 +1063,10 @@ class Index extends Component
             return;
         }
 
+        if (auth()->check() && ($sheet->taken_by == 1 || empty($sheet->taken_by))) {
+            $sheet->update(['taken_by' => auth()->id()]);
+        }
+
         DB::transaction(function () use ($sheet) {
             $existingMarks = AttendanceMark::query()
                 ->where('sheet_id', $sheet->id)
@@ -1040,8 +1089,12 @@ class Index extends Component
                     ]);
                 }
 
-                $note = !empty($row['note']) ? (string) $row['note'] : $existing?->note;
+                $rawNote = !empty($row['note']) ? (string) $row['note'] : null;
+                $note = $this->sanitizeNote($rawNote, $status, $existing?->note);
                 $arrivedAt = $row['arrived_at'] ?? $existing?->arrived_at;
+                if ($status === 'Absent') {
+                    $arrivedAt = null;
+                }
 
                 AttendanceMark::query()->updateOrCreate(
                     [
@@ -1051,7 +1104,7 @@ class Index extends Component
                     [
                         'tenant_id'  => $sheet->tenant_id ?? auth()->user()?->tenant_id,
                         'status'     => $status,
-                        'note'       => $note ? (string) $note : null,
+                        'note'       => $note,
                         'arrived_at' => $arrivedAt,
                     ],
                 );
@@ -1074,12 +1127,18 @@ class Index extends Component
         foreach ($students as $student) {
             $mark = $existing->get($student->id);
             $hasArrived = !empty($mark?->arrived_at);
-            $hasBioNote = !empty($mark?->note) && (str_contains((string) $mark->note, 'Biometric') || str_contains((string) $mark->note, 'Arrived:') || str_contains((string) $mark->note, 'K40'));
+            $noteText = (string) ($mark?->note ?? '');
+            $hasBioNote = !empty($noteText) && !str_contains($noteText, 'No biometric') && (
+                str_contains($noteText, 'Biometric') || str_contains($noteText, 'Arrived:') || str_contains($noteText, 'K40')
+            );
             $isBio = $hasArrived && ($hasBioNote || !empty($mark?->departed_at));
 
+            $st = $mark?->status ?? 'Unmarked';
+            $loadedNote = $this->sanitizeNote($mark?->note, $st, null);
+
             $this->marks[$student->id] = [
-                'status'       => $mark?->status ?? 'Unmarked',
-                'note'         => $mark?->note,
+                'status'       => $st,
+                'note'         => $loadedNote,
                 'arrived_at'   => $mark?->arrived_at,
                 'departed_at'  => $mark?->departed_at,
                 'is_biometric' => $isBio,

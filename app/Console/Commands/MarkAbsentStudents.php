@@ -176,6 +176,18 @@ class MarkAbsentStudents extends Command
                             continue;
                         }
 
+                        // Check if student was already marked Present or Late on ANY sheet for this date
+                        $alreadyPresentElsewhere = AttendanceMark::withoutGlobalScopes()
+                            ->where('student_id', $student->id)
+                            ->whereIn('status', ['Present', 'Late'])
+                            ->whereHas('sheet', fn($q) => $q->whereDate('date', $dateStr))
+                            ->exists();
+
+                        if ($alreadyPresentElsewhere) {
+                            $totalProtected++;
+                            continue;
+                        }
+
                         // If already marked Excused, leave as Excused
                         if ($mark && $mark->status === 'Excused') {
                             $totalExcused++;
@@ -194,10 +206,15 @@ class MarkAbsentStudents extends Command
                             ->where('status', 'Approved')
                             ->exists();
 
+                        $isTeacherSheet = !empty($sheet->taken_by) && (int) $sheet->taken_by !== (int) $systemUserId;
+                        $defaultAbsentNote = $isTeacherSheet
+                            ? 'Absent (Class Roll Call)'
+                            : 'Absent (No biometric gate punch recorded)';
+
                         $newStatus = $hasExcuse ? 'Excused' : 'Absent';
                         $note = $hasExcuse 
                             ? 'Absence excused by school management'
-                            : 'Absent (No biometric gate punch recorded)';
+                            : $defaultAbsentNote;
 
                         AttendanceMark::withoutGlobalScopes()->updateOrCreate(
                             [

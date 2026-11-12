@@ -78,6 +78,10 @@ class SyncController extends Controller
             ]
         );
 
+        if ($user && ($sheet->taken_by == 1 || empty($sheet->taken_by))) {
+            $sheet->update(['taken_by' => $user->id]);
+        }
+
         foreach ($payload['marks'] ?? [] as $mark) {
             $existing = AttendanceMark::withoutGlobalScopes()->where(['sheet_id' => $sheet->id, 'student_id' => $mark['student_id']])->first();
             
@@ -88,12 +92,24 @@ class SyncController extends Controller
                 }
             }
 
+            $rawNote = $mark['note'] ?? null;
+            if ($rawNote) {
+                $trimmed = trim((string) $rawNote);
+                if (str_contains($trimmed, 'No biometric gate punch recorded')) {
+                    $rawNote = null;
+                } elseif (in_array($mark['status'], ['Present', 'Late'], true) && str_contains(strtolower($trimmed), 'absent')) {
+                    $rawNote = null;
+                } else {
+                    $rawNote = $trimmed !== '' ? $trimmed : null;
+                }
+            }
+
             AttendanceMark::withoutGlobalScopes()->updateOrCreate(
                 ['sheet_id' => $sheet->id, 'student_id' => $mark['student_id']],
                 [
                     'tenant_id' => $sheet->tenant_id ?? $user->tenant_id,
                     'status'    => $mark['status'],
-                    'note'      => $mark['note'] ?? null,
+                    'note'      => $rawNote,
                 ]
             );
         }
