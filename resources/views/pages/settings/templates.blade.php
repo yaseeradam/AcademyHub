@@ -183,6 +183,11 @@
                                 'free' => true,
                             ],
                         ];
+
+                        foreach ($reportTemplates as &$rt) {
+                            $rt['booklet_preview'] = route('settings.templates.preview', ['type' => 'booklet', 'template' => $rt['key'], 'html' => 1]);
+                        }
+                        unset($rt);
                     @endphp
 
 
@@ -325,10 +330,16 @@
                                         <span>{{ $isLocked ? 'Locked' : 'Click to select' }}</span>
                                     </template>
                                 </div>
-                                <button type="button" class="rounded-lg bg-slate-50 px-3 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-100 border border-slate-200 transition-colors"
-                                    @click.stop="open = true; src = @js($t['preview']); title = @js('Report Card · ' . $t['title'])">
-                                    Full Preview
-                                </button>
+                                <div class="flex items-center gap-1.5">
+                                    <button type="button" class="rounded-lg bg-slate-50 px-2.5 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-100 border border-slate-200 transition-colors"
+                                        @click.stop="open = true; src = @js($t['preview']); title = @js('Report Card · ' . $t['title'])">
+                                        Card
+                                    </button>
+                                    <button type="button" class="rounded-lg bg-indigo-50 px-2.5 py-1.5 text-xs font-bold text-indigo-700 hover:bg-indigo-100 border border-indigo-200 transition-colors"
+                                        @click.stop="open = true; src = @js($t['booklet_preview']); title = @js('Report Booklet · ' . $t['title'])">
+                                        Booklet
+                                    </button>
+                                </div>
                             </div>
                         </label>
                     @endforeach

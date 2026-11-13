@@ -791,6 +791,10 @@ class StudentDossierService
         $template = $optionsOverrides['template']
             ?? TenantSettings::getForTenant('report_card_template', $tenantId, config('academyhub.report_card_template', 'elegant'));
 
+        $theme = self::resolveBookletTheme($template);
+        $dossierData['template'] = $template;
+        $dossierData['theme'] = $theme;
+
         // 4. Determine terms to render in this book (A complete student report book covers Terms 1, 2, and 3)
         if ($isParentOrStudent) {
             $publishedTerms = ResultPublication::publishedTermsForClass($student->class_id, $session);
@@ -827,7 +831,7 @@ class StudentDossierService
         [$ledgerCss, $ledgerBody] = $this->extractCssAndBody($ledgerHtml);
 
         // 8. Assemble unified styles and master HTML container
-        $bookletCss = $this->getBookletMasterCss($templateCss);
+        $bookletCss = $this->getBookletMasterCss($template, $templateCss);
 
         $html = '<!doctype html>' . "\n"
             . '<html lang="en">' . "\n"
@@ -879,15 +883,270 @@ class StudentDossierService
     }
 
     /**
-     * Master CSS stylesheet for the entire Student Report Book.
+     * Resolve theme attributes for a report card template.
      */
-    protected function getBookletMasterCss(string $templateCss = ''): string
+    public static function resolveBookletTheme(string $template): array
     {
-        return <<<'CSS'
+        $template = strtolower(trim($template));
+        return match ($template) {
+            'classic' => [
+                'name' => 'classic',
+                'fontFamily' => 'DejaVu Sans, Arial, sans-serif',
+                'primary' => '#111827',
+                'accent' => '#4b5563',
+                'secondary' => '#374151',
+                'lightBg' => '#f9fafb',
+                'darkBg' => '#030712',
+                'borderPrimary' => '#111827',
+                'borderSecondary' => '#6b7280',
+                'cardBg' => '#ffffff',
+                'highlightBg' => '#f3f4f6',
+                'highlightText' => '#111827',
+                'outerFrame' => '3px double #111827',
+                'innerFrame' => '1px solid #6b7280',
+                'headerBorder' => '3px double #111827',
+                'badgeBg' => '#111827',
+                'badgeText' => '#ffffff',
+                'badgeBorder' => '1.5px solid #111827',
+                'isCircularPhoto' => false,
+                'isFrameless' => false,
+            ],
+            'heritage' => [
+                'name' => 'heritage',
+                'fontFamily' => 'Georgia, "DejaVu Serif", serif',
+                'primary' => '#1e3a8a',
+                'accent' => '#a16207',
+                'secondary' => '#854d0e',
+                'lightBg' => '#fffbeb',
+                'darkBg' => '#172554',
+                'borderPrimary' => '#1e3a8a',
+                'borderSecondary' => '#a16207',
+                'cardBg' => '#fffbeb',
+                'highlightBg' => '#fef3c7',
+                'highlightText' => '#854d0e',
+                'outerFrame' => '3px solid #1e3a8a',
+                'innerFrame' => '1.5px solid #a16207',
+                'headerBorder' => '3px double #a16207',
+                'badgeBg' => '#1e3a8a',
+                'badgeText' => '#fef08a',
+                'badgeBorder' => '1px solid #a16207',
+                'isCircularPhoto' => false,
+                'isFrameless' => false,
+            ],
+            'nordic' => [
+                'name' => 'nordic',
+                'fontFamily' => 'DejaVu Sans, Arial, sans-serif',
+                'primary' => '#1e293b',
+                'accent' => '#475569',
+                'secondary' => '#64748b',
+                'lightBg' => '#f8fafc',
+                'darkBg' => '#0f172a',
+                'borderPrimary' => '#cbd5e1',
+                'borderSecondary' => '#e2e8f0',
+                'cardBg' => '#f8fafc',
+                'highlightBg' => '#f1f5f9',
+                'highlightText' => '#0f172a',
+                'outerFrame' => '1.5px solid #cbd5e1',
+                'innerFrame' => 'none',
+                'headerBorder' => '1.5px solid #cbd5e1',
+                'badgeBg' => '#475569',
+                'badgeText' => '#ffffff',
+                'badgeBorder' => 'none',
+                'isCircularPhoto' => false,
+                'isFrameless' => false,
+            ],
+            'riverdale', 'riverdale-burgundy', 'riverdale-emerald', 'riverdale-purple' => [
+                'name' => 'riverdale',
+                'fontFamily' => 'DejaVu Sans, Arial, sans-serif',
+                'primary' => match($template) {
+                    'riverdale-burgundy' => '#881337',
+                    'riverdale-emerald' => '#065f46',
+                    'riverdale-purple' => '#581c87',
+                    default => '#0d2c54',
+                },
+                'accent' => match($template) {
+                    'riverdale-burgundy' => '#eab308',
+                    'riverdale-emerald' => '#f59e0b',
+                    'riverdale-purple' => '#fbbf24',
+                    default => '#c5a059',
+                },
+                'secondary' => '#475569',
+                'lightBg' => '#f0f4f8',
+                'darkBg' => '#06162a',
+                'borderPrimary' => match($template) {
+                    'riverdale-burgundy' => '#881337',
+                    'riverdale-emerald' => '#065f46',
+                    'riverdale-purple' => '#581c87',
+                    default => '#0d2c54',
+                },
+                'borderSecondary' => match($template) {
+                    'riverdale-burgundy' => '#eab308',
+                    'riverdale-emerald' => '#f59e0b',
+                    'riverdale-purple' => '#fbbf24',
+                    default => '#c5a059',
+                },
+                'cardBg' => '#ffffff',
+                'highlightBg' => '#fef3c7',
+                'highlightText' => match($template) {
+                    'riverdale-burgundy' => '#881337',
+                    'riverdale-emerald' => '#065f46',
+                    'riverdale-purple' => '#581c87',
+                    default => '#0d2c54',
+                },
+                'outerFrame' => '3px solid ' . match($template) {
+                    'riverdale-burgundy' => '#881337',
+                    'riverdale-emerald' => '#065f46',
+                    'riverdale-purple' => '#581c87',
+                    default => '#0d2c54',
+                },
+                'innerFrame' => '1px solid ' . match($template) {
+                    'riverdale-burgundy' => '#eab308',
+                    'riverdale-emerald' => '#f59e0b',
+                    'riverdale-purple' => '#fbbf24',
+                    default => '#c5a059',
+                },
+                'headerBorder' => '2.5px solid ' . match($template) {
+                    'riverdale-burgundy' => '#881337',
+                    'riverdale-emerald' => '#065f46',
+                    'riverdale-purple' => '#581c87',
+                    default => '#0d2c54',
+                },
+                'badgeBg' => match($template) {
+                    'riverdale-burgundy' => '#881337',
+                    'riverdale-emerald' => '#065f46',
+                    'riverdale-purple' => '#581c87',
+                    default => '#0d2c54',
+                },
+                'badgeText' => '#ffffff',
+                'badgeBorder' => '1px solid ' . match($template) {
+                    'riverdale-burgundy' => '#eab308',
+                    'riverdale-emerald' => '#f59e0b',
+                    'riverdale-purple' => '#fbbf24',
+                    default => '#c5a059',
+                },
+                'isCircularPhoto' => false,
+                'isFrameless' => false,
+            ],
+            'signature' => [
+                'name' => 'signature',
+                'fontFamily' => 'Garamond, Georgia, "DejaVu Serif", serif',
+                'primary' => '#7f1d1d',
+                'accent' => '#d97706',
+                'secondary' => '#991b1b',
+                'lightBg' => '#fffbeb',
+                'darkBg' => '#450a0a',
+                'borderPrimary' => '#991b1b',
+                'borderSecondary' => '#d97706',
+                'cardBg' => '#fffbeb',
+                'highlightBg' => '#fffbeb',
+                'highlightText' => '#7f1d1d',
+                'outerFrame' => '3.5px solid #991b1b',
+                'innerFrame' => '1.5px solid #d97706',
+                'headerBorder' => '2.5px solid #991b1b',
+                'badgeBg' => '#991b1b',
+                'badgeText' => '#fffbeb',
+                'badgeBorder' => '1px solid #d97706',
+                'isCircularPhoto' => false,
+                'isFrameless' => false,
+            ],
+            'greenwood' => [
+                'name' => 'greenwood',
+                'fontFamily' => 'DejaVu Sans, Arial, sans-serif',
+                'primary' => '#004b49',
+                'accent' => '#c5a059',
+                'secondary' => '#0f766e',
+                'lightBg' => '#f0faf9',
+                'darkBg' => '#002c2b',
+                'borderPrimary' => '#004b49',
+                'borderSecondary' => '#c5a059',
+                'cardBg' => '#ffffff',
+                'highlightBg' => '#f0faf9',
+                'highlightText' => '#004b49',
+                'outerFrame' => '3px solid #004b49',
+                'innerFrame' => '1px solid #c5a059',
+                'headerBorder' => '2px solid #004b49',
+                'badgeBg' => '#004b49',
+                'badgeText' => '#ffffff',
+                'badgeBorder' => '1px solid #c5a059',
+                'isCircularPhoto' => false,
+                'isFrameless' => false,
+            ],
+            'compact', 'standard' => [
+                'name' => 'compact',
+                'fontFamily' => '"Helvetica Neue", Helvetica, Arial, sans-serif',
+                'primary' => '#1e3a8a',
+                'accent' => '#2563eb',
+                'secondary' => '#93c5fd',
+                'lightBg' => '#f1f5f9',
+                'darkBg' => '#0f2744',
+                'borderPrimary' => '#e2e8f0',
+                'borderSecondary' => '#cbd5e1',
+                'cardBg' => '#ffffff',
+                'highlightBg' => '#eff6ff',
+                'highlightText' => '#1e3a8a',
+                'outerFrame' => 'none',
+                'innerFrame' => 'none',
+                'headerBorder' => '2px solid #1e3a8a',
+                'badgeBg' => '#1e3a8a',
+                'badgeText' => '#ffffff',
+                'badgeBorder' => 'none',
+                'isCircularPhoto' => true,
+                'isFrameless' => true,
+            ],
+            default => [ // elegant
+                'name' => 'elegant',
+                'fontFamily' => 'DejaVu Sans, Arial, sans-serif',
+                'primary' => '#1e3a5f',
+                'accent' => '#c4975a',
+                'secondary' => '#0f2744',
+                'lightBg' => '#f8fafc',
+                'darkBg' => '#0f172a',
+                'borderPrimary' => '#1e3a5f',
+                'borderSecondary' => '#c4975a',
+                'cardBg' => '#ffffff',
+                'highlightBg' => '#fef3c7',
+                'highlightText' => '#1e3a5f',
+                'outerFrame' => '3.5px solid #1e3a5f',
+                'innerFrame' => '1px solid #c4975a',
+                'headerBorder' => '2px solid #1e3a5f',
+                'badgeBg' => '#1e3a5f',
+                'badgeText' => '#c4975a',
+                'badgeBorder' => '1px solid #c4975a',
+                'isCircularPhoto' => false,
+                'isFrameless' => false,
+            ],
+        };
+    }
+
+    /**
+     * Master CSS stylesheet for the entire Student Report Book tailored to the template theme.
+     */
+    protected function getBookletMasterCss(string $template, string $templateCss = ''): string
+    {
+        $theme = self::resolveBookletTheme($template);
+
+        $primary       = $theme['primary'];
+        $accent        = $theme['accent'];
+        $secondary     = $theme['secondary'];
+        $lightBg       = $theme['lightBg'];
+        $darkBg        = $theme['darkBg'];
+        $borderPrimary = $theme['borderPrimary'];
+        $borderSec     = $theme['borderSecondary'];
+        $highlightBg   = $theme['highlightBg'];
+        $highlightText = $theme['highlightText'];
+        $outerFrame    = $theme['outerFrame'];
+        $innerFrame    = $theme['innerFrame'];
+        $headerBorder  = $theme['headerBorder'];
+        $badgeBg       = $theme['badgeBg'];
+        $badgeText     = $theme['badgeText'];
+        $badgeBorder   = $theme['badgeBorder'];
+        $fontFamily    = $theme['fontFamily'];
+
+        return <<<CSS
 @page { margin: 4mm 6mm; }
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body {
-    font-family: DejaVu Sans, Arial, sans-serif;
+    font-family: {$fontFamily};
     font-size: 8.5px;
     color: #1e293b;
     background: #ffffff;
@@ -903,18 +1162,18 @@ body {
 }
 
 /* ══════════════════════════════════════════════════════════════════
-   COVER PAGE: REGAL EXECUTIVE DESIGN
+   COVER PAGE: THEMED DESIGN SYSTEM
    ══════════════════════════════════════════════════════════════════ */
 .book-cover-page {
     width: 100%;
 }
 .cover-outer-frame {
-    border: 3.5px solid #1e3a5f;
+    border: {$outerFrame};
     padding: 4px;
     background: #ffffff;
 }
 .cover-inner-frame {
-    border: 1px solid #c4975a;
+    border: {$innerFrame};
     padding: 14px 18px 10px 18px;
     position: relative;
     background: #ffffff;
@@ -931,7 +1190,7 @@ body {
     width: 58px;
     height: 58px;
     margin: 0 auto;
-    border: 1.5px solid #c4975a;
+    border: 1.5px solid {$borderSec};
     border-radius: 6px;
     background: #ffffff;
     display: table;
@@ -945,8 +1204,8 @@ body {
     margin: 4px auto;
 }
 .placeholder-crest {
-    background: #1e3a5f;
-    color: #c4975a;
+    background: {$primary};
+    color: {$accent};
     font-size: 22px;
     font-weight: 800;
     text-align: center;
@@ -955,7 +1214,7 @@ body {
 .cover-school-name {
     font-size: 19px;
     font-weight: 800;
-    color: #1e3a5f;
+    color: {$primary};
     text-transform: uppercase;
     letter-spacing: 2px;
     line-height: 1.15;
@@ -963,7 +1222,7 @@ body {
 }
 .cover-school-motto {
     font-size: 8.5px;
-    color: #c4975a;
+    color: {$accent};
     font-style: italic;
     font-weight: 600;
     margin-bottom: 2px;
@@ -981,7 +1240,7 @@ body {
 .fillet-line {
     display: table-cell;
     vertical-align: middle;
-    border-bottom: 1px solid #c4975a;
+    border-bottom: 1px solid {$borderSec};
     width: 32%;
 }
 .fillet-tag {
@@ -989,7 +1248,7 @@ body {
     text-align: center;
     font-size: 7px;
     font-weight: 800;
-    color: #1e3a5f;
+    color: {$primary};
     letter-spacing: 2px;
     width: 36%;
     padding: 0 6px;
@@ -1002,7 +1261,7 @@ body {
 }
 .cover-doc-type {
     font-size: 7.5px;
-    color: #c4975a;
+    color: {$accent};
     font-weight: 800;
     letter-spacing: 1.5px;
     text-transform: uppercase;
@@ -1011,15 +1270,16 @@ body {
 .cover-doc-title {
     font-size: 15px;
     font-weight: 800;
-    color: #1e3a5f;
+    color: {$primary};
     letter-spacing: 2px;
     text-transform: uppercase;
     margin-bottom: 5px;
 }
 .cover-session-badge {
     display: inline-block;
-    background: #1e3a5f;
-    color: #c4975a;
+    background: {$badgeBg};
+    color: {$badgeText};
+    border: {$badgeBorder};
     font-size: 8.5px;
     font-weight: 800;
     padding: 3px 18px;
@@ -1029,9 +1289,9 @@ body {
 
 /* Student Credential Plaque */
 .cover-student-card {
-    background: #f8fafc;
-    border: 1px solid #e2e8f0;
-    border-top: 3px solid #1e3a5f;
+    background: {$lightBg};
+    border: 1px solid {$borderSec};
+    border-top: 3px solid {$primary};
     border-radius: 4px;
     padding: 8px 12px;
     margin-bottom: 10px;
@@ -1048,7 +1308,7 @@ body {
 .cover-photo-frame {
     width: 80px;
     height: 100px;
-    border: 1.5px solid #c4975a;
+    border: 1.5px solid {$borderSec};
     border-radius: 4px;
     background: #ffffff;
     overflow: hidden;
@@ -1073,7 +1333,7 @@ body {
 .placeholder-initial {
     font-size: 28px;
     font-weight: 800;
-    color: #1e3a5f;
+    color: {$primary};
     line-height: 1;
 }
 .placeholder-label {
@@ -1087,14 +1347,14 @@ body {
     vertical-align: middle;
 }
 .cover-name-banner {
-    border-bottom: 1.5px solid #c4975a;
+    border-bottom: 1.5px solid {$borderSec};
     padding-bottom: 4px;
     margin-bottom: 6px;
 }
 .cover-student-name {
     font-size: 14px;
     font-weight: 800;
-    color: #1e3a5f;
+    color: {$primary};
     letter-spacing: 0.5px;
     text-transform: uppercase;
     line-height: 1.15;
@@ -1102,7 +1362,7 @@ body {
 .cover-student-class {
     font-size: 8.5px;
     font-weight: 700;
-    color: #c4975a;
+    color: {$accent};
     text-transform: uppercase;
     letter-spacing: 1px;
     margin-top: 1px;
@@ -1134,11 +1394,11 @@ body {
 .folio-heading {
     font-size: 7.5px;
     font-weight: 800;
-    color: #1e3a5f;
+    color: {$primary};
     text-transform: uppercase;
     letter-spacing: 1px;
     margin-bottom: 3px;
-    border-bottom: 1px solid #1e3a5f;
+    border-bottom: 1px solid {$primary};
     padding-bottom: 2px;
 }
 .folio-table {
@@ -1146,7 +1406,7 @@ body {
     border-collapse: collapse;
 }
 .folio-table th {
-    background: #1e3a5f;
+    background: {$primary};
     color: #ffffff;
     font-size: 7px;
     font-weight: 800;
@@ -1165,7 +1425,7 @@ body {
 }
 .folio-num {
     font-weight: 800;
-    color: #1e3a5f;
+    color: {$primary};
 }
 .folio-desc {
     color: #475569;
@@ -1173,13 +1433,13 @@ body {
 .folio-tag {
     text-align: center;
     font-weight: 700;
-    color: #1e3a5f;
+    color: {$primary};
     font-size: 7px;
 }
 
 /* Endorsement Section */
 .cover-endorsement-section {
-    border-top: 1px solid #c4975a;
+    border-top: 1px solid {$borderSec};
     padding-top: 8px;
     margin-top: 6px;
 }
@@ -1195,7 +1455,7 @@ body {
 .endorse-heading {
     font-size: 7px;
     font-weight: 800;
-    color: #1e3a5f;
+    color: {$primary};
     letter-spacing: 0.5px;
     margin-bottom: 2px;
 }
@@ -1229,7 +1489,7 @@ body {
 .endorse-qr-text {
     font-size: 6px;
     font-weight: 800;
-    color: #1e3a5f;
+    color: {$primary};
     letter-spacing: 0.5px;
     margin-top: 2px;
 }
@@ -1249,11 +1509,11 @@ body {
     height: 20px;
 }
 .endorse-sig-line {
-    border-top: 1px solid #1e3a5f;
+    border-top: 1px solid {$primary};
     padding-top: 2px;
     font-size: 8px;
     font-weight: 800;
-    color: #1e3a5f;
+    color: {$primary};
 }
 .endorse-sig-line.has-img {
     margin-top: 1px;
@@ -1266,18 +1526,18 @@ body {
 }
 
 /* ══════════════════════════════════════════════════════════════════
-   DOSSIER LEDGER & VERDICT (MATCHING ELEGANT LUXURY PALETTE)
+   DOSSIER LEDGER & VERDICT: THEMED PALETTE
    ══════════════════════════════════════════════════════════════════ */
 .dossier-page {
     width: 100%;
 }
 .dossier-outer-frame {
-    border: 3.5px solid #1e3a5f;
+    border: {$outerFrame};
     padding: 4px;
     background: #ffffff;
 }
 .dossier-inner-frame {
-    border: 1px solid #c4975a;
+    border: {$innerFrame};
     padding: 6px;
 }
 
@@ -1286,7 +1546,7 @@ body {
     text-align: center;
     padding-bottom: 4px;
     margin-bottom: 6px;
-    border-bottom: 2px solid #1e3a5f;
+    border-bottom: {$headerBorder};
 }
 .header-table { display: table; width: 100%; }
 .header-cell { display: table-cell; vertical-align: middle; }
@@ -1294,7 +1554,7 @@ body {
 .logo-box {
     width: 52px;
     height: 52px;
-    border: 1.5px solid #c4975a;
+    border: 1.5px solid {$borderSec};
     border-radius: 6px;
     background: white;
 }
@@ -1309,14 +1569,14 @@ body {
 .school-name {
     font-size: 18px;
     font-weight: 800;
-    color: #1e3a5f;
+    color: {$primary};
     text-transform: uppercase;
     letter-spacing: 2px;
     margin-bottom: 2px;
 }
 .school-motto {
     font-size: 8px;
-    color: #c4975a;
+    color: {$accent};
     font-style: italic;
     font-weight: 600;
     margin-bottom: 2px;
@@ -1329,8 +1589,9 @@ body {
 .report-badge {
     display: inline-block;
     margin-top: 4px;
-    background: #1e3a5f;
-    color: #c4975a;
+    background: {$badgeBg};
+    color: {$badgeText};
+    border: {$badgeBorder};
     padding: 3px 16px;
     font-size: 9px;
     font-weight: 800;
@@ -1344,8 +1605,8 @@ body {
     display: table;
     width: 100%;
     margin-bottom: 4px;
-    background: #f8fafc;
-    border: 1px solid #e2e8f0;
+    background: {$lightBg};
+    border: 1px solid {$borderSec};
     border-radius: 4px;
 }
 .meta-cell {
@@ -1359,14 +1620,14 @@ body {
 .meta-label {
     font-size: 7px;
     font-weight: 800;
-    color: #c4975a;
+    color: {$accent};
     text-transform: uppercase;
     display: block;
 }
 .meta-value {
     font-size: 9px;
     font-weight: 800;
-    color: #1e3a5f;
+    color: {$primary};
 }
 
 /* Tables */
@@ -1374,17 +1635,17 @@ table.scores {
     width: 100%;
     border-collapse: collapse;
     margin-bottom: 4px;
-    border: 1px solid #1e3a5f;
+    border: 1px solid {$borderPrimary};
 }
 table.scores th {
-    background: #1e3a5f;
+    background: {$primary};
     color: #ffffff;
     padding: 3px 4px;
     font-size: 7.5px;
     font-weight: 800;
     text-transform: uppercase;
     text-align: center;
-    border: 1px solid #1e3a5f;
+    border: 1px solid {$borderPrimary};
 }
 table.scores td {
     padding: 2.5px 4px;
@@ -1398,15 +1659,46 @@ table.scores tr:nth-child(even) td {
 table.scores td.subj {
     text-align: left;
     font-weight: 700;
-    color: #1e3a5f;
+    color: {$primary};
     padding-left: 6px;
 }
 table.scores td.bold {
     font-weight: 800;
 }
-table.scores td.gold-cell {
-    background: #fef3c7;
-    color: #1e3a5f;
+
+/* Semantic theme styling */
+.th-cumulative {
+    background: {$darkBg} !important;
+    color: #ffffff !important;
+}
+.th-annual {
+    background: {$secondary} !important;
+    color: #ffffff !important;
+}
+.cell-highlight {
+    background: {$highlightBg} !important;
+    color: {$highlightText} !important;
+}
+.row-highlight td {
+    background: {$highlightBg} !important;
+}
+.text-brand-primary {
+    color: {$primary} !important;
+}
+.text-brand-accent {
+    color: {$accent} !important;
+}
+.observation-tutor-label {
+    font-size: 7px;
+    font-weight: 800;
+    color: {$accent};
+    text-transform: uppercase;
+}
+.observation-principal-label {
+    font-size: 7px;
+    font-weight: 800;
+    color: {$primary};
+    text-transform: uppercase;
 }
 
 /* Stats Bar */
@@ -1420,34 +1712,34 @@ table.scores td.gold-cell {
     padding: 1.5px;
 }
 .stat-inner {
-    background: #f8fafc;
+    background: {$lightBg};
     border: 1px solid #e2e8f0;
     border-radius: 4px;
     padding: 4px 2px;
     text-align: center;
 }
-.stat-inner.gold {
-    background: #fef3c7;
-    border-color: #c4975a;
+.stat-inner.stat-highlight {
+    background: {$highlightBg};
+    border-color: {$accent};
 }
 .stat-label {
     font-size: 6.5px;
     font-weight: 800;
-    color: #1e3a5f;
+    color: {$primary};
     text-transform: uppercase;
     margin-bottom: 1px;
 }
 .stat-value {
     font-size: 12px;
     font-weight: 800;
-    color: #1e3a5f;
+    color: {$primary};
 }
 
 /* Page 2 Strip */
 .page2-header-strip {
     display: table;
     width: 100%;
-    background: #1e3a5f;
+    background: {$primary};
     color: #ffffff;
     padding: 4px 8px;
     margin-bottom: 6px;
@@ -1458,7 +1750,7 @@ table.scores td.gold-cell {
     font-size: 8px;
     font-weight: 800;
     letter-spacing: 1px;
-    color: #c4975a;
+    color: {$accent};
 }
 .strip-info {
     display: table-cell;
@@ -1469,9 +1761,9 @@ table.scores td.gold-cell {
 
 /* Verdict Decree */
 .verdict-decree {
-    background: #1e3a5f;
+    background: {$primary};
     color: #ffffff;
-    border: 1.5px solid #c4975a;
+    border: 1.5px solid {$accent};
     border-radius: 4px;
     padding: 6px 12px;
     text-align: center;
@@ -1480,7 +1772,7 @@ table.scores td.gold-cell {
 .verdict-decree-header {
     font-size: 7px;
     font-weight: 800;
-    color: #c4975a;
+    color: {$accent};
     letter-spacing: 1.5px;
     text-transform: uppercase;
     margin-bottom: 2px;
@@ -1500,13 +1792,13 @@ table.scores td.gold-cell {
 
 /* Sub-card */
 .sub-card {
-    border: 1px solid #1e3a5f;
+    border: 1px solid {$borderPrimary};
     border-radius: 4px;
     overflow: hidden;
     margin-bottom: 6px;
 }
 .sub-card-header {
-    background: #1e3a5f;
+    background: {$primary};
     color: #ffffff;
     font-size: 7px;
     font-weight: 800;
@@ -1535,7 +1827,7 @@ table.scores td.gold-cell {
 
 /* Resumption Stripe */
 .resumption-stripe {
-    background: #1e3a5f;
+    background: {$primary};
     color: #ffffff;
     text-align: center;
     padding: 3.5px;
@@ -1547,7 +1839,7 @@ table.scores td.gold-cell {
     margin-top: 6px;
 }
 .resumption-stripe strong {
-    color: #c4975a;
+    color: {$accent};
 }
 
 /* Signatures */
@@ -1569,11 +1861,11 @@ table.scores td.gold-cell {
     margin-bottom: 1px;
 }
 .sig-line {
-    border-top: 1px solid #1e3a5f;
+    border-top: 1px solid {$primary};
     padding-top: 2px;
     font-size: 7.5px;
     font-weight: 800;
-    color: #1e3a5f;
+    color: {$primary};
 }
 .sig-line.has-img {
     margin-top: 1px;
@@ -1583,9 +1875,173 @@ table.scores td.gold-cell {
     color: #64748b;
     font-style: italic;
 }
+
+/* ══════════════════════════════════════════════════════════════════
+   TEMPLATE-SPECIFIC BOOKLET OVERRIDES & DISTINCTIONS
+   ══════════════════════════════════════════════════════════════════ */
+/* Compact */
+.theme-compact.book-cover-page, .theme-compact.dossier-page {
+    width: 92%;
+    margin: 0 auto;
+}
+.theme-compact .cover-outer-frame, .theme-compact .cover-inner-frame,
+.theme-compact .dossier-outer-frame, .theme-compact .dossier-inner-frame {
+    border: none;
+    padding: 0;
+}
+.theme-compact .compact-banner {
+    background: #1e3a8a;
+    color: #ffffff;
+    text-align: center;
+    padding: 14px 16px 12px 16px;
+    border-radius: 4px;
+    margin-bottom: 14px;
+}
+.theme-compact .compact-banner .cover-school-name,
+.theme-compact .compact-banner .school-name {
+    color: #ffffff;
+    font-size: 20px;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    margin-bottom: 2px;
+}
+.theme-compact .compact-banner .cover-school-motto,
+.theme-compact .compact-banner .school-motto {
+    color: #93c5fd;
+    font-size: 8.5px;
+    margin-bottom: 2px;
+}
+.theme-compact .compact-banner .cover-school-meta,
+.theme-compact .compact-banner .school-info {
+    color: #bfdbfe;
+    font-size: 7.5px;
+}
+.theme-compact .cover-photo-frame {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    border: 2px solid #2563eb;
+    margin: 0 auto;
+    overflow: hidden;
+}
+.theme-compact .cover-photo-img {
+    width: 68px;
+    height: 68px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+.theme-compact .cover-student-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    padding: 10px;
+}
+.theme-compact .pill {
+    background: #f1f5f9;
+    border-radius: 4px;
+    padding: 4px 8px;
+    font-size: 8px;
+    color: #334155;
+    display: inline-block;
+    margin-right: 4px;
+    margin-bottom: 4px;
+}
+.theme-compact .pill strong {
+    color: #0f172a;
+}
+.theme-compact table.scores {
+    border: 1px solid #cbd5e1;
+}
+.theme-compact table.scores th {
+    background: #f8fafc;
+    color: #0f172a;
+    border: 1px solid #e2e8f0;
+}
+.theme-compact .verdict-decree {
+    background: #eff6ff;
+    border: 2px solid #3b82f6;
+    color: #1d4ed8;
+}
+.theme-compact .verdict-decree-header { color: #1e40af; }
+.theme-compact .verdict-decree-title { color: #1e3a8a; }
+.theme-compact .verdict-decree-sub { color: #334155; }
+
+/* Nordic */
+.theme-nordic .cover-outer-frame, .theme-nordic .dossier-outer-frame {
+    border: 1.5px solid #cbd5e1;
+    border-radius: 6px;
+    padding: 10px;
+}
+.theme-nordic .cover-inner-frame, .theme-nordic .dossier-inner-frame {
+    border: none;
+    padding: 0;
+}
+.theme-nordic .cover-logo-img {
+    filter: grayscale(100%);
+    opacity: 0.85;
+}
+.theme-nordic table.scores {
+    border: 1.5px solid #cbd5e1;
+}
+.theme-nordic table.scores th {
+    background: #f1f5f9;
+    color: #334155;
+    border: 1px solid #cbd5e1;
+    border-bottom: 2px solid #94a3b8;
+}
+.theme-nordic .th-cumulative, .theme-nordic .th-annual {
+    background: #e2e8f0 !important;
+    color: #0f172a !important;
+}
+.theme-nordic .verdict-decree {
+    background: #f8fafc;
+    border: 1.5px solid #94a3b8;
+    color: #0f172a;
+}
+.theme-nordic .verdict-decree-header { color: #475569; }
+.theme-nordic .verdict-decree-title { color: #0f172a; }
+.theme-nordic .verdict-decree-sub { color: #475569; }
+
+/* Classic */
+.theme-classic .cover-doc-title {
+    border: 1.5px solid #111827;
+    display: inline-block;
+    padding: 3px 14px;
+    letter-spacing: 2px;
+}
+.theme-classic .report-badge {
+    border: 1.5px solid #111827;
+    background: #ffffff;
+    color: #111827;
+}
+
+/* Riverdale */
+.theme-riverdale .cover-doc-title {
+    background: {$primary};
+    color: #ffffff;
+    display: inline-block;
+    padding: 4px 14px;
+    border-radius: 3px;
+}
+.theme-riverdale .cover-session-badge {
+    background: #f0f4f8;
+    color: {$primary};
+    border: 1px solid {$primary};
+}
+.theme-riverdale .report-badge {
+    background: {$primary};
+    color: #ffffff;
+}
+
+/* Signature */
+.theme-signature .cover-doc-title {
+    letter-spacing: 1.5px;
+}
+
 CSS
-        . "\n\n/* ═══ Template-Specific Styles ═══ */\n"
+        . "\n\n/* ═══ Embedded Term Template CSS ═══ */\n"
         . $templateCss;
     }
 }
+
 

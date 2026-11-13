@@ -20,9 +20,140 @@
     $className = $student->schoolClass?->name ?? 'Class';
     $sectionName = $student->section?->name ? " - {$student->section->name}" : '';
     $classFull = "{$className}{$sectionName}";
+
+    $theme = $theme ?? \App\Support\StudentDossierService::resolveBookletTheme($template ?? 'elegant');
+    $themeName = $theme['name'] ?? 'elegant';
+    $isCompact = ($themeName === 'compact');
 @endphp
 
-<div class="book-cover-page">
+@if ($isCompact)
+<div class="book-cover-page theme-compact">
+    {{-- Institutional Masthead Banner --}}
+    <div class="compact-banner">
+        <div class="cover-school-name">{{ $schoolName }}</div>
+        @if ($motto)
+            <div class="cover-school-motto">{{ $motto }}</div>
+        @endif
+        <div class="cover-school-meta">
+            {{ $address }}@if($phone) &bull; Tel: {{ $phone }}@endif
+        </div>
+    </div>
+
+    {{-- Document Title --}}
+    <div class="cover-title-area" style="margin-bottom:12px;">
+        <div class="cover-doc-type" style="color:#1e3a8a;">CONTINUOUS ASSESSMENT &amp; TERMINAL RECORDS</div>
+        <div class="cover-doc-title" style="color:#1e3a8a;">STUDENT REPORT BOOKLET</div>
+        <div class="cover-session-badge" style="background:#1e3a8a; color:#ffffff;">
+            {{ $session }} ACADEMIC SESSION
+        </div>
+    </div>
+
+    {{-- Student Credential Plaque with Circular Photo & Pills --}}
+    <div class="cover-student-card">
+        <table class="cover-student-table">
+            <tr>
+                <td class="cover-photo-cell" style="width:84px; text-align:center;">
+                    <div class="cover-photo-frame">
+                        @if ($base64StudentPhoto)
+                            <img src="{{ $base64StudentPhoto }}" class="cover-photo-img" alt="{{ $studentName }}" />
+                        @else
+                            <div class="cover-photo-placeholder" style="border-radius:50%; line-height:68px;">
+                                <div class="placeholder-initial">{{ strtoupper(substr($student->first_name ?? 'S', 0, 1)) }}</div>
+                            </div>
+                        @endif
+                    </div>
+                </td>
+                <td class="cover-meta-cell">
+                    <div class="cover-name-banner" style="border-bottom:1.5px solid #e2e8f0;">
+                        <div class="cover-student-name" style="color:#1e3a8a;">{{ $studentName }}</div>
+                        <div class="cover-student-class" style="color:#2563eb;">{{ $classFull }}</div>
+                    </div>
+
+                    <div style="margin-top:6px;">
+                        <span class="pill"><strong>Adm:</strong> {{ $student->admission_number ?? 'N/A' }}</span>
+                        <span class="pill"><strong>Gender:</strong> {{ ucfirst($student->gender ?? '—') }}</span>
+                        <span class="pill"><strong>DOB:</strong> {{ $student->dob ? \Carbon\Carbon::parse($student->dob)->format('d M, Y') : '—' }}</span>
+                        <span class="pill"><strong>Blood:</strong> {{ $student->blood_group ?: '—' }}</span>
+                        <span class="pill"><strong>Status:</strong> Active Scholar</span>
+                    </div>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    {{-- Folio Index --}}
+    <div class="cover-folio-section" style="margin-top:14px;">
+        <div class="folio-heading" style="color:#1e3a8a; border-bottom:1.5px solid #1e3a8a;">CONTENTS OF THIS RECORD BOOK</div>
+        <table class="folio-table">
+            <thead>
+                <tr>
+                    <th style="width: 25%; background:#1e3a8a; color:#ffffff;">FOLIO SECTION</th>
+                    <th style="width: 55%; background:#1e3a8a; color:#ffffff;">DESCRIPTION &amp; COVERAGE</th>
+                    <th style="width: 20%; text-align: center; background:#1e3a8a; color:#ffffff;">RECORD</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class="folio-num" style="color:#1e3a8a;">FOLIO I</td>
+                    <td class="folio-desc">First Term Continuous Assessment, Tests &amp; Terminal Examination</td>
+                    <td class="folio-tag" style="color:#1e3a8a;">Enclosed</td>
+                </tr>
+                <tr>
+                    <td class="folio-num" style="color:#1e3a8a;">FOLIO II</td>
+                    <td class="folio-desc">Second Term Continuous Assessment, Tests &amp; Terminal Examination</td>
+                    <td class="folio-tag" style="color:#1e3a8a;">Enclosed</td>
+                </tr>
+                <tr>
+                    <td class="folio-num" style="color:#1e3a8a;">FOLIO III</td>
+                    <td class="folio-desc">Third Term Continuous Assessment, Tests &amp; Promotional Examination</td>
+                    <td class="folio-tag" style="color:#1e3a8a;">Enclosed</td>
+                </tr>
+                <tr>
+                    <td class="folio-num" style="color:#1e3a8a;">ANNUAL DOSSIER</td>
+                    <td class="folio-desc">Cumulative Three-Term Ledger, Attendance Portfolio &amp; Promotion Verdict</td>
+                    <td class="folio-tag" style="color:#1e3a8a;">Enclosed</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    {{-- Endorsements --}}
+    <div class="cover-endorsement-section" style="border-top:1px solid #e2e8f0; margin-top:14px;">
+        <table class="cover-endorsement-table">
+            <tr>
+                <td class="endorse-left">
+                    <div class="endorse-heading" style="color:#1e3a8a;">OFFICIAL CERTIFICATION</div>
+                    <div class="endorse-text">
+                        This volume constitutes the continuous assessment record of {{ $schoolName }}. Certified valid only when bearing the official institutional watermark and executive signature.
+                    </div>
+                    <div class="endorse-date">
+                        Date of Issue: <strong>{{ now()->format('d F, Y') }}</strong>
+                    </div>
+                </td>
+                <td class="endorse-center">
+                    @if (!empty($qrCodeUri) && ($rcOptions['show_qr_code'] ?? true))
+                        <div class="endorse-qr-box">
+                            <img src="{{ $qrCodeUri }}" class="endorse-qr-img" alt="Digital Seal" />
+                        </div>
+                        <div class="endorse-qr-text" style="color:#1e3a8a;">DIGITAL RECORD SEAL</div>
+                    @endif
+                </td>
+                <td class="endorse-right">
+                    @if (!empty($signatureImages['principal']) && file_exists($signatureImages['principal']))
+                        <img src="data:image/png;base64,{{ base64_encode(file_get_contents($signatureImages['principal'])) }}" class="endorse-sig-img" alt="Principal Signature" />
+                        <div class="endorse-sig-line has-img" style="border-top:1px solid #1e3a8a; color:#1e3a8a;">{{ $principalName }}</div>
+                    @else
+                        <div class="endorse-sig-spacer"></div>
+                        <div class="endorse-sig-line" style="border-top:1px solid #1e3a8a; color:#1e3a8a;">{{ $principalName }}</div>
+                    @endif
+                    <div class="endorse-sig-title">{{ $principalTitle }} &bull; Head of Institution</div>
+                </td>
+            </tr>
+        </table>
+    </div>
+</div>
+@else
+<div class="book-cover-page theme-{{ $themeName }}">
     <div class="cover-outer-frame">
         <div class="cover-inner-frame">
             {{-- Institutional Masthead --}}
@@ -186,3 +317,4 @@
         </div>
     </div>
 </div>
+@endif

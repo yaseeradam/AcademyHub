@@ -645,6 +645,35 @@ class SettingsController extends Controller
             ]);
         }
 
+        if ($type === 'booklet') {
+            abort_unless(in_array($template, self::REPORT_CARD_TEMPLATES, true), 404);
+
+            $student = \App\Models\Student::with(['schoolClass', 'section'])->where('status', 'Active')->first()
+                ?? \App\Models\Student::first();
+
+            if ($student) {
+                $service = app(\App\Support\StudentDossierService::class);
+                $session = \App\Models\AcademicSession::activeName() ?: (now()->format('Y') . '/' . (now()->format('Y') + 1));
+                $html = $service->compileBookletHtml($student, $session, ['template' => $template], false);
+
+                if (request()->boolean('html') || !request()->has('pdf')) {
+                    return response($html, 200, ['Content-Type' => 'text/html; charset=UTF-8']);
+                }
+
+                $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadHTML($html)->setPaper('a4', 'portrait')->setOptions([
+                    'dpi' => 72,
+                    'isHtml5ParserEnabled' => true,
+                    'isPhpEnabled' => false,
+                    'defaultFont' => 'dejavu sans',
+                ]);
+
+                return response($pdf->output(), 200, [
+                    'Content-Type' => 'application/pdf',
+                    'Content-Disposition' => 'inline; filename="booklet-' . $template . '-preview.pdf"',
+                ]);
+            }
+        }
+
         abort(404);
     }
 
