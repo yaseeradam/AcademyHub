@@ -159,7 +159,6 @@
     $showQrCode                    = $opts['show_qr_code'] ?? true;
     $showCumulativeSummary         = $opts['show_cumulative_summary'] ?? false;
     $showColorBadges               = $opts['show_color_badges'] ?? true;
-    $showPerformance               = $opts['show_performance'] ?? false;
 
     // 1. Resolve Homeroom Teacher dynamically
     $homeroomTeacher = null;
@@ -365,18 +364,11 @@
                                 @endif
                                 @if($showPosition)<th style="width: 6%;">Pos</th>@endif
                                 @if($showSubjectTeacherRemarks)<th style="width: 10%; text-align: left; padding-left: 4px;">Remark</th>@endif
-                                @if($showPerformance)<th style="width: 14%;">Performance</th>@endif
                             </tr>
                         </thead>
                         <tbody>
                             @foreach($rows as $r)
                                 @php
-                                    $totalScore = $r['total'] ?? 0;
-                                    if ($totalScore >= 90) { $perfText = 'Excellent'; }
-                                    elseif ($totalScore >= 80) { $perfText = 'Very Good'; }
-                                    elseif ($totalScore >= 70) { $perfText = 'Good'; }
-                                    elseif ($totalScore >= 50) { $perfText = 'Satisfactory'; }
-                                    else { $perfText = 'Needs Improvement'; }
                                     $g = strtoupper($r['grade'] ?? '-');
                                     $badgeBg = match($g) { 'A'=>'#dcfce7','B'=>'#dbeafe','C'=>'#fef9c3','D'=>'#ffedd5','F','U'=>'#fee2e2',default=>'transparent' };
                                     $badgeFg = match($g) { 'A'=>'#166534','B'=>'#1e40af','C'=>'#854d0e','D'=>'#9a3412','F','U'=>'#991b1b',default=>$themeColor };
@@ -401,15 +393,6 @@
                                     @endif
                                     @if($showPosition)<td>{{ $r['position'] ?? '-' }}</td>@endif
                                     @if($showSubjectTeacherRemarks)<td style="font-size:7px;text-align:left;padding-left:4px;font-style:italic;">{{ $r['teacher_remark'] ?? 'Good' }}</td>@endif
-                                    @if($showPerformance)
-                                        <td class="performance-cell">
-                                            @if($r['total'])
-                                                <span style="color: {{ $accentColor }};">★</span> {{ $perfText }}
-                                            @else
-                                                -
-                                            @endif
-                                        </td>
-                                    @endif
                                 </tr>
                             @endforeach
                         </tbody>

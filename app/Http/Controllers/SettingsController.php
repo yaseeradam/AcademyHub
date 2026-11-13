@@ -317,7 +317,6 @@ class SettingsController extends Controller
                 'rc_show_qr_code' => ['nullable', 'boolean'],
                 'rc_show_cumulative_summary' => ['nullable', 'boolean'],
                 'rc_show_color_badges' => ['nullable', 'boolean'],
-                'rc_show_performance' => ['nullable', 'boolean'],
                 'rc_block_debtors' => ['nullable', 'boolean'],
                 'rc_next_term_date' => ['nullable', 'string', 'max:50'],
                 'rc_principal_name' => ['nullable', 'string', 'max:150'],
@@ -331,6 +330,7 @@ class SettingsController extends Controller
             $settings['report_card_template'] = (string) $data['report_card_template'];
             $settings['rc_principal_name'] = $data['rc_principal_name'] ?? null;
             $settings['rc_principal_title'] = $data['rc_principal_title'] ?? null;
+            $settings['rc_show_performance'] = false;
             if ($request->has('rc_next_term_date')) {
                 $val = trim((string) $request->input('rc_next_term_date'));
                 $settings['rc_next_term_date'] = $val !== '' ? $val : null;
@@ -344,7 +344,7 @@ class SettingsController extends Controller
                 'rc_show_psychomotor', 'rc_show_school_fees', 'rc_show_signatures',
                 'rc_show_class_highest_lowest', 'rc_show_subject_teacher_remarks',
                 'rc_show_qr_code', 'rc_show_cumulative_summary', 'rc_show_color_badges',
-                'rc_show_performance', 'rc_block_debtors',
+                'rc_block_debtors',
             ];
             foreach ($boolKeys as $key) {
                 // A hidden input with value="0" is submitted when unchecked; the checkbox
@@ -612,7 +612,6 @@ class SettingsController extends Controller
                     'show_qr_code' => true,
                     'show_cumulative_summary' => true,
                     'show_color_badges' => true,
-                    'show_performance' => true,
                 ],
 
                 'schoolFees' => [

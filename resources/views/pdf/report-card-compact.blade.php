@@ -136,7 +136,6 @@
     $showQrCode                    = $opts['show_qr_code'] ?? true;
     $showCumulativeSummary         = $opts['show_cumulative_summary'] ?? false;
     $showColorBadges               = $opts['show_color_badges'] ?? true;
-    $showPerformance               = $opts['show_performance'] ?? false;
 @endphp
 
 @if($logoDataUri && $showWatermark)
@@ -242,7 +241,6 @@
                         <th style="width:6%;">LOW</th>
                     @endif
                     @if($showPosition)<th style="width:6%;">POS</th>@endif
-                    @if($showPerformance)<th style="width:10%;">PERF</th>@endif
                     @if($showSubjectTeacherRemarks)<th style="width:12%;">REMARK</th>@endif
                 </tr>
             </thead>
@@ -286,7 +284,6 @@
                         <td>{{ $r['lowest'] ?? '—' }}</td>
                     @endif
                     @if($showPosition)<td>{{ $r['position'] ?? '—' }}</td>@endif
-                    @if($showPerformance)<td style="font-size:7.5pt;font-weight:600;">{{ \App\Support\ReportCardService::getPerformanceText($r['total'] ?? 0) }}</td>@endif
                     @if($showSubjectTeacherRemarks)<td style="font-size:7.5pt;font-style:italic;">{{ $r['teacher_remark'] ?? 'Good' }}</td>@endif
                 </tr>
                 @endforeach

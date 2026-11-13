@@ -17,5 +17,4 @@
     $showQrCode                    = $opts['show_qr_code'] ?? true;
     $showCumulativeSummary         = $opts['show_cumulative_summary'] ?? false;
     $showColorBadges               = $opts['show_color_badges'] ?? true;
-    $showPerformance               = $opts['show_performance'] ?? false;
 @endphp

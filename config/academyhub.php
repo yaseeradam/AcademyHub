@@ -83,7 +83,6 @@ return [
     'rc_show_qr_code' => true,
     'rc_show_cumulative_summary' => false,
     'rc_show_color_badges' => true,
-    'rc_show_performance' => false,
     'rc_block_debtors' => true,
     'rc_principal_name' => null,
     'rc_principal_title' => 'Principal',

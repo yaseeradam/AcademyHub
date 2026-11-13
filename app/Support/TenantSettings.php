@@ -177,7 +177,6 @@ class TenantSettings
                 'rc_show_qr_code',
                 'rc_show_cumulative_summary',
                 'rc_show_color_badges',
-                'rc_show_performance',
                 'rc_promotion_pass_mark',
                 'rc_next_term_date',
                 'rc_block_debtors',
@@ -211,7 +210,7 @@ class TenantSettings
                 'rc_show_psychomotor', 'rc_show_school_fees', 'rc_show_signatures',
                 'rc_show_class_highest_lowest', 'rc_show_subject_teacher_remarks',
                 'rc_show_qr_code', 'rc_show_cumulative_summary', 'rc_show_color_badges',
-                'rc_show_performance', 'rc_block_debtors',
+                'rc_block_debtors',
             ], true)) {
                 $value = (bool) $value;
             }
