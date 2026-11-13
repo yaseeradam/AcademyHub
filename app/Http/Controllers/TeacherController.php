@@ -3,19 +3,31 @@
 namespace App\Http\Controllers;
 
 use App\Support\Audit;
+use App\Models\AttendanceSheet;
+use App\Models\CbtExam;
+use App\Models\ClassNote;
+use App\Models\CustomField;
+use App\Models\Homework;
+use App\Models\InAppNotification;
 use App\Models\SchoolClass;
+use App\Models\ScoreSubmission;
 use App\Models\Section;
 use App\Models\Subject;
 use App\Models\SubjectAllocation;
+use App\Models\TeacherAttendanceMark;
+use App\Models\TeacherAttendanceSheet;
+use App\Models\TimetableEntry;
 use App\Models\User;
-use Illuminate\Http\Request;
+use App\Models\WeeklyDataCollection;
+use App\Support\TenantSettings;
 use Illuminate\Database\QueryException;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
-use App\Support\TenantSettings;
 use Illuminate\Validation\Rule;
-
-use App\Models\CustomField;
 
 class TeacherController extends Controller
 {
@@ -295,9 +307,83 @@ class TeacherController extends Controller
         $photo = $teacher->profile_photo ? str_replace('\\', '/', (string) $teacher->profile_photo) : null;
 
         try {
-            $teacher->delete();
-        } catch (QueryException $e) {
-            return back()->withErrors(['teacher' => 'Unable to delete this teacher. Remove dependent records first.']);
+            DB::transaction(function () use ($teacher) {
+                // Proactively clean up dependent records
+                if (Schema::hasTable('teacher_attendance_marks')) {
+                    TeacherAttendanceMark::query()->where('teacher_id', $teacher->id)->delete();
+                }
+
+                if (Schema::hasTable('weekly_data_collections')) {
+                    WeeklyDataCollection::query()->where('teacher_id', $teacher->id)->delete();
+                }
+
+                if (Schema::hasTable('subject_allocations')) {
+                    SubjectAllocation::query()->where('teacher_id', $teacher->id)->delete();
+                }
+
+                if (Schema::hasTable('score_submissions')) {
+                    ScoreSubmission::query()->where('teacher_id', $teacher->id)->delete();
+                }
+
+                if (Schema::hasTable('timetable_entries')) {
+                    TimetableEntry::query()->where('teacher_id', $teacher->id)->update(['teacher_id' => null]);
+                }
+
+                if (Schema::hasTable('cbt_exams')) {
+                    CbtExam::query()->where('assigned_teacher_id', $teacher->id)->update(['assigned_teacher_id' => null]);
+                    if (auth()->check()) {
+                        CbtExam::query()->where('created_by', $teacher->id)->update(['created_by' => auth()->id()]);
+                    }
+                }
+
+                if (Schema::hasTable('homework')) {
+                    $homeworks = Homework::query()->where('teacher_id', $teacher->id)->get();
+                    foreach ($homeworks as $hw) {
+                        if ($hw->attachment) {
+                            Storage::disk('uploads')->delete(str_replace('\\', '/', (string) $hw->attachment));
+                        }
+                        $hw->submissions()->delete();
+                        $hw->delete();
+                    }
+                }
+
+                if (Schema::hasTable('class_notes')) {
+                    $notes = ClassNote::query()->where('user_id', $teacher->id)->get();
+                    foreach ($notes as $note) {
+                        if ($note->attachment_path) {
+                            Storage::disk('uploads')->delete(str_replace('\\', '/', (string) $note->attachment_path));
+                        }
+                        $note->comments()->delete();
+                        $note->delete();
+                    }
+                }
+
+                if (Schema::hasTable('teacher_attendance_sheets')) {
+                    TeacherAttendanceSheet::query()->where('taken_by', $teacher->id)->update(['taken_by' => null]);
+                }
+
+                if (Schema::hasTable('attendance_sheets')) {
+                    AttendanceSheet::query()->where('taken_by', $teacher->id)->update(['taken_by' => null]);
+                }
+
+                if (Schema::hasTable('in_app_notifications')) {
+                    InAppNotification::query()->where('user_id', $teacher->id)->delete();
+                }
+
+                if (Schema::hasTable('conversation_user')) {
+                    DB::table('conversation_user')->where('user_id', $teacher->id)->delete();
+                }
+
+                Audit::log('teacher.deleted', $teacher, [
+                    'name'  => $teacher->name,
+                    'email' => $teacher->email,
+                ]);
+
+                $teacher->delete();
+            });
+        } catch (\Throwable $e) {
+            Log::error('Failed to delete teacher: ' . $e->getMessage(), ['exception' => $e]);
+            return back()->withErrors(['teacher' => 'Unable to delete this teacher: ' . $e->getMessage()]);
         }
 
         if ($photo) {
@@ -306,6 +392,6 @@ class TeacherController extends Controller
 
         return redirect()
             ->route('teachers')
-            ->with('status', 'Teacher deleted.');
+            ->with('status', 'Teacher deleted successfully.');
     }
 }
