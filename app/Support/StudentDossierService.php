@@ -211,16 +211,22 @@ class StudentDossierService
                 $studentAvgs = $tClassScores->groupBy('student_id')->map(fn($r) => $r->sum('total') / max(1, $r->count()));
                 $tClassAverage = round((float) $studentAvgs->avg(), 2);
 
-                $sorted = $studentTotals->sortDesc()->values();
-                $rank = 1; $last = null;
-                foreach ($sorted as $idx => $tot) {
+                // Sort descending keeping student_id as keys (do NOT call values() which resets keys to 0,1,2...)
+                $sorted = $studentTotals->sortDesc();
+                $rank = 1;
+                $last = null;
+                $pos  = 1;
+                $idx  = 0;
+                foreach ($sorted as $sid => $tot) {
                     if ($last !== null && $tot !== $last) {
-                        $rank = $idx + 1; // Standard competition rank (1, 1, 3)
+                        $rank = $idx + 1; // Standard competition rank (1, 1, 3, ...)
                     }
-                    if ((int) $sorted->keys()[$idx] === (int) $student->id || (int) $studentTotals->search($tot) === (int) $student->id) {
+                    if ((int) $sid === (int) $student->id) {
                         $tPosition = $rank;
+                        break;
                     }
                     $last = $tot;
+                    $idx++;
                 }
             }
 
@@ -446,12 +452,23 @@ class StudentDossierService
         $totalAbsent = 0;
 
         for ($t = 1; $t <= 3; $t++) {
-            $sheets = AttendanceSheet::query()
+            // Build sheets query: include section-specific AND class-wide (NULL section) sheets
+            // so no school day is missed regardless of how the sheet was recorded.
+            $sheetsQuery = AttendanceSheet::query()
                 ->where('class_id', $student->class_id)
-                ->when($sectionId > 0, fn($q) => $q->where('section_id', $sectionId), fn($q) => $q->whereNull('section_id'))
                 ->where('term', $t)
-                ->where('session', $session)
-                ->get(['id', 'date']);
+                ->where('session', $session);
+
+            if ($sectionId > 0) {
+                $sheetsQuery->where(function ($q) use ($sectionId) {
+                    $q->where('section_id', $sectionId)
+                      ->orWhereNull('section_id');
+                });
+            } else {
+                $sheetsQuery->whereNull('section_id');
+            }
+
+            $sheets = $sheetsQuery->get(['id', 'date']);
 
             $validSheetIds = $sheets->filter(function ($sheet) use ($allowWeekends, $sessionYears) {
                 if (!$sheet->date) {
@@ -471,26 +488,28 @@ class StudentDossierService
                 }
             })->pluck('id');
 
-            $opened = $validSheetIds->count();
+            // Deduplicate by date to avoid double-counting same day across sheet types
+            $uniqueValidSheetIds = $sheets
+                ->whereIn('id', $validSheetIds->all())
+                ->unique(fn ($s) => \Carbon\Carbon::parse($s->date)->toDateString())
+                ->pluck('id');
+
+            $opened = $uniqueValidSheetIds->count();
             if ($opened > 0) {
                 $marks = AttendanceMark::query()
-                    ->whereIn('sheet_id', $validSheetIds)
+                    ->whereIn('sheet_id', $uniqueValidSheetIds)
                     ->where('student_id', $student->id)
                     ->get(['id', 'sheet_id', 'status']);
 
-                $present = $marks->whereIn('status', ['Present', 'Late', 'Excused'])->count();
-                $absent = $marks->where('status', 'Absent')->count();
+                $present = (int) $marks->whereIn('status', ['Present', 'Late', 'Excused'])->count();
+                $explicitAbsent = (int) $marks->where('status', 'Absent')->count();
 
-                // Reconcile matching ReportCardService logic
-                $recordedTotal = $present + $absent;
-                if ($recordedTotal > $opened) {
-                    $opened = $recordedTotal;
-                } elseif ($recordedTotal < $opened) {
-                    $absent += ($opened - $recordedTotal);
-                }
+                // Any school day without an explicit mark is treated as absent.
+                // Do NOT overwrite $opened — it is the authoritative count of valid school days.
+                $absent = max($explicitAbsent, $opened - $present);
             } else {
                 $present = 0;
-                $absent = 0;
+                $absent  = 0;
             }
 
             $rate = $opened > 0 ? round(($present / $opened) * 100, 1) : null;

@@ -350,7 +350,12 @@ class BulkReportCardsController extends Controller
 
         $overrides = [];
         foreach ($supported as $opt) {
-            $overrides[$opt] = isset($raw[$opt]) && ($raw[$opt] === '1' || $raw[$opt] === 1 || $raw[$opt] === true || $raw[$opt] === 'on');
+            // Only override options that were explicitly sent in the request.
+            // Absent options fall through to the service's settings.json defaults.
+            if (array_key_exists($opt, $raw)) {
+                $v = $raw[$opt];
+                $overrides[$opt] = ($v === '1' || $v === 1 || $v === true || $v === 'on');
+            }
         }
 
         return $overrides;

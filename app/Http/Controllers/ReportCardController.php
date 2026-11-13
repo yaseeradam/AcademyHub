@@ -114,8 +114,21 @@ class ReportCardController extends Controller
             ->max('updated_at');
         $lastPsychomotorTimestamp = $lastPsychomotorAt ? \Carbon\Carbon::parse($lastPsychomotorAt)->timestamp : null;
 
-        $lastAttendanceAt = \App\Models\AttendanceMark::where('student_id', $student->id)->max('updated_at');
-        $lastAttendanceTimestamp = $lastAttendanceAt ? \Carbon\Carbon::parse($lastAttendanceAt)->timestamp : null;
+        $lastAttendanceMarkAt = \App\Models\AttendanceMark::where('student_id', $student->id)->max('updated_at');
+        $lastAttendanceMarkTimestamp = $lastAttendanceMarkAt ? \Carbon\Carbon::parse($lastAttendanceMarkAt)->timestamp : null;
+
+        // Also watch attendance sheets: a new school day (new sheet) for the student's class
+        // should invalidate the cached report card even if no marks have changed yet.
+        $lastAttendanceSheetAt = \App\Models\AttendanceSheet::where('class_id', $student->class_id)
+            ->where('term', $term)
+            ->where('session', $session)
+            ->max('updated_at');
+        $lastAttendanceSheetTimestamp = $lastAttendanceSheetAt ? \Carbon\Carbon::parse($lastAttendanceSheetAt)->timestamp : null;
+
+        $lastAttendanceTimestamp = max(
+            $lastAttendanceMarkTimestamp ?? 0,
+            $lastAttendanceSheetTimestamp ?? 0
+        ) ?: null;
 
         $settingsPath = storage_path('app/academyhub/tenants/' . $student->tenant_id . '/settings.json');
         if (!file_exists($settingsPath)) {
