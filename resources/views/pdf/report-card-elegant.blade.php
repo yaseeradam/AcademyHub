@@ -3,110 +3,128 @@
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
         <title>Report Sheet - {{ $student->admission_number }}</title>
+        @php
+            $rowCount = count($rows ?? []);
+            $rowPadY = match(true) {
+                $rowCount >= 16 => '1px',
+                $rowCount >= 13 => '1.5px',
+                $rowCount >= 10 => '2px',
+                default         => '2.5px',
+            };
+            $subjFontSize = match(true) {
+                $rowCount >= 16 => '7px',
+                $rowCount >= 13 => '7.5px',
+                default         => '8px',
+            };
+            $secMargin = match(true) {
+                $rowCount >= 14 => '2.5px',
+                default         => '3.5px',
+            };
+        @endphp
         <style>
             @page { margin: 4mm 6mm; }
             * { margin: 0; padding: 0; box-sizing: border-box; }
             body {
                 font-family: DejaVu Sans, Arial, sans-serif;
-                font-size: 9px;
+                font-size: 8.5px;
                 color: #1e293b;
                 background: #fff;
-                line-height: 1.25;
+                line-height: 1.2;
             }
 
             /* ─── Elegant Navy & Gold ─── */
             .page {
-                border: 3.5px solid #1e3a5f;
-                padding: 4px;
+                border: 3px solid #1e3a5f;
+                padding: 3px;
                 background: white;
             }
             .page-inner {
                 border: 1px solid #c4975a;
-                padding: 6px;
+                padding: 5px;
             }
 
             .header {
                 text-align: center;
-                padding-bottom: 4px;
-                margin-bottom: 6px;
-                border-bottom: 2px solid #1e3a5f;
+                padding-bottom: 3px;
+                margin-bottom: 4px;
+                border-bottom: 1.5px solid #1e3a5f;
             }
             .header-table { display: table; width: 100%; }
             .header-cell { display: table-cell; vertical-align: middle; }
-            .logo-cell { width: 62px; text-align: center; vertical-align: middle; }
+            .logo-cell { width: 56px; text-align: center; vertical-align: middle; }
             .logo-box {
-                width: 52px;
-                height: 52px;
+                width: 48px;
+                height: 48px;
                 border: 1.5px solid #c4975a;
-                border-radius: 6px;
+                border-radius: 5px;
                 background: white;
             }
             .logo {
-                max-width: 46px;
-                max-height: 46px;
+                max-width: 42px;
+                max-height: 42px;
                 width: auto !important;
                 height: auto !important;
                 display: block;
                 margin: 0 auto;
             }
             .school-name {
-                font-size: 18px;
+                font-size: 16px;
                 font-weight: 800;
                 color: #1e3a5f;
                 text-transform: uppercase;
-                letter-spacing: 2px;
-                margin-bottom: 2px;
+                letter-spacing: 1.5px;
+                margin-bottom: 1.5px;
             }
             .school-motto {
-                font-size: 8px;
+                font-size: 7.5px;
                 color: #c4975a;
                 font-style: italic;
                 font-weight: 600;
-                margin-bottom: 2px;
+                margin-bottom: 1.5px;
             }
             .school-info {
-                font-size: 7.5px;
+                font-size: 7px;
                 color: #64748b;
                 margin-bottom: 1px;
             }
             .report-badge {
                 display: inline-block;
-                margin-top: 4px;
+                margin-top: 3px;
                 background: #1e3a5f;
                 color: #c4975a;
-                padding: 3px 16px;
-                font-size: 9px;
+                padding: 2.5px 14px;
+                font-size: 8.5px;
                 font-weight: 800;
                 text-transform: uppercase;
-                letter-spacing: 2px;
+                letter-spacing: 1.5px;
                 border-radius: 3px;
             }
 
             .meta-bar {
                 display: table;
                 width: 100%;
-                margin-bottom: 4px;
+                margin-bottom: {{ $secMargin }};
                 background: #f8fafc;
                 border: 1px solid #e2e8f0;
-                border-radius: 4px;
+                border-radius: 3px;
             }
             .meta-cell {
                 display: table-cell;
                 width: 33.33%;
-                padding: 4px;
+                padding: 3px 4px;
                 text-align: center;
                 border-right: 1px solid #e2e8f0;
             }
             .meta-cell:last-child { border-right: none; }
             .meta-label {
-                font-size: 7px;
+                font-size: 6.5px;
                 font-weight: 800;
                 color: #c4975a;
                 text-transform: uppercase;
                 display: block;
             }
             .meta-value {
-                font-size: 9px;
+                font-size: 8.5px;
                 font-weight: 800;
                 color: #1e3a5f;
             }
@@ -114,17 +132,17 @@
             .stats-bar {
                 display: table;
                 width: 100%;
-                margin-bottom: 4px;
+                margin-bottom: {{ $secMargin }};
             }
             .stat {
                 display: table-cell;
-                padding: 1.5px;
+                padding: 1px;
             }
             .stat-inner {
                 background: #f8fafc;
                 border: 1px solid #e2e8f0;
-                border-radius: 4px;
-                padding: 4px 2px;
+                border-radius: 3px;
+                padding: 3px 2px;
                 text-align: center;
             }
             .stat-inner.gold {
@@ -139,7 +157,7 @@
                 margin-bottom: 1px;
             }
             .stat-value {
-                font-size: 13px;
+                font-size: 12px;
                 font-weight: 800;
                 color: #1e3a5f;
             }
@@ -147,13 +165,13 @@
             table.scores {
                 width: 100%;
                 border-collapse: collapse;
-                margin-bottom: 4px;
+                margin-bottom: {{ $secMargin }};
                 border: 1px solid #1e3a5f;
             }
             table.scores th {
                 background: #1e3a5f;
                 color: white;
-                padding: 3px 4px;
+                padding: 2.5px 3px;
                 font-size: 7.5px;
                 font-weight: 800;
                 text-transform: uppercase;
@@ -161,10 +179,10 @@
                 border: 1px solid #1e3a5f;
             }
             table.scores td {
-                padding: 2px 4px;
+                padding: {{ $rowPadY }} 3px;
                 border: 1px solid #e2e8f0;
                 text-align: center;
-                font-size: 8.5px;
+                font-size: {{ $subjFontSize }};
             }
             table.scores tr:nth-child(even) {
                 background: #f8fafc;
@@ -173,7 +191,7 @@
                 text-align: left;
                 font-weight: 700;
                 color: #1e3a5f;
-                padding-left: 6px;
+                padding-left: 5px;
             }
             .bold { font-weight: 800; }
 
@@ -181,15 +199,17 @@
                 display: table;
                 width: 100%;
                 border: 1px solid #c4975a;
-                margin-bottom: 4px;
+                margin-bottom: {{ $secMargin }};
                 background: #fffbeb;
                 border-radius: 3px;
+                page-break-inside: avoid;
+                break-inside: avoid;
             }
             .grading-cell {
                 display: table-cell;
-                padding: 3px 2px;
+                padding: 2px 2px;
                 text-align: center;
-                font-size: 7px;
+                font-size: 6.5px;
                 font-weight: 600;
                 color: #78350f;
                 border-right: 1px solid #fde68a;
@@ -200,28 +220,30 @@
             .attendance {
                 display: table;
                 width: 100%;
-                margin-bottom: 4px;
+                margin-bottom: {{ $secMargin }};
                 border: 1px solid #1e3a5f;
                 border-radius: 3px;
+                page-break-inside: avoid;
+                break-inside: avoid;
             }
             .att-cell {
                 display: table-cell;
                 width: 33.33%;
                 text-align: center;
-                padding: 4px;
+                padding: 2.5px 4px;
                 border-right: 1px solid #e2e8f0;
                 background: #f8fafc;
             }
             .att-cell:last-child { border-right: none; }
             .att-label {
-                font-size: 7px;
+                font-size: 6.5px;
                 font-weight: 800;
                 color: #1e3a5f;
                 text-transform: uppercase;
                 margin-bottom: 1px;
             }
             .att-value {
-                font-size: 12px;
+                font-size: 11px;
                 font-weight: 800;
                 color: #1e3a5f;
             }
@@ -229,12 +251,14 @@
             .remarks {
                 border: 1px solid #c4975a;
                 padding: 3px 5px;
-                margin-bottom: 3px;
+                margin-bottom: {{ $secMargin }};
                 background: #fffbeb;
                 border-radius: 3px;
+                page-break-inside: avoid;
+                break-inside: avoid;
             }
             .remarks-label {
-                font-size: 7px;
+                font-size: 6.5px;
                 font-weight: 800;
                 color: #1e3a5f;
                 text-transform: uppercase;
@@ -242,7 +266,7 @@
                 margin-bottom: 1px;
             }
             .remarks-text {
-                font-size: 8px;
+                font-size: 7.5px;
                 color: #1e293b;
                 line-height: 1.25;
             }
@@ -251,32 +275,36 @@
                 background: #1e3a5f;
                 color: #c4975a;
                 text-align: center;
-                padding: 4px;
-                font-size: 8.5px;
+                padding: 2.5px 4px;
+                font-size: 8px;
                 font-weight: 800;
                 text-transform: uppercase;
                 letter-spacing: 1px;
-                margin-bottom: 4px;
+                margin-bottom: {{ $secMargin }};
                 border-radius: 3px;
+                page-break-inside: avoid;
+                break-inside: avoid;
             }
 
             .signatures {
                 display: table;
                 width: 100%;
-                margin-top: 4px;
+                margin-top: 3px;
+                page-break-inside: avoid;
+                break-inside: avoid;
             }
             .sig {
                 display: table-cell;
                 width: 33.33%;
                 text-align: center;
-                padding: 3px;
+                padding: 2px;
                 vertical-align: bottom;
             }
             .sig-line {
                 border-top: 1.5px solid #1e3a5f;
-                margin-top: 8px;
+                margin-top: 6px;
                 padding-top: 2px;
-                font-size: 8px;
+                font-size: 7.5px;
                 font-weight: 800;
                 color: #1e3a5f;
             }

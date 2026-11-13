@@ -63,7 +63,7 @@
         .att-value { font-size: 11px; font-weight: bold; color: #450a0a; }
 
         /* Remarks */
-        .remarks { border: 1.5px solid #991b1b; border-radius: 3px; padding: 5px 8px; margin-bottom: 5px; background: #fffbeb; }
+        .remarks { border: 1.5px solid #991b1b; border-radius: 3px; padding: 5px 8px; margin-bottom: 5px; background: #fffbeb; page-break-inside: avoid; }
         .remarks-label { font-size: 7.5px; font-weight: bold; color: #7f1d1d; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 2px; }
         .remarks-text { font-size: 8px; color: #450a0a; line-height: 1.3; font-style: italic; }
 

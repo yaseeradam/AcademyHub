@@ -54,7 +54,7 @@
         .att-value { font-size: 11px; font-weight: bold; color: #0f172a; }
 
         /* Remarks */
-        .remarks { border: 1.5px solid #cbd5e1; border-radius: 3px; padding: 5px 8px; margin-bottom: 5px; background: #f8fafc; }
+        .remarks { border: 1.5px solid #cbd5e1; border-radius: 3px; padding: 5px 8px; margin-bottom: 5px; background: #f8fafc; page-break-inside: avoid; }
         .remarks-label { font-size: 7.5px; font-weight: bold; color: #1e293b; text-transform: uppercase; letter-spacing: 0.3px; margin-bottom: 2px; }
         .remarks-text { font-size: 8px; color: #334155; line-height: 1.3; }
 
