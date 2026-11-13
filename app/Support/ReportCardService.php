@@ -381,13 +381,26 @@ class ReportCardService
             $sessionYears = [(int) $m[1], (int) $m[2]];
         }
 
-        // Query all attendance sheets for this class and section
-        $sheets = AttendanceSheet::query()
+        // Query all attendance sheets for this class and term/session.
+        // Include BOTH section-specific sheets AND class-wide sheets (NULL section_id)
+        // so we never miss valid school days regardless of how the sheet was created.
+        $sheetsQuery = AttendanceSheet::query()
             ->where('class_id', $student->class_id)
-            ->when($sectionId > 0, fn($q) => $q->where('section_id', $sectionId), fn($q) => $q->whereNull('section_id'))
             ->where('term', $term)
-            ->where('session', $session)
-            ->get(['id', 'date']);
+            ->where('session', $session);
+
+        if ($sectionId > 0) {
+            // For sectioned students: accept sheets for their specific arm OR class-wide sheets
+            $sheetsQuery->where(function ($q) use ($sectionId) {
+                $q->where('section_id', $sectionId)
+                  ->orWhereNull('section_id');
+            });
+        } else {
+            // For non-sectioned students: class-wide sheets only
+            $sheetsQuery->whereNull('section_id');
+        }
+
+        $sheets = $sheetsQuery->get(['id', 'date']);
 
         // Filter out corrupted dates and unwanted weekends
         $validSheetIds = $sheets->filter(function ($sheet) use ($allowWeekends, $sessionYears) {
@@ -408,25 +421,38 @@ class ReportCardService
             }
         })->pluck('id');
 
-        $timesOpened = $validSheetIds->count();
+        // De-duplicate by date to avoid double-counting when both a section sheet
+        // and a class-wide sheet exist for the same day.
+        $uniqueValidSheetIds = $sheets
+            ->whereIn('id', $validSheetIds->all())
+            ->unique(fn ($s) => \Carbon\Carbon::parse($s->date)->toDateString())
+            ->pluck('id');
+
+        $timesOpened = $uniqueValidSheetIds->count();
 
         if ($timesOpened === 0) {
             return [null, null, null];
         }
 
-        // Query attendance marks for this student on the valid sheets
+        // Query attendance marks for this student on the valid sheets.
+        // When both a section sheet and a class-wide sheet exist for the same day,
+        // uniqueValidSheetIds already de-duplicated to one sheet per date, so the
+        // mark lookup is unambiguous.
         $marks = AttendanceMark::query()
-            ->whereIn('sheet_id', $validSheetIds)
+            ->whereIn('sheet_id', $uniqueValidSheetIds)
             ->where('student_id', $student->id)
             ->get(['id', 'sheet_id', 'status']);
 
-        $timesPresent = (int) $marks->whereIn('status', ['Present', 'Late', 'Excused'])->count();
+        $timesPresent   = (int) $marks->whereIn('status', ['Present', 'Late', 'Excused'])->count();
         $explicitAbsent = (int) $marks->where('status', 'Absent')->count();
 
-        // Enforce mathematical integrity:
-        // A student is either Present or Absent on each valid session the school opened.
+        // Any school day without an explicit mark is treated as absent.
         $timesAbsent = max($explicitAbsent, $timesOpened - $timesPresent);
-        $timesOpened = $timesPresent + $timesAbsent;
+
+        // timesOpened is the authoritative count of valid school days — do NOT
+        // overwrite it with timesPresent + timesAbsent (which inflates if a student
+        // has marks on sheets outside the valid set).
+        // timesPresent + timesAbsent will always equal timesOpened by the formula above.
 
         return [$timesOpened, $timesPresent, $timesAbsent];
     }
