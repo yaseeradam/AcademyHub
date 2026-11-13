@@ -455,9 +455,14 @@ class SettingsController extends Controller
                 $cacheDirs[] = storage_path('app/academyhub/tenants/' . $tenantId . '/report_booklets');
             }
             foreach ($cacheDirs as $dir) {
-                if (File::exists($dir)) {
-                    File::deleteDirectory($dir);
-                    File::makeDirectory($dir, 0755, true);
+                try {
+                    if (File::isDirectory($dir)) {
+                        File::cleanDirectory($dir);
+                    } else {
+                        File::ensureDirectoryExists($dir, 0775);
+                    }
+                } catch (\Throwable $e) {
+                    \Log::warning('Could not clear report card cache in ' . $dir . ': ' . $e->getMessage());
                 }
             }
 
