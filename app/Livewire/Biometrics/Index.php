@@ -50,6 +50,24 @@ class Index extends Component
     public int $editingTerminalPort = 4370;
     public string $editingTerminalLocation = 'Main Gate';
 
+    // K40 Students PDF & Auto-Assignment Modal
+    public bool $showK40Modal = false;
+    public string $k40ClassFilter = 'all';
+    public string $k40ShiftFilter = 'all';
+    public string $k40StatusFilter = 'Active';
+
+    public function autoAssignK40Ids(): void
+    {
+        $tenantId = auth()->user()?->tenant_id ?? 1;
+        $assigned = \App\Http\Controllers\K40StudentsPdfController::performAutoAssignment($tenantId, $this->k40ClassFilter);
+
+        if ($assigned > 0) {
+            $this->dispatch('alert', message: "Successfully auto-assigned K40 Biometric IDs to {$assigned} student(s)!", type: 'success');
+        } else {
+            $this->dispatch('alert', message: "All students in the selected scope already have assigned K40 Biometric IDs.", type: 'info');
+        }
+    }
+
     public function mount(): void
     {
         $this->todayDate = Carbon::today()->format('Y-m-d');
@@ -732,17 +750,28 @@ class Index extends Component
 
         $totalPunchesToday = $allLogs->count();
 
+        $unassignedStudentsCount = Student::where('tenant_id', $tenantId)
+            ->where(function($q) {
+                $q->whereNull('status')->orWhere('status', 'Active')->orWhere('status', 'active');
+            })
+            ->whereNull('k40_uid')
+            ->count();
+
+        $classes = \App\Models\SchoolClass::where('tenant_id', $tenantId)->orderBy('level')->get();
+
         return view('livewire.biometrics.index', [
-            'totalStudents'     => $totalStudents,
-            'totalStaff'        => $totalStaff,
-            'totalPunchesToday' => $totalPunchesToday,
-            'studentMarks'      => $studentMarks,
-            'staffMarks'        => $staffMarks,
-            'terminals'         => $this->terminals,
-            'punchLogs'         => $filteredLogs,
-            'totalStudentLogs'  => $studentLogs->count(),
-            'totalStaffLogs'    => $staffLogs->count(),
-            'totalAllLogs'      => $allLogs->count(),
+            'totalStudents'           => $totalStudents,
+            'totalStaff'              => $totalStaff,
+            'totalPunchesToday'       => $totalPunchesToday,
+            'studentMarks'            => $studentMarks,
+            'staffMarks'              => $staffMarks,
+            'terminals'               => $this->terminals,
+            'punchLogs'               => $filteredLogs,
+            'totalStudentLogs'        => $studentLogs->count(),
+            'totalStaffLogs'          => $staffLogs->count(),
+            'totalAllLogs'            => $allLogs->count(),
+            'unassignedStudentsCount' => $unassignedStudentsCount,
+            'classes'                 => $classes,
         ]);
     }
 }

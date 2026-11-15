@@ -16,6 +16,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\StudentController;
 use App\Http\Controllers\StudentsExportController;
+use App\Http\Controllers\K40StudentsPdfController;
 use App\Http\Controllers\MessageAttachmentController;
 use App\Http\Controllers\SchoolClassController;
 use App\Http\Controllers\PaystackCallbackController;
@@ -276,6 +277,7 @@ Route::middleware(['auth', 'active'])->group(function () {
     Route::middleware('role:admin,teacher,bursar,proprietor,parent')->group(function () {
         Route::get('/students', StudentsIndex::class)->name('students.index');
         Route::get('/students/export', [StudentsExportController::class, 'export'])->middleware('role:admin,teacher,bursar,proprietor')->name('students.export');
+        Route::get('/students/k40-pdf', [K40StudentsPdfController::class, 'download'])->middleware('role:admin,teacher,bursar,proprietor')->name('students.k40-pdf');
         Route::get('/students/{student}/admission-form', [AdmissionFormController::class, 'download'])->name('students.admission-form')->where('student', '[A-Za-z0-9\/\-\.]+');
         Route::get('/students/{student}', [StudentController::class, 'show'])->name('students.show')->where('student', '[A-Za-z0-9\/\-\.]+');
     });
@@ -319,6 +321,8 @@ Route::middleware(['auth', 'active'])->group(function () {
     // ZKTeco K40 Biometrics — accessible to admin and teachers when plugin is installed
     Route::middleware(['role:admin,teacher', 'plugin:k40-biometrics'])->group(function () {
         Route::get('/biometrics', \App\Livewire\Biometrics\Index::class)->name('biometrics.index');
+        Route::get('/biometrics/students-pdf', [K40StudentsPdfController::class, 'download'])->name('biometrics.students-pdf');
+        Route::post('/biometrics/auto-assign-k40', [K40StudentsPdfController::class, 'autoAssign'])->middleware('role:admin,proprietor')->name('biometrics.auto-assign-k40');
     });
 
     Route::middleware('role:admin,teacher,bursar,proprietor')->group(function () {
