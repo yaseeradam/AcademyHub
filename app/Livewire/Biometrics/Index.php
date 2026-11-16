@@ -56,6 +56,123 @@ class Index extends Component
     public string $k40ShiftFilter = 'all';
     public string $k40StatusFilter = 'Active';
 
+    // Staff K40 Hardware Management Modal & Inline Editing
+    public bool $showStaffK40Modal = false;
+    public ?int $editingStaffId = null;
+    public ?int $editingStaffK40Uid = null;
+    public string $staffSearch = '';
+
+    public function editStaffK40(int $staffId): void
+    {
+        $this->editingStaffId = $staffId;
+        $user = User::withoutGlobalScopes()->find($staffId);
+        $this->editingStaffK40Uid = $user?->k40_uid ?? ($user?->custom_fields['k40_uid'] ?? null);
+    }
+
+    public function cancelEditStaffK40(): void
+    {
+        $this->editingStaffId = null;
+        $this->editingStaffK40Uid = null;
+    }
+
+    public function saveStaffK40(): void
+    {
+        if (!$this->editingStaffId) return;
+
+        $tenantId = auth()->user()?->tenant_id ?? 1;
+        $user = User::withoutGlobalScopes()->where('tenant_id', $tenantId)->find($this->editingStaffId);
+        if (!$user) return;
+
+        $val = $this->editingStaffK40Uid ? (int) $this->editingStaffK40Uid : null;
+
+        if ($val !== null) {
+            // Check collision with other staff
+            $collision = User::withoutGlobalScopes()
+                ->where('tenant_id', $tenantId)
+                ->where('id', '!=', $user->id)
+                ->where('k40_uid', $val)
+                ->first();
+
+            if ($collision) {
+                $this->dispatch('alert', message: "K40 Hardware ID #{$val} is already assigned to {$collision->name}!", type: 'error');
+                return;
+            }
+        }
+
+        $user->k40_uid = $val;
+        $custom = $user->custom_fields ?? [];
+        $custom['k40_uid'] = $val;
+        $user->custom_fields = $custom;
+        $user->save();
+
+        if ($val !== null) {
+            $unmapped = Cache::get("tenant_{$tenantId}_unmapped_k40_punches", []);
+            unset($unmapped[$val]);
+            Cache::put("tenant_{$tenantId}_unmapped_k40_punches", $unmapped, now()->addDays(7));
+        }
+
+        $this->editingStaffId = null;
+        $this->editingStaffK40Uid = null;
+        $this->dispatch('alert', message: "Updated K40 Biometric Hardware ID for {$user->name} to #" . ($val ?? 'UNASSIGNED') . "!", type: 'success');
+    }
+
+    public function autoAssignStaffK40Ids(): void
+    {
+        $tenantId = auth()->user()?->tenant_id ?? 1;
+
+        $unassigned = User::withoutGlobalScopes()
+            ->where('tenant_id', $tenantId)
+            ->whereIn('role', ['teacher', 'admin', 'bursar'])
+            ->whereNull('k40_uid')
+            ->orderBy('name')
+            ->get();
+
+        $count = 0;
+        foreach ($unassigned as $staff) {
+            $nextUid = User::getNextAvailableK40Uid($tenantId);
+            $staff->k40_uid = $nextUid;
+            $custom = $staff->custom_fields ?? [];
+            $custom['k40_uid'] = $nextUid;
+            $staff->custom_fields = $custom;
+            $staff->save();
+            $count++;
+        }
+
+        if ($count > 0) {
+            $this->dispatch('alert', message: "Successfully auto-assigned unique K40 IDs to {$count} staff member(s)!", type: 'success');
+        } else {
+            $this->dispatch('alert', message: "All staff members already have unique K40 Hardware IDs assigned.", type: 'info');
+        }
+    }
+
+    public function linkUnmappedPunchToStaff(string $k40Uid, int $staffId): void
+    {
+        $tenantId = auth()->user()?->tenant_id ?? 1;
+        $user = User::withoutGlobalScopes()->where('tenant_id', $tenantId)->find($staffId);
+        if (!$user) return;
+
+        $user->k40_uid = (int) $k40Uid;
+        $custom = $user->custom_fields ?? [];
+        $custom['k40_uid'] = (int) $k40Uid;
+        $user->custom_fields = $custom;
+        $user->save();
+
+        $unmapped = Cache::get("tenant_{$tenantId}_unmapped_k40_punches", []);
+        unset($unmapped[$k40Uid]);
+        Cache::put("tenant_{$tenantId}_unmapped_k40_punches", $unmapped, now()->addDays(7));
+
+        $this->dispatch('alert', message: "Successfully linked K40 ID #{$k40Uid} to {$user->name}!", type: 'success');
+    }
+
+    public function dismissUnmappedPunch(string $k40Uid): void
+    {
+        $tenantId = auth()->user()?->tenant_id ?? 1;
+        $unmapped = Cache::get("tenant_{$tenantId}_unmapped_k40_punches", []);
+        unset($unmapped[$k40Uid]);
+        Cache::put("tenant_{$tenantId}_unmapped_k40_punches", $unmapped, now()->addDays(7));
+        $this->dispatch('alert', message: "Dismissed punch from K40 ID #{$k40Uid}.", type: 'info');
+    }
+
     public function autoAssignK40Ids(): void
     {
         $tenantId = auth()->user()?->tenant_id ?? 1;
@@ -759,6 +876,30 @@ class Index extends Component
 
         $classes = \App\Models\SchoolClass::where('tenant_id', $tenantId)->orderBy('level')->get();
 
+        $staffMembersQuery = User::withoutGlobalScopes()
+            ->where('tenant_id', $tenantId)
+            ->whereIn('role', ['teacher', 'admin', 'bursar']);
+
+        if (!empty($this->staffSearch)) {
+            $s = $this->staffSearch;
+            $staffMembersQuery->where(function($q) use ($s) {
+                $q->where('name', 'like', "%{$s}%")
+                  ->orWhere('email', 'like', "%{$s}%")
+                  ->orWhere('k40_uid', 'like', "%{$s}%");
+            });
+        }
+
+        $staffMembers = $staffMembersQuery->orderByRaw("k40_uid IS NULL, k40_uid ASC, name ASC")->get();
+
+        $unassignedStaffCount = User::withoutGlobalScopes()
+            ->where('tenant_id', $tenantId)
+            ->whereIn('role', ['teacher', 'admin', 'bursar'])
+            ->whereNull('k40_uid')
+            ->count();
+
+        $unmappedPunches = Cache::get("tenant_{$tenantId}_unmapped_k40_punches", []);
+        $deviceInventory = Cache::get("tenant_{$tenantId}_k40_device_inventory", null);
+
         return view('livewire.biometrics.index', [
             'totalStudents'           => $totalStudents,
             'totalStaff'              => $totalStaff,
@@ -772,6 +913,10 @@ class Index extends Component
             'totalAllLogs'            => $allLogs->count(),
             'unassignedStudentsCount' => $unassignedStudentsCount,
             'classes'                 => $classes,
+            'staffMembers'            => $staffMembers,
+            'unassignedStaffCount'    => $unassignedStaffCount,
+            'unmappedPunches'         => $unmappedPunches,
+            'deviceInventory'         => $deviceInventory,
         ]);
     }
 }

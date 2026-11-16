@@ -34,7 +34,8 @@ class TeacherController extends Controller
     public function create()
     {
         $customFields = CustomField::active()->ordered()->where('form_type', 'teacher')->get();
-        return view('pages.teachers.create', compact('customFields'));
+        $nextK40Uid = User::getNextAvailableK40Uid();
+        return view('pages.teachers.create', compact('customFields', 'nextK40Uid'));
     }
 
     public function store(Request $request)
@@ -44,6 +45,7 @@ class TeacherController extends Controller
         $rules = [
             'name'             => ['required', 'string', 'max:255'],
             'email'            => ['required', 'string', 'email', 'max:255', Rule::unique('users', 'email')->where('tenant_id', TenantSettings::tenantId())],
+            'k40_uid'          => ['nullable', 'integer', 'min:1', 'max:65535', Rule::unique('users', 'k40_uid')->where('tenant_id', TenantSettings::tenantId())],
             'whatsapp_phone'   => ['nullable', 'string', 'max:25'],
             'password'         => ['required', 'string', 'min:8', 'confirmed'],
             'is_active'        => ['nullable', 'boolean'],
@@ -85,10 +87,13 @@ class TeacherController extends Controller
         }
 
         $cleanPhone = !empty($data['whatsapp_phone']) ? preg_replace('/[^\+0-9]/', '', $data['whatsapp_phone']) : null;
+        $k40Uid = !empty($data['k40_uid']) ? (int) $data['k40_uid'] : User::getNextAvailableK40Uid();
+        $customFieldValues['k40_uid'] = $k40Uid;
 
         $teacher = User::query()->create([
             'name'             => $data['name'],
             'email'            => $data['email'],
+            'k40_uid'          => $k40Uid,
             'whatsapp_phone'   => $cleanPhone,
             'password'         => $data['password'],
             'role'             => 'teacher',
@@ -140,6 +145,7 @@ class TeacherController extends Controller
         $rules = [
             'name'             => ['required', 'string', 'max:255'],
             'email'            => ['required', 'string', 'email', 'max:255', Rule::unique('users', 'email')->where('tenant_id', TenantSettings::tenantId())->ignore($teacher->id)],
+            'k40_uid'          => ['nullable', 'integer', 'min:1', 'max:65535', Rule::unique('users', 'k40_uid')->where('tenant_id', TenantSettings::tenantId())->ignore($teacher->id)],
             'whatsapp_phone'   => ['nullable', 'string', 'max:25'],
             'password'         => ['nullable', 'string', 'min:8', 'confirmed'],
             'is_active'        => ['nullable', 'boolean'],
@@ -176,6 +182,8 @@ class TeacherController extends Controller
 
         $teacher->name             = $data['name'];
         $teacher->email            = $data['email'];
+        $teacher->k40_uid          = !empty($data['k40_uid']) ? (int) $data['k40_uid'] : null;
+        $customFieldValues['k40_uid'] = $teacher->k40_uid;
         $teacher->whatsapp_phone   = !empty($data['whatsapp_phone']) ? preg_replace('/[^\+0-9]/', '', $data['whatsapp_phone']) : null;
         $teacher->is_active        = (bool) ($data['is_active'] ?? false);
         $teacher->is_class_teacher = (bool) ($data['is_class_teacher'] ?? false);

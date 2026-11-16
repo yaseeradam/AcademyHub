@@ -167,17 +167,27 @@
                                     </span>
                                 </div>
                                 
-                                @if($teacher->is_class_teacher)
-                                    <div class="mt-2">
-                                        <span class="inline-flex items-center rounded-lg bg-gradient-to-r {{ $color['icon'] }} px-2.5 py-1 text-xs font-bold text-white shadow-sm">
+                                <div class="mt-2 flex flex-wrap items-center gap-1.5">
+                                    @if($teacher->k40_uid ?? ($teacher->custom_fields['k40_uid'] ?? null))
+                                        <span class="inline-flex items-center gap-1 rounded-md bg-amber-200/80 px-2 py-0.5 text-[11px] font-mono font-bold text-amber-950 ring-1 ring-amber-300">
+                                            <svg class="w-3 h-3 text-amber-800" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 11c0 3.517-1.009 6.799-2.753 9.571m-3.44-2.04l.054-.09A13.916 13.916 0 008 11a4 4 0 118 0c0 1.017-.07 2.019-.203 3m-2.118 6.844A21.88 21.88 0 0015.171 17m3.839 1.132c.645-2.266.99-4.659.99-7.132A8 8 0 008 4.07M3 15.364c.64-1.319 1-2.8 1-4.364 0-1.457.39-2.823 1.07-4"></path></svg>
+                                            K40 #{{ $teacher->k40_uid ?? $teacher->custom_fields['k40_uid'] }}
+                                        </span>
+                                    @else
+                                        <span class="inline-flex items-center gap-1 rounded-md bg-rose-100 px-2 py-0.5 text-[11px] font-mono font-bold text-rose-800 ring-1 ring-rose-200">
+                                            K40 PENDING
+                                        </span>
+                                    @endif
+                                    @if($teacher->is_class_teacher)
+                                        <span class="inline-flex items-center rounded-lg bg-gradient-to-r {{ $color['icon'] }} px-2 py-0.5 text-[11px] font-bold text-white shadow-sm">
                                             <svg class="mr-1 h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                                 <path d="M22 10 12 5 2 10l10 5 10-5z"/>
                                                 <path d="M6 12v5a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2v-5"/>
                                             </svg>
                                             Class Teacher
                                         </span>
-                                    </div>
-                                @endif
+                                    @endif
+                                </div>
                             </div>
                         </div>
 

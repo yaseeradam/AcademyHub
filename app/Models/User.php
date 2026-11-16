@@ -36,6 +36,7 @@ class User extends Authenticatable
         'whatsapp_subscribed',
         'is_class_teacher',
         'shift',
+        'k40_uid',
     ];
 
     /**
@@ -73,6 +74,7 @@ class User extends Authenticatable
         'whatsapp_verified'   => 'boolean',
         'whatsapp_subscribed' => 'boolean',
         'is_class_teacher'    => 'boolean',
+        'k40_uid'             => 'integer',
     ];
 
     protected static function booted(): void
@@ -292,10 +294,51 @@ class User extends Authenticatable
 
     /**
      * Returns matching hardware biometric UID on K40 device.
+     * Explicitly avoids fallback to auto-increment DB id to prevent cross-teacher overwrite bugs.
      */
     public function getK40Uid(): ?int
     {
-        return isset($this->custom_fields['k40_uid']) ? (int) $this->custom_fields['k40_uid'] : $this->id;
+        if ($this->k40_uid !== null) {
+            return (int) $this->k40_uid;
+        }
+
+        if (isset($this->custom_fields['k40_uid']) && is_numeric($this->custom_fields['k40_uid'])) {
+            return (int) $this->custom_fields['k40_uid'];
+        }
+
+        return null;
+    }
+
+    /**
+     * Get the next available unique K40 hardware UID for staff (range: 1 - 199).
+     */
+    public static function getNextAvailableK40Uid(?int $tenantId = null): int
+    {
+        $tenantId = $tenantId ?? (auth()->user()?->tenant_id ?? 1);
+
+        $usedStaffUids = static::withoutGlobalScopes()
+            ->where('tenant_id', $tenantId)
+            ->whereNotNull('k40_uid')
+            ->pluck('k40_uid')
+            ->map(fn($v) => (int) $v)
+            ->toArray();
+
+        $usedStudentUids = \App\Models\Student::withoutGlobalScopes()
+            ->where('tenant_id', $tenantId)
+            ->whereNotNull('k40_uid')
+            ->pluck('k40_uid')
+            ->map(fn($v) => (int) $v)
+            ->toArray();
+
+        $allUsed = array_unique(array_merge($usedStaffUids, $usedStudentUids));
+
+        for ($uid = 1; $uid < 200; $uid++) {
+            if (!in_array($uid, $allUsed)) {
+                return $uid;
+            }
+        }
+
+        return max(1, (!empty($allUsed) ? max($allUsed) + 1 : 1));
     }
 
     /**

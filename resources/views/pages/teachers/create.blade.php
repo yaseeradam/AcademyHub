@@ -98,6 +98,45 @@
                     </div>
                 </div>
 
+                {{-- Biometric Hardware Enrollment (ZKTeco K40) --}}
+                <div class="rounded-xl border border-amber-200 bg-amber-50/40 p-6 shadow-sm">
+                    <div class="flex items-center justify-between mb-4 border-b border-amber-200/60 pb-2">
+                        <div class="flex items-center gap-2">
+                            <span class="p-1.5 rounded-lg bg-amber-100 text-amber-800">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 11c0 3.517-1.009 6.799-2.753 9.571m-3.44-2.04l.054-.09A13.916 13.916 0 008 11a4 4 0 118 0c0 1.017-.07 2.019-.203 3m-2.118 6.844A21.88 21.88 0 0015.171 17m3.839 1.132c.645-2.266.99-4.659.99-7.132A8 8 0 008 4.07M3 15.364c.64-1.319 1-2.8 1-4.364 0-1.457.39-2.823 1.07-4"></path></svg>
+                            </span>
+                            <div>
+                                <h2 class="text-base font-bold text-gray-900">ZKTeco K40 Biometric Hardware ID</h2>
+                                <p class="text-xs text-gray-500">Hardware User ID matching the teacher's enrolled fingerprint/RFID card on the K40 device.</p>
+                            </div>
+                        </div>
+                        <span class="text-xs font-semibold px-2.5 py-1 rounded-full bg-amber-100 text-amber-800 border border-amber-300 font-mono">
+                            Staff Range: 1 - 199
+                        </span>
+                    </div>
+
+                    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                        <div>
+                            <label class="block text-sm font-bold text-gray-900 mb-2">Assigned K40 Hardware ID</label>
+                            <input
+                                name="k40_uid"
+                                type="number"
+                                min="1"
+                                max="65535"
+                                class="w-full rounded-lg border-2 border-amber-300 bg-white px-4 py-3 text-sm font-bold font-mono text-gray-900 shadow-sm transition-all focus:border-amber-500 focus:ring-4 focus:ring-amber-500/20 hover:border-amber-400"
+                                value="{{ old('k40_uid', $nextK40Uid ?? '') }}"
+                                placeholder="e.g. 17"
+                            />
+                            @error('k40_uid')
+                                <p class="mt-1 text-xs text-rose-600 font-semibold">{{ $message }}</p>
+                            @enderror
+                            <p class="mt-1.5 text-xs text-gray-500">
+                                Pre-filled with next free ID. This exact number must be registered when enrolling this teacher's finger or card on the K40 terminal.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
                 {{-- Security Settings & Toggles --}}
                 <div class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
                     <h2 class="text-base font-semibold text-gray-900 mb-4 border-b border-gray-100 pb-2">Security & Roles</h2>

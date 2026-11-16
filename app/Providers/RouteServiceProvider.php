@@ -96,6 +96,8 @@ class RouteServiceProvider extends ServiceProvider
                     Route::post('/api/zkteco/manual-override', [\App\Http\Controllers\Api\ZkTecoController::class, 'manualOverride']);
                     Route::get('/api/zkteco/gate-status', [\App\Http\Controllers\Api\ZkTecoController::class, 'gateStatus']);
                     Route::post('/api/zkteco/test-popup', [\App\Http\Controllers\Api\ZkTecoController::class, 'testPopup']);
+                    Route::post('/api/zkteco/device-roster', [\App\Http\Controllers\Api\ZkTecoController::class, 'recordDeviceRoster']);
+                    Route::post('/api/zkteco/assign-hardware-user', [\App\Http\Controllers\Api\ZkTecoController::class, 'assignHardwareUser']);
                 });
 
             Route::middleware('api')

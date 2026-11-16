@@ -61,31 +61,18 @@ class BiometricSyncService
         });
 
         // ── 1. Check if punch belongs to a Teacher/Staff ──────────────────
-        // Priority 1: Match by hardware K40 UID (custom_fields->k40_uid)
+        // Match strictly by explicit hardware K40 UID (k40_uid column or custom_fields->k40_uid)
+        // NEVER fall back to database auto-increment ID to prevent cross-teacher attendance cross-signing.
         $teacher = User::withoutGlobalScopes()
             ->whereIn('role', ['teacher', 'admin', 'bursar'])
             ->where('is_active', true)
             ->where(function ($q) use ($userId) {
-                $q->where('custom_fields->k40_uid', (int) $userId)
+                $q->where('k40_uid', (int) $userId)
+                  ->orWhere('custom_fields->k40_uid', (int) $userId)
                   ->orWhere('custom_fields->k40_uid', (string) $userId);
             })
             ->orderByRaw("CASE WHEN role = 'teacher' THEN 0 ELSE 1 END")
             ->first();
-
-        // Priority 2: Staff database ID or email prefix (only if no student owns this k40_uid)
-        if (!$teacher) {
-            $hasStudentUid = Student::where('k40_uid', (int) $userId)->exists();
-            if (!$hasStudentUid) {
-                $teacher = User::withoutGlobalScopes()
-                    ->whereIn('role', ['teacher', 'admin', 'bursar'])
-                    ->where('is_active', true)
-                    ->where(function ($q) use ($userId) {
-                        $q->where('id', $userId)
-                          ->orWhere('email', 'like', $userId . '@%');
-                    })
-                    ->first();
-            }
-        }
 
         if ($teacher) {
             $staffTenantId = $teacher->tenant_id ?? $tenantId;
@@ -198,6 +185,20 @@ class BiometricSyncService
             ->first();
 
         if (!$student) {
+            $effectiveTenant = $tenantId ?? 1;
+            $unmapped = Cache::get("tenant_{$effectiveTenant}_unmapped_k40_punches", []);
+            $unmapped[$userId] = [
+                'k40_uid'    => (string) $userId,
+                'time'       => $timeStr,
+                'date'       => $dateStr,
+                'last_seen'  => now()->toISOString(),
+                'device_sn'  => 'LAN-SYNC',
+            ];
+            if (count($unmapped) > 25) {
+                $unmapped = array_slice($unmapped, -25, 25, true);
+            }
+            Cache::put("tenant_{$effectiveTenant}_unmapped_k40_punches", $unmapped, now()->addDays(7));
+
             return null;
         }
 

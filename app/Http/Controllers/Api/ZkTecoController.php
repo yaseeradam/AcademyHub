@@ -166,31 +166,18 @@ class ZkTecoController extends Controller
             $status = ($timeStr > $lateThreshold) ? 'Late' : 'Present';
 
             // ── Try matching as a Teacher/Staff first ──────────────────────────
-            // Priority 1: Match by hardware K40 UID (custom_fields->k40_uid)
+            // Match strictly by explicit hardware K40 UID (k40_uid column or custom_fields->k40_uid)
+            // NEVER fall back to database auto-increment ID to prevent cross-teacher attendance cross-signing.
             $teacher = User::withoutGlobalScopes()
                 ->whereIn('role', ['teacher', 'admin', 'bursar'])
                 ->where('is_active', true)
                 ->where(function ($q) use ($userId) {
-                    $q->where('custom_fields->k40_uid', (int) $userId)
+                    $q->where('k40_uid', (int) $userId)
+                      ->orWhere('custom_fields->k40_uid', (int) $userId)
                       ->orWhere('custom_fields->k40_uid', (string) $userId);
                 })
                 ->orderByRaw("CASE WHEN role = 'teacher' THEN 0 ELSE 1 END")
                 ->first();
-
-            // Priority 2: Fall back to staff ID or email ONLY if no student explicitly owns this k40_uid
-            if (!$teacher) {
-                $hasStudentUid = Student::where('k40_uid', (int) $userId)->exists();
-                if (!$hasStudentUid) {
-                    $teacher = User::withoutGlobalScopes()
-                        ->whereIn('role', ['teacher', 'admin', 'bursar'])
-                        ->where('is_active', true)
-                        ->where(function ($q) use ($userId) {
-                            $q->where('id', $userId)
-                              ->orWhere('email', 'like', $userId . '@%');
-                        })
-                        ->first();
-                }
-            }
 
             if ($teacher) {
                 $targetTenant = $teacher->tenant ?? Tenant::find($teacher->tenant_id ?? 1);
@@ -326,7 +313,22 @@ class ZkTecoController extends Controller
                 ->first();
 
             if (!$student) {
-                Log::warning("ZKTeco ADMS Sync: No student or staff found for User ID: {$userId}");
+                Log::warning("ZKTeco ADMS Sync: Unregistered hardware punch from K40 User ID: {$userId}");
+
+                // Store unmapped punch so administrator can link or auto-assign it in the Biometrics Hub
+                $unmapped = Cache::get("tenant_{$tenantId}_unmapped_k40_punches", []);
+                $unmapped[$userId] = [
+                    'k40_uid'    => (string) $userId,
+                    'time'       => $timeStr,
+                    'date'       => $dateStr,
+                    'last_seen'  => now()->toISOString(),
+                    'device_sn'  => $sn,
+                ];
+                if (count($unmapped) > 25) {
+                    $unmapped = array_slice($unmapped, -25, 25, true);
+                }
+                Cache::put("tenant_{$tenantId}_unmapped_k40_punches", $unmapped, now()->addDays(7));
+
                 continue;
             }
 
@@ -609,31 +611,41 @@ class ZkTecoController extends Controller
         $students = $studentQuery->get();
 
         $formatted = [];
+        $seenUids = [];
 
         foreach ($staffUsers as $u) {
+            $uid = $u->getK40Uid();
+            if ($uid === null || in_array($uid, $seenUids)) {
+                continue;
+            }
+            $seenUids[] = $uid;
+
             $cleanName = trim(preg_replace('/[^A-Za-z0-9\s]/', ' ', $u->name));
             $cleanName = preg_replace('/\s+/', ' ', $cleanName);
             $cleanName = substr($cleanName, 0, 24);
 
-            // Set privilege to 0 (USER_DEFAULT) on K40 hardware so device menu is never locked
-            $privilege = 0;
-
             $formatted[] = [
-                'user_id'    => (string) $u->getK40Uid(),
-                'uid'        => (int) $u->getK40Uid(),
+                'user_id'    => (string) $uid,
+                'uid'        => (int) $uid,
                 'name'       => $cleanName,
                 'raw_name'   => $u->name,
                 'role'       => ucfirst($u->role),
                 'type'       => $u->role === 'teacher' ? 'teacher' : 'staff',
                 'class'      => '',
                 'section'    => $u->getShiftLabel(),
-                'privilege'  => $privilege,
+                'privilege'  => 0,
                 'email'      => $u->email,
                 'tenant_id'  => $u->tenant_id,
             ];
         }
 
         foreach ($students as $s) {
+            $uid = $s->getK40Uid();
+            if ($uid === null || in_array($uid, $seenUids)) {
+                continue;
+            }
+            $seenUids[] = $uid;
+
             $fullName = trim($s->first_name . ' ' . $s->last_name);
             $cleanName = preg_replace('/(?i)\bmuh[,\\\']?d\b/', 'Muhammad', $fullName);
             $cleanName = preg_replace('/(?i)\bmd\b/', 'Muhammad', $cleanName);
@@ -642,8 +654,8 @@ class ZkTecoController extends Controller
             $cleanName = substr($cleanName, 0, 24);
 
             $formatted[] = [
-                'user_id'          => (string) $s->getK40Uid(),
-                'uid'              => (int) $s->getK40Uid(),
+                'user_id'          => (string) $uid,
+                'uid'              => (int) $uid,
                 'name'             => $cleanName,
                 'raw_name'         => $fullName,
                 'role'             => 'Student',
@@ -665,6 +677,147 @@ class ZkTecoController extends Controller
             ],
             'users'          => $formatted,
         ]);
+    }
+
+    /**
+     * Ingest the live user inventory directly from K40 device hardware memory.
+     * Compares device users against AcademyHub database to identify unmapped hardware users.
+     */
+    public function recordDeviceRoster(Request $request)
+    {
+        $tenantId = $request->input('tenant_id') ?: TenantSettings::tenantId() ?: 1;
+        $deviceUsers = $request->input('users', []);
+        $deviceName = $request->input('device_name', 'K40 Gate Terminal');
+
+        if (!is_array($deviceUsers)) {
+            return response()->json(['status' => 'error', 'message' => 'Invalid users array'], 400);
+        }
+
+        $allStaff = User::withoutGlobalScopes()
+            ->where('tenant_id', $tenantId)
+            ->whereIn('role', ['teacher', 'admin', 'bursar'])
+            ->get()
+            ->keyBy(fn($u) => (string) $u->getK40Uid());
+
+        $allStudents = Student::withoutGlobalScopes()
+            ->where('tenant_id', $tenantId)
+            ->whereNotNull('k40_uid')
+            ->get()
+            ->keyBy(fn($s) => (string) $s->k40_uid);
+
+        $matched = [];
+        $unmapped = [];
+
+        foreach ($deviceUsers as $du) {
+            $uid = (string) ($du['user_id'] ?? ($du['uid'] ?? ''));
+            if (!$uid) continue;
+
+            $name = $du['name'] ?? "User #{$uid}";
+            $fingerCount = (int) ($du['finger_count'] ?? ($du['fingers'] ?? 0));
+            $card = $du['card'] ?? 0;
+
+            if ($allStaff->has($uid)) {
+                $teacher = $allStaff->get($uid);
+                $matched[] = [
+                    'k40_uid'      => $uid,
+                    'device_name'  => $name,
+                    'academy_name' => $teacher->name,
+                    'type'         => 'staff',
+                    'role'         => ucfirst($teacher->role),
+                    'user_id'      => $teacher->id,
+                    'finger_count' => $fingerCount,
+                ];
+            } elseif ($allStudents->has($uid)) {
+                $student = $allStudents->get($uid);
+                $matched[] = [
+                    'k40_uid'      => $uid,
+                    'device_name'  => $name,
+                    'academy_name' => $student->full_name,
+                    'type'         => 'student',
+                    'role'         => 'Student',
+                    'user_id'      => $student->id,
+                    'finger_count' => $fingerCount,
+                ];
+            } else {
+                $unmapped[] = [
+                    'k40_uid'      => $uid,
+                    'device_name'  => $name,
+                    'finger_count' => $fingerCount,
+                    'card'         => $card,
+                    'first_seen'   => now()->toISOString(),
+                ];
+            }
+        }
+
+        $summary = [
+            'device_name'     => $deviceName,
+            'total_on_device' => count($deviceUsers),
+            'matched_count'   => count($matched),
+            'unmapped_count'  => count($unmapped),
+            'unmapped_users'  => $unmapped,
+            'matched_users'   => $matched,
+            'synced_at'       => now()->toDateTimeString(),
+        ];
+
+        Cache::put("tenant_{$tenantId}_k40_device_inventory", $summary, now()->addDays(30));
+
+        return response()->json([
+            'status'  => 'ok',
+            'message' => "Device user inventory recorded: " . count($matched) . " matched, " . count($unmapped) . " unmapped.",
+            'data'    => $summary,
+        ]);
+    }
+
+    /**
+     * Map an unmapped K40 hardware UID to an existing teacher/staff or student.
+     */
+    public function assignHardwareUser(Request $request)
+    {
+        $tenantId = $request->input('tenant_id') ?: TenantSettings::tenantId() ?: 1;
+        $k40Uid = (int) $request->input('k40_uid');
+        $targetType = $request->input('target_type', 'teacher'); // 'teacher' or 'student'
+        $targetId = (int) $request->input('target_id');
+
+        if ($k40Uid <= 0 || $targetId <= 0) {
+            return response()->json(['status' => 'error', 'message' => 'Invalid parameters'], 400);
+        }
+
+        if ($targetType === 'teacher') {
+            $user = User::withoutGlobalScopes()->where('tenant_id', $tenantId)->find($targetId);
+            if (!$user) {
+                return response()->json(['status' => 'error', 'message' => 'Staff member not found'], 404);
+            }
+
+            // Check if another staff owns this UID
+            $conflict = User::withoutGlobalScopes()
+                ->where('tenant_id', $tenantId)
+                ->where('id', '!=', $user->id)
+                ->where('k40_uid', $k40Uid)
+                ->first();
+
+            if ($conflict) {
+                return response()->json(['status' => 'error', 'message' => "K40 UID #{$k40Uid} is already assigned to {$conflict->name}"], 422);
+            }
+
+            $user->k40_uid = $k40Uid;
+            $custom = $user->custom_fields ?? [];
+            $custom['k40_uid'] = $k40Uid;
+            $user->custom_fields = $custom;
+            $user->save();
+
+            // Clear unmapped cache entry
+            $unmapped = Cache::get("tenant_{$tenantId}_unmapped_k40_punches", []);
+            unset($unmapped[$k40Uid]);
+            Cache::put("tenant_{$tenantId}_unmapped_k40_punches", $unmapped, now()->addDays(7));
+
+            return response()->json([
+                'status'  => 'ok',
+                'message' => "Successfully linked K40 UID #{$k40Uid} to {$user->name}!",
+                'user'    => ['id' => $user->id, 'name' => $user->name, 'k40_uid' => $k40Uid],
+            ]);
+        }
+
+        return response()->json(['status' => 'error', 'message' => 'Unsupported target type'], 400);
     }
 
 

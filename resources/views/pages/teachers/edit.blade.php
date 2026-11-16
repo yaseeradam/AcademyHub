@@ -83,6 +83,35 @@
                     <div class="mt-1 text-xs text-slate-500">Used for 1-click WhatsApp messaging in the Parent Portal directory.</div>
                 </div>
 
+                <div class="rounded-xl border border-amber-200 bg-amber-50/50 p-4">
+                    <div class="flex items-center justify-between mb-2">
+                        <label class="text-sm font-bold text-amber-950 flex items-center gap-1.5">
+                            <svg class="w-4 h-4 text-amber-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 11c0 3.517-1.009 6.799-2.753 9.571m-3.44-2.04l.054-.09A13.916 13.916 0 008 11a4 4 0 118 0c0 1.017-.07 2.019-.203 3m-2.118 6.844A21.88 21.88 0 0015.171 17m3.839 1.132c.645-2.266.99-4.659.99-7.132A8 8 0 008 4.07M3 15.364c.64-1.319 1-2.8 1-4.364 0-1.457.39-2.823 1.07-4"></path></svg>
+                            Biometric K40 Hardware ID
+                        </label>
+                        <span class="text-[11px] font-mono font-bold px-2 py-0.5 rounded bg-amber-100 text-amber-800 border border-amber-300">
+                            Staff Range: 1 - 199
+                        </span>
+                    </div>
+                    <div class="mt-1">
+                        <input
+                            name="k40_uid"
+                            type="number"
+                            min="1"
+                            max="65535"
+                            class="input font-mono font-bold text-amber-950 border-amber-300 focus:border-amber-500 focus:ring-amber-500/20"
+                            value="{{ old('k40_uid', $teacher->k40_uid ?? ($teacher->custom_fields['k40_uid'] ?? '')) }}"
+                            placeholder="e.g. 17"
+                        />
+                    </div>
+                    @error('k40_uid')
+                        <div class="mt-1 text-xs text-rose-600 font-semibold">{{ $message }}</div>
+                    @enderror
+                    <div class="mt-1.5 text-xs text-amber-800/80">
+                        Exact User ID programmed on the ZKTeco K40 device for this teacher.
+                    </div>
+                </div>
+
                 <div>
                     <label class="text-sm font-semibold text-slate-900">New password</label>
                     <div class="mt-2">
