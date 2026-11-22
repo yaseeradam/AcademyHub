@@ -51,17 +51,15 @@
             }
             .header-table { display: table; width: 100%; }
             .header-cell { display: table-cell; vertical-align: middle; }
-            .logo-cell { width: 56px; text-align: center; vertical-align: middle; }
+            .logo-cell { width: 62px; text-align: center; vertical-align: middle; }
             .logo-box {
-                width: 48px;
-                height: 48px;
-                border: 1.5px solid #c4975a;
-                border-radius: 5px;
+                width: 54px;
+                height: 54px;
                 background: white;
             }
             .logo {
-                max-width: 42px;
-                max-height: 42px;
+                max-width: 50px;
+                max-height: 50px;
                 width: auto !important;
                 height: auto !important;
                 display: block;

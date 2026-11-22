@@ -23,9 +23,9 @@
         .header-cell { display: table-cell; vertical-align: middle; }
         
         /* Logo (Crest) */
-        .logo-wrap { width: 55px; text-align: left; vertical-align: middle; }
-        .logo-box { width: 44px; height: 44px; border: 1px solid {{ $accentColor }}; border-radius: 4px; background: #fff; }
-        .logo { max-width: 40px; max-height: 40px; width: auto !important; height: auto !important; display: block; margin: 0 auto; }
+        .logo-wrap { width: 62px; text-align: left; vertical-align: middle; }
+        .logo-box { width: 54px; height: 54px; }
+        .logo { max-width: 50px; max-height: 50px; width: auto !important; height: auto !important; display: block; margin: 0 auto; }
         
         /* School Info Centered */
         .school-info { text-align: center; padding: 0 6px; }
@@ -264,7 +264,7 @@
                     @if($logoExists)
                         <table class="logo-box" cellpadding="0" cellspacing="0">
                             <tr>
-                                <td align="center" valign="middle" style="width: 44px; height: 44px; text-align: center; vertical-align: middle;">
+                                <td align="center" valign="middle" style="width: 54px; height: 54px; text-align: center; vertical-align: middle;">
                                     <img class="logo" src="{{ $logoDataUri }}" alt="Logo">
                                 </td>
                             </tr>

@@ -16,9 +16,9 @@
         .header { border-bottom: 3px double #a16207; padding-bottom: 3px; margin-bottom: 4px; }
         .header-table { display: table; width: 100%; }
         .header-cell { display: table-cell; vertical-align: middle; }
-        .logo-wrap { width: 55px; text-align: left; vertical-align: middle; }
-        .logo-box { width: 48px; height: 48px; border: 1.5px solid #a16207; border-radius: 4px; background: #fff; }
-        .logo { max-width: 44px; max-height: 44px; width: auto !important; height: auto !important; display: block; margin: 0 auto; }
+        .logo-wrap { width: 62px; text-align: left; vertical-align: middle; }
+        .logo-box { width: 56px; height: 56px; }
+        .logo { max-width: 54px; max-height: 54px; width: auto !important; height: auto !important; display: block; margin: 0 auto; }
         .school-name { font-size: 16px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; color: #1e3a8a; font-family: Georgia, serif; }
         .school-meta { margin-top: 1px; font-size: 7.5px; color: #475569; font-weight: bold; font-style: italic; }
         .badge { display: inline-block; margin-top: 3px; background: #1e3a8a; color: #fef08a; padding: 2px 10px; border-radius: 2px; font-size: 7.5px; font-weight: bold; letter-spacing: 1px; text-transform: uppercase; border: 1px solid #a16207; }
@@ -99,6 +99,65 @@
             'svg' => 'image/svg+xml',
             default => 'image/png',
         };
+
+        // If GD is available and it's a raster image, trim off any excessive blank border margins
+        if (extension_loaded('gd') && in_array($ext, ['png', 'jpg', 'jpeg', 'webp'], true)) {
+            $raw = @file_get_contents($path);
+            if ($raw) {
+                $im = @imagecreatefromstring($raw);
+                if ($im) {
+                    $w = imagesx($im);
+                    $h = imagesy($im);
+                    if ($w > 20 && $h > 20) {
+                        $c1 = imagecolorat($im, 0, 0);
+                        $r1 = ($c1 >> 16) & 0xFF;
+                        $g1 = ($c1 >> 8) & 0xFF;
+                        $b1 = $c1 & 0xFF;
+                        $a1 = ($c1 >> 24) & 0x7F;
+                        // Check if corners are transparent or near-white background
+                        if (($r1 > 225 && $g1 > 225 && $b1 > 225) || $a1 > 100) {
+                            $minX = $w; $maxX = 0; $minY = $h; $maxY = 0;
+                            $step = max(1, (int) floor(min($w, $h) / 250));
+                            for ($y = 0; $y < $h; $y += $step) {
+                                for ($x = 0; $x < $w; $x += $step) {
+                                    $rgb = imagecolorat($im, $x, $y);
+                                    $a = ($rgb >> 24) & 0x7F;
+                                    $r = ($rgb >> 16) & 0xFF;
+                                    $g = ($rgb >> 8) & 0xFF;
+                                    $b = $rgb & 0xFF;
+                                    if ($a < 100 && ($r < 225 || $g < 225 || $b < 225)) {
+                                        if ($x < $minX) $minX = $x;
+                                        if ($x > $maxX) $maxX = $x;
+                                        if ($y < $minY) $minY = $y;
+                                        if ($y > $maxY) $maxY = $y;
+                                    }
+                                }
+                            }
+                            if ($minX < $maxX && $minY < $maxY) {
+                                $pad = 8;
+                                $cropX = max(0, $minX - $pad);
+                                $cropY = max(0, $minY - $pad);
+                                $cropW = min($w - $cropX, ($maxX - $minX) + ($pad * 2));
+                                $cropH = min($h - $cropY, ($maxY - $minY) + ($pad * 2));
+                                if ($cropW < ($w * 0.95) || $cropH < ($h * 0.95)) {
+                                    $cropped = imagecrop($im, ['x' => $cropX, 'y' => $cropY, 'width' => $cropW, 'height' => $cropH]);
+                                    if ($cropped) {
+                                        ob_start();
+                                        imagepng($cropped);
+                                        $trimmedData = ob_get_clean();
+                                        imagedestroy($cropped);
+                                        imagedestroy($im);
+                                        return 'data:image/png;base64,' . base64_encode($trimmedData);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    imagedestroy($im);
+                }
+            }
+        }
+
         $data = @file_get_contents($path);
         return $data ? 'data:' . $mime . ';base64,' . base64_encode($data) : null;
     };
@@ -157,7 +216,7 @@
                     @if($logoExists)
                         <table class="logo-box" cellpadding="0" cellspacing="0">
                             <tr>
-                                <td align="center" valign="middle" style="width: 48px; height: 48px; text-align: center; vertical-align: middle;">
+                                <td align="center" valign="middle" style="width: 56px; height: 56px; text-align: center; vertical-align: middle;">
                                     <img class="logo" src="{{ $logoDataUri }}" alt="">
                                 </td>
                             </tr>

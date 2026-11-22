@@ -51,16 +51,14 @@
         }
 
         .logo-box {
-            width: 52px;
-            height: 52px;
-            border: 1.5px solid #374151;
-            border-radius: 4px;
+            width: 54px;
+            height: 54px;
             background: white;
         }
 
         .logo {
-            max-width: 46px;
-            max-height: 46px;
+            max-width: 50px;
+            max-height: 50px;
             width: auto !important;
             height: auto !important;
             display: block;

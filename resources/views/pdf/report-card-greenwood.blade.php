@@ -14,9 +14,9 @@
 
         /* Top Header */
         .header-table { display: table; width: 100%; border-bottom: 2px solid #004b49; padding-bottom: 3px; margin-bottom: 4px; }
-        .logo-wrap { width: 55px; text-align: left; vertical-align: middle; }
-        .logo-box { width: 44px; height: 44px; border: 1px solid #c5a059; border-radius: 4px; background: #fff; }
-        .logo { max-width: 40px; max-height: 40px; width: auto !important; height: auto !important; display: block; margin: 0 auto; }
+        .logo-wrap { width: 62px; text-align: left; vertical-align: middle; }
+        .logo-box { width: 54px; height: 54px; }
+        .logo { max-width: 50px; max-height: 50px; width: auto !important; height: auto !important; display: block; margin: 0 auto; }
         .school-info { text-align: left; padding-left: 4px; }
         .school-name { font-size: 15px; font-weight: 900; color: #004b49; text-transform: uppercase; letter-spacing: 0.5px; }
         .school-tagline { font-size: 8px; font-weight: bold; color: #c5a059; font-style: italic; margin-top: 1px; }
@@ -206,7 +206,7 @@
                 @if($logoExists)
                     <table class="logo-box" cellpadding="0" cellspacing="0">
                         <tr>
-                            <td align="center" valign="middle" style="width: 44px; height: 44px; text-align: center; vertical-align: middle;">
+                            <td align="center" valign="middle" style="width: 54px; height: 54px; text-align: center; vertical-align: middle;">
                                 <img class="logo" src="{{ $logoDataUri }}" alt="Logo">
                             </td>
                         </tr>
