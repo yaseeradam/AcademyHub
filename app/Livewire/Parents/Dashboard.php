@@ -109,23 +109,47 @@ class Dashboard extends Component
     public function resultsPublished(): bool
     {
         if (! $this->selectedChild) return false;
-        return ResultPublication::where('class_id', $this->selectedChild->class_id)
-            ->where('term', $this->term)
-            ->where('session', $this->session)
-            ->whereNotNull('published_at')
-            ->exists();
+        return ResultPublication::anyPublished($this->selectedChild->class_id, (int) $this->term, (string) $this->session);
     }
 
     #[Computed]
     public function scores(): Collection
     {
         if (! $this->selectedChild || ! $this->resultsPublished) return collect();
-        return Score::where('student_id', $this->selectedChild->id)
-            ->where('term', $this->term)
-            ->where('session', $this->session)
+
+        $classId = (int) $this->selectedChild->class_id;
+        $term = (int) $this->term;
+        $session = (string) $this->session;
+
+        $isCa1 = ResultPublication::isCa1Published($classId, $term, $session);
+        $isCa2 = ResultPublication::isCa2Published($classId, $term, $session);
+        $isExam = ResultPublication::isExamPublished($classId, $term, $session);
+
+        $scores = Score::where('student_id', $this->selectedChild->id)
+            ->where('term', $term)
+            ->where('session', $session)
             ->with('subject')
             ->orderBy('subject_id')
             ->get();
+
+        return $scores->map(function ($score) use ($isCa1, $isCa2, $isExam) {
+            $score->display_ca1 = $isCa1 ? $score->ca1 : null;
+            $score->display_ca2 = $isCa2 ? $score->ca2 : null;
+            $score->display_exam = $isExam ? $score->exam : null;
+
+            $caSum = ($score->display_ca1 ?? 0) + ($score->display_ca2 ?? 0);
+            $score->display_ca = ($isCa1 || $isCa2) ? $caSum : null;
+
+            if ($isExam) {
+                $score->display_total = $score->total;
+                $score->display_grade = $score->grade;
+            } else {
+                $score->display_total = ($isCa1 || $isCa2) ? "{$caSum} (CA)" : '-';
+                $score->display_grade = '-';
+            }
+
+            return $score;
+        });
     }
 
     #[Computed]

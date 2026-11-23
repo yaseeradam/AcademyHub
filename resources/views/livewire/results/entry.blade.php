@@ -2,7 +2,22 @@
     $user = auth()->user();
     $submission = $this->submission();
     $submissionStatus = $submission?->status;
-    $locked = ($user?->role === 'teacher' && in_array($submissionStatus, ['submitted', 'approved'], true)) || $this->isPublished();
+
+    $isCa1Released = $this->isCa1Published;
+    $isCa2Released = $this->isCa2Published;
+    $isExamReleased = $this->isExamPublished;
+    $isAllPublished = $this->isPublished();
+
+    $isTeacher = $user?->role === 'teacher';
+    $isPending = $isTeacher && $submissionStatus === 'submitted';
+
+    // Component-level lock for teachers
+    $ca1Locked = $isTeacher && ($isCa1Released || $isAllPublished || $isPending);
+    $ca2Locked = $isTeacher && ($isCa2Released || $isAllPublished || $isPending);
+    $examLocked = $isTeacher && ($isExamReleased || $isAllPublished || $isPending);
+
+    $locked = $isAllPublished || ($ca1Locked && $ca2Locked && $examLocked);
+    $canManageRelease = $user?->role === 'admin' || $user?->hasPermission('results.publish') || $user?->hasPermission('results.review');
 @endphp
 
 <div class="space-y-8">
@@ -536,17 +551,32 @@
                             <p class="text-xs sm:text-sm text-gray-600 mt-0.5">Enter scores for each assessment component</p>
                         </div>
                         <div class="flex flex-wrap items-center gap-2 sm:gap-3 text-xs font-extrabold">
-                            <div class="inline-flex items-center gap-1.5 rounded-full bg-blue-50 px-3 py-1.5 text-blue-700 border border-blue-200/60 shadow-sm">
-                                <span class="h-2 w-2 rounded-full bg-blue-500"></span>
+                            <div class="inline-flex items-center gap-1.5 rounded-full {{ $isCa1Released ? 'bg-emerald-50 text-emerald-800 border-emerald-300' : 'bg-blue-50 text-blue-700 border-blue-200/60' }} px-3 py-1.5 border shadow-sm">
+                                <span class="h-2 w-2 rounded-full {{ $isCa1Released ? 'bg-emerald-500' : 'bg-blue-500' }}"></span>
                                 <span>CA1 /{{ $maxMarks['ca1'] }}</span>
+                                @if($isCa1Released)
+                                    <span class="text-[10px] bg-emerald-200/60 text-emerald-900 rounded-md px-1.5 py-0.5">Released</span>
+                                @else
+                                    <span class="text-[10px] bg-blue-100 text-blue-700 rounded-md px-1.5 py-0.5">Draft</span>
+                                @endif
                             </div>
-                            <div class="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1.5 text-emerald-700 border border-emerald-200/60 shadow-sm">
-                                <span class="h-2 w-2 rounded-full bg-emerald-500"></span>
+                            <div class="inline-flex items-center gap-1.5 rounded-full {{ $isCa2Released ? 'bg-emerald-50 text-emerald-800 border-emerald-300' : 'bg-teal-50 text-teal-700 border-teal-200/60' }} px-3 py-1.5 border shadow-sm">
+                                <span class="h-2 w-2 rounded-full {{ $isCa2Released ? 'bg-emerald-500' : 'bg-teal-500' }}"></span>
                                 <span>CA2 /{{ $maxMarks['ca2'] }}</span>
+                                @if($isCa2Released)
+                                    <span class="text-[10px] bg-emerald-200/60 text-emerald-900 rounded-md px-1.5 py-0.5">Released</span>
+                                @else
+                                    <span class="text-[10px] bg-teal-100 text-teal-700 rounded-md px-1.5 py-0.5">Draft</span>
+                                @endif
                             </div>
-                            <div class="inline-flex items-center gap-1.5 rounded-full bg-amber-50 px-3 py-1.5 text-amber-700 border border-amber-200/60 shadow-sm">
-                                <span class="h-2 w-2 rounded-full bg-amber-500"></span>
+                            <div class="inline-flex items-center gap-1.5 rounded-full {{ $isExamReleased ? 'bg-emerald-50 text-emerald-800 border-emerald-300' : 'bg-amber-50 text-amber-700 border-amber-200/60' }} px-3 py-1.5 border shadow-sm">
+                                <span class="h-2 w-2 rounded-full {{ $isExamReleased ? 'bg-emerald-500' : 'bg-amber-500' }}"></span>
                                 <span>Exam /{{ $maxMarks['exam'] }}</span>
+                                @if($isExamReleased)
+                                    <span class="text-[10px] bg-emerald-200/60 text-emerald-900 rounded-md px-1.5 py-0.5">Released</span>
+                                @else
+                                    <span class="text-[10px] bg-amber-100 text-amber-700 rounded-md px-1.5 py-0.5">Draft</span>
+                                @endif
                             </div>
                         </div>
                     </div>
@@ -559,9 +589,105 @@
                             <thead>
                                 <tr class="border-b-2 border-gray-200 bg-gray-50">
                                     <th class="px-6 py-4 text-left text-xs font-black uppercase tracking-wider text-gray-700">Student</th>
-                                    <th class="px-6 py-4 text-center text-xs font-black uppercase tracking-wider text-blue-700">CA1 /{{ $maxMarks['ca1'] }}</th>
-                                    <th class="px-6 py-4 text-center text-xs font-black uppercase tracking-wider text-green-700">CA2 /{{ $maxMarks['ca2'] }}</th>
-                                    <th class="px-6 py-4 text-center text-xs font-black uppercase tracking-wider text-amber-700">Exam /{{ $maxMarks['exam'] }}</th>
+                                    <th class="px-5 py-3.5 text-center text-xs font-black uppercase tracking-wider text-blue-700 bg-blue-50/50">
+                                        <div class="flex flex-col items-center justify-center gap-1.5">
+                                            <div class="flex items-center gap-1">
+                                                <span>CA1 /{{ $maxMarks['ca1'] }}</span>
+                                                @if($isCa1Released)
+                                                    <span title="Released to parents & locked for teachers" class="text-emerald-600">
+                                                        <svg class="h-3.5 w-3.5 inline" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                                                    </span>
+                                                @else
+                                                    <span title="Draft / open for score entry" class="text-slate-400">
+                                                        <svg class="h-3.5 w-3.5 inline" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z"/></svg>
+                                                    </span>
+                                                @endif
+                                            </div>
+                                            @if($canManageRelease && $classId)
+                                                @if($isCa1Released)
+                                                    <button type="button" wire:click="toggleReleaseComponent('ca1')" wire:loading.attr="disabled"
+                                                        class="inline-flex items-center gap-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white px-2.5 py-1 text-[10px] font-extrabold shadow-xs transition-all cursor-pointer"
+                                                        title="CA1 is Released to Parents & Locked. Click to Unrelease / Unlock.">
+                                                        <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                                                        <span>Released</span>
+                                                    </button>
+                                                @else
+                                                    <button type="button" wire:click="toggleReleaseComponent('ca1')" wire:loading.attr="disabled"
+                                                        class="inline-flex items-center gap-1 rounded-lg border-2 border-blue-400 bg-white hover:bg-blue-50 text-blue-700 px-2.5 py-1 text-[10px] font-extrabold shadow-xs transition-all cursor-pointer"
+                                                        title="Click to Release CA1 to Parents & Lock for Teachers.">
+                                                        <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 10.5V6.75a4.5 4.5 0 119 0v3.75M3.75 21.75h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H3.75A2.25 2.25 0 001.5 13.5v6.75a2.25 2.25 0 002.25 2.25z"/></svg>
+                                                        <span>Release</span>
+                                                    </button>
+                                                @endif
+                                            @endif
+                                        </div>
+                                    </th>
+                                    <th class="px-5 py-3.5 text-center text-xs font-black uppercase tracking-wider text-green-700 bg-green-50/50">
+                                        <div class="flex flex-col items-center justify-center gap-1.5">
+                                            <div class="flex items-center gap-1">
+                                                <span>CA2 /{{ $maxMarks['ca2'] }}</span>
+                                                @if($isCa2Released)
+                                                    <span title="Released to parents & locked for teachers" class="text-emerald-600">
+                                                        <svg class="h-3.5 w-3.5 inline" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                                                    </span>
+                                                @else
+                                                    <span title="Draft / open for score entry" class="text-slate-400">
+                                                        <svg class="h-3.5 w-3.5 inline" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z"/></svg>
+                                                    </span>
+                                                @endif
+                                            </div>
+                                            @if($canManageRelease && $classId)
+                                                @if($isCa2Released)
+                                                    <button type="button" wire:click="toggleReleaseComponent('ca2')" wire:loading.attr="disabled"
+                                                        class="inline-flex items-center gap-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white px-2.5 py-1 text-[10px] font-extrabold shadow-xs transition-all cursor-pointer"
+                                                        title="CA2 is Released to Parents & Locked. Click to Unrelease / Unlock.">
+                                                        <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                                                        <span>Released</span>
+                                                    </button>
+                                                @else
+                                                    <button type="button" wire:click="toggleReleaseComponent('ca2')" wire:loading.attr="disabled"
+                                                        class="inline-flex items-center gap-1 rounded-lg border-2 border-emerald-400 bg-white hover:bg-emerald-50 text-emerald-700 px-2.5 py-1 text-[10px] font-extrabold shadow-xs transition-all cursor-pointer"
+                                                        title="Click to Release CA2 to Parents & Lock for Teachers.">
+                                                        <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 10.5V6.75a4.5 4.5 0 119 0v3.75M3.75 21.75h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H3.75A2.25 2.25 0 001.5 13.5v6.75a2.25 2.25 0 002.25 2.25z"/></svg>
+                                                        <span>Release</span>
+                                                    </button>
+                                                @endif
+                                            @endif
+                                        </div>
+                                    </th>
+                                    <th class="px-5 py-3.5 text-center text-xs font-black uppercase tracking-wider text-amber-700 bg-amber-50/50">
+                                        <div class="flex flex-col items-center justify-center gap-1.5">
+                                            <div class="flex items-center gap-1">
+                                                <span>Exam /{{ $maxMarks['exam'] }}</span>
+                                                @if($isExamReleased)
+                                                    <span title="Released to parents & locked for teachers" class="text-emerald-600">
+                                                        <svg class="h-3.5 w-3.5 inline" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                                                    </span>
+                                                @else
+                                                    <span title="Draft / open for score entry" class="text-slate-400">
+                                                        <svg class="h-3.5 w-3.5 inline" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z"/></svg>
+                                                    </span>
+                                                @endif
+                                            </div>
+                                            @if($canManageRelease && $classId)
+                                                @if($isExamReleased)
+                                                    <button type="button" wire:click="toggleReleaseComponent('exam')" wire:loading.attr="disabled"
+                                                        class="inline-flex items-center gap-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white px-2.5 py-1 text-[10px] font-extrabold shadow-xs transition-all cursor-pointer"
+                                                        title="Exam is Released to Parents & Locked. Click to Unrelease / Unlock.">
+                                                        <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                                                        <span>Released</span>
+                                                    </button>
+                                                @else
+                                                    <button type="button" wire:click="toggleReleaseComponent('exam')" wire:loading.attr="disabled"
+                                                        class="inline-flex items-center gap-1 rounded-lg border-2 border-amber-400 bg-white hover:bg-amber-50 text-amber-700 px-2.5 py-1 text-[10px] font-extrabold shadow-xs transition-all cursor-pointer"
+                                                        title="Click to Release Exam to Parents & Lock for Teachers.">
+                                                        <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 10.5V6.75a4.5 4.5 0 119 0v3.75M3.75 21.75h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H3.75A2.25 2.25 0 001.5 13.5v6.75a2.25 2.25 0 002.25 2.25z"/></svg>
+                                                        <span>Release</span>
+                                                    </button>
+                                                @endif
+                                            @endif
+                                        </div>
+                                    </th>
                                     <th class="px-6 py-4 text-center text-xs font-black uppercase tracking-wider text-purple-700">Total</th>
                                     <th class="px-6 py-4 text-center text-xs font-black uppercase tracking-wider text-gray-700">Grade</th>
                                     <th class="px-6 py-4 text-center text-xs font-black uppercase tracking-wider text-gray-700">Psychomotor</th>
@@ -631,8 +757,8 @@
                                                 value="{{ $row['ca1'] }}"
                                                 type="number" min="0" max="{{ $maxMarks['ca1'] }}" step="1"
                                                 data-student-id="{{ $student->id }}" data-field="ca1"
-                                                @disabled($locked)
-                                                class="w-20 rounded-xl border-2 {{ $ca1Error ? 'border-red-400 bg-red-50' : 'border-blue-300 bg-blue-50' }} px-3 py-2 text-center text-sm font-bold text-gray-900 shadow-sm transition-all focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/20 hover:border-blue-400 disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-gray-100" />
+                                                @disabled($ca1Locked)
+                                                class="w-20 rounded-xl border-2 {{ $ca1Error ? 'border-red-400 bg-red-50' : ($ca1Locked ? 'border-gray-200 bg-gray-100 text-gray-500' : 'border-blue-300 bg-blue-50 text-gray-900') }} px-3 py-2 text-center text-sm font-bold shadow-sm transition-all focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/20 hover:border-blue-400 disabled:opacity-60 disabled:cursor-not-allowed" />
                                         </td>
                                         
                                         {{-- CA2 Score --}}
@@ -642,8 +768,8 @@
                                                 value="{{ $row['ca2'] }}"
                                                 type="number" min="0" max="{{ $maxMarks['ca2'] }}" step="1"
                                                 data-student-id="{{ $student->id }}" data-field="ca2"
-                                                @disabled($locked)
-                                                class="w-20 rounded-xl border-2 {{ $ca2Error ? 'border-red-400 bg-red-50' : 'border-green-300 bg-green-50' }} px-3 py-2 text-center text-sm font-bold text-gray-900 shadow-sm transition-all focus:border-green-500 focus:bg-white focus:ring-4 focus:ring-green-500/20 hover:border-green-400 disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-gray-100" />
+                                                @disabled($ca2Locked)
+                                                class="w-20 rounded-xl border-2 {{ $ca2Error ? 'border-red-400 bg-red-50' : ($ca2Locked ? 'border-gray-200 bg-gray-100 text-gray-500' : 'border-green-300 bg-green-50 text-gray-900') }} px-3 py-2 text-center text-sm font-bold shadow-sm transition-all focus:border-green-500 focus:bg-white focus:ring-4 focus:ring-green-500/20 hover:border-green-400 disabled:opacity-60 disabled:cursor-not-allowed" />
                                         </td>
                                         
                                         {{-- Exam Score --}}
@@ -653,8 +779,8 @@
                                                 value="{{ $row['exam'] }}"
                                                 type="number" min="0" max="{{ $maxMarks['exam'] }}" step="1"
                                                 data-student-id="{{ $student->id }}" data-field="exam"
-                                                @disabled($locked)
-                                                class="w-20 rounded-xl border-2 {{ $examError ? 'border-red-400 bg-red-50' : 'border-amber-300 bg-amber-50' }} px-3 py-2 text-center text-sm font-bold text-gray-900 shadow-sm transition-all focus:border-amber-500 focus:bg-white focus:ring-4 focus:ring-amber-500/20 hover:border-amber-400 disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-gray-100" />
+                                                @disabled($examLocked)
+                                                class="w-20 rounded-xl border-2 {{ $examError ? 'border-red-400 bg-red-50' : ($examLocked ? 'border-gray-200 bg-gray-100 text-gray-500' : 'border-amber-300 bg-amber-50 text-gray-900') }} px-3 py-2 text-center text-sm font-bold shadow-sm transition-all focus:border-amber-500 focus:bg-white focus:ring-4 focus:ring-amber-500/20 hover:border-amber-400 disabled:opacity-60 disabled:cursor-not-allowed" />
                                         </td>
                                         
                                         {{-- Total Score --}}
@@ -756,34 +882,49 @@
                                 
                                 <div class="grid grid-cols-3 gap-3">
                                     <div>
-                                        <label class="block text-[10px] font-black text-blue-700 uppercase mb-1">CA1 ({{ $maxMarks['ca1'] }})</label>
+                                        <div class="flex items-center justify-between mb-1">
+                                            <label class="block text-[10px] font-black text-blue-700 uppercase">CA1 ({{ $maxMarks['ca1'] }})</label>
+                                            @if($isCa1Released)
+                                                <span class="inline-flex items-center text-[9px] text-emerald-700 font-bold" title="Released & Locked">🔒</span>
+                                            @endif
+                                        </div>
                                         <input wire:key="mobile-ca1-{{ $student->id }}"
                                             wire:model.blur="scores.{{ $student->id }}.ca1" 
                                             value="{{ $row['ca1'] }}"
                                             type="number" min="0" max="{{ $maxMarks['ca1'] }}"
                                             data-student-id="{{ $student->id }}" data-field="ca1"
-                                            @disabled($locked)
-                                            class="w-full rounded-xl border-2 {{ $ca1Error ? 'border-red-400 bg-red-50 text-red-950 focus:border-red-500' : 'border-blue-200 bg-blue-50 text-gray-900 focus:border-blue-500' }} px-2 py-2 text-center text-sm font-bold focus:bg-white focus:ring-0 disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-gray-100">
+                                            @disabled($ca1Locked)
+                                            class="w-full rounded-xl border-2 {{ $ca1Error ? 'border-red-400 bg-red-50 text-red-950 focus:border-red-500' : ($ca1Locked ? 'border-gray-200 bg-gray-100 text-gray-500' : 'border-blue-200 bg-blue-50 text-gray-900 focus:border-blue-500') }} px-2 py-2 text-center text-sm font-bold focus:bg-white focus:ring-0 disabled:opacity-60 disabled:cursor-not-allowed">
                                     </div>
                                     <div>
-                                        <label class="block text-[10px] font-black text-green-700 uppercase mb-1">CA2 ({{ $maxMarks['ca2'] }})</label>
+                                        <div class="flex items-center justify-between mb-1">
+                                            <label class="block text-[10px] font-black text-green-700 uppercase">CA2 ({{ $maxMarks['ca2'] }})</label>
+                                            @if($isCa2Released)
+                                                <span class="inline-flex items-center text-[9px] text-emerald-700 font-bold" title="Released & Locked">🔒</span>
+                                            @endif
+                                        </div>
                                         <input wire:key="mobile-ca2-{{ $student->id }}"
                                             wire:model.blur="scores.{{ $student->id }}.ca2" 
                                             value="{{ $row['ca2'] }}"
                                             type="number" min="0" max="{{ $maxMarks['ca2'] }}"
                                             data-student-id="{{ $student->id }}" data-field="ca2"
-                                            @disabled($locked)
-                                            class="w-full rounded-xl border-2 {{ $ca2Error ? 'border-red-400 bg-red-50 text-red-950 focus:border-red-500' : 'border-green-200 bg-green-50 text-gray-900 focus:border-green-500' }} px-2 py-2 text-center text-sm font-bold focus:bg-white focus:ring-0 disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-gray-100">
+                                            @disabled($ca2Locked)
+                                            class="w-full rounded-xl border-2 {{ $ca2Error ? 'border-red-400 bg-red-50 text-red-950 focus:border-red-500' : ($ca2Locked ? 'border-gray-200 bg-gray-100 text-gray-500' : 'border-green-200 bg-green-50 text-gray-900 focus:border-green-500') }} px-2 py-2 text-center text-sm font-bold focus:bg-white focus:ring-0 disabled:opacity-60 disabled:cursor-not-allowed">
                                     </div>
                                     <div>
-                                        <label class="block text-[10px] font-black text-amber-700 uppercase mb-1">Exam ({{ $maxMarks['exam'] }})</label>
+                                        <div class="flex items-center justify-between mb-1">
+                                            <label class="block text-[10px] font-black text-amber-700 uppercase">Exam ({{ $maxMarks['exam'] }})</label>
+                                            @if($isExamReleased)
+                                                <span class="inline-flex items-center text-[9px] text-emerald-700 font-bold" title="Released & Locked">🔒</span>
+                                            @endif
+                                        </div>
                                         <input wire:key="mobile-exam-{{ $student->id }}"
                                             wire:model.blur="scores.{{ $student->id }}.exam" 
                                             value="{{ $row['exam'] }}"
                                             type="number" min="0" max="{{ $maxMarks['exam'] }}"
                                             data-student-id="{{ $student->id }}" data-field="exam"
-                                            @disabled($locked)
-                                            class="w-full rounded-xl border-2 {{ $examError ? 'border-red-400 bg-red-50 text-red-950 focus:border-red-500' : 'border-amber-200 bg-amber-50 text-gray-900 focus:border-amber-500' }} px-2 py-2 text-center text-sm font-bold focus:bg-white focus:ring-0 disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-gray-100">
+                                            @disabled($examLocked)
+                                            class="w-full rounded-xl border-2 {{ $examError ? 'border-red-400 bg-red-50 text-red-950 focus:border-red-500' : ($examLocked ? 'border-gray-200 bg-gray-100 text-gray-500' : 'border-amber-200 bg-amber-50 text-gray-900 focus:border-amber-500') }} px-2 py-2 text-center text-sm font-bold focus:bg-white focus:ring-0 disabled:opacity-60 disabled:cursor-not-allowed">
                                     </div>
                                 </div>
 

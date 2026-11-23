@@ -1511,15 +1511,15 @@
                                 <div class="grid grid-cols-3 gap-2 text-center pt-1">
                                     <div class="bg-white rounded-xl p-2.5 border border-slate-200/70 shadow-2xs">
                                         <span class="block text-[9px] font-black uppercase tracking-wider text-slate-400">CA</span>
-                                        <span class="text-sm font-bold text-slate-700">{{ ($score->ca1 ?? 0) + ($score->ca2 ?? 0) }}</span>
+                                        <span class="text-sm font-bold text-slate-700">{{ $score->display_ca ?? '-' }}</span>
                                     </div>
                                     <div class="bg-white rounded-xl p-2.5 border border-slate-200/70 shadow-2xs">
                                         <span class="block text-[9px] font-black uppercase tracking-wider text-slate-400">Exam</span>
-                                        <span class="text-sm font-bold text-slate-700">{{ $score->exam ?? '-' }}</span>
+                                        <span class="text-sm font-bold text-slate-700">{{ $score->display_exam ?? '-' }}</span>
                                     </div>
                                     <div class="bg-indigo-50/70 rounded-xl p-2.5 border border-indigo-100 shadow-2xs">
                                         <span class="block text-[9px] font-black uppercase tracking-wider text-indigo-500">Total</span>
-                                        <span class="text-sm font-black text-indigo-700">{{ $score->total ?? '-' }}</span>
+                                        <span class="text-sm font-black text-indigo-700">{{ $score->display_total ?? '-' }}</span>
                                     </div>
                                 </div>
                             </div>
@@ -1542,16 +1542,16 @@
                                 @foreach ($scores as $score)
                                     <tr class="hover:bg-slate-50 transition-colors">
                                         <td class="px-6 py-4 font-bold text-slate-800">{{ $score->subject?->name }}</td>
-                                        <td class="px-6 py-4 text-center text-slate-500 font-semibold">{{ ($score->ca1 ?? 0) + ($score->ca2 ?? 0) }}</td>
-                                        <td class="px-6 py-4 text-center text-slate-500 font-semibold">{{ $score->exam ?? '-' }}</td>
+                                        <td class="px-6 py-4 text-center text-slate-500 font-semibold">{{ $score->display_ca ?? '-' }}</td>
+                                        <td class="px-6 py-4 text-center text-slate-500 font-semibold">{{ $score->display_exam ?? '-' }}</td>
                                         <td class="px-6 py-4 text-center">
-                                            <div class="inline-flex items-center justify-center rounded-lg bg-slate-100 h-8 w-12 text-sm font-black text-slate-800 border border-slate-200">
-                                                {{ $score->total ?? '-' }}
+                                            <div class="inline-flex items-center justify-center rounded-lg bg-slate-100 h-8 w-16 text-sm font-black text-slate-800 border border-slate-200">
+                                                {{ $score->display_total ?? '-' }}
                                             </div>
                                         </td>
                                         <td class="px-6 py-4 text-right">
-                                            <span class="rounded-md px-2.5 py-1 text-[11px] uppercase font-black {{ $gradeColor($score->grade) }}">
-                                                {{ $score->grade ?? '-' }}
+                                            <span class="rounded-md px-2.5 py-1 text-[11px] uppercase font-black {{ $gradeColor($score->display_grade ?? $score->grade) }}">
+                                                {{ $score->display_grade ?? '-' }}
                                             </span>
                                         </td>
                                     </tr>

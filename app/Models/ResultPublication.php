@@ -16,6 +16,9 @@ class ResultPublication extends Model
         'term',
         'session',
         'published_at',
+        'ca1_published_at',
+        'ca2_published_at',
+        'exam_published_at',
         'published_by',
         'note',
     ];
@@ -25,6 +28,9 @@ class ResultPublication extends Model
         'class_id' => 'integer',
         'term' => 'integer',
         'published_at' => 'datetime',
+        'ca1_published_at' => 'datetime',
+        'ca2_published_at' => 'datetime',
+        'exam_published_at' => 'datetime',
         'published_by' => 'integer',
     ];
 
@@ -45,6 +51,76 @@ class ResultPublication extends Model
             ->where('term', $term)
             ->where('session', $session)
             ->whereNotNull('published_at')
+            ->exists();
+    }
+
+    public static function isCa1Published(int $classId, int $term, string $session): bool
+    {
+        return self::query()
+            ->where('class_id', $classId)
+            ->where('term', $term)
+            ->where('session', $session)
+            ->where(function ($q) {
+                $q->whereNotNull('published_at')->orWhereNotNull('ca1_published_at');
+            })
+            ->exists();
+    }
+
+    public static function isCa2Published(int $classId, int $term, string $session): bool
+    {
+        return self::query()
+            ->where('class_id', $classId)
+            ->where('term', $term)
+            ->where('session', $session)
+            ->where(function ($q) {
+                $q->whereNotNull('published_at')->orWhereNotNull('ca2_published_at');
+            })
+            ->exists();
+    }
+
+    public static function isExamPublished(int $classId, int $term, string $session): bool
+    {
+        return self::query()
+            ->where('class_id', $classId)
+            ->where('term', $term)
+            ->where('session', $session)
+            ->where(function ($q) {
+                $q->whereNotNull('published_at')->orWhereNotNull('exam_published_at');
+            })
+            ->exists();
+    }
+
+    public static function isComponentPublished(string $component, int $classId, int $term, string $session): bool
+    {
+        $field = match (strtolower(trim($component))) {
+            'ca1' => 'ca1_published_at',
+            'ca2' => 'ca2_published_at',
+            'exam' => 'exam_published_at',
+            default => 'published_at',
+        };
+
+        return self::query()
+            ->where('class_id', $classId)
+            ->where('term', $term)
+            ->where('session', $session)
+            ->where(function ($q) use ($field) {
+                $q->whereNotNull('published_at')->orWhereNotNull($field);
+            })
+            ->exists();
+    }
+
+    public static function anyPublished(int $classId, int $term, string $session): bool
+    {
+        return self::query()
+            ->where('class_id', $classId)
+            ->where('term', $term)
+            ->where('session', $session)
+            ->where(function ($q) {
+                $q->whereNotNull('published_at')
+                    ->orWhereNotNull('ca1_published_at')
+                    ->orWhereNotNull('ca2_published_at')
+                    ->orWhereNotNull('exam_published_at');
+            })
             ->exists();
     }
 

@@ -50,24 +50,38 @@ class Results extends Component
             $sessions = $sessions->unique()->values();
         }
 
-        // Check if results are published for this class/term/session
-        $published = ResultPublication::where('class_id', $student->class_id)
-            ->where('term', $this->selectedTerm)
-            ->where('session', $this->selectedSession)
-            ->whereNotNull('published_at')
-            ->exists();
+        // Check if any results or assessments are published for this class/term/session
+        $published = ResultPublication::anyPublished($student->class_id, (int) $this->selectedTerm, (string) $this->selectedSession);
 
         $scores = collect();
         $classSize = 0;
         $overallPosition = null;
 
         if ($published) {
+            $classId = (int) $student->class_id;
+            $term = (int) $this->selectedTerm;
+            $session = (string) $this->selectedSession;
+
+            $isCa1 = ResultPublication::isCa1Published($classId, $term, $session);
+            $isCa2 = ResultPublication::isCa2Published($classId, $term, $session);
+            $isExam = ResultPublication::isExamPublished($classId, $term, $session);
+
             $scores = Score::where('student_id', $student->id)
-                ->where('session', $this->selectedSession)
-                ->where('term', $this->selectedTerm)
+                ->where('session', $session)
+                ->where('term', $term)
                 ->with('subject')
                 ->orderBy('subject_id')
-                ->get();
+                ->get()
+                ->map(function ($s) use ($isCa1, $isCa2, $isExam) {
+                    $s->ca1 = $isCa1 ? $s->ca1 : null;
+                    $s->ca2 = $isCa2 ? $s->ca2 : null;
+                    $s->exam = $isExam ? $s->exam : null;
+                    if (! $isExam) {
+                        $s->total = ($s->ca1 ?? 0) + ($s->ca2 ?? 0);
+                        $s->grade = '-';
+                    }
+                    return $s;
+                });
 
             // Overall position: rank by sum of totals across all students in same class/term/session
             if ($scores->isNotEmpty()) {

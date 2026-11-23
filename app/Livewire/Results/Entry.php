@@ -322,18 +322,54 @@ class Entry extends Component
     }
 
     #[Computed]
-    public function isPublished(): bool
+    public function currentPublication(): ?ResultPublication
     {
-        if (! $this->classId || ! $this->session) {
-            return false;
+        if (! $this->classId || ! $this->session || ! $this->term) {
+            return null;
         }
 
         return ResultPublication::query()
             ->where('class_id', $this->classId)
-            ->where('term', $this->term)
-            ->where('session', $this->session)
-            ->whereNotNull('published_at')
-            ->exists();
+            ->where('term', (int) $this->term)
+            ->where('session', (string) $this->session)
+            ->first();
+    }
+
+    #[Computed]
+    public function isPublished(): bool
+    {
+        $pub = $this->currentPublication();
+        return (bool) ($pub && $pub->published_at !== null);
+    }
+
+    #[Computed]
+    public function isCa1Published(): bool
+    {
+        $pub = $this->currentPublication();
+        if (! $pub) {
+            return false;
+        }
+        return $pub->published_at !== null || $pub->ca1_published_at !== null;
+    }
+
+    #[Computed]
+    public function isCa2Published(): bool
+    {
+        $pub = $this->currentPublication();
+        if (! $pub) {
+            return false;
+        }
+        return $pub->published_at !== null || $pub->ca2_published_at !== null;
+    }
+
+    #[Computed]
+    public function isExamPublished(): bool
+    {
+        $pub = $this->currentPublication();
+        if (! $pub) {
+            return false;
+        }
+        return $pub->published_at !== null || $pub->exam_published_at !== null;
     }
 
     #[Computed]
@@ -548,7 +584,8 @@ class Entry extends Component
         }
 
         // Bust Livewire 3 computed property cache
-        unset($this->classes, $this->subjects, $this->sections, $this->students, $this->isPublished, $this->submission, $this->submissions, $this->sectionSubmissions);
+        unset($this->classes, $this->subjects, $this->sections, $this->students, $this->submission, $this->submissions, $this->sectionSubmissions);
+        $this->clearPublicationCache();
     }
 
     public function updatedSectionId($value): void
@@ -578,7 +615,8 @@ class Entry extends Component
         $this->subjectId = $value !== '' && $value !== null ? (int) $value : null;
         $this->validationErrors = [];
         // Bust Livewire 3 computed property cache before loading scores
-        unset($this->sections, $this->students, $this->isPublished, $this->submission, $this->submissions, $this->sectionSubmissions);
+        unset($this->sections, $this->students, $this->submission, $this->submissions, $this->sectionSubmissions);
+        $this->clearPublicationCache();
         $this->loadExistingScores();
     }
 
@@ -593,7 +631,8 @@ class Entry extends Component
         }
         $this->validationErrors = [];
         $this->loadExistingScores();
-        unset($this->isPublished, $this->submission, $this->submissions);
+        unset($this->submission, $this->submissions);
+        $this->clearPublicationCache();
     }
 
     public function updatedSession(): void
@@ -604,7 +643,8 @@ class Entry extends Component
         }
         $this->validationErrors = [];
         $this->loadExistingScores();
-        unset($this->isPublished, $this->submission, $this->submissions);
+        unset($this->submission, $this->submissions);
+        $this->clearPublicationCache();
     }
 
     public function setTab(string $tab): void
@@ -640,6 +680,34 @@ class Entry extends Component
         $studentId = (int) $parts[0];
         $field = (string) end($parts);
         $errorKey = "{$studentId}.{$field}";
+
+        $user = auth()->user();
+        if ($user?->role === 'teacher') {
+            $isLocked = false;
+            if ($this->isPublished()) {
+                $isLocked = true;
+            } elseif ($field === 'ca1' && $this->isCa1Published()) {
+                $isLocked = true;
+            } elseif ($field === 'ca2' && $this->isCa2Published()) {
+                $isLocked = true;
+            } elseif ($field === 'exam' && $this->isExamPublished()) {
+                $isLocked = true;
+            }
+
+            if ($isLocked) {
+                $dbVal = Score::query()
+                    ->where('student_id', $studentId)
+                    ->where('subject_id', $this->subjectId)
+                    ->where('class_id', $this->classId)
+                    ->where('term', $this->term)
+                    ->where('session', $this->session)
+                    ->value($field);
+                $this->scores[$studentId][$field] = (int) ($dbVal ?? 0);
+                $label = strtoupper($field);
+                $this->dispatch('alert', message: "{$label} is released and locked for edits.", type: 'warning');
+                return;
+            }
+        }
 
         $maxMarks = $this->maxMarks();
         if (! array_key_exists($field, $maxMarks)) {
@@ -711,7 +779,7 @@ class Entry extends Component
             }
 
             $submission = $subQuery->latest('submitted_at')->first();
-            if ($submission && in_array($submission->status, ['submitted', 'approved'], true)) {
+            if ($submission && $submission->status === 'submitted') {
                 return;
             }
         }
@@ -755,6 +823,26 @@ class Entry extends Component
             return;
         }
 
+        if ($user->role === 'teacher') {
+            $existing = Score::query()
+                ->where('student_id', $studentId)
+                ->where('subject_id', $this->subjectId)
+                ->where('class_id', $this->classId)
+                ->where('term', $this->term)
+                ->where('session', $this->session)
+                ->first();
+
+            if ($this->isCa1Published() && $existing) {
+                $ca1 = (int) $existing->ca1;
+            }
+            if ($this->isCa2Published() && $existing) {
+                $ca2 = (int) $existing->ca2;
+            }
+            if ($this->isExamPublished() && $existing) {
+                $exam = (int) $existing->exam;
+            }
+        }
+
         Score::query()->updateOrCreate(
             [
                 'student_id' => $studentId,
@@ -793,9 +881,14 @@ class Entry extends Component
 
         if ($user?->role === 'teacher') {
             $submission = $this->submission();
-            if ($submission && in_array($submission->status, ['submitted', 'approved'], true)) {
+            if ($submission && $submission->status === 'submitted') {
                 throw ValidationException::withMessages([
-                    'scores' => 'This score entry has already been submitted to admin.',
+                    'scores' => 'This score entry has already been submitted to admin and is currently pending review.',
+                ]);
+            }
+            if ($this->isCa1Published() && $this->isCa2Published() && $this->isExamPublished()) {
+                throw ValidationException::withMessages([
+                    'scores' => 'All assessment components (CA1, CA2, Exam) are released and locked.',
                 ]);
             }
         }
@@ -826,7 +919,7 @@ class Entry extends Component
             ]);
         }
 
-        DB::transaction(function () use ($maxMarks) {
+        DB::transaction(function () use ($maxMarks, $user) {
             foreach ($this->students as $student) {
                 $row = $this->scores[$student->id] ?? [];
 
@@ -842,6 +935,26 @@ class Entry extends Component
                     throw ValidationException::withMessages([
                         'scores' => "Invalid score range for {$student->full_name}.",
                     ]);
+                }
+
+                $existing = Score::query()
+                    ->where('student_id', $student->id)
+                    ->where('subject_id', $this->subjectId)
+                    ->where('class_id', $this->classId)
+                    ->where('term', $this->term)
+                    ->where('session', $this->session)
+                    ->first();
+
+                if ($user?->role === 'teacher') {
+                    if ($this->isCa1Published() && $existing) {
+                        $ca1 = (int) $existing->ca1;
+                    }
+                    if ($this->isCa2Published() && $existing) {
+                        $ca2 = (int) $existing->ca2;
+                    }
+                    if ($this->isExamPublished() && $existing) {
+                        $exam = (int) $existing->exam;
+                    }
                 }
 
                 Score::query()->updateOrCreate(
@@ -1074,6 +1187,76 @@ class Entry extends Component
         $this->dispatch('$refresh');
     }
 
+    public function toggleReleaseComponent(string $component): void
+    {
+        $user = auth()->user();
+        abort_unless($user && ($user->role === 'admin' || $user->hasPermission('results.publish') || $user->hasPermission('results.review')), 403);
+
+        if (! $this->classId || ! $this->session || ! $this->term) {
+            $this->dispatch('alert', message: 'Please select a class, term, and session first.', type: 'warning');
+            return;
+        }
+
+        $comp = strtolower(trim($component));
+        if (! in_array($comp, ['ca1', 'ca2', 'exam'], true)) {
+            return;
+        }
+
+        $field = "{$comp}_published_at";
+        $label = strtoupper($comp);
+
+        $pub = ResultPublication::query()->firstOrCreate(
+            [
+                'class_id' => (int) $this->classId,
+                'term' => (int) $this->term,
+                'session' => (string) $this->session,
+            ],
+            [
+                'tenant_id' => $user->tenant_id,
+                'published_by' => $user->id,
+            ]
+        );
+
+        $nowReleased = false;
+
+        if ($pub->published_at !== null) {
+            // Full terminal results were published; un-releasing this component unpublishes it specifically
+            $pub->published_at = null;
+            $pub->ca1_published_at = $comp === 'ca1' ? null : now();
+            $pub->ca2_published_at = $comp === 'ca2' ? null : now();
+            $pub->exam_published_at = $comp === 'exam' ? null : now();
+            $pub->save();
+            $nowReleased = false;
+        } else {
+            if ($pub->{$field} !== null) {
+                $pub->{$field} = null;
+                $nowReleased = false;
+            } else {
+                $pub->{$field} = now();
+                $pub->published_by = $user->id;
+                $nowReleased = true;
+            }
+            $pub->save();
+        }
+
+        Audit::log($nowReleased ? "results.{$comp}_published" : "results.{$comp}_unpublished", null, [
+            'class_id' => $this->classId,
+            'term' => $this->term,
+            'session' => $this->session,
+            'component' => $comp,
+        ]);
+
+        $this->clearPublicationCache();
+
+        if ($nowReleased) {
+            $this->dispatch('alert', message: "{$label} released to parents and locked for teachers.", type: 'success');
+        } else {
+            $this->dispatch('alert', message: "{$label} unreleased. Teachers can now edit {$label} scores.", type: 'info');
+        }
+
+        $this->dispatch('$refresh');
+    }
+
     public function togglePublishResults(): void
     {
         $user = auth()->user();
@@ -1090,33 +1273,58 @@ class Entry extends Component
             ->where('session', (string) $this->session)
             ->first();
 
-        if ($existing) {
-            $existing->delete();
+        if ($existing && $existing->published_at !== null) {
+            $existing->published_at = null;
+            $existing->ca1_published_at = null;
+            $existing->ca2_published_at = null;
+            $existing->exam_published_at = null;
+            $existing->save();
+
             Audit::log('results.unpublished', null, [
                 'class_id' => $this->classId,
                 'term' => $this->term,
                 'session' => $this->session,
             ]);
-            unset($this->isPublished);
-            $this->dispatch('alert', message: 'Results unpublished. Parents and students cannot view scores for this class until re-released.', type: 'info');
+            $this->clearPublicationCache();
+            $this->dispatch('alert', message: 'All results unpublished. Parents and students cannot view scores for this class until re-released.', type: 'info');
         } else {
-            ResultPublication::query()->create([
-                'class_id' => $this->classId,
-                'term' => (int) $this->term,
-                'session' => (string) $this->session,
-                'published_at' => now(),
-                'published_by' => $user->id,
-            ]);
+            ResultPublication::query()->updateOrCreate(
+                [
+                    'class_id' => (int) $this->classId,
+                    'term' => (int) $this->term,
+                    'session' => (string) $this->session,
+                ],
+                [
+                    'tenant_id' => $user->tenant_id,
+                    'published_at' => now(),
+                    'ca1_published_at' => now(),
+                    'ca2_published_at' => now(),
+                    'exam_published_at' => now(),
+                    'published_by' => $user->id,
+                ]
+            );
+
             Audit::log('results.published', null, [
                 'class_id' => $this->classId,
                 'term' => $this->term,
                 'session' => $this->session,
             ]);
-            unset($this->isPublished);
-            $this->dispatch('alert', message: 'Results released! Parents and students can now view grades and download report cards.', type: 'success');
+            $this->clearPublicationCache();
+            $this->dispatch('alert', message: 'All results released! Parents and students can now view grades and download report cards.', type: 'success');
         }
 
         $this->dispatch('$refresh');
+    }
+
+    protected function clearPublicationCache(): void
+    {
+        unset(
+            $this->isPublished,
+            $this->currentPublication,
+            $this->isCa1Published,
+            $this->isCa2Published,
+            $this->isExamPublished
+        );
     }
 
     private function loadExistingScores(): void
