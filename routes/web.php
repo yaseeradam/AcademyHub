@@ -318,18 +318,22 @@ Route::middleware(['auth', 'active'])->group(function () {
         Route::get('/procurement/cash-flow', \App\Livewire\Procurement\CashFlow::class)->name('procurement.cash-flow');
     });
 
-    // ZKTeco K40 Biometrics — accessible to admin and teachers when plugin is installed
-    Route::middleware(['role:admin,teacher', 'plugin:k40-biometrics'])->group(function () {
+    // ZKTeco K40 Biometrics — accessible to admin when plugin is installed
+    Route::middleware(['role:admin', 'plugin:k40-biometrics'])->group(function () {
         Route::get('/biometrics', \App\Livewire\Biometrics\Index::class)->name('biometrics.index');
         Route::get('/biometrics/students-pdf', [K40StudentsPdfController::class, 'download'])->name('biometrics.students-pdf');
         Route::post('/biometrics/auto-assign-k40', [K40StudentsPdfController::class, 'autoAssign'])->middleware('role:admin,proprietor')->name('biometrics.auto-assign-k40');
     });
 
-    Route::middleware('role:admin,teacher,bursar,proprietor')->group(function () {
-        Route::view('/institute', 'pages.institute.index')->name('institute');
+    // Staff & Parents Management — accessible only to administrators & proprietors
+    Route::middleware('role:admin,proprietor')->group(function () {
         Route::view('/teachers', 'pages.teachers.index')->name('teachers');
         Route::get('/teachers/{teacher}', [TeacherController::class, 'show'])->name('teachers.show');
         Route::get('/parents', \App\Livewire\Parents\Management::class)->name('parents.index');
+    });
+
+    Route::middleware('role:admin,teacher,bursar,proprietor')->group(function () {
+        Route::view('/institute', 'pages.institute.index')->name('institute');
         Route::get('/classes', [SchoolClassController::class, 'index'])->name('classes.index');
         Route::get('/classes/{class}/subjects', ManageSubjects::class)->middleware('role:admin')->name('classes.subjects');
         Route::get('/subjects', [SubjectController::class, 'index'])->name('subjects.index');

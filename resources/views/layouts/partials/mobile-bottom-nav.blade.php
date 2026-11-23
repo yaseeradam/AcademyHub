@@ -88,9 +88,9 @@
                 'icon'   => 'clipboard-list',
             ],
             [
-                'label'  => 'Classes',
-                'route'  => route('classes.index'),
-                'active' => request()->routeIs('classes.*'),
+                'label'  => 'Students',
+                'route'  => route('students.index'),
+                'active' => request()->routeIs('students.*'),
                 'icon'   => 'academic-cap',
             ],
             [

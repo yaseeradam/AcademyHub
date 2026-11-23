@@ -129,13 +129,194 @@ HTML;
         'bg-violet-100', 'text-violet-500',
         '<path stroke-linecap="round" stroke-linejoin="round" d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>',
         request()->routeIs('profile')) !!}
+@elseif($user?->role === 'teacher')
+    {{-- Dedicated, Clean Sidebar for Teachers (Only Educator Tools, No Admin Control) --}}
+    
+    {{-- 1. My Students --}}
+    {!! $navLink(route('students.index'), 'My Students',
+        'bg-blue-100', 'text-blue-500',
+        '<path stroke-linecap="round" stroke-linejoin="round" d="M12 14l9-5-9-5-9 5 9 5z"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"/>',
+        request()->routeIs('students.*')) !!}
+
+    {{-- 2. Academics Dropdown --}}
+    @php
+        $isTeacherAcademicsActive = request()->routeIs('results.entry') || request()->routeIs('curriculum.*') || request()->routeIs('attendance') || request()->routeIs('attendance.excuses*') || request()->routeIs('timetable*') || request()->routeIs('academics.hall-of-fame') || request()->routeIs('results.broadsheet') || request()->routeIs('data-collection');
+    @endphp
+    <div x-data="{ open: {{ $isTeacherAcademicsActive ? 'true' : 'false' }} }" class="mb-1">
+        <button type="button" 
+            @click="sidebarCollapsed ? (sidebarCollapsed = false, open = true) : (open = !open)" 
+            title="Academics"
+            class="flex items-center transition-all duration-300 {{ $isTeacherAcademicsActive ? 'bg-violet-50/80 text-violet-700 font-bold ring-1 ring-violet-200/50' : 'text-slate-700 hover:bg-white hover:shadow-sm' }}"
+            x-bind:class="sidebarCollapsed ? 'w-11 h-11 mx-auto justify-center rounded-xl p-0' : 'w-full justify-between px-3 py-2.5 rounded-2xl'">
+            <div class="flex items-center" x-bind:class="sidebarCollapsed ? 'justify-center' : 'gap-3'">
+                <div class="nav-icon-box bg-slate-100 rounded-xl flex-shrink-0 flex items-center justify-center">
+                    <svg class="h-5 w-5 text-slate-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+                    </svg>
+                </div>
+                <span class="text-slate-700 font-bold text-sm leading-none whitespace-nowrap" x-show="!sidebarCollapsed" x-transition:enter="transition-opacity ease-out duration-200 delay-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="transition-opacity ease-in duration-75" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0">Academics</span>
+            </div>
+            <svg x-show="!sidebarCollapsed" x-transition:enter="transition-opacity ease-out duration-200 delay-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="transition-opacity ease-in duration-75" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" :class="open ? 'rotate-180 text-slate-600' : 'text-slate-400'" class="h-4 w-4 transform transition-transform duration-200 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/>
+            </svg>
+        </button>
+        <div x-cloak x-show="open && (!sidebarCollapsed || {{ $isMobile ? 'true' : 'false' }})" 
+             x-transition:enter="transition ease-out duration-200"
+             x-transition:enter-start="opacity-0 -translate-y-1"
+             x-transition:enter-end="opacity-100 translate-y-0"
+             x-transition:leave="transition ease-in duration-150"
+             x-transition:leave-start="opacity-100 translate-y-0"
+             x-transition:leave-end="opacity-0 -translate-y-1"
+             class="mt-1 space-y-0.5" 
+             x-bind:class="sidebarCollapsed ? '' : 'pl-4 border-l border-slate-200/60 ml-4.5'">
+            {!! $navLink(route('results.entry'), 'Score Entry',
+                'bg-green-100', 'text-green-500',
+                '<path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>',
+                request()->routeIs('results.entry')) !!}
+
+            {!! $navLink(route('curriculum.topics'), 'Subject Topics',
+                'bg-purple-100', 'text-purple-500',
+                '<path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>',
+                request()->routeIs('curriculum.*')) !!}
+
+            @if($user?->is_class_teacher || $user?->hasPermission('attendance.mark'))
+                {!! $navLink(route('attendance'), 'Attendance',
+                    'bg-teal-100', 'text-teal-500',
+                    '<path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>',
+                    request()->routeIs('attendance') && !request()->routeIs('attendance.excuses*')) !!}
+
+                {!! $navLink(route('attendance.excuses'), 'Excuse Requests',
+                    'bg-amber-100', 'text-amber-600',
+                    '<path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>',
+                    request()->routeIs('attendance.excuses*')) !!}
+            @endif
+
+            {!! $navLink(route('timetable'), 'Timetable',
+                'bg-sky-100', 'text-sky-500',
+                '<path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>',
+                request()->routeIs('timetable*')) !!}
+
+            @if($user?->hasPermission('results.broadsheet'))
+                {!! $navLink(route('results.broadsheet'), 'Broadsheet',
+                    'bg-emerald-100', 'text-emerald-500',
+                    '<path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M3 14h18M10 3v18M14 3v18"/><rect x="3" y="3" width="18" height="18" rx="2" stroke-linecap="round" stroke-linejoin="round"/>',
+                    request()->routeIs('results.broadsheet')) !!}
+            @endif
+
+            @if($user?->hasPermission('data_collection.submit'))
+                {!! $navLink(route('data-collection'), 'Data Collection',
+                    'bg-blue-100', 'text-blue-500',
+                    '<path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>',
+                    request()->routeIs('data-collection')) !!}
+            @endif
+
+            {!! $navLink(route('academics.hall-of-fame'), 'Hall of Fame',
+                'bg-amber-100', 'text-amber-600',
+                '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16.5 18.75h-9m9 0a3 3 0 013 3h-15a3 3 0 013-3m9 0v-3.375c0-.621-.504-1.125-1.125-1.125h-.871M7.5 18.75v-3.375c0-.621.504-1.125 1.125-1.125h.872m5.004 0A6.75 6.75 0 0019.5 7.5c0-1.88-1.04-3.52-2.58-4.375M7.5 14.25a6.75 6.75 0 01-5.004-6.75C2.496 5.62 3.536 3.98 5.076 3.125M12 3a4.5 4.5 0 00-4.5 4.5c0 1.766 1.018 3.295 2.5 4.025v2.725h4v-2.725A4.502 4.502 0 0016.5 7.5 4.5 4.5 0 0012 3z"/>',
+                request()->routeIs('academics.hall-of-fame')) !!}
+        </div>
+    </div>
+
+    {{-- 3. Teaching Tools (Homework, CBT, E-Learning, Messages) --}}
+    @php
+        $teacherTenantComponents = auth()->user()?->tenant?->activeMarketplaceComponents()->get() ?? collect();
+        $hasTeacherHomework = $teacherTenantComponents->where('slug', 'homework')->isNotEmpty();
+        $hasTeacherCbt = $teacherTenantComponents->where('slug', 'cbt')->isNotEmpty();
+        $hasTeacherELearning = $teacherTenantComponents->where('slug', 'e-learning')->isNotEmpty();
+        $hasTeacherMessages = $teacherTenantComponents->where('slug', 'messages')->isNotEmpty() && ($user?->hasPermission('messages.access') ?? true);
+        $hasTeacherPlugins = $hasTeacherHomework || $hasTeacherCbt || $hasTeacherELearning || $hasTeacherMessages;
+        $isTeacherPluginsActive = request()->routeIs('homework.*') || request()->routeIs('cbt.*') || request()->routeIs('e-learning.*') || request()->routeIs('messages*');
+    @endphp
+    @if($hasTeacherPlugins)
+        <div x-data="{ open: {{ $isTeacherPluginsActive ? 'true' : 'false' }} }" class="mb-1">
+            <button type="button" 
+                @click="sidebarCollapsed ? (sidebarCollapsed = false, open = true) : (open = !open)" 
+                title="Teaching Tools"
+                class="flex items-center transition-all duration-300 {{ $isTeacherPluginsActive ? 'bg-violet-50/80 text-violet-700 font-bold ring-1 ring-violet-200/50' : 'text-slate-700 hover:bg-white hover:shadow-sm' }}"
+                x-bind:class="sidebarCollapsed ? 'w-11 h-11 mx-auto justify-center rounded-xl p-0' : 'w-full justify-between px-3 py-2.5 rounded-2xl'">
+                <div class="flex items-center" x-bind:class="sidebarCollapsed ? 'justify-center' : 'gap-3'">
+                    <div class="nav-icon-box bg-purple-100 rounded-xl flex-shrink-0 flex items-center justify-center">
+                        <svg class="h-5 w-5 text-purple-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+                        </svg>
+                    </div>
+                    <span class="text-slate-700 font-bold text-sm leading-none whitespace-nowrap" x-show="!sidebarCollapsed" x-transition:enter="transition-opacity ease-out duration-200 delay-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="transition-opacity ease-in duration-75" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0">Teaching Tools</span>
+                </div>
+                <svg x-show="!sidebarCollapsed" x-transition:enter="transition-opacity ease-out duration-200 delay-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="transition-opacity ease-in duration-75" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" :class="open ? 'rotate-180 text-slate-600' : 'text-slate-400'" class="h-4 w-4 transform transition-transform duration-200 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                </svg>
+            </button>
+            <div x-cloak x-show="open && (!sidebarCollapsed || {{ $isMobile ? 'true' : 'false' }})" 
+                 x-transition:enter="transition ease-out duration-200"
+                 x-transition:enter-start="opacity-0 -translate-y-1"
+                 x-transition:enter-end="opacity-100 translate-y-0"
+                 x-transition:leave="transition ease-in duration-150"
+                 x-transition:leave-start="opacity-100 translate-y-0"
+                 x-transition:leave-end="opacity-0 -translate-y-1"
+                 class="mt-1 space-y-0.5" 
+                 x-bind:class="sidebarCollapsed ? '' : 'pl-4 border-l border-slate-200/60 ml-4.5'">
+                @if($hasTeacherHomework)
+                    {!! $navLink(route('homework.index'), 'Homework',
+                        'bg-purple-100', 'text-purple-500',
+                        '<path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>',
+                        request()->routeIs('homework.*')) !!}
+                @endif
+
+                @if($hasTeacherCbt)
+                    {!! $navLink(route('cbt.index'), 'CBT Exams',
+                        'bg-indigo-100', 'text-indigo-500',
+                        '<path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>',
+                        request()->routeIs('cbt.*')) !!}
+                @endif
+
+                @if($hasTeacherELearning)
+                    {!! $navLink(route('e-learning.index'), 'E-Learning',
+                        'bg-sky-100', 'text-sky-500',
+                        '<path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>',
+                        request()->routeIs('e-learning.*')) !!}
+                @endif
+
+                @if($hasTeacherMessages)
+                    {!! $navLink(route('messages'), 'Messages',
+                        'bg-sky-100', 'text-sky-500',
+                        '<path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>',
+                        request()->routeIs('messages*')) !!}
+                @endif
+            </div>
+        </div>
+    @endif
+
+    {{-- 4. My Profile --}}
+    {!! $navLink(route('profile'), 'My Profile',
+        'bg-violet-100', 'text-violet-500',
+        '<path stroke-linecap="round" stroke-linejoin="round" d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>',
+        request()->routeIs('profile')) !!}
+
+    {{-- 5. Install App (PWA) --}}
+    <a href="javascript:void(0)" onclick="if(window.triggerPwaInstall){window.triggerPwaInstall()}else{alert('To install AcademyHub: Use the 3 dots menu in your browser and click Install App.')}" 
+       title="Install App"
+       class="pwa-install-trigger flex items-center transition-all duration-300 hover:bg-white hover:shadow-sm {{ $isMobile ? 'w-full gap-3 px-3 py-2.5 rounded-2xl' : '' }}"
+       {!! !$isMobile ? 'x-bind:class="sidebarCollapsed ? \'w-11 h-11 mx-auto justify-center rounded-xl p-0\' : \'w-full gap-3 px-3 py-2.5 rounded-2xl\'"' : '' !!}>
+        <div class="nav-icon-box bg-emerald-100 rounded-xl transition-all duration-300 flex-shrink-0">
+            <svg class="h-5 w-5 text-emerald-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+            </svg>
+        </div>
+        <span class="text-slate-700 font-bold flex-1 text-sm leading-none whitespace-nowrap overflow-hidden"
+              {!! !$isMobile ? 'x-show="!sidebarCollapsed" x-transition:enter="transition-opacity ease-out duration-200 delay-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="transition-opacity ease-in duration-75" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"' : '' !!}>
+            Install App
+        </span>
+        <div {!! !$isMobile ? 'x-show="!sidebarCollapsed" x-transition:enter="transition-opacity ease-out duration-200 delay-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="transition-opacity ease-in duration-75" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"' : '' !!}>
+            <span class="text-[9px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wider bg-emerald-50 text-emerald-700">PWA</span>
+        </div>
+    </a>
 @else
-    {{-- Dropdowns for Administrators, Teachers, and Bursars --}}
+    {{-- Dropdowns for Administrators and Bursars --}}
     
     {{-- Dropdown 1: Registry & Users --}}
     @php
         $isRegistryActive = request()->routeIs('students.*') || request()->routeIs('teachers') || request()->routeIs('teachers.*') || request()->routeIs('parents.*');
-        $hasRegistryAccess = in_array($user?->role, ['admin', 'teacher', 'bursar'], true);
+        $hasRegistryAccess = in_array($user?->role, ['admin', 'bursar'], true);
     @endphp
     @if($hasRegistryAccess)
         <div x-data="{ open: {{ $isRegistryActive ? 'true' : 'false' }} }" class="mb-1">
@@ -170,14 +351,12 @@ HTML;
                     '<path stroke-linecap="round" stroke-linejoin="round" d="M12 14l9-5-9-5-9 5 9 5z"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"/>',
                     request()->routeIs('students.*')) !!}
                 
-                @if(in_array($user?->role, ['admin', 'teacher', 'bursar', 'proprietor'], true))
+                @if($user?->role === 'admin' || $user?->hasPermission('users.manage'))
                     {!! $navLink(route('teachers'), 'Teachers',
                         'bg-orange-100', 'text-orange-500',
                         '<path stroke-linecap="round" stroke-linejoin="round" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>',
                         request()->routeIs('teachers') || request()->routeIs('teachers.*')) !!}
-                @endif
 
-                @if(in_array($user?->role, ['admin', 'teacher', 'bursar', 'proprietor'], true))
                     {!! $navLink(route('parents.index'), 'Parents',
                         'bg-pink-100', 'text-pink-500',
                         '<path stroke-linecap="round" stroke-linejoin="round" d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><path stroke-linecap="round" stroke-linejoin="round" d="M9 22V12h6v10"/>',
@@ -190,7 +369,7 @@ HTML;
     {{-- Dropdown 2: Academics Portal --}}
     @php
         $isAcademicsActive = request()->routeIs('classes.*') || request()->routeIs('subjects.*') || request()->routeIs('curriculum.*') || request()->routeIs('results.entry') || request()->routeIs('results.broadsheet') || request()->routeIs('attendance') || request()->routeIs('attendance.teachers') || request()->routeIs('attendance.staff-timesheet') || request()->routeIs('academics.hall-of-fame');
-        $hasAcademicsAccess = in_array($user?->role, ['admin', 'teacher'], true);
+        $hasAcademicsAccess = $user?->role === 'admin';
     @endphp
     @if($hasAcademicsAccess)
         <div x-data="{ open: {{ $isAcademicsActive ? 'true' : 'false' }} }" class="mb-1">
@@ -276,7 +455,7 @@ HTML;
                         request()->routeIs('attendance.staff-timesheet')) !!}
                 @endif
 
-                @if(auth()->user()?->tenant?->activeMarketplaceComponents()->where('slug', 'k40-biometrics')->exists() && in_array($user?->role, ['admin', 'teacher', 'bursar'], true))
+                @if(auth()->user()?->tenant?->activeMarketplaceComponents()->where('slug', 'k40-biometrics')->exists() && $user?->role === 'admin')
                     {!! $navLink(route('biometrics.index'), 'K40 Biometrics',
                         'bg-purple-100', 'text-purple-500',
                         '<path stroke-linecap="round" stroke-linejoin="round" d="M12 11c0 3.517-1.009 6.799-2.753 9.571m-3.44-2.04l.054-.09A13.916 13.916 0 008 11a4 4 0 118 0c0 1.017-.07 2.019-.203 3m-2.118 6.844A21.88 21.88 0 0015.171 17m3.839 1.132c.645-2.266.99-4.659.99-7.132A8 8 0 004.07 9m4.93 11a13.935 13.935 0 004.93-2.868"/>',
@@ -294,7 +473,7 @@ HTML;
         $sidebarPlugins = $tenantComponents->whereNotIn('slug', ['whatsapp-bot', 'homework', 'messages', 'payment-gateway', 'student-dashboard', 'parent-portal', 'k40-biometrics', 'procurement-records']);
         
         $isAddonsActive = request()->routeIs('homework.*') || request()->routeIs('messages') || $sidebarPlugins->contains(fn($p) => (Route::has($p->route_name) && request()->routeIs(explode('.', $p->route_name)[0] . '.*')) || (Route::has($p->slug . '.index') && request()->routeIs($p->slug . '.*')));
-        $hasAddonsAccess = in_array($user?->role, ['admin', 'teacher'], true) && ($hasHomework || $hasMessages || $sidebarPlugins->isNotEmpty());
+        $hasAddonsAccess = ($user?->role === 'admin') && ($hasHomework || $hasMessages || $sidebarPlugins->isNotEmpty());
     @endphp
     @if($hasAddonsAccess)
         <div x-data="{ open: {{ $isAddonsActive ? 'true' : 'false' }} }" class="mb-1">
@@ -368,7 +547,7 @@ HTML;
     {{-- Dropdown 4: System Administration & Finance --}}
     @php
         $isSystemActive = request()->routeIs('settings.index') || request()->routeIs('settings.subscription') || request()->routeIs('more-features') || request()->routeIs('timetable*') || request()->routeIs('billing.*') || request()->routeIs('profile');
-        $hasSystemAccess = in_array($user?->role, ['admin', 'teacher', 'bursar'], true);
+        $hasSystemAccess = in_array($user?->role, ['admin', 'bursar'], true);
     @endphp
     @if($hasSystemAccess)
         <div x-data="{ open: {{ $isSystemActive ? 'true' : 'false' }} }" class="mb-1">
@@ -425,10 +604,12 @@ HTML;
                         request()->routeIs('procurement.cash-flow')) !!}
                 @endif
                 
-                {!! $navLink(route('more-features'), 'More Features',
-                    'bg-amber-100', 'text-amber-500',
-                    '<path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/>',
-                    request()->routeIs('more-features')) !!}
+                @if($user?->role === 'admin')
+                    {!! $navLink(route('more-features'), 'More Features',
+                        'bg-amber-100', 'text-amber-500',
+                        '<path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/>',
+                        request()->routeIs('more-features')) !!}
+                @endif
 
                 @if($user?->role === 'admin')
                     {!! $navLink(route('settings.index'), 'Settings',
