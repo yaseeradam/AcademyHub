@@ -7,6 +7,7 @@ use App\Models\AcademicSession;
 use App\Models\InAppNotification;
 use App\Models\ResultPublication;
 use App\Models\SchoolClass;
+use App\Models\Section;
 use App\Models\Score;
 use App\Models\ScoreSubmission;
 use App\Models\Student;
