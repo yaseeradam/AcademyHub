@@ -54,7 +54,8 @@ class StudentDossierService
 
         // Publication filter: if only_published requested (e.g. by parent/student)
         $onlyPublished = (bool) ($optionsOverrides['only_published'] ?? false);
-        $publishedTerms = $onlyPublished ? ResultPublication::publishedTermsForClass($classId, $session) : [1, 2, 3];
+        $studentSec = $student->section_id ? (int) $student->section_id : null;
+        $publishedTerms = $onlyPublished ? ResultPublication::publishedTermsForClass($classId, $session, $studentSec) : [1, 2, 3];
 
         // Fetch all scores for this student across the entire session
         $studentScores = Score::query()
@@ -797,7 +798,8 @@ class StudentDossierService
 
         // 4. Determine terms to render in this book (A complete student report book covers Terms 1, 2, and 3)
         if ($isParentOrStudent) {
-            $publishedTerms = ResultPublication::publishedTermsForClass($student->class_id, $session);
+            $studentSec = $student->section_id ? (int) $student->section_id : null;
+            $publishedTerms = ResultPublication::publishedTermsForClass((int) $student->class_id, $session, $studentSec);
             $termsToRender = !empty($publishedTerms) ? array_values($publishedTerms) : [1];
             sort($termsToRender);
         } else {

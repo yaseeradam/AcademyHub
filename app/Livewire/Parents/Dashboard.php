@@ -109,7 +109,8 @@ class Dashboard extends Component
     public function resultsPublished(): bool
     {
         if (! $this->selectedChild) return false;
-        return ResultPublication::anyPublished($this->selectedChild->class_id, (int) $this->term, (string) $this->session);
+        $sectionId = $this->selectedChild->section_id ? (int) $this->selectedChild->section_id : null;
+        return ResultPublication::anyPublished((int) $this->selectedChild->class_id, (int) $this->term, (string) $this->session, $sectionId);
     }
 
     #[Computed]
@@ -120,10 +121,11 @@ class Dashboard extends Component
         $classId = (int) $this->selectedChild->class_id;
         $term = (int) $this->term;
         $session = (string) $this->session;
+        $sectionId = $this->selectedChild->section_id ? (int) $this->selectedChild->section_id : null;
 
-        $isCa1 = ResultPublication::isCa1Published($classId, $term, $session);
-        $isCa2 = ResultPublication::isCa2Published($classId, $term, $session);
-        $isExam = ResultPublication::isExamPublished($classId, $term, $session);
+        $isCa1 = ResultPublication::isCa1Published($classId, $term, $session, $sectionId);
+        $isCa2 = ResultPublication::isCa2Published($classId, $term, $session, $sectionId);
+        $isExam = ResultPublication::isExamPublished($classId, $term, $session, $sectionId);
 
         $scores = Score::where('student_id', $this->selectedChild->id)
             ->where('term', $term)
@@ -903,11 +905,8 @@ class Dashboard extends Component
             $attRate = $totalMarks > 0 ? min(100, (int) round(($present / $effTotal) * 100)) : 100;
 
             // Academic Average
-            $published = ResultPublication::where('class_id', $child->class_id)
-                ->where('term', $this->term)
-                ->where('session', $this->session)
-                ->whereNotNull('published_at')
-                ->exists();
+            $childSec = $child->section_id ? (int) $child->section_id : null;
+            $published = ResultPublication::isPublished((int) $child->class_id, (int) $this->term, (string) $this->session, $childSec);
             $avgScore = 0;
             if ($published) {
                 $avgScore = round((float) Score::where('student_id', $child->id)

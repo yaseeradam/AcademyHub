@@ -328,11 +328,18 @@ class Entry extends Component
             return null;
         }
 
-        return ResultPublication::query()
-            ->where('class_id', $this->classId)
+        $query = ResultPublication::query()
+            ->where('class_id', (int) $this->classId)
             ->where('term', (int) $this->term)
-            ->where('session', (string) $this->session)
-            ->first();
+            ->where('session', (string) $this->session);
+
+        if ($this->sectionId) {
+            $query->where('section_id', (int) $this->sectionId);
+        } else {
+            $query->whereNull('section_id');
+        }
+
+        return $query->first();
     }
 
     #[Computed]
@@ -607,6 +614,7 @@ class Entry extends Component
         }
 
         unset($this->subjects, $this->students, $this->submission, $this->sectionSubmissions);
+        $this->clearPublicationCache();
         $this->loadExistingScores();
     }
 
@@ -683,14 +691,16 @@ class Entry extends Component
 
         $user = auth()->user();
         if ($user?->role === 'teacher') {
+            $studentSectionId = Student::whereKey($studentId)->value('section_id');
+            $activeSectionId = $this->sectionId ? (int) $this->sectionId : ($studentSectionId ? (int) $studentSectionId : null);
             $isLocked = false;
-            if ($this->isPublished()) {
+            if (ResultPublication::isPublished((int) $this->classId, (int) $this->term, (string) $this->session, $activeSectionId)) {
                 $isLocked = true;
-            } elseif ($field === 'ca1' && $this->isCa1Published()) {
+            } elseif ($field === 'ca1' && ResultPublication::isCa1Published((int) $this->classId, (int) $this->term, (string) $this->session, $activeSectionId)) {
                 $isLocked = true;
-            } elseif ($field === 'ca2' && $this->isCa2Published()) {
+            } elseif ($field === 'ca2' && ResultPublication::isCa2Published((int) $this->classId, (int) $this->term, (string) $this->session, $activeSectionId)) {
                 $isLocked = true;
-            } elseif ($field === 'exam' && $this->isExamPublished()) {
+            } elseif ($field === 'exam' && ResultPublication::isExamPublished((int) $this->classId, (int) $this->term, (string) $this->session, $activeSectionId)) {
                 $isLocked = true;
             }
 
@@ -824,6 +834,9 @@ class Entry extends Component
         }
 
         if ($user->role === 'teacher') {
+            $studentSectionId = Student::whereKey($studentId)->value('section_id');
+            $activeSectionId = $this->sectionId ? (int) $this->sectionId : ($studentSectionId ? (int) $studentSectionId : null);
+
             $existing = Score::query()
                 ->where('student_id', $studentId)
                 ->where('subject_id', $this->subjectId)
@@ -832,13 +845,13 @@ class Entry extends Component
                 ->where('session', $this->session)
                 ->first();
 
-            if ($this->isCa1Published() && $existing) {
+            if (ResultPublication::isCa1Published((int) $this->classId, (int) $this->term, (string) $this->session, $activeSectionId) && $existing) {
                 $ca1 = (int) $existing->ca1;
             }
-            if ($this->isCa2Published() && $existing) {
+            if (ResultPublication::isCa2Published((int) $this->classId, (int) $this->term, (string) $this->session, $activeSectionId) && $existing) {
                 $ca2 = (int) $existing->ca2;
             }
-            if ($this->isExamPublished() && $existing) {
+            if (ResultPublication::isExamPublished((int) $this->classId, (int) $this->term, (string) $this->session, $activeSectionId) && $existing) {
                 $exam = (int) $existing->exam;
             }
         }
@@ -946,13 +959,14 @@ class Entry extends Component
                     ->first();
 
                 if ($user?->role === 'teacher') {
-                    if ($this->isCa1Published() && $existing) {
+                    $secId = $student->section_id ? (int) $student->section_id : ($this->sectionId ? (int) $this->sectionId : null);
+                    if (ResultPublication::isCa1Published((int) $this->classId, (int) $this->term, (string) $this->session, $secId) && $existing) {
                         $ca1 = (int) $existing->ca1;
                     }
-                    if ($this->isCa2Published() && $existing) {
+                    if (ResultPublication::isCa2Published((int) $this->classId, (int) $this->term, (string) $this->session, $secId) && $existing) {
                         $ca2 = (int) $existing->ca2;
                     }
-                    if ($this->isExamPublished() && $existing) {
+                    if (ResultPublication::isExamPublished((int) $this->classId, (int) $this->term, (string) $this->session, $secId) && $existing) {
                         $exam = (int) $existing->exam;
                     }
                 }
@@ -1205,53 +1219,76 @@ class Entry extends Component
         $field = "{$comp}_published_at";
         $label = strtoupper($comp);
 
-        $pub = ResultPublication::query()->firstOrCreate(
-            [
-                'class_id' => (int) $this->classId,
-                'term' => (int) $this->term,
-                'session' => (string) $this->session,
-            ],
-            [
-                'tenant_id' => $user->tenant_id,
-                'published_by' => $user->id,
-            ]
-        );
+        // Target section: specific section if selected; otherwise all sections of the class or null (if no sections exist)
+        $targetSectionIds = [];
+        if ($this->sectionId) {
+            $targetSectionIds[] = (int) $this->sectionId;
+        } else {
+            $sections = Section::where('class_id', (int) $this->classId)->pluck('id')->all();
+            if (! empty($sections)) {
+                $targetSectionIds = $sections;
+            } else {
+                $targetSectionIds = [null];
+            }
+        }
 
         $nowReleased = false;
 
-        if ($pub->published_at !== null) {
-            // Full terminal results were published; un-releasing this component unpublishes it specifically
-            $pub->published_at = null;
-            $pub->ca1_published_at = $comp === 'ca1' ? null : now();
-            $pub->ca2_published_at = $comp === 'ca2' ? null : now();
-            $pub->exam_published_at = $comp === 'exam' ? null : now();
-            $pub->save();
-            $nowReleased = false;
-        } else {
-            if ($pub->{$field} !== null) {
-                $pub->{$field} = null;
+        foreach ($targetSectionIds as $secId) {
+            $pub = ResultPublication::query()->firstOrCreate(
+                [
+                    'class_id' => (int) $this->classId,
+                    'section_id' => $secId,
+                    'term' => (int) $this->term,
+                    'session' => (string) $this->session,
+                ],
+                [
+                    'tenant_id' => $user->tenant_id,
+                    'published_by' => $user->id,
+                ]
+            );
+
+            if ($pub->published_at !== null) {
+                // Full terminal results were published; un-releasing this component unpublishes it specifically
+                $pub->published_at = null;
+                $pub->ca1_published_at = $comp === 'ca1' ? null : now();
+                $pub->ca2_published_at = $comp === 'ca2' ? null : now();
+                $pub->exam_published_at = $comp === 'exam' ? null : now();
+                $pub->save();
                 $nowReleased = false;
             } else {
-                $pub->{$field} = now();
-                $pub->published_by = $user->id;
-                $nowReleased = true;
+                if ($pub->{$field} !== null) {
+                    $pub->{$field} = null;
+                    $nowReleased = false;
+                } else {
+                    $pub->{$field} = now();
+                    $pub->published_by = $user->id;
+                    $nowReleased = true;
+                }
+                $pub->save();
             }
-            $pub->save();
-        }
 
-        Audit::log($nowReleased ? "results.{$comp}_published" : "results.{$comp}_unpublished", null, [
-            'class_id' => $this->classId,
-            'term' => $this->term,
-            'session' => $this->session,
-            'component' => $comp,
-        ]);
+            Audit::log($nowReleased ? "results.{$comp}_published" : "results.{$comp}_unpublished", null, [
+                'class_id' => $this->classId,
+                'section_id' => $secId,
+                'term' => $this->term,
+                'session' => $this->session,
+                'component' => $comp,
+            ]);
+        }
 
         $this->clearPublicationCache();
 
+        $sectionLabel = '';
+        if ($this->sectionId) {
+            $secName = Section::whereKey($this->sectionId)->value('name');
+            $sectionLabel = $secName ? " for {$secName}" : '';
+        }
+
         if ($nowReleased) {
-            $this->dispatch('alert', message: "{$label} released to parents and locked for teachers.", type: 'success');
+            $this->dispatch('alert', message: "{$label} released to parents and locked for teachers{$sectionLabel}.", type: 'success');
         } else {
-            $this->dispatch('alert', message: "{$label} unreleased. Teachers can now edit {$label} scores.", type: 'info');
+            $this->dispatch('alert', message: "{$label} unreleased{$sectionLabel}. Teachers can now edit {$label} scores.", type: 'info');
         }
 
         $this->dispatch('$refresh');
@@ -1267,49 +1304,73 @@ class Entry extends Component
             return;
         }
 
-        $existing = ResultPublication::query()
-            ->where('class_id', $this->classId)
-            ->where('term', (int) $this->term)
-            ->where('session', (string) $this->session)
-            ->first();
-
-        if ($existing && $existing->published_at !== null) {
-            $existing->published_at = null;
-            $existing->ca1_published_at = null;
-            $existing->ca2_published_at = null;
-            $existing->exam_published_at = null;
-            $existing->save();
-
-            Audit::log('results.unpublished', null, [
-                'class_id' => $this->classId,
-                'term' => $this->term,
-                'session' => $this->session,
-            ]);
-            $this->clearPublicationCache();
-            $this->dispatch('alert', message: 'All results unpublished. Parents and students cannot view scores for this class until re-released.', type: 'info');
+        $targetSectionIds = [];
+        if ($this->sectionId) {
+            $targetSectionIds[] = (int) $this->sectionId;
         } else {
-            ResultPublication::query()->updateOrCreate(
-                [
-                    'class_id' => (int) $this->classId,
-                    'term' => (int) $this->term,
-                    'session' => (string) $this->session,
-                ],
-                [
-                    'tenant_id' => $user->tenant_id,
-                    'published_at' => now(),
-                    'ca1_published_at' => now(),
-                    'ca2_published_at' => now(),
-                    'exam_published_at' => now(),
-                    'published_by' => $user->id,
-                ]
-            );
+            $sections = Section::where('class_id', (int) $this->classId)->pluck('id')->all();
+            if (! empty($sections)) {
+                $targetSectionIds = $sections;
+            } else {
+                $targetSectionIds = [null];
+            }
+        }
 
-            Audit::log('results.published', null, [
-                'class_id' => $this->classId,
-                'term' => $this->term,
-                'session' => $this->session,
-            ]);
-            $this->clearPublicationCache();
+        $isCurrentlyPublished = $this->isPublished();
+
+        foreach ($targetSectionIds as $secId) {
+            $existing = ResultPublication::query()
+                ->where('class_id', (int) $this->classId)
+                ->when($secId, fn($q) => $q->where('section_id', $secId), fn($q) => $q->whereNull('section_id'))
+                ->where('term', (int) $this->term)
+                ->where('session', (string) $this->session)
+                ->first();
+
+            if ($existing && $existing->published_at !== null) {
+                $existing->published_at = null;
+                $existing->ca1_published_at = null;
+                $existing->ca2_published_at = null;
+                $existing->exam_published_at = null;
+                $existing->save();
+
+                Audit::log('results.unpublished', null, [
+                    'class_id' => $this->classId,
+                    'section_id' => $secId,
+                    'term' => $this->term,
+                    'session' => $this->session,
+                ]);
+            } else {
+                ResultPublication::query()->updateOrCreate(
+                    [
+                        'class_id' => (int) $this->classId,
+                        'section_id' => $secId,
+                        'term' => (int) $this->term,
+                        'session' => (string) $this->session,
+                    ],
+                    [
+                        'tenant_id' => $user->tenant_id,
+                        'published_at' => now(),
+                        'ca1_published_at' => now(),
+                        'ca2_published_at' => now(),
+                        'exam_published_at' => now(),
+                        'published_by' => $user->id,
+                    ]
+                );
+
+                Audit::log('results.published', null, [
+                    'class_id' => $this->classId,
+                    'section_id' => $secId,
+                    'term' => $this->term,
+                    'session' => $this->session,
+                ]);
+            }
+        }
+
+        $this->clearPublicationCache();
+
+        if ($isCurrentlyPublished) {
+            $this->dispatch('alert', message: 'All results unpublished. Parents and students cannot view scores until re-released.', type: 'info');
+        } else {
             $this->dispatch('alert', message: 'All results released! Parents and students can now view grades and download report cards.', type: 'success');
         }
 

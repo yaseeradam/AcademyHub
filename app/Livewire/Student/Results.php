@@ -50,8 +50,9 @@ class Results extends Component
             $sessions = $sessions->unique()->values();
         }
 
-        // Check if any results or assessments are published for this class/term/session
-        $published = ResultPublication::anyPublished($student->class_id, (int) $this->selectedTerm, (string) $this->selectedSession);
+        // Check if any results or assessments are published for this class/section/term/session
+        $sectionId = $student->section_id ? (int) $student->section_id : null;
+        $published = ResultPublication::anyPublished((int) $student->class_id, (int) $this->selectedTerm, (string) $this->selectedSession, $sectionId);
 
         $scores = collect();
         $classSize = 0;
@@ -62,9 +63,9 @@ class Results extends Component
             $term = (int) $this->selectedTerm;
             $session = (string) $this->selectedSession;
 
-            $isCa1 = ResultPublication::isCa1Published($classId, $term, $session);
-            $isCa2 = ResultPublication::isCa2Published($classId, $term, $session);
-            $isExam = ResultPublication::isExamPublished($classId, $term, $session);
+            $isCa1 = ResultPublication::isCa1Published($classId, $term, $session, $sectionId);
+            $isCa2 = ResultPublication::isCa2Published($classId, $term, $session, $sectionId);
+            $isExam = ResultPublication::isExamPublished($classId, $term, $session, $sectionId);
 
             $scores = Score::where('student_id', $student->id)
                 ->where('session', $session)

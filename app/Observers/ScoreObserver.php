@@ -31,11 +31,9 @@ class ScoreObserver
             return;
         }
 
-        // Only notify parents if results for this class, term, and session are formally published
-        $isPublished = \App\Models\ResultPublication::where('class_id', $score->class_id)
-            ->where('term', $score->term)
-            ->where('session', $score->session)
-            ->exists();
+        // Only notify parents if results for this class/section, term, and session are formally published
+        $secId = $student?->section_id ? (int) $student->section_id : null;
+        $isPublished = \App\Models\ResultPublication::isExamPublished((int) $score->class_id, (int) $score->term, (string) $score->session, $secId);
 
         if (! $isPublished) {
             return;
