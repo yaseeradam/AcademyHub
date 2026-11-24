@@ -108,8 +108,8 @@ class Index extends Component
 
         $this->registerSession = $this->registerSession ?? $this->defaultSession();
         $this->registerTerm = $this->registerTerm ?? 1;
-        if (! $this->registerClassId && $this->classes->isNotEmpty()) {
-            $this->registerClassId = $this->classes->first()->id;
+        if (! $this->registerClassId) {
+            $this->registerClassId = \App\Models\SchoolClass::query()->orderBy('level')->orderBy('name')->value('id');
         }
 
         $this->debtorsCategory = $this->debtorsCategory ?: $this->category ?: 'Tuition';
