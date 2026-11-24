@@ -25,6 +25,10 @@
                         class="px-4 py-2 text-xs font-bold rounded-xl transition-all duration-200 {{ $tab === 'debtors' ? 'bg-emerald-500 text-white shadow-md' : 'bg-transparent text-slate-600 hover:bg-slate-100' }}" wire:loading.attr="disabled" wire:loading.class="opacity-50 cursor-wait">
                     Outstanding Balances
                 </button>
+                <button wire:click="$set('tab', 'class-register')" 
+                        class="px-4 py-2 text-xs font-bold rounded-xl transition-all duration-200 {{ $tab === 'class-register' ? 'bg-emerald-500 text-white shadow-md' : 'bg-transparent text-slate-600 hover:bg-slate-100' }}" wire:loading.attr="disabled" wire:loading.class="opacity-50 cursor-wait">
+                    Class Fee Register
+                </button>
                 @if ($canFees)
                     <button wire:click="$set('tab', 'fees')" 
                             class="px-4 py-2 text-xs font-bold rounded-xl transition-all duration-200 {{ $tab === 'fees' ? 'bg-emerald-500 text-white shadow-md' : 'bg-transparent text-slate-600 hover:bg-slate-100' }}" wire:loading.attr="disabled" wire:loading.class="opacity-50 cursor-wait">
@@ -134,38 +138,94 @@
                     {{-- Left Section: Student & Category Selection (7 Cols on desktop) --}}
                     <div class="lg:col-span-7 space-y-4">
                         @if ($type === 'Income')
-                            {{-- Class & Student Picker --}}
-                            <div class="grid grid-cols-1 sm:grid-cols-12 gap-3">
-                                <div class="sm:col-span-5">
-                                    <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5 flex items-center gap-1.5">
-                                        <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
-                                        Filter Class
+                            {{-- Fast Student Search & Picker --}}
+                            <div class="space-y-3">
+                                <div class="flex items-center justify-between">
+                                    <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+                                        <svg class="w-4 h-4 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                                        <span>Search Student (Name or Admission #) *</span>
                                     </label>
-                                    <select wire:model.live="selectedClassId" class="w-full text-sm rounded-xl border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700/80 text-slate-900 dark:text-white shadow-sm focus:border-emerald-500 focus:ring-emerald-500">
-                                        <option value="">All Classes (All Students)</option>
-                                        @foreach ($this->classes as $class)
-                                            <option value="{{ $class->id }}">{{ $class->name }}</option>
-                                        @endforeach
-                                    </select>
+                                    @if($this->selectedStudent)
+                                        <button type="button" wire:click="clearSelectedStudent" class="text-xs text-rose-500 hover:text-rose-700 font-bold flex items-center gap-1">
+                                            <span>✕ Clear Selection</span>
+                                        </button>
+                                    @endif
                                 </div>
-                                <div class="sm:col-span-7">
-                                    <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5 flex items-center justify-between">
-                                        <span class="flex items-center gap-1.5">
-                                            <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
-                                            Select Student *
-                                        </span>
-                                        <span class="text-[11px] font-normal text-slate-400">({{ $this->students->count() }} students)</span>
-                                    </label>
-                                    <select wire:model.live="studentId" class="w-full text-sm font-medium rounded-xl border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700/80 text-slate-900 dark:text-white shadow-sm focus:border-emerald-500 focus:ring-emerald-500">
-                                        <option value="">-- Choose Student to Receive Cash --</option>
-                                        @foreach ($this->students as $student)
-                                            <option value="{{ $student->id }}">
-                                                {{ $student->full_name }} ({{ $student->admission_number ?? 'No Adm #' }}) - {{ $student->schoolClass?->name ?? 'No Class' }}
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                    @error('studentId') <p class="mt-1 text-xs text-rose-500 font-medium">{{ $message }}</p> @enderror
+
+                                {{-- Live Search Autocomplete Input --}}
+                                <div class="relative">
+                                    <div class="relative rounded-xl shadow-xs">
+                                        <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5">
+                                            <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+                                        </div>
+                                        <input type="text" 
+                                               wire:model.live.debounce.250ms="studentSearch" 
+                                               placeholder="Type student name or admission number (e.g. John or 2024/001)..." 
+                                               class="w-full pl-10 pr-10 py-2.5 text-sm font-medium rounded-xl border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700/80 text-slate-900 dark:text-white shadow-sm focus:border-emerald-500 focus:ring-emerald-500" />
+                                        @if($studentSearch)
+                                            <button type="button" wire:click="clearSelectedStudent" class="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400 hover:text-rose-500">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                                            </button>
+                                        @endif
+                                    </div>
+
+                                    {{-- Dropdown Instant Matches --}}
+                                    @if($this->searchResults->isNotEmpty())
+                                        <div class="absolute z-30 mt-1 w-full bg-white dark:bg-slate-800 rounded-2xl shadow-xl border border-slate-200 dark:border-slate-700 max-h-64 overflow-y-auto divide-y divide-slate-100 dark:divide-slate-700/60">
+                                            @foreach($this->searchResults as $res)
+                                                <button type="button" 
+                                                        wire:click="selectStudent({{ $res->id }})" 
+                                                        class="w-full text-left px-4 py-2.5 hover:bg-emerald-50 dark:hover:bg-slate-700/50 flex items-center justify-between group transition-colors">
+                                                    <div class="flex items-center gap-3">
+                                                        <div class="w-8 h-8 rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-900/60 dark:text-emerald-300 flex items-center justify-center font-bold text-xs shrink-0">
+                                                            {{ strtoupper(substr($res->first_name, 0, 1) . substr($res->last_name, 0, 1)) }}
+                                                        </div>
+                                                        <div>
+                                                            <div class="text-sm font-bold text-slate-900 dark:text-white group-hover:text-emerald-700 dark:group-hover:text-emerald-400">
+                                                                {{ $res->full_name }}
+                                                            </div>
+                                                            <div class="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-2">
+                                                                <span class="font-mono bg-slate-100 dark:bg-slate-700 px-1.5 py-0.5 rounded text-[11px]">{{ $res->admission_number ?? 'No Adm #' }}</span>
+                                                                <span>&bull;</span>
+                                                                <span>{{ $res->schoolClass?->name ?? 'No Class' }} @if($res->section)({{ $res->section->name }})@endif</span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <span class="text-xs font-bold text-emerald-600 dark:text-emerald-400 group-hover:translate-x-0.5 transition-transform flex items-center gap-1">
+                                                        Select
+                                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                                                    </span>
+                                                </button>
+                                            @endforeach
+                                        </div>
+                                    @endif
                                 </div>
+
+                                {{-- Collapsible Class List Browser for alternate selection --}}
+                                <details class="text-xs text-slate-500 cursor-pointer">
+                                    <summary class="hover:text-slate-700 dark:hover:text-slate-300 font-medium">Or choose student from class list...</summary>
+                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-2 pt-2 border-t border-slate-100 dark:border-slate-700">
+                                        <div>
+                                            <label class="block text-[11px] font-semibold text-slate-500 mb-1">Filter Class</label>
+                                            <select wire:model.live="selectedClassId" class="w-full text-xs rounded-xl border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-white">
+                                                <option value="">All Classes</option>
+                                                @foreach ($this->classes as $class)
+                                                    <option value="{{ $class->id }}">{{ $class->name }}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label class="block text-[11px] font-semibold text-slate-500 mb-1">Student</label>
+                                            <select wire:model.live="studentId" class="w-full text-xs rounded-xl border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-white">
+                                                <option value="">-- Choose Student --</option>
+                                                @foreach ($this->students as $st)
+                                                    <option value="{{ $st->id }}">{{ $st->full_name }} ({{ $st->admission_number ?? 'No Adm #' }})</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                    </div>
+                                </details>
+                                @error('studentId') <p class="mt-1 text-xs text-rose-500 font-medium">{{ $message }}</p> @enderror
                             </div>
 
                             {{-- Student Financial Ledger Snapshot --}}
@@ -350,7 +410,40 @@
                                     </button>
                                 </div>
                             </div>
+
+                            {{-- Payment Specific Details (Transfer / POS reference, Payer Name) --}}
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">
+                                <div>
+                                    <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1">
+                                        {{ $paymentMethod === 'Transfer' ? 'Bank Transfer / Teller Ref #' : ($paymentMethod === 'POS' ? 'POS Terminal RRN / Code' : 'Payment Reference (Optional)') }}
+                                    </label>
+                                    <input type="text" 
+                                           wire:model.live="reference" 
+                                           placeholder="{{ $paymentMethod === 'Transfer' ? 'e.g. GTB/TRF/482019' : ($paymentMethod === 'POS' ? 'e.g. 000482918' : 'Receipt / Ref #') }}" 
+                                           class="w-full text-xs rounded-xl border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-mono shadow-xs focus:border-emerald-500 focus:ring-emerald-500" />
+                                </div>
+                                <div>
+                                    <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1">
+                                        Depositor / Payer Name
+                                    </label>
+                                    <input type="text" 
+                                           wire:model.live="payerName" 
+                                           placeholder="e.g. Mr. &amp; Mrs. Adeleke" 
+                                           class="w-full text-xs rounded-xl border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-xs focus:border-emerald-500 focus:ring-emerald-500" />
+                                </div>
+                            </div>
                         @endif
+
+                        {{-- Cashier Memo / Notes --}}
+                        <div class="pt-0.5">
+                            <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1">
+                                Cashier Memo / Notes (Optional)
+                            </label>
+                            <input type="text" 
+                                   wire:model.live="notes" 
+                                   placeholder="e.g. Part payment, balance to be cleared next week" 
+                                   class="w-full text-xs rounded-xl border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-xs focus:border-emerald-500 focus:ring-emerald-500" />
+                        </div>
 
                         {{-- Prominent Amount Register --}}
                         <div>
@@ -551,6 +644,7 @@
                     <th class="px-5 py-3 text-right">Previous Arrears</th>
                     <th class="px-5 py-3 text-right">Total Paid</th>
                     <th class="px-5 py-3 text-right">Total Outstanding</th>
+                    <th class="px-5 py-3 text-right">Action</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-gray-100">
@@ -583,14 +677,243 @@
                                 {{ config('academyhub.currency_symbol') }}{{ number_format($row['balance'], 2) }}
                             </span>
                         </td>
+                        <td class="px-5 py-4 text-right">
+                            <button type="button" 
+                                    wire:click="quickCollect({{ $row['student']->id }}, {{ $row['balance'] }}, '{{ $row['category'] ?? $debtorsCategory }}')" 
+                                    class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 shadow-sm transition-all active:scale-95">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                                <span>Collect Fee</span>
+                            </button>
+                        </td>
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="6" class="px-5 py-10 text-center text-sm text-gray-500">No debtors found.</td>
+                        <td colspan="7" class="px-5 py-10 text-center text-sm text-gray-500">No debtors found.</td>
                     </tr>
                 @endforelse
             </tbody>
         </x-table>
+    @elseif ($tab === 'class-register')
+        @php
+            $reg = $this->classRegisterData;
+        @endphp
+        <div class="space-y-4">
+            <!-- Filter & Selection Bar -->
+            <div class="relative overflow-hidden rounded-2xl bg-white dark:bg-slate-800 shadow-sm ring-1 ring-slate-200 dark:ring-slate-700 p-4 sm:p-5">
+                <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
+                    <div class="flex items-center gap-3">
+                        <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-500 text-white shadow-sm shrink-0">
+                            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 class="text-base sm:text-lg font-bold text-slate-900 dark:text-white">Class Fee Register &amp; Roster</h3>
+                            <p class="text-xs text-slate-500 dark:text-slate-400">Class-by-class student fee ledger, payment reconciliation &amp; collection terminal</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-6">
+                    {{-- Class Select --}}
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">Select Class *</label>
+                        <select wire:model.live="registerClassId" class="select text-xs sm:text-sm w-full font-bold text-emerald-800 dark:text-emerald-300">
+                            <option value="">-- Choose Class --</option>
+                            @foreach($this->classes as $c)
+                                <option value="{{ $c->id }}">{{ $c->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    {{-- Arm / Section Select --}}
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">Arm / Section</label>
+                        <select wire:model.live="registerSectionId" class="select text-xs sm:text-sm w-full font-medium">
+                            <option value="">All Arms (All Sections)</option>
+                            @foreach($this->registerSections as $sec)
+                                <option value="{{ $sec->id }}">{{ $sec->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    {{-- Fee Category --}}
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">Fee Category</label>
+                        <select wire:model.live="registerCategory" class="select text-xs sm:text-sm w-full font-medium">
+                            @foreach($this->availableFeeCategories as $cat)
+                                <option value="{{ $cat }}">{{ $cat }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    {{-- Session Select --}}
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">Session</label>
+                        <select wire:model.live="registerSession" class="select text-xs sm:text-sm w-full font-medium">
+                            @foreach($this->availableSessions as $sess)
+                                <option value="{{ $sess }}">{{ $sess }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    {{-- Term Select --}}
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">Term</label>
+                        <select wire:model.live="registerTerm" class="select text-xs sm:text-sm w-full font-medium">
+                            <option value="1">Term 1 (First Term)</option>
+                            <option value="2">Term 2 (Second Term)</option>
+                            <option value="3">Term 3 (Third Term)</option>
+                        </select>
+                    </div>
+
+                    {{-- Search in Class --}}
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">Filter in Class</label>
+                        <div class="relative">
+                            <input wire:model.live.debounce.250ms="registerSearch" type="text" placeholder="Search student..." class="input-compact text-xs sm:text-sm w-full pl-8" />
+                            <svg class="h-3.5 w-3.5 text-slate-400 absolute left-2.5 top-2.5 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Class Register KPI Summary Cards -->
+            <div class="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-5">
+                <div class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-xs border border-slate-200/80 dark:border-slate-700">
+                    <p class="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">Students</p>
+                    <h3 class="text-xl sm:text-2xl font-black text-slate-800 dark:text-white">
+                        {{ number_format($reg['total_students']) }}
+                    </h3>
+                    <p class="text-[10px] text-slate-400 mt-0.5">Enrolled in roster</p>
+                </div>
+
+                <div class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-xs border border-slate-200/80 dark:border-slate-700">
+                    <p class="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">Total Expected</p>
+                    <h3 class="text-xl sm:text-2xl font-black text-slate-900 dark:text-white font-mono">
+                        {{ config('academyhub.currency_symbol', '₦') }}{{ number_format($reg['total_expected'], 2) }}
+                    </h3>
+                    <p class="text-[10px] text-slate-400 mt-0.5">Term Due + Arrears</p>
+                </div>
+
+                <div class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-xs border border-slate-200/80 dark:border-slate-700">
+                    <p class="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider mb-1">Total Collected</p>
+                    <h3 class="text-xl sm:text-2xl font-black text-emerald-600 dark:text-emerald-400 font-mono">
+                        {{ config('academyhub.currency_symbol', '₦') }}{{ number_format($reg['total_paid'], 2) }}
+                    </h3>
+                    <p class="text-[10px] text-emerald-500 mt-0.5">Cash / Trf / POS</p>
+                </div>
+
+                <div class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-xs border border-slate-200/80 dark:border-slate-700">
+                    <p class="text-[11px] font-bold text-rose-500 uppercase tracking-wider mb-1">Outstanding</p>
+                    <h3 class="text-xl sm:text-2xl font-black text-rose-600 dark:text-rose-400 font-mono">
+                        {{ config('academyhub.currency_symbol', '₦') }}{{ number_format($reg['total_balance'], 2) }}
+                    </h3>
+                    <p class="text-[10px] text-rose-400 mt-0.5">Unpaid balance</p>
+                </div>
+
+                <div class="col-span-2 sm:col-span-1 bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-xs border border-slate-200/80 dark:border-slate-700 flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-1">
+                            <p class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Collection Rate</p>
+                            <span class="text-xs font-extrabold text-emerald-600">{{ $reg['collection_rate'] }}%</span>
+                        </div>
+                        <div class="w-full bg-slate-100 dark:bg-slate-700 h-2 rounded-full overflow-hidden">
+                            <div class="bg-emerald-500 h-2 rounded-full transition-all duration-500" style="width: {{ $reg['collection_rate'] }}%"></div>
+                        </div>
+                    </div>
+                    <p class="text-[10px] text-slate-400 mt-1">Class target progress</p>
+                </div>
+            </div>
+
+            <!-- Student Roster Table -->
+            <x-table>
+                <thead class="bg-slate-50 dark:bg-slate-800 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                    <tr>
+                        <th class="px-4 py-3 text-center w-12">#</th>
+                        <th class="px-4 py-3">Student</th>
+                        <th class="px-4 py-3">Arm</th>
+                        <th class="px-4 py-3 text-right">Term Due</th>
+                        <th class="px-4 py-3 text-right">Past Arrears</th>
+                        <th class="px-4 py-3 text-right">Total Paid</th>
+                        <th class="px-4 py-3 text-right">Balance</th>
+                        <th class="px-4 py-3 text-center">Status</th>
+                        <th class="px-4 py-3 text-right">Action</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 dark:divide-slate-700">
+                    @forelse ($reg['students'] as $idx => $row)
+                        <tr class="bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors">
+                            <td class="px-4 py-3.5 text-center text-xs text-slate-400 font-mono">{{ $idx + 1 }}</td>
+                            <td class="px-4 py-3.5">
+                                <div class="text-sm font-bold text-slate-900 dark:text-white">{{ $row['student']->full_name }}</div>
+                                <div class="text-xs text-slate-500 dark:text-slate-400 font-mono">{{ $row['student']->admission_number ?? 'No Adm #' }}</div>
+                            </td>
+                            <td class="px-4 py-3.5 text-xs text-slate-600 dark:text-slate-300">
+                                {{ $row['student']->section?->name ?? '—' }}
+                            </td>
+                            <td class="px-4 py-3.5 text-right text-xs font-semibold text-slate-800 dark:text-slate-200 font-mono">
+                                {{ config('academyhub.currency_symbol') }}{{ number_format($row['due'], 2) }}
+                            </td>
+                            <td class="px-4 py-3.5 text-right text-xs font-mono">
+                                @if($row['arrears'] > 0)
+                                    <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[11px] font-bold bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300 ring-1 ring-inset ring-amber-600/20">
+                                        {{ config('academyhub.currency_symbol') }}{{ number_format($row['arrears'], 2) }}
+                                    </span>
+                                @else
+                                    <span class="text-slate-400">{{ config('academyhub.currency_symbol') }}0.00</span>
+                                @endif
+                            </td>
+                            <td class="px-4 py-3.5 text-right text-xs font-bold text-emerald-600 dark:text-emerald-400 font-mono">
+                                {{ config('academyhub.currency_symbol') }}{{ number_format($row['paid'], 2) }}
+                            </td>
+                            <td class="px-4 py-3.5 text-right text-xs font-mono">
+                                @if($row['balance'] > 0)
+                                    <span class="font-bold text-rose-600 dark:text-rose-400">
+                                        {{ config('academyhub.currency_symbol') }}{{ number_format($row['balance'], 2) }}
+                                    </span>
+                                @else
+                                    <span class="text-emerald-600 dark:text-emerald-400 font-bold">₦0.00</span>
+                                @endif
+                            </td>
+                            <td class="px-4 py-3.5 text-center">
+                                @if($row['status'] === 'paid')
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300 ring-1 ring-inset ring-emerald-600/20">
+                                        ✓ Paid in Full
+                                    </span>
+                                @elseif($row['status'] === 'partial')
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-50 text-blue-700 dark:bg-blue-950/50 dark:text-blue-300 ring-1 ring-inset ring-blue-600/20">
+                                        Part Payment
+                                    </span>
+                                @else
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-50 text-rose-700 dark:bg-rose-950/50 dark:text-rose-300 ring-1 ring-inset ring-rose-600/20">
+                                        Owing
+                                    </span>
+                                @endif
+                            </td>
+                            <td class="px-4 py-3.5 text-right">
+                                <button type="button" 
+                                        wire:click="quickCollect({{ $row['student']->id }}, {{ $row['balance'] > 0 ? $row['balance'] : null }}, '{{ $registerCategory }}')" 
+                                        class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 shadow-sm transition-all active:scale-95">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                                    <span>Collect</span>
+                                </button>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="9" class="px-4 py-12 text-center text-sm text-slate-500">
+                                @if(!$registerClassId)
+                                    Please select a class above to load the student fee register.
+                                @else
+                                    No students found for the selected class and filters.
+                                @endif
+                            </td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </x-table>
+        </div>
     @elseif ($tab === 'fees' && $canFees)
         <!-- Quick Fee Setup -->
         <div class="relative overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200">
@@ -732,14 +1055,27 @@
                             </td>
                             <td class="px-5 py-4 text-sm text-gray-700">
                                 <div class="font-medium text-gray-900">{{ $t->category }}</div>
-                                <div class="mt-1 text-xs text-gray-500">
+                                <div class="mt-0.5 text-xs text-gray-500">
                                     @if ($t->session)
                                         {{ $t->session }}
                                     @endif
                                     @if ($t->term)
                                         &middot; Term {{ $t->term }}
                                     @endif
+                                    @if ($t->payment_method)
+                                        &middot; <span class="font-semibold text-slate-700 dark:text-slate-300">{{ $t->payment_method }}</span>
+                                    @endif
                                 </div>
+                                @if ($t->reference || $t->payer_name)
+                                    <div class="mt-1 text-[11px] text-slate-500 dark:text-slate-400 flex flex-wrap items-center gap-1.5">
+                                        @if ($t->reference)
+                                            <span class="font-mono bg-slate-100 dark:bg-slate-700 px-1.5 py-0.5 rounded text-[10px]">Ref: {{ $t->reference }}</span>
+                                        @endif
+                                        @if ($t->payer_name)
+                                            <span>Paid By: <strong class="text-slate-700 dark:text-slate-300">{{ $t->payer_name }}</strong></span>
+                                        @endif
+                                    </div>
+                                @endif
                             </td>
                             <td class="px-5 py-4 text-right text-sm font-semibold text-gray-900">{{ config('academyhub.currency_symbol') }}{{ number_format((float) $t->amount_paid, 2) }}</td>
                             <td class="px-5 py-4 text-sm font-medium text-gray-700">
@@ -902,6 +1238,81 @@
                 @endforelse
             </tbody>
         </x-table>
+    @endif
+
+    {{-- Instant Receipt Popup Modal --}}
+    @if ($showReceiptModal && $this->receiptTransaction)
+        @php
+            $rt = $this->receiptTransaction;
+        @endphp
+        <div class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+            <div class="relative bg-white dark:bg-slate-800 rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-200 dark:border-slate-700 animate-in fade-in zoom-in duration-200">
+                <div class="text-center">
+                    <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 mb-4 shadow-inner">
+                        <svg class="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
+                        </svg>
+                    </div>
+                    <h3 class="text-lg font-bold text-slate-900 dark:text-white">Payment Recorded Successfully!</h3>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Official school receipt has been generated.</p>
+                </div>
+
+                <div class="mt-5 p-4 rounded-2xl bg-slate-50 dark:bg-slate-700/50 border border-slate-100 dark:border-slate-700 space-y-2.5 text-xs">
+                    <div class="flex justify-between items-center pb-2 border-b border-slate-200 dark:border-slate-600">
+                        <span class="text-slate-500">Receipt Number</span>
+                        <span class="font-mono font-bold text-slate-900 dark:text-white">{{ $rt->receipt_number }}</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-slate-500">Student</span>
+                        <span class="font-semibold text-slate-900 dark:text-white">{{ $rt->student?->full_name }}</span>
+                    </div>
+                    @if($rt->student?->schoolClass)
+                        <div class="flex justify-between items-center">
+                            <span class="text-slate-500">Class &amp; Arm</span>
+                            <span class="text-slate-700 dark:text-slate-300">{{ $rt->student->schoolClass->name }} @if($rt->student->section)({{ $rt->student->section->name }})@endif</span>
+                        </div>
+                    @endif
+                    <div class="flex justify-between items-center">
+                        <span class="text-slate-500">Amount Paid</span>
+                        <span class="text-sm font-black text-emerald-600 dark:text-emerald-400 font-mono">{{ config('academyhub.currency_symbol', '₦') }}{{ number_format($rt->amount_paid, 2) }}</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-slate-500">Payment Mode</span>
+                        <span class="font-semibold text-slate-800 dark:text-slate-200">{{ $rt->payment_method ?: 'Cash' }}</span>
+                    </div>
+                    @if($rt->reference)
+                        <div class="flex justify-between items-center">
+                            <span class="text-slate-500">Reference / Teller #</span>
+                            <span class="font-mono text-slate-700 dark:text-slate-300">{{ $rt->reference }}</span>
+                        </div>
+                    @endif
+                    @if($rt->payer_name)
+                        <div class="flex justify-between items-center">
+                            <span class="text-slate-500">Paid By (Payer)</span>
+                            <span class="text-slate-700 dark:text-slate-300">{{ $rt->payer_name }}</span>
+                        </div>
+                    @endif
+                    <div class="flex justify-between items-center pt-1 border-t border-slate-200 dark:border-slate-600">
+                        <span class="text-slate-500">Date</span>
+                        <span class="text-slate-700 dark:text-slate-300">{{ $rt->date?->format('M j, Y') }}</span>
+                    </div>
+                </div>
+
+                <div class="mt-6 flex flex-col sm:flex-row gap-2.5">
+                    <a href="{{ route('billing.receipt', $rt->id) }}" 
+                       target="_blank"
+                       class="flex-1 py-3 px-4 rounded-xl text-center font-bold text-xs text-white bg-emerald-600 hover:bg-emerald-700 shadow-md shadow-emerald-600/20 flex items-center justify-center gap-2 transition-all">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+                        <span>Print / Download Receipt</span>
+                    </a>
+                    <button type="button" 
+                            wire:click="closeReceiptModal" 
+                            class="py-3 px-4 rounded-xl text-center font-bold text-xs text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 transition-all">
+                        Done / Next
+                    </button>
+                </div>
+            </div>
+        </div>
     @endif
 </div>
 

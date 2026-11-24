@@ -25,6 +25,7 @@ class Index extends Component
     public string $errorMessage = '';
 
     public ?int $studentId = null;
+    public string $studentSearch = '';
     public ?int $selectedClassId = null;
     public string $type = 'Income';
     public string $category = 'Tuition';
@@ -32,7 +33,20 @@ class Index extends Component
     public ?string $session = null;
     public string $paymentMethod = 'Cash';
     public string $amountPaid = '';
+    public string $reference = '';
+    public string $payerName = '';
+    public string $notes = '';
     public string $date = '';
+
+    public bool $showReceiptModal = false;
+    public ?int $receiptTransactionId = null;
+
+    public ?int $registerClassId = null;
+    public ?int $registerSectionId = null;
+    public ?string $registerSession = null;
+    public ?int $registerTerm = null;
+    public string $registerCategory = 'Tuition';
+    public string $registerSearch = '';
 
     public ?string $filterType = null;
     public string $filterCategory = '';
@@ -77,6 +91,7 @@ class Index extends Component
         $allowedTabs = ['plugin-bills'];
         if ($canTransactions || $canView) {
             $allowedTabs[] = 'debtors';
+            $allowedTabs[] = 'class-register';
         }
         if ($canTransactions) {
             $allowedTabs[] = 'transactions';
@@ -90,6 +105,12 @@ class Index extends Component
         $this->date = now()->toDateString();
         $this->session = $this->session ?? $this->defaultSession();
         $this->term = $this->term ?? 1;
+
+        $this->registerSession = $this->registerSession ?? $this->defaultSession();
+        $this->registerTerm = $this->registerTerm ?? 1;
+        if (! $this->registerClassId && $this->classes->isNotEmpty()) {
+            $this->registerClassId = $this->classes->first()->id;
+        }
 
         $this->debtorsCategory = $this->debtorsCategory ?: $this->category ?: 'Tuition';
         $this->debtorsSession = $this->debtorsSession ?? $this->defaultSession();
@@ -193,6 +214,180 @@ class Index extends Component
     public function updatedFeeFilterSession(): void
     {
         $this->dispatch('$refresh');
+    }
+
+    public function updatedRegisterClassId(): void
+    {
+        $this->registerSectionId = null;
+        $this->dispatch('$refresh');
+    }
+
+    public function updatedRegisterSectionId(): void
+    {
+        $this->dispatch('$refresh');
+    }
+
+    public function updatedRegisterSession(): void
+    {
+        $this->dispatch('$refresh');
+    }
+
+    public function updatedRegisterTerm(): void
+    {
+        $this->dispatch('$refresh');
+    }
+
+    public function updatedRegisterCategory(): void
+    {
+        $this->dispatch('$refresh');
+    }
+
+    public function updatedRegisterSearch(): void
+    {
+        $this->dispatch('$refresh');
+    }
+
+    #[Computed]
+    public function searchResults()
+    {
+        $term = trim($this->studentSearch);
+        if (strlen($term) < 1) {
+            return collect();
+        }
+
+        // If search string matches the current selected student's display text, don't show dropdown
+        if ($this->selectedStudent && $this->studentSearch === ($this->selectedStudent->full_name . ' (' . ($this->selectedStudent->admission_number ?? 'No Adm #') . ')')) {
+            return collect();
+        }
+
+        return Student::query()
+            ->with(['schoolClass', 'section'])
+            ->where('status', 'Active')
+            ->where(function ($q) use ($term) {
+                $q->where('first_name', 'like', "%{$term}%")
+                  ->orWhere('last_name', 'like', "%{$term}%")
+                  ->orWhere('admission_number', 'like', "%{$term}%");
+            })
+            ->when($this->selectedClassId, fn($q) => $q->where('class_id', $this->selectedClassId))
+            ->limit(10)
+            ->get();
+    }
+
+    #[Computed]
+    public function registerSections()
+    {
+        if (! $this->registerClassId) {
+            return collect();
+        }
+
+        return \App\Models\Section::query()
+            ->where('class_id', $this->registerClassId)
+            ->orderBy('name')
+            ->get();
+    }
+
+    #[Computed]
+    public function classRegisterData(): array
+    {
+        if (! $this->registerClassId) {
+            return [
+                'students' => [],
+                'total_students' => 0,
+                'total_due' => 0.0,
+                'total_arrears' => 0.0,
+                'total_expected' => 0.0,
+                'total_paid' => 0.0,
+                'total_balance' => 0.0,
+                'collection_rate' => 0.0,
+            ];
+        }
+
+        $category = trim($this->registerCategory) !== '' ? trim($this->registerCategory) : 'Tuition';
+        $session = $this->registerSession ?: $this->defaultSession();
+        $term = $this->registerTerm ? (int) $this->registerTerm : null;
+
+        $query = Student::query()
+            ->with(['schoolClass', 'section'])
+            ->where('class_id', $this->registerClassId)
+            ->where('status', 'Active')
+            ->orderBy('last_name');
+
+        if ($this->registerSectionId) {
+            $query->where('section_id', $this->registerSectionId);
+        }
+
+        if (trim($this->registerSearch) !== '') {
+            $s = trim($this->registerSearch);
+            $query->where(function ($q) use ($s) {
+                $q->where('first_name', 'like', "%{$s}%")
+                  ->orWhere('last_name', 'like', "%{$s}%")
+                  ->orWhere('admission_number', 'like', "%{$s}%");
+            });
+        }
+
+        $students = $query->get();
+
+        $rows = [];
+        $totalDue = 0.0;
+        $totalArrears = 0.0;
+        $totalPaid = 0.0;
+        $totalBalance = 0.0;
+
+        foreach ($students as $student) {
+            $ledger = BillingService::getStudentTermLedger($student, $session, $term, $category);
+            $due = (float) ($ledger['current_term_due'] ?? $ledger['total_due']);
+            $arrears = (float) ($ledger['past_arrears'] ?? 0);
+            $paid = (float) ($ledger['total_paid'] ?? 0);
+            $balance = (float) ($ledger['total_balance'] ?? 0);
+
+            $totalDue += $due;
+            $totalArrears += $arrears;
+            $totalPaid += $paid;
+            $totalBalance += $balance;
+
+            $status = 'owing';
+            if ($balance <= 0 && ($due > 0 || $paid > 0)) {
+                $status = 'paid';
+            } elseif ($paid > 0 && $balance > 0) {
+                $status = 'partial';
+            }
+
+            $rows[] = [
+                'student' => $student,
+                'due' => $due,
+                'arrears' => $arrears,
+                'total_expected' => $due + $arrears,
+                'paid' => $paid,
+                'balance' => $balance,
+                'status' => $status,
+            ];
+        }
+
+        $totalExpected = $totalDue + $totalArrears;
+        $rate = $totalExpected > 0 ? round(($totalPaid / $totalExpected) * 100, 1) : 0;
+
+        return [
+            'students' => $rows,
+            'total_students' => count($rows),
+            'total_due' => $totalDue,
+            'total_arrears' => $totalArrears,
+            'total_expected' => $totalExpected,
+            'total_paid' => $totalPaid,
+            'total_balance' => $totalBalance,
+            'collection_rate' => min(100, max(0, $rate)),
+        ];
+    }
+
+    #[Computed]
+    public function receiptTransaction(): ?Transaction
+    {
+        if (! $this->receiptTransactionId) {
+            return null;
+        }
+
+        return Transaction::query()
+            ->with(['student.schoolClass', 'student.section'])
+            ->find($this->receiptTransactionId);
     }
 
     #[Computed]
@@ -528,6 +723,48 @@ class Index extends Component
         $this->dispatch('alert', message: 'Fee structure deleted.', type: 'success');
     }
 
+    public function selectStudent(int $id): void
+    {
+        $this->studentId = $id;
+        $student = Student::with(['schoolClass', 'section'])->find($id);
+        if ($student) {
+            $this->selectedClassId = $student->class_id;
+            $this->studentSearch = $student->full_name . ' (' . ($student->admission_number ?? 'No Adm #') . ')';
+
+            // Auto prefill balance if available
+            $info = $this->selectedStudentBalance;
+            if ($info && $info['balance'] > 0) {
+                $this->amountPaid = (string) $info['balance'];
+            }
+        }
+    }
+
+    public function clearSelectedStudent(): void
+    {
+        $this->studentId = null;
+        $this->studentSearch = '';
+        $this->amountPaid = '';
+    }
+
+    public function quickCollect(int $studentId, ?float $amount = null, ?string $category = null): void
+    {
+        $this->tab = 'transactions';
+        $this->type = 'Income';
+        if ($category) {
+            $this->category = $category;
+        }
+        $this->selectStudent($studentId);
+        if ($amount !== null && $amount > 0) {
+            $this->amountPaid = (string) $amount;
+        }
+    }
+
+    public function closeReceiptModal(): void
+    {
+        $this->showReceiptModal = false;
+        $this->receiptTransactionId = null;
+    }
+
     public function saveTransaction(): void
     {
         $user = auth()->user();
@@ -548,6 +785,9 @@ class Index extends Component
                 'paymentMethod' => ['nullable', Rule::in(['Cash', 'Transfer', 'POS'])],
                 'amountPaid' => ['required', 'numeric', 'min:0.01'],
                 'date' => ['required', 'date'],
+                'reference' => ['nullable', 'string', 'max:100'],
+                'payerName' => ['nullable', 'string', 'max:255'],
+                'notes' => ['nullable', 'string', 'max:500'],
             ], [
                 'studentId.required' => 'Please select a student for income transactions.',
                 'studentId.exists' => 'The selected student does not exist.',
@@ -565,6 +805,9 @@ class Index extends Component
                 'session' => $data['type'] === 'Income' ? $data['session'] : null,
                 'payment_method' => $data['type'] === 'Income' ? $data['paymentMethod'] : null,
                 'amount_paid' => $data['amountPaid'],
+                'reference' => $data['type'] === 'Income' && !empty($this->reference) ? trim($this->reference) : null,
+                'payer_name' => $data['type'] === 'Income' && !empty($this->payerName) ? trim($this->payerName) : null,
+                'notes' => !empty($this->notes) ? trim($this->notes) : null,
                 'date' => Carbon::parse($data['date'])->toDateString(),
             ]);
 
@@ -576,9 +819,16 @@ class Index extends Component
                 'session' => $transaction->session,
                 'amount_paid' => (string) $transaction->amount_paid,
                 'payment_method' => $transaction->payment_method,
+                'reference' => $transaction->reference,
+                'payer_name' => $transaction->payer_name,
             ]);
 
-            $this->reset(['studentId', 'amountPaid']);
+            if ($transaction->type === 'Income') {
+                $this->receiptTransactionId = $transaction->id;
+                $this->showReceiptModal = true;
+            }
+
+            $this->reset(['studentId', 'studentSearch', 'amountPaid', 'reference', 'payerName', 'notes']);
 
             // Force refresh of computed properties
             $this->dispatch('$refresh');

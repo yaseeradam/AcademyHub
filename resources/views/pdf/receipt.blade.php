@@ -423,6 +423,28 @@
                         </div>
                     </div>
                 </div>
+                @if ($transaction->reference || $transaction->payer_name)
+                    <div class="payment-grid" style="margin-top: 8px;">
+                        @if ($transaction->reference)
+                            <div class="payment-item">
+                                <div class="payment-item-label">Ref / Teller / RRN:</div>
+                                <div class="payment-item-value">{{ $transaction->reference }}</div>
+                            </div>
+                        @endif
+                        @if ($transaction->payer_name)
+                            <div class="payment-item">
+                                <div class="payment-item-label">Paid By (Payer):</div>
+                                <div class="payment-item-value">{{ $transaction->payer_name }}</div>
+                            </div>
+                        @endif
+                    </div>
+                @endif
+                @if ($transaction->notes)
+                    <div style="margin-top: 8px; padding: 6px; background: #f8fafc; border-radius: 4px; border-left: 3px solid #3b82f6;">
+                        <div style="font-size: 8px; color: #64748b; font-weight: 600;">Cashier Memo / Notes:</div>
+                        <div style="font-size: 9px; color: #1e293b;">{{ $transaction->notes }}</div>
+                    </div>
+                @endif
             </div>
 
             <div class="amount-box">
