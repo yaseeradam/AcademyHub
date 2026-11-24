@@ -14,30 +14,35 @@
             @endif
         </x-slot:actions>
         <x-slot:after>
-            <div class="flex flex-wrap gap-2">
+            <div class="inline-flex flex-wrap items-center gap-1.5 p-1.5 bg-slate-100/90 rounded-2xl border border-slate-200/80 shadow-2xs">
                 @if ($canTransactions)
                     <button wire:click="$set('tab', 'transactions')" 
-                            class="px-4 py-2 text-xs font-bold rounded-xl transition-all duration-200 {{ $tab === 'transactions' ? 'bg-emerald-500 text-white shadow-md' : 'bg-transparent text-slate-600 hover:bg-slate-100' }}" wire:loading.attr="disabled" wire:loading.class="opacity-50 cursor-wait">
-                        Transactions
+                            class="px-3.5 py-2 text-xs font-bold rounded-xl transition-all duration-200 flex items-center gap-1.5 {{ $tab === 'transactions' ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-md shadow-emerald-600/25 ring-1 ring-emerald-500/30' : 'text-slate-600 hover:text-slate-900 hover:bg-white/70' }}" wire:loading.attr="disabled" wire:loading.class="opacity-50 cursor-wait">
+                        <svg class="w-3.5 h-3.5 {{ $tab === 'transactions' ? 'text-emerald-100' : 'text-slate-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+                        <span>Transactions</span>
                     </button>
                 @endif
                 <button wire:click="$set('tab', 'debtors')" 
-                        class="px-4 py-2 text-xs font-bold rounded-xl transition-all duration-200 {{ $tab === 'debtors' ? 'bg-emerald-500 text-white shadow-md' : 'bg-transparent text-slate-600 hover:bg-slate-100' }}" wire:loading.attr="disabled" wire:loading.class="opacity-50 cursor-wait">
-                    Outstanding Balances
+                        class="px-3.5 py-2 text-xs font-bold rounded-xl transition-all duration-200 flex items-center gap-1.5 {{ $tab === 'debtors' ? 'bg-gradient-to-r from-amber-500 to-orange-600 text-white shadow-md shadow-amber-500/25 ring-1 ring-amber-500/30' : 'text-slate-600 hover:text-slate-900 hover:bg-white/70' }}" wire:loading.attr="disabled" wire:loading.class="opacity-50 cursor-wait">
+                    <svg class="w-3.5 h-3.5 {{ $tab === 'debtors' ? 'text-amber-100' : 'text-slate-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                    <span>Outstanding Balances</span>
                 </button>
                 <button wire:click="$set('tab', 'class-register')" 
-                        class="px-4 py-2 text-xs font-bold rounded-xl transition-all duration-200 {{ $tab === 'class-register' ? 'bg-emerald-500 text-white shadow-md' : 'bg-transparent text-slate-600 hover:bg-slate-100' }}" wire:loading.attr="disabled" wire:loading.class="opacity-50 cursor-wait">
-                    Class Fee Register
+                        class="px-3.5 py-2 text-xs font-bold rounded-xl transition-all duration-200 flex items-center gap-1.5 {{ $tab === 'class-register' ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-600/25 ring-1 ring-blue-500/30' : 'text-slate-600 hover:text-slate-900 hover:bg-white/70' }}" wire:loading.attr="disabled" wire:loading.class="opacity-50 cursor-wait">
+                    <svg class="w-3.5 h-3.5 {{ $tab === 'class-register' ? 'text-blue-100' : 'text-slate-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/></svg>
+                    <span>Class Fee Register</span>
                 </button>
                 @if ($canFees)
                     <button wire:click="$set('tab', 'fees')" 
-                            class="px-4 py-2 text-xs font-bold rounded-xl transition-all duration-200 {{ $tab === 'fees' ? 'bg-emerald-500 text-white shadow-md' : 'bg-transparent text-slate-600 hover:bg-slate-100' }}" wire:loading.attr="disabled" wire:loading.class="opacity-50 cursor-wait">
-                        Fee Structures
+                            class="px-3.5 py-2 text-xs font-bold rounded-xl transition-all duration-200 flex items-center gap-1.5 {{ $tab === 'fees' ? 'bg-gradient-to-r from-violet-600 to-purple-600 text-white shadow-md shadow-violet-600/25 ring-1 ring-violet-500/30' : 'text-slate-600 hover:text-slate-900 hover:bg-white/70' }}" wire:loading.attr="disabled" wire:loading.class="opacity-50 cursor-wait">
+                        <svg class="w-3.5 h-3.5 {{ $tab === 'fees' ? 'text-violet-100' : 'text-slate-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/></svg>
+                        <span>Fee Structures</span>
                     </button>
                 @endif
                 <button wire:click="$set('tab', 'plugin-bills')" 
-                        class="px-4 py-2 text-xs font-bold rounded-xl transition-all duration-200 {{ $tab === 'plugin-bills' ? 'bg-emerald-500 text-white shadow-md' : 'bg-transparent text-slate-600 hover:bg-slate-100' }}" wire:loading.attr="disabled" wire:loading.class="opacity-50 cursor-wait">
-                    Plugin Invoices
+                        class="px-3.5 py-2 text-xs font-bold rounded-xl transition-all duration-200 flex items-center gap-1.5 {{ $tab === 'plugin-bills' ? 'bg-gradient-to-r from-fuchsia-600 to-pink-600 text-white shadow-md shadow-fuchsia-600/25 ring-1 ring-fuchsia-500/30' : 'text-slate-600 hover:text-slate-900 hover:bg-white/70' }}" wire:loading.attr="disabled" wire:loading.class="opacity-50 cursor-wait">
+                    <svg class="w-3.5 h-3.5 {{ $tab === 'plugin-bills' ? 'text-fuchsia-100' : 'text-slate-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 4a2 2 0 114 0v1a1 1 0 001 1h3a1 1 0 011 1v3a1 1 0 01-1 1h-1a2 2 0 100 4h1a1 1 0 011 1v3a1 1 0 01-1 1h-3a1 1 0 01-1-1v-1a2 2 0 10-4 0v1a1 1 0 01-1 1H7a1 1 0 01-1-1v-3a1 1 0 00-1-1H4a2 2 0 110-4h1a1 1 0 001-1V7a1 1 0 011-1h3a1 1 0 001-1V4z"/></svg>
+                    <span>Plugin Invoices</span>
                 </button>
             </div>
         </x-slot:after>
@@ -46,50 +51,73 @@
     {{-- Financial Overview Cards --}}
     @if ($user?->role === 'admin' || $user?->role === 'bursar' || $user?->role === 'proprietor')
         <div class="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 mb-4 sm:mb-6">
-            <div class="bg-white rounded-2xl p-3.5 sm:p-5 lg:p-6 shadow-sm border border-slate-100 flex items-center justify-between active:scale-[0.98] transition-transform">
+            {{-- Total Income Card --}}
+            <div class="relative overflow-hidden bg-gradient-to-br from-emerald-50/90 via-white to-teal-50/40 rounded-2xl p-4 sm:p-5 lg:p-6 shadow-sm hover:shadow-md border-2 border-emerald-200/80 flex items-center justify-between active:scale-[0.98] transition-all group">
                 <div class="min-w-0 flex-1 pr-2">
-                    <p class="text-[10px] sm:text-xs font-bold text-slate-500 uppercase tracking-wider mb-0.5 sm:mb-1 truncate">Total Income</p>
-                    <h3 class="text-lg sm:text-2xl font-black text-emerald-600 truncate">
+                    <div class="flex items-center gap-1.5 mb-1">
+                        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                        <p class="text-[10px] sm:text-xs font-bold text-emerald-800 uppercase tracking-wider truncate">Total Income (Inflow)</p>
+                    </div>
+                    <h3 class="text-xl sm:text-2xl lg:text-3xl font-black text-emerald-600 font-mono tracking-tight truncate">
                         {{ config('academyhub.currency_symbol', '₦') }}{{ number_format($this->totalIncome, 2) }}
                     </h3>
+                    <div class="mt-1 flex items-center gap-1 text-[11px] font-semibold text-emerald-700">
+                        <span class="inline-flex items-center px-1.5 py-0.2 rounded text-[10px] font-bold bg-emerald-100/90 text-emerald-800">Verified Fees &amp; Collections</span>
+                    </div>
                 </div>
-                <div class="h-9 w-9 sm:h-12 sm:w-12 rounded-xl sm:rounded-full bg-emerald-50 text-emerald-500 flex items-center justify-center shrink-0">
-                    <svg class="h-5 w-5 sm:h-6 sm:w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                <div class="h-11 w-11 sm:h-14 sm:w-14 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white flex items-center justify-center shrink-0 shadow-md shadow-emerald-500/25 group-hover:scale-105 transition-transform">
+                    <svg class="h-6 w-6 sm:h-7 sm:w-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
                 </div>
             </div>
 
-            <div class="bg-white rounded-2xl p-3.5 sm:p-5 lg:p-6 shadow-sm border border-slate-100 flex items-center justify-between active:scale-[0.98] transition-transform">
+            {{-- Total Expenses Card --}}
+            <div class="relative overflow-hidden bg-gradient-to-br from-rose-50/90 via-white to-pink-50/40 rounded-2xl p-4 sm:p-5 lg:p-6 shadow-sm hover:shadow-md border-2 border-rose-200/80 flex items-center justify-between active:scale-[0.98] transition-all group">
                 <div class="min-w-0 flex-1 pr-2">
-                    <p class="text-[10px] sm:text-xs font-bold text-slate-500 uppercase tracking-wider mb-0.5 sm:mb-1 truncate">Total Expenses</p>
-                    <h3 class="text-lg sm:text-2xl font-black text-rose-500 truncate">
+                    <div class="flex items-center gap-1.5 mb-1">
+                        <span class="w-2 h-2 rounded-full bg-rose-500"></span>
+                        <p class="text-[10px] sm:text-xs font-bold text-rose-800 uppercase tracking-wider truncate">Total Expenses (Outflow)</p>
+                    </div>
+                    <h3 class="text-xl sm:text-2xl lg:text-3xl font-black text-rose-600 font-mono tracking-tight truncate">
                         {{ config('academyhub.currency_symbol', '₦') }}{{ number_format($this->totalExpenses, 2) }}
                     </h3>
+                    <div class="mt-1 flex items-center gap-1 text-[11px] font-semibold text-rose-700">
+                        <span class="inline-flex items-center px-1.5 py-0.2 rounded text-[10px] font-bold bg-rose-100/90 text-rose-800">Operational Spending</span>
+                    </div>
                 </div>
-                <div class="h-9 w-9 sm:h-12 sm:w-12 rounded-xl sm:rounded-full bg-rose-50 text-rose-500 flex items-center justify-center shrink-0">
-                    <svg class="h-5 w-5 sm:h-6 sm:w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"></path></svg>
+                <div class="h-11 w-11 sm:h-14 sm:w-14 rounded-2xl bg-gradient-to-br from-rose-500 to-pink-600 text-white flex items-center justify-center shrink-0 shadow-md shadow-rose-500/25 group-hover:scale-105 transition-transform">
+                    <svg class="h-6 w-6 sm:h-7 sm:w-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"></path></svg>
                 </div>
             </div>
 
-            <div class="col-span-2 sm:col-span-1 bg-white rounded-2xl p-3.5 sm:p-5 lg:p-6 shadow-sm border border-slate-100 flex items-center justify-between active:scale-[0.98] transition-transform">
+            {{-- Net Balance Card --}}
+            <div class="col-span-2 sm:col-span-1 relative overflow-hidden bg-gradient-to-br from-indigo-50/90 via-white to-blue-50/40 rounded-2xl p-4 sm:p-5 lg:p-6 shadow-sm hover:shadow-md border-2 border-indigo-200/80 flex items-center justify-between active:scale-[0.98] transition-all group">
                 <div class="min-w-0 flex-1 pr-2">
-                    <p class="text-[10px] sm:text-xs font-bold text-slate-500 uppercase tracking-wider mb-0.5 sm:mb-1 truncate">Net Balance</p>
-                    <h3 class="text-lg sm:text-2xl font-black truncate {{ $this->netBalance >= 0 ? 'text-slate-900' : 'text-rose-600' }}">
+                    <div class="flex items-center gap-1.5 mb-1">
+                        <span class="w-2 h-2 rounded-full {{ $this->netBalance >= 0 ? 'bg-indigo-500' : 'bg-rose-500' }}"></span>
+                        <p class="text-[10px] sm:text-xs font-bold text-indigo-900 uppercase tracking-wider truncate">Net School Balance</p>
+                    </div>
+                    <h3 class="text-xl sm:text-2xl lg:text-3xl font-black font-mono tracking-tight truncate {{ $this->netBalance >= 0 ? 'text-indigo-700' : 'text-rose-600' }}">
                         {{ config('academyhub.currency_symbol', '₦') }}{{ number_format($this->netBalance, 2) }}
                     </h3>
+                    <div class="mt-1 flex items-center gap-1 text-[11px] font-semibold {{ $this->netBalance >= 0 ? 'text-indigo-700' : 'text-rose-700' }}">
+                        <span class="inline-flex items-center px-1.5 py-0.2 rounded text-[10px] font-bold {{ $this->netBalance >= 0 ? 'bg-indigo-100/90 text-indigo-800' : 'bg-rose-100/90 text-rose-800' }}">
+                            {{ $this->netBalance >= 0 ? 'Liquid Reserve Available' : 'Deficit' }}
+                        </span>
+                    </div>
                 </div>
-                <div class="h-9 w-9 sm:h-12 sm:w-12 rounded-xl sm:rounded-full bg-slate-50 text-slate-500 flex items-center justify-center shrink-0">
-                    <svg class="h-5 w-5 sm:h-6 sm:w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3"></path></svg>
+                <div class="h-11 w-11 sm:h-14 sm:w-14 rounded-2xl bg-gradient-to-br from-indigo-600 to-blue-600 text-white flex items-center justify-center shrink-0 shadow-md shadow-indigo-600/25 group-hover:scale-105 transition-transform">
+                    <svg class="h-6 w-6 sm:h-7 sm:w-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3"></path></svg>
                 </div>
             </div>
         </div>
     @endif
 
     @if ($canTransactions)
-        <div class="relative overflow-hidden rounded-2xl sm:rounded-3xl bg-white border border-slate-200/80 shadow-lg sm:shadow-xl transition-all duration-300">
+        <div class="relative overflow-hidden rounded-2xl sm:rounded-3xl bg-white border border-slate-200/80 shadow-lg sm:shadow-xl border-t-4 {{ $type === 'Income' ? 'border-t-emerald-500' : 'border-t-rose-500' }} transition-all duration-300">
             <!-- Header bar with subtle gradient background and mode toggle -->
-            <div class="px-4 sm:px-6 py-3.5 sm:py-5 bg-gradient-to-r from-slate-50 via-slate-50/50 to-white border-b border-slate-200/70 flex flex-wrap items-center justify-between gap-3 sm:gap-4">
+            <div class="px-4 sm:px-6 py-3.5 sm:py-5 bg-gradient-to-r {{ $type === 'Income' ? 'from-emerald-50/90 via-teal-50/30 to-white' : 'from-rose-50/90 via-pink-50/30 to-white' }} border-b border-slate-200/80 flex flex-wrap items-center justify-between gap-3 sm:gap-4">
                 <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 sm:w-11 sm:h-11 rounded-xl sm:rounded-2xl {{ $type === 'Income' ? 'bg-emerald-500/10 text-emerald-600' : 'bg-rose-500/10 text-rose-600' }} flex items-center justify-center shadow-inner shrink-0">
+                    <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl {{ $type === 'Income' ? 'bg-gradient-to-br from-emerald-500 to-teal-600 shadow-emerald-500/25' : 'bg-gradient-to-br from-rose-500 to-pink-600 shadow-rose-500/25' }} text-white flex items-center justify-center shadow-md shrink-0">
                         @if($type === 'Income')
                             <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
@@ -105,7 +133,7 @@
                             <h2 class="text-sm sm:text-lg font-bold text-slate-900">
                                 {{ $type === 'Income' ? 'Cashier & Fee Payment Terminal' : 'Record School Expense' }}
                             </h2>
-                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] sm:text-xs font-semibold {{ $type === 'Income' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200/50' : 'bg-rose-50 text-rose-700 border border-rose-200/50' }}">
+                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] sm:text-xs font-bold {{ $type === 'Income' ? 'bg-emerald-100 text-emerald-800 border border-emerald-300' : 'bg-rose-100 text-rose-800 border border-rose-300' }}">
                                 {{ $type === 'Income' ? 'Fee Inflow' : 'Operating Outflow' }}
                             </span>
                         </div>
@@ -116,16 +144,16 @@
                 </div>
 
                 <!-- Segmented Type Selector (Income / Expense) -->
-                <div class="inline-flex p-1 bg-slate-100 rounded-xl border border-slate-200/80 w-full sm:w-auto">
+                <div class="inline-flex p-1 bg-slate-200/80 rounded-xl border border-slate-300/80 w-full sm:w-auto shadow-2xs">
                     <button type="button" 
                             wire:click="$set('type', 'Income')" 
-                            class="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-3.5 py-1.5 text-xs font-bold rounded-lg transition-all active:scale-95 {{ $type === 'Income' ? 'bg-white text-emerald-600 shadow-sm' : 'text-slate-500 hover:text-slate-800' }}">
+                            class="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 sm:gap-2 px-3.5 sm:px-4 py-1.5 text-xs font-bold rounded-lg transition-all active:scale-95 {{ $type === 'Income' ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-md shadow-emerald-600/25 ring-1 ring-emerald-500/30' : 'text-slate-600 hover:text-slate-900 hover:bg-white/60' }}">
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
                         Fee Inflow (Income)
                     </button>
                     <button type="button" 
                             wire:click="$set('type', 'Expense')" 
-                            class="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-3.5 py-1.5 text-xs font-bold rounded-lg transition-all active:scale-95 {{ $type === 'Expense' ? 'bg-white text-rose-600 shadow-sm' : 'text-slate-500 hover:text-slate-800' }}">
+                            class="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 sm:gap-2 px-3.5 sm:px-4 py-1.5 text-xs font-bold rounded-lg transition-all active:scale-95 {{ $type === 'Expense' ? 'bg-gradient-to-r from-rose-600 to-pink-600 text-white shadow-md shadow-rose-600/25 ring-1 ring-rose-500/30' : 'text-slate-600 hover:text-slate-900 hover:bg-white/60' }}">
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"></path></svg>
                         Expense (Payout)
                     </button>
@@ -234,65 +262,68 @@
                                     $balanceInfo = $this->selectedStudentBalance;
                                     $student = $this->selectedStudent;
                                 @endphp
-                                <div class="p-4 rounded-2xl bg-gradient-to-r from-emerald-500/5 via-teal-500/5 to-slate-50 border border-emerald-200/60 transition-all">
-                                    <div class="flex flex-wrap items-center justify-between gap-3">
+                                <div class="p-4 sm:p-5 rounded-2xl bg-gradient-to-br from-emerald-50/80 via-teal-50/30 to-white border-2 border-emerald-300/90 shadow-sm transition-all">
+                                    <div class="flex flex-wrap items-center justify-between gap-3 mb-3.5 pb-3 border-b border-emerald-100">
                                         <div class="flex items-center gap-3">
-                                            <div class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold text-sm">
+                                            <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white flex items-center justify-center font-black text-sm shadow-md shadow-emerald-500/25 shrink-0">
                                                 {{ strtoupper(substr($student->first_name, 0, 1) . substr($student->last_name, 0, 1)) }}
                                             </div>
                                             <div>
-                                                <div class="font-bold text-sm text-slate-900 flex items-center gap-2">
+                                                <div class="font-bold text-sm sm:text-base text-slate-900 flex items-center gap-2">
                                                     {{ $student->full_name }}
-                                                    <span class="text-xs px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 font-mono">
+                                                    <span class="text-xs px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 font-mono font-bold border border-slate-200">
                                                         {{ $student->admission_number }}
                                                     </span>
                                                 </div>
-                                                <div class="text-xs text-slate-500">
-                                                    Class: <span class="font-semibold text-slate-700">{{ $student->schoolClass?->name ?? 'N/A' }}</span>
-                                                    @if($student->section) &middot; Section: {{ $student->section->name }} @endif
+                                                <div class="text-xs text-slate-500 mt-0.5">
+                                                    Class: <span class="font-bold text-slate-800">{{ $student->schoolClass?->name ?? 'N/A' }}</span>
+                                                    @if($student->section) &middot; Section: <span class="font-bold text-slate-800">{{ $student->section->name }}</span> @endif
                                                 </div>
                                             </div>
                                         </div>
 
-                                        @if ($balanceInfo)
-                                            <div class="flex items-center gap-3 sm:gap-4 text-xs">
-                                                <div class="text-right">
-                                                    <div class="text-slate-400 text-[11px] uppercase tracking-wider font-semibold">Current Term Due</div>
-                                                    <div class="font-bold text-slate-800 font-mono">₦{{ number_format($balanceInfo['current_due'] ?? $balanceInfo['due'], 2) }}</div>
-                                                </div>
-                                                @if (!empty($balanceInfo['has_arrears']))
-                                                    <div class="text-right">
-                                                        <div class="text-amber-600 text-[11px] uppercase tracking-wider font-bold">Past Arrears</div>
-                                                        <div class="font-bold text-amber-600 font-mono">₦{{ number_format($balanceInfo['past_arrears'], 2) }}</div>
-                                                    </div>
-                                                @endif
-                                                <div class="text-right">
-                                                    <div class="text-slate-400 text-[11px] uppercase tracking-wider font-semibold">Total Paid</div>
-                                                    <div class="font-bold text-emerald-600 font-mono">₦{{ number_format($balanceInfo['paid'], 2) }}</div>
-                                                </div>
-                                                <div class="text-right pl-3 border-l border-slate-200">
-                                                    <div class="text-rose-500 text-[11px] uppercase tracking-wider font-bold">Total Balance</div>
-                                                    <div class="text-sm font-extrabold text-rose-600 font-mono">₦{{ number_format($balanceInfo['balance'], 2) }}</div>
-                                                </div>
-                                            </div>
-                                        @endif
+                                        <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                                            Active Student Ledger
+                                        </span>
                                     </div>
 
+                                    @if ($balanceInfo)
+                                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 text-xs">
+                                            <div class="bg-white p-2.5 rounded-xl border border-slate-200 shadow-2xs text-center">
+                                                <div class="text-slate-400 text-[10px] uppercase tracking-wider font-bold">Current Term Due</div>
+                                                <div class="text-sm sm:text-base font-black text-slate-900 font-mono mt-0.5">₦{{ number_format($balanceInfo['current_due'] ?? $balanceInfo['due'], 2) }}</div>
+                                            </div>
+                                            <div class="bg-amber-50 p-2.5 rounded-xl border border-amber-200 shadow-2xs text-center">
+                                                <div class="text-amber-700 text-[10px] uppercase tracking-wider font-bold">Past Arrears</div>
+                                                <div class="text-sm sm:text-base font-black text-amber-700 font-mono mt-0.5">₦{{ number_format($balanceInfo['past_arrears'] ?? 0, 2) }}</div>
+                                            </div>
+                                            <div class="bg-emerald-50 p-2.5 rounded-xl border border-emerald-200 shadow-2xs text-center">
+                                                <div class="text-emerald-700 text-[10px] uppercase tracking-wider font-bold">Total Paid</div>
+                                                <div class="text-sm sm:text-base font-black text-emerald-700 font-mono mt-0.5">₦{{ number_format($balanceInfo['paid'], 2) }}</div>
+                                            </div>
+                                            <div class="bg-rose-50 p-2.5 rounded-xl border-2 border-rose-300 shadow-xs ring-1 ring-rose-200 text-center">
+                                                <div class="text-rose-600 text-[10px] uppercase tracking-wider font-extrabold">Net Balance Due</div>
+                                                <div class="text-sm sm:text-base font-black text-rose-600 font-mono mt-0.5">₦{{ number_format($balanceInfo['balance'], 2) }}</div>
+                                            </div>
+                                        </div>
+                                    @endif
+
                                     @if ($balanceInfo && $balanceInfo['balance'] > 0)
-                                        <div class="mt-3 pt-2.5 border-t border-emerald-100 flex flex-wrap items-center justify-between gap-2">
+                                        <div class="mt-3.5 pt-3 border-t border-emerald-100 flex flex-wrap items-center justify-between gap-2">
                                             <span class="text-xs text-slate-600 flex items-center gap-1.5">
-                                                <svg class="w-4 h-4 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                                <svg class="w-4 h-4 text-emerald-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                                                 @if (!empty($balanceInfo['has_arrears']))
-                                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-amber-50 text-amber-700 ring-1 ring-inset ring-amber-600/20">Includes ₦{{ number_format($balanceInfo['past_arrears'], 2) }} prior arrears</span>
+                                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-bold bg-amber-100 text-amber-800 border border-amber-300">Includes ₦{{ number_format($balanceInfo['past_arrears'], 2) }} prior arrears</span>
                                                 @else
-                                                    Unpaid balance available for auto-fill
+                                                    <span>Unpaid balance ready for instant receipting</span>
                                                 @endif
                                             </span>
                                             <button type="button" 
                                                     wire:click="applyStudentBalance" 
-                                                    class="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-bold text-emerald-700 bg-emerald-100 rounded-lg hover:bg-emerald-200 transition-colors shadow-sm">
+                                                    class="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-extrabold text-white bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 rounded-xl shadow-md shadow-emerald-600/20 active:scale-95 transition-all">
                                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-                                                Apply Outstanding Balance (₦{{ number_format($balanceInfo['balance'], 2) }})
+                                                Auto-Fill Outstanding (₦{{ number_format($balanceInfo['balance'], 2) }})
                                             </button>
                                         </div>
                                     @endif
@@ -361,51 +392,58 @@
                     </div>
 
                     {{-- Right Section: Payment Register & Amount (5 Cols on desktop) --}}
-                    <div class="lg:col-span-5 bg-slate-50/70 rounded-2xl p-5 border border-slate-200/80 flex flex-col justify-between space-y-4">
+                    <div class="lg:col-span-5 bg-gradient-to-b from-slate-50 via-slate-50/70 to-white rounded-2xl p-4 sm:p-5 lg:p-6 border-2 border-slate-200/90 shadow-sm flex flex-col justify-between space-y-4">
                         
                         {{-- Payment Method Pills (Cash, Transfer, POS) --}}
                         @if ($type === 'Income')
                             <div>
-                                <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">
-                                    Payment Method
+                                <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2 flex items-center justify-between">
+                                    <span>Payment Method</span>
+                                    <span class="text-[11px] text-emerald-700 font-extrabold capitalize">{{ $paymentMethod }} Selected</span>
                                 </label>
                                 <div class="grid grid-cols-3 gap-2">
                                     <!-- CASH -->
                                     <button type="button" 
                                             wire:click="setPaymentMethod('Cash')" 
-                                            class="relative flex flex-col items-center justify-center py-3 px-2 rounded-xl border-2 transition-all {{ $paymentMethod === 'Cash' ? 'border-emerald-500 bg-emerald-500/10 text-emerald-700 shadow-md ring-2 ring-emerald-500/20' : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300' }}">
-                                        <svg class="w-5 h-5 mb-1 {{ $paymentMethod === 'Cash' ? 'text-emerald-600' : 'text-slate-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path>
-                                        </svg>
-                                        <span class="text-xs font-bold">Cash</span>
+                                            class="relative flex flex-col items-center justify-center py-3 px-2 rounded-xl border-2 transition-all {{ $paymentMethod === 'Cash' ? 'border-emerald-500 bg-emerald-50/90 text-emerald-800 shadow-md ring-2 ring-emerald-500/20' : 'border-slate-200 bg-white text-slate-600 hover:border-emerald-200 hover:bg-emerald-50/30' }}">
+                                        <div class="w-8 h-8 rounded-full flex items-center justify-center mb-1 {{ $paymentMethod === 'Cash' ? 'bg-emerald-200/60 text-emerald-800' : 'bg-slate-100 text-slate-500' }}">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                                            </svg>
+                                        </div>
+                                        <span class="text-xs font-black">Cash</span>
                                         @if($paymentMethod === 'Cash')
-                                            <span class="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full bg-emerald-500 flex items-center justify-center text-[10px] text-white">✓</span>
+                                            <span class="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full bg-emerald-600 flex items-center justify-center text-[10px] text-white shadow-xs">✓</span>
                                         @endif
                                     </button>
 
                                     <!-- TRANSFER -->
                                     <button type="button" 
                                             wire:click="setPaymentMethod('Transfer')" 
-                                            class="relative flex flex-col items-center justify-center py-3 px-2 rounded-xl border-2 transition-all {{ $paymentMethod === 'Transfer' ? 'border-indigo-500 bg-indigo-500/10 text-indigo-700 shadow-md ring-2 ring-indigo-500/20' : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300' }}">
-                                        <svg class="w-5 h-5 mb-1 {{ $paymentMethod === 'Transfer' ? 'text-indigo-600' : 'text-slate-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z"></path>
-                                        </svg>
-                                        <span class="text-xs font-bold">Transfer</span>
+                                            class="relative flex flex-col items-center justify-center py-3 px-2 rounded-xl border-2 transition-all {{ $paymentMethod === 'Transfer' ? 'border-indigo-500 bg-indigo-50/90 text-indigo-800 shadow-md ring-2 ring-indigo-500/20' : 'border-slate-200 bg-white text-slate-600 hover:border-indigo-200 hover:bg-indigo-50/30' }}">
+                                        <div class="w-8 h-8 rounded-full flex items-center justify-center mb-1 {{ $paymentMethod === 'Transfer' ? 'bg-indigo-200/60 text-indigo-800' : 'bg-slate-100 text-slate-500' }}">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z"></path>
+                                            </svg>
+                                        </div>
+                                        <span class="text-xs font-black">Transfer</span>
                                         @if($paymentMethod === 'Transfer')
-                                            <span class="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full bg-indigo-500 flex items-center justify-center text-[10px] text-white">✓</span>
+                                            <span class="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full bg-indigo-600 flex items-center justify-center text-[10px] text-white shadow-xs">✓</span>
                                         @endif
                                     </button>
 
                                     <!-- POS -->
                                     <button type="button" 
                                             wire:click="setPaymentMethod('POS')" 
-                                            class="relative flex flex-col items-center justify-center py-3 px-2 rounded-xl border-2 transition-all {{ $paymentMethod === 'POS' ? 'border-purple-500 bg-purple-500/10 text-purple-700 shadow-md ring-2 ring-purple-500/20' : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300' }}">
-                                        <svg class="w-5 h-5 mb-1 {{ $paymentMethod === 'POS' ? 'text-purple-600' : 'text-slate-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path>
-                                        </svg>
-                                        <span class="text-xs font-bold">POS / Card</span>
+                                            class="relative flex flex-col items-center justify-center py-3 px-2 rounded-xl border-2 transition-all {{ $paymentMethod === 'POS' ? 'border-purple-500 bg-purple-50/90 text-purple-800 shadow-md ring-2 ring-purple-500/20' : 'border-slate-200 bg-white text-slate-600 hover:border-purple-200 hover:bg-purple-50/30' }}">
+                                        <div class="w-8 h-8 rounded-full flex items-center justify-center mb-1 {{ $paymentMethod === 'POS' ? 'bg-purple-200/60 text-purple-800' : 'bg-slate-100 text-slate-500' }}">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path>
+                                            </svg>
+                                        </div>
+                                        <span class="text-xs font-black">POS / Card</span>
                                         @if($paymentMethod === 'POS')
-                                            <span class="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full bg-purple-500 flex items-center justify-center text-[10px] text-white">✓</span>
+                                            <span class="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full bg-purple-600 flex items-center justify-center text-[10px] text-white shadow-xs">✓</span>
                                         @endif
                                     </button>
                                 </div>
@@ -446,48 +484,49 @@
                         </div>
 
                         {{-- Prominent Amount Register --}}
-                        <div>
+                        <div class="bg-white p-3.5 sm:p-4 rounded-2xl border-2 border-emerald-200/90 shadow-2xs">
                             <div class="flex items-center justify-between mb-1.5">
-                                <label class="block text-xs font-bold uppercase tracking-wider text-slate-500">
-                                    Amount to Record (₦) *
+                                <label class="block text-xs font-extrabold uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
+                                    <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                                    <span>Amount to Record (₦) *</span>
                                 </label>
                                 @if((float)$amountPaid > 0)
-                                    <button type="button" wire:click="clearAmount" class="text-xs font-semibold text-rose-500 hover:text-rose-700">
+                                    <button type="button" wire:click="clearAmount" class="text-xs font-bold text-rose-500 hover:text-rose-700 bg-rose-50 px-2 py-0.5 rounded-lg border border-rose-200">
                                         Clear ✕
                                     </button>
                                 @endif
                             </div>
 
-                            <div class="relative rounded-2xl shadow-sm">
-                                <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4">
-                                    <span class="text-2xl font-black text-slate-400">₦</span>
+                            <div class="relative rounded-xl shadow-xs">
+                                <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5">
+                                    <span class="text-2xl font-black text-emerald-600">₦</span>
                                 </div>
                                 <input wire:model.live="amountPaid" 
                                        type="number" 
                                        step="0.01" 
                                        min="0" 
                                        placeholder="0.00" 
-                                       class="w-full pl-11 pr-4 py-3.5 text-2xl sm:text-3xl font-black font-mono tracking-tight text-slate-900 bg-white rounded-2xl border-2 {{ $errors->has('amountPaid') ? 'border-rose-400 focus:border-rose-500 focus:ring-rose-500' : 'border-slate-300 focus:border-emerald-500 focus:ring-emerald-500' }} transition-all" />
+                                       class="w-full pl-10 pr-4 py-3 sm:py-3.5 text-2xl sm:text-3xl font-black font-mono tracking-tight text-slate-900 bg-slate-50/50 rounded-xl border-2 {{ $errors->has('amountPaid') ? 'border-rose-400 focus:border-rose-500 focus:ring-rose-500' : 'border-slate-300 focus:border-emerald-500 focus:ring-emerald-500 focus:bg-white' }} transition-all" />
                             </div>
                             @error('amountPaid') <p class="mt-1 text-xs text-rose-500 font-medium">{{ $message }}</p> @enderror
 
                             {{-- Cash Preset Fast-Tap Chips --}}
-                            <div class="mt-3">
-                                <div class="text-[11px] font-semibold text-slate-400 mb-1.5">Quick Cash Presets:</div>
+                            <div class="mt-3 pt-2.5 border-t border-slate-100">
+                                <div class="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2">⚡ Quick Tap Presets:</div>
                                 <div class="flex flex-wrap gap-1.5">
-                                    <button type="button" wire:click="addQuickAmount(1000)" class="px-2.5 py-1 text-xs font-bold rounded-lg bg-white text-slate-700 border border-slate-200 hover:bg-emerald-50 hover:text-emerald-700 hover:border-emerald-200 transition-all shadow-2xs">
+                                    <button type="button" wire:click="addQuickAmount(1000)" class="px-3 py-1.5 text-xs font-extrabold rounded-xl bg-gradient-to-r from-emerald-50 to-teal-50 text-emerald-800 border border-emerald-300 hover:bg-emerald-100 hover:border-emerald-400 transition-all shadow-2xs active:scale-95">
                                         +₦1k
                                     </button>
-                                    <button type="button" wire:click="addQuickAmount(5000)" class="px-2.5 py-1 text-xs font-bold rounded-lg bg-white text-slate-700 border border-slate-200 hover:bg-emerald-50 hover:text-emerald-700 hover:border-emerald-200 transition-all shadow-2xs">
+                                    <button type="button" wire:click="addQuickAmount(5000)" class="px-3 py-1.5 text-xs font-extrabold rounded-xl bg-gradient-to-r from-teal-50 to-cyan-50 text-teal-800 border border-teal-300 hover:bg-teal-100 hover:border-teal-400 transition-all shadow-2xs active:scale-95">
                                         +₦5k
                                     </button>
-                                    <button type="button" wire:click="addQuickAmount(10000)" class="px-2.5 py-1 text-xs font-bold rounded-lg bg-white text-slate-700 border border-slate-200 hover:bg-emerald-50 hover:text-emerald-700 hover:border-emerald-200 transition-all shadow-2xs">
+                                    <button type="button" wire:click="addQuickAmount(10000)" class="px-3 py-1.5 text-xs font-extrabold rounded-xl bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-800 border border-blue-300 hover:bg-blue-100 hover:border-blue-400 transition-all shadow-2xs active:scale-95">
                                         +₦10k
                                     </button>
-                                    <button type="button" wire:click="addQuickAmount(20000)" class="px-2.5 py-1 text-xs font-bold rounded-lg bg-white text-slate-700 border border-slate-200 hover:bg-emerald-50 hover:text-emerald-700 hover:border-emerald-200 transition-all shadow-2xs">
+                                    <button type="button" wire:click="addQuickAmount(20000)" class="px-3 py-1.5 text-xs font-extrabold rounded-xl bg-gradient-to-r from-indigo-50 to-purple-50 text-indigo-800 border border-indigo-300 hover:bg-indigo-100 hover:border-indigo-400 transition-all shadow-2xs active:scale-95">
                                         +₦20k
                                     </button>
-                                    <button type="button" wire:click="addQuickAmount(50000)" class="px-2.5 py-1 text-xs font-bold rounded-lg bg-white text-slate-700 border border-slate-200 hover:bg-emerald-50 hover:text-emerald-700 hover:border-emerald-200 transition-all shadow-2xs">
+                                    <button type="button" wire:click="addQuickAmount(50000)" class="px-3 py-1.5 text-xs font-extrabold rounded-xl bg-gradient-to-r from-purple-50 to-pink-50 text-purple-800 border border-purple-300 hover:bg-purple-100 hover:border-purple-400 transition-all shadow-2xs active:scale-95">
                                         +₦50k
                                     </button>
                                 </div>
@@ -565,24 +604,28 @@
         </div>
 
     @elseif ($tab === 'debtors')
-        <div class="relative overflow-hidden rounded-xl sm:rounded-2xl bg-white shadow-sm ring-1 ring-gray-200">
-            <div class="absolute inset-0 bg-gradient-to-br from-orange-500/5 to-orange-600/10"></div>
-            <div class="relative p-4 sm:p-6">
-                <div class="mb-3 sm:mb-4 flex items-center gap-2.5 sm:gap-3">
-                    <div class="flex h-8 w-8 sm:h-10 sm:w-10 items-center justify-center rounded-xl bg-orange-500 text-white shrink-0">
-                        <svg class="h-4 w-4 sm:h-5 sm:w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+        <div class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-amber-500/10 via-orange-500/5 to-white shadow-sm border-2 border-amber-200/90 p-4 sm:p-6">
+            <div class="relative">
+                <div class="mb-4 flex items-center gap-3">
+                    <div class="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-amber-500 to-orange-600 text-white shadow-md shadow-amber-500/25 shrink-0">
+                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
                         </svg>
                     </div>
                     <div>
-                        <h3 class="text-base sm:text-lg font-bold text-gray-900">Outstanding Balances</h3>
-                        <p class="text-xs sm:text-sm text-gray-600">Students with pending payments</p>
+                        <div class="flex items-center gap-2">
+                            <h3 class="text-base sm:text-lg font-bold text-slate-900">Outstanding Balances &amp; Debtors Register</h3>
+                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-300">
+                                Pending Fees
+                            </span>
+                        </div>
+                        <p class="text-xs text-slate-500 mt-0.5">Quickly identify and collect outstanding balances across terms and classes</p>
                     </div>
                 </div>
-                <div class="grid gap-2 sm:gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-5">
+                <div class="grid gap-2.5 sm:gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-5">
                     {{-- Category Select --}}
                     <div>
-                        <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">Fee Category</label>
+                        <label class="block text-[11px] font-bold text-slate-600 uppercase tracking-wider mb-1">Fee Category</label>
                         <select wire:model.live="debtorsCategory" class="select text-xs sm:text-sm w-full font-medium">
                             @foreach($this->availableFeeCategories as $cat)
                                 <option value="{{ $cat }}">{{ $cat }}</option>
@@ -592,7 +635,7 @@
 
                     {{-- Session Select --}}
                     <div>
-                        <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">Session</label>
+                        <label class="block text-[11px] font-bold text-slate-600 uppercase tracking-wider mb-1">Session</label>
                         <select wire:model.live="debtorsSession" class="select text-xs sm:text-sm w-full font-medium">
                             <option value="">All Sessions</option>
                             @foreach($this->availableSessions as $sess)
@@ -603,7 +646,7 @@
 
                     {{-- Term Select --}}
                     <div>
-                        <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">Term</label>
+                        <label class="block text-[11px] font-bold text-slate-600 uppercase tracking-wider mb-1">Term</label>
                         <select wire:model.live="debtorsTerm" class="select text-xs sm:text-sm w-full font-medium">
                             <option value="">All Terms</option>
                             <option value="1">Term 1</option>
@@ -614,7 +657,7 @@
 
                     {{-- Class Select --}}
                     <div>
-                        <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">Class</label>
+                        <label class="block text-[11px] font-bold text-slate-600 uppercase tracking-wider mb-1">Class</label>
                         <select wire:model.live="debtorsClassId" class="select text-xs sm:text-sm w-full font-medium">
                             <option value="">All Classes</option>
                             @foreach($this->classes as $c)
@@ -625,7 +668,7 @@
 
                     {{-- Student Search --}}
                     <div>
-                        <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">Search Student</label>
+                        <label class="block text-[11px] font-bold text-slate-600 uppercase tracking-wider mb-1">Search Student</label>
                         <div class="relative">
                             <input wire:model.live.debounce.300ms="debtorsSearch" type="text" placeholder="Name or Adm No..." class="input-compact text-xs sm:text-sm w-full pl-8" />
                             <svg class="h-3.5 w-3.5 text-slate-400 absolute left-2.5 top-2.5 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
@@ -636,7 +679,7 @@
         </div>
 
         <x-table>
-            <thead class="bg-gray-50 text-xs font-semibold uppercase tracking-wider text-gray-500">
+            <thead class="bg-slate-100/80 text-xs font-bold uppercase tracking-wider text-slate-600 border-b border-slate-200">
                 <tr>
                     <th class="px-5 py-3">Student</th>
                     <th class="px-5 py-3">Class</th>
@@ -647,40 +690,40 @@
                     <th class="px-5 py-3 text-right">Action</th>
                 </tr>
             </thead>
-            <tbody class="divide-y divide-gray-100">
+            <tbody class="divide-y divide-slate-100">
                 @forelse ($this->debtors as $row)
-                    <tr class="bg-white hover:bg-gray-50">
+                    <tr class="bg-white hover:bg-slate-50/80 transition-colors">
                         <td class="px-5 py-4">
-                            <div class="text-sm font-semibold text-gray-900">{{ $row['student']->full_name }}</div>
-                            <div class="mt-1 text-xs text-gray-500 font-mono">{{ $row['student']->admission_number }}</div>
+                            <div class="text-sm font-bold text-slate-900">{{ $row['student']->full_name }}</div>
+                            <div class="mt-0.5 text-xs text-slate-500 font-mono">{{ $row['student']->admission_number }}</div>
                         </td>
-                        <td class="px-5 py-4 text-sm text-gray-700">
+                        <td class="px-5 py-4 text-sm text-slate-700">
                             {{ $row['student']->schoolClass?->name ?? '-' }}@if($row['student']->section) / {{ $row['student']->section->name }}@endif
                         </td>
-                        <td class="px-5 py-4 text-right text-sm font-semibold text-gray-900 font-mono">
+                        <td class="px-5 py-4 text-right text-sm font-bold text-slate-900 font-mono">
                             {{ config('academyhub.currency_symbol') }}{{ number_format($row['current_due'] ?? $row['due'], 2) }}
                         </td>
                         <td class="px-5 py-4 text-right text-sm">
                             @if (($row['past_arrears'] ?? 0) > 0)
-                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-amber-50 text-amber-700 ring-1 ring-inset ring-amber-600/20 font-mono">
+                                <span class="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-bold bg-amber-50 text-amber-800 border border-amber-300 font-mono">
                                     {{ config('academyhub.currency_symbol') }}{{ number_format($row['past_arrears'], 2) }}
                                 </span>
                             @else
                                 <span class="text-xs text-slate-400 font-mono">{{ config('academyhub.currency_symbol') }}0.00</span>
                             @endif
                         </td>
-                        <td class="px-5 py-4 text-right text-sm font-semibold text-emerald-600 font-mono">
+                        <td class="px-5 py-4 text-right text-sm font-bold text-emerald-600 font-mono">
                             {{ config('academyhub.currency_symbol') }}{{ number_format($row['paid'], 2) }}
                         </td>
                         <td class="px-5 py-4 text-right">
-                            <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-black bg-rose-50 text-rose-700 ring-1 ring-inset ring-rose-600/20 font-mono">
+                            <span class="inline-flex items-center px-2.5 py-1 rounded-xl text-xs font-black bg-rose-50 text-rose-700 border-2 border-rose-300 font-mono shadow-2xs">
                                 {{ config('academyhub.currency_symbol') }}{{ number_format($row['balance'], 2) }}
                             </span>
                         </td>
                         <td class="px-5 py-4 text-right">
                             <button type="button" 
                                     wire:click="quickCollect({{ $row['student']->id }}, {{ $row['balance'] }}, '{{ $row['category'] ?? $debtorsCategory }}')" 
-                                    class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 shadow-sm transition-all active:scale-95">
+                                    class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 shadow-md shadow-emerald-600/20 transition-all active:scale-95">
                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
                                 <span>Collect Fee</span>
                             </button>
@@ -688,7 +731,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="7" class="px-5 py-10 text-center text-sm text-gray-500">No debtors found.</td>
+                        <td colspan="7" class="px-5 py-10 text-center text-sm text-slate-500">No debtors found matching the filter criteria.</td>
                     </tr>
                 @endforelse
             </tbody>
@@ -699,17 +742,22 @@
         @endphp
         <div class="space-y-4">
             <!-- Filter & Selection Bar -->
-            <div class="relative overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-slate-200 p-4 sm:p-5">
+            <div class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-blue-50/70 via-indigo-50/30 to-white shadow-sm border-2 border-blue-200/90 p-4 sm:p-5">
                 <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
                     <div class="flex items-center gap-3">
-                        <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-500 text-white shadow-sm shrink-0">
+                        <div class="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-600/25 shrink-0">
                             <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
                             </svg>
                         </div>
                         <div>
-                            <h3 class="text-base sm:text-lg font-bold text-slate-900">Class Fee Register &amp; Roster</h3>
-                            <p class="text-xs text-slate-500">Class-by-class student fee ledger, payment reconciliation &amp; collection terminal</p>
+                            <div class="flex items-center gap-2">
+                                <h3 class="text-base sm:text-lg font-bold text-slate-900">Class Fee Register &amp; Roster</h3>
+                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 text-blue-800 border border-blue-300">
+                                    Term Roster
+                                </span>
+                            </div>
+                            <p class="text-xs text-slate-500 mt-0.5">Class-by-class student fee ledger, payment reconciliation &amp; collection terminal</p>
                         </div>
                     </div>
                 </div>
@@ -717,8 +765,8 @@
                 <div class="grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-6">
                     {{-- Class Select --}}
                     <div>
-                        <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">Select Class *</label>
-                        <select wire:model.live="registerClassId" class="select text-xs sm:text-sm w-full font-bold text-emerald-800">
+                        <label class="block text-[11px] font-bold text-slate-600 uppercase tracking-wider mb-1">Select Class *</label>
+                        <select wire:model.live="registerClassId" class="select text-xs sm:text-sm w-full font-bold text-blue-900 bg-white">
                             <option value="">-- Choose Class --</option>
                             @foreach($this->classes as $c)
                                 <option value="{{ $c->id }}">{{ $c->name }}</option>
@@ -728,8 +776,8 @@
 
                     {{-- Arm / Section Select --}}
                     <div>
-                        <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">Arm / Section</label>
-                        <select wire:model.live="registerSectionId" class="select text-xs sm:text-sm w-full font-medium">
+                        <label class="block text-[11px] font-bold text-slate-600 uppercase tracking-wider mb-1">Arm / Section</label>
+                        <select wire:model.live="registerSectionId" class="select text-xs sm:text-sm w-full font-medium bg-white">
                             <option value="">All Arms (All Sections)</option>
                             @foreach($this->registerSections as $sec)
                                 <option value="{{ $sec->id }}">{{ $sec->name }}</option>
@@ -739,8 +787,8 @@
 
                     {{-- Fee Category --}}
                     <div>
-                        <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">Fee Category</label>
-                        <select wire:model.live="registerCategory" class="select text-xs sm:text-sm w-full font-medium">
+                        <label class="block text-[11px] font-bold text-slate-600 uppercase tracking-wider mb-1">Fee Category</label>
+                        <select wire:model.live="registerCategory" class="select text-xs sm:text-sm w-full font-medium bg-white">
                             @foreach($this->availableFeeCategories as $cat)
                                 <option value="{{ $cat }}">{{ $cat }}</option>
                             @endforeach
@@ -749,8 +797,8 @@
 
                     {{-- Session Select --}}
                     <div>
-                        <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">Session</label>
-                        <select wire:model.live="registerSession" class="select text-xs sm:text-sm w-full font-medium">
+                        <label class="block text-[11px] font-bold text-slate-600 uppercase tracking-wider mb-1">Session</label>
+                        <select wire:model.live="registerSession" class="select text-xs sm:text-sm w-full font-medium bg-white">
                             @foreach($this->availableSessions as $sess)
                                 <option value="{{ $sess }}">{{ $sess }}</option>
                             @endforeach
@@ -759,8 +807,8 @@
 
                     {{-- Term Select --}}
                     <div>
-                        <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">Term</label>
-                        <select wire:model.live="registerTerm" class="select text-xs sm:text-sm w-full font-medium">
+                        <label class="block text-[11px] font-bold text-slate-600 uppercase tracking-wider mb-1">Term</label>
+                        <select wire:model.live="registerTerm" class="select text-xs sm:text-sm w-full font-medium bg-white">
                             <option value="1">Term 1 (First Term)</option>
                             <option value="2">Term 2 (Second Term)</option>
                             <option value="3">Term 3 (Third Term)</option>
@@ -769,9 +817,9 @@
 
                     {{-- Search in Class --}}
                     <div>
-                        <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">Filter in Class</label>
+                        <label class="block text-[11px] font-bold text-slate-600 uppercase tracking-wider mb-1">Filter in Class</label>
                         <div class="relative">
-                            <input wire:model.live.debounce.250ms="registerSearch" type="text" placeholder="Search student..." class="input-compact text-xs sm:text-sm w-full pl-8" />
+                            <input wire:model.live.debounce.250ms="registerSearch" type="text" placeholder="Search student..." class="input-compact text-xs sm:text-sm w-full pl-8 bg-white" />
                             <svg class="h-3.5 w-3.5 text-slate-400 absolute left-2.5 top-2.5 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
                         </div>
                     </div>
@@ -780,55 +828,55 @@
 
             <!-- Class Register KPI Summary Cards -->
             <div class="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-5">
-                <div class="bg-white rounded-2xl p-4 shadow-xs border border-slate-200/80">
-                    <p class="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">Students</p>
-                    <h3 class="text-xl sm:text-2xl font-black text-slate-800">
+                <div class="bg-gradient-to-br from-blue-50/80 via-white to-indigo-50/30 rounded-2xl p-4 shadow-xs border-2 border-blue-200/90 hover:shadow-sm transition-all">
+                    <p class="text-[11px] font-bold text-blue-800 uppercase tracking-wider mb-1">Students</p>
+                    <h3 class="text-xl sm:text-2xl font-black text-blue-900">
                         {{ number_format($reg['total_students']) }}
                     </h3>
-                    <p class="text-[10px] text-slate-400 mt-0.5">Enrolled in roster</p>
+                    <p class="text-[10px] text-blue-600 font-semibold mt-0.5">Enrolled in roster</p>
                 </div>
 
-                <div class="bg-white rounded-2xl p-4 shadow-xs border border-slate-200/80">
-                    <p class="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">Total Expected</p>
-                    <h3 class="text-xl sm:text-2xl font-black text-slate-900 font-mono">
+                <div class="bg-gradient-to-br from-indigo-50/80 via-white to-purple-50/30 rounded-2xl p-4 shadow-xs border-2 border-indigo-200/90 hover:shadow-sm transition-all">
+                    <p class="text-[11px] font-bold text-indigo-800 uppercase tracking-wider mb-1">Total Expected</p>
+                    <h3 class="text-xl sm:text-2xl font-black text-indigo-900 font-mono">
                         {{ config('academyhub.currency_symbol', '₦') }}{{ number_format($reg['total_expected'], 2) }}
                     </h3>
-                    <p class="text-[10px] text-slate-400 mt-0.5">Term Due + Arrears</p>
+                    <p class="text-[10px] text-indigo-600 font-semibold mt-0.5">Term Due + Arrears</p>
                 </div>
 
-                <div class="bg-white rounded-2xl p-4 shadow-xs border border-slate-200/80">
-                    <p class="text-[11px] font-bold text-emerald-600 uppercase tracking-wider mb-1">Total Collected</p>
+                <div class="bg-gradient-to-br from-emerald-50/80 via-white to-teal-50/30 rounded-2xl p-4 shadow-xs border-2 border-emerald-300 hover:shadow-sm transition-all">
+                    <p class="text-[11px] font-bold text-emerald-800 uppercase tracking-wider mb-1">Total Collected</p>
                     <h3 class="text-xl sm:text-2xl font-black text-emerald-600 font-mono">
                         {{ config('academyhub.currency_symbol', '₦') }}{{ number_format($reg['total_paid'], 2) }}
                     </h3>
-                    <p class="text-[10px] text-emerald-500 mt-0.5">Cash / Trf / POS</p>
+                    <p class="text-[10px] text-emerald-600 font-semibold mt-0.5">Cash / Trf / POS</p>
                 </div>
 
-                <div class="bg-white rounded-2xl p-4 shadow-xs border border-slate-200/80">
-                    <p class="text-[11px] font-bold text-rose-500 uppercase tracking-wider mb-1">Outstanding</p>
+                <div class="bg-gradient-to-br from-rose-50/80 via-white to-pink-50/30 rounded-2xl p-4 shadow-xs border-2 border-rose-300 hover:shadow-sm transition-all">
+                    <p class="text-[11px] font-bold text-rose-800 uppercase tracking-wider mb-1">Outstanding</p>
                     <h3 class="text-xl sm:text-2xl font-black text-rose-600 font-mono">
                         {{ config('academyhub.currency_symbol', '₦') }}{{ number_format($reg['total_balance'], 2) }}
                     </h3>
-                    <p class="text-[10px] text-rose-400 mt-0.5">Unpaid balance</p>
+                    <p class="text-[10px] text-rose-500 font-semibold mt-0.5">Unpaid balance</p>
                 </div>
 
-                <div class="col-span-2 sm:col-span-1 bg-white rounded-2xl p-4 shadow-xs border border-slate-200/80 flex flex-col justify-between">
+                <div class="col-span-2 sm:col-span-1 bg-gradient-to-br from-teal-50/80 via-white to-cyan-50/30 rounded-2xl p-4 shadow-xs border-2 border-teal-200/90 flex flex-col justify-between hover:shadow-sm transition-all">
                     <div>
-                        <div class="flex items-center justify-between mb-1">
-                            <p class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Collection Rate</p>
-                            <span class="text-xs font-extrabold text-emerald-600">{{ $reg['collection_rate'] }}%</span>
+                        <div class="flex items-center justify-between mb-1.5">
+                            <p class="text-[11px] font-bold text-teal-800 uppercase tracking-wider">Collection Rate</p>
+                            <span class="text-xs font-black text-teal-700 font-mono">{{ $reg['collection_rate'] }}%</span>
                         </div>
-                        <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
-                            <div class="bg-emerald-500 h-2 rounded-full transition-all duration-500" style="width: {{ $reg['collection_rate'] }}%"></div>
+                        <div class="w-full bg-slate-200/80 h-2.5 rounded-full overflow-hidden p-0.5">
+                            <div class="bg-gradient-to-r from-emerald-500 to-teal-500 h-1.5 rounded-full transition-all duration-500" style="width: {{ $reg['collection_rate'] }}%"></div>
                         </div>
                     </div>
-                    <p class="text-[10px] text-slate-400 mt-1">Class target progress</p>
+                    <p class="text-[10px] text-teal-700 font-semibold mt-1">Class target progress</p>
                 </div>
             </div>
 
             <!-- Student Roster Table -->
             <x-table>
-                <thead class="bg-slate-50 text-xs font-semibold uppercase tracking-wider text-slate-500">
+                <thead class="bg-slate-100/80 text-xs font-bold uppercase tracking-wider text-slate-600 border-b border-slate-200">
                     <tr>
                         <th class="px-4 py-3 text-center w-12">#</th>
                         <th class="px-4 py-3">Student</th>
@@ -843,21 +891,21 @@
                 </thead>
                 <tbody class="divide-y divide-slate-100">
                     @forelse ($reg['students'] as $idx => $row)
-                        <tr class="bg-white hover:bg-slate-50 transition-colors">
+                        <tr class="bg-white hover:bg-slate-50/80 transition-colors">
                             <td class="px-4 py-3.5 text-center text-xs text-slate-400 font-mono">{{ $idx + 1 }}</td>
                             <td class="px-4 py-3.5">
                                 <div class="text-sm font-bold text-slate-900">{{ $row['student']->full_name }}</div>
                                 <div class="text-xs text-slate-500 font-mono">{{ $row['student']->admission_number ?? 'No Adm #' }}</div>
                             </td>
-                            <td class="px-4 py-3.5 text-xs text-slate-600">
+                            <td class="px-4 py-3.5 text-xs text-slate-600 font-semibold">
                                 {{ $row['student']->section?->name ?? '—' }}
                             </td>
-                            <td class="px-4 py-3.5 text-right text-xs font-semibold text-slate-800 font-mono">
+                            <td class="px-4 py-3.5 text-right text-xs font-bold text-slate-800 font-mono">
                                 {{ config('academyhub.currency_symbol') }}{{ number_format($row['due'], 2) }}
                             </td>
                             <td class="px-4 py-3.5 text-right text-xs font-mono">
                                 @if($row['arrears'] > 0)
-                                    <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[11px] font-bold bg-amber-50 text-amber-700 ring-1 ring-inset ring-amber-600/20">
+                                    <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[11px] font-bold bg-amber-50 text-amber-800 border border-amber-300">
                                         {{ config('academyhub.currency_symbol') }}{{ number_format($row['arrears'], 2) }}
                                     </span>
                                 @else
@@ -869,24 +917,24 @@
                             </td>
                             <td class="px-4 py-3.5 text-right text-xs font-mono">
                                 @if($row['balance'] > 0)
-                                    <span class="font-bold text-rose-600">
+                                    <span class="font-extrabold text-rose-600 bg-rose-50 px-2 py-0.5 rounded-lg border border-rose-200">
                                         {{ config('academyhub.currency_symbol') }}{{ number_format($row['balance'], 2) }}
                                     </span>
                                 @else
-                                    <span class="text-emerald-600 font-bold">₦0.00</span>
+                                    <span class="text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 rounded-lg border border-emerald-200">₦0.00</span>
                                 @endif
                             </td>
                             <td class="px-4 py-3.5 text-center">
                                 @if($row['status'] === 'paid')
-                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 ring-1 ring-inset ring-emerald-600/20">
+                                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-emerald-100 text-emerald-800 border border-emerald-300 shadow-2xs">
                                         ✓ Paid in Full
                                     </span>
                                 @elseif($row['status'] === 'partial')
-                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-50 text-blue-700 ring-1 ring-inset ring-blue-600/20">
+                                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-blue-100 text-blue-800 border border-blue-300 shadow-2xs">
                                         Part Payment
                                     </span>
                                 @else
-                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-50 text-rose-700 ring-1 ring-inset ring-rose-600/20">
+                                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-rose-100 text-rose-800 border border-rose-300 shadow-2xs">
                                         Owing
                                     </span>
                                 @endif
@@ -894,7 +942,7 @@
                             <td class="px-4 py-3.5 text-right">
                                 <button type="button" 
                                         wire:click="quickCollect({{ $row['student']->id }}, {{ $row['balance'] > 0 ? $row['balance'] : null }}, '{{ $registerCategory }}')" 
-                                        class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 shadow-sm transition-all active:scale-95">
+                                        class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 shadow-sm transition-all active:scale-95">
                                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
                                     <span>Collect</span>
                                 </button>
@@ -1025,7 +1073,7 @@
             <div class="card-padded text-sm text-gray-600">Transactions are disabled for your account.</div>
         @else
             <x-table>
-                <thead class="bg-gray-50 text-xs font-semibold uppercase tracking-wider text-gray-500">
+                <thead class="bg-slate-100/80 text-xs font-bold uppercase tracking-wider text-slate-600 border-b border-slate-200">
                     <tr>
                         <th class="px-5 py-3">Date</th>
                         <th class="px-5 py-3">Student</th>
@@ -1036,26 +1084,32 @@
                         <th class="px-5 py-3 text-right">Action</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-gray-100">
+                <tbody class="divide-y divide-slate-100">
                     @forelse ($this->transactions as $t)
-                        <tr class="bg-white hover:bg-gray-50">
-                            <td class="px-5 py-4 text-sm text-gray-700">{{ $t->date?->format('M j, Y') }}</td>
+                        <tr class="bg-white hover:bg-slate-50/80 transition-colors">
+                            <td class="px-5 py-4 text-sm text-slate-700 font-medium">{{ $t->date?->format('M j, Y') }}</td>
                             <td class="px-5 py-4">
-                                <div class="text-sm font-semibold text-gray-900">{{ $t->student?->full_name ?: '-' }}</div>
-                                <div class="mt-1 text-xs text-gray-500">{{ $t->student?->admission_number ?: '' }}</div>
+                                <div class="text-sm font-bold text-slate-900">{{ $t->student?->full_name ?: '-' }}</div>
+                                <div class="mt-0.5 text-xs text-slate-500 font-mono">{{ $t->student?->admission_number ?: '' }}</div>
                             </td>
                             <td class="px-5 py-4">
                                 @if ($t->is_void)
-                                    <x-status-badge variant="warning">Voided</x-status-badge>
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-300">Voided</span>
                                 @elseif ($t->type === 'Income')
-                                    <x-status-badge variant="success">Income</x-status-badge>
+                                    <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-100 text-emerald-800 border border-emerald-300">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                                        Income
+                                    </span>
                                 @else
-                                    <x-status-badge variant="warning">Expense</x-status-badge>
+                                    <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-rose-100 text-rose-800 border border-rose-300">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span>
+                                        Expense
+                                    </span>
                                 @endif
                             </td>
-                            <td class="px-5 py-4 text-sm text-gray-700">
-                                <div class="font-medium text-gray-900">{{ $t->category }}</div>
-                                <div class="mt-0.5 text-xs text-gray-500">
+                            <td class="px-5 py-4 text-sm text-slate-700">
+                                <div class="font-bold text-slate-900">{{ $t->category }}</div>
+                                <div class="mt-0.5 text-xs text-slate-500">
                                     @if ($t->session)
                                         {{ $t->session }}
                                     @endif
@@ -1063,54 +1117,59 @@
                                         &middot; Term {{ $t->term }}
                                     @endif
                                     @if ($t->payment_method)
-                                        &middot; <span class="font-semibold text-slate-700">{{ $t->payment_method }}</span>
+                                        &middot; <span class="font-bold text-emerald-700 bg-emerald-50 px-1.5 py-0.2 rounded border border-emerald-200">{{ $t->payment_method }}</span>
                                     @endif
                                 </div>
                                 @if ($t->reference || $t->payer_name)
                                     <div class="mt-1 text-[11px] text-slate-500 flex flex-wrap items-center gap-1.5">
                                         @if ($t->reference)
-                                            <span class="font-mono bg-slate-100 px-1.5 py-0.5 rounded text-[10px]">Ref: {{ $t->reference }}</span>
+                                            <span class="font-mono bg-slate-100 px-1.5 py-0.5 rounded text-[10px] text-slate-700 border border-slate-200">Ref: {{ $t->reference }}</span>
                                         @endif
                                         @if ($t->payer_name)
-                                            <span>Paid By: <strong class="text-slate-700">{{ $t->payer_name }}</strong></span>
+                                            <span>Paid By: <strong class="text-slate-800">{{ $t->payer_name }}</strong></span>
                                         @endif
                                     </div>
                                 @endif
                             </td>
-                            <td class="px-5 py-4 text-right text-sm font-semibold text-gray-900">{{ config('academyhub.currency_symbol') }}{{ number_format((float) $t->amount_paid, 2) }}</td>
-                            <td class="px-5 py-4 text-sm font-medium text-gray-700">
-                                <div class="flex items-center gap-2">
-                                    <span>{{ $t->receipt_number ?: '-' }}</span>
+                            <td class="px-5 py-4 text-right text-sm font-black font-mono {{ $t->type === 'Income' ? 'text-emerald-600' : 'text-rose-600' }}">
+                                {{ $t->type === 'Income' ? '+' : '-' }}{{ config('academyhub.currency_symbol') }}{{ number_format((float) $t->amount_paid, 2) }}
+                            </td>
+                            <td class="px-5 py-4 text-sm font-medium text-slate-700">
+                                <div class="flex items-center gap-1.5">
+                                    <span class="font-mono font-bold text-xs bg-slate-100 px-2 py-0.5 rounded text-slate-800 border border-slate-200">{{ $t->receipt_number ?: '-' }}</span>
                                     @if ($t->is_void)
-                                        <x-status-badge variant="warning">VOID</x-status-badge>
+                                        <span class="text-[10px] font-bold text-rose-600">VOID</span>
                                     @endif
                                 </div>
                             </td>
                             <td class="px-5 py-4 text-right">
-                                <div class="flex justify-end gap-1">
+                                <div class="flex justify-end gap-1.5">
                                     @if ($t->receipt_number)
-                                        <a href="{{ route('billing.receipt', $t) }}" class="btn-outline btn-sm">Receipt</a>
+                                        <a href="{{ route('billing.receipt', $t) }}" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl text-xs font-bold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 shadow-2xs transition-all">
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+                                            <span>Receipt</span>
+                                        </a>
                                     @endif
                                     @if ($canVoid && !$t->is_void)
-                                        <button type="button" wire:click="startVoid({{ $t->id }})" class="btn-ghost btn-sm text-red-600">Void</button>
+                                        <button type="button" wire:click="startVoid({{ $t->id }})" class="btn-ghost btn-sm text-rose-600 hover:bg-rose-50">Void</button>
                                     @endif
                                 </div>
                             </td>
                         </tr>
                         @if ($canVoid && $voidingTransactionId === $t->id)
-                            <tr class="bg-red-50">
+                            <tr class="bg-rose-50 border-y border-rose-200">
                                 <td colspan="7" class="px-5 py-3">
                                     <div class="flex gap-2">
-                                        <input wire:model.live="voidReason" type="text" class="input-compact flex-1" placeholder="Void reason (optional)" />
+                                        <input wire:model.live="voidReason" type="text" class="input-compact flex-1 bg-white border-rose-300" placeholder="Void reason (optional)" />
                                         <button type="button" wire:click="cancelVoid" class="btn-outline btn-sm" wire:loading.attr="disabled" wire:loading.class="opacity-50 cursor-wait">Cancel</button>
-                                        <button type="button" wire:click="confirmVoid({{ $t->id }})" class="btn-primary btn-sm">Confirm</button>
+                                        <button type="button" wire:click="confirmVoid({{ $t->id }})" class="btn-primary btn-sm bg-rose-600 hover:bg-rose-700 border-none text-white">Confirm Void</button>
                                     </div>
                                 </td>
                             </tr>
                         @endif
                     @empty
                         <tr>
-                            <td colspan="7" class="px-5 py-10 text-center text-sm text-gray-500">No transactions yet.</td>
+                            <td colspan="7" class="px-5 py-10 text-center text-sm text-slate-500">No transactions recorded yet.</td>
                         </tr>
                     @endforelse
                 </tbody>
@@ -1246,62 +1305,65 @@
             $rt = $this->receiptTransaction;
         @endphp
         <div class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
-            <div class="relative bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-200 animate-in fade-in zoom-in duration-200">
+            <div class="relative bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border-2 border-emerald-200/90 animate-in fade-in zoom-in duration-200">
                 <div class="text-center">
-                    <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-600 mb-4 shadow-inner">
-                        <svg class="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-3xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white mb-4 shadow-lg shadow-emerald-500/30">
+                        <svg class="h-9 w-9" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
                         </svg>
                     </div>
-                    <h3 class="text-lg font-bold text-slate-900">Payment Recorded Successfully!</h3>
-                    <p class="text-xs text-slate-500 mt-1">Official school receipt has been generated.</p>
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-extrabold bg-emerald-100 text-emerald-800 border border-emerald-300 mb-1.5">
+                        ✓ Transaction Successful
+                    </span>
+                    <h3 class="text-lg sm:text-xl font-black text-slate-900">Payment Recorded Successfully!</h3>
+                    <p class="text-xs text-slate-500 mt-1">Official school receipt has been generated and filed.</p>
                 </div>
 
-                <div class="mt-5 p-4 rounded-2xl bg-slate-50 border border-slate-100 space-y-2.5 text-xs">
-                    <div class="flex justify-between items-center pb-2 border-b border-slate-200">
-                        <span class="text-slate-500">Receipt Number</span>
-                        <span class="font-mono font-bold text-slate-900">{{ $rt->receipt_number }}</span>
+                <div class="mt-5 p-4 sm:p-5 rounded-2xl bg-gradient-to-br from-slate-50 to-emerald-50/20 border border-emerald-100/80 space-y-2.5 text-xs">
+                    <div class="flex justify-between items-center pb-2.5 border-b border-slate-200">
+                        <span class="text-slate-500 font-semibold">Receipt Number</span>
+                        <span class="font-mono font-black text-sm text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200">{{ $rt->receipt_number }}</span>
                     </div>
                     <div class="flex justify-between items-center">
-                        <span class="text-slate-500">Student</span>
-                        <span class="font-semibold text-slate-900">{{ $rt->student?->full_name }}</span>
+                        <span class="text-slate-500 font-medium">Student</span>
+                        <span class="font-bold text-slate-900">{{ $rt->student?->full_name }}</span>
                     </div>
                     @if($rt->student?->schoolClass)
                         <div class="flex justify-between items-center">
-                            <span class="text-slate-500">Class &amp; Arm</span>
-                            <span class="text-slate-700">{{ $rt->student->schoolClass->name }} @if($rt->student->section)({{ $rt->student->section->name }})@endif</span>
+                            <span class="text-slate-500 font-medium">Class &amp; Arm</span>
+                            <span class="text-slate-800 font-semibold">{{ $rt->student->schoolClass->name }} @if($rt->student->section)({{ $rt->student->section->name }})@endif</span>
                         </div>
                     @endif
-                    <div class="flex justify-between items-center">
-                        <span class="text-slate-500">Amount Paid</span>
-                        <span class="text-sm font-black text-emerald-600 font-mono">{{ config('academyhub.currency_symbol', '₦') }}{{ number_format($rt->amount_paid, 2) }}</span>
+                    <div class="flex justify-between items-center py-1">
+                        <span class="text-slate-600 font-bold uppercase tracking-wider text-[11px]">Amount Paid</span>
+                        <span class="text-base font-black text-emerald-600 font-mono">{{ config('academyhub.currency_symbol', '₦') }}{{ number_format($rt->amount_paid, 2) }}</span>
                     </div>
                     <div class="flex justify-between items-center">
-                        <span class="text-slate-500">Payment Mode</span>
-                        <span class="font-semibold text-slate-800">{{ $rt->payment_method ?: 'Cash' }}</span>
+                        <span class="text-slate-500 font-medium">Payment Mode</span>
+                        <span class="font-bold text-emerald-800 bg-emerald-100/70 px-2 py-0.5 rounded text-[11px]">{{ $rt->payment_method ?: 'Cash' }}</span>
                     </div>
                     @if($rt->reference)
                         <div class="flex justify-between items-center">
-                            <span class="text-slate-500">Reference / Teller #</span>
-                            <span class="font-mono text-slate-700">{{ $rt->reference }}</span>
+                            <span class="text-slate-500 font-medium">Reference / Teller #</span>
+                            <span class="font-mono text-slate-700 bg-slate-100 px-1.5 py-0.5 rounded">{{ $rt->reference }}</span>
                         </div>
                     @endif
                     @if($rt->payer_name)
                         <div class="flex justify-between items-center">
-                            <span class="text-slate-500">Paid By (Payer)</span>
-                            <span class="text-slate-700">{{ $rt->payer_name }}</span>
+                            <span class="text-slate-500 font-medium">Paid By (Payer)</span>
+                            <span class="text-slate-800 font-semibold">{{ $rt->payer_name }}</span>
                         </div>
                     @endif
-                    <div class="flex justify-between items-center pt-1 border-t border-slate-200">
-                        <span class="text-slate-500">Date</span>
-                        <span class="text-slate-700">{{ $rt->date?->format('M j, Y') }}</span>
+                    <div class="flex justify-between items-center pt-2 border-t border-slate-200">
+                        <span class="text-slate-500 font-medium">Date</span>
+                        <span class="text-slate-700 font-semibold">{{ $rt->date?->format('M j, Y') }}</span>
                     </div>
                 </div>
 
                 <div class="mt-6 flex flex-col sm:flex-row gap-2.5">
                     <a href="{{ route('billing.receipt', $rt->id) }}" 
                        target="_blank"
-                       class="flex-1 py-3 px-4 rounded-xl text-center font-bold text-xs text-white bg-emerald-600 hover:bg-emerald-700 shadow-md shadow-emerald-600/20 flex items-center justify-center gap-2 transition-all">
+                       class="flex-1 py-3 px-4 rounded-xl text-center font-bold text-xs text-white bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 shadow-md shadow-emerald-600/30 flex items-center justify-center gap-2 transition-all active:scale-95">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
                         <span>Print / Download Receipt</span>
                     </a>
