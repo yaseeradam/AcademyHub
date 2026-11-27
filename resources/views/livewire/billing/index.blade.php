@@ -235,21 +235,31 @@
                                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-2 pt-2 border-t border-slate-100">
                                         <div>
                                             <label class="block text-[11px] font-semibold text-slate-500 mb-1">Filter Class</label>
-                                            <select wire:model.live="selectedClassId" class="w-full text-xs rounded-xl border-slate-300 bg-white text-slate-900">
-                                                <option value="">All Classes</option>
-                                                @foreach ($this->classes as $class)
-                                                    <option value="{{ $class->id }}">{{ $class->name }}</option>
-                                                @endforeach
-                                            </select>
+                                            <div class="relative">
+                                                <select wire:model.live="selectedClassId" class="w-full appearance-none text-xs rounded-xl border border-slate-300 bg-white text-slate-900 px-3 py-2 pr-8 shadow-sm focus:border-amber-400 focus:ring-2 focus:ring-amber-300 transition-all cursor-pointer">
+                                                    <option value="">All Classes</option>
+                                                    @foreach ($this->classes as $class)
+                                                        <option value="{{ $class->id }}">{{ $class->name }}</option>
+                                                    @endforeach
+                                                </select>
+                                                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2.5">
+                                                    <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/></svg>
+                                                </div>
+                                            </div>
                                         </div>
                                         <div>
                                             <label class="block text-[11px] font-semibold text-slate-500 mb-1">Student</label>
-                                            <select wire:model.live="studentId" class="w-full text-xs rounded-xl border-slate-300 bg-white text-slate-900">
-                                                <option value="">-- Choose Student --</option>
-                                                @foreach ($this->students as $st)
-                                                    <option value="{{ $st->id }}">{{ $st->full_name }} ({{ $st->admission_number ?? 'No Adm #' }})</option>
-                                                @endforeach
-                                            </select>
+                                            <div class="relative">
+                                                <select wire:model.live="studentId" class="w-full appearance-none text-xs rounded-xl border border-slate-300 bg-white text-slate-900 px-3 py-2 pr-8 shadow-sm focus:border-amber-400 focus:ring-2 focus:ring-amber-300 transition-all cursor-pointer">
+                                                    <option value="">-- Choose Student --</option>
+                                                    @foreach ($this->students as $st)
+                                                        <option value="{{ $st->id }}">{{ $st->full_name }} ({{ $st->admission_number ?? 'No Adm #' }})</option>
+                                                    @endforeach
+                                                </select>
+                                                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2.5">
+                                                    <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/></svg>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 </details>
@@ -367,12 +377,17 @@
                                 </div>
                                 <div>
                                     <label class="block text-xs font-semibold text-slate-700 mb-1.5">Academic Term</label>
-                                    <select wire:model.live="term" class="w-full text-sm rounded-xl border-slate-300 bg-white text-slate-900 shadow-sm focus:border-emerald-500 focus:ring-emerald-500">
-                                        <option value="">Full Year / General</option>
-                                        <option value="1">Term 1 (First Term)</option>
-                                        <option value="2">Term 2 (Second Term)</option>
-                                        <option value="3">Term 3 (Third Term)</option>
-                                    </select>
+                                    <div class="relative">
+                                        <select wire:model.live="term" class="w-full appearance-none text-sm rounded-xl border border-slate-300 bg-white text-slate-900 px-3 py-2.5 pr-9 shadow-sm focus:border-emerald-500 focus:ring-2 focus:ring-emerald-300 transition-all cursor-pointer">
+                                            <option value="">Full Year / General</option>
+                                            <option value="1">Term 1 (First Term)</option>
+                                            <option value="2">Term 2 (Second Term)</option>
+                                            <option value="3">Term 3 (Third Term)</option>
+                                        </select>
+                                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2.5">
+                                            <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/></svg>
+                                        </div>
+                                    </div>
                                 </div>
                             @else
                                 <div class="sm:col-span-2">
@@ -499,14 +514,14 @@
 
                             <div class="relative rounded-xl shadow-xs">
                                 <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5">
-                                    <span class="text-2xl font-black text-emerald-600">₦</span>
+                                    <span class="text-sm font-bold text-emerald-600 leading-none">₦</span>
                                 </div>
                                 <input wire:model.live="amountPaid" 
                                        type="number" 
                                        step="0.01" 
                                        min="0" 
                                        placeholder="0.00" 
-                                       class="w-full pl-10 pr-4 py-3 sm:py-3.5 text-2xl sm:text-3xl font-black font-mono tracking-tight text-slate-900 bg-slate-50/50 rounded-xl border-2 {{ $errors->has('amountPaid') ? 'border-rose-400 focus:border-rose-500 focus:ring-rose-500' : 'border-slate-300 focus:border-emerald-500 focus:ring-emerald-500 focus:bg-white' }} transition-all" />
+                                       class="w-full pl-8 pr-4 py-3 sm:py-3.5 text-xl sm:text-2xl font-black font-mono tracking-tight text-slate-900 bg-slate-50/50 rounded-xl border-2 {{ $errors->has('amountPaid') ? 'border-rose-400 focus:border-rose-500 focus:ring-rose-500' : 'border-slate-300 focus:border-emerald-500 focus:ring-emerald-500 focus:bg-white' }} transition-all" />
                             </div>
                             @error('amountPaid') <p class="mt-1 text-xs text-rose-500 font-medium">{{ $message }}</p> @enderror
 
@@ -580,24 +595,39 @@
                 <h4 class="text-sm sm:text-base font-semibold text-gray-900">Filter Transactions</h4>
             </div>
             <div class="grid gap-2.5 sm:gap-3 grid-cols-2 sm:grid-cols-3 lg:grid-cols-6">
-                <select wire:model.live="filterType" class="select text-xs sm:text-sm">
-                    <option value="">All Types</option>
-                    <option value="Income">Income</option>
-                    <option value="Expense">Expense</option>
-                </select>
+                <div class="relative">
+                    <select wire:model.live="filterType" class="select appearance-none text-xs sm:text-sm pr-8 cursor-pointer w-full">
+                        <option value="">All Types</option>
+                        <option value="Income">Income</option>
+                        <option value="Expense">Expense</option>
+                    </select>
+                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2.5">
+                        <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/></svg>
+                    </div>
+                </div>
                 <input wire:model.live.debounce.300ms="filterCategory" type="text" placeholder="Category" class="input-compact text-xs sm:text-sm" />
-                <select wire:model.live="selectedClassId" class="select text-xs sm:text-sm">
-                    <option value="">All Classes</option>
-                    @foreach ($this->classes as $class)
-                        <option value="{{ $class->id }}">{{ $class->name }}</option>
-                    @endforeach
-                </select>
-                <select wire:model.live="filterStudentId" class="select text-xs sm:text-sm">
-                    <option value="">All Students</option>
-                    @foreach ($this->students as $student)
-                        <option value="{{ $student->id }}">{{ $student->full_name }}</option>
-                    @endforeach
-                </select>
+                <div class="relative">
+                    <select wire:model.live="selectedClassId" class="select appearance-none text-xs sm:text-sm pr-8 cursor-pointer w-full">
+                        <option value="">All Classes</option>
+                        @foreach ($this->classes as $class)
+                            <option value="{{ $class->id }}">{{ $class->name }}</option>
+                        @endforeach
+                    </select>
+                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2.5">
+                        <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/></svg>
+                    </div>
+                </div>
+                <div class="relative">
+                    <select wire:model.live="filterStudentId" class="select appearance-none text-xs sm:text-sm pr-8 cursor-pointer w-full">
+                        <option value="">All Students</option>
+                        @foreach ($this->students as $student)
+                            <option value="{{ $student->id }}">{{ $student->full_name }}</option>
+                        @endforeach
+                    </select>
+                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2.5">
+                        <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/></svg>
+                    </div>
+                </div>
                 <input wire:model.live="filterFrom" type="date" class="input-compact text-xs sm:text-sm" />
                 <input wire:model.live="filterTo" type="date" class="input-compact text-xs sm:text-sm" />
             </div>
@@ -626,44 +656,64 @@
                     {{-- Category Select --}}
                     <div>
                         <label class="block text-[11px] font-bold text-slate-600 uppercase tracking-wider mb-1">Fee Category</label>
-                        <select wire:model.live="debtorsCategory" class="select text-xs sm:text-sm w-full font-medium">
-                            @foreach($this->availableFeeCategories as $cat)
-                                <option value="{{ $cat }}">{{ $cat }}</option>
-                            @endforeach
-                        </select>
+                        <div class="relative">
+                            <select wire:model.live="debtorsCategory" class="select appearance-none text-xs sm:text-sm w-full font-medium pr-8 cursor-pointer">
+                                @foreach($this->availableFeeCategories as $cat)
+                                    <option value="{{ $cat }}">{{ $cat }}</option>
+                                @endforeach
+                            </select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2.5">
+                                <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/></svg>
+                            </div>
+                        </div>
                     </div>
 
                     {{-- Session Select --}}
                     <div>
                         <label class="block text-[11px] font-bold text-slate-600 uppercase tracking-wider mb-1">Session</label>
-                        <select wire:model.live="debtorsSession" class="select text-xs sm:text-sm w-full font-medium">
-                            <option value="">All Sessions</option>
-                            @foreach($this->availableSessions as $sess)
-                                <option value="{{ $sess }}">{{ $sess }}</option>
-                            @endforeach
-                        </select>
+                        <div class="relative">
+                            <select wire:model.live="debtorsSession" class="select appearance-none text-xs sm:text-sm w-full font-medium pr-8 cursor-pointer">
+                                <option value="">All Sessions</option>
+                                @foreach($this->availableSessions as $sess)
+                                    <option value="{{ $sess }}">{{ $sess }}</option>
+                                @endforeach
+                            </select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2.5">
+                                <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/></svg>
+                            </div>
+                        </div>
                     </div>
 
                     {{-- Term Select --}}
                     <div>
                         <label class="block text-[11px] font-bold text-slate-600 uppercase tracking-wider mb-1">Term</label>
-                        <select wire:model.live="debtorsTerm" class="select text-xs sm:text-sm w-full font-medium">
-                            <option value="">All Terms</option>
-                            <option value="1">Term 1</option>
-                            <option value="2">Term 2</option>
-                            <option value="3">Term 3</option>
-                        </select>
+                        <div class="relative">
+                            <select wire:model.live="debtorsTerm" class="select appearance-none text-xs sm:text-sm w-full font-medium pr-8 cursor-pointer">
+                                <option value="">All Terms</option>
+                                <option value="1">Term 1</option>
+                                <option value="2">Term 2</option>
+                                <option value="3">Term 3</option>
+                            </select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2.5">
+                                <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/></svg>
+                            </div>
+                        </div>
                     </div>
 
                     {{-- Class Select --}}
                     <div>
                         <label class="block text-[11px] font-bold text-slate-600 uppercase tracking-wider mb-1">Class</label>
-                        <select wire:model.live="debtorsClassId" class="select text-xs sm:text-sm w-full font-medium">
-                            <option value="">All Classes</option>
-                            @foreach($this->classes as $c)
-                                <option value="{{ $c->id }}">{{ $c->name }}</option>
-                            @endforeach
-                        </select>
+                        <div class="relative">
+                            <select wire:model.live="debtorsClassId" class="select appearance-none text-xs sm:text-sm w-full font-medium pr-8 cursor-pointer">
+                                <option value="">All Classes</option>
+                                @foreach($this->classes as $c)
+                                    <option value="{{ $c->id }}">{{ $c->name }}</option>
+                                @endforeach
+                            </select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2.5">
+                                <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/></svg>
+                            </div>
+                        </div>
                     </div>
 
                     {{-- Student Search --}}
@@ -766,53 +816,78 @@
                     {{-- Class Select --}}
                     <div>
                         <label class="block text-[11px] font-bold text-slate-600 uppercase tracking-wider mb-1">Select Class *</label>
-                        <select wire:model.live="registerClassId" class="select text-xs sm:text-sm w-full font-bold text-blue-900 bg-white">
-                            <option value="">-- Choose Class --</option>
-                            @foreach($this->classes as $c)
-                                <option value="{{ $c->id }}">{{ $c->name }}</option>
-                            @endforeach
-                        </select>
+                        <div class="relative">
+                            <select wire:model.live="registerClassId" class="select appearance-none text-xs sm:text-sm w-full font-bold text-blue-900 bg-white pr-8 cursor-pointer">
+                                <option value="">-- Choose Class --</option>
+                                @foreach($this->classes as $c)
+                                    <option value="{{ $c->id }}">{{ $c->name }}</option>
+                                @endforeach
+                            </select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2.5">
+                                <svg class="w-3.5 h-3.5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/></svg>
+                            </div>
+                        </div>
                     </div>
 
                     {{-- Arm / Section Select --}}
                     <div>
                         <label class="block text-[11px] font-bold text-slate-600 uppercase tracking-wider mb-1">Arm / Section</label>
-                        <select wire:model.live="registerSectionId" class="select text-xs sm:text-sm w-full font-medium bg-white">
-                            <option value="">All Arms (All Sections)</option>
-                            @foreach($this->registerSections as $sec)
-                                <option value="{{ $sec->id }}">{{ $sec->name }}</option>
-                            @endforeach
-                        </select>
+                        <div class="relative">
+                            <select wire:model.live="registerSectionId" class="select appearance-none text-xs sm:text-sm w-full font-medium bg-white pr-8 cursor-pointer">
+                                <option value="">All Arms (All Sections)</option>
+                                @foreach($this->registerSections as $sec)
+                                    <option value="{{ $sec->id }}">{{ $sec->name }}</option>
+                                @endforeach
+                            </select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2.5">
+                                <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/></svg>
+                            </div>
+                        </div>
                     </div>
 
                     {{-- Fee Category --}}
                     <div>
                         <label class="block text-[11px] font-bold text-slate-600 uppercase tracking-wider mb-1">Fee Category</label>
-                        <select wire:model.live="registerCategory" class="select text-xs sm:text-sm w-full font-medium bg-white">
-                            @foreach($this->availableFeeCategories as $cat)
-                                <option value="{{ $cat }}">{{ $cat }}</option>
-                            @endforeach
-                        </select>
+                        <div class="relative">
+                            <select wire:model.live="registerCategory" class="select appearance-none text-xs sm:text-sm w-full font-medium bg-white pr-8 cursor-pointer">
+                                @foreach($this->availableFeeCategories as $cat)
+                                    <option value="{{ $cat }}">{{ $cat }}</option>
+                                @endforeach
+                            </select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2.5">
+                                <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/></svg>
+                            </div>
+                        </div>
                     </div>
 
                     {{-- Session Select --}}
                     <div>
                         <label class="block text-[11px] font-bold text-slate-600 uppercase tracking-wider mb-1">Session</label>
-                        <select wire:model.live="registerSession" class="select text-xs sm:text-sm w-full font-medium bg-white">
-                            @foreach($this->availableSessions as $sess)
-                                <option value="{{ $sess }}">{{ $sess }}</option>
-                            @endforeach
-                        </select>
+                        <div class="relative">
+                            <select wire:model.live="registerSession" class="select appearance-none text-xs sm:text-sm w-full font-medium bg-white pr-8 cursor-pointer">
+                                @foreach($this->availableSessions as $sess)
+                                    <option value="{{ $sess }}">{{ $sess }}</option>
+                                @endforeach
+                            </select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2.5">
+                                <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/></svg>
+                            </div>
+                        </div>
                     </div>
 
                     {{-- Term Select --}}
                     <div>
                         <label class="block text-[11px] font-bold text-slate-600 uppercase tracking-wider mb-1">Term</label>
-                        <select wire:model.live="registerTerm" class="select text-xs sm:text-sm w-full font-medium bg-white">
-                            <option value="1">Term 1 (First Term)</option>
-                            <option value="2">Term 2 (Second Term)</option>
-                            <option value="3">Term 3 (Third Term)</option>
-                        </select>
+                        <div class="relative">
+                            <select wire:model.live="registerTerm" class="select appearance-none text-xs sm:text-sm w-full font-medium bg-white pr-8 cursor-pointer">
+                                <option value="1">Term 1 (First Term)</option>
+                                <option value="2">Term 2 (Second Term)</option>
+                                <option value="3">Term 3 (Third Term)</option>
+                            </select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2.5">
+                                <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/></svg>
+                            </div>
+                        </div>
                     </div>
 
                     {{-- Search in Class --}}
@@ -980,21 +1055,31 @@
                     </div>
                 </div>
                 <form wire:submit="saveFeeStructure" class="grid gap-4 sm:grid-cols-5">
-                <select wire:model.live="feeClassId" class="select">
-                    <option value="">Select Class</option>
-                    @foreach ($this->classes as $class)
-                        <option value="{{ $class->id }}">{{ $class->name }}</option>
-                    @endforeach
-                </select>
+                <div class="relative">
+                    <select wire:model.live="feeClassId" class="select appearance-none pr-8 cursor-pointer w-full">
+                        <option value="">Select Class</option>
+                        @foreach ($this->classes as $class)
+                            <option value="{{ $class->id }}">{{ $class->name }}</option>
+                        @endforeach
+                    </select>
+                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2.5">
+                        <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/></svg>
+                    </div>
+                </div>
                 <input wire:model.live="feeCategory" type="text" placeholder="Category" class="input-compact" />
                 <input wire:model.live="feeAmountDue" type="number" step="0.01" placeholder="Amount" class="input-compact" />
                 <div class="flex gap-2">
-                    <select wire:model.live="feeTerm" class="select flex-1">
-                        <option value="">All Terms</option>
-                        <option value="1">Term 1</option>
-                        <option value="2">Term 2</option>
-                        <option value="3">Term 3</option>
-                    </select>
+                    <div class="relative flex-1">
+                        <select wire:model.live="feeTerm" class="select appearance-none pr-8 cursor-pointer w-full">
+                            <option value="">All Terms</option>
+                            <option value="1">Term 1</option>
+                            <option value="2">Term 2</option>
+                            <option value="3">Term 3</option>
+                        </select>
+                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2.5">
+                            <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/></svg>
+                        </div>
+                    </div>
                     <button type="submit" class="btn-primary px-6">
                         {{ $editingFeeId ? 'Update' : 'Save' }}
                     </button>
@@ -1015,19 +1100,29 @@
                 <h4 class="font-medium text-gray-900">Filter Fee Structures</h4>
             </div>
             <div class="grid gap-3 sm:grid-cols-3">
-                <select wire:model.live="feeFilterClassId" class="select">
-                    <option value="">All Classes</option>
-                    @foreach ($this->classes as $class)
-                        <option value="{{ $class->id }}">{{ $class->name }}</option>
-                    @endforeach
-                </select>
+                <div class="relative">
+                    <select wire:model.live="feeFilterClassId" class="select appearance-none pr-8 cursor-pointer w-full">
+                        <option value="">All Classes</option>
+                        @foreach ($this->classes as $class)
+                            <option value="{{ $class->id }}">{{ $class->name }}</option>
+                        @endforeach
+                    </select>
+                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2.5">
+                        <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/></svg>
+                    </div>
+                </div>
                 <input wire:model.live.debounce.300ms="feeFilterCategory" type="text" placeholder="Category" class="input-compact" />
-                <select wire:model.live="feeFilterTerm" class="select">
-                    <option value="">All Terms</option>
-                    <option value="1">Term 1</option>
-                    <option value="2">Term 2</option>
-                    <option value="3">Term 3</option>
-                </select>
+                <div class="relative">
+                    <select wire:model.live="feeFilterTerm" class="select appearance-none pr-8 cursor-pointer w-full">
+                        <option value="">All Terms</option>
+                        <option value="1">Term 1</option>
+                        <option value="2">Term 2</option>
+                        <option value="3">Term 3</option>
+                    </select>
+                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2.5">
+                        <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/></svg>
+                    </div>
+                </div>
             </div>
         </div>
 
